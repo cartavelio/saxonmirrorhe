@@ -5,7 +5,6 @@ import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
 import net.sf.saxon.expr.ErrorExpression;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.instruct.TemplateRule;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -37,18 +36,19 @@ public class TemplateRuleInitializer {
     private final XSLTemplate xslTemplate;
     private final ComponentDeclaration decl;
     private final StructuredQName modeName;
+    private TemplateRuleEE templateRule;
     private boolean firstTime = true;
 
-    TemplateRuleInitializer(Compilation comp, ComponentDeclaration decl, StructuredQName modeName) {
+    TemplateRuleInitializer(Compilation comp, ComponentDeclaration decl, TemplateRuleEE templateRule) {
         compilation = comp;
         this.decl = decl;
-        this.modeName = modeName;
+        this.templateRule = templateRule;
+        this.modeName = templateRule.getMode().getModeName();
         xslTemplate = (XSLTemplate) decl.getSourceElement();
     }
 
     public synchronized void init() throws XPathException {
         if (firstTime) {
-            TemplateRule rule = xslTemplate.getTemplateRulesByMode().get(modeName);
             try {
                 xslTemplate.jitCompile(compilation, decl);
 
@@ -60,30 +60,35 @@ public class TemplateRuleInitializer {
                 RuleManager mgr = compilation.getPrincipalStylesheetModule().getRuleManager();
                 Mode m = mgr.obtainMode(modeName, false);
                 visitor.setOptimizeForStreaming(m.isDeclaredStreamable());
-                Expression body = rule.getBody().typeCheck(visitor, cisi);
-                rule.setBody(ExpressionTool.optimizeComponentBody(
+                Expression body = templateRule.getBody().typeCheck(visitor, cisi);
+                templateRule.setBody(ExpressionTool.optimizeComponentBody(
                         body, compilation, visitor, cisi, false));
-                SimpleMode.allocateBindingSlotsRecursive(xslTemplate.getPackageData(), m, rule.getBody(), m.getDeclaringComponent().getComponentBindings());
+                SimpleMode.allocateBindingSlotsRecursive(
+                        xslTemplate.getPackageData(), m, templateRule.getBody(),
+                        m.getDeclaringComponent().getComponentBindings());
                 if (compilation.getCompilerInfo().getCodeInjector() != null) {
-                    compilation.getCompilerInfo().getCodeInjector().process(rule);
+                    compilation.getCompilerInfo().getCodeInjector().process(templateRule);
                 }
-                ExpressionTool.allocateSlots(rule.getBody(), rule.getStackFrameMap().getNumberOfVariables(), rule.getStackFrameMap());
+                ExpressionTool.allocateSlots(
+                        templateRule.getBody(),
+                        templateRule.getStackFrameMap().getNumberOfVariables(),
+                        templateRule.getStackFrameMap());
 
                 if (m.isDeclaredStreamable()) {
                     List<String> reasons = new ArrayList<>();
-                    if (!((TemplateRuleEE) rule).isActuallyStreamable(reasons)) {
+                    if (!templateRule.isActuallyStreamable(reasons)) {
                         StringBuilder message = new StringBuilder("Template rule is not streamable");
                         for (String reason : reasons) {
                             message.append("\n  * ").append(reason);
                         }
-                        throw new XPathException(message.toString(), "XTSE3430", rule);
+                        throw new XPathException(message.toString(), "XTSE3430", templateRule);
                     }
-                    if (Streamability.getSweep(rule.getBody()) == Sweep.CONSUMING) {
-                        ((TemplateRuleEE) rule).makeInversion();
+                    if (Streamability.getSweep(templateRule.getBody()) == Sweep.CONSUMING) {
+                        templateRule.makeInversion();
                     }
                 }
             } catch (XPathException e) {
-                rule.setBody(new ErrorExpression(new XmlProcessingException(e)));
+                templateRule.setBody(new ErrorExpression(new XmlProcessingException(e)));
                 firstTime = false;
                 throw e;
             }

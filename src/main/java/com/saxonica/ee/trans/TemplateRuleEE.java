@@ -5,7 +5,6 @@ import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
 import net.sf.saxon.expr.instruct.TemplateRule;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.trans.XPathException;
@@ -67,13 +66,12 @@ public class TemplateRuleEE extends TemplateRule {
      *
      * @param compilation the XSLT compilation
      * @param decl        the component declaration of this template rule
-     * @param modeName    the mode name
      */
 
     @Override
-    public void prepareInitializer(Compilation compilation, ComponentDeclaration decl, StructuredQName modeName) {
+    public void prepareInitializer(Compilation compilation, ComponentDeclaration decl) {
         if (getInitializer() == null) {
-            setInitializer(new TemplateRuleInitializer(compilation, decl, modeName));
+            setInitializer(new TemplateRuleInitializer(compilation, decl, this));
         }
     }
 
@@ -91,28 +89,6 @@ public class TemplateRuleEE extends TemplateRule {
             initializer = null;
         }
     }
-
-    /**
-     * Create a copy of a template rule. This is needed when copying a rule from the "omniMode" (mode=#all)
-     * to a specific mode. Because we want the rules to be chained in the right order within the mode object,
-     * we create the copy as soon as we know it is needed. The problem is that at this stage many of the properties
-     * of the template rule are still uninitialised. So we mark the new copy as a slave of the original, and at
-     * the end of the compilation process we update all the slave copies to match the properties of the original.
-     *
-     * @return a copy of the template rule
-     */
-
-    @Override
-    public TemplateRule copy() {
-        TemplateRule tr = new TemplateRuleEE();
-        if (body == null || matchPattern == null) {
-            slaveCopies.add(tr);
-        } else {
-            copyTo(tr);
-        }
-        return tr;
-    }
-
 
     /**
      * Ask whether this template satisfies the rules for a guaranteed streamable template

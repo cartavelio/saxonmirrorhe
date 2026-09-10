@@ -18,19 +18,19 @@ public class RuleEE extends Rule {
     // A list of preconditions that must be satisfied for this rule to match
     private List<Precondition> preconditions = Collections.emptyList();
 
-    public RuleEE() {
-    }
+//    public RuleEE() {
+//    }
 
     public RuleEE(Pattern p, RuleTarget o, int prec, int min, double prio, int seq, int part) {
         super(p, o, prec, min, prio, seq, part);
     }
 
-    @Override
-    public Rule copy(boolean copyChain) {
-        RuleEE r2 = new RuleEE();
-        r2.copyFrom(this, copyChain);
-        return r2;
-    }
+//    @Override
+//    public Rule copy(boolean copyChain) {
+//        RuleEE r2 = new RuleEE();
+//        r2.copyFrom(this, copyChain);
+//        return r2;
+//    }
 
     /**
      * Get the preconditions for this rule
