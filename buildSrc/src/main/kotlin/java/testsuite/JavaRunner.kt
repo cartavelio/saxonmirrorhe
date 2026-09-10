@@ -142,8 +142,7 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
       javaArgs.add("-t:${testPattern.get()}")
     }
 
-    println("MAIN: ${driverClass}")
-    println("JARG: ${javaArgs}")
+    println("java ${driverClass} ${javaArgs.joinToString(" ")}")
 
     ex.javaexec {
       mainClass = driverClass

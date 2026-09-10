@@ -166,6 +166,7 @@ abstract class TestSuitesExtension
     val plugin = this
 
     val thisSuite = tasks.register<JavaRunner>(taskName) {
+      outputs.upToDateWhen { false }
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       this.edition = plugin.edition
       this.suite = suite
@@ -222,6 +223,7 @@ abstract class TestSuitesExtension
     driverargs.addAll(testargs)
 
     val thisSuite = tasks.register<JavaExec>(taskName) {
+      outputs.upToDateWhen { false }
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       mainClass.set(driverClass)
       workingDir = directory.get().asFile
@@ -250,6 +252,7 @@ abstract class TestSuitesExtension
     val plugin = this
 
     val thisSuite = tasks.register<CSharpRunner>(taskName) {
+      outputs.upToDateWhen { false }
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       dependsOn("dotnetBuildTestDrivers")
       this.edition = plugin.edition
@@ -309,6 +312,7 @@ abstract class TestSuitesExtension
     driverargs.addAll(testargs)
 
     val thisSuite = tasks.register<Exec>(taskName) {
+      outputs.upToDateWhen { false }
       dependsOn(build)
 
       workingDir = directory.get().asFile
