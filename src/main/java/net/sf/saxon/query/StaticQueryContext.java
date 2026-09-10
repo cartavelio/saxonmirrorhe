@@ -763,6 +763,7 @@ public class StaticQueryContext {
         declareNamespace("array", NamespaceUri.ARRAY_FUNCTIONS);
         declareNamespace("local", NamespaceUri.LOCAL);
         declareNamespace("err", NamespaceUri.ERR);
+        declareNamespace("output", NamespaceUri.OUTPUT);
         declareNamespace("saxon", NamespaceUri.SAXON);
         declareNamespace("", NamespaceUri.NULL);
 
