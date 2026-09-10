@@ -14,10 +14,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.StylesheetPackage;
-import net.sf.saxon.trace.AbstractTraceListener;
-import net.sf.saxon.trace.Instrumentation;
-import net.sf.saxon.trace.TimingCodeInjector;
-import net.sf.saxon.trace.TimingTraceListener;
+import net.sf.saxon.trace.*;
 import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.LicenseException;
@@ -104,8 +101,10 @@ public class Transform {
                                     "Use specified catalog file to resolve URIs");
         options.addRecognizedOption("config", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified configuration file");
+        //#if CSHARP==false
         options.addRecognizedOption("cr", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified collection URI resolver class");
+        //#endif
         options.addRecognizedOption("diag", CommandLineOptions.TYPE_FILENAME,
                                     "Display runtime diagnostics");
         options.addRecognizedOption("dtd", CommandLineOptions.TYPE_ENUMERATION,
@@ -513,9 +512,10 @@ public class Transform {
                 }
 
                 if ("".equals(value)) {
-                    value = "net.sf.saxon.trace.XSLTTraceListener";
+                    traceListener = new XSLTTraceListener();
+                } else {
+                    traceListener = config.makeTraceListener(value);
                 }
-                traceListener = config.makeTraceListener(value);
                 processor.setConfigurationProperty(Feature.TRACE_LISTENER, traceListener);
                 processor.setConfigurationProperty(Feature.LINE_NUMBERING, true);
 
@@ -666,7 +666,7 @@ public class Transform {
             }
 
             if (!useAssociatedStylesheet && styleFileName == null) {
-                if (positional.size() == currentPositionalOption) {
+                if (positional.size() <= currentPositionalOption) {
                     badUsage("No stylesheet file name");
                 }
                 styleFileName = positional.get(currentPositionalOption++);

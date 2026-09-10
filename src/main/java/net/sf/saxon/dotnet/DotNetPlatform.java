@@ -223,11 +223,11 @@ public class DotNetPlatform implements Platform {
         if(depth > 2) {
             return input;
         }
-        Configuration config = pipe.getConfiguration();
-        boolean preferJaxp = config.getConfigurationProperty(Feature.PREFER_JAXP_PARSER);
+        //Configuration config = pipe.getConfiguration();
+        //boolean preferJaxp = config.getConfigurationProperty(Feature.PREFER_JAXP_PARSER);
         InputStream is = input.getInputStream();
         if (is != null) {
-            if (is instanceof DotNetInputStream && !preferJaxp) {
+            if (is instanceof DotNetInputStream) {
                 XmlReader parser = new XmlTextReader(input.getSystemId(),
                         ((DotNetInputStream) is).getUnderlyingStream());
                 ((XmlTextReader) parser).set_WhitespaceHandling(WhitespaceHandling.wrap(WhitespaceHandling.All));
@@ -262,7 +262,7 @@ public class DotNetPlatform implements Platform {
         }
         Reader reader = input.getReader();
         if (reader != null) {
-            if (reader instanceof DotNetReader && !preferJaxp) {
+            if (reader instanceof DotNetReader) {
                 XmlReader parser = new XmlTextReader(input.getSystemId(),
                         ((DotNetReader) reader).getUnderlyingTextReader());
                 ((XmlTextReader) parser).set_Normalization(true);
