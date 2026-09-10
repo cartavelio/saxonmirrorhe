@@ -232,6 +232,13 @@ public class CompareToStringConstant extends CompareToConstant {
             final boolean nullable = Cardinality.allowsZero(expression.getCardinality());
             final OperatorSymbol operator = expression.getComparisonOperator();
             final UnicodeString comparand = expression.getComparand();
+            if (comparand.isEmpty()) {
+                if (operator == OperatorSymbol.FEQ) {
+                    return context -> argEval.eval(context).isEmpty();
+                } else if (operator == OperatorSymbol.FNE) {
+                    return context -> !argEval.eval(context).isEmpty();
+                }
+            }
             if (operator == OperatorSymbol.FEQ) {
                 return context -> comparand.equals(argEval.eval(context));
             } else if (operator == OperatorSymbol.FNE) {
