@@ -4724,17 +4724,20 @@ public class Configuration implements SourceResolver {
             return (Boolean) value;
         } else if (value instanceof String) {
             value = ((String)value).trim();
-            if ("true".equals(value) || "on".equals(value) || "yes".equals(value) || "1".equals(value)) {
+            if (ayes.contains(value)) {
                 return true;
-            } else if ("false".equals(value) || "off".equals(value) || "no".equals(value) || "0".equals(value)) {
+            } else if (noes.contains(value)) {
                 return false;
             } else {
-                throw new IllegalArgumentException(propertyName + " must be 'true' or 'false' (or on|off, yes|no, 1|0)");
+                throw new IllegalArgumentException(propertyName + " must be true|false (or on|off, yes|no, 1|0)");
             }
         } else {
             throw new IllegalArgumentException(propertyName + " must be a boolean (or a string representing a boolean)");
         }
     }
+
+    private final static Set<String> ayes = Set.of("true", "on", "yes", "1");
+    private final static Set<String> noes = Set.of("false", "off", "no", "0");
 
     /**
      * Validate a property value where the required type is integer
