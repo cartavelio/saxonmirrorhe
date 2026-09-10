@@ -475,7 +475,7 @@ EndGlobal
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
       </xsl:when>
       <xsl:when test=". = 'NSec.Cryptography'">
-        <PackageReference Include="NSec.Cryptography" Version="24.4.0" />
+        <PackageReference Include="NSec.Cryptography" Version="25.4.0" />
       </xsl:when>
       <xsl:when test=". = 'NUnit'">
         <PackageReference Include="NUnit" Version="4.3.2"/>
