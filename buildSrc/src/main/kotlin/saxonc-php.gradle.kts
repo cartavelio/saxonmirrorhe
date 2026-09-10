@@ -1,6 +1,8 @@
 import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.TemplatedDocTask
+import com.saxonica.build.php.PhpFinder
 import com.saxonica.build.doc.SaxonCPhpReadme
+import com.saxonica.build.php.PhpExec
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.kotlin.dsl.filter
 import org.gradle.kotlin.dsl.register
@@ -10,7 +12,11 @@ plugins {
   id("saxon-build")
 }
 
+val phpFinder = PhpFinder(providers)
 val extension = project.extensions.create<SaxonCPhpExtension>("saxoncPhp")
+extension.phpExe.convention(phpFinder.php)
+extension.phpizeExe.convention(phpFinder.phpize)
+extension.makeExe.convention(phpFinder.make)
 
 val libsaxoncReleaseArtifactsBucket by configurations.dependencyScope("libsaxoncReleaseArtifactsBucket")
 val libsaxoncReleaseArtifactsDir by configurations.resolvable("libsaxoncReleaseArtifactsDir") {
@@ -29,6 +35,11 @@ val libsaxoncCoreDebugArtifactsDir by configurations.resolvable("libsaxoncCoreDe
   extendsFrom(libsaxoncCoreDebugArtifactsBucket)
 }
 
+val phpComposerBucket by configurations.dependencyScope("phpComposerBucket")
+val phpComposer by configurations.resolvable("phpComposer") {
+  extendsFrom(phpComposerBucket)
+}
+
 dependencies {
   libsaxoncReleaseArtifactsBucket(extension.edition.map { edition ->
     project(path = ":libsaxonc:${edition}", configuration = "releaseArtifactsDir")
@@ -42,12 +53,16 @@ dependencies {
   libsaxoncCoreDebugArtifactsBucket(extension.edition.map { edition ->
     project(path = ":libsaxonc-core:${edition}", configuration = "debugCMakePackageDir")
   })
+  phpComposerBucket(project(":php", configuration = "composer"))
 }
 
 val srcFolder = project.layout.projectDirectory.dir("../src")
 val releaseBuildFolder = project.layout.buildDirectory.dir("release")
 
 val saxonBuild = the<SaxonBuildExtension>()
+
+val phpBuildRoot = project.layout.buildDirectory.dir("build-root")
+val phpExtensionLibDir = project.layout.buildDirectory.dir("lib")
 
 val phpizeOutputs = arrayOf("configure", "config.h.in", "configure.ac", "run-tests.php")
 val phpizeBuildOutputs = arrayOf("ax_check_compile_flag.m4", "ax_gcc_func_attribute.m4", "config.guess", "config.sub",
@@ -57,17 +72,30 @@ val configureOutputs = arrayOf("config.h", "config.log", "config.nice", "config.
   "libtool", "Makefile", "Makefile.fragments", "Makefile.objects"
 )
 
+val buildRootInputs = layout.projectDirectory.files("config.m4", "../saxon-config-base.m4", "../composer.json")
+val createPhpBuildRoot = tasks.register<Copy>("create-build-root") {
+  inputs.files(buildRootInputs)
+  outputs.files(phpBuildRoot.map { it.files("config.m4", "saxon-config-base.m4", "saxon-config-extdir.m4", "composer.json") })
+
+  into(phpBuildRoot)
+  from(buildRootInputs)
+
+  doLast {
+    phpBuildRoot.get().file("saxon-config-extdir.m4").asFile.writeText("EXTENSION_DIR=\"\$SAXON_EXTENSION_DIR\"\n")
+  }
+}
+
 val phpizeTask = tasks.register<Exec>("phpize") {
-  inputs.file(layout.projectDirectory.file("config.m4"))
+  inputs.files(createPhpBuildRoot.map { it.outputs.files }) // avoid marking the build root as an input...
   inputs.dir(srcFolder)
-  inputs.file(layout.projectDirectory.file("../saxon-config-base.m4"))
 
-  outputs.files(layout.projectDirectory.files(phpizeOutputs))
-  outputs.files(layout.projectDirectory.dir("build").files(phpizeBuildOutputs))
-  outputs.dir(layout.projectDirectory.dir("autom4te.cache"))
+  outputs.files(phpBuildRoot.map { it.files(phpizeOutputs) })
+  outputs.dir(phpBuildRoot.map { it.dir("build") })
+  outputs.dir(phpBuildRoot.map { it.dir("autom4te.cache") })
 
-  workingDir = layout.projectDirectory.asFile
-  executable("phpize")
+  workingDir = phpBuildRoot.get().asFile
+
+  executable(extension.phpizeExe.get())
 }
 
 abstract class PhpDefaultWithExec: DefaultTask() {
@@ -82,18 +110,17 @@ val phpConfigureTask = tasks.register<PhpDefaultWithExec>("configure") {
   inputs.files(phpizeTask)
   inputs.files(libsaxoncReleaseArtifactsDir)
   inputs.files(libsaxoncCoreReleaseArtifactsDir)
-  outputs.files(layout.projectDirectory.files(configureOutputs))
-  outputs.dir(layout.projectDirectory.dir("modules"))
+  outputs.files(phpBuildRoot.map { it.files(configureOutputs) })
 
   doLast {
     val libsaxoncDir = libsaxoncReleaseArtifactsDir.elements.get().first().asFile
     val libsaxoncCoreDir = libsaxoncCoreReleaseArtifactsDir.elements.get().first().asFile
 
     ex.exec {
-      workingDir = layout.projectDirectory.asFile
+      workingDir = phpBuildRoot.get().asFile
       executable("./configure")
 
-      environment("SAXON_VERSION" to saxonBuild.version.get())
+      environment("SAXON_VERSION" to saxonBuild.version.get(), "SAXON_EXTENSION_DIR" to phpExtensionLibDir.get().asFile)
       args("--with-saxonc=${libsaxoncDir}", "--with-saxonc-core=${libsaxoncCoreDir}")
     }
   }
@@ -101,31 +128,34 @@ val phpConfigureTask = tasks.register<PhpDefaultWithExec>("configure") {
 
 val makeTask = tasks.register<Exec>("make") {
   inputs.files(phpConfigureTask)
-  outputs.files(layout.projectDirectory.files("saxon.la", ".dep", ".loT"))
-  outputs.dir(layout.projectDirectory.dir(".libs"))
+  outputs.files(phpBuildRoot.map { it.files("saxon.la", ".dep", ".loT") })
+  outputs.dir(phpBuildRoot.map { it.dir(".libs") })
+  outputs.dir(phpBuildRoot.map { it.dir("modules") })
 
-  workingDir = layout.projectDirectory.asFile
-  executable("make")
+  workingDir = phpBuildRoot.get().asFile
+  executable(extension.makeExe)
 }
 
-val makeInstall = tasks.register<Exec>("makeInstall") {
-  dependsOn(makeTask)
-  workingDir = layout.projectDirectory.asFile
-  executable("make")
+val makeInstallTask = tasks.register<Exec>("make-install") {
+  inputs.files(phpConfigureTask)
+  outputs.dir(phpExtensionLibDir)
+
+  workingDir = phpBuildRoot.get().asFile
+  executable(extension.makeExe.get())
   args("install")
 }
 
-val makeCleanTask = tasks.register<PhpDefaultWithExec>("makeClean") {
+val makeCleanTask = tasks.register<PhpDefaultWithExec>("make-clean") {
   doLast {
-    if (layout.projectDirectory.file("Makefile").asFile.exists()) {
+    if (phpBuildRoot.get().file("Makefile").asFile.exists()) {
       ex.exec {
-        workingDir = layout.projectDirectory.asFile
-        executable("make")
+        workingDir = phpBuildRoot.get().asFile
+        executable(extension.makeExe.get())
         args("clean")
       }
     }
 
-    val lotFile = layout.projectDirectory.file(".loT").asFile
+    val lotFile = phpBuildRoot.get().file(".loT").asFile
     if (lotFile.exists()) {
       fs.delete {
         delete(lotFile)
@@ -134,16 +164,60 @@ val makeCleanTask = tasks.register<PhpDefaultWithExec>("makeClean") {
   }
 }
 
-val phpizeCleanTask = tasks.register<Exec>("phpizeClean") {
-  workingDir = layout.projectDirectory.asFile
-  executable("phpize")
-  args("--clean")
 
-  mustRunAfter(makeCleanTask)
+val testRunnerDir = layout.buildDirectory.dir("testrunner")
+val vendorDir = testRunnerDir.map { it.dir("vendor") }
+val composerJson = layout.projectDirectory.file("../composer.json")
+val composerLock = testRunnerDir.get().file("composer.lock")
+
+val composerInstallTask = tasks.register<PhpExec>("composer-install") {
+  inputs.file(composerJson)
+  inputs.files(composerUpdateTask)
+  outputs.file(vendorDir.map { it.file("bin/phpunit") })
+  workingDir = testRunnerDir
+  phpExe = extension.phpExe
+  args(phpComposer.elements.map { it.single().asFile.toString() })
+  args("install")
 }
 
-tasks.named(LifecycleBasePlugin.CLEAN_TASK_NAME) {
-  dependsOn(phpizeCleanTask, makeCleanTask)
+val composerUpdateTask = tasks.register<PhpExec>("composer-update") {
+  inputs.file(composerJson)
+  outputs.file(composerLock)
+  workingDir = testRunnerDir
+  phpExe = extension.phpExe
+  args(phpComposer.elements.map { it.single().asFile.toString() })
+  args("update")
+
+  doFirst {
+    project.copy {
+      into(testRunnerDir)
+      from(composerJson)
+    }
+  }
+
+  doLast {
+    project.copy {
+      into(layout.buildDirectory)
+      from(phpBuildRoot.map { it.file("composer.lock") })
+    }
+  }
+}
+
+private fun libpath(configuration: ResolvableConfiguration): Provider<File> {
+  return configuration.elements.map {
+    it.single().asFile.resolve("lib")
+  }
+}
+
+val phpUnitTask = tasks.register<PhpExec>("phpunit") {
+  phpExe = extension.phpExe
+  workingDir = phpBuildRoot
+  saxonPhpExt = makeInstallTask.map { layout.projectDirectory.dir(it.outputs.files.singleFile.toString()).file("saxon.so") }
+  libsaxoncLibPath = libpath(libsaxoncReleaseArtifactsDir)
+  libsaxoncCoreLibPath = libpath(libsaxoncCoreReleaseArtifactsDir)
+
+  args(composerInstallTask.map { it.outputs.files.single().toString() })
+  args(layout.projectDirectory.file("../samples/SaxonCPHPTests.php").asFile.toString())
 }
 
 val readmeDir = layout.buildDirectory.dir("release-readme")

@@ -86,10 +86,10 @@ if test "$PHP_SAXONC" != "no"; then
 
   dnl In case of no dependencies
   AC_DEFINE(HAVE_SAXON, 1, [ Have saxon support ])
-
+  EXTENSION_DIR="$SAXON_EXTENSION_DIR"
   PHP_ADD_LIBRARY(stdc++, 1, SAXON_SHARED_LIBADD)
   PHP_ADD_LIBRARY(dl, 1, SAXON_SHARED_LIBADD)
   PHP_ADD_LIBRARY(saxonc-$SAXON_EDITION, 1, SAXON_SHARED_LIBADD)
   PHP_ADD_LIBRARY(saxonc-core-$SAXON_EDITION, 1, SAXON_SHARED_LIBADD)
-  PHP_NEW_EXTENSION(saxon, ../src/php8_saxon.cpp, $ext_shared)
+  PHP_NEW_EXTENSION(saxon, ../../../src/php8_saxon.cpp, $ext_shared)
 fi

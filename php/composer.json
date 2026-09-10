@@ -1,0 +1,15 @@
+{
+    "name": "saxonica/saxon",
+    "authors": [
+        {
+            "name": "O'Neil Delpratt",
+            "email": "oneil@saxonica.com"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^13.0"
+    },
+    "require": {
+
+    }
+}

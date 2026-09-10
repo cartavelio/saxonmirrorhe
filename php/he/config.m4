@@ -5,4 +5,4 @@ dnl Set edition-specific vars
 SAXON_EDITION="he"
 
 dnl include base extension config.m4
-m4_include([../saxon-config-base.m4])
+m4_include([saxon-config-base.m4])
