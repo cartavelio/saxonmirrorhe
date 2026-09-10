@@ -62,5 +62,5 @@ install(TARGETS ${saxonc_core}
 )
 install(EXPORT "SaxonCCore${SAXON_EDITION}"
         DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
-        NAMESPACE "SaxonC${SAXON_EDITION}::"
+        NAMESPACE "SaxonCCore${SAXON_EDITION}::"
 )

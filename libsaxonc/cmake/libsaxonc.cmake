@@ -86,4 +86,4 @@ target_sources(${saxonc}
 list(APPEND CMAKE_PREFIX_PATH ${SAXONC_CORE_PACKAGE_DIR})
 find_package(SaxonCCore${SAXON_EDITION} ${SaxonC_VERSION} EXACT REQUIRED)
 
-target_link_libraries(${saxonc} PUBLIC SaxonC${SAXON_EDITION}::saxonc-core-${SaxonC_EDITION})
+target_link_libraries(${saxonc} PUBLIC SaxonCCore${SAXON_EDITION}::saxonc-core-${SaxonC_EDITION})

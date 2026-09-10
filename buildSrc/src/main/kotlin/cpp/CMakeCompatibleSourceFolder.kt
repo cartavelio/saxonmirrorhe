@@ -38,7 +38,7 @@ abstract class CMakeCompatibleSourceFolder @Inject constructor(private var fs: F
   @TaskAction
   fun build() {
     fs.copy {
-      into(packageTmpDir.map { it.dir("tmp/${packageDirName.get()}") })
+      into(outputDir)
 
       from(layout.projectDirectory.dir("../source-cmake-distro")) {
         include("CMakeLists.txt.in")
