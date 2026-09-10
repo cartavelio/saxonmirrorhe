@@ -25,9 +25,11 @@ import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.z.IntSet;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static net.sf.saxon.type.Affinity.DISJOINT;
@@ -236,19 +238,18 @@ public class TypeHierarchy {
                 return SAME_TYPE;
             }
             if (t1 instanceof AnyItemType) {
-                if (t2 instanceof AnyItemType) {
-                    return SAME_TYPE;
-                } else {
-                    return SUBSUMES;
-                }
-            } else if (t2 instanceof AnyItemType) {
+                return SUBSUMES;
+            }
+            if (t2 instanceof AnyItemType) {
                 return SUBSUMED_BY;
-            } else if (t1 instanceof ChoiceItemType || t2 instanceof ChoiceItemType) {
+            }
+            if (t1 instanceof ChoiceItemType || t2 instanceof ChoiceItemType) {
                 ChoiceItemType c1 = t1 instanceof ChoiceItemType ? (ChoiceItemType) t1 : ChoiceItemType.of(t1);
                 ChoiceItemType c2 = t2 instanceof ChoiceItemType ? (ChoiceItemType) t2 : ChoiceItemType.of(t2);
                 return choiceItemRelationship(c1, c2);
 
-            } else if (t1.isPlainType()) {
+            }
+            if (t1.isPlainType()) {
                 if (t2 instanceof NodeTest || t2 instanceof FunctionItemType || t2 instanceof JavaExternalObjectType) {
                     return DISJOINT;
                 } else if (t1 == BuiltInAtomicType.ANY_ATOMIC && t2.isPlainType()) {
@@ -259,29 +260,24 @@ public class TypeHierarchy {
                     if (((AtomicType) t1).getFingerprint() == ((AtomicType) t2).getFingerprint()) {
                         return SAME_TYPE;
                     }
-                    AtomicType t = (AtomicType)t2;
-                    while (true) {
-                        if (((AtomicType) t1).getFingerprint() == t.getFingerprint()) {
+                    // For built-in atomic types, use the alphacode, which is designed to
+                    // capture the type hierarchy: for example AD = decimal, ADI = integer, ADIL = long.
+                    if (t1 instanceof BuiltInAtomicType && t2 instanceof BuiltInAtomicType) {
+                        String alpha1 = t1.getBasicAlphaCode();
+                        String alpha2 = t2.getBasicAlphaCode();
+                        if (alpha1.startsWith(alpha2)) {
                             return SUBSUMES;
                         }
-                        SchemaType st = t.getBaseType();
-                        if (st instanceof AtomicType) {
-                            t = (AtomicType)st;
-                        } else {
-                            break;
-                        }
-                    }
-                    t = (AtomicType)t1;
-                    while (true) {
-                        if (t.getFingerprint() == ((AtomicType) t2).getFingerprint()) {
+                        if (alpha2.startsWith(alpha1)) {
                             return SUBSUMED_BY;
                         }
-                        SchemaType st = t.getBaseType();
-                        if (st instanceof AtomicType) {
-                            t = (AtomicType)st;
-                        } else {
-                            break;
-                        }
+                        return DISJOINT;
+                    }
+                    if (derivesFrom((AtomicType) t2, (AtomicType) t1)) {
+                        return SUBSUMES;
+                    }
+                    if (derivesFrom((AtomicType) t1, (AtomicType) t2)) {
+                        return SUBSUMED_BY;
                     }
                     return DISJOINT;
 
@@ -325,11 +321,7 @@ public class TypeHierarchy {
                 } else {
                     // both types are NodeTests
                     if (t1 instanceof AnyNodeTest) {
-                        if (t2 instanceof AnyNodeTest) {
-                            return SAME_TYPE;
-                        } else {
-                            return SUBSUMES;
-                        }
+                        return SUBSUMES;
                     } else if (t2 instanceof AnyNodeTest) {
                         return SUBSUMED_BY;
                     } else if (t2 instanceof ErrorType) {
@@ -356,42 +348,9 @@ public class TypeHierarchy {
                                 ((NodeTest)t1).getQNameTest(),
                                 ((NodeTest)t2).getQNameTest());
 
-                        Optional<IntSet> on1 = ((NodeTest) t1).getRequiredNodeNames();
-                        Optional<IntSet> on2 = ((NodeTest) t2).getRequiredNodeNames();
-//
-//                        if (t1 instanceof QNameTest && t2 instanceof QNameTest) {
-//                            nodeNameRelationship = nameTestRelationship((QNameTest)t1, (QNameTest)t2);
-//                        } else if (on1.isPresent() && on1.get() instanceof IntUniversalSet) {
-//                            if (on2.isPresent() && on2.get() instanceof IntUniversalSet) {
-//                                nodeNameRelationship = SAME_TYPE;
-//                            } else {
-//                                nodeNameRelationship = SUBSUMES;
-//                            }
-//                        } else if (on2.isPresent() && on2.get() instanceof IntUniversalSet) {
-//                            nodeNameRelationship = SUBSUMED_BY;
-//                        } else if (!(on1.isPresent() && on2.isPresent())) {
-//                            nodeNameRelationship = t1.equals(t2) ? SAME_TYPE : OVERLAPS;
-//                        } else {
-//                            IntSet n1 = on1.get();
-//                            IntSet n2 = on2.get();
-//                            if (n1.containsAll(n2)) {
-//                                if (n1.size() == n2.size()) {
-//                                    nodeNameRelationship = SAME_TYPE;
-//                                } else {
-//                                    nodeNameRelationship = SUBSUMES;
-//                                }
-//                            } else if (n2.containsAll(n1)) {
-//                                nodeNameRelationship = SUBSUMED_BY;
-//                            } else if (IntHashSet.containsSome(n1, n2)) {
-//                                nodeNameRelationship = OVERLAPS;
-//                            } else {
-//                                nodeNameRelationship = DISJOINT;
-//                            }
-//                        }
-
                         // now find the relationship between the content types allowed
 
-                        Affinity contentRelationship = computeContentRelationship(t1, t2, on1, on2);
+                        Affinity contentRelationship = computeContentRelationship(t1, t2);
 
                         // now analyse the three different relationships
 
@@ -506,6 +465,17 @@ public class TypeHierarchy {
         }
     }
 
+    private boolean derivesFrom(AtomicType t1, AtomicType t2) {
+        SchemaType t = t1;
+        do {
+            if (t.getFingerprint() == t2.getFingerprint()) {
+                return true;
+            }
+            t = t.getBaseType();
+        } while (t instanceof AtomicType);
+        return false;
+    }
+
     private static void requireTrueItemType(ItemType t) {
         Objects.requireNonNull(t);
         if (t instanceof UnionType && !t.isPlainType()) {
@@ -608,13 +578,11 @@ public class TypeHierarchy {
      *
      * @param t1 the first type
      * @param t2 the second type
-     * @param n1 the set of element names allowed by the first type
-     * @param n2 the set of element names allowed by the second type
      * @return the relationship, as one of the constants
      *         {@link Affinity#SAME_TYPE}, {@link Affinity#SUBSUMES},
      *         {@link Affinity#SUBSUMED_BY}, {@link Affinity#DISJOINT}, {@link Affinity#OVERLAPS}
      */
-    protected Affinity computeContentRelationship(ItemType t1, ItemType t2, Optional<IntSet> n1, Optional<IntSet> n2) {
+    protected Affinity computeContentRelationship(ItemType t1, ItemType t2) {
         Affinity contentRelationship;
         if (t1 instanceof DocumentNodeTest) {
             if (t2 instanceof DocumentNodeTest) {
