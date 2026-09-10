@@ -124,6 +124,15 @@
       <reason>XQuery item types: forwards references not yet implemented</reason>
    </exception>
    
+   <exception test-set="prod-MapConstructor" test-case="MapConstructor-500
+      MapConstructor-501
+      MapConstructor-502
+      MapConstructor-504" 
+      run="false" report="notRun">
+      <created by="Michael Kay" on="2026-04-07"/>
+      <reason>PR2541 not yet implemented</reason>
+   </exception>
+   
    
    
    <exception test-set="misc-HtmlTestSuite" test-case="
@@ -151,24 +160,44 @@
       fo-test-fn-scan-right-001
       fo-test-fn-scan-right-002
       fo-test-fn-scan-right-003
+      fo-test-fn-system-properties-001
+      fo-test-fn-system-properties-002
+      fo-test-fn-system-properties-003
       " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-01"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <!--<exception test-set="app-spec-examples" 
-      test-case=" fo-test-fn-build-dateTime-001
-      fo-test-fn-build-dateTime-002
-      fo-test-fn-build-dateTime-003
-      fo-test-fn-parse-dateTime-001
-      fo-test-fn-parse-dateTime-002
-      fo-test-fn-parse-dateTime-003
-      " 
+   <exception test-set="app-spec-examples" 
+      test-case=" fo-test-fn-jvalue-003 " 
       run="false" report="n/a">
-      <created by="Michael Kay" on="2026-02-10"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
+      <created by="Michael Kay" on="2026-01-01"/>
+      <reason>Error in example (see issue 2408, search for jvalue)</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-distinct-ordered-nodes-002" 
+      run="false" report="bug">
+      <created by="Michael Kay" on="2026-04-11"/>
+      <reason>Not implemented: calling jnode($x) twice gives two distinct JNodes</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" test-case="
+      fo-test-fn-resolve-QName-001
+      fo-test-fn-resolve-QName-002" 
+      run="XQ" report="n/a">
+      <created by="Michael Kay" on="2026-04-13"/>
+      <reason>Examples require XQuery but are not tagged as such</reason>
+   </exception>
+   
+   <exception test-set="fn-json-to-xml" 
+      test-case="json-to-xml-017
+      json-to-xml-037
+      json-to-xml-038" run="XQ" report="known restriction">
+      <created by="Michael Kay" on="2026-04-13"/>
+      <reason>Test driver limitation: schema-aware XPath using schema for fn namespace</reason>
+   </exception>
    
    <exception test-set="fn-serialize" 
       test-case="serialize-xhtml-149" 
@@ -201,6 +230,7 @@
    <exception test-set="misc-BuiltInKeywords" 
       test-case=" Keywords-fn-scan-left-1
       Keywords-fn-scan-right-1
+      Keywords-fn-system-properties-1
       Keywords-fn-build-dateTime-1
       Keywords-fn-parts-of-dateTime-1
       " 
@@ -209,8 +239,15 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
+   <exception test-set="misc-BuiltInKeywords" 
+      test-case="Keywords-fn-xsd-validator-1" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-11"/>
+      <reason>Problem with test: expects extensible record type in result</reason>
+   </exception>
+   
    <exception test-set="prod-SequenceType" 
-      test-case="built-in-record-type-304" 
+      test-case="built-in-record-type-004 built-in-record-type-204 built-in-record-type-304" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-06"/>
       <reason>Functionality not yet implemented: recursive record types</reason>
@@ -244,6 +281,13 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-03-23"/>
       <reason>Fallback option not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="EXPath-file" 
+      test-case="EXPath-file-delete-006" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-03-23"/>
+      <reason>PR2548 not yet implemented</reason>
    </exception>
    
    
