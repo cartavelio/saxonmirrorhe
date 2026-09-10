@@ -54,7 +54,7 @@ public class ActiveStreamSource extends StreamSource implements ActiveSource {
         XMLReader parser = options.obtainXMLReader();
         if (parser == null) {
             parser = config.getSourceParser();
-            if (options.getEntityResolver() != null && parser.getEntityResolver() == null) {
+            if (options.getEntityResolver() != null /*&& parser.getEntityResolver() == null*/) {
                 parser.setEntityResolver(options.getEntityResolver());
             }
             reuseParser = true;
