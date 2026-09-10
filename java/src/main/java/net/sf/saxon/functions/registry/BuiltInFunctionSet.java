@@ -97,7 +97,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      */
 
     protected static RecordType.Field field(String name, SequenceType type, boolean optional) {
-        return new RecordType.Field(name, type, optional);
+        return new RecordType.Field(name, type);
     }
 
     private final HashMap<String, net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry> functionTable = new HashMap<>(200);

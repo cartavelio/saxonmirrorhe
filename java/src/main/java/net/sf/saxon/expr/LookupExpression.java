@@ -285,7 +285,7 @@ public class LookupExpression extends BinaryExpression {
                     String fieldName = ((StringLiteral) getRhsExpression()).stringify();
                     SequenceType fieldType = ((RecordType) mapType).getFieldType(fieldName);
                     if (fieldType == null) {
-                        return ((RecordType) mapType).isExtensible() ? StaticProperty.ALLOWS_ZERO_OR_MORE : StaticProperty.ALLOWS_ZERO;
+                        return StaticProperty.ALLOWS_ZERO;
                     } else {
                         return fieldType.getCardinality();
                     }

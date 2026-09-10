@@ -38,17 +38,17 @@ import java.util.Random;
  */
 public class RandomNumberGenerator extends SystemFunction implements Callable {
 
-    public static ItemType RETURN_TYPE = RecordType.extensible(
-            new RecordType.Field("number", SequenceType.SINGLE_DOUBLE, false),
+    public static ItemType RETURN_TYPE = RecordType.make(
+            new RecordType.Field("number", SequenceType.SINGLE_DOUBLE),
             new RecordType.Field("next",
                                  SequenceType.one(
                                          // TODO: the precise type is recursive
-                                         new SpecificFunctionType(SequenceType.one(new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_ITEM)))),
-                                 false),
+                                         new SpecificFunctionType(SequenceType.one(new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_ITEM))))
+            ),
             new RecordType.Field("permute",
                                  SequenceType.one(
-                                         new SpecificFunctionType(SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE)),
-                                 false));
+                                         new SpecificFunctionType(SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE))
+            ));
 
     private static final Shape SHAPE = new Shape(new Twine8("number"),
                                                  new Twine8("next"),

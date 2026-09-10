@@ -35,17 +35,15 @@ import java.util.List;
 
 public class ArraySortBy extends SystemFunction {
 
-    public static class MemberToBeSorted {
-        public GroundedValue value;
-        public GroundedValue[] sortKeys;
-    }
+    private record MemberToBeSorted (GroundedValue value, GroundedValue[] sortKeys) {}
 
     public static final FunctionItemType keyFunctionType =
         new SpecificFunctionType(SequenceType.ANY_SEQUENCE, SequenceType.ATOMIC_SEQUENCE);
-    public static RecordType sortKeyRecord = RecordType.nonExtensible(
-            new RecordType.Field("key", SequenceType.optional(keyFunctionType), true),
-            new RecordType.Field("collation", SequenceType.OPTIONAL_STRING, true),
-            new RecordType.Field("order", SequenceType.optional(EnumerationUnionType.of("ascending", "descending")), true)
+
+    public static RecordType sortKeyRecord = RecordType.make(
+            new RecordType.Field("key", SequenceType.optional(keyFunctionType)),
+            new RecordType.Field("collation", SequenceType.OPTIONAL_STRING),
+            new RecordType.Field("order", SequenceType.optional(EnumerationUnionType.of("ascending", "descending")))
     );
 
     public static Callable dataFn = SortBy.DATA_FN;
@@ -81,14 +79,14 @@ public class ArraySortBy extends SystemFunction {
         } else {
 
             for (Item f : details.asIterable()) {
-                Callable k = (FunctionItem) ((MapItem) f).get(new StringValue("key"));
+                Callable k = (FunctionItem) ((MapItem) f).get(new StringValue("key")).head();
                 sortKeys.add(k == null ? dataFn : k);
 
-                StringValue c = (StringValue) ((MapItem) f).get(new StringValue("collation"));
+                Item c = ((MapItem) f).get(new StringValue("collation")).head();
                 String collation = c == null
                         ? getRetainedStaticContext().getDefaultCollationName()
                         : c.getStringValue();
-                StringValue o = (StringValue) ((MapItem) f).get(new StringValue("order"));
+                Item o = ((MapItem) f).get(new StringValue("order")).head();
                 boolean descending = o != null && o.getStringValue().equals("descending");
                 StringCollator collator = context.getConfiguration().getCollation(collation);
                 if (collator == null) {
@@ -107,9 +105,9 @@ public class ArraySortBy extends SystemFunction {
         SequenceIterator iterator = ((ArrayItem)arguments[0].head()).parcels();
         Item item;
         while ((item = iterator.next()) != null) {
-            MemberToBeSorted member = new MemberToBeSorted();
-            member.value = ((Parcel)item).getValue();
-            member.sortKeys = new GroundedValue[sortKeys.size()];
+            MemberToBeSorted member = new MemberToBeSorted(
+                    ((Parcel)item).getValue(),
+                    new GroundedValue[sortKeys.size()]);
             int k = 0;
             for (Callable callable : sortKeys) {
                 member.sortKeys[k++] = callable.call(context, new Sequence[]{((Parcel) item).getValue()}).materialize();
@@ -120,7 +118,7 @@ public class ArraySortBy extends SystemFunction {
         try {
             inputList.sort((a, b) -> {
                 for (int k = 0; k < sortKeys.size(); k++) {
-                    int result = ArraySort.compareSortKeys(a.sortKeys[k], b.sortKeys[k], comparers.get(k));
+                    int result = ArraySort.compareSortKeys(a.sortKeys()[k], b.sortKeys()[k], comparers.get(k));
                     if (result != 0) {
                         return result;
                     }

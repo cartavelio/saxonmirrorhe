@@ -19,6 +19,7 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapFunctionSet;
+import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
@@ -196,7 +197,6 @@ public class XQueryParser extends XPathParser {
 
             ((QueryModule) env).setLocallyVisibleItemTypes(visibleItemTypes);
 
-
             Map<StructuredQName, ItemType> expandedItemTypes = new HashMap<>();
             for (Map.Entry<StructuredQName, ItemType> entry : visibleItemTypes.entrySet()) {
                 ItemType expanded = entry.getValue().resolveAliases(new Stack<>());
@@ -204,10 +204,6 @@ public class XQueryParser extends XPathParser {
             }
 
             ((QueryModule) env).setLocallyVisibleItemTypes(expandedItemTypes);
-
-
-
-            //typeAliasManager.setTypeAliases(expandedItemTypes);
 
             for (GlobalVariable var : env.getPackageData().getGlobalVariableList()) {
                 if (languageVersion >= 40 && var.getRequiredType() != SequenceType.ANY_SEQUENCE) {
@@ -650,11 +646,15 @@ public class XQueryParser extends XPathParser {
                             annotationList.check(env.getConfiguration(), "DV");
                             parseVariableDeclaration(annotationList);
                         } else if (tryKeyword("type")) {
-                            checkSyntaxExtensions("declare type");
+                            checkLanguageVersion40("declare type");
                             annotationList.check(env.getConfiguration(), "DI");
                             parseItemTypeDeclaration(annotationList);
+                        } else if (tryKeyword("record")) {
+                            checkLanguageVersion40("declare record");
+                            annotationList.check(env.getConfiguration(), "DR");
+                            parseRecordTypeDeclaration(annotationList);
                         } else {
-                            grumble("Annotations can appear only in 'declare variable' and 'declare function'");
+                            grumble("Annotations can appear only in 'declare variable|function|item|record'");
                         }
                     } else if (tryKeyword("fixed")) {
                         checkLanguageVersion40("a fixed default namespace");
@@ -771,11 +771,17 @@ public class XQueryParser extends XPathParser {
                         }
                         parseOptionDeclaration();
                     } else if (tryKeyword("type")) {
-                        checkSyntaxExtensions("declare type");
+                        checkLanguageVersion40("declare type");
                         if (allowDeclarations) {
                             allowDeclarations = false;
                         }
                         parseItemTypeDeclaration(AnnotationList.EMPTY);
+                    } else if (tryKeyword("record")) {
+                        checkLanguageVersion40("declare record");
+                        if (allowDeclarations) {
+                            allowDeclarations = false;
+                        }
+                        parseRecordTypeDeclaration(AnnotationList.EMPTY);
                     } else if (tryKeyword("construction")) {
                         if (!allowDeclarations) {
                             grumble("'declare construction' must appear earlier in the query prolog");
@@ -1963,7 +1969,7 @@ public class XQueryParser extends XPathParser {
 
 
     /**
-     * Parse a type alias declaration. Allowed only in Saxon-PE and higher
+     * Parse a 4.0 item type declaration. Allowed only if 4.0 is enabled
      *
      * @throws XPathException if parsing fails
      */
@@ -1979,6 +1985,58 @@ public class XQueryParser extends XPathParser {
                             + typeName.getEQName(), "XQST0146");
         }
         ((QueryModule)env).declareItemType(typeName, typeDef, !annotations.includes(Annotation.PRIVATE));
+    }
+
+    protected void parseRecordTypeDeclaration(AnnotationList annotations) throws XPathException {
+        String name = readName();
+        StructuredQName typeName = makeStructuredQName(name, NamespaceUri.NULL);
+        readToken(Token.LPAREN);
+
+        List<String> fieldNames = new ArrayList<>(6);
+        List<String> optionalFieldNames = new ArrayList<>(6);
+        List<SequenceType> fieldTypes = new ArrayList<>(6);
+        boolean extensible = false;
+        RecordType recordTest = new RecordType();
+        while (true) {
+            if (t.currentToken instanceof Token.NameToken) {
+                name = t.currentName();
+                if (!NameChecker.isValidNCName(name)) {
+                    grumble(Err.wrap(name) + " is not a valid NCName");
+                }
+            } else if (t.currentToken instanceof Token.StringLiteral) {
+                name = expectStringLiteral();
+            } else {
+                grumble("Name of field in record declaration must be either an NCName or a quoted string literal");
+                name = "dummy";
+            }
+            if (fieldNames.contains(name)) {
+                grumble("Duplicate field name (" + name + ")");
+                name = "dummy";
+            }
+            fieldNames.add(name);
+            nextToken();
+            SequenceType arg = SequenceType.ANY_SEQUENCE;
+            if (tryKeyword("as")) {
+                arg = parseSequenceType();
+            }
+            fieldTypes.add(arg);
+            if (t.currentToken == Token.RPAREN) {
+                break;
+            } else if (t.currentToken == Token.COMMA) {
+                nextToken();
+            } else {
+                grumble("Expected ',' or ')' after field in record type, found '" +
+                                  t.currentToken + '\'');
+            }
+        }
+        nextToken();
+        recordTest.setDetails(fieldNames, fieldTypes);
+        SchemaType st = env.getImportedSchema().getSchemaType(typeName);
+        if (st != null) {
+            grumble("Named record type duplicates an existing type name in the static context: "
+                            + typeName.getEQName(), "XQST0146");
+        }
+        ((QueryModule) env).declareItemType(typeName, recordTest, !annotations.includes(Annotation.PRIVATE));
     }
 
     /**
@@ -2176,9 +2234,7 @@ public class XQueryParser extends XPathParser {
                     parseWindowClause(flwor, clauseList);
                 } else {
                     if (isKeyword(second, "member") || isKeyword(second, "key") || isKeyword(second, "value")) {
-                        if (languageVersion < 40) {
-                            grumble("The 'for member/key/value' clause requires XQuery 4.0 to be enabled");
-                        }
+                        checkLanguageVersion40("a for member/key/value clause");
                     }
                     parseForClause(flwor, clauseList);
                 }
@@ -2195,9 +2251,7 @@ public class XQueryParser extends XPathParser {
                 clause.setRepeated(containsLoopingClause(clauseList));
                 clauseList.add(clause);
             } else if (isKeyword("while")) {
-                if (languageVersion < 40) {
-                    grumble("The 'while' clause requires XQuery 4.0 to be enabled");
-                }
+                checkLanguageVersion40("a while clause");
                 nextToken();
                 Expression condition = parseExprSingle();
                 WhileClause clause = new WhileClause(flwor, condition);
@@ -2341,8 +2395,8 @@ public class XQueryParser extends XPathParser {
                 iterand = ForQualifier.FOR_ITEM;
             }
 
-            if (iterand != ForQualifier.FOR_ITEM && languageVersion < 40) {
-                grumble("The 'for member/key/value' syntax requires XQuery 4.0 to be enabled");
+            if (iterand != ForQualifier.FOR_ITEM) {
+                checkLanguageVersion40("a for member/key/value clause");
             }
 
             int offset = t.currentTokenStartOffset;

@@ -58,19 +58,19 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
     }
 
 
-    public static ItemType RESULT_TYPE = RecordType.nonExtensible(
+    public static ItemType RESULT_TYPE = RecordType.make(
             new RecordType.Field("variables",
                                  SequenceType.one(
                                          //map(xs:QName, item()*)
                                          new MapType(BuiltInAtomicType.QNAME,
-                                                     SequenceType.ANY_SEQUENCE)), false),
+                                                     SequenceType.ANY_SEQUENCE))),
             new RecordType.Field("functions",
                                  SequenceType.one(
                                          //map(xs:QName, map(xs:integer, function(*)))
                                          new MapType(BuiltInAtomicType.QNAME,
                                                      SequenceType.one(
                                                              new MapType(BuiltInAtomicType.INTEGER,
-                                                                         SequenceType.one(AnyFunctionType.INSTANCE))))), false)
+                                                                         SequenceType.one(AnyFunctionType.INSTANCE))))))
     );
 
 

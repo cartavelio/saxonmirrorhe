@@ -370,7 +370,7 @@ public abstract class AtomicValue
      *
      * @param component identifies the required component, as a constant defined in class
      *                  {@link net.sf.saxon.functions.AccessorFn}
-     * @return the value of the requested component of this value
+     * @return the value of the requested component of this value, if present, or null if absent
      * @throws net.sf.saxon.trans.XPathException
      *                                       if a dynamic error occurs
      * @throws UnsupportedOperationException if applied to a value of a type that has no components

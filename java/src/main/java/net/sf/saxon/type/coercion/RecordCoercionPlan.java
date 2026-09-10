@@ -17,6 +17,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
@@ -49,30 +50,27 @@ public final class RecordCoercionPlan extends CoercionPlan {
                  StringValue key = new StringValue(s);
                  GroundedValue val = suppliedMap.get(key);
                  if (val == null) {
-                     if (!test.isOptionalField(s)) {
-                         throw coercionError(item, requiredType, request, "Field '" + s + "' is required");
-                     }
-                 } else {
-                     SequenceType fieldType = test.getFieldType(s);
-                     if (fieldType != null) {
-                         CoercionPlan fieldPlan = fieldType.getPrimaryType().getCoercionPlan(40);
-                         if (fieldType.matches(val)) {
-                             builder.put(key.getUnicodeStringValue(), val);
-                         } else {
-                             Supplier<RoleDiagnostic> fieldRoleSupplier = () ->
-                                     new RoleDiagnostic(RoleDiagnostic.OPTION, s, 0);
-                             CoercionRequest subRequest = new CoercionRequest(
-                                     SequenceType.ANY_SEQUENCE,
-                                     request.config, fieldRoleSupplier, request.locator);
-                             SequenceIterator convertedValue =
-                                     null;
-                             try {
-                                 convertedValue = fieldPlan.coerceSequence(val.iterate(), fieldType, subRequest);
-                             } catch (XPathException e) {
-                                 throw coercionError(item, requiredType, request, "Failed to convert value of field '" + s + "': " + e.getMessage());
-                             }
-                             builder.put(key.getUnicodeStringValue(), SequenceTool.toGroundedValue(convertedValue));
+                     val = EmptySequence.getInstance();
+                 }
+                 SequenceType fieldType = test.getFieldType(s);
+                 if (fieldType != null) {
+                     CoercionPlan fieldPlan = fieldType.getPrimaryType().getCoercionPlan(40);
+                     if (fieldType.matches(val)) {
+                         builder.put(key.getUnicodeStringValue(), val);
+                     } else {
+                         Supplier<RoleDiagnostic> fieldRoleSupplier = () ->
+                                 new RoleDiagnostic(RoleDiagnostic.OPTION, s, 0);
+                         CoercionRequest subRequest = new CoercionRequest(
+                                 SequenceType.ANY_SEQUENCE,
+                                 request.config, fieldRoleSupplier, request.locator);
+                         SequenceIterator convertedValue =
+                                 null;
+                         try {
+                             convertedValue = fieldPlan.coerceSequence(val.iterate(), fieldType, subRequest);
+                         } catch (XPathException e) {
+                             throw coercionError(item, requiredType, request, "Failed to convert value of field '" + s + "': " + e.getMessage());
                          }
+                         builder.put(key.getUnicodeStringValue(), SequenceTool.toGroundedValue(convertedValue));
                      }
                  }
             }

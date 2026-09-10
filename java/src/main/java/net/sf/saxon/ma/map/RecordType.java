@@ -36,55 +36,50 @@ import java.util.function.Supplier;
  * a record type requires Saxon-PE or higher, but the supporting code is included in
  * Saxon-HE for convenience.
  *
- * Extended in 10.0 to distinguish extensible vs non-extensible record types. Extensible record
- * types permit fields other than those listed to appear; non-extensible record types do not.
- * An extensible record type is denoted by record(... ,*).
+ * Extensible record types and optional fields are dropped in 13.1
  */
 public class RecordType implements FunctionItemType {
 
     private final Map<String, SequenceType> fieldTypes = new HashMap<>();
     private final List<String> fieldNamesInOrder = new ArrayList<>();
-    private final Set<String> optionalFields = new HashSet<>();
-    private boolean _extensible;
     private StructuredQName name;
 
-    public static RecordType VALUE_RECORD = nonExtensible(
-            new Field("value", SequenceType.ANY_SEQUENCE, false)
+    public static RecordType VALUE_RECORD = make(
+            new Field("value", SequenceType.ANY_SEQUENCE)
     );
-    public static RecordType KEY_VALUE_RECORD = nonExtensible(
-            new Field("key", SequenceType.ATOMIC_SEQUENCE, false),
-            new Field("value", SequenceType.ANY_SEQUENCE, false)
+    public static RecordType KEY_VALUE_RECORD = make(
+            new Field("key", SequenceType.ATOMIC_SEQUENCE),
+            new Field("value", SequenceType.ANY_SEQUENCE)
     );
 
     public final static RecordType SCHEMA_TYPE_RECORD = new RecordType(new StructuredQName("fn", NamespaceUri.FN, "schema-type-record"));
 
     static {
         SCHEMA_TYPE_RECORD.setDetails(
-                true,
-                f("name", SequenceType.SINGLE_QNAME, false),
-                f("is-simple", SequenceType.SINGLE_BOOLEAN, false),
+                f("name", SequenceType.SINGLE_QNAME),
+                f("is-simple", SequenceType.SINGLE_BOOLEAN),
                 f("base-type", SequenceType.one(
-                        new SpecificFunctionType(SequenceType.optional(SCHEMA_TYPE_RECORD))), false),
+                        new SpecificFunctionType(SequenceType.optional(SCHEMA_TYPE_RECORD)))),
                 f("primitive-type", SequenceType.one(
-                        new SpecificFunctionType(SequenceType.one(SCHEMA_TYPE_RECORD))), true),
+                        new SpecificFunctionType(SequenceType.one(SCHEMA_TYPE_RECORD)))),
                 f("variety", SequenceType.one(
-                        EnumerationUnionType.of("atomic", "list", "union", "empty", "simple", "element-only", "mixed")), true),
+                        EnumerationUnionType.of("atomic", "list", "union", "empty", "simple", "element-only", "mixed"))),
                 f("members", SequenceType.one(
-                        new SpecificFunctionType(SequenceType.zeroOrMore(SCHEMA_TYPE_RECORD))), true),
+                        new SpecificFunctionType(SequenceType.zeroOrMore(SCHEMA_TYPE_RECORD)))),
                 f("simple-content-type", SequenceType.one(
-                        new SpecificFunctionType(SequenceType.one(SCHEMA_TYPE_RECORD))), true),
+                        new SpecificFunctionType(SequenceType.one(SCHEMA_TYPE_RECORD)))),
                 f("matches", SequenceType.one(
                         new SpecificFunctionType(SequenceType.SINGLE_ATOMIC,
-                                                 SequenceType.SINGLE_BOOLEAN)), true),
+                                                 SequenceType.SINGLE_BOOLEAN))),
                 f("constructor", SequenceType.one(
                         new SpecificFunctionType(SequenceType.OPTIONAL_ATOMIC,
-                                                 SequenceType.OPTIONAL_ATOMIC)), true)
+                                                 SequenceType.OPTIONAL_ATOMIC)))
         );
     }
 
 
-    private static RecordType.Field f(String name, SequenceType type, boolean optional) {
-        return new RecordType.Field(name, type, optional);
+    private static RecordType.Field f(String name, SequenceType type) {
+        return new RecordType.Field(name, type);
     }
 
     /**
@@ -94,12 +89,10 @@ public class RecordType implements FunctionItemType {
     public static class Field {
         String name;
         SequenceType type;
-        boolean optional;
 
-        public Field(String name, SequenceType type, boolean optional) {
+        public Field(String name, SequenceType type) {
             this.name = name;
             this.type = type;
-            this.optional = optional;
         }
     }
 
@@ -121,13 +114,10 @@ public class RecordType implements FunctionItemType {
      * Construct a RecordTest
      * @param names the names of the fields
      * @param types the types of the fields
-     * @param optionalFieldNames a list of the names of the fields that are declared optional
-     * @param extensible indicates whether the RecordTest is extensible (allows fields other
-     *                   than those declared)
      */
 
-    public RecordType(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible) {
-        setDetails(names, types, optionalFieldNames, extensible);
+    public RecordType(List<String> names, List<SequenceType> types) {
+        setDetails(names, types);
     }
 
     /**
@@ -135,47 +125,31 @@ public class RecordType implements FunctionItemType {
      *
      * @param names              the names of the fields
      * @param types              the types of the fields
-     * @param optionalFieldNames a list of the names of the fields that are declared optional
-     * @param extensible         indicates whether the RecordTest is extensible (allows fields other
-     *                           than those declared)
      * @param name               the name of the record type
      */
 
-    public RecordType(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible, StructuredQName name) {
-        setDetails(names, types, optionalFieldNames, extensible);
+    public RecordType(List<String> names, List<SequenceType> types, StructuredQName name) {
+        setDetails(names, types);
         this.name = name;
     }
 
     /**
-     * Make an extensible record type
+     * Make a (non-extensible) record type
      * @param fields the fields of the record type
      * @return the record type
      */
-    public static RecordType extensible(Field... fields) {
-        return makeRecordTest(true, fields);
+    public static RecordType make(Field... fields) {
+        return makeRecordTest(fields);
     }
 
-    /**
-     * Make a non-extensible record type
-     * @param fields the fields of the record type
-     * @return the record type
-     */
-    public static RecordType nonExtensible(Field... fields) {
-        return makeRecordTest(false, fields);
-    }
-
-    private static RecordType makeRecordTest(boolean extensible, Field... fields) {
+    private static RecordType makeRecordTest(Field... fields) {
         List<String> fieldNames = new ArrayList<>(fields.length);
-        List<String> optionalFieldNames = new ArrayList<>(fields.length);
         List<SequenceType> fieldTypes = new ArrayList<>(fields.length);
         for (Field field : fields) {
             fieldNames.add(field.name);
             fieldTypes.add(field.type);
-            if (field.optional) {
-                optionalFieldNames.add(field.name);
-            }
         }
-        return new RecordType(fieldNames, fieldTypes, optionalFieldNames, extensible);
+        return new RecordType(fieldNames, fieldTypes);
     }
 
     /**
@@ -183,14 +157,10 @@ public class RecordType implements FunctionItemType {
      * it is needed so that a RecordTest can refer to itself. Apart from this, the RecordTest
      * is immutable.
      */
-    public void setDetails(boolean extensible, Field... fields) {
-        this._extensible = extensible;
+    public void setDetails(Field... fields) {
         for (Field field : fields) {
             fieldNamesInOrder.add(field.name);
             fieldTypes.put(field.name, field.type);
-            if (field.optional) {
-                optionalFields.add(field.name);
-            }
         }
     }
 
@@ -200,17 +170,12 @@ public class RecordType implements FunctionItemType {
      * is immutable.
      * @param names the names of the fields
      * @param types the types of the fields
-     * @param optionalFieldNames a list of the names of the fields that are declared optional
-     * @param extensible indicates whether the RecordTest is extensible (allows fields other
-     *                   than those declared)
      */
-    public void setDetails(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible) {
+    public void setDetails(List<String> names, List<SequenceType> types) {
         for (int i = 0; i < names.size(); i++) {
             fieldNamesInOrder.add(names.get(i));
             fieldTypes.put(names.get(i), types.get(i));
         }
-        optionalFields.addAll(optionalFieldNames);
-        this._extensible = extensible;
     }
 
     /**
@@ -285,25 +250,6 @@ public class RecordType implements FunctionItemType {
     }
 
     /**
-     * Ask whether a given field is optional
-     * @param field the name of the field
-     * @return true if the field is defined as an optional field
-     */
-
-    public boolean isOptionalField(String field) {
-        return optionalFields.contains(field);
-    }
-
-    /**
-     * Ask whether the record type is extensible, that is, whether fields other than those named are permitted
-     *
-     * @return true if fields other than the named fields are permitted to appear
-     */
-    public boolean isExtensible() {
-        return _extensible;
-    }
-
-    /**
      * Test whether a given item conforms to this type
      *
      * @param item The item to be tested
@@ -315,22 +261,22 @@ public class RecordType implements FunctionItemType {
             for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
                 GroundedValue val = map.get(new StringValue(field.getKey()));
                 if (val == null) {
-                    if (!isOptionalField(field.getKey())) {
+                    //if (!Cardinality.allowsZero(field.getValue().getCardinality())) {
                         return false;
-                    }
+                   // }
                 } else if (!field.getValue().matches(val)) {
                     return false;
                 }
             }
-            if (!_extensible) {
-                AtomicIterator keyIter = map.keys();
-                AtomicValue key;
-                while ((key = keyIter.next()) != null) {
-                    if (!(key instanceof StringValue) || !fieldTypes.containsKey(key.getStringValue())) {
-                        return false;
-                    }
+
+            AtomicIterator keyIter = map.keys();
+            AtomicValue key;
+            while ((key = keyIter.next()) != null) {
+                if (!(key instanceof StringValue) || !fieldTypes.containsKey(key.getStringValue())) {
+                    return false;
                 }
             }
+
             return true;
         } else {
             return false;
@@ -367,22 +313,18 @@ public class RecordType implements FunctionItemType {
 
     @Override
     public SequenceType getResultType() {
-        if (_extensible) {
-            return SequenceType.ANY_SEQUENCE;
-        } else {
-            ItemType resultType = null;
-            boolean allowsMany = false;
-            for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
-               if (resultType == null) {
-                   resultType = field.getValue().getPrimaryType();
-               } else {
-                   resultType = Type.getCommonSuperType(resultType, field.getValue().getPrimaryType());
-               }
-               allowsMany = allowsMany || Cardinality.allowsMany(field.getValue().getCardinality());
-            }
-            return SequenceType.makeSequenceType(resultType,
-                                                 allowsMany ? StaticProperty.ALLOWS_ZERO_OR_MORE : StaticProperty.ALLOWS_ZERO_OR_ONE);
+        ItemType resultType = null;
+        boolean allowsMany = false;
+        for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
+           if (resultType == null) {
+               resultType = field.getValue().getPrimaryType();
+           } else {
+               resultType = Type.getCommonSuperType(resultType, field.getValue().getPrimaryType());
+           }
+           allowsMany = allowsMany || Cardinality.allowsMany(field.getValue().getCardinality());
         }
+        return SequenceType.makeSequenceType(resultType,
+                                             allowsMany ? StaticProperty.ALLOWS_ZERO_OR_MORE : StaticProperty.ALLOWS_ZERO_OR_ONE);
     }
 
     /**
@@ -392,7 +334,7 @@ public class RecordType implements FunctionItemType {
      */
     @Override
     public double getDefaultPriority() {
-        if (fieldTypes.isEmpty() && isExtensible()) {
+        if (fieldTypes.isEmpty()) {
             return -0.25;
         } else {
             return 0.0;
@@ -458,9 +400,6 @@ public class RecordType implements FunctionItemType {
             } else {
                 sb.append('"').append(key).append('"');
             }
-            if (isOptionalField(key)) {
-                sb.append('?');
-            }
             sb.append(" as ");
             SequenceType fieldType = fieldTypes.get(key);
             if (fieldType.getPrimaryType() == this) {
@@ -468,9 +407,6 @@ public class RecordType implements FunctionItemType {
             } else {
                 sb.append(show.apply(fieldType));
             }
-        }
-        if (isExtensible()) {
-            sb.append(", *");
         }
         sb.append(")");
         return sb.toString();
@@ -483,15 +419,13 @@ public class RecordType implements FunctionItemType {
     public boolean equals(Object other) {
         return this == other ||
                 other instanceof RecordType
-                        && _extensible == ((RecordType) other)._extensible
-                        && fieldTypes.equals(((RecordType) other).fieldTypes)
-                        && optionalFields.equals(((RecordType) other).optionalFields);
+                        && fieldTypes.equals(((RecordType) other).fieldTypes);
     }
 
     @Override
     public ItemType normalizeItemType() {
         if (fieldTypes.isEmpty()) {
-            return _extensible ? MapType.ANY_MAP_TYPE : MapType.EMPTY_MAP_TYPE;
+            return MapType.EMPTY_MAP_TYPE;
         }
         return this;
     }
@@ -543,7 +477,7 @@ public class RecordType implements FunctionItemType {
     }
 
     private Affinity recordToMapRelationship(MapType other) {
-        AtomicType recordKeyType = isExtensible() ? BuiltInAtomicType.ANY_ATOMIC : BuiltInAtomicType.STRING;
+        AtomicType recordKeyType = BuiltInAtomicType.STRING;
         Affinity keyRel = Subsumption.computeRelationship(recordKeyType, other.getKeyType());
         if (keyRel == Affinity.DISJOINT) {
             return Affinity.DISJOINT;
@@ -555,8 +489,6 @@ public class RecordType implements FunctionItemType {
             } else {
                 return Affinity.OVERLAPS;
             }
-        } else if (isExtensible()) {
-            return Affinity.OVERLAPS;
         } else {
             // The type of every field in the record must be a subtype of the map value type
             for (SequenceType entry : fieldTypes.values()) {
@@ -575,38 +507,17 @@ public class RecordType implements FunctionItemType {
         boolean foundSubsuming = false;
         boolean foundSubsumed = false;
         boolean foundOverlap = false;
-        if (isExtensible()) {
-            if (!other.isExtensible()) {
-                foundSubsuming = true;
-            }
-        } else if (other.isExtensible()) {
-            foundSubsumed = true;
-        }
         for (String key : keys) {
             SequenceType t1 = fieldTypes.get(key);
             SequenceType t2 = other.fieldTypes.get(key);
-            boolean optional1 = isOptionalField(key);
-            boolean optional2 = other.isOptionalField(key);
-            if (optional1 != optional2) {
-                if (optional1) {
-                    foundSubsuming = true;
-                }
-                if (optional2) {
-                    foundSubsumed = true;
-                }
-            }
             if (t1 == null) {
-                if (isExtensible()) {
-                    foundSubsuming = true;
-                } else if (Cardinality.allowsZero(t2.getCardinality())) {
+                if (Cardinality.allowsZero(t2.getCardinality())) {
                     foundOverlap = true;
                 } else {
                     return Affinity.DISJOINT;
                 }
             } else if (t2 == null) {
-                if (other.isExtensible()) {
-                    foundSubsumed = true;
-                } else if (Cardinality.allowsZero(t1.getCardinality())) {
+                if (Cardinality.allowsZero(t1.getCardinality())) {
                     foundOverlap = true;
                 } else {
                     return Affinity.DISJOINT;
@@ -657,7 +568,7 @@ public class RecordType implements FunctionItemType {
                 SequenceType required = entry.getValue();
                 GroundedValue value = ((MapItem) item).get(new StringValue(key));
                 if (value == null) {
-                    if (!Cardinality.allowsZero(required.getCardinality()) && !isOptionalField(key)) {
+                    if (!Cardinality.allowsZero(required.getCardinality())) {
                         return Optional.of("Field " + key + " is absent; it must have a value");
                     }
                 } else {
@@ -674,15 +585,13 @@ public class RecordType implements FunctionItemType {
                     }
                 }
             }
-            if (!_extensible) {
-                AtomicIterator keyIter = ((MapItem)item).keys();
-                AtomicValue key;
-                while ((key = keyIter.next()) != null) {
-                    if (!(key instanceof StringValue)) {
-                        return Optional.of("Undeclared field " + key + " is present, but it is not a string, and the record type is not extensible");
-                    } else if (!fieldTypes.containsKey(key.getStringValue())) {
-                        return Optional.of("Undeclared field " + key + " is present, but the record type is not extensible");
-                    }
+            AtomicIterator keyIter = ((MapItem)item).keys();
+            AtomicValue key;
+            while ((key = keyIter.next()) != null) {
+                if (!(key instanceof StringValue)) {
+                    return Optional.of("Undeclared field " + key + " is present, but it is not a string, and the record type is not extensible");
+                } else if (!fieldTypes.containsKey(key.getStringValue())) {
+                    return Optional.of("Undeclared field " + key + " is present, but the record type is not extensible");
                 }
             }
         }
@@ -690,8 +599,7 @@ public class RecordType implements FunctionItemType {
     }
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40)
-            throws XPathException {
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40) {
         return new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role, false);
     }
 
@@ -824,7 +732,7 @@ public class RecordType implements FunctionItemType {
         }
         path.pop();
         if (changed) {
-            return new RecordType(fieldNamesInOrder, fieldTypes2, optionalFields, _extensible, name);
+            return new RecordType(fieldNamesInOrder, fieldTypes2, name);
         }
         return this;
     }

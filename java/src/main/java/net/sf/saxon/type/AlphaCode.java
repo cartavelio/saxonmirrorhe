@@ -308,13 +308,9 @@ public class AlphaCode {
         @Override
         public void setMultiStringProperty(AlphaCodeTree tree, String key, List<String> value) {
             switch (key) {
-                case "f" ->  // fields in tuple type
+                case "f" ->  // fields in recprd type
                         tree.fieldNames = value;
                 case "s" -> tree.enumValues = value;
-                case "optionalFields" -> {
-                    tree.optionalFieldNames = new HashSet<>();
-                    tree.optionalFieldNames.addAll(value);
-                }
                 default -> throw new IllegalArgumentException("Bad alphacode component " + key);
             }
         }
@@ -667,7 +663,6 @@ public class AlphaCode {
         AlphaCodeTree[] vennOperands;
         List<String> fieldNames;
         List<String> enumValues;
-        Set<String> optionalFieldNames;
         AlphaCodeTree selfReference;
     }
 
@@ -953,7 +948,7 @@ public class AlphaCode {
                     for (AlphaCodeTree t : tree.argTypes) {
                         fieldTypes.add(sequenceTypeFromTree(t, schema));
                     }
-                    recordTest.setDetails(tree.fieldNames, fieldTypes, tree.optionalFieldNames, false);
+                    recordTest.setDetails(tree.fieldNames, fieldTypes);
                     itemType = recordTest;
                 }
             } else {
@@ -1108,16 +1103,12 @@ public class AlphaCode {
                 if (rec.getName() != null) {
                     result.name = rec.getName().getEQName();
                 } else {
-                    result.optionalFieldNames = new HashSet<>();
-                    result.fieldNames = new ArrayList<>();
+                   result.fieldNames = new ArrayList<>();
                     result.argTypes = new ArrayList<>();
                     for (String s : rec.getFieldNames()) {
                         result.fieldNames.add(s);
                         SequenceType fieldType = rec.getFieldType(s);
                         result.argTypes.add(makeTree(fieldType));
-                        if (rec.isOptionalField(s)) {
-                            result.optionalFieldNames.add(s);
-                        }
                     }
                 }
             } else if (primary instanceof MapType) {
@@ -1271,9 +1262,6 @@ public class AlphaCode {
                     first = false;
                 }
                 sb.append(escapeNCName(s));
-                if (tree.optionalFieldNames.contains(s)) {
-                    sb.append('?');
-                }
             }
             sb.append("]");
         }

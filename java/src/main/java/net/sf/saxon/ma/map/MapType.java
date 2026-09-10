@@ -257,7 +257,7 @@ public class MapType extends AnyFunctionType {
     }
 
     /**
-     * Test whether this function type equals another function type
+     * Test whether this map type equals another map type
      */
 
     public boolean equals(Object other) {
@@ -267,7 +267,7 @@ public class MapType extends AnyFunctionType {
         if (other instanceof MapType f2) {
             return keyType.equals(f2.keyType) && valueType.equals(f2.valueType) && mustBeEmpty == f2.mustBeEmpty;
         }
-        return this == MapType.ANY_MAP_TYPE && other instanceof RecordType r && r.isExtensible() && r.getSize() == 0;
+        return false;
     }
 
     /**

@@ -59,11 +59,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         return version >= 40 ? instance40 : instance31;
     }
 
-    public static final RecordType KVP_TYPE_INEXTENSIBLE = RecordType.nonExtensible(
-            field("key", SequenceType.SINGLE_ATOMIC, false),
-            field("value", SequenceType.ANY_SEQUENCE, false));
-
-    public static final RecordType KVP_TYPE_EXTENSIBLE = RecordType.extensible(
+   public static final RecordType KVP_TYPE = RecordType.make(
             field("key", SequenceType.SINGLE_ATOMIC, false),
             field("value", SequenceType.ANY_SEQUENCE, false));
 

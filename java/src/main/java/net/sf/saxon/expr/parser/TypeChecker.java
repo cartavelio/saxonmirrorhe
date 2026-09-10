@@ -110,7 +110,7 @@ public class TypeChecker {
 
         if (!forceCoercion) {
             // Unless coercion is forced, if the supplied type is a subtype of the required type, no action is needed
-            if (supplied instanceof Literal && ((Literal)supplied).isInstance(req, th)) {
+            if (supplied instanceof Literal literal && literal.isInstance(req, th)) {
                 return supplied;
             }
             if (th.isSubType(supplied.getItemType(), reqItemType)) {

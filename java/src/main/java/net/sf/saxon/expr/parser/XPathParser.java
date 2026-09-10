@@ -2320,7 +2320,7 @@ public class XPathParser {
                 } else if (t.currentToken instanceof Token.StringLiteral) {
                     name = expectStringLiteral();
                 } else {
-                    p.grumble("Name of field in tuple must be either an NCName or a quoted string literal");
+                    p.grumble("Name of field in record type must be either an NCName or a quoted string literal");
                     name = "dummy";
                 }
                 if (fieldNames.contains(name)) {
@@ -2330,8 +2330,9 @@ public class XPathParser {
                 fieldNames.add(name);
                 p.nextToken();
                 if (t.currentToken == Token.QMARK) {
-                    optionalFieldNames.add(name);
+                    p.grumble("Optional fields in record types have been dropped from the 4.0 specification");
                     p.nextToken();
+                    throw new AssertionError();
                 }
                 SequenceType arg = SequenceType.ANY_SEQUENCE;
                 if (tryKeyword("as")) {
@@ -2349,7 +2350,7 @@ public class XPathParser {
             }
         }
         p.nextToken();
-        recordTest.setDetails(fieldNames, fieldTypes, optionalFieldNames, extensible);
+        recordTest.setDetails(fieldNames, fieldTypes);
         return recordTest;
     }
 
