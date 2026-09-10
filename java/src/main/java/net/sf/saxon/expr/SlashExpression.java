@@ -176,7 +176,7 @@ public class SlashExpression extends BinaryExpression
             return getStart();
         }
 
-        // The first operand must be of type node()*
+        // The first operand must be of type gnode()*
 
         Configuration config = visitor.getConfiguration();
         TypeChecker tc = config.getTypeChecker(false);

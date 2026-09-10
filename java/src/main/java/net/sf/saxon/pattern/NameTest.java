@@ -38,7 +38,7 @@ public class NameTest extends NodeTest {
     private final NamePool namePool;
     private NamespaceUri uri = null;  // the URI corresponding to the fingerprint - computed lazily
     private String localName = null; //the local name corresponding to the fingerprint - computed lazily
-
+    private boolean isNCName = false; // flag to indicate that the name was written as an NCName:
     /**
      * Create a NameTest to match nodes by name
      *
@@ -62,7 +62,7 @@ public class NameTest extends NodeTest {
     /**
      * Create a NameTest to match nodes by their nameCode allocated from the NamePool
      *
-     * @param nodeKind the kind of node, for example {@link Type#ELEMENT}
+     * @param nodeKind the principal node kind of the axis, for example {@link Type#ELEMENT}
      * @param nameCode the nameCode representing the name of the node
      * @param namePool the namePool holding the name codes
      * @since 8.4
@@ -94,23 +94,14 @@ public class NameTest extends NodeTest {
     }
 
     /**
-     * Specialize this NodeTest for use with nodes on a given axis starting at
-     * a specific origin. This enables a more efficient test to be used, for example
-     * if the origin is a fingerprinted node, because it is then known that all
-     * the nodes on the axis will be fingerprinted
-     *
-     * @param origin the origin node
-     * @param axis   the axis (a constant in class {@link AxisInfo}
-     * @return the same or an optimized NodeTest
+     * Say whether the QName was written as a lexical NCName. This affects the semantics
+     * of the test when it used to select from a JNode that wraps a map: the NCName is used
+     * as a string key, not as a QName key
+     * @param isNCName true if the name was written as an unprefixed NCName
      */
-    @Override
-    public NodePredicate specialize(GNode origin, int axis) {
-        if (origin instanceof NodeInfo) {
-            if (((NodeInfo)origin).hasFingerprint()) {
-                return new FingerprintedNameTest(nodeKind, fingerprint);
-            }
-        }
-        return this;
+
+    public void setIsNCName(boolean isNCName) {
+        this.isNCName = isNCName;
     }
 
     /**
@@ -223,31 +214,6 @@ public class NameTest extends NodeTest {
             localName = name.getLocalPart();
         }
     }
-
-//    /**
-//     * Test whether the NameTest matches a given QName
-//     *
-//     * @param qname the QName to be matched
-//     * @return true if the name matches
-//     */
-//
-//    @Override
-//    public boolean matches(StructuredQName qname) {
-//        computeUriAndLocal();
-//        return qname.getLocalPart().equals(localName) && qname.hasURI(uri);
-//    }
-//
-//    /**
-//     * Test whether the QNameTest matches a given fingerprint
-//     *
-//     * @param namePool the name pool
-//     * @param fp       the fingerprint of the QName to be matched
-//     * @return true if the name matches, false if not
-//     */
-//    @Override
-//    public boolean matchesFingerprint(NamePool namePool, int fp) {
-//        return fp == fingerprint;
-//    }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
@@ -373,18 +339,6 @@ public class NameTest extends NodeTest {
     public String getFullAlphaCode() {
         return getBasicAlphaCode() + " n" + getMatchingNodeName().getEQName();
     }
-
-//    /**
-//     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
-//     *
-//     * @return a string representation of the QNameTest, suitable for use in export files. The format is
-//     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
-//     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
-//     */
-//    @Override
-//    public String exportQNameTest() {
-//        return getMatchingNodeName().getEQName();
-//    }
 
     /**
      * Get extra diagnostic information about why a supplied item does not conform to this

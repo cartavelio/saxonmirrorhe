@@ -22,6 +22,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
 
@@ -80,6 +81,15 @@ public final class AxisExpression extends Expression {
     }
 
     /**
+     * Set the node test
+     * @param test the node test
+     */
+
+    public void setNodeTest(NodeTest test) {
+        this.test = test;
+    }
+
+    /**
      * Get a name identifying the kind of expression, in terms meaningful to a user.
      *
      * @return a name identifying the kind of expression, in terms meaningful to a user.
@@ -118,6 +128,8 @@ public final class AxisExpression extends Expression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+        Configuration config = visitor.getConfiguration();
+        TypeHierarchy th = config.getTypeHierarchy();
         ItemType contextItemType = contextInfo.getItemType();
         boolean noWarnings = doneOptimize || (doneTypeCheck && this.staticInfo.getItemType().equals(contextItemType));
         doneTypeCheck = true;
@@ -125,11 +137,26 @@ public final class AxisExpression extends Expression {
             // There is no context item. In principle we could raise XPTY0020 ("Context item is not a node"),
             // which is a type error and therefore can be thrown statically. But many test cases expect
             // XPDY0002 ("Context item absent") which for inexplicable reasons is a dynamic error rather than
-            // a type error, and therefore cannot be raised until execution time.
-            throw new XPathException("Axis step " + this + " cannot be used here: the context item is absent")
+             // a type error, and therefore cannot be raised until execution time.
+           throw new XPathException("Axis step " + this + " cannot be used here: the context item is absent")
                     .withErrorCode("XPDY0002")
                     .withLocation(getLocation());
-        } else if (contextInfo.getCardinality() != StaticProperty.ALLOWS_ONE) {
+        }
+        if (visitor.getStaticContext().getXPathVersion() >= 40) {
+            if (!th.isSubType(contextItemType, AnyGNodeTest.getInstance())) {
+                Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(
+                        RoleDiagnostic.AXIS_STEP, "", axis);
+                Expression coercer = SequenceCoercer.makeSequenceCoercer(new ContextItemExpression(), JNodeType.ANY_JNODE.zeroOrMore(), role, true);
+                return new SimpleStepExpression(coercer, this).typeCheck(visitor, contextInfo);
+            }
+        }
+        if (test instanceof RawNodeTest) {
+            NodeTest newTest = ((RawNodeTest) test).cook(contextItemType);
+            if (newTest != test) {
+                return new AxisExpression(axis, newTest).typeCheck(visitor, contextInfo);
+            }
+        }
+        if (contextInfo.getCardinality() != StaticProperty.ALLOWS_ONE) {
             // XPath 4.0 generalizes the context item to context value
             SlashExpression slash = new SlashExpression(new ContextValueExpression(), this);
             Expression sortedSlash = new DocumentSorter(slash);
@@ -138,10 +165,8 @@ public final class AxisExpression extends Expression {
         } else {
             staticInfo = contextInfo;
         }
-        Configuration config = visitor.getConfiguration();
 
         if (!UType.GNODE.subsumes(contextItemType.getUType())) {
-            TypeHierarchy th = config.getTypeHierarchy();
             Affinity relation = th.relationship(contextItemType, AnyXNodeTest.getInstance());
             if (relation == Affinity.DISJOINT) {
                 throw new XPathException("Axis step "
@@ -184,8 +209,12 @@ public final class AxisExpression extends Expression {
             contextType = AnyXNodeTest.getInstance();
         }
 
+        if (contextType instanceof JNodeType) {
+            return this;
+        }
+
         // Test whether the requested nodetest is consistent with the requested axis
-        if (test != null && !AxisInfo.getTargetUType(UType.XNODE, axis).overlaps(test.getUType())) {
+        if (test != null && !AxisInfo.getTargetUType(UType.GNODE, axis).overlaps(test.getUType())) {
             if (warnings) {
                 visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select " +
                                              test.getUType().toStringWithIndefiniteArticle(),
@@ -505,7 +534,7 @@ public final class AxisExpression extends Expression {
                 return NodeKindTest.makeNodeKindTest(p);
             default:
                 if (test == null) {
-                    return AnyXNodeTest.getInstance();
+                    return AnyGNodeTest.getInstance();
                 } else {
                     return test;
                 }
@@ -792,7 +821,7 @@ public final class AxisExpression extends Expression {
         StringBuilder fsb = new StringBuilder(16);
         fsb.append(AxisInfo.axisName[axis]);
         fsb.append("::");
-        fsb.append(test == null ? "node()" : test.toString());
+        fsb.append(test == null ? "gnode()" : test.toString());
         return fsb.toString();
     }
 
@@ -808,7 +837,7 @@ public final class AxisExpression extends Expression {
             fsb.append("::");
         }
         if (test == null) {
-            fsb.append("node()");
+            fsb.append("gnode()");
         } else if (test instanceof NameTest) {
             if (((NameTest) test).getNodeKind() != AxisInfo.principalNodeType[axis]) {
                 fsb.append(test.toString());
@@ -923,7 +952,11 @@ public final class AxisExpression extends Expression {
                     return context -> {
                         Item origin = context.getContextItem();
                         checkOrigin.accept(origin, context);
-                        return ((GNode) origin).iterateChildAxis(test);
+                        NodePredicate t = test;
+                        if (t instanceof RawNodeTest) {
+                            t = ((RawNodeTest)t).cook((GNode)origin);
+                        }
+                        return ((GNode) origin).iterateChildAxis(t);
                     };
 
                 case AxisInfo.DESCENDANT:

@@ -29,7 +29,6 @@ import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
-import net.sf.saxon.ma.jnode.GNodeType;
 import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
@@ -2125,7 +2124,7 @@ public class XPathParser {
                 nextToken();
                 readToken(Token.LPAREN);
                 readToken(Token.RPAREN);
-                return GNodeType.getInstance();
+                return AnyGNodeTest.getInstance();
             case "node":
             case "element":
             case "attribute":
@@ -2137,8 +2136,8 @@ public class XPathParser {
             case "schema-element":
             case "schema-attribute":
                 return parseKindTest();
-            case "jnode":
-                checkLanguageVersion40("jnode() item type");
+            case "jnode-type":
+                checkLanguageVersion40("jnode-type() item type");
                 nextToken();
                 readToken(Token.LPAREN);
                 if (t.currentToken == Token.RPAREN) {
@@ -3022,18 +3021,39 @@ public class XPathParser {
                     case "document-node":
                     case "comment":
                     case "element":
-                    case "text":
+                    case "text": {
                         NodeTest nodeTest = parseNodeTest(Type.ELEMENT);
                         int defaultAxis = (firstInPattern && name.equals("document-node")) ? AxisInfo.SELF : AxisInfo.CHILD;
                         AxisExpression ae = new AxisExpression(defaultAxis, nodeTest);
                         setLocation(ae);
                         return ae;
+                    }
+                    case "jnode-type":
+                    case "gnode": {
+                        checkLanguageVersion40("nodeTest " + name);
+                        NodeTest nodeTest = parseNodeTest(Type.ELEMENT);
+                        int defaultAxis = (firstInPattern && name.equals("document-node")) ? AxisInfo.SELF : AxisInfo.CHILD;
+                        AxisExpression ae = new AxisExpression(defaultAxis, nodeTest);
+                        setLocation(ae);
+                        return ae;
+                    }
                     case "attribute":
-                    case "schema-attribute":
+                    case "schema-attribute": {
                         NodeTest attNodeTest = parseNodeTest(Type.ATTRIBUTE);
-                        AxisExpression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE, attNodeTest);
-                        setLocation(ae2);
-                        return ae2;
+                        AxisExpression ae = new AxisExpression(AxisInfo.ATTRIBUTE, attNodeTest);
+                        setLocation(ae);
+                        return ae;
+                    }
+                    case "get": {
+                        nextToken();
+                        readToken(Token.LPAREN);
+                        Expression selector = parseExpression();
+                        readToken(Token.RPAREN);
+                        NodeTest test = new RawSelectorNodeTest(selector, Type.ELEMENT);
+                        AxisExpression ae = new AxisExpression(AxisInfo.CHILD, test);
+                        setLocation(ae);
+                        return ae;
+                    }
                     case "function":
                     case "fn":
                         return parseInlineFunction(AnnotationList.EMPTY);
@@ -3186,7 +3206,7 @@ public class XPathParser {
 
         } else if (token == Token.STAR) {
             nextToken();
-            AxisExpression ae = new AxisExpression(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+            AxisExpression ae = new AxisExpression(AxisInfo.CHILD, new RawNodeTestStar(Type.ELEMENT));
             setLocation(ae);
             return ae;
 
@@ -3822,7 +3842,8 @@ public class XPathParser {
             return parseUnionNodeTest(nodeKind);
         } else if (tok == Token.STAR) {
             nextToken();
-            return NodeKindTest.makeNodeKindTest(nodeKind);
+            //return NodeKindTest.makeNodeKindTest(nodeKind);
+            return new RawNodeTestStar(nodeKind);
         } else if (tok instanceof Token.Wildcard) {
             nextToken();
             return getNodeTestForWildcard(((Token.Wildcard) tok), nodeKind);
@@ -4058,6 +4079,13 @@ public class XPathParser {
                     grumble("Expected ')' or ',' in SequenceType");
                 }
                 return null;
+            case "jnode-type":
+                checkLanguageVersion40("NodeTest jnode-type()");
+                // TODO: allow parameterisation by content type
+                return JNodeType.ANY_JNODE;
+            case "gnode":
+                checkLanguageVersion40("NodeTest gnode()");
+                return AnyGNodeTest.getInstance();
             default:
                 // can't happen!
                 grumble("Unknown node kind " + kind);
@@ -5646,25 +5674,32 @@ public class XPathParser {
 
 
     /**
-     * Make a NameTest, using the static context for namespace resolution
+     * Make a NameTest, using the static context for namespace resolution.
      *
-     * @param nodeKind   the type of node required (identified by a constant in
+     * <p>In 4.0, a name appearing in an axis step such as $a/child::b has
+     * different meanings depending whether the origin node is a JNode or
+     * an XNode. The XPath parser has no type information, so it generates
+     * a SpecificSelectorTest which can handle either. This is resolved
+     * to a NamedXNodeTest or a MapKeyTest as soon as the type information
+     * is available.</p>
+     *
+     * @param nodeKind   the principal node kind of the axis (identified by a constant in
      *                   class Type)
-     * @param qname      the lexical QName of the required node; alternatively,
-     *                   a QName in Clark notation ({uri}local)
-     * @param useDefault true if the default namespace should be used when
-     *                   the QName is unprefixed
+     * @param qname      the lexical QName of the required node
+     * @param useDefault true if the unprefixed element matching policy
+     *                   should be used when the QName is unprefixed
      * @return a NameTest, representing a pattern that tests for a node of a
      * given node kind and a given name
      * @throws XPathException if the QName is invalid
      */
 
     /*@NotNull*/
-    public NodeTest makeNameTest(int nodeKind, /*@NotNull*/ String qname, boolean useDefault)
+    public NodeTest makeNameTest(int nodeKind, String qname, boolean useDefault)
             throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         NamespaceUri defaultNS = NamespaceUri.NULL;
-        if (useDefault && nodeKind == Type.ELEMENT && !qname.startsWith("Q{") && !qname.contains(":")) {
+        boolean isNCName = !qname.startsWith("Q{") && !qname.contains(":");
+        if (useDefault && nodeKind == Type.ELEMENT && isNCName) {
             UnprefixedElementMatchingPolicy policy = env.getUnprefixedElementMatchingPolicy();
             switch (policy) {
                 case DEFAULT_NAMESPACE:
@@ -5686,8 +5721,16 @@ public class XPathParser {
             }
         }
         StructuredQName qName = makeStructuredQName(qname, defaultNS);
+//        return new SelectorTest(
+//                new SingletonSet<>(new QNameValue(qName, BuiltInAtomicType.QNAME)),
+//                isNCName,
+//                nodeKind);
+//
+//
         int fp = pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart());
-        return new NameTest(nodeKind, fp, pool);
+        NameTest test = new NameTest(nodeKind, fp, pool);
+        test.setIsNCName(isNCName);
+        return test;
     }
 
     public QNameTest makeQNameTest(String qname)

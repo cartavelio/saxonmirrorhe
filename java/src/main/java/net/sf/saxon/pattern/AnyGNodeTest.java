@@ -17,6 +17,8 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.GNodeCoercionPlan;
 import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 
@@ -81,6 +83,23 @@ public final class AnyGNodeTest extends NodeTest {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         return IntPredicateLambda.of(nodeNr -> nodeKindArray[nodeNr] != Type.PARENT_POINTER);
     }
+
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath language version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        if (version < 4.0) {
+            return super.getCoercionPlan(version);
+        } else {
+            return GNodeCoercionPlan.getInstance();
+        }
+    }
+
+
 
     /**
      * Test whether this node test is satisfied by a given node. This alternative

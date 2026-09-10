@@ -78,6 +78,16 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
         }
     }
 
+    /**
+     * Get a value whose equals() method follows the "same key" rules for comparing the keys of a map.
+     *
+     * @return a value with the property that the equals() and hashCode() methods follow the rules for comparing
+     * keys in maps.
+     */
+    @Override
+    public AtomicMatchKey asMapKey() {
+        return this;
+    }
 
     /**
      * Get the string value as a String. Returns the QName as a lexical QName, retaining the original

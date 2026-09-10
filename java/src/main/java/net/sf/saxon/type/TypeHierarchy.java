@@ -12,7 +12,6 @@ import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
-import net.sf.saxon.ma.jnode.GNodeType;
 import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NamespaceUri;
@@ -335,13 +334,13 @@ public class TypeHierarchy {
                     // all options exhausted
                     throw new IllegalStateException();
                 }
-            } else if (t1 instanceof GNodeType) {
+            } else if (t1 instanceof AnyGNodeTest) {
                 if (t2 instanceof JNodeType || t2 instanceof NodeTest) {
                     return SUBSUMES;
                 }
                 return DISJOINT;
             } else if (t1 instanceof JNodeType) {
-                if (t2 instanceof GNodeType) {
+                if (t2 instanceof AnyGNodeTest) {
                     return SUBSUMED_BY;
                 } else if (t2 instanceof JNodeType) {
                     return sequenceTypeRelationship(((JNodeType)t1).getValueType(), ((JNodeType) t2).getValueType());
@@ -513,6 +512,9 @@ public class TypeHierarchy {
     }
 
     private static Affinity nameTestRelationship(QNameTest t1, QNameTest t2) {
+        if (t1 == null || t2 == null) {
+            return SAME_TYPE;
+        }
         return t1.relationship(t2);
     }
 

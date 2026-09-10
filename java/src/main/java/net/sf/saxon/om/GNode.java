@@ -64,7 +64,7 @@ public interface GNode extends Item {
      */
     default SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
         SequenceIterator desc = new Navigator.DescendantIterator(this, false, true);
-        return predicate == null ? Navigator.filter(desc, predicate) : desc;
+        return predicate != null ? Navigator.filter(desc, predicate) : desc;
     }
 
     /**

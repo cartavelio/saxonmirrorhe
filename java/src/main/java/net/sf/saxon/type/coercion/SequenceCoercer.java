@@ -12,7 +12,9 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.AnyGNodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -59,22 +61,30 @@ public final class SequenceCoercer extends UnaryExpression {
         // we use an ItemChecker and/or CardinalityChecker.
 
         ItemType requiredItemType = requiredType.getPrimaryType();
-        if (requiredItemType.getGenre() == Genre.XNODE) {
-            Expression result = new ItemChecker(sequence, requiredItemType, role);
-            if (!Cardinality.subsumes(requiredType.getCardinality(),sequence.getCardinality())) {
-                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
-            }
-            return result;
-        }
-        if (requiredItemType.getGenre() == Genre.JNODE) {
-            Expression result = new ItemChecker(sequence, requiredItemType, role);
-            if (!Cardinality.subsumes(requiredType.getCardinality(), sequence.getCardinality())) {
-                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
-            }
-            return result;
-        }
-        if (requiredItemType.isAtomicType() && sequence.getItemType().getGenre() == Genre.XNODE) {
+//        if (requiredItemType instanceof NodeTest) {
+//            // the only allowed coercion to nodes is to wrap arrays and maps in a JNode.
+//            // but we may also need to check cardinality
+//        }
+//        if (requiredItemType.getGenre() == Genre.XNODE) {
+//            Expression result = new ItemChecker(sequence, requiredItemType, role);
+//            if (!Cardinality.subsumes(requiredType.getCardinality(),sequence.getCardinality())) {
+//                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
+//            }
+//            return result;
+//        }
+//        if (requiredItemType.getGenre() == Genre.JNODE) {
+//            Expression result = new ItemChecker(sequence, requiredItemType, role);
+//            if (!Cardinality.subsumes(requiredType.getCardinality(), sequence.getCardinality())) {
+//                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
+//            }
+//            return result;
+//        }
+        Genre supplied = sequence.getItemType().getGenre();
+        if (requiredItemType.isAtomicType() && supplied == Genre.XNODE) {
             sequence = new Atomizer(sequence, role);
+        }
+        if (requiredItemType == AnyGNodeTest.getInstance() && (supplied == Genre.ARRAY || supplied == Genre.MAP)) {
+            requiredType = SequenceType.makeSequenceType(JNodeType.ANY_JNODE, requiredType.getCardinality());
         }
         return new SequenceCoercer(sequence, requiredType, role, allow40);
     }

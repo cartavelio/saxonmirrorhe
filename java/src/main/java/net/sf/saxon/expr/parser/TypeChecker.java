@@ -11,7 +11,10 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -184,6 +187,10 @@ public class TypeChecker {
             return true;
         }
         if (uSupplied == UType.JNODE) {
+            return true;
+        }
+        if ((supplied instanceof ArrayItemType || supplied instanceof MapType) &&
+                required instanceof NodeTest) {
             return true;
         }
         if (uRequired.overlaps(UType.ANY_ATOMIC)) {

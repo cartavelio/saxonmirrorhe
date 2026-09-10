@@ -19,10 +19,13 @@ import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.SelectorTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.value.SequenceType;
 
 
@@ -77,6 +80,16 @@ public final class SimpleStepExpression extends SlashExpression {
             SlashExpression se = new SlashExpression(getStart(), getStep());
             ExpressionTool.copyLocationInfo(this, se);
             return se;
+        }
+
+        UType contextItemUType = contextInfo.getContextItemUType();
+        NodeTest test = ((AxisExpression) getStep()).getNodeTest();
+        if (test instanceof SelectorTest) {
+            if (UType.JNODE.subsumes(contextItemUType)) {
+                ((AxisExpression) getStep()).setNodeTest(((SelectorTest) test).asJNodeTest());
+            } else if (UType.XNODE.subsumes(contextItemUType)) {
+                ((AxisExpression) getStep()).setNodeTest(((SelectorTest) test).asXNodeTest(getConfiguration().getNamePool()));
+            }
         }
         if (getStart() instanceof ContextItemExpression && AxisInfo.isForwards[((AxisExpression) getStep()).getAxis()]) {
             return getStep();

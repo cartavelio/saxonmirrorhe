@@ -1,5 +1,6 @@
 package net.sf.saxon.ma.jnode;
 
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeName;
@@ -7,6 +8,7 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.JNodeCoercionPlan;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
@@ -113,6 +115,20 @@ public class JNodeType extends NodeTest {
     }
 
     /**
+     * Test whether this node test is satisfied by a given node. This alternative
+     * method is used in the case of nodes where calculating the fingerprint is expensive,
+     * for example DOM or JDOM nodes. The default implementation calls the method
+     * {@link #matches(int, NodeName, SchemaType)}
+     *
+     * @param node the node to be matched
+     * @return true if the node test is satisfied by the supplied node, false otherwise
+     */
+    @Override
+    public boolean test(GNode node) {
+        return node instanceof JNode;
+    }
+
+    /**
      * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
      * if it is to satisfy this NodeTest
      *
@@ -186,7 +202,7 @@ public class JNodeType extends NodeTest {
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        return null;
+        return JNodeCoercionPlan.getInstance();
     }
 
     /**

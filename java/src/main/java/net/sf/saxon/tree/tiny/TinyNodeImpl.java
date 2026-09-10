@@ -478,21 +478,6 @@ public abstract class TinyNodeImpl implements NodeInfo {
         }
     }
 
-//    private SequenceIterator iteratorPRECEDING_OR_ANCESTOR(int type, NodeTest nodeTest)
-//    {
-//        if (type == Type.DOCUMENT) {
-//            return EmptyIterator.getInstance();
-//        } else if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-//            // See test numb32.
-//            TinyNodeImpl el = getParent();
-//            return new PrependIterator(el, new PrecedingIterator(tree, el, nodeTest, true));
-//        } else {
-//            return new PrecedingIterator(tree, this, nodeTest, true);
-//        }
-//    }
-
-
-
     /**
      * Find the parent node of this node.
      *
