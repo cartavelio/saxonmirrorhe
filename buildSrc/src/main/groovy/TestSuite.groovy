@@ -81,7 +81,18 @@ class TestSuite {
       throw new GradleException("No test suite specified.")
     }
     if (!(options['suite'] in this.directoryMap)) {
-      throw new GradleException("Incomplete configuration for test suite ${options['suite']}")
+      String testTaskName = options["name"]
+      println("Configure task to fail later: ${testTaskName}")
+      Task incomplete = project.task("${testTaskName}_test_suite") {
+        doLast {
+          throw new GradleException("Incomplete configuration for test suite ${options['suite']}")
+        }
+      }
+      Task t = project.tasks.findByName("all_test_suites")
+      if (t) {
+        t.dependsOn incomplete
+      }
+      return
     }
 
     // Defaults
