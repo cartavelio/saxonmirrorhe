@@ -256,7 +256,7 @@ public class MapConstructor extends Expression implements Pingable {
     public String toShortString() {
         int n = getOperanda().getNumberOfOperands();
         return switch (n) {
-            case 0 -> "{}}";
+            case 0 -> "{}";
             case 1 -> "{" + getOperanda().getOperand(0).getChildExpression().toShortString() + "}";
             case 2 -> "{" + getOperanda().getOperand(0).getChildExpression().toShortString() + ", " +
                     getOperanda().getOperand(1).getChildExpression().toShortString() + "}";
@@ -268,7 +268,7 @@ public class MapConstructor extends Expression implements Pingable {
     public String toString() {
         int n = getOperanda().getNumberOfOperands();
         return switch (n) {
-            case 0 -> "{}}";
+            case 0 -> "{}";
             case 1 -> "{" + getOperanda().getOperand(0).getChildExpression().toString() + "}";
             case 2 -> "{" + getOperanda().getOperand(0).getChildExpression().toString() + ", " +
                     getOperanda().getOperand(1).getChildExpression().toString() + "}";
@@ -288,7 +288,7 @@ public class MapConstructor extends Expression implements Pingable {
     }
 
     /**
-     * Notify that an array created using this expression has been converted to an immutable array.
+     * Notify that a map created using this expression has been converted to an immutable map.
      */
     @Override
     public void ping() {
@@ -352,12 +352,15 @@ public class MapConstructor extends Expression implements Pingable {
                                  Item childEntry;
                                  while ((childEntry = contentIter.next()) != null) {
                                      if (childEntry instanceof MapItem childMap) {
-                                         for (KeyValuePair kvp : childMap.keyValuePairs()) {
-                                             builder.put(kvp.key(), kvp.value());
+                                         for (KeyValuePair pair : childMap.keyValuePairs()) {
+                                             builder.put(pair.key(), pair.value());
                                          }
                                      }
                                  }
                              }
+                         } else if (entry instanceof SingleEntryMap singleEntryMap) {
+                             // Fast path for a common case
+                             builder.put(singleEntryMap.getKey(), singleEntryMap.getValue());
                          } else if (entry instanceof MapItem mapEntry) {
                               for (KeyValuePair kvp : mapEntry.keyValuePairs()) {
                                   builder.put(kvp.key(), kvp.value());
