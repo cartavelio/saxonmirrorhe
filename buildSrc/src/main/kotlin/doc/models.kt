@@ -8,7 +8,8 @@ data class SaxonCReadme(
   val productVersion: String,
   val edition: String,
   val host: TargetHost,
-  val binaries: Array<String>
+  val binaries: Array<String>,
+  val binDirName: String
 ) : Model() {
   val binariesSentence: String get() = if (binaries.size < 3) {
     binaries.joinToString(" and ") { it }

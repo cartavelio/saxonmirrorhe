@@ -72,7 +72,9 @@ target_sources(${saxonc}
             ${SAXONC_EDITION_SRC_DIR}/include/saxonc/saxonc-core.h
 )
 
-list(APPEND CMAKE_PREFIX_PATH ${SAXONC_CORE_PACKAGE_DIR})
+if(NOT(DEFINED NO_BUNDLED_SAXONC_CORE AND NO_BUNDLED_SAXONC_CORE))
+    list(APPEND CMAKE_PREFIX_PATH ${BUNDLED_SAXONC_CORE_DIR})
+endif()
 find_package(SaxonCCore${SAXON_EDITION} ${SaxonC_VERSION} EXACT REQUIRED)
 
 target_link_libraries(${saxonc} PUBLIC SaxonCCore${SAXON_EDITION}::saxonc-core-${SaxonC_EDITION})
