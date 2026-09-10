@@ -57,6 +57,9 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         if (expression.length() - start > 30 && terminator != Token.RCURLY) {
             return null;
         }
+        if (env.getXPathVersion() < 31) {
+            return null;
+        }
         try {
             t.tokenize(expression, start, -1);
 

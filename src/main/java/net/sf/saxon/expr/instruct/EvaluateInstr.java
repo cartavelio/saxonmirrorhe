@@ -57,7 +57,7 @@ public final class EvaluateInstr extends Expression {
     private Operand namespaceContextOp;
     private Operand schemaAwareOp;
     private Operand optionsOp;
-    //private Set<NamespaceUri> importedSchemaNamespaces = new HashSet<>();
+    private Set<NamespaceUri> importedSchemaNamespaces = new HashSet<>();
     private WithParam[] actualParams;
     private Operand dynamicParamsOp;
     private NamespaceUri defaultXPathNamespace = null;
@@ -123,17 +123,17 @@ public final class EvaluateInstr extends Expression {
     }
 
 
-//    /**
-//     * Add an imported schema namespace
-//     * @param ns the namespace to be imported ("" for the non-namespace)
-//     */
-//
-//    public void importSchemaNamespace(NamespaceUri ns) {
-//        if (importedSchemaNamespaces == null) {
-//            importedSchemaNamespaces = new HashSet<>();
-//        }
-//        importedSchemaNamespaces.add(ns);
-//    }
+    /**
+     * Add an imported schema namespace
+     * @param ns the namespace to be imported ("" for the non-namespace)
+     */
+
+    public void importSchemaNamespace(NamespaceUri ns) {
+        if (importedSchemaNamespaces == null) {
+            importedSchemaNamespaces = new HashSet<>();
+        }
+        importedSchemaNamespaces.add(ns);
+    }
 
     /**
      * Type-check the expression
@@ -142,7 +142,7 @@ public final class EvaluateInstr extends Expression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        //importedSchemaNamespaces = visitor.getStaticContext().getImportedSchemaNamespaces();
+        importedSchemaNamespaces = visitor.getStaticContext().getImportedSchemaNamespaces();
         typeCheckChildren(visitor, contextInfo);
 
         WithParam.typeCheck(getActualParams(), visitor, contextInfo);
@@ -261,7 +261,7 @@ public final class EvaluateInstr extends Expression {
                                              getSchemaAwareExpr() == null ? null : getSchemaAwareExpr().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, e2);
         e2.setRetainedStaticContext(getRetainedStaticContext());
-        //e2.importedSchemaNamespaces = importedSchemaNamespaces;
+        e2.importedSchemaNamespaces = importedSchemaNamespaces;
         e2.setActualParams(WithParam.copy(e2, getActualParams(), rebindings));
         if (optionsOp != null) {
             e2.setOptionsExpression(optionsOp.getChildExpression().copy(rebindings));
@@ -289,15 +289,15 @@ public final class EvaluateInstr extends Expression {
         if (!SequenceType.ANY_SEQUENCE.equals(requiredType)) {
             out.emitAttribute("as", requiredType.toAlphaCode());
         }
-//        if (importedSchemaNamespaces != null && !importedSchemaNamespaces.isEmpty()) {
-//            StringBuilder buff = new StringBuilder(256);
-//            for (NamespaceUri s : importedSchemaNamespaces) {
-//                buff.append(s.isEmpty() ? "##" : s);
-//                buff.append(' ');
-//            }
-//            buff.setLength(buff.length() - 1);
-//            out.emitAttribute("schNS", buff.toString());
-//        }
+        if (importedSchemaNamespaces != null && !importedSchemaNamespaces.isEmpty()) {
+            StringBuilder buff = new StringBuilder(256);
+            for (NamespaceUri s : importedSchemaNamespaces) {
+                buff.append(s.isEmpty() ? "##" : s);
+                buff.append(' ');
+            }
+            buff.setLength(buff.length() - 1);
+            out.emitAttribute("schNS", buff.toString());
+        }
         if(defaultXPathNamespace != null) {
             out.emitAttribute("dxns", defaultXPathNamespace.toString());
         }
@@ -523,6 +523,9 @@ public final class EvaluateInstr extends Expression {
                     // Expression needs to be compiled. First create the static context...
 
                     int version = instr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+//                    if (version == 30) {
+//                        version = 31;
+//                    }
                     MapItem options = (optionsEval == null ? new HashTrieMap() : (MapItem) optionsEval.eval(context));
 
                     IndependentContext env = new IndependentContext(config);
@@ -540,16 +543,13 @@ public final class EvaluateInstr extends Expression {
                         env.setNamespaceResolver(instr.getRetainedStaticContext());
                         env.setDefaultElementNamespace(instr.getRetainedStaticContext().getDefaultElementNamespace());
                     }
-                    if (isSchemaAware) {
-                        env.getPackageData().setImportedSchema(instr.getPackageData().getImportedSchema());
-                    }
                     // Copy the function library list, except for XSLT-defined system functions and private user-written functions
                     FunctionLibraryList libraryList0 = ((StylesheetPackage) instr.getRetainedStaticContext().getPackageData()).getFunctionLibrary();
                     FunctionLibraryList libraryList1 = new FunctionLibraryList();
                     for (FunctionLibrary lib : libraryList0.getLibraryList()) {
                         if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceUri.FN)) {
                             // Exclude XSLT-defined functions
-                            libraryList1.addFunctionLibrary(config.getXPathFunctionSet(version));
+                            libraryList1.addFunctionLibrary(config.getXPathFunctionSet(version == 40 ? 40 : 31));   // see bug 6221
                         } else if (lib instanceof StylesheetFunctionLibrary || lib instanceof ExecutableFunctionLibrary) {
                             libraryList1.addFunctionLibrary(new PublicStylesheetFunctionLibrary(lib));
                         } else {
@@ -559,14 +559,14 @@ public final class EvaluateInstr extends Expression {
                     env.setFunctionLibrary(libraryList1);
                     env.setDecimalFormatManager(instr.getRetainedStaticContext().getDecimalFormatManager());
                     //env.setXPathLanguageLevel(config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
-//                    if (isSchemaAware) {
-//                        GroundedValue allowAny = options.get(StringValue.bmp("allow-any-namespace"));
-//                        if (allowAny != null && allowAny.effectiveBooleanValue()) {
-//                            env.setImportedSchemaNamespaces(config.getImportedNamespaces());
-//                        } else {
-//                            env.setImportedSchemaNamespaces(instr.importedSchemaNamespaces);
-//                        }
-//                    }
+                    if (isSchemaAware) {
+                        GroundedValue allowAny = options.get(StringValue.bmp("allow-any-namespace"));
+                        if (allowAny != null && allowAny.effectiveBooleanValue()) {
+                            env.setImportedSchemaNamespaces(config.getImportedNamespaces());
+                        } else {
+                            env.setImportedSchemaNamespaces(instr.importedSchemaNamespaces);
+                        }
+                    }
 
                     GroundedValue defaultCollation = options.get(StringValue.bmp("default-collation"));
                     if (defaultCollation != null) {

@@ -566,7 +566,6 @@ public class XPathParser {
     /*@NotNull*/
     public Expression parse(String expression, int start, int terminator, StaticContext env)
             throws XPathException {
-        // System.err.println("Parse expression: " + expression);
         this.env = env;
         int languageVersion = env.getXPathVersion();
         if (languageVersion == 20 && language == ParsedLanguage.XQUERY) {
@@ -1602,12 +1601,18 @@ public class XPathParser {
                     return it;
                 }
             }
-            SchemaType st = env.getPackageData().getImportedSchema().getSchemaType(sq);
+            SchemaType st = config.getSchemaType(sq);
             if (st == null) {
                 grumble("Unknown simple type " + qname, "XPST0051");
             } else if (st.isAtomicType()) {
+                if (!env.isImportedSchema(uri)) {
+                    grumble("Atomic type " + qname + " exists, but its schema definition has not been imported", "XPST0051");
+                }
                 return (AtomicType) st;
             } else if (st instanceof ItemType && ((ItemType) st).isPlainType() && allowXPath30Syntax) {
+                if (!env.isImportedSchema(uri)) {
+                    grumble("Type " + qname + " exists, but its schema definition has not been imported", "XPST0051");
+                }
                 return (ItemType) st;
             } else if (st.isComplexType()) {
                 grumble("Type (" + qname + ") is a complex type", "XPST0051");
@@ -1694,7 +1699,7 @@ public class XPathParser {
 
         } else {
 
-            SchemaType st = env.getPackageData().getImportedSchema().getSchemaType(new StructuredQName("", uri, local));
+            SchemaType st = env.getConfiguration().getSchemaType(new StructuredQName("", uri, local));
             if (st == null) {
                 if (allowXPath30Syntax) {
                     grumble("Unknown simple type " + qname, "XQST0052");
@@ -1705,11 +1710,17 @@ public class XPathParser {
             }
             if (allowXPath30Syntax) {
                 // XPath 3.0
+                if (!env.isImportedSchema(uri)) {
+                    grumble("Simple type " + qname + " exists, but its target namespace has not been imported in the static context");
+                }
                 return (CastingTarget) st;
 
             } else {
                 // XPath 2.0
                 if (st.isAtomicType()) {
+                    if (!env.isImportedSchema(uri)) {
+                        grumble("Atomic type " + qname + " exists, but its target namespace has not been imported in the static context");
+                    }
                     return (AtomicType) st;
                 } else if (st.isComplexType()) {
                     grumble("Cannot cast to a complex type (" + qname + ")", "XPST0051");
@@ -1825,6 +1836,10 @@ public class XPathParser {
                 case "record":
                     primaryType = parseRecordTest(this);
                     break;
+                case "tuple": // No longer recognized
+                    grumble("The keyword 'tuple' is no longer recognized: use 'record' instead");
+                    primaryType = null;
+                    break;
                 case "atomic":
                     // Allowed only in patterns, not in item types??
                     // TODO: not in spec, drop this
@@ -1870,9 +1885,7 @@ public class XPathParser {
                             return realType;
                         }
                     }
-                    if (language != ParsedLanguage.XSLT_PATTERN) {
-                        grumble("In an XPath expression (as distinct from an XSLT pattern), type(N) must refer to a named item type");
-                    }
+
                     ItemType it = parseItemType();
                     expect(Token.RPAR);
                     nextToken();
@@ -2011,34 +2024,38 @@ public class XPathParser {
         List<AtomicType> memberTypes = new ArrayList<>(6);
 
         while (true) {
-            expect(Token.NAME);
-            StructuredQName member = getQNameParser().parse(
-                    t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
-            ItemType type = getPlainType(member);
-            if (type instanceof AtomicType) {
-                memberTypes.add((AtomicType) type);
-            } else if (type instanceof PlainType) {
-                for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
-                    if (pt instanceof AtomicType) {
-                        memberTypes.add((AtomicType) pt);
-                    } else {
-                        grumble("Union type " + type + " has a non-atomic member type " + pt);
-                    }
-                }
+            if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")) {
+                EnumerationType type = parseEnumType();
+                memberTypes.add(type);
             } else {
-                grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+                expect(Token.NAME);
+                StructuredQName member = getQNameParser().parse(
+                        t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
+                ItemType type = getPlainType(member);
+                if (type instanceof AtomicType) {
+                    memberTypes.add((AtomicType) type);
+                } else if (type instanceof PlainType) {
+                    for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
+                        if (pt instanceof AtomicType) {
+                            memberTypes.add((AtomicType) pt);
+                        } else {
+                            grumble("Union type " + type + " has a non-atomic member type " + pt);
+                        }
+                    }
+                } else {
+                    grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+                }
+                nextToken();
             }
-            nextToken();
             if (t.currentToken == Token.RPAR) {
                 break;
             } else if (t.currentToken == Token.COMMA) {
                 nextToken();
             } else {
                 grumble("Expected ',' or ')' after member name in union type, found '" +
-                                Token.tokens[t.currentToken] + '\'');
+                                  Token.tokens[t.currentToken] + '\'');
             }
         }
-
         nextToken();
         return new LocalUnionType(memberTypes);
 
@@ -3358,7 +3375,6 @@ public class XPathParser {
     private NodeTest parseKindTest() throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         String typeName = t.currentTokenValue;
-
         boolean empty = false;
         nextToken();
         if (t.currentToken == Token.RPAR) {
@@ -3420,7 +3436,6 @@ public class XPathParser {
                     nextToken();
                     return new DocumentNodeTest(inner);
                 }
-
             case "processing-instruction":
                 int fp = -1;
                 if (empty) {
@@ -3453,7 +3468,6 @@ public class XPathParser {
                 return new NameTest(Type.PROCESSING_INSTRUCTION, fp, pool);
 
             case "schema-attribute":
-
                 if (empty) {
                     grumble(typeName + "schema-attribute() requires a name to be supplied");
                     return null;
@@ -3464,12 +3478,15 @@ public class XPathParser {
                     nextToken();
                     expect(Token.RPAR);
                     nextToken();
-                    SchemaDeclaration decl = env.getPackageData().getImportedSchema().getAttributeDecl(fp);
+                    if (!env.isImportedSchema(pool.getURI(fp))) {
+                        grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
+                    }
+                    SchemaDeclaration decl = env.getConfiguration().getAttributeDeclaration(fp);
                     if (decl == null) {
                         grumble("There is no declaration for attribute @" + name + " in an imported schema", "XPST0008");
                         return null;
                     } else {
-                        return env.getPackageData().getImportedSchema().makeSchemaAttributeTest(fp);
+                        return decl.makeSchemaNodeTest();
                     }
                 }
             case "schema-element":
@@ -3483,12 +3500,15 @@ public class XPathParser {
                     nextToken();
                     expect(Token.RPAR);
                     nextToken();
-                    SchemaDeclaration decl = env.getPackageData().getImportedSchema().getElementDecl(fp);
+                    if (!env.isImportedSchema(pool.getURI(fp))) {
+                        grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
+                    }
+                    SchemaDeclaration decl = env.getConfiguration().getElementDeclaration(fp);
                     if (decl == null) {
                         grumble("There is no declaration for element " + name + " in an imported schema", "XPST0008");
                         return null;
                     } else {
-                        return env.getPackageData().getImportedSchema().makeSchemaElementTest(fp);
+                        return decl.makeSchemaNodeTest();
                     }
                 }
 
@@ -3519,7 +3539,12 @@ public class XPathParser {
                     NodeTest result;
                     if (t.currentToken == Token.NAME) {
                         StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
-                        SchemaType schemaType = env.getPackageData().getImportedSchema().getSchemaType(contentType);
+                        NamespaceUri uri = contentType.getNamespaceUri();
+
+                        if (!(uri.equals(NamespaceUri.SCHEMA) || env.isImportedSchema(uri))) {
+                            grumble("No schema has been imported for namespace '" + uri + '\'', "XPST0008");
+                        }
+                        SchemaType schemaType = env.getConfiguration().getSchemaType(contentType);
                         if (schemaType == null) {
                             grumble("Unknown type name " + contentType.getEQName(), "XPST0008");
                             return null;
@@ -3536,7 +3561,7 @@ public class XPathParser {
                             }
                             nextToken();
                         }
-                        if ((nodeKind == Type.ATTRIBUTE && schemaType == AnyType.getInstance() && nillable) ||
+                        if (schemaType == AnyType.getInstance() ||
                                 (nodeKind == Type.ATTRIBUTE && schemaType == AnySimpleType.getInstance())) {
                             result = nodeTest;
                         } else {
@@ -4054,7 +4079,7 @@ public class XPathParser {
             for (int i = 0; i < arguments.length + 5; i++) {
                 if (i != arguments.length) {
                     SymbolicName.F sn = new SymbolicName.F(functionName, i);
-                    if (env.getFunctionLibrary().isAvailable(sn, env.getPackageData().getImportedSchema(), 31)) {
+                    if (env.getFunctionLibrary().isAvailable(sn, 31)) {
                         existsWithDifferentArity = true;
                         break;
                     }
