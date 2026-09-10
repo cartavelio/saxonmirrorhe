@@ -15,9 +15,7 @@
 
 // using namespace std;
 
-    int cppExtensionFunction::c_nativeCall(graal_isolatethread_t *thread){
-    return 0;
-    }
+
 
 /*
  * Test transform to String. Source and stylesheet supplied as arguments
