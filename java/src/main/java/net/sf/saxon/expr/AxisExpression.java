@@ -41,7 +41,6 @@ import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.GNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.SequenceType;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -756,11 +755,11 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
             test = AnyGNodeType.getInstance();
         }
         if (test instanceof SpecificJNodeType sjt) {
-            pat = new JNodePattern(sjt.getSelector(), sjt.getValueType());
+            pat = new JNodePattern(sjt.getSelector(), SequenceMatcher.fromSequenceType(sjt.getValueType()));
         } else if (test instanceof RootJNodeType rjt) {
-            pat = new JNodePattern(null, rjt.getValueType());
+            pat = new JNodePattern(null, SequenceMatcher.fromSequenceType(rjt.getValueType()));
         } else if (test instanceof AnyJNodeType ajt) {
-            pat = new JNodePattern(null, SequenceType.ANY_SEQUENCE);
+            pat = new JNodePattern(null, SequenceMatcher.UNIVERSAL_MATCHER);
         } else {
             test = test.asXNodeTest(config);
             if (test instanceof AnyXNodeType

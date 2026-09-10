@@ -13,12 +13,24 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.QNameParser;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.Affinity;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.NumericType;
+import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.SequenceType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Parser for XSLT patterns. This is created by overriding selected parts of the standard ExpressionParser.
@@ -66,18 +78,50 @@ public class PatternParser extends XPathParser {
             grumble(err.getMessage());
         }
 
-        Pattern result;
-        if (t.currentToken == Token.DOT) {
-            result = parsePredicatePattern();
-        } else if (t.currentToken == Token.TILDE) {
-            result = parseTypePattern();
-        } else {
-            result = parsePathExprP();
-        }
+        Pattern result = parsePattern();
         expect(Token.EOF);
         result.setRetainedStaticContextThoroughly(env.makeRetainedStaticContext());
         return result;
     }
+
+    /**
+     * Parse an instance of the Pattern production, either a top-level pattern
+     * or a nested pattern
+     * @return the parsed Pattern
+     * @throws XPathException in the event of a syntax error
+     */
+
+    private Pattern parsePattern() throws XPathException {
+        Pattern result = null;
+        int version = env.getXPathVersion();
+        if (version >= 40) {
+            if (t.currentToken == Token.DOT) {
+                result = parsePredicatePattern();
+            } else if (t.currentToken == Token.TILDE) {
+                result = parseTypePattern();
+            } else if (t.currentToken == Token.LCURLY) {
+                result = parseMapPattern();
+            } else if (t.peekAhead() == Token.LCURLY && isKeyword("map")) {
+                nextToken();
+                result = parseMapPattern();
+            } else if (t.peekAhead() == Token.LPAREN && isKeyword("array")) {
+                result = parseArrayPattern();
+            } else if (t.peekAhead() == Token.LPAREN && isKeyword("jnode")) {
+                result = parseJNodePattern();
+            } else {
+                result = parsePathExprP();
+            }
+        } else {
+            if (t.currentToken == Token.DOT) {
+                result = parsePredicatePattern();
+            } else {
+                result = parsePathExprP();
+            }
+        }
+        return result;
+    }
+
+
 
     public Pattern parseUnionPattern(boolean topLevel, StaticContext env) throws XPathException {
         Pattern operand = parseIntersectExceptPattern(topLevel, env);
@@ -178,6 +222,10 @@ public class PatternParser extends XPathParser {
         readToken(Token.TILDE);
         ItemType type = parseItemType();
         result = new ItemTypePattern(type);
+        return addPredicates(result);
+    }
+
+    private Pattern addPredicates(Pattern result) throws XPathException {
         while (t.currentToken == Token.LSQB) {
             nextToken();
             Expression predicate = parsePredicate();
@@ -185,6 +233,76 @@ public class PatternParser extends XPathParser {
             result = new BasePatternWithPredicate(result, predicate);
         }
         return result;
+    }
+
+    private Pattern parseArrayPattern() throws XPathException {
+        nextToken();
+        readToken(Token.LPAREN);
+        SequenceMatcher sequenceMatcher = parseSequenceMatcher();
+        readToken(Token.RPAREN);
+        Pattern result = new ArrayPattern(sequenceMatcher);
+        return addPredicates(result);
+    }
+
+    private Pattern parseMapPattern() throws XPathException {
+        readToken(Token.LCURLY);
+        boolean extensible = false;
+        List<MapPattern.MapPatternEntry> entries = new ArrayList<MapPattern.MapPatternEntry>();
+        while (t.currentToken != Token.RCURLY) {
+            if (t.currentToken == Token.STAR) {
+                extensible = true;
+                nextToken();
+                break;
+            } else {
+                AtomicValue key = parseConstant();
+                if (t.currentToken == Token.COLON) {
+                    nextToken();
+                    SequenceMatcher sequenceMatcher = parseSequenceMatcher();
+                    entries.add(new MapPattern.MapPatternEntry(key, sequenceMatcher));
+                } else {
+                    entries.add(new MapPattern.MapPatternEntry(key, SequenceMatcher.UNIVERSAL_MATCHER));
+                }
+                if (t.currentToken == Token.COMMA) {
+                    nextToken();
+                }
+            }
+        }
+        readToken(Token.RCURLY);
+        Pattern result = new MapPattern(entries, extensible);
+        return addPredicates(result);
+    }
+
+
+    private Pattern parseJNodePattern() throws XPathException {
+        nextToken();
+        readToken(Token.LPAREN);
+        AtomicValue key = null;
+        if (t.currentToken == Token.STAR) {
+            nextToken();
+        } else {
+            key = parseConstant();
+        }
+        readToken(Token.COMMA);
+        SequenceMatcher sequenceMatcher = parseSequenceMatcher();
+        readToken(Token.RPAREN);
+        Pattern result = new JNodePattern(key, sequenceMatcher);
+        return addPredicates(result);
+    }
+
+    private SequenceMatcher parseSequenceMatcher() throws XPathException {
+        Pattern content = parsePattern();
+        int cardinality = StaticProperty.EXACTLY_ONE;
+        if (t.currentToken == Token.QMARK) {
+            cardinality = StaticProperty.ALLOWS_ZERO_OR_ONE;
+            nextToken();
+        } else if (t.currentToken == Token.PLUS) {
+            cardinality = StaticProperty.ALLOWS_ONE_OR_MORE;
+            nextToken();
+        } else if (t.currentToken == Token.STAR) {
+            cardinality = StaticProperty.ALLOWS_ZERO_OR_MORE;
+            nextToken();
+        }
+        return new SequenceMatcher(content, cardinality);
     }
 
     private Pattern parsePathExprP() throws XPathException {
@@ -271,45 +389,10 @@ public class PatternParser extends XPathParser {
     /*@NotNull*/
     @Override
     public Expression parseExpression() throws XPathException {
-        Tokenizer t = getTokenizer();
         if (inPredicate > 0) {
             return super.parseExpression();
-//        } else if (languageVersion >= 40 && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
-//                (isKeyword("record")  || isKeyword("type") || isKeyword("map") || isKeyword("array"))) {
-//            ItemType type = parseItemType();
-//            Expression expr = new ItemTypePattern(type);
-//            expr.setRetainedStaticContext(env.makeRetainedStaticContext());
-//            setLocation(expr);
-//            while (t.currentToken == Token.LSQB) {
-//                expr = parsePredicate(expr).toPattern(env.getConfiguration(), false);
-//            }
-//            return expr;
-//        } else if (languageVersion >= 40 && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
-//                isKeyword("atomic")) {
-//            nextToken();
-//
-//            String name = readName();
-//            StructuredQName typeName = makeStructuredQName(name, env.getDefaultElementNamespace());
-//            readToken(Token.RPAREN);
-//            Schema schema = env.getImportedSchema();
-//            SchemaType type = schema.getSchemaType(typeName);
-//
-//            if (type == null || !type.isAtomicType()) {
-//                grumble("Unknown atomic type " + typeName);
-//            }
-//            AtomicType at = (AtomicType)type;
-//            Expression expr = new ItemTypePattern(at);
-////            Expression expr = new InstanceOfExpression(
-////                    new ContextItemExpression(), SequenceType.makeSequenceType(at, StaticProperty.EXACTLY_ONE));
-////            expr = new FilterExpression(new ContextItemExpression(), expr);
-//            setLocation(expr);
-//            while (t.currentToken == Token.LSQB) {
-//                expr = parsePredicate(expr);
-//            }
-//            return expr;
         } else {
             return parseBinaryExpression(parsePathExpression(), 10);
-            //return parsePathExpression();
         }
     }
 

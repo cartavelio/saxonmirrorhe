@@ -17,14 +17,13 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SequenceType;
 
 public class JNodePattern extends Pattern {
 
     private final AtomicValue selector;
-    private final SequenceType contentType;
+    private final SequenceMatcher contentType;
 
-    public JNodePattern(AtomicValue selector, SequenceType contentType) {
+    public JNodePattern(AtomicValue selector, SequenceMatcher contentType) {
         this.selector = selector;
         this.contentType = contentType;
     }
@@ -32,8 +31,8 @@ public class JNodePattern extends Pattern {
     @Override
     public boolean matches(Item item, XPathContext context) throws XPathException {
         return item instanceof JNode jnode &&
-                (selector == null || jnode.getSelector().asMapKey(40).equals(selector.asMapKey(40))) &&
-                contentType.matches(jnode.getContent());
+                (selector == null || (jnode.getSelector() != null && jnode.getSelector().asMapKey(40).equals(selector.asMapKey(40))))
+                && contentType.matches(jnode.getContent(), context);
     }
 
     @Override
@@ -65,12 +64,12 @@ public class JNodePattern extends Pattern {
             The default priority of the pattern jnode(S, T), where S is any constant, and T is any sequence type other than item()*, is +0.25.
         */
         if (selector == null) {
-            if (contentType.equals(SequenceType.ANY_SEQUENCE)) {
+            if (contentType == SequenceMatcher.UNIVERSAL_MATCHER) {
                 return -1;
             } else {
                 return 0;
             }
-        } else if (contentType.equals(SequenceType.ANY_SEQUENCE)) {
+        } else if (contentType == SequenceMatcher.UNIVERSAL_MATCHER) {
             return 0;
         } else {
             return 0.25;

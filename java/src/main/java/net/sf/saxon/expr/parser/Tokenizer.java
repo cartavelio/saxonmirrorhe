@@ -42,9 +42,6 @@ import java.util.function.Predicate;
 
 public final class Tokenizer {
 
-//    public static final char FULL_WIDTH_LT = '＜'; // xFF1C
-//    public static final char FULL_WIDTH_GT = '＞'; // xFF1E
-
     @CSharpModifiers(code={"public", "const"})    // The transpiler handles this for int but not for char??
     public final static char NUL = (char)0;
 
