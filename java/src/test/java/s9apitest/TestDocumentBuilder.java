@@ -645,5 +645,37 @@ public class TestDocumentBuilder {
         }
     }
 
+    @Test
+    public void testErrorReporter() {
+        // bug #6913
+        List<XmlProcessingError> errorList = new ArrayList<>();
+        try {
+            StreamSource source = new StreamSource(new StringReader(
+                    "<xsl:stylesheet\n"
+                            + "    version=\"4.0\"\n"
+                            + "    xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n"
+                            + "    exclude-result-prefixes=\"#all\">\n"
+                            + "    \n"
+                            + "    <!-- this is the error -->\n"
+                            + "    </xsl:function>\n"
+                            + "\n"
+                            + "</xsl:stylesheet>"));
+            Processor processor = new Processor(true);
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            builder.setErrorReporter(err -> {
+                Location loc = err.getLocation();
+                assertEquals(7, loc.getLineNumber());
+                assertEquals(7, loc.getColumnNumber());
+                errorList.add(err);
+            });
+            XdmNode sourceNode = builder.build(source);
+            fail("Parsing should fail");
+        } catch (SaxonApiException err) {
+            //System.err.println("§" + err.getMessage() + "§");
+            assertFalse(errorList.isEmpty());
+            assertTrue(err.getMessage().contains("matching end-tag"));
+        }
+    }
+
 
 }

@@ -12,6 +12,7 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.JPConverter;
 import net.sf.saxon.lib.AugmentedSource;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NoElementsSpaceStrippingRule;
@@ -53,6 +54,7 @@ public class DocumentBuilder {
     private TreeModel treeModel = TreeModel.TINY_TREE;
     private WhitespaceStrippingPolicy whitespacePolicy = WhitespaceStrippingPolicy.UNSPECIFIED;
     private URI baseURI;
+    private ErrorReporter errorReporter;
 
     /**
      * Create a DocumentBuilder. This is a protected constructor. Users should construct a DocumentBuilder
@@ -94,6 +96,31 @@ public class DocumentBuilder {
     public TreeModel getTreeModel() {
         return treeModel;
     }
+
+    /**
+     * Supply a callback which will be notified of all errors and warnings
+     * encountered during XML parsing using this {@code DocumentBuilder}.
+     * <p>If no error reporter is supplied by the caller, error information
+     * will be written to the standard error stream.</p>
+     *
+     * @param reporter a callback function which will be notified of all errors and warnings
+     *                 encountered during XML parsing.
+     * @since 13.0
+     */
+
+    public void setErrorReporter(ErrorReporter reporter) {
+        this.errorReporter = reporter;
+    }
+
+    /**
+     * Get the error reporter previously set using {@link #setErrorReporter(ErrorReporter)}
+     * @return the current error reporter, or null if none has been explicitly set
+     */
+
+    public ErrorReporter getErrorReporter() {
+        return this.errorReporter;
+    }
+
 
     /**
      * Say whether line and column numbering and is to be enabled for documents constructed using this DocumentBuilder.
@@ -389,6 +416,9 @@ public class DocumentBuilder {
             }
         }
         options = options.withLineNumbering(lineNumbering);
+        if (errorReporter != null) {
+            options = options.withErrorReporter(errorReporter);
+        }
         if (source.getSystemId() == null && baseURI != null) {
             source.setSystemId(baseURI.toString());
         }
