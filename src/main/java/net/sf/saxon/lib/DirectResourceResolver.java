@@ -48,6 +48,9 @@ public class DirectResourceResolver implements ResourceResolver {
     @Override
     public Source resolve(ResourceRequest request) throws XPathException {
 
+        if (request.uriIsNamespace) {
+            return null;  // bug 5266
+        }
         ProtocolRestrictor restrictor = config.getProtocolRestrictor();
         if (!"all".equals(restrictor.toString())) {
             try {
