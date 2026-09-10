@@ -245,10 +245,11 @@ public class XPathCompiler {
     }
 
     /**
-     * Get the static base URI for XPath expressions compiled using this {@code XPathCompiler}. The base URI
+     * Get the static base URI for XPath expressions compiled using this XPathCompiler. The base URI
      * is part of the static context, and is used to resolve any relative URIs appearing within an XPath
      * expression, for example a relative URI passed as an argument to the doc() function. If no
-     * static base URI has been explicitly set, this method returns null.
+     * static base URI has been explicitly set, this method returns an empty URI (effectively
+     * <code>new URI("")</code>).
      *
      * @return the base URI from the static context
      */
