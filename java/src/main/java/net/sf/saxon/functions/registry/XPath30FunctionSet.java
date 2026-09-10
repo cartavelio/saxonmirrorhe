@@ -240,7 +240,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
         register("serialize", 1, e -> e.populate( Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("sort", 1, e -> e.populate( Sort_1::new, AnyItemType.getInstance(), STAR, 0)
+        register("sort", 1, e -> e.populate(Sort::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
         register("string-join", 1, e -> e.populate( StringJoin::new, BuiltInAtomicType.STRING, ONE, 0)

@@ -9,6 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Atomizer;
 import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
@@ -20,6 +21,7 @@ import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.EnumerationUnionType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -32,7 +34,8 @@ import java.util.List;
 
 
 /**
- * This class implements the function fn:sort-by, which is a proposed function in XPath 4.0
+ * This class implements the function fn:sort-by, which is a proposed function in XPath 4.0.
+ * It also provides supporting code underpinning the implementation of fn:sort.
  */
 
 public class SortBy extends SystemFunction {
@@ -50,12 +53,8 @@ public class SortBy extends SystemFunction {
             new RecordTest.Field("order", SequenceType.optional(EnumerationUnionType.of("ascending", "descending")), true)
     );
 
-    public static Callable dataFn = new Callable() {
-        @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            return Atomizer.atomize(arguments[0]);
-        }
-    };
+    public static Callable DATA_FN =
+            new CallableDelegate((cxt, args) -> Atomizer.atomize(args[0]));
 
     /**
      * Evaluate the expression
@@ -70,9 +69,9 @@ public class SortBy extends SystemFunction {
 
         GroundedValue details = arguments[1].materialize();
         if (details.getLength() == 0) {
-            ArrayList<Sort_1.ItemToBeSorted> inputList0 = Sort_1.getItemsToBeSorted(arguments[0]);
             StringCollator collation = context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName());
-            return Sort_1.doSort(inputList0, collation, context);
+            AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collation,StandardNames.XS_ANY_ATOMIC_TYPE, context);
+            return sort(arguments[0].iterate(), listOfOne(DATA_FN), listOfOne(comparer), context);
         }
 
         List<Callable> sortKeys = new ArrayList<>();
@@ -80,7 +79,7 @@ public class SortBy extends SystemFunction {
 
         for (Item f : details.asIterable()) {
             Callable k = (FunctionItem)((MapItem)f).get(new StringValue("key"));
-            sortKeys.add(k == null ? dataFn : k);
+            sortKeys.add(k == null ? DATA_FN : k);
 
             StringValue c = (StringValue) ((MapItem) f).get(new StringValue("collation"));
             String collation = c == null
@@ -100,23 +99,41 @@ public class SortBy extends SystemFunction {
             comparers.add(comparer);
         }
 
+        return sort(arguments[0].iterate(), sortKeys, comparers, context);
+
+    }
+
+    /**
+     * Sort a sequence
+     * @param iterator iterator over the input sequence
+     * @param keyFunctions list of functions for computing sort key values, major to minor
+     * @param comparers list of comparers for comparing sort key values, major to minor
+     * @param context XPath dynamic evaluation context
+     * @return the sorted sequence
+     * @throws XPathException for example if there are incomparable keys present
+     */
+
+    public static GroundedValue sort(SequenceIterator iterator,
+                                     List<Callable> keyFunctions,
+                                     List<AtomicComparer> comparers,
+                                     XPathContext context) throws XPathException {
+
         final ArrayList<ItemToBeSorted> inputList = new ArrayList<>();
-        SequenceIterator iterator = arguments[0].iterate();
         Item item;
         while ((item = iterator.next()) != null) {
             ItemToBeSorted member = new ItemToBeSorted();
             member.value = item;
-            member.sortKeys = new GroundedValue[sortKeys.size()];
+            member.sortKeys = new GroundedValue[keyFunctions.size()];
             int k = 0;
-            for (Callable callable : sortKeys) {
-                member.sortKeys[k++] = callable.call(context, new Sequence[]{item}).materialize();
+            for (Callable fn : keyFunctions) {
+                member.sortKeys[k++] = fn.call(context, new Sequence[]{item}).materialize();
             }
             inputList.add(member);
         }
 
         try {
             inputList.sort((a, b) -> {
-                for (int k = 0; k < sortKeys.size(); k++) {
+                for (int k = 0; k < comparers.size(); k++) {
                     int result = ArraySort.compareSortKeys(a.sortKeys[k], b.sortKeys[k], comparers.get(k));
                     if (result != 0) {
                         return result;
@@ -133,9 +150,13 @@ public class SortBy extends SystemFunction {
             outputList.add(member.value);
         }
         return new SequenceExtent.Of<>(outputList);
+
     }
 
-
+    @CSharpReplaceBody(code="return new System.Collections.Generic.List<T>() { element };")
+    public static <T> List<T> listOfOne(T element) {
+        return List.of(element);
+    }
 
     
 

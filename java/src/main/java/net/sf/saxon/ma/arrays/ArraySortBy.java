@@ -48,7 +48,7 @@ public class ArraySortBy extends SystemFunction {
             new RecordTest.Field("order", SequenceType.optional(EnumerationUnionType.of("ascending", "descending")), true)
     );
 
-    public static Callable dataFn = SortBy.dataFn;
+    public static Callable dataFn = SortBy.DATA_FN;
 
     public static Shape keyDefinition =
             new Shape(new Twine8("key"), new Twine8("collation"), new Twine8("order"));

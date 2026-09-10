@@ -10,7 +10,7 @@ package net.sf.saxon.functions.registry;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.LoadXqueryModule;
 import net.sf.saxon.functions.hof.RandomNumberGenerator;
-import net.sf.saxon.functions.hof.Sort_3;
+import net.sf.saxon.functions.hof.Sort;
 import net.sf.saxon.ma.json.JsonDoc;
 import net.sf.saxon.ma.json.JsonToXMLFn;
 import net.sf.saxon.ma.json.ParseJsonFn;
@@ -163,11 +163,11 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                  STAR, NEW)
                 .arg(0, AnyItemType.getInstance(), STAR | ABS, EMPTY));
 
-        register("sort", 1, e -> e.populate( Sort_1::new, AnyItemType.getInstance(), STAR, 0)
+        register("sort", 1, e -> e.populate(Sort::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("sort", 2, e -> e.populate( Sort_2::new, AnyItemType.getInstance(),
-                 STAR, 0)
+        register("sort", 2, e -> e.populate(Sort::new, AnyItemType.getInstance(),
+                                            STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
@@ -175,8 +175,8 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                 SequenceType.SINGLE_ITEM,
                 SequenceType.ATOMIC_SEQUENCE);
 
-        register("sort", 3, e -> e.populate( Sort_3::new, AnyItemType.getInstance(),
-                 STAR, 0)
+        register("sort", 3, e -> e.populate(Sort::new, AnyItemType.getInstance(),
+                                            STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null));

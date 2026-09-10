@@ -37,6 +37,7 @@ public class CallableDelegate implements Callable {
         this.expression = expression;
     }
 
+
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         return expression.call(context, arguments);

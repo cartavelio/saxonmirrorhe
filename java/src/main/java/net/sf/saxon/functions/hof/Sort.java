@@ -7,22 +7,24 @@
 
 package net.sf.saxon.functions.hof;
 
+import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.Sort_2;
+import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.AtomicSortComparer;
+import net.sf.saxon.functions.SortBy;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.XPathException;
-
-import java.util.ArrayList;
+import net.sf.saxon.value.StringValue;
 
 /**
- * This class implements the function fn:sort#3, which is a higher-order function in XPath 3.1
- * available only in Saxon-PE and above
+ * This class implements the function fn:sort
  */
 
-public class Sort_3 extends Sort_2 {
+public class Sort extends SystemFunction {
 
     /**
      * Evaluate the expression
@@ -34,20 +36,23 @@ public class Sort_3 extends Sort_2 {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Sequence input = arguments[0];
-        final ArrayList<ItemToBeSorted> inputList = new ArrayList<>();
-        int i = 0;
-        FunctionItem key = (FunctionItem) arguments[2].head();
-        SequenceIterator iterator = input.iterate();
-        Item item;
-        while ((item = iterator.next()) != null) {
-            ItemToBeSorted member = new ItemToBeSorted();
-            member.value = item;
-            member.originalPosition = i++;
-            member.sortKey = dynamicCall(key, context, item).materialize();
-            inputList.add(member);
+        String collationName = getRetainedStaticContext().getDefaultCollationName();
+        if (arguments.length > 1) {
+            StringValue collationNameItem = (StringValue) arguments[1].head();
+            if (collationNameItem != null) {
+                collationName = collationNameItem.getStringValue();
+            }
         }
-        return doSort(inputList, getCollation(context, arguments[1]), context);
+        StringCollator collation = context.getConfiguration().getCollation(collationName);
+        AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collation, StandardNames.XS_ANY_ATOMIC_TYPE, context);
+        Callable key = null;
+        if (arguments.length > 2) {
+            key = (FunctionItem) arguments[2].head();
+        }
+        if (key == null) {
+            key = SortBy.DATA_FN;
+        }
+        return SortBy.sort(arguments[0].iterate(), SortBy.listOfOne(key), SortBy.listOfOne(comparer), context);
     }
 
 
