@@ -27,22 +27,7 @@
       <created by="Michael Kay" on="2023-06-29"/>
       <reason>Empty sequence in arg2 - not yet implemented</reason>
    </exception>
-<!--
-   
-   <exception test-set="fn-range"  run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Function neither specified nor implemented</reason>
-   </exception>
-   
-   <exception test-set="fn-range-from"  run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Function neither specified nor implemented</reason>
-   </exception>
-   
-   <exception test-set="fn-range-to"  run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Function neither specified nor implemented</reason>
-   </exception>-->
+
    
    <exception test-set="fn-replace" test-case="  
       fn-replace-100
@@ -82,57 +67,13 @@
       <reason>Remove does not currently allow second argument to be a sequence</reason>
    </exception>
    
-   
-   
- <!--  
- 
-   <exception test-set="fn-slice"  run="false" report="n/a">
-      <created by="Michael Kay" on="2022-08-09"/>
-      <reason>Spec unclear; depends on keyword arguments</reason>
-   </exception>
-   -->
-   
-   
-   <!--<exception test-set="array-partition"  run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Spec unclear; depends on keyword arguments</reason>
-   </exception>-->
- <!--  
-   <exception test-set="array-slice"  run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Spec unclear; depends on keyword arguments</reason>
-   </exception>
-   -->
+
    <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
       <created by="Michael Kay" on="2018-02-01"/>
       <reason>Known bug in ICU</reason>
    </exception>
    
- <!--  <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-build-uri-1" run="false" report="disputed">
-      <created by="Michael Kay" on="2023-03-16"/>
-      <reason>Auto-generated test is incorrect</reason>
-   </exception>
-   
-   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-parse-uri-1" run="false" report="disputed">
-      <created by="Michael Kay" on="2023-03-16"/>
-      <reason>Auto-generated test is incorrect</reason>
-   </exception>
-   
-   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-iterate-while-1" run="false" report="disputed">
-      <created by="Michael Kay" on="2022-12-02"/>
-      <reason>Generated test appears to be incorrect</reason>
-   </exception>
-   
-   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-map-get-1" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-03-16"/>
-      <reason>map:get#3 not yet implemented</reason>
-   </exception>
-   
-   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-array-get-1" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-03-16"/>
-      <reason>array:get#3 not yet implemented</reason>
-   </exception>
-   -->
+ 
 
    <exception test-set="misc-BuiltInKeywords" 
       test-case="Keywords-array-subarray-1
@@ -167,11 +108,53 @@
    </exception>
 
 
-Keywords-fn-all-1
-
-
-Keywords-fn-some-1
-
+   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009" run="false" report="known bug in ICU">
+      <created by="Michael Kay" on="2018-02-01"/>
+      <reason>Known bug in ICU</reason>
+   </exception>
+   
+   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-010" run="false" report="known bug in ICU">
+      <created by="Michael Kay" on="2018-02-01"/>
+      <reason>Known bug in ICU</reason>
+   </exception>
+   
+   <exception test-set="fn-collection" test-case="cbcl-collection-002" run="false" report="test queried">
+      <created by="Michael Kay" on="2021-08-23"/>
+      <reason>Saxon-CS delivers collection results in wrong order due to multithreading. Should this be allowed? See bug 5067.</reason>
+   </exception>
+   
+   <exception test-set="fn-format-integer" 
+      test-case="format-integer-032 format-integer-032-fr format-integer-032-it
+      format-integer-065 format-integer-066" 
+      run="false" report="not supported">
+      <created by="Michael Kay" on="2021-12-07"/>
+      <reason>SaxonCS doesn't format "numbers as words" for languages other than English.</reason>
+   </exception>
+   
+   <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="known restriction">
+      <created by="Michael Kay" on="2019-03-11"/>
+      <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
+   </exception>
+   
+   <exception test-set="prod-CastExpr" test-case="K-SeqExprCast-71a" run="false" report="known restriction">
+      <created by="Michael Kay" on="2019-03-11"/>
+      <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
+   </exception>
+   
+   <exception test-set="prod-CastableExpr" test-case="CastableAs648" run="false" report="known restriction">
+      <created by="Michael Kay" on="2019-03-11"/>
+      <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
+   </exception>
+   
+   <exception test-set="prod-FunctionCall" test-case="K-FunctionCallExpr-15" run="false" report="known restriction">
+      <created by="Michael Kay" on="2021-08-08"/>
+      <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
+   </exception>
+   
+   <exception test-set="misc-JsonTestSuite" test-case="n_structure_100000_opening_arrays n_structure_open_array_object" run="false" report="tooBig">
+      <created by="Michael Kay" on="2021-10-04"/>
+      <reason>Fails with a stack overflow (we've set a limit but it's too low)</reason>
+   </exception>
 
    
    <exception test-set="op-to" test-case="RangeExpr-408f
@@ -191,13 +174,7 @@ Keywords-fn-some-1
    </exception>
    
    
- <!--  
-   
-   <exception test-set="prod-ByExpr"  run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Not yet implemented (spec not agreed)</reason>
-   </exception>
-   -->
+ 
    <exception test-set="prod-CastExpr" test-case=" K-SeqExprCast-76a
       K-SeqExprCast-81a"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
@@ -251,7 +228,7 @@ Keywords-fn-some-1
       <reason>Generated test case contains incorrect syntax</reason>
    </exception>
    
-   <exception test-set="misc-HtmlTestSuite" test-case="
+   <!--<exception test-set="misc-HtmlTestSuite" test-case="
       html-test-1050
       html-test-1054
       html-test-1147
@@ -263,7 +240,7 @@ Keywords-fn-some-1
       " run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Wrong results from validator.nu? Needs checking.</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="fn-format-number" test-case="
       numberformat-40-87 numberformat-40-88
