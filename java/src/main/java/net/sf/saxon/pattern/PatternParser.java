@@ -117,7 +117,9 @@ public class PatternParser extends XPathParser {
     }
 
     protected void notAllowedInPattern() throws XPathException {
-        grumble("Pattern uses syntax that is allowed in expressions, but not in patterns");
+        if (inPredicate == 0) {
+            grumble("Pattern uses syntax that is allowed in expressions, but not in patterns");
+        }
     }
 
 

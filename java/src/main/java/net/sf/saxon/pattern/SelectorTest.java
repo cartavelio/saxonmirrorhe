@@ -81,19 +81,31 @@ public class SelectorTest implements NodeTest, NodeVectorMatchMaker, NamedXNodeP
     }
 
     /**
-     * Get an equivalent node test, knowing that it will only be used to match XNodes
+     * Get an equivalent node test, knowing that it will only be used to match JNodes
      *
-     * @return an equivalent node test for XNodes
+     * @return an equivalent node test for JNodes
      */
-    public JNodePattern asJNodePattern() {
+    public Pattern asJNodePattern() {
         if (asNCName) {
             String mapKey;
-            if (key instanceof LocalQNameTest) {
-                mapKey = ((LocalQNameTest) key).getLocalName();
+            if (key instanceof LocalQNameTest lqt) {
+                mapKey = lqt.getLocalName();
+                return new JNodePattern(new StringValue(mapKey), SequenceType.ANY_SEQUENCE);
+            } else if (key instanceof SpecificQNameTest sqt) {
+                mapKey = sqt.getStructuredQName().getLocalPart();
+                return new JNodePattern(new StringValue(mapKey), SequenceType.ANY_SEQUENCE);
+            } else if (key instanceof UnionQNameTest uqt) {
+                Pattern result = null;
+                for (QNameTest test : uqt.getTests()) {
+                    SelectorTest st = new SelectorTest(test, true, nodeKind);
+                    Pattern subPattern = st.asJNodePattern();
+                    result = result == null ? subPattern : new UnionPattern(result, subPattern);
+                }
+                return result;
             } else {
-                mapKey = ((SpecificQNameTest) key).getStructuredQName().getLocalPart();
+                throw new AssertionError("Unrecognized QNameTest: " + key.getClass().getName());
             }
-            return new JNodePattern(new StringValue(mapKey), SequenceType.ANY_SEQUENCE);
+
         } else {
             AtomicValue actual = new QNameValue(((SpecificQNameTest) key).getStructuredQName(), BuiltInAtomicType.QNAME);
             return new JNodePattern(actual, SequenceType.ANY_SEQUENCE);

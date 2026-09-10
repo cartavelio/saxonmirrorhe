@@ -102,7 +102,7 @@ public class XsltCompiler {
      * transformation (requires Saxon-EE).
      *
      * <p>If this method is called, then any <code>xsl:import-schema</code> declaration
-     * for a target namespace that is present in the supplied schema (other than an
+     * for a target namespace that is present in the supplied stylesheet (other than an
      * <code>xsl:import-schema</code> with an inline <code>xs:schema</code>) is satisfied
      * by schema components in this schema; the <code>schema-location</code> attribute
      * on the declaration is ignored.</p>
@@ -139,6 +139,18 @@ public class XsltCompiler {
         usedXsdSchemata.put(role, schema);
         usedSchemata.put(role,  schema.getUnderlyingSchema());
     }
+
+    /**
+     * Set the {@link XsdSchema} to be used with this {@code XsltCompiler} for a schema-aware
+     * transformation (requires Saxon-EE). Equivalent to <code>useSchema("", schema)</code>
+     * @param schema the schema to be imported
+     * @since 13.0
+     */
+
+    public void useSchema(XsdSchema schema) {
+        useSchema("", schema);
+    }
+
 
     /**
      * Get the schema that is to be used for a schema-aware transformation.

@@ -480,7 +480,7 @@ public class Environment implements ResourceResolver {
                     environment.xqueryCompiler.useSchema(schema);
                 }
                 if (environment.xsltCompiler != null) {
-                    environment.xsltCompiler.useSchema("", schema);
+                    environment.xsltCompiler.useSchema(schema);
                 }
             } catch (SaxonApiException err) {
                 driver.println("*** Failed to load schema: " + err.getMessage());

@@ -163,7 +163,7 @@ public abstract class Sender {
         PipelineConfiguration pipe = receiver.getPipelineConfiguration();
         Configuration config = pipe.getConfiguration();
         int sv = options.getSchemaValidationMode();
-        if (sv != Validation.PRESERVE && sv != Validation.DEFAULT) {
+        if (sv != Validation.PRESERVE && sv != Validation.DEFAULT && config instanceof EnterpriseConfiguration) {
             Controller controller = pipe.getController();
             if (controller != null && !controller.getExecutable().isSchemaAware() && sv != Validation.STRIP) {
                 throw new XPathException("Cannot use schema-validated input documents when the query/stylesheet is not schema-aware");
@@ -173,6 +173,9 @@ public abstract class Sender {
             Schema schema = options.getSchema();
             if (schema == null && sv == Validation.STRICT && !options.isUseXsiSchemaLocation()) {
                 throw new XPathException("Cannot perform strict schema validation; no schema supplied");
+            }
+            if (schema == null) {
+                schema = config.emptySchema();
             }
             if (schema instanceof MinimalSchema) {
                 schema = new PreparedSchema((EnterpriseConfiguration) config);
