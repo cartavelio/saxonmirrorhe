@@ -240,7 +240,7 @@
         
         <p>The new function <code>fn:sort-with</code> is implemented.</p>
         
-        <p>The new function <code>fn:collation</code> is implemented.</p>
+        <p>The new functions <code>fn:collation</code> and <code>fn:collation-available</code> are implemented.</p>
         
         <p>The new function <code>fn:graphemes</code> is implemented.</p>
         
