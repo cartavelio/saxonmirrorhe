@@ -100,7 +100,7 @@ public class XSLArray extends XSLSequence {
             Expression mapEntryCall = mapEntry.makeFunctionCall(
                     new StringLiteral("value"), use);
             ForEach bangExpression = new ForEach(getSelectExpression(), mapEntryCall);
-            SystemFunction arrayOf = ArrayFunctionSet.getInstance(40).makeFunction("of", 1);
+            SystemFunction arrayOf = ArrayFunctionSet.getInstance(40).makeFunction("of-members", 1);
             functionCall = arrayOf.makeFunctionCall(bangExpression);
         }
         ExpressionTool.copyLocationInfo(getSelectExpression(), functionCall);
