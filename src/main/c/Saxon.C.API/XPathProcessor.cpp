@@ -235,6 +235,15 @@ void XPathProcessor::setBackwardsCompatible(bool option) {
     }
 }
 
+void XPathProcessor::setLanguageVersion(const char * version){
+    if (version) {
+        		setProperty("lang:", version);
+    } else {
+       properties.erase("lang:");
+    }
+
+}
+
 void XPathProcessor::setCaching(bool caching){
     if (caching) {
         	setProperty("caching:", "true");

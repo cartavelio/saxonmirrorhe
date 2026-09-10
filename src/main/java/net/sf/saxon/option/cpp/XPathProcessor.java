@@ -344,6 +344,14 @@ public class XPathProcessor extends SaxonCAPI {
             }
         }
 
+        if (parameterMap.containsKey("lang:")) {
+            valuei = (String) parameterMap.get("lang");
+            if(valuei != null && valuei instanceof String) {
+                compiler.setLanguageVersion((String)valuei);
+
+            }
+        }
+
         /*if(!variables.isEmpty()) {
             for(QName name : variables) {
                 compiler.declareVariable(name);

@@ -45,6 +45,16 @@ static int exists(const char *fname)
     return 0;
 }
 
+static int assertEquals(const char * str1, const char * str2) {
+    if(str1 != nullptr && str2 != nullptr) {
+        return strcmp(str1, str2) == 0;
+    } else {
+        return 1;
+    }
+
+}
+
+
 private:
 
 };
