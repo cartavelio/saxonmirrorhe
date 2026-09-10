@@ -284,7 +284,7 @@ val configM4Task = tasks.register("config_m4") {
 
     configLines.add("SAXON_VERSION=\"${saxonBuild.version.get()}\"")
 
-    val newExtRegex = Regex("""^(\s+)PHP_NEW_EXTENSION\(saxon, \.\./src/(.+\.cpp).+""")
+    val newExtRegex = Regex("""^(\s+)PHP_NEW_EXTENSION\(saxon, (?:\.\./)+src/(.+\.cpp).+""")
     val newExtReplace: (String) -> String = { line ->
       val (indent, srcFile) = newExtRegex.find(line)!!.destructured
       "${indent}PHP_NEW_EXTENSION(saxon, ${srcFile}, \$ext_shared)"
