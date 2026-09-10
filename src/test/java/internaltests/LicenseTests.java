@@ -2,6 +2,8 @@ package internaltests;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
+import jaxptest.ConfigTest;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.LicenseException;
 import org.junit.jupiter.api.Test;
@@ -9,9 +11,11 @@ import org.junit.jupiter.api.Test;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -246,6 +250,21 @@ public class LicenseTests {
             assertTrue(e.getMessage().contains("(serial number V010024)"), "serial");
         } catch (SaxonApiException e) {
             fail();
+        }
+    }
+
+    @Test
+    public void TestReadConfigFileWithLinkToLicenseFile() {
+        try {
+            // Create a Processor instance.
+            Processor processor = new Processor(new StreamSource(new File(
+                    new ConfigTest().getDataDir() + "config-with-link-to-license-file.config")));
+            assertNotNull(processor);
+            assertTrue(processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
+            assertEquals("V010267", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex);
         }
     }
 }
