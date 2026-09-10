@@ -197,7 +197,6 @@ public class ValidationStack extends ValidatingFilter {
                     List<ValidationFailure> failures = new ArrayList<>(1);
                     if (xsiType != null) {
                         if (initialReceiver instanceof EmptyContentValidator ||
-                                initialReceiver instanceof AnyTypeValidator ||
                                 initialReceiver instanceof LaxValidator) {
                             initial = ContentValidator.makeValidatorForType(
                                     null, xsiType, pipe, outputReceiver, failures);
@@ -255,9 +254,6 @@ public class ValidationStack extends ValidatingFilter {
                 initial.setConstraintChecker(getConstraintChecker());
                 initial.setNamespaceResolver(namespaces);
                 initial.setNilled(isNilled);
-//                if (isNilled) {
-//                    properties |= ReceiverOption.NILLED_ELEMENT;
-//                }
 
                 if (!(initial instanceof SkipValidator) && !xsiValidationErrors.isEmpty()) {
                     // Errors in xsi attributes are not reported when doing skip validation
@@ -333,27 +329,6 @@ public class ValidationStack extends ValidatingFilter {
                     }
                     prepareForAssertions(elemName, type, validatedAtts, namespaces, location, properties, pipe);
                 }
-
-//                if (builder == null) {
-//                    SchemaType type = v1.getSchemaType();
-//                    if (type instanceof UserComplexType && ((UserComplexType) type).hasAssertions()) {
-//                        List<NamespaceBinding> additionalNamespaces = new ArrayList<>();
-//                        AttributeMap validatedAtts = v1.validateAttributes(attributes, additionalNamespaces);
-//                        for (NamespaceBinding ns : additionalNamespaces) {
-//                            namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
-//                        }
-//                        builder = new TinyBuilder(pipe);
-//                        builder.setStatistics(pipe.getConfiguration().getTreeStatistics().ASSERTION_TREE_STATISTICS);
-//                        builder.setSystemId(location.getSystemId());
-//                        builder.setBaseURI(location.getSystemId());
-//                        builder.open();
-//                        builder.startElement(elemName, typeCode, validatedAtts, namespaces, location, properties);
-////                        StartTagBuffer nr = getValidationContext().getStartTagBuffer();
-////                        builder.namespaces(nr.getNamespaceMap(), ReceiverOption.NONE);
-//                        builderDepth = 0;
-//                        assertionBuilder.activate(builder);
-//                    }
-//                }
 
             }
             if (builder != null) {

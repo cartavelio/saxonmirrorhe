@@ -38,8 +38,8 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
     private final HashSet<NamespaceUri> namespacesEncountered;
     private final HashMap<NamespaceUri, URI> schemaDocumentsRead;
-    private boolean useXsiSchemaLocation = true;
-    private final List<ValidationFailure> xsiValidationErrors = new ArrayList<ValidationFailure>(4);
+    private boolean useXsiSchemaLocation;
+    private final List<ValidationFailure> xsiValidationErrors = new ArrayList<>(4);
 
     /**
      * Create a handler for xsi: attributes
@@ -77,8 +77,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
         boolean hasXsiAttributes = false;
         for (AttributeInfo att : attributes) {
-            NamespaceUri uri = att.getNodeName().getNamespaceUri();
-            if (uri.equals(NamespaceUri.SCHEMA_INSTANCE)) {
+            if (att.getNodeName().hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
                 hasXsiAttributes = true;
                 break;
             }
@@ -92,8 +91,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 NodeName attName = att.getNodeName();
                 SimpleType attType = att.getType();
                 // Check for special xsi attributes and annotate them with a type code
-                NamespaceUri uri = attName.getNamespaceUri();
-                if (uri.equals(NamespaceUri.SCHEMA_INSTANCE)) {
+                if (attName.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
                     String value = att.getValue();
                     int fp = attName.obtainFingerprint(getNamePool());
                     if (fp == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION) {
@@ -167,6 +165,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 }
                 if (!ignore) {
                     if (namespacesEncountered.contains(targetNS)) {
+                        //noinspection StatementWithEmptyBody
                         if (getConfiguration().getXsdVersion() == Configuration.XSD11) {
                             // ignore it: see XSD 1.1 Part 1 G.1.15 bullet 4
                         } else {
@@ -213,12 +212,6 @@ public class XSIAttributeHandler extends ValidatingFilter {
             // ignore a duplicate xsi:noNamespaceSchemaLocation (can occur with XInclude, for example)
             ignore = absoluteLocation.equals(schemaDocumentsRead.get(NamespaceUri.NULL));
             schemaDocumentsRead.put(NamespaceUri.NULL, absoluteLocation);
-            // Following removed code suppresses rejection of xsi:schemaLocation when encountered after existing elements
-            // in the relevant namespace.
-//            if (getConfiguration().getImportedNamespaces().contains("") &&
-//                    !(Boolean)getConfiguration().getConfigurationProperty(FeatureKeys.MULTIPLE_SCHEMA_IMPORTS)) {
-//                ignore = true;
-//            }
         } catch (URISyntaxException err) {
             // we'll deal with this later
             ignore = false;
@@ -309,25 +302,21 @@ public class XSIAttributeHandler extends ValidatingFilter {
      *
      * @param value    The absolute URI of the location hint
      * @param targetNS The required target namespace
-     * @throws XPathException
+     * @throws XPathException If the schema is invalid for any reason
      */
     private void loadSchema(URI value, NamespaceUri targetNS) throws XPathException {
 
         // First see if we already have a loaded schema for this namespace. If so, assume it's the same one.
 
-        //PreparedSchema existing = ((EnterpriseConfiguration)getConfiguration()).getSchema(targetNS);
         int status = ((EnterpriseConfiguration) getConfiguration()).getNamespaceStatus(targetNS);
 
-        // There are three possibilities. Either "existing" was null, in which case this schema is previously
+        // There are three possibilities. Either this schema is previously
         // unknown, and we carry on to load it. Or it was a normal PreparedSchema, in which case we can
         // make a quick return. Or it was a SurrogateSchema, which shouldn't really
         // happen, unless (a) the schema is currently being loaded in another thread, or (b) someone
         // started to load the schema, didn't finish, and didn't tidy up. In this case, we just
         // pretend it wasn't there, and reload it from scratch.
 
-//        if (existing != null && !(existing instanceof EnterpriseConfiguration.SurrogateSchema)) {
-//            return;
-//        }
         if (status != PreparedSchema.NAMESPACE_UNKNOWN && status != PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION) {
             return;
         }

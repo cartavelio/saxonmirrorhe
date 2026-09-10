@@ -22,10 +22,7 @@ import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CoderResult;
-import java.nio.charset.CodingErrorAction;
+import java.nio.charset.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +33,9 @@ import java.util.zip.*;
  * http://expath.org/spec/archive
  */
 
+@SuppressWarnings("unused")
 public class Archive {
-    public static final BigDecimalValue VERSION = new BigDecimalValue(new BigDecimal(0.1));
+    public static final BigDecimalValue VERSION = new BigDecimalValue(new BigDecimal("0.1"));
 
     public static final NamespaceUri NAMESPACE = NamespaceUri.of("http://expath.org/ns/archive");
     public static final String PREFIX = "arch";
@@ -79,8 +77,7 @@ public class Archive {
         UNKNOWN, ZIP, GZIP
     }
 
-    @SuppressWarnings("serial")
-    private static final HashMap<ArchiveType, String> archiveTypes = new HashMap<ArchiveType, String>() {
+    private static final HashMap<ArchiveType, String> archiveTypes = new HashMap<>() {
         {
             put(ArchiveType.ZIP, "zip");
             put(ArchiveType.GZIP, "gzip");
@@ -92,8 +89,7 @@ public class Archive {
         STORED, DEFLATE, UNKNOWN, MIXED
     }
 
-    @SuppressWarnings("serial")
-    private static final HashMap<CompressionType, String> compressionTypes = new HashMap<CompressionType, String>() {
+    private static final HashMap<CompressionType, String> compressionTypes = new HashMap<>() {
         {
             put(CompressionType.STORED, "stored");
             put(CompressionType.DEFLATE, "deflate");
@@ -154,22 +150,26 @@ public class Archive {
         return new QName(PREFIX, NAMESPACE.toString(), s);
     }
 
-    private static final HashMap<String, CharsetDecoder> decoders = new HashMap<String, CharsetDecoder>();
+    private static final HashMap<String, CharsetDecoder> decoders = new HashMap<>();
 
     static {
-        CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
         decoder.onMalformedInput(CodingErrorAction.REPORT);
         decoders.put("UTF-8", decoder);
-        decoder = Charset.forName("UTF-16").newDecoder();
+
+        decoder = StandardCharsets.UTF_16.newDecoder();
         decoder.onMalformedInput(CodingErrorAction.REPORT);
         decoders.put("UTF-16", decoder);
-        decoder = Charset.forName("US-ASCII").newDecoder();
+
+        decoder = StandardCharsets.US_ASCII.newDecoder();
         decoder.onMalformedInput(CodingErrorAction.REPORT);
         decoders.put("US-ASCII", decoder);
-        decoder = Charset.forName("ASCII").newDecoder();
+
+        decoder = StandardCharsets.US_ASCII.newDecoder();
         decoder.onMalformedInput(CodingErrorAction.REPORT);
         decoders.put("ASCII", decoder);
-        decoder = Charset.forName("ISO-8859-1").newDecoder();
+
+        decoder = StandardCharsets.ISO_8859_1.newDecoder();
         decoder.onMalformedInput(CodingErrorAction.REPORT);
         decoders.put("ISO-8859-1", decoder);
     }
@@ -217,7 +217,7 @@ public class Archive {
         r.startElement(name, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
     }
 
-    private static ArrayList<Entry> toExtractionEntries(Sequence entries) throws XPathException {
+    private static ArrayList<Entry> toExtractionEntries(Sequence entries) {
         return toExtractionEntries(entries, null);
     }
 
@@ -230,9 +230,8 @@ public class Archive {
      *                     null
      * @return The list of entries required, each having a name recorded
      * internally
-     * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
      */
-    private static ArrayList<Entry> toExtractionEntries(Sequence entries, Entry entryDefault) throws XPathException {
+    private static ArrayList<Entry> toExtractionEntries(Sequence entries, Entry entryDefault) {
         ArrayList<Entry> requested = new ArrayList<>();
         if (entries == null) {
             return requested;
@@ -256,7 +255,7 @@ public class Archive {
 
     private static ArrayList<Entry> toInsertionEntries(ZeroOrMore<StringValue> entries, ZeroOrMore<Base64BinaryValue> values)
             throws XPathException {
-        ArrayList<Entry> m = new ArrayList<Entry>();
+        ArrayList<Entry> m = new ArrayList<>();
         SequenceIterator entryIter = entries.iterate();
         SequenceIterator valueIter = values.iterate();
         while (true) {
@@ -288,7 +287,7 @@ public class Archive {
                                 (Base64BinaryValue) entry.get(content).iterate().next());
             e.setCompression(defaultEntry.compression);
             if ((s = entry.get(compressionKey)) != null) {
-                String compressionValue = ((StringValue) s.iterate().next()).getStringValue();
+                String compressionValue = s.iterate().next().getStringValue();
                 e.setCompression(stringToCompressionType(compressionValue));
             }
             if ((s = entry.get(positionKey)) != null) {
@@ -350,7 +349,7 @@ public class Archive {
     }
 
     /* Helper functions to add to immutable maps */
-    private static HashTrieMap add(HashTrieMap map, String key, HashTrieMap val) throws XPathException {
+    private static HashTrieMap add(HashTrieMap map, String key, HashTrieMap val) {
         return map.addEntry(new StringValue(key), val);
     }
 
@@ -368,9 +367,8 @@ public class Archive {
     }
 
     // Returns entries in archive order
-    private static ArrayList<ZipEntry> getEntries(ZipInputStream in)
-            throws IOException, URISyntaxException {
-        ArrayList<ZipEntry> entries = new ArrayList<ZipEntry>();
+    private static ArrayList<ZipEntry> getEntries(ZipInputStream in) throws IOException {
+        ArrayList<ZipEntry> entries = new ArrayList<>();
         ZipEntry next;
         while ((next = in.getNextEntry()) != null) {
             entries.add(next);
@@ -380,8 +378,7 @@ public class Archive {
         return entries;
     }
 
-    private static CompressionType compressionMethods(Base64BinaryValue in) throws IOException,
-            XPathException, URISyntaxException {
+    private static CompressionType compressionMethods(Base64BinaryValue in) throws IOException {
         CompressionType ct = CompressionType.UNKNOWN;
         for (ZipEntry ze : getEntries(new ZipInputStream(
                 new ByteArrayInputStream(in.getBinaryValue())))) {
@@ -398,12 +395,12 @@ public class Archive {
     // arch:entry-names($in as xs:base64Binary) as xs:string*
     public static ZeroOrMore<? extends StringValue> entryNames(Base64BinaryValue in)
             throws IOException, XPathException, URISyntaxException {
-        List<StringValue> names = new ArrayList<StringValue>();
+        List<StringValue> names = new ArrayList<>();
         final ZipInputStream stream = new ZipInputStream(new ByteArrayInputStream(in.getBinaryValue()));
         for (ZipEntry ze : getEntries(stream)) {
             names.add(new StringValue(ze.getName()));
         }
-        return new ZeroOrMore<StringValue>(names);
+        return new ZeroOrMore<>(names);
     }
 
     // arch:entries($in as xs:base64Binary) as element(arch:entry)*
@@ -437,13 +434,13 @@ public class Archive {
 
     // archM:entries($in as xs:base64Binary) as map(xs:string, map(xs:string,item()))
     public static MapItem entriesMap(XPathContext context, Base64BinaryValue in)
-            throws IOException, XPathException, URISyntaxException {
+            throws IOException, XPathException {
         return entriesMap(context, in, BooleanValue.FALSE);
     }
 
     // archM:entries($in as xs:base64Binary, $return-content as xs:boolean) as map(xs:string, map(xs:string,item()))
     public static MapItem entriesMap(XPathContext context, Base64BinaryValue in, BooleanValue returnContent)
-            throws IOException, XPathException, URISyntaxException {
+            throws IOException, XPathException {
         HashTrieMap result = new HashTrieMap();
         ZipInputStream zi = new ZipInputStream(new ByteArrayInputStream(
                 in.getBinaryValue()));
@@ -485,7 +482,7 @@ public class Archive {
 
     // archM:options($in as xs:base64Binary) as map(xs:string,item())
     public static MapItem optionsMap(XPathContext context, Base64BinaryValue in)
-            throws IOException, XPathException, URISyntaxException {
+            throws IOException, XPathException {
         HashTrieMap result = new HashTrieMap();
         result = add(result, "format", archiveTypes.get(archiveType(in)));
         result = add(result, "compression", compressionTypes.get(compressionMethods(in)));
@@ -516,27 +513,28 @@ public class Archive {
     private static void checkUnfound(ArrayList<Entry> entries)
             throws XPathException {
         if (!entries.isEmpty()) {
-            String e = "No entr" + (entries.size() == 1 ? "y" : "ies");
+            StringBuilder e = new StringBuilder("No entr").append(entries.size() == 1 ? "y" : "ies");
             for (int i = 0; i < entries.size(); i++) {
-                e += " " + entries.get(i).name;
+                e.append(" ").append(entries.get(i).name);
                 if (i != entries.size() - 1) {
-                    e += ",";
+                    e.append(",");
                 }
             }
-            error(e + " found in archive", ERROR_UNKNOWN_ENTRY);
+            e.append(" found in archive");
+            error(e.toString(), ERROR_UNKNOWN_ENTRY);
         }
     }
 
     private static ArrayList<Entry> extractEntries(Base64BinaryValue in, ArrayList<Entry> entries)
             throws IOException, XPathException {
         ArrayList<Entry> requested = (ArrayList<Entry>) entries.clone();
-        ArrayList<Entry> result = new ArrayList<Entry>();
+        ArrayList<Entry> result = new ArrayList<>();
         byte[] buffer = new byte[4096];
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         ZipInputStream zi = new ZipInputStream(new ByteArrayInputStream(
                 in.getBinaryValue()));
         ZipEntry next;
-        HashMap<String, Entry> found = new HashMap<String, Entry>();
+        HashMap<String, Entry> found = new HashMap<>();
         while ((next = zi.getNextEntry()) != null && !entries.isEmpty()) {
             String name = next.getName();
             Entry e = new Entry(name);
@@ -566,28 +564,28 @@ public class Archive {
 
     // arch:extract-binary($in as xs:base64Binary, $entries as xs:string*) as xs:base64Binary*
     public static ZeroOrMore<Base64BinaryValue> extractBinary(One<Base64BinaryValue> in, ZeroOrMore<StringValue> entries) throws IOException,
-            XPathException, URISyntaxException {
-        List<Base64BinaryValue> result = new ArrayList<Base64BinaryValue>();
+            XPathException {
+        List<Base64BinaryValue> result = new ArrayList<>();
         for (Entry e : extractEntries(in.head(), toExtractionEntries(entries))) {
             result.add(e.content);
         }
-        return new ZeroOrMore<Base64BinaryValue>(result);
+        return new ZeroOrMore<>(result);
     }
 
     // arch:extract-binary-map($in as xs:base64Binary, $entries as map(xs:string,item())) as xs:base64Binary*
     public static ZeroOrMore<Base64BinaryValue> extractBinaryMap(One<Base64BinaryValue> in, One<MapItem> entries) throws IOException,
-            XPathException, URISyntaxException {
-        List<Base64BinaryValue> result = new ArrayList<Base64BinaryValue>();
+            XPathException {
+        List<Base64BinaryValue> result = new ArrayList<>();
         for (Entry e : extractEntries(in.head(), toExtractionEntries(entries.head()))) {
             result.add(e.content);
         }
-        return new ZeroOrMore<Base64BinaryValue>(result);
+        return new ZeroOrMore<>(result);
     }
 
     // arch:extract-text($in as xs:base64Binary, $entries as xs:string*) as xs:string*
     public static ZeroOrMore<? extends StringValue> extractText(One<Base64BinaryValue> in, ZeroOrMore<StringValue> entries) throws IOException,
             XPathException, URISyntaxException {
-        return extractText(in, entries, new One<StringValue>(StringValue.bmp("UTF-8")));
+        return extractText(in, entries, new One<>(StringValue.bmp("UTF-8")));
     }
 
     // arch:extract-text($in as xs:base64Binary, $entries as xs:string*, $encoding as xs:string) as xs:string*
@@ -600,10 +598,10 @@ public class Archive {
     }
 
     private static ZeroOrMore<? extends StringValue> extractText(Base64BinaryValue in, ArrayList<Entry> entries)
-            throws IOException, XPathException, URISyntaxException {
+            throws IOException, XPathException {
         CharsetDecoder decoder;
 
-        List<StringValue> result = new ArrayList<StringValue>();
+        List<StringValue> result = new ArrayList<>();
         for (Entry b : extractEntries(in, entries)) {
             decoder = decoders.get(b.encoding);
             if (decoder == null) {
@@ -629,22 +627,21 @@ public class Archive {
             System.arraycopy(outChars, 0, resChars, 0, out.position());
             result.add(new StringValue(new String(resChars)));
         }
-        return new ZeroOrMore<StringValue>(result);
+        return new ZeroOrMore<>(result);
     }
 
     // arch:extract-map($in as xs:base64Binary, map(xs:string,map(xs:string,item()))) as xs:anyAtomicType*
     public static AtomicValue[] extractMap(One<Base64BinaryValue> in, One<MapItem> entries) throws IOException,
-            XPathException, URISyntaxException {
+            XPathException {
         return _extractMap(in.head(), toExtractionEntries(entries.head()));
     }
 
     // This might be able to subsume extractText()
     private static AtomicValue[] _extractMap(Base64BinaryValue in,
-                                           ArrayList<Entry> entries) throws IOException, XPathException,
-            URISyntaxException {
+                                           ArrayList<Entry> entries) throws IOException, XPathException {
         CharsetDecoder decoder;
 
-        ArrayList<AtomicValue> result = new ArrayList<AtomicValue>();
+        ArrayList<AtomicValue> result = new ArrayList<>();
         for (Entry b : extractEntries(in, entries)) {
             if (b.encoding != null) {
                 decoder = decoders.get(b.encoding);
@@ -674,18 +671,18 @@ public class Archive {
                 result.add(b.content);
             }
         }
-        return result.toArray(new AtomicValue[result.size()]);
+        return result.toArray(new AtomicValue[0]);
     }
 
     // arch:extract-text-map($in as xs:base64Binary, map(xs:string,item())) as xs:string*
     public static ZeroOrMore<? extends StringValue> extractTextMap(One<Base64BinaryValue> in, One<MapItem> entries) throws IOException,
-            XPathException, URISyntaxException {
+            XPathException {
         return extractTextMap(in, entries, One.string("UTF-8"));
     }
 
     // arch:extract-text-map($in as xs:base64Binary, map(xs:string,item()), $encoding as xs:string) as xs:string*
     public static ZeroOrMore<? extends StringValue> extractTextMap(One<Base64BinaryValue> in, One<MapItem> entries, One<StringValue> encoding)
-            throws IOException, XPathException, URISyntaxException {
+            throws IOException, XPathException {
         Entry def = new Entry();
         def.setEncoding(encoding.head().getStringValue().toUpperCase());
         return extractText(in.head(), toExtractionEntries(entries, def));
@@ -723,7 +720,7 @@ public class Archive {
             String name = next.getName();
             Entry e = new Entry(name);
             if (!entries.contains(e)) {
-                int len = 0;
+                int len;
                 while ((len = zi.read(buffer)) > 0) {
                     output.write(buffer, 0, len);
                 }
@@ -794,7 +791,7 @@ public class Archive {
                 zo.closeEntry();
                 entries.remove(e);
             } else {
-                int len = 0;
+                int len;
                 while ((len = zi.read(buffer)) > 0) {
                     output.write(buffer, 0, len);
                 }
@@ -842,13 +839,13 @@ public class Archive {
         Entry defaultEntry = new Entry();
         Sequence s = options.head().get(StringValue.bmp("compression"));
         if (s != null) {
-            defaultEntry.setCompression(stringToCompressionType(((StringValue) s.iterate().next()).getStringValue()));
+            defaultEntry.setCompression(stringToCompressionType((s.iterate().next()).getStringValue()));
         }
         return createFromEntries(toInsertionEntries(entries.head(), defaultEntry));
     }
 
     private static Base64BinaryValue createFromEntries(ArrayList<Entry> entries)
-            throws IOException, XPathException {
+            throws IOException {
         ByteArrayOutputStream full = new ByteArrayOutputStream();
         ZipOutputStream zo = new ZipOutputStream(full);
         ZipEntry nze;

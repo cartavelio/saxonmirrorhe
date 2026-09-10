@@ -423,12 +423,8 @@ public abstract class AttributeValidator extends ContentValidator {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
 
-        //System.err.println("AttValidator " + this + "startElement");
         idAttributes = 0;
         checkNoChildrenWhenNil(location);
-        //AttributeCollectionImpl validatedAtts = validateAttributes(attributes);
-
-        final PipelineConfiguration pipe = getPipelineConfiguration();
 
         super.startElement(elemName, type, attributes, namespaces, location, properties);
 

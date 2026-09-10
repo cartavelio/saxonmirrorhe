@@ -39,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 
@@ -303,16 +304,16 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             try {
                 File file = toFile(path);
                 if (file.isDirectory()) {
-                    error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
+                    throw error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
                 }
                 FileOutputStream stream = makeFileAppendOutputStream(file);
                 Base64BinaryValue contents = (Base64BinaryValue) arguments[1].head();
                 stream.write(contents.getBinaryValue());
                 stream.close();
             } catch (FileNotFoundException e) {
-                error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
+                throw error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
             } catch (IOException e) {
-                error("Failed to write to file " + path, e, ERROR_IO);
+                throw error("Failed to write to file " + path, e, ERROR_IO);
             }
             return EmptySequence.getInstance();
         }
@@ -340,17 +341,18 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             try {
                 file = toFile(path);
                 if (file.isDirectory()) {
-                    error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
+                    throw error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
                 }
-                writer = newOutputStreamWriter(makeFileAppendOutputStream(file), encoding);
+                writer = Objects.requireNonNull(
+                        newOutputStreamWriter(makeFileAppendOutputStream(file), encoding));
                 writer.write(contents);
                 writer.close();
             } catch (UnsupportedEncodingException e) {
-                error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
+                throw error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
             } catch (FileNotFoundException e) {
-                error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
+                throw error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
             } catch (IOException e) {
-                error("Failed to write to file " + file.getAbsolutePath(), e, ERROR_IO);
+                throw error("Failed to write to file " + file.getAbsolutePath(), e, ERROR_IO);
             }
             return EmptySequence.getInstance();
         }
@@ -362,8 +364,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         try {
             return new OutputStreamWriter(stream, encoding);
         } catch (UnsupportedEncodingException e) {
-            handleIOError(e);
-            return null;
+            throw handleIOError(e);
         }
     }
 
@@ -379,7 +380,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             try {
                 file = toFile(path);
                 if (file.isDirectory()) {
-                    error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
+                    throw error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
                 }
                 Writer writer = newOutputStreamWriter(makeFileAppendOutputStream(file), encoding);
                 SequenceIterator iter = arguments[1].iterate();
@@ -389,11 +390,11 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                     writer.write(NEWLINE);
                 }
             } catch (UnsupportedEncodingException e) {
-                error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
+                throw error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
             } catch (FileNotFoundException e) {
-                error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
+                throw error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
             } catch (IOException e) {
-                error("Failed to write to file " + path, e, ERROR_IO);
+                throw error("Failed to write to file " + path, e, ERROR_IO);
             }
             return EmptySequence.getInstance();
         }
@@ -406,9 +407,9 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             String dir = arguments[0].head().getStringValue();
             File fd = toExistingDirectory(dir);
             if (!fd.isDirectory()) {
-                error("File " + dir + " is not a directory", ERROR_PATH_NOT_DIRECTORY);
+                throw error("File " + dir + " is not a directory", ERROR_PATH_NOT_DIRECTORY);
             }
-            for (File file : fd.listFiles()) {
+            for (File file : Objects.requireNonNull(fd.listFiles())) {
                 result.add(new StringValue(file.getAbsolutePath() + (file.isDirectory() ? File.separator : "")));
             }
             return SequenceExtent.makeSequenceExtent(result);
@@ -416,6 +417,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     }
 
     public static class FileCopy extends SystemFunction {
+        @SuppressWarnings("ResultOfMethodCallIgnored")
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             File from = toFile(arguments[0].head().getStringValue());
@@ -427,23 +429,17 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                         to.mkdir();
                         copyDirectory(from, to);
                     } else {
-                        error("Source is a directory but target is a file", ERROR_PATH_EXISTS);
+                        throw error("Source is a directory but target is a file", ERROR_PATH_EXISTS);
                     }
                 } else {
                     to.mkdir();
                     copyDirectory(from, to);
                 }
             } else {
-                if (to.exists()) {
-                    if (to.isDirectory()) {
-                        to = new File(to, from.getName());
-                        copyFile(from, to);
-                    } else {
-                        copyFile(from, to);
-                    }
-                } else {
-                    copyFile(from, to);
+                if (to.exists() && to.isDirectory()) {
+                    to = new File(to, from.getName());
                 }
+                copyFile(from, to);
             }
             return EmptySequence.getInstance();
         }
@@ -456,12 +452,12 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             File file = toFile(path);
             if (file.exists()) {
                 if (!file.isDirectory()) {
-                    error("Path " + path + " already exists and is not a directory", ERROR_PATH_EXISTS);
+                    throw error("Path " + path + " already exists and is not a directory", ERROR_PATH_EXISTS);
                 }
             } else {
                 boolean result = file.mkdirs();
                 if (!result) {
-                    error("Failed to create directory " + path, ERROR_PATH_EXISTS);
+                    throw error("Failed to create directory " + path, ERROR_PATH_EXISTS);
                 }
             }
             return EmptySequence.getInstance();
@@ -469,6 +465,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     }
 
     public static class FileCreateTempDir extends SystemFunction {
+        @SuppressWarnings("ResultOfMethodCallIgnored")
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             try {
@@ -489,9 +486,8 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 deleteTempFile(context, temp);
                 return new StringValue(temp.getCanonicalPath());
             } catch (IOException e) {
-                handleIOError(e);
+                throw handleIOError(e);
             }
-            return EmptySequence.getInstance();
         }
     }
 
@@ -512,9 +508,8 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 deleteTempFile(context, temp);
                 return new StringValue(temp.getCanonicalPath());
             } catch (IOException e) {
-                handleIOError(e);
+                throw handleIOError(e);
             }
-            return EmptySequence.getInstance();
         }
     }
 
@@ -536,18 +531,18 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 recurse = ((BooleanValue)arguments[1].head()).getBooleanValue();
             }
             if (!recurse) {
-                if (file.isDirectory() && file.list().length != 0) {
-                    error("Cannot delete non-empty directory " + file.getAbsolutePath(), ERROR_PATH_IS_DIRECTORY);
+                if (file.isDirectory() && Objects.requireNonNull(file.list()).length != 0) {
+                    throw error("Cannot delete non-empty directory " + file.getAbsolutePath(), ERROR_PATH_IS_DIRECTORY);
                 }
                 boolean result = file.delete();
                 if (!result) {
-                    error("Failed to delete file " + file.getAbsolutePath(), ERROR_IO);
+                    throw error("Failed to delete file " + file.getAbsolutePath(), ERROR_IO);
                 }
             } else {
                 try {
                     deleteRecursive(file);
                 } catch (IOException e) {
-                    error("Failed to delete " + path, e, ERROR_IO);
+                    throw error("Failed to delete " + path, e, ERROR_IO);
                 }
             }
             return EmptySequence.getInstance();
@@ -607,7 +602,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             String path = arguments[0].head().getStringValue();
             File file = toExistingDirectory(path);
             if (!file.isDirectory()) {
-                error("File " + path + " is not a directory", ERROR_PATH_NOT_DIRECTORY);
+                throw error("File " + path + " is not a directory", ERROR_PATH_NOT_DIRECTORY);
             }
             boolean recursive = false;
             if (arguments.length > 1) {
@@ -618,12 +613,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             if (arguments.length > 2) {
                 filter = URIQueryParameters.makeGlobFilter(arguments[2].head().getStringValue());
             } else {
-                filter = new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name) {
-                        return true;
-                    }
-                };
+                filter = (dir, name) -> true;
             }
             gatherDirectoryContents(file, "", recursive, filter, result);
             return SequenceExtent.makeSequenceExtent(result);
@@ -632,7 +622,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         private static void gatherDirectoryContents(File dir, String prefix, boolean recurse, FilenameFilter filter, List<StringValue> result) {
             URIQueryParameters.RegexFilter filter2 =
                     filter instanceof URIQueryParameters.RegexFilter ? (URIQueryParameters.RegexFilter) filter : null;
-            for (File file : dir.listFiles(filter)) {
+            for (File file : Objects.requireNonNull(dir.listFiles(filter))) {
                 if (filter2 == null || !file.isDirectory() || filter2.matches(file.getName())) {
                     String name =
                             prefix.isEmpty() ? file.getName() : prefix + File.separator + file.getName();
@@ -643,11 +633,11 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 }
             }
             if (recurse) {
-                for (File file : dir.listFiles()) {
+                for (File file : Objects.requireNonNull(dir.listFiles())) {
                     if (file.isDirectory()) {
                         String name =
                                 prefix.isEmpty() ? file.getName() : prefix + File.separator + file.getName();
-                        gatherDirectoryContents(file, name, recurse, filter, result);
+                        gatherDirectoryContents(file, name, true, filter, result);
                     }
                 }
             }
@@ -662,17 +652,24 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             if (from.isDirectory()) {
                 if (to.exists()) {
                     if (to.isDirectory()) {
-                        from.renameTo(new File(to, from.getName())); // the dirctory gets moved INSIDE the target
-                    /*for (File f : from.listFiles()) {
-                        f.renameTo(new File(to, f.getName()));
-                    }*/
+                        boolean success = from.renameTo(new File(to, from.getName())); 
+                        // the directory gets moved INSIDE the target
+                        if (!success) {
+                            throw error("Renaming of " + from.getName() + " failed", ERROR_IO);
+                        }
                     } else {
-                        error("Target of directory move exists and is not a directory", ERROR_PATH_EXISTS);
+                        throw error("Target of directory move exists and is not a directory", ERROR_PATH_EXISTS);
                     }
                 } else {
-                    to.mkdirs();
-                    for (File f : from.listFiles()) {
-                        f.renameTo(new File(to, f.getName()));
+                    boolean created = to.mkdirs();
+                    if (!created) {
+                        throw error("Creation of " + to + " failed", ERROR_IO);
+                    }
+                    for (File f : Objects.requireNonNull(from.listFiles())) {
+                        boolean success = f.renameTo(new File(to, f.getName()));
+                        if (!success) {
+                            throw error("Renaming of " + f + " failed", ERROR_IO);
+                        }
                     }
                 }
             } else {
@@ -681,11 +678,14 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 }
                 //TODO - move sideways to rollback if something fails.
                 if (to.exists()) {
-                    to.delete();
+                    boolean success = to.delete();
+                    if (!success) {
+                        throw error("Deletion of existing file " + to + " failed", ERROR_IO);
+                    }
                 }
                 boolean result = from.renameTo(to);
                 if (!result) {
-                    throw new XPathException("Moving " + from + " to " + to + " failed ");
+                    throw error("Moving " + from + " to " + to + " failed ", ERROR_IO);
                 }
                 //
             }
@@ -697,7 +697,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             String path = arguments[0].head().getStringValue();
-            if (path.equals("/") || path.equals("")) {  // || !path.contains(File.separator)
+            if (path.equals("/") || path.equals("")) {  
                 return StringValue.EMPTY_STRING;
             }
             File file = toFile(path);
@@ -717,9 +717,8 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 File parent = new File(file.getParent());
                 return new StringValue(parent.getCanonicalPath() + File.separator);
             } catch (IOException e) {
-                handleIOError(e);
+                throw handleIOError(e);
             }
-            return EmptySequence.getInstance();
         }
     }
 
@@ -740,7 +739,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                     URI uri = new URI(path);
                     file = new File(uri);
                     if (!(file.exists())) {
-                        error(("No file exists at " + path), ERROR_PATH_NOT_EXIST);
+                        throw error(("No file exists at " + path), ERROR_PATH_NOT_EXIST);
                     }
                 } catch (URISyntaxException err) {
                     // no action
@@ -752,9 +751,8 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             try {
                 return new StringValue(file.getCanonicalPath());
             } catch (IOException e) {
-                handleIOError(e);
+                throw handleIOError(e);
             }
-            return null;
         }
     }
 
@@ -801,33 +799,32 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             try {
                 long fileLength = file.length();
                 if (offset < 0L) {
-                    error("Negative offset in binary read:" + offset, ERROR_INDEX_OUT_OF_BOUNDS);
+                    throw error("Negative offset in binary read:" + offset, ERROR_INDEX_OUT_OF_BOUNDS);
                 }
                 if (length < 0L) {
-                    error("Negative length in binary read:" + length, ERROR_INDEX_OUT_OF_BOUNDS);
+                    throw error("Negative length in binary read:" + length, ERROR_INDEX_OUT_OF_BOUNDS);
                 }
                 if (offset + length > fileLength) {
-                    error("Length exceeds file length in binary read:" + (offset + length), ERROR_INDEX_OUT_OF_BOUNDS);
+                    throw error("Length exceeds file length in binary read:" + (offset + length), ERROR_INDEX_OUT_OF_BOUNDS);
                 }
                 byte[] content = new byte[(int) length];
                 FileInputStream in = new FileInputStream(file);
                 if (offset > 0) {
                     long skipped = in.skip(offset);
                     if (skipped != offset) {
-                        error("Error skipping content at start of binary: " + skipped + " bytes skipped, but requested " + offset, ERROR_IO);
+                        throw error("Error skipping content at start of binary: " + skipped + " bytes skipped, but requested " + offset, ERROR_IO);
                     }
                 }
                 int bytes = in.read(content, 0, (int) length);
                 if (bytes != content.length) {
                     in.close();
-                    error("Number of bytes read does not match file length", ERROR_IO);
+                    throw error("Number of bytes read does not match file length", ERROR_IO);
                 }
                 in.close(); // ensure input stream is closed
                 return new Base64BinaryValue(content);
             } catch (IOException e) {
-                error("Failed to read file " + path, e, ERROR_IO);
+                throw error("Failed to read file " + path, e, ERROR_IO);
             }
-            return null;
         }
     }
 
@@ -841,29 +838,27 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 encoding = arguments[1].head().getStringValue();
             }
 
-            Reader reader = getInputStreamReader(file, encoding);
+            Reader reader = Objects.requireNonNull(getInputStreamReader(file, encoding));
             try {
                 String result = UnparsedTextFunction.readFile(
                         context.getConfiguration().getValidCharacterChecker(), reader).toString();
                 reader.close();
-                //in.close();
                 return new StringValue(result);
             } catch (XPathException e) {
                 try {
                     reader.close();
                 } catch (IOException e1) {
-                    error("Failed to close file " + file.getAbsolutePath(), e, ERROR_IO);
+                    throw error("Failed to close file " + file.getAbsolutePath(), e, ERROR_IO);
                 }
-                error(e.getMessage(), ERROR_IO);
+                throw error(e.getMessage(), ERROR_IO);
             } catch (IOException e) {
                 try {
                     reader.close();
                 } catch (IOException e1) {
-                    error("Failed to close file " + file.getAbsolutePath(), e, ERROR_IO);
+                    throw error("Failed to close file " + file.getAbsolutePath(), e, ERROR_IO);
                 }
-                error("Failed to read file " + path, e, ERROR_IO);
+                throw error("Failed to read file " + path, e, ERROR_IO);
             }
-            return null;
         }
 
 
@@ -938,13 +933,13 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                     stream.write(content);
                     stream.close();
                 } catch (IOException e) {
-                    error("Failed to write to file " + path, e, ERROR_IO);
+                    throw error("Failed to write to file " + path, e, ERROR_IO);
                 }
             } else {
                 try {
                     long offset = ((NumericValue)arguments[2].head()).longValue();
                     if (offset < 0L) {
-                        error("Negative offset in binary write:" + offset, ERROR_INDEX_OUT_OF_BOUNDS);
+                        throw error("Negative offset in binary write:" + offset, ERROR_INDEX_OUT_OF_BOUNDS);
                     }
                     int lb = content.length;
                     byte[] data;
@@ -952,14 +947,14 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                         long fileLength = file.length();
                         // Comment the test out for permitting extending the file
                         if (offset > fileLength) {
-                            error("Offset exceeds file length in binary write:" + offset, ERROR_INDEX_OUT_OF_BOUNDS);
+                            throw error("Offset exceeds file length in binary write:" + offset, ERROR_INDEX_OUT_OF_BOUNDS);
                         }
                         data = new byte[Math.max((int) fileLength, (int) offset + lb)];
                         FileInputStream in = new FileInputStream(file);
                         int bytes = in.read(data);
                         if (bytes != fileLength) {
                             in.close();
-                            error("Number of bytes read does not match file length", ERROR_IO);
+                            throw error("Number of bytes read does not match file length", ERROR_IO);
                         }
                         in.close();
                     } else {
@@ -970,7 +965,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                     stream.write(data);
                     stream.close();
                 } catch (IOException e) {
-                    error("Failed to write to file " + path, e, ERROR_IO);
+                    throw error("Failed to write to file " + path, e, ERROR_IO);
                 }
             }
             return EmptySequence.getInstance();
@@ -993,11 +988,11 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 writer.write(content);
                 writer.close();
             } catch (UnsupportedEncodingException e) {
-                error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
+                throw error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
             } catch (FileNotFoundException e) {
-                error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
+                throw error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
             } catch (IOException e) {
-                error("Failed to write to file " + file.getAbsolutePath(), e, ERROR_IO);
+                throw error("Failed to write to file " + file.getAbsolutePath(), e, ERROR_IO);
             }
             return EmptySequence.getInstance();
         }
@@ -1023,11 +1018,11 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 }
                 writer.close();
             } catch (UnsupportedEncodingException e) {
-                error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
+                throw error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
             } catch (FileNotFoundException e) {
-                error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
+                throw error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
             } catch (IOException e) {
-                error("Failed to write to file " + file.getAbsolutePath(), e, ERROR_IO);
+                throw error("Failed to write to file " + file.getAbsolutePath(), e, ERROR_IO);
             }
             return EmptySequence.getInstance();
         }
@@ -1083,7 +1078,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     private static File toExistingFile(String path) throws XPathException {
         File file = toFile(path);
         if (!file.exists()) {
-            error("No file exists at " + path, ERROR_PATH_NOT_EXIST);
+            throw error("No file exists at " + path, ERROR_PATH_NOT_EXIST);
         }
         return file;
     }
@@ -1098,10 +1093,10 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     private static File checkReadSource(String path) throws XPathException {
         File file = toExistingFile(path);
         if (file.isDirectory()) {
-            error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
+            throw error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
         }
         if (!file.exists()) {
-            error("File not found: " + path, ERROR_PATH_NOT_EXIST);
+            throw error("File not found: " + path, ERROR_PATH_NOT_EXIST);
         }
         return file;
     }
@@ -1116,10 +1111,10 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     private static File checkWriteDestination(String path) throws XPathException {
         File file = toFile(path);
         if (file.isDirectory()) {
-            error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
+            throw error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
         }
         if (!file.getParentFile().exists()) {
-            error("Parent directory does not exist: " + path, ERROR_PATH_NOT_DIRECTORY);
+            throw error("Parent directory does not exist: " + path, ERROR_PATH_NOT_DIRECTORY);
         }
         return file;
     }
@@ -1138,7 +1133,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     private static File toExistingDirectory(String path) throws XPathException {
         File file = toFile(path);
         if (!file.exists()) {
-            error("No directory exists at " + path, ERROR_PATH_NOT_DIRECTORY);
+            throw error("No directory exists at " + path, ERROR_PATH_NOT_DIRECTORY);
         }
         return file;
     }
@@ -1148,13 +1143,13 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
      *
      * @param message the error message
      * @param code    the error code to be used
-     * @throws XPathException always
+     * @return XPathException always
      */
 
-    public static void error(String message, String code) throws XPathException {
+    public static XPathException error(String message, String code)  {
         XPathException e = new XPathException(message);
         e.setErrorCodeQName(new StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, code));
-        throw e;
+        return e;
     }
 
     /**
@@ -1163,13 +1158,13 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
      * @param message the error message
      * @param cause   the underlying exception, usually an IOException
      * @param code    the error code to be used
-     * @throws XPathException always
+     * @return XPathException always
      */
 
-    public static void error(String message, Exception cause, String code) throws XPathException {
+    public static XPathException error(String message, Exception cause, String code) throws XPathException {
         XPathException e = new XPathException(message, cause);
         e.setErrorCodeQName(new StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, code));
-        throw e;
+        return e;
     }
 
     private static void serialize(XPathContext context, String path, boolean append, Sequence contents, SerializationProperties properties) throws XPathException {
@@ -1178,9 +1173,9 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         pipe.setXPathContext(context);
         File file = toFile(path);
         if (file.isDirectory()) {
-            error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
+            throw error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
         }
-        OutputStream stream = null;
+        OutputStream stream;
         try {
             if (append) {
                 stream = makeFileAppendOutputStream(file);
@@ -1188,7 +1183,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 stream = new FileOutputStream(file);
             }
         } catch (FileNotFoundException e) {
-            error("Failed to write to file " + path, e, ERROR_UNKNOWN_ENCODING);
+            throw error("Failed to write to file " + path, e, ERROR_UNKNOWN_ENCODING);
         }
         Result result = new StreamResult(stream);
         Receiver sr = factory.getReceiver(result, properties, pipe);
@@ -1203,33 +1198,37 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         sr.endDocument();
         sr.close();
         try {
-            if (stream != null) {
-                stream.close();
-            }
+            stream.close();
         } catch (IOException e) {
             // no action
         }
     }
 
     private static void copyDirectory(File from, File to) throws XPathException {
-        for (File child : from.listFiles()) {
+        for (File child : Objects.requireNonNull(from.listFiles())) {
             File target = new File(to, child.getName());
             if (child.isDirectory()) {
                 if (target.exists()) {
-                    if (target.isDirectory()) {
-                        copyDirectory(child, target);
-                    } else {
-                        target.delete();
-                        target.mkdir();
-                        copyDirectory(child, target);
+                    if (!target.isDirectory()) {
+                        boolean deleteOK = target.delete();
+                        if (!deleteOK) {
+                            throw error("Failed to delete existing file " + target, ERROR_IO);
+                        }
+                        boolean mkOK = target.mkdir();
+                        if (!mkOK) {
+                            throw error("Failed to create new directory " + target, ERROR_IO);
+                        }
                     }
                 } else {
-                    target.mkdir();
-                    copyDirectory(child, target);
+                    boolean mkOK = target.mkdir();
+                    if (!mkOK) {
+                        throw error("Failed to create new directory " + target, ERROR_IO);
+                    }
                 }
+                copyDirectory(child, target);
             } else {
                 if (target.exists() && target.isDirectory()) {
-                    error("Cannot copy " + child.getAbsolutePath() + " because directory " + target.getAbsolutePath() + " is in the way", ERROR_PATH_IS_DIRECTORY);
+                    throw error("Cannot copy " + child.getAbsolutePath() + " because directory " + target.getAbsolutePath() + " is in the way", ERROR_PATH_IS_DIRECTORY);
                 } else {
                     copyFile(child, target);
                 }
@@ -1243,7 +1242,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             Query.createFileIfNecessary(destFile);
             Files.copy(sourceFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
         } catch (IOException e) {
-            handleIOError(e);
+            throw handleIOError(e);
         }
     }
 
@@ -1258,17 +1257,14 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private static void deleteRecursive(File file) throws IOException {
         if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
+            for (File child : Objects.requireNonNull(file.listFiles())) {
                 deleteRecursive(child);
             }
         }
-        boolean ok = file.delete();
-        if (!ok) {
-            throw new IOException("Failed to delete " + file.getAbsolutePath());
-        }
+        file.delete();
     }
 
-    private static void handleIOError(IOException err) throws XPathException {
+    private static XPathException handleIOError(IOException err) throws XPathException {
         XPathException xe = new XPathException(err);
         String localName = err instanceof UnsupportedEncodingException ? ERROR_UNKNOWN_ENCODING : ERROR_IO;
         xe.setErrorCodeQName(new StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, localName));
@@ -1283,30 +1279,14 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         public TextFileLinesIterator(File file, String encoding) throws XPathException {
             this.encoding = encoding;
             this.file = file;
-            reader = new LineNumberReader(getInputStreamReader(file, encoding));
+            reader = new LineNumberReader(
+                    Objects.requireNonNull(
+                            getInputStreamReader(file, encoding)));
             uri = file.toURI();
+            //noinspection Convert2MethodRef
             checker = IntPredicateLambda.of(ch -> XMLCharacterData.isValid11(ch));
         }
 
-        @Override
-        public StringValue next() {
-            StringValue result = null;
-            result = super.next();
-            return result;
-        }
-
-        @Override
-        protected XPathException handleIOError(URI uri, IOException err) {
-            // Overridden to return the EXPath error code
-            String message = "Failed to read input file";
-            if (uri != null && !err.getMessage().equals(uri.toString())) {
-                message += ' ' + uri.toString();
-            }
-            message += " (" + err.getClass().getName() + ')';
-            XPathException e = new XPathException(message, err);
-            e.setErrorCodeQName(new StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, ERROR_IO));
-            return e;
-        }
     }
 
     /**
@@ -1324,7 +1304,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             + "                return file.getInputStreamReader(encoding);\n"
             + "            }\n"
             + "            catch (Saxon.Ejava.io.IOException) {\n"
-            + "                error(\"Unsupported encoding \" + encoding, ERROR_UNKNOWN_ENCODING);\n"
+            + "                throw error(\"Unsupported encoding \" + encoding, ERROR_UNKNOWN_ENCODING);\n"
             + "                return null;\n"
             + "            }")
     private static Reader getInputStreamReader(File file, String encoding) throws XPathException {
@@ -1335,27 +1315,26 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             decoder.onMalformedInput(CodingErrorAction.REPORT);
             return new InputStreamReader(in, decoder);
         } catch (FileNotFoundException e) {
-            error("File not found: " + file.getAbsolutePath(), ERROR_PATH_NOT_EXIST);
+            throw error("File not found: " + file.getAbsolutePath(), ERROR_PATH_NOT_EXIST);
         } catch (UnsupportedCharsetException e) {
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e1) {
-                    error("Failed to close file " + file.getAbsolutePath(), e, ERROR_IO);
+                    throw error("Failed to close file " + file.getAbsolutePath(), e, ERROR_IO);
                 }
             }
-            error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
+            throw error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
         } catch (IllegalCharsetNameException e) {
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e1) {
-                    error("Failed to close file " + file.getAbsolutePath(), e, ERROR_IO);
+                    throw error("Failed to close file " + file.getAbsolutePath(), e, ERROR_IO);
                 }
             }
-            error("Invalid encoding name " + encoding, ERROR_UNKNOWN_ENCODING);
+            throw error("Invalid encoding name " + encoding, ERROR_UNKNOWN_ENCODING);
         }
-        return null;
     }
 
     public static String _parent(String path) throws XPathException {

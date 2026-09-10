@@ -306,7 +306,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @return the first facet associated with the given name
      */
 
-    public Facet getFacet(Class name) {
+    public Facet getFacet(Class<? extends Facet> name) {
         for (Facet f : getExtendedFacetList()) {
             if (f.getClass() == name) {
                 return f;

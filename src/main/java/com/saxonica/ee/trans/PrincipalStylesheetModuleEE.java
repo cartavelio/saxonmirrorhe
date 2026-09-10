@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
 
-    private final Map<Expression, GlobalVariable> indexOfVariablesByInitializer = new HashMap<Expression, GlobalVariable>();
+    private final Map<Expression, GlobalVariable> indexOfVariablesByInitializer = new HashMap<>();
 
     public PrincipalStylesheetModuleEE(XSLPackage node) throws XPathException {
         super(node);
@@ -47,16 +47,17 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
 
     @Override
     protected void importSchemata() throws XPathException {
-        // Scan the declarations in reverse order, that is, highest precedence first
+
         boolean importsSchemas = false;
-        for (int i = topLevel.size() - 1; i >= 0; i--) {
-            ComponentDeclaration decl = topLevel.get(i);
+        for (ComponentDeclaration decl : topLevel) {
             if (decl.getSourceElement() instanceof XSLImportSchema) {
                 importsSchemas = true;
+                break;
             }
         }
         if (importsSchemas) {
             synchronized (getConfiguration()) {
+                // Scan the declarations in reverse order, that is, highest precedence first
                 for (int i = topLevel.size() - 1; i >= 0; i--) {
                     ComponentDeclaration decl = topLevel.get(i);
                     if (decl.getSourceElement() instanceof XSLImportSchema) {
@@ -86,7 +87,7 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
 
     @Override
     protected void checkStreamability(AttributeSet aSet) throws XPathException {
-        List<String> reasons = new ArrayList<String>();
+        List<String> reasons = new ArrayList<>();
         Expression body = aSet.getBody();
         if (body != null) {
             ContextItemStaticInfoEE info =
