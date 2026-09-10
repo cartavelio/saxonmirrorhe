@@ -634,30 +634,25 @@ public class QT3TestDriverHE extends TestDriver {
                         case "XQ": {
                             XQueryCompiler testXqc = env.xqueryCompiler;
                             testXqc.setLanguageVersion(langVersion);
-                            //testXqc.declareNamespace("fn", NamespaceConstant.FN);
-                            //testXqc.declareNamespace("xs", NamespaceConstant.SCHEMA);
-                            //testXqc.declareNamespace("math", NamespaceConstant.MATH);
-                            //testXqc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
-                            //testXqc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
                             ErrorCollector errorCollector = new ErrorCollector();
                             testXqc.setErrorReporter(errorCollector);
                             String decVars = env.paramDecimalDeclarations.toString();
                             if (!decVars.isEmpty()) {
-                                int x = exp.indexOf("(:%DECL%:)");  // TODO: Mechanism no longer used?
-                                if (x < 0) {
+//                                int x = exp.indexOf("(:%DECL%:)");  // TODO: Mechanism no longer used?
+//                                if (x < 0) {
                                     exp = decVars + exp;
-                                } else {
-                                    exp = exp.substring(0, x) + decVars + exp.substring(x + 13);
-                                }
+//                                } else {
+//                                    exp = exp.substring(0, x) + decVars + exp.substring(x + 13);
+//                                }
                             }
                             String vars = env.paramDeclarations.toString();
                             if (!vars.isEmpty()) {
-                                int x = exp.indexOf("(:%VARDECL%:)");
-                                if (x < 0) {
+//                                int x = exp.indexOf("(:%VARDECL%:)");
+//                                if (x < 0) {
                                     exp = vars + exp;
-                                } else {
-                                    exp = exp.substring(0, x) + vars + exp.substring(x + 13);
-                                }
+//                                } else {
+//                                    exp = exp.substring(0, x) + vars + exp.substring(x + 13);
+//                                }
                             }
                             ModuleResolver mr = new ModuleResolver(xpc);
                             mr.setTestCase(testCase);

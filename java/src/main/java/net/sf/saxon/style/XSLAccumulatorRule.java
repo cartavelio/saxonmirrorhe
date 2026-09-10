@@ -58,8 +58,9 @@ public class XSLAccumulatorRule extends StyleElement {
                         }
                         break;
                     case "capture":
-                        requireXslt40Attribute("capture");
-                        capture = processBooleanAttribute("capture", value);
+                        if (requireXslt40Attribute("capture")) {
+                            capture = processBooleanAttribute("capture", value);
+                        }
                         break;
 
                     default:

@@ -147,8 +147,9 @@ public class XSLResultDocument extends StyleElement {
             } else if (f.equals("use-character-maps")) {
                 useCharacterMapsAtt = Whitespace.trim(value);
             } else if (f.equals("select")) {
-                requireXslt40Attribute("select");
-                select = makeExpression(value, att);
+                if (requireXslt40Attribute("select")) {
+                    select = makeExpression(value, att);
+                }
             } else if (fans.contains(f) || (f.startsWith("{") && !StandardNames.SAXON_ASYCHRONOUS.equals(f))) {
                 // this is a serialization attribute
                 String val = value;

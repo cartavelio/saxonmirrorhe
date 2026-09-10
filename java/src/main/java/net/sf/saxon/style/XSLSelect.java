@@ -96,11 +96,12 @@ public class XSLSelect extends StyleElement implements AutoDocumentInhibitor {
             String value = att.getValue();
             String f = attName.getDisplayName();
             if (f.equals("as")) {
-                requireXslt40Attribute("as");
-                try {
-                    requiredType = makeSequenceType(value);
-                } catch (XPathException e) {
-                    compileErrorInAttribute(e, "as");
+                if (requireXslt40Attribute("as")) {
+                    try {
+                        requiredType = makeSequenceType(value);
+                    } catch (XPathException e) {
+                        compileErrorInAttribute(e, "as");
+                    }
                 }
             } else {
                 checkUnknownAttribute(attName);

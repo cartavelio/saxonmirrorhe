@@ -11,7 +11,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.gnode.GNodeType;
 
 /**
- * A schema that contains only the built-in types
+ * A schema that contains only the built-in types. This class is used in Saxon-HE and Saxon-PE,
+ * which do not support schema validation.
  */
 
 public class MinimalSchema implements Schema {

@@ -157,7 +157,7 @@ public class Configuration implements SourceResolver {
     protected IndependentContext staticContextForSystemFunctions;
 
     private String label = null;
-    private final MinimalSchema minimalSchema;
+    protected Schema minimalSchema;
 
 
     private DocumentNumberAllocator documentNumberAllocator = new DocumentNumberAllocator();

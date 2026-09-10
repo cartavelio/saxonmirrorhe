@@ -203,7 +203,9 @@ public class JsonReceiver implements Receiver {
                                                      "' is not a valid xs:boolean", ERR_INPUT);
                 }
             }
-            key = (alreadyEscaped ? handleEscapedString(key) : escape(key, false, !escapeSolidus, isControlChar));
+            key = (alreadyEscaped ?
+                           handleEscapedString(key) :
+                           escape(key, new EscapeOptions(false, !escapeSolidus, true, isControlChar)));
 
             UnicodeString normalizedKey = alreadyEscaped ? unescape(key) : key;
             boolean added = keyChecker.peek().add(normalizedKey);
@@ -275,8 +277,14 @@ public class JsonReceiver implements Receiver {
         }
     }
 
+    private final static IntPredicateProxy isControlChar =
+            IntPredicateLambda.of(c -> c < 31 || (c >= 127 && c <= 159));
+
     private final static UnicodeString ZERO = new UnicodeChar('0');
     private final static UnicodeString MINUS_ZERO = new Twine8("-0");
+//    private final static EscapeOptions XmlToJsonEscapeOptions =
+//            new EscapeOptions(false, !escapeSolidus, true, isControlChar);
+
     @Override
     public void endElement() throws XPathException {
         NodeName name = stack.pop();
@@ -348,7 +356,7 @@ public class JsonReceiver implements Receiver {
             if (escaped) {
                 output.accept(handleEscapedString(content));
             } else {
-                output.accept(escape(content, false, !escapeSolidus, isControlChar));
+                output.accept(escape(content, new EscapeOptions(false, !escapeSolidus, true, isControlChar)));
             }
             output.accept(U_QUOT);
         } else if (!Whitespace.isAllWhite(uContent)) {
@@ -402,7 +410,7 @@ public class JsonReceiver implements Receiver {
                 } else if (c == '\t') {
                     tb = tb.append('\\').append('t');
                 } else {
-                    tb = tb.append('\\').append('u').append(hex4(c));
+                    tb = tb.append('\\').append('u').append(hex4(c, true));
                 }
             } else if (c == '/' && !afterEscapeChar) {
                 tb = tb.append('\\').append('/');
@@ -414,26 +422,36 @@ public class JsonReceiver implements Receiver {
         return tb.toUnicodeString();
     }
 
+    /**
+     * @param retainQuot true if the quotation marks should not be escaped
+     * @param retainSlash true if solidus (forwards slash) should not be escaped
+     * @param upperCaseHex true if hexadecimal digits are to be uppercase
+     * @param hexEscapes a predicate identifying characters that should be output as hex escapes using \ u XXXX notation.
+     *
+     */
+    public record EscapeOptions (
+        boolean retainQuot,
+        boolean retainSlash,
+        boolean upperCaseHex,
+        IntPredicateProxy hexEscapes
+    ) {};
 
     /**
      * Escape a string using backslash escape sequences as defined in JSON
      *
      * @param in         the input string
-     * @param retainQuot true if the quotation marks should not be escaped
-     * @param retainSlash true if solidus (forwards slash) should not be escaped
-     * @param hexEscapes a predicate identifying characters that should be output as hex escapes using \ u XXXX notation.
+     * @param options    options controlling escaping
      * @return the escaped string
      */
 
-    public static UnicodeString escape(UnicodeString in, boolean retainQuot,
-                                       boolean retainSlash, IntPredicateProxy hexEscapes)  {
+    public static UnicodeString escape(UnicodeString in, EscapeOptions options)  {
         TwineBuilder tb = TwineBuilder.make(in.length32());
         IntIterator cp = in.codePoints();
         while (cp.hasNext()) {
             int c = cp.next();
             switch (c) {
                 case '"':
-                    if (!retainQuot) {
+                    if (!options.retainQuot()) {
                         tb = tb.append('\\');
                     }
                     tb = tb.append('"');
@@ -454,7 +472,7 @@ public class JsonReceiver implements Receiver {
                     tb = tb.append('\\').append('t');
                     break;
                 case '/':
-                    if (!retainSlash) {
+                    if (!options.retainSlash()) {
                         tb = tb.append('\\');
                     }
                     tb = tb.append('/');  // spec bug 29665, saxon bug 2849
@@ -463,12 +481,13 @@ public class JsonReceiver implements Receiver {
                     tb = tb.append('\\').append('\\');
                     break;
                 default:
-                    if (hexEscapes.test(c)) {
+                    if (options.hexEscapes().test(c)) {
+                        boolean uc = options.upperCaseHex();
                         if (c > 65535) {
-                            tb = tb.append('\\').append('u').append(hex4(UTF16CharacterSet.highSurrogate(c)));
-                            tb = tb.append('\\').append('u').append(hex4(UTF16CharacterSet.lowSurrogate(c)));
+                            tb = tb.append('\\').append('u').append(hex4(UTF16CharacterSet.highSurrogate(c), uc));
+                            tb = tb.append('\\').append('u').append(hex4(UTF16CharacterSet.lowSurrogate(c), uc));
                         } else {
-                            tb = tb.append('\\').append('u').append(hex4(c));
+                            tb = tb.append('\\').append('u').append(hex4(c, uc));
                         }
                     } else {
                         tb = tb.append(c);
@@ -479,13 +498,10 @@ public class JsonReceiver implements Receiver {
         return tb.toUnicodeString();
     }
 
-    @CSharpReplaceBody(code="return c.ToString(\"x4\");")
-    public static String hex4(int c) {
-        return String.format("%04x", c);
+    @CSharpReplaceBody(code="return c.ToString(upperCase ? \"X4\" : \"x4\");")
+    public static String hex4(int c, boolean upperCase) {
+        return String.format(upperCase ? "%04X" : "%04x", c);
     }
-
-    private final static IntPredicateProxy isControlChar =
-            IntPredicateLambda.of(c -> c < 31 || (c >= 127 && c <= 159));
 
     @Override
     public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {

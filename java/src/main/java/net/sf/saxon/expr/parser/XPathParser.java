@@ -4630,6 +4630,9 @@ public class XPathParser {
 
         Expression fcall = null;
         if (env instanceof QueryModule qm) {
+            if (isReservedFunctionName(fname, env.getXPathVersion())) {
+                grumble("Function name " + fname + " is a reserved name");
+            }
             fcall = new DraftFunctionCall(fname,
                                           qm,
                                           arguments,
@@ -5053,7 +5056,7 @@ public class XPathParser {
             try {
                 functionName = getQNameParser().parse(fname, env.getDefaultFunctionNamespace());
                 if (functionName.getPrefix().isEmpty()) {
-                    if (XPathParser.isReservedFunctionName(functionName.getLocalPart(), languageVersion)) {
+                    if (isReservedFunctionName(functionName.getLocalPart(), languageVersion)) {
                         grumble("The unprefixed function name '" + functionName.getLocalPart() + "' is reserved");
                     }
                 }

@@ -59,6 +59,8 @@ public class JSONEmitter {
     private boolean escapeSolidus = true;
     private boolean canonical = false;
     private boolean unfailing = false;
+    private JsonReceiver.EscapeOptions escapeOptions;
+    private JsonReceiver.EscapeOptions canonicalEscapeOptions;
 
     public JSONEmitter(PipelineConfiguration pipe, UnicodeWriter writer, Properties outputProperties)  {
         config = pipe.getConfiguration();
@@ -89,6 +91,11 @@ public class JSONEmitter {
         if ("no".equals(details.getProperty(SaxonOutputKeys.ESCAPE_SOLIDUS)) || canonical) {
             escapeSolidus = false;
         }
+        escapeOptions = new JsonReceiver.EscapeOptions(
+                false, !escapeSolidus, false, IntPredicateLambda.of(
+                                                  c -> c < 31 || (c >= 127 && c <= 159) || !characterSet.inCharset(c)));
+        canonicalEscapeOptions = new JsonReceiver.EscapeOptions(
+                false, true, false, IntPredicateLambda.of(c -> c < 31));
 
         String max = details.getProperty(SaxonOutputKeys.LINE_LENGTH);
         if (max != null) {
@@ -384,17 +391,14 @@ public class JSONEmitter {
         if (normalize) {
             cs = StringView.of(Normalizer.normalize(cs.toString(), normalizationForm));
         }
-        return JsonReceiver.escape(cs, false, !escapeSolidus,
-                                   IntPredicateLambda.of(
-                                           c -> c < 31 || (c >= 127 && c <= 159) || !characterSet.inCharset(c)));
+        return JsonReceiver.escape(cs, escapeOptions);
     }
 
     private UnicodeString canonicalEscape(UnicodeString cs)  {
         if (normalize) {
             cs = StringView.of(Normalizer.normalize(cs.toString(), normalizationForm));
         }
-        return JsonReceiver.escape(cs, false, !escapeSolidus,
-                                   IntPredicateLambda.of(c -> c < 31));
+        return JsonReceiver.escape(cs, canonicalEscapeOptions);
     }
 
     private void emit(String s) throws XPathException {

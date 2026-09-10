@@ -119,6 +119,7 @@ public class GenericAtomicComparer implements AtomicComparer {
                 return new CollatingAtomicComparer(collator);
             }
         }
+
         return new GenericAtomicComparer(collator, specVersion, context);
     }
     
@@ -447,12 +448,28 @@ public class GenericAtomicComparer implements AtomicComparer {
             XPathComparable bc = b.getXPathComparable(collator, implicitTimezone, specVersion);
             if (ac == null || bc == null) {
                 XPathException e = new XPathException("Objects are not comparable (" +
-                        Type.displayTypeName(a) + ", " + Type.displayTypeName(b) + ')', "XPTY0004");
+                                                              Type.displayTypeName(a) + ", " + Type.displayTypeName(b) + ')', "XPTY0004");
                 throw new ComparisonException(e);
-            } else {
-                return ac.compareTo(bc);
+            }
+            if (!mutuallyComparable(ac, bc)) {
+                XPathException e = new XPathException("Objects are not mutually comparable (" +
+                                                              Type.displayTypeName(a) + ", " + Type.displayTypeName(b) + ')', "XPTY0004");
+                throw new ComparisonException(e);
+            }
+            return ac.compareTo(bc);
+        }
+    }
+
+    private boolean mutuallyComparable(XPathComparable a, XPathComparable b) {
+        if (a instanceof DurationValue && b instanceof DurationValue && specVersion < 40) {
+            if (a instanceof DayTimeDurationValue && !(b instanceof DayTimeDurationValue)) {
+                return false;
+            }
+            if (a instanceof YearMonthDurationValue && !(b instanceof YearMonthDurationValue)) {
+                return false;
             }
         }
+        return true;
     }
 
     /**

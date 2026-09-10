@@ -161,7 +161,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.INSTANCE, STAR | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
-        ItemType actionType = new SpecificFunctionType(
+        ItemType actionType31 = new SpecificFunctionType(
+                SequenceType.SINGLE_ATOMIC,
+                SequenceType.ANY_SEQUENCE,
+                SequenceType.ANY_SEQUENCE);
+
+        ItemType actionType40 = new SpecificFunctionType(
                 SequenceType.SINGLE_ATOMIC,
                 SequenceType.ANY_SEQUENCE,
                 SequenceType.SINGLE_INTEGER,
@@ -169,7 +174,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
         register("for-each", 2, e -> e.populate(MapForEach::new, AnyItemType.INSTANCE, STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, actionType, ONE | INS, null));
+                .arg(1, version>=40 ? actionType40 : actionType31, ONE | INS, null));
 
         register("get", 2, e -> e.populate(MapGet::new, AnyItemType.INSTANCE, STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)

@@ -1341,33 +1341,45 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        return switch (fingerprint) {
-            case StandardNames.XS_ANY_ATOMIC_TYPE -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_STRING -> StringCoercionPlan.getInstance();
-            case StandardNames.XS_ANY_URI -> AnyURICoercionPlan.getInstance();
-            case StandardNames.XS_DECIMAL -> DecimalCoercionPlan.getInstance();
-            case StandardNames.XS_DURATION -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_G_YEAR -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_G_YEAR_MONTH -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_G_MONTH -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_G_MONTH_DAY -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_G_DAY -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_TIME -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_DATE -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_DATE_TIME -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_DATE_TIME_STAMP -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_BOOLEAN -> AtomicCoercionPlan.getInstance();
-            case StandardNames.XS_DOUBLE -> DoubleCoercionPlan.getInstance();
-            case StandardNames.XS_FLOAT -> FloatCoercionPlan.getInstance(version);
-            case StandardNames.XS_HEX_BINARY -> HexBinaryCoercionPlan.getInstance();
-            case StandardNames.XS_BASE64_BINARY -> Base64BinaryCoercionPlan.getInstance();
-            case StandardNames.XS_QNAME -> QNameCoercionPlan.getInstance();
-            case StandardNames.XS_NOTATION -> QNameCoercionPlan.getInstance();
-            case StandardNames.XS_UNTYPED_ATOMIC -> AtomicCoercionPlan.getInstance();
+        if (version >= 40) {
+            return switch (fingerprint) {
+                case StandardNames.XS_ANY_ATOMIC_TYPE -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_STRING -> StringCoercionPlan.getInstance();
+                case StandardNames.XS_ANY_URI -> AnyURICoercionPlan.getInstance();
+                case StandardNames.XS_DECIMAL -> DecimalCoercionPlan.getInstance();
+                case StandardNames.XS_DURATION -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_G_YEAR -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_G_YEAR_MONTH -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_G_MONTH -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_G_MONTH_DAY -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_G_DAY -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_TIME -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_DATE -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_DATE_TIME -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_DATE_TIME_STAMP -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_BOOLEAN -> AtomicCoercionPlan.getInstance();
+                case StandardNames.XS_DOUBLE -> DoubleCoercionPlan.getInstance();
+                case StandardNames.XS_FLOAT -> FloatCoercionPlan.getInstance(version);
+                case StandardNames.XS_HEX_BINARY -> HexBinaryCoercionPlan.getInstance();
+                case StandardNames.XS_BASE64_BINARY -> Base64BinaryCoercionPlan.getInstance();
+                case StandardNames.XS_QNAME -> QNameCoercionPlan.getInstance();
+                case StandardNames.XS_NOTATION -> QNameCoercionPlan.getInstance();
+                case StandardNames.XS_UNTYPED_ATOMIC -> AtomicCoercionPlan.getInstance();
 
-            default -> DerivedAtomicCoercionPlan.getInstance();
-
-        };
+                default -> DerivedAtomicCoercionPlan.getInstance();
+            };
+        } else {
+            return switch (fingerprint) {
+                case StandardNames.XS_STRING -> StringCoercionPlan.getInstance();
+                case StandardNames.XS_ANY_URI -> AnyURICoercionPlan.getInstance();
+                case StandardNames.XS_DECIMAL -> DecimalCoercionPlan.getInstance();
+                case StandardNames.XS_DOUBLE -> DoubleCoercionPlan.getInstance();
+                case StandardNames.XS_FLOAT -> FloatCoercionPlan.getInstance(version);
+                case StandardNames.XS_QNAME -> QNameCoercionPlan.getInstance();
+                case StandardNames.XS_NOTATION -> QNameCoercionPlan.getInstance();
+                default -> AtomicCoercionPlan.getInstance();
+            };
+        }
     }
 
     /**

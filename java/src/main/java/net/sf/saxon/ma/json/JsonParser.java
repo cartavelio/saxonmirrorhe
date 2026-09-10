@@ -362,10 +362,10 @@ public class JsonParser {
                     } else if (UTF16CharacterSet.isHighSurrogate(ch)) {
                         // This is a high surrogate, deal with it later
                         pendingHighSurrogate = ch;
-                        pendingHighSurrogateHex = JsonReceiver.hex4(ch);
+                        pendingHighSurrogateHex = JsonReceiver.hex4(ch, true);
                     } else if (UTF16CharacterSet.isLowSurrogate(ch)) {
                         // This is an unmatched low surrogate
-                        tb = tb.append('\\').append('u').append(JsonReceiver.hex4(ch));
+                        tb = tb.append('\\').append('u').append(JsonReceiver.hex4(ch, true));
                     }
                 } else {
                     if (pendingHighSurrogate > 0) {
@@ -407,7 +407,7 @@ public class JsonParser {
         } else if (ch == '\f') {
             tb = tb.append('\\').append('f');
         } else {
-            tb = tb.append('\\').append('u').append(JsonReceiver.hex4(ch));
+            tb = tb.append('\\').append('u').append(JsonReceiver.hex4(ch, true));
         }
         return tb;
     }
@@ -535,10 +535,10 @@ public class JsonParser {
                     } else if (UTF16CharacterSet.isHighSurrogate(ch)) {
                         // This is a high surrogate; deal with it later;
                         pendingHighSurrogate = ch;
-                        pendingHighSurrogateHex = JsonReceiver.hex4(ch);
+                        pendingHighSurrogateHex = JsonReceiver.hex4(ch, true);
                     } else if (UTF16CharacterSet.isLowSurrogate(ch)) {
                         // This is an unmatched low surrogate
-                        tb = tb.append(fallback("\\u" + JsonReceiver.hex4(ch)));
+                        tb = tb.append(fallback("\\u" + JsonReceiver.hex4(ch, true)));
                     }
                 } else {
                     if (pendingHighSurrogate > 0) {

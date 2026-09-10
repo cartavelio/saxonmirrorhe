@@ -79,11 +79,12 @@ public class XSLSequence extends StyleElement {
             if (f.equals("select")) {
                 select = makeExpression(value, att);
             } else if (f.equals("as")) {
-                requireXslt40Attribute("as");
-                try {
-                    requiredType = makeSequenceType(value);
-                } catch (XPathException e) {
-                    compileErrorInAttribute(e, "as");
+                if (requireXslt40Attribute("as")) {
+                    try {
+                        requiredType = makeSequenceType(value);
+                    } catch (XPathException e) {
+                        compileErrorInAttribute(e, "as");
+                    }
                 }
             } else {
                 checkUnknownAttribute(attName);
