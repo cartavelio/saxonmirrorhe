@@ -1,9 +1,9 @@
 package com.saxonica.ee.optim;
 
-import net.sf.saxon.expr.elab.FallbackElaborator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
@@ -31,8 +31,6 @@ public final class IndexedFilterExpression extends Expression {
     private final AtomicComparer comparer;
     private final boolean convertUntypedToOther;
 
-    private PullEvaluator basePullEvaluator = null;
-    private PullEvaluator searchPullEvaluator = null;
 
     /**
      * Constructor
@@ -330,44 +328,41 @@ public final class IndexedFilterExpression extends Expression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-
-        Expression baseExp = getBaseExpression();
-        SearchableValue indexedValue;
-        if (baseExp instanceof VariableReference) {
-            Sequence base = ((VariableReference) baseExp).evaluateVariable(context);
-            if (base instanceof EmptySequence) {
-                return EmptyIterator.emptyIterator();
-            } else if (base instanceof SearchableValue) {
-                indexedValue = (SearchableValue) base;
-            } else {
-                indexedValue = SearchableValue.makeSearchableValue(base.iterate());
-                Binding binding = ((VariableReference) baseExp).getBinding();
-                if (binding instanceof LocalBinding) {
-                    context.setLocalVariable(((LocalBinding) binding).getLocalSlotNumber(), indexedValue);
-                } else if (binding instanceof GlobalVariable) {
-                    context.getController().getBindery(((GlobalVariable) binding).getPackageData())
-                            .setGlobalVariable((GlobalVariable) binding, indexedValue);
-                }
-            }
-        } else {
-            if (basePullEvaluator == null) {
-                basePullEvaluator = baseExp.makeElaborator().elaborateForPull();
-            }
-            indexedValue = SearchableValue.makeSearchableValue(basePullEvaluator.iterate(context));
-        }
-        // In all other cases there must have been some kind of rewrite; evaluate as a regular
-        // filter expression
-
-        if (indexedValue.getLength() == 0) {
-            return EmptyIterator.emptyIterator();
-        }
-        AtomicComparer comparer = this.comparer.provideContext(context);
-        if (searchPullEvaluator == null) {
-            searchPullEvaluator = getSearchExpression().makeElaborator().elaborateForPull();
-        }
-        SequenceIterator values = searchPullEvaluator.iterate(context);
-        return indexedValue.findItems(getUseExpression(), values, convertUntypedToOther,
-                                      false, comparer, context);
+        return makeElaborator().elaborateForPull().iterate(context);
+//        Expression baseExp = getBaseExpression();
+//        SearchableValue indexedValue;
+//        if (baseExp instanceof VariableReference) {
+//            Sequence base = ((VariableReference) baseExp).evaluateVariable(context);
+//            if (base instanceof EmptySequence) {
+//                return EmptyIterator.emptyIterator();
+//            } else if (base instanceof SearchableValue) {
+//                indexedValue = (SearchableValue) base;
+//            } else {
+//                indexedValue = SearchableValue.makeSearchableValue(base.iterate());
+//                Binding binding = ((VariableReference) baseExp).getBinding();
+//                if (binding instanceof LocalBinding) {
+//                    context.setLocalVariable(((LocalBinding) binding).getLocalSlotNumber(), indexedValue);
+//                } else if (binding instanceof GlobalVariable) {
+//                    context.getController().getBindery(((GlobalVariable) binding).getPackageData())
+//                            .setGlobalVariable((GlobalVariable) binding, indexedValue);
+//                }
+//            }
+//        } else {
+//            indexedValue = SearchableValue.makeSearchableValue(basePullEvaluator.iterate(context));
+//        }
+//        // In all other cases there must have been some kind of rewrite; evaluate as a regular
+//        // filter expression
+//
+//        if (indexedValue.getLength() == 0) {
+//            return EmptyIterator.emptyIterator();
+//        }
+//        AtomicComparer comparer = this.comparer.provideContext(context);
+//        if (searchPullEvaluator == null) {
+//            searchPullEvaluator = getSearchExpression().makeElaborator().elaborateForPull();
+//        }
+//        SequenceIterator values = searchPullEvaluator.iterate(context);
+//        return indexedValue.findItems(getUseExpression(), values, convertUntypedToOther,
+//                                      false, comparer, context);
 
     }
 
@@ -439,7 +434,53 @@ public final class IndexedFilterExpression extends Expression {
      */
     @Override
     public Elaborator getElaborator() {
-        return new FallbackElaborator();
+        return new IndexedFilterExpressionElaborator();
+    }
+
+
+    private static class IndexedFilterExpressionElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            IndexedFilterExpression expr = (IndexedFilterExpression) getExpression();
+            Expression baseExp = expr.getBaseExpression();
+            PullEvaluator basePullEvaluator = baseExp.makeElaborator().elaborateForPull();
+            PullEvaluator searchPullEvaluator = expr.getSearchExpression().makeElaborator().elaborateForPull();
+            return context -> {
+                SearchableValue indexedValue;
+                if (baseExp instanceof VariableReference) {
+                    Sequence base = ((VariableReference) baseExp).evaluateVariable(context);
+                    if (base instanceof EmptySequence) {
+                        return EmptyIterator.emptyIterator();
+                    } else if (base instanceof SearchableValue) {
+                        indexedValue = (SearchableValue) base;
+                    } else {
+                        indexedValue = SearchableValue.makeSearchableValue(base.iterate());
+                        Binding binding = ((VariableReference) baseExp).getBinding();
+                        if (binding instanceof LocalBinding) {
+                            context.setLocalVariable(((LocalBinding) binding).getLocalSlotNumber(), indexedValue);
+                        } else if (binding instanceof GlobalVariable) {
+                            context.getController().getBindery(((GlobalVariable) binding).getPackageData())
+                                    .setGlobalVariable((GlobalVariable) binding, indexedValue);
+                        }
+                    }
+                } else {
+                    indexedValue = SearchableValue.makeSearchableValue(basePullEvaluator.iterate(context));
+                }
+                // In all other cases there must have been some kind of rewrite; evaluate as a regular
+                // filter expression
+
+                if (indexedValue.getLength() == 0) {
+                    return EmptyIterator.emptyIterator();
+                }
+                AtomicComparer comparer = expr.comparer.provideContext(context);
+                SequenceIterator values = searchPullEvaluator.iterate(context);
+                return indexedValue.findItems(expr.getUseExpression(), values, expr.convertUntypedToOther,
+                                              false, comparer, context);
+
+            };
+        }
+
     }
 }
 

@@ -10,6 +10,7 @@ import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -140,7 +141,8 @@ public class LetExpressionAdjunct extends StreamingAdjunct {
             GroundedValue value = collector.getSequence();
             XPathContext context = getContext();
             context.setLocalVariable(letExpr.getLocalSlotNumber(), value);
-            letExpr.getAction().process(getResultFeed(), context);
+            TailCall tc = letExpr.getAction().makeElaborator().elaborateForPush().processLeavingTail(getResultFeed(), context);
+            Expression.dispatchTailCall(tc);
             super.close();
         }
 

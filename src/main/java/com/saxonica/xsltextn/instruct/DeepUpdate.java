@@ -5,6 +5,10 @@ import com.saxonica.xsltextn.pedigree.PedigreeArrayItem;
 import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
 import com.saxonica.xsltextn.pedigree.PedigreeValue;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -13,6 +17,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
 
@@ -145,54 +150,6 @@ public class DeepUpdate extends Instruction {
         }
     }
 
-    private Item processRootItem(Item root, XPathContext c2) throws XPathException {
-        IdentityHashMap<Item, Item> substitutions = new IdentityHashMap<>();
-        XPathContext c3 = c2.newMinorContext();
-        FocusIterator selectIterator = c3.trackFocus(getSelectExpression().iterate(c2));
-        Item selected;
-        while ((selected = selectIterator.next()) != null) {
-            if (!(selected instanceof PedigreeValue)) {
-                if (selected instanceof MapItem) {
-                    throw new XPathException("saxon:deep-update: selected item is a map with no pedigree");
-                } else if (selected instanceof ArrayItem) {
-                    throw new XPathException("saxon:deep-update: selected item is an array with no pedigree");
-                } else {
-                    throw new XPathException(
-                            "saxon:deep-update: selected value " + Err.depict(selected) +
-                                    " is an instance of "
-                                    + SequenceTool.getItemType(selected, c2.getConfiguration().getTypeHierarchy())
-                                    + " (expected a map/array with pedigree)");
-                }
-            }
-            SequenceIterator actionIter = getActionExpression().iterate(c3);
-            GroundedValue actionVal = SequenceTool.toGroundedValue(actionIter);
-            Pedigree pedigree = ((PedigreeValue)selected).getPedigree();
-            PedigreeValue parent = pedigree.getContainer();
-            GroundedValue val = actionVal;
-            while (parent != null) {
-                Item latestParent = (Item) parent;
-                // If two updates affect the same parent/ancestor at some level in the
-                // tree, then the updates need to be cumulative, so we keep track of a mapping
-                // from items in the original tree to the items that replace them in the new tree
-                if (substitutions.containsKey((Item)parent)) {
-                    latestParent = substitutions.get((Item)parent);
-                }
-                if (latestParent instanceof ArrayItem) {
-                    val = ((ArrayItem) latestParent).put(pedigree.getIndex(), val);
-                } else if (latestParent instanceof MapItem) {
-                    val = ((MapItem) latestParent).addEntry(pedigree.getKey(), val);
-                } else {
-                    assert false;
-                }
-                substitutions.put((Item) parent, (Item) val);
-                substitutions.put(latestParent, (Item) val);
-                pedigree = parent.getPedigree();
-                parent = pedigree.getContainer();
-            }
-            root = (Item)val;
-        }
-        return root;
-    }
 
 
     /**
@@ -210,6 +167,83 @@ public class DeepUpdate extends Instruction {
         out.setChildRole("action");
         getActionExpression().export(out);
         out.endElement();
+    }
+
+    public Elaborator getElaborator() {
+        return new DeepUpdateElaborator();
+    }
+
+    private static class DeepUpdateElaborator extends PushElaborator {
+
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            DeepUpdate expr = (DeepUpdate) getExpression();
+            PullEvaluator rootPuller = expr.getRootExpression().makeElaborator().elaborateForPull();
+            PullEvaluator selectPuller = expr.getSelectExpression().makeElaborator().elaborateForPull();
+            PullEvaluator actionPuller = expr.getActionExpression().makeElaborator().elaborateForPull();
+            return (output, context) -> {
+                Item root;
+                SequenceIterator rootIterator = rootPuller.iterate(context);
+                SequenceIterator mappedRootIterator =
+                        MappingIterator.map(rootIterator,
+                                            item -> SingletonIterator.makeIterator(makeRootWithPedigree(item)));
+
+                XPathContext c2 = context.newMinorContext();
+                FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
+                while ((root = trackingIterator.next()) != null) {
+                    Item root1 = root;
+                    IdentityHashMap<Item, Item> substitutions = new IdentityHashMap<>();
+                    XPathContext c3 = c2.newMinorContext();
+                    FocusIterator selectIterator = c3.trackFocus(selectPuller.iterate(c2));
+                    Item selected;
+                    while ((selected = selectIterator.next()) != null) {
+                        if (!(selected instanceof PedigreeValue)) {
+                            if (selected instanceof MapItem) {
+                                throw new XPathException("saxon:deep-update: selected item is a map with no pedigree");
+                            } else if (selected instanceof ArrayItem) {
+                                throw new XPathException("saxon:deep-update: selected item is an array with no pedigree");
+                            } else {
+                                throw new XPathException(
+                                        "saxon:deep-update: selected value " + Err.depict(selected) +
+                                                " is an instance of "
+                                                + SequenceTool.getItemType(selected, c2.getConfiguration().getTypeHierarchy())
+                                                + " (expected a map/array with pedigree)");
+                            }
+                        }
+                        SequenceIterator actionIter = actionPuller.iterate(c3);
+                        GroundedValue actionVal = SequenceTool.toGroundedValue(actionIter);
+                        Pedigree pedigree = ((PedigreeValue) selected).getPedigree();
+                        PedigreeValue parent = pedigree.getContainer();
+                        GroundedValue val = actionVal;
+                        while (parent != null) {
+                            Item latestParent = (Item) parent;
+                            // If two updates affect the same parent/ancestor at some level in the
+                            // tree, then the updates need to be cumulative, so we keep track of a mapping
+                            // from items in the original tree to the items that replace them in the new tree
+                            if (substitutions.containsKey((Item) parent)) {
+                                latestParent = substitutions.get((Item) parent);
+                            }
+                            if (latestParent instanceof ArrayItem) {
+                                val = ((ArrayItem) latestParent).put(pedigree.getIndex(), val);
+                            } else if (latestParent instanceof MapItem) {
+                                val = ((MapItem) latestParent).addEntry(pedigree.getKey(), val);
+                            } else {
+                                assert false;
+                            }
+                            substitutions.put((Item) parent, (Item) val);
+                            substitutions.put(latestParent, (Item) val);
+                            pedigree = parent.getPedigree();
+                            parent = pedigree.getContainer();
+                        }
+                        root1 = (Item) val;
+                    }
+                    Item replacedRoot = root1;
+                    output.append(replacedRoot);
+                }
+                return null;
+            };
+        }
     }
 
 }

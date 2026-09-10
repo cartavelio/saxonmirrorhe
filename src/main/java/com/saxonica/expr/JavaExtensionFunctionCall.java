@@ -3,6 +3,10 @@ package com.saxonica.expr;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.IntegratedFunctionCall;
 import net.sf.saxon.lib.Feature;
@@ -471,12 +475,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        Sequence[] argValues = SequenceTool.makeSequenceArray(getArity());
-        for (int i = 0; i < argValues.length; i++) {
-            Expression argument = getArg(i);
-            argValues[i] = ExpressionTool.lazyEvaluator(argument, false).evaluate(argument, context);
-        }
-        return call(context, argValues).iterate();
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**
@@ -999,6 +998,55 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         out.endElement();
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new JavaExtensionFunctionCallElaborator();
+    }
+
+    private static class JavaExtensionFunctionCallElaborator extends UserFunctionCall.UserFunctionCallAbstractElaborator {
+
+        /**
+         * Allocate evaluation functions for each argument (in field {@code argumentEvaluators})
+         *
+         * @param expr             the function call
+         * @param allowRepeatedUse true if the value of the argument must be supplied
+         *                         to the function in a way that allows repeated use. This
+         *                         will be true for user-written functions, false for system functions,
+         *                         where the implementation is arranged to only use the value once.
+         */
+        public void allocateArgumentEvaluators(FunctionCall expr, boolean allowRepeatedUse) {
+            int arity = expr.getArity();
+            argumentEvaluators = new SequenceEvaluator[arity];
+            for (int i = 0; i < arity; i++) {
+                argumentEvaluators[i] = expr.getArg(i).makeElaborator().eagerly();
+            }
+        }
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            JavaExtensionFunctionCall expr = (JavaExtensionFunctionCall)getExpression();
+            allocateArgumentEvaluators(expr, true);
+            return context -> {
+                Sequence[] actualArgs = evaluateArguments(context);
+                return expr.call(context, actualArgs).iterate();
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            JavaExtensionFunctionCall expr = (JavaExtensionFunctionCall) getExpression();
+            allocateArgumentEvaluators(expr, true);
+            return context -> {
+                Sequence[] actualArgs = evaluateArguments(context);
+                return expr.call(context, actualArgs).head();
+            };
+        }
+    }
 }
 
 // Copyright (c) 2009-2022 Saxonica Limited

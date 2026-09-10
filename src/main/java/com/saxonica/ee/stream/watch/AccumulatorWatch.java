@@ -15,7 +15,6 @@ import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRule;
 import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.expr.parser.Evaluator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.AccumulatorFn;
@@ -204,7 +203,7 @@ public class AccumulatorWatch extends PatternWatch {
         c2.setCurrentComponent(accumulator.getDeclaringComponent());
         c2.setTemporaryOutputState(StandardNames.XSL_ACCUMULATOR_RULE);
         try {
-            return Evaluator.EagerSequence.INSTANCE.evaluate(delta, c2);
+            return ExpressionTool.eagerEvaluate(delta, c2);
         } catch (XPathException e) {
             // Save the error until the accumulator value is read
             return new ObjectValue<>(e);
