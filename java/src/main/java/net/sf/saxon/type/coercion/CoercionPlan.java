@@ -34,44 +34,48 @@ public abstract class CoercionPlan {
 
     public final SequenceIterator coerceSequence(SequenceIterator value, SequenceType requiredType, CoercionRequest request)
             throws XPathException {
-        int cardinality = requiredType.getCardinality();
-        boolean singleton = false;
-        if (value instanceof LastPositionFinder && ((LastPositionFinder) value).supportsGetLength()) {
-            int length = ((LastPositionFinder) value).getLength();
-            if (length == 0) {
-                if (Cardinality.allowsZero(cardinality)) {
-                    return value;
-                } else {
-                    // force an error
-                    return new CardinalityCheckingIterator(
-                            value, cardinality, request.roleSupplier, request.locator);
+        try {
+            int cardinality = requiredType.getCardinality();
+            boolean singleton = false;
+            if (value instanceof LastPositionFinder && ((LastPositionFinder) value).supportsGetLength()) {
+                int length = ((LastPositionFinder) value).getLength();
+                if (length == 0) {
+                    if (Cardinality.allowsZero(cardinality)) {
+                        return value;
+                    } else {
+                        // force an error
+                        return new CardinalityCheckingIterator(
+                                value, cardinality, request.roleSupplier, request.locator);
+                    }
+                } else if (length == 1) {
+                    singleton = true;
                 }
-            } else if (length == 1) {
-                singleton = true;
             }
-        }
-        // If the required type is empty-sequence(), check that the sequence is actually empty
-        if (cardinality == StaticProperty.ALLOWS_ZERO) {
-            return new CardinalityCheckingIterator(
-                    value, StaticProperty.ALLOWS_ZERO, request.roleSupplier, request.locator);
-        }
-        // Convert the items in the sequence (lazily)
-        SequenceIterator uncheckedResult;
-        if (singleton) {
-            Item input = value.next();
-            if (input instanceof Parcel) {
-                return coerceSequence(((Parcel)input).getValue().iterate(), requiredType, request);
+            // If the required type is empty-sequence(), check that the sequence is actually empty
+            if (cardinality == StaticProperty.ALLOWS_ZERO) {
+                return new CardinalityCheckingIterator(
+                        value, StaticProperty.ALLOWS_ZERO, request.roleSupplier, request.locator);
             }
-            uncheckedResult = coerceItem(input, requiredType.getPrimaryType(), request).iterate();
-        } else {
-            uncheckedResult = makeMappingIterator(value, requiredType.getPrimaryType(), request);
-        }
-        // If necessary, check the cardinality of the result (lazily)
-        if (cardinality != StaticProperty.ALLOWS_ZERO_OR_MORE) {
-            return new CardinalityCheckingIterator(
-                    uncheckedResult, cardinality, request.roleSupplier, request.locator);
-        } else {
-            return uncheckedResult;
+            // Convert the items in the sequence (lazily)
+            SequenceIterator uncheckedResult;
+            if (singleton) {
+                Item input = value.next();
+                if (input instanceof Parcel) {
+                    return coerceSequence(((Parcel)input).getValue().iterate(), requiredType, request);
+                }
+                uncheckedResult = coerceItem(input, requiredType.getPrimaryType(), request).iterate();
+            } else {
+                uncheckedResult = makeMappingIterator(value, requiredType.getPrimaryType(), request);
+            }
+            // If necessary, check the cardinality of the result (lazily)
+            if (cardinality != StaticProperty.ALLOWS_ZERO_OR_MORE) {
+                return new CardinalityCheckingIterator(
+                        uncheckedResult, cardinality, request.roleSupplier, request.locator);
+            } else {
+                return uncheckedResult;
+            }
+        } catch (XPathException e) {
+            throw e.maybeWithErrorCode("XPTY0004").maybeWithLocation(request.locator);
         }
     }
 

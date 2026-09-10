@@ -139,7 +139,7 @@ public class EnumerationUnionType extends LocalUnionType {
      */
     @Override
     public boolean matches(Item item, TypeHierarchy th) {
-        if (item instanceof StringValue) {
+        if (item instanceof StringValue && BuiltInAtomicType.STRING.matches(item, th)) {
             return dictionary.containsKey(item.getUnicodeStringValue());
         } else {
             return false;
@@ -188,6 +188,17 @@ public class EnumerationUnionType extends LocalUnionType {
         }
         sb.setCharAt(sb.length()-1, ')');
         return sb.toString();
+    }
+
+    /**
+     * Produce a string representation of the type name. If the type is anonymous, an internally-allocated
+     * type name will be returned.
+     *
+     * @return the name of the atomic type in the form Q{uri}local
+     */
+
+    public String toString() {
+        return getDescription();
     }
 }
 
