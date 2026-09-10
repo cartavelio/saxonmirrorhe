@@ -210,12 +210,12 @@
 
       <p>SaxonC-PE and SaxonC-EE are commercial products, and require a license key. By
          downloading the software, you agree to the terms and conditions published at <a
-            target="_blank" href="https://saxonica.com/license/eval-license.pdf"
-            >https://saxonica.com/license/eval-license.pdf</a> (for use with a free <a
-            target="_blank" href="https://saxonica.com/download/download.xml">evaluation
-         license</a>) or <a target="_blank" href="https://saxonica.com/license/paid-license.pdf"
-            >https://saxonica.com/license/paid-license.pdf</a> (in the case of paid-up licenses,
-         purchased from our <a target="_blank" href="https://saxonica.com/shop/shop.html">online
+            target="_blank" href="https://www.saxonica.com/license/eval-license.pdf"
+            >https://www.saxonica.com/license/eval-license.pdf</a> (for use with a free <a
+               target="_blank" href="https://www.saxonica.com/download/download.xml">evaluation
+               license</a>) or <a target="_blank" href="https://www.saxonica.com/license/paid-license.pdf"
+                  >https://www.saxonica.com/license/paid-license.pdf</a> (in the case of paid-up licenses,
+         purchased from our <a target="_blank" href="https://www.saxonica.com/shop/shop.html">online
             store</a>).</p>
 
       <h3>Location of the Saxon license file</h3>
@@ -243,7 +243,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
          this is the difficulty of contacting all past contributors to gain their assent).</p>
 
       <p>Some components are licensed under the Apache version 2.0 license or under BSD-style
-         licenses. For more information see the <a href="https://saxonica.com/license/license.xml"
+         licenses. For more information see the <a href="https://www.saxonica.com/license/license.xml"
             target="_blank">Licenses</a> section on the main Saxonica website.</p>
 
       <p>Although SaxonC technically adheres to the definition of open source software, there are
@@ -310,22 +310,22 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <kbd>./validate [options] source.xml</kbd>
 
       <p>The same command line options as in the Java products are available in the SaxonC command
-         line tool. Please see the relevant sections of the Saxon 9.9 documentation for details:</p>
+         line tool. Please see the relevant sections of the Saxon 11 documentation for details:</p>
 
       <ul>
          <li>
             <a target="_blank"
-               href="https://saxonica.com/documentation/index.html#!using-xsl/commandline">Running
+               href="https://www.saxonica.com/documentation11/index.html#!using-xsl/commandline">Running
                XSLT from the Command Line</a>
          </li>
          <li>
             <a target="_blank"
-               href="https://saxonica.com/documentation/index.html#!using-xquery/commandline"
+               href="https://www.saxonica.com/documentation11/index.html#!using-xquery/commandline"
                >Running XQuery from the Command Line</a>
          </li>
          <li>
             <a target="_blank"
-               href="https://saxonica.com/documentation/index.html#!schema-processing/commandline"
+               href="https://www.saxonica.com/documentation11/index.html#!schema-processing/commandline"
                >Running Validation from the Command Line</a>
          </li>
       </ul>
@@ -353,7 +353,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <h2 class="subtitle">Installing on Linux and Mac OS</h2>
 
       <!--<p>(Alternatively, you may like to use the installation script <a 
-         href="https://saxonica.com/saxon-c/download/install.sh">install.sh</a> supplied by
+         href="https://www.saxonica.com/saxon-c/download/install.sh">install.sh</a> supplied by
          Petr Zak - written for a 64-bit machine, but can be changed for a 32-bit machine.)</p>-->
 
       <h3>Building with PHP7</h3>
