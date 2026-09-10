@@ -6320,7 +6320,7 @@
       <name namespace="http://saxon.sf.net/">function-annotations</name>
       <description>
         <p>Returns the XQuery function annotations defined on a function item.</p>
-      </description>inary
+      </description>
       <signatures>
         <proto return-type="map(*)*">
           <arg name="fn" type="function(*)" desc="The function item in question"/>
