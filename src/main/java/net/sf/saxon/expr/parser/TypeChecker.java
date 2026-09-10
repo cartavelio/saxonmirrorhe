@@ -103,7 +103,8 @@ public class TypeChecker {
             if (Cardinality.subsumes(reqCardinality, supplied.getCardinality())) {
                 // The cardinality is OK
                 return supplied;
-            } else {
+            }
+            else {
                 // return a CardinalityChecker
                 return CardinalityChecker.makeCardinalityChecker(supplied, reqCardinality, roleSupplier);
             }

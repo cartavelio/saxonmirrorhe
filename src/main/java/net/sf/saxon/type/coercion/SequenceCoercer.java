@@ -109,10 +109,11 @@ public final class SequenceCoercer extends UnaryExpression {
             if (th.isSubType(supplied.getItemType(), reqItemType)) {
                 // no item type check needed
                 return supplied;
-            } else if (th.isSubType(reqItemType, supplied.getItemType())) {
-                // need item type check only (note: this rewrite needed for streaming use cases)
-                return new ItemChecker(getBaseExpression(), reqItemType, roleSupplier);
             }
+//            else if (th.isSubType(reqItemType, supplied.getItemType())) {
+//                // need item type check only (note: this rewrite needed for streaming use cases)
+//                return new ItemChecker(getBaseExpression(), reqItemType, roleSupplier);
+//            }
         }
 
         return this;
