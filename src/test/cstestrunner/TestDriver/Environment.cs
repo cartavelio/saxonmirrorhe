@@ -820,6 +820,9 @@ namespace TestDriver {
                     catch (FileNotFoundException) {
                         return null;
                     }
+                    catch (DirectoryNotFoundException) {
+                        return null;
+                    }
                 }
             }
             else {
