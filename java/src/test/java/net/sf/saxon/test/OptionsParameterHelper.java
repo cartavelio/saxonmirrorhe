@@ -25,7 +25,7 @@ public class OptionsParameterHelper {
      */
     public static ProcessedOptions defaultOptionParameters(OptionsParameter params) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
-        return params.processSuppliedOptions(EmptyMap.INSTANCE_40, ctxt, 40);
+        return params.processSuppliedOptions(EmptyMap.INSTANCE_40, ctxt);
     }
 
     /**
@@ -37,7 +37,7 @@ public class OptionsParameterHelper {
      */
     public static ProcessedOptions parsedOptionParameters(OptionsParameter params, Map<String, GroundedValue> options) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
-        return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt, 40);
+        return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt);
     }
 
     /**
@@ -49,7 +49,7 @@ public class OptionsParameterHelper {
      */
     public static ProcessedOptions parsedOptionParameters(OptionsParameter params, MapItem options) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
-        return params.processSuppliedOptions(options, ctxt, 40);
+        return params.processSuppliedOptions(options, ctxt);
     }
 
     /**
@@ -61,7 +61,7 @@ public class OptionsParameterHelper {
      * @throws XPathException
      */
     public static ProcessedOptions parsedOptionParameters(OptionsParameter params, Map<String, GroundedValue> options, XPathContext ctxt) throws XPathException {
-        return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt, 40);
+        return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt);
     }
 
     /**
@@ -73,7 +73,7 @@ public class OptionsParameterHelper {
      * @throws XPathException
      */
     public static ProcessedOptions parsedOptionParameters(OptionsParameter params, MapItem options, XPathContext ctxt) throws XPathException {
-        return params.processSuppliedOptions(options, ctxt, 40);
+        return params.processSuppliedOptions(options, ctxt);
     }
 
     public static ProcessedOptions parsedOptionParameters(OptionsParameter params, DslLambda<TestMapBuilder> definition) throws XPathException {
