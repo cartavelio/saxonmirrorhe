@@ -1255,3 +1255,79 @@ task saxonc_build_wheels(
     }
   }
 }
+
+// ============================================================
+// Tasks for running the Python test suites
+
+task pyenvEnvironment(
+  type: Exec,
+  dependsOn: ['record_branch'],
+  description: "Determine which pyenv virtualenv is in use"
+) {
+  def recordVersion = new ByteArrayOutputStream();
+  commandLine "pyenv", "version"
+  standardOutput = recordVersion
+  doLast {
+    BufferedReader branch = new BufferedReader(new FileReader(new File("${project.buildDir}/built-branch")))
+    def currentBranch = branch.readLine()
+    def currentEnv = recordVersion.toString("utf-8").split('\s+')[0]
+    if (currentEnv != "saxon-${currentBranch}") {
+      throw new GradleException("Wrong virtual environment configured: ${currentEnv} for ${currentBranch}")
+    }
+  }
+}
+
+["ee", "pe", "he"].each { edition ->
+
+  task "pyenv_setup_saxon_${edition}c"(
+    dependsOn: ["pyenvEnvironment", "saxon_${edition}c_stage_wheel"]
+  ) {
+    inputs.files fileTree(dir: "${buildDir}/wheels/${systemOsName}/${edition}c_pypi",
+                          exclude: ["build", "dist", "saxonc${edition}.egg-info"])
+    outputs.files fileTree(dir: "${buildDir}/wheels/${systemOsName}/${edition}c_pypi/dist")
+
+    doLast {
+      exec {
+        workingDir "${buildDir}/wheels/${systemOsName}/${edition}c_pypi"
+        commandLine "python3", "-m", "pip", "install", "-r", "requirements.txt"
+      }
+    }
+    doLast {
+      exec {
+        workingDir "${buildDir}/wheels/${systemOsName}/${edition}c_pypi"
+        commandLine "python3", "setup.py", "bdist_wheel"
+      }
+    }
+  }
+
+  task "pyenv_install_saxon_${edition}c"(
+    dependsOn: ["pyenv_setup_saxon_${edition}c"]
+  ) {
+    inputs.files fileTree(dir: "${buildDir}/wheels/${systemOsName}/${edition}c_pypi/dist")
+    outputs.file "${buildDir}/wheels/${edition}c_wheel.txt"
+    def wheel
+
+    doLast {
+      wheel = fileTree("${buildDir}/wheels/${systemOsName}/${edition}c_pypi/dist/").getSingleFile().toString()
+    }
+
+    doLast {
+      exec {
+        commandLine "python3", "-m", "pip", "uninstall", "-y", "saxonc${edition}"
+      }
+    }
+
+    doLast {
+      exec {
+        workingDir "${buildDir}/wheels/${systemOsName}/${edition}c_pypi"
+        commandLine "python3", "-m", "pip", "install", "${wheel}"
+      }
+    }
+
+    doLast {
+      def output = new FileWriter(new File("${buildDir}/wheels/${edition}c_wheel.txt"))
+      output.write("${wheel}")
+      output.close()
+    }    
+  }
+}
