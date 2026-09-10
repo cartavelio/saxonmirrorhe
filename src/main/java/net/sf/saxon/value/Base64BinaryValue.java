@@ -11,7 +11,6 @@ import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
@@ -51,25 +50,25 @@ public class Base64BinaryValue extends BinaryValue {
      * Constructor: create a base64Binary value from a given array of bytes
      *
      * @param value array of bytes holding the octet sequence
-     * @param metadata the specific type (must be a subtype of BASE64_BINARY)
+     * @param typeLabel the specific type (must be a subtype of BASE64_BINARY)
      */
 
-    public Base64BinaryValue(byte[] value, AtomicMetadata metadata) {
-        super(metadata, value);
+    public Base64BinaryValue(byte[] value, AtomicType typeLabel) {
+        super(typeLabel, value);
     }
 
     /**
      * Create a copy of this atomic value (usually so that the type label can be changed).
      * The type label of the copy will be reset to the primitive type.
      *
-     * @param metadata the type label to be attached to the value, a subtype of xs:base64Binary
+     * @param typeLabel the type label to be attached to the value, a subtype of xs:base64Binary
      * @return the copied value
      */
 
     /*@NotNull*/
     @Override
-    public AtomicValue withMetadata(AtomicMetadata metadata) {
-        return new Base64BinaryValue(binaryValue, metadata);
+    public AtomicValue copyAsSubType(AtomicType typeLabel) {
+        return new Base64BinaryValue(binaryValue, typeLabel);
     }
 
 

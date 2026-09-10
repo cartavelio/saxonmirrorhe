@@ -15,7 +15,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicMetadata;
+import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
@@ -61,7 +61,7 @@ public abstract class IntegerValue extends DecimalValue {
             StandardNames.XS_UNSIGNED_SHORT, 0, 65535,
             StandardNames.XS_UNSIGNED_BYTE, 0, 255};
 
-    public IntegerValue(AtomicMetadata typeLabel) {
+    public IntegerValue(AtomicType typeLabel) {
         super(typeLabel);
     }
 

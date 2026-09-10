@@ -13,7 +13,7 @@ import net.sf.saxon.expr.sort.DoubleSortComparer;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.AtomicMetadata;
+import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationException;
 
@@ -55,7 +55,7 @@ public final class DoubleValue extends NumericValue {
      *              value must conform to this type. The method does not check these conditions.
      */
 
-    public DoubleValue(double value, AtomicMetadata typeLabel) {
+    public DoubleValue(double value, AtomicType typeLabel) {
         super(typeLabel);
         this.value = value;
     }
@@ -74,14 +74,14 @@ public final class DoubleValue extends NumericValue {
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param metadata the type label of the new copy. The caller is responsible for checking that
+     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      */
 
     /*@NotNull*/
     @Override
-    public AtomicValue withMetadata(AtomicMetadata metadata) {
-        return new DoubleValue(value, metadata);
+    public AtomicValue copyAsSubType(AtomicType typeLabel) {
+        return new DoubleValue(value, typeLabel);
     }
 
     /**

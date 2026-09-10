@@ -58,14 +58,14 @@ public final class DayTimeDurationValue extends DurationValue
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param metadata the type label of the new copy. The caller is responsible for checking that
+     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      */
 
     /*@NotNull*/
     @Override
-    public AtomicValue withMetadata(AtomicMetadata metadata) {
-        return new DayTimeDurationValue(_seconds, metadata.getType());
+    public AtomicValue copyAsSubType(AtomicType typeLabel) {
+        return new DayTimeDurationValue(_seconds, typeLabel);
     }
 
     /**

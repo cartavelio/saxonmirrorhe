@@ -13,7 +13,10 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.ValidationFailure;
 
 /**
  * A boolean XPath value
@@ -63,7 +66,7 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
      * @param typeLabel the type label, xs:boolean or a subtype
      */
 
-    public BooleanValue(boolean value, AtomicMetadata typeLabel) {
+    public BooleanValue(boolean value, AtomicType typeLabel) {
         super(typeLabel);
         this.value = value;
     }
@@ -72,12 +75,12 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
      * Create a copy of this atomic value (usually so that the type label can be changed).
      * The type label of the copy will be reset to the primitive type.
      *
-     * @param metadata the atomic type label to be added to the copied value
+     * @param typeLabel the atomic type label to be added to the copied value
      */
 
     @Override
-    public AtomicValue withMetadata(AtomicMetadata metadata) {
-        return new BooleanValue(value, metadata);
+    public AtomicValue copyAsSubType(AtomicType typeLabel) {
+        return new BooleanValue(value, typeLabel);
     }
 
     /**

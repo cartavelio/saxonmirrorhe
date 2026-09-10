@@ -16,7 +16,10 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.ValidationException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -300,15 +303,15 @@ public class DateValue extends GDateValue implements XPathComparable {
     /**
      * Make a copy of this date value, but with a new type label
      *
-     * @param metadata the new type label: must be a subtype of xs:date
+     * @param typeLabel the new type label: must be a subtype of xs:date
      * @return the new xs:date value
      */
 
     /*@NotNull*/
     @Override
-    public AtomicValue withMetadata(AtomicMetadata metadata) {
+    public AtomicValue copyAsSubType(AtomicType typeLabel) {
         MutableGDateValue m = makeMutableCopy();
-        m.typeLabel = metadata.getType();
+        m.typeLabel = typeLabel;
         return new DateValue(m);
     }
 

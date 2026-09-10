@@ -16,7 +16,10 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.ValidationFailure;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
@@ -94,7 +97,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
         this.tzMinutes = NO_TIMEZONE;
     }
 
-    public CalendarValue(AtomicMetadata typeLabel, int tzMinutes) {
+    public CalendarValue(AtomicType typeLabel, int tzMinutes) {
         super(typeLabel);
         this.tzMinutes = tzMinutes;
     }
@@ -270,7 +273,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
         if (implicitTimezone == MISSING_TIMEZONE) {
             throw new NoDynamicContextException("Unknown implicit timezone");
         }
-        return adjustTimezone(implicitTimezone);
+        return hasTimezone() ? this : adjustTimezone(implicitTimezone);
     }
 
     /**

@@ -9,7 +9,6 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.str.*;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
@@ -58,7 +57,7 @@ public final class AnyURIValue extends StringValue {
      *              to the definition of this type.
      */
 
-    public AnyURIValue(UnicodeString value, AtomicMetadata type) {
+    public AnyURIValue(UnicodeString value, AtomicType type) {
         super(value == null ? "" : Whitespace.collapseWhitespace(value).toString(), type);
     }
 
@@ -66,14 +65,14 @@ public final class AnyURIValue extends StringValue {
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param metadata the type label of the new copy. The caller is responsible for checking that
+     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      */
 
     /*@NotNull*/
     @Override
-    public AnyURIValue withMetadata(AtomicMetadata metadata) {
-        return new AnyURIValue(this.getUnicodeStringValue(), metadata);
+    public AnyURIValue copyAsSubType(AtomicType typeLabel) {
+        return new AnyURIValue(this.getUnicodeStringValue(), typeLabel);
     }
 
     public StringValue convertToString() {

@@ -22,7 +22,10 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.ValidationFailure;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -76,7 +79,7 @@ public final class DateTimeValue extends CalendarValue
     private final boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
 
     public DateTimeValue(int year, byte month, byte day, byte hour, byte minute, byte second,
-                         int nanosecond, boolean hasNoYearZero, int tzMinutes, AtomicMetadata typeLabel) {
+                         int nanosecond, boolean hasNoYearZero, int tzMinutes, AtomicType typeLabel) {
         super(typeLabel, tzMinutes);
         this.year = year;
         this.month = month;
@@ -99,7 +102,7 @@ public final class DateTimeValue extends CalendarValue
         public int nanosecond; // the number of nanoseconds within the current second
         public boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
         public int tzMinutes = NO_TIMEZONE;
-        public AtomicMetadata typeLabel = BuiltInAtomicType.DATE_TIME;
+        public AtomicType typeLabel = BuiltInAtomicType.DATE_TIME;
     }
 
     private MutableDateTimeValue makeMutableCopy() {
@@ -113,7 +116,7 @@ public final class DateTimeValue extends CalendarValue
         m.nanosecond = nanosecond;
         m.hasNoYearZero = hasNoYearZero;
         m.tzMinutes = getTimezoneInMinutes();
-        m.typeLabel = getItemType();
+        m.typeLabel = typeLabel;
         return m;
     }
 
@@ -1132,15 +1135,15 @@ public final class DateTimeValue extends CalendarValue
     /**
      * Make a copy of this date, time, or dateTime value, but with a new type label
      *
-     * @param metadata the type label to be attached to the new copy. It is the caller's responsibility
+     * @param typeLabel the type label to be attached to the new copy. It is the caller's responsibility
      *                  to ensure that the value actually conforms to the rules for this type.
      */
 
     /*@NotNull*/
     @Override
-    public DateTimeValue withMetadata(AtomicMetadata metadata) {
+    public DateTimeValue copyAsSubType(AtomicType typeLabel) {
         MutableDateTimeValue v = makeMutableCopy();
-        v.typeLabel = metadata;
+        v.typeLabel = typeLabel;
         return fromMutableCopy(v);
     }
 

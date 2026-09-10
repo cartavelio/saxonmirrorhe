@@ -10,7 +10,10 @@ package net.sf.saxon.value;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.ValidationFailure;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,15 +57,15 @@ public class GYearMonthValue extends GDateValue {
     /**
      * Make a copy of this date, time, or dateTime value
      *
-     * @param metadata the type label of the new copy. The caller is responsible for checking that
+     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      * @return the copied value
      */
 
     @Override
-    public AtomicValue withMetadata(AtomicMetadata metadata) {
+    public AtomicValue copyAsSubType(AtomicType typeLabel) {
         MutableGDateValue m = makeMutableCopy();
-        m.typeLabel = metadata.getType();
+        m.typeLabel = typeLabel;
         return new GYearMonthValue(m);
     }
 

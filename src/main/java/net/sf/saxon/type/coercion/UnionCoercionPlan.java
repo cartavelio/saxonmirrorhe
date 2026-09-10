@@ -80,7 +80,7 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
                     AtomicType prim = memberType.getPrimitiveItemType();
                     if (prim.matches(item, th)
                             && ((AtomicType) memberType).validate((AtomicValue) item, null, rules) == null) {
-                        return ((AtomicValue) item).withMetadata((AtomicType) memberType);
+                        return ((AtomicValue) item).copyAsSubType((AtomicType) memberType);
                     }
                 }
             }

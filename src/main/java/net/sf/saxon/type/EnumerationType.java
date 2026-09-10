@@ -710,11 +710,6 @@ public class EnumerationType implements AtomicType {
         return 0;
     }
 
-    @Override
-    public AtomicType getType() {
-        return this;
-    }
-
     //#ifdefined SCHEMA
     /**
      * Get the schema component in the form of a function item. This allows schema information

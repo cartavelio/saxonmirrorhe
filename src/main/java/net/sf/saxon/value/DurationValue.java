@@ -18,7 +18,10 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.ValidationFailure;
 
 import java.math.BigDecimal;
 import java.util.StringTokenizer;
@@ -261,14 +264,14 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param metadata the type label of the new copy. The caller is responsible for checking that
+     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type. This method can't be used to create
      *                  an instance of xs:dayTimeDuration or xs:yearMonthDuration.
      */
 
     @Override
-    public AtomicValue withMetadata(AtomicMetadata metadata) {
-        return new DurationValue(_months, _seconds, metadata.getType());
+    public AtomicValue copyAsSubType(AtomicType typeLabel) {
+        return new DurationValue(_months, _seconds, typeLabel);
     }
 
     /**
@@ -572,7 +575,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public DurationValue negate() {
-        return new DurationValue(-_months, _seconds.negate(), getItemType());
+        return new DurationValue(-_months, _seconds.negate(), typeLabel);
     }
 
     /**

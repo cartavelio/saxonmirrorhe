@@ -11,7 +11,7 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.BinaryMatchKey;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.type.AtomicMetadata;
+import net.sf.saxon.type.AtomicType;
 
 import java.util.Arrays;
 
@@ -23,7 +23,7 @@ public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey,
 
     protected final byte[] binaryValue;
 
-    protected BinaryValue(AtomicMetadata type, byte[] binaryValue) {
+    protected BinaryValue(AtomicType type, byte[] binaryValue) {
         super(type);
         this.binaryValue = binaryValue;
     }

@@ -15,7 +15,6 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
@@ -31,11 +30,11 @@ public class QNameValue extends QualifiedNameValue {
      * Constructor
      *
      * @param qName     the name as a StructuredQName
-     * @param metadata identifies a subtype of xs:QName or other metadata
+     * @param typeLabel idenfies a subtype of xs:QName
      */
 
-    public QNameValue(/*@Nullable*/ StructuredQName qName, /*@Nullable*/ AtomicMetadata metadata) {
-        super(qName, metadata);
+    public QNameValue(/*@Nullable*/ StructuredQName qName, /*@Nullable*/ AtomicType typeLabel) {
+        super(qName, typeLabel);
     }
 
 
@@ -106,14 +105,14 @@ public class QNameValue extends QualifiedNameValue {
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param metadata the type label of the new copy. The caller is responsible for checking that
+     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      */
 
     /*@NotNull*/
     @Override
-    public AtomicValue withMetadata(AtomicMetadata metadata) {
-        return new QNameValue(qName, metadata);
+    public AtomicValue copyAsSubType(AtomicType typeLabel) {
+        return new QNameValue(qName, typeLabel);
     }
 
     /**

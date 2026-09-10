@@ -75,7 +75,7 @@ public final class BigDecimalValue extends DecimalValue {
      * @param typeLabel the type label, which must be a subtype of DECIMAL
      */
 
-    public BigDecimalValue(BigDecimal value, AtomicMetadata typeLabel) {
+    public BigDecimalValue(BigDecimal value, AtomicType typeLabel) {
         super(typeLabel);
         this.value = value.stripTrailingZeros();
     }
@@ -255,16 +255,16 @@ public final class BigDecimalValue extends DecimalValue {
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param metadata the type label of the new copy. The caller is responsible for checking that
+     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      */
 
     @Override
-    public AtomicValue withMetadata(AtomicMetadata metadata) {
-        if (metadata.getType().getPrimitiveItemType() == BuiltInAtomicType.INTEGER) {
-            return IntegerValue.makeIntegerValue(value.toBigInteger()).withMetadata(metadata);
+    public AtomicValue copyAsSubType(AtomicType typeLabel) {
+        if (typeLabel.getPrimitiveItemType() == BuiltInAtomicType.INTEGER) {
+            return IntegerValue.makeIntegerValue(value.toBigInteger()).copyAsSubType(typeLabel);
         } else {
-            return new BigDecimalValue(value, metadata);
+            return new BigDecimalValue(value, typeLabel);
         }
     }
 

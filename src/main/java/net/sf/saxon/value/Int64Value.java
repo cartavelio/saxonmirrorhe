@@ -12,7 +12,6 @@ import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationFailure;
@@ -99,7 +98,7 @@ public final class Int64Value extends IntegerValue {
      * @param typeLabel the type annotation (trusted to be correct)
      */
 
-    public Int64Value(long value, AtomicMetadata typeLabel) {
+    public Int64Value(long value, AtomicType typeLabel) {
         super(typeLabel);
         this.value = value;
     }
@@ -190,17 +189,17 @@ public final class Int64Value extends IntegerValue {
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param metadata the type label of the new copy. The caller is responsible for checking that
+     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      */
 
     /*@NotNull*/
     @Override
-    public AtomicValue withMetadata(/*@NotNull*/ AtomicMetadata metadata) {
-        if (metadata.getType().getPrimitiveType() == StandardNames.XS_INTEGER) {
-            return new Int64Value(value, metadata);
+    public AtomicValue copyAsSubType(/*@NotNull*/ AtomicType typeLabel) {
+        if (typeLabel.getPrimitiveType() == StandardNames.XS_INTEGER) {
+            return new Int64Value(value, typeLabel);
         } else {
-            return new BigDecimalValue(value).withMetadata(metadata);
+            return new BigDecimalValue(value).copyAsSubType(typeLabel);
         }
     }
 

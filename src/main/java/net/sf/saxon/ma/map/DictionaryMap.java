@@ -9,7 +9,6 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
@@ -26,7 +25,7 @@ import java.util.*;
  * for example when parsing JSON input, or when creating a fixed map to use in an options argument.
  */
 
-public class DictionaryMap extends StringMap {
+public class DictionaryMap extends MapItem {
 
     private final Map<String, GroundedValue> hashMap;
 
@@ -79,18 +78,8 @@ public class DictionaryMap extends StringMap {
      * @param key the key being tested
      * @return true if the key is present
      */
-    public boolean contains(String key) {
+    public boolean containsStringKey(String key) {
         return hashMap.containsKey(key);
-    }
-
-    /**
-     * Ask whether a given string is present as a key in the map
-     *
-     * @param key the key being tested
-     * @return true if the key is present
-     */
-    public boolean contains(UnicodeString key) {
-        return hashMap.containsKey(key.toString());
     }
 
     /**
@@ -106,26 +95,6 @@ public class DictionaryMap extends StringMap {
         } else {
             return null;
         }
-    }
-
-    /**
-     * Get an entry from the map, supplying a Java String as the key
-     * @param key the key
-     * @return the relevant entry if present, or null if absent.
-     */
-    public GroundedValue get(String key) {
-        return hashMap.get(key);
-    }
-
-    /**
-     * Get an entry from the map, supplying a {@link UnicodeString} as the key
-     *
-     * @param key the key
-     * @return the relevant entry if present, or null if absent.
-     */
-    @Override
-    public GroundedValue get(UnicodeString key) {
-        return hashMap.get(key.toString());
     }
 
     /**

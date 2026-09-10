@@ -10,7 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicMetadata;
+import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
 /**
@@ -62,20 +62,20 @@ public class HexBinaryValue extends BinaryValue {
      * @param typeLabel the type label, which must be a subtype of HEX_BINARY
      */
 
-    public HexBinaryValue(byte[] value, AtomicMetadata typeLabel) {
+    public HexBinaryValue(byte[] value, AtomicType typeLabel) {
         super(typeLabel, value);
     }
 
     /**
      * Create a primitive copy of this atomic value (usually so that the type label can be changed).
      *
-     * @param metadata the target type (a derived type from hexBinary)
+     * @param typeLabel the target type (a derived type from hexBinary)
      */
 
     /*@NotNull*/
     @Override
-    public AtomicValue withMetadata(AtomicMetadata metadata) {
-        return new HexBinaryValue(binaryValue, metadata);
+    public AtomicValue copyAsSubType(AtomicType typeLabel) {
+        return new HexBinaryValue(binaryValue, typeLabel);
     }
 
     /**

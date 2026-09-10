@@ -7,7 +7,6 @@
 
 package net.sf.saxon.type;
 
-import net.sf.saxon.ma.pin.LabeledItem;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -132,14 +131,9 @@ public abstract class Type {
 
     /*@NotNull*/
     public static ItemType getItemType(/*@NotNull*/ Item item, /*@Nullable*/ TypeHierarchy th) {
-
         if (item == null) {
             return AnyItemType.getInstance();
-        }
-        if (item instanceof LabeledItem) {
-            item = ((LabeledItem) item).getSubject();
-        }
-        if (item instanceof AtomicValue) {
+        } else if (item instanceof AtomicValue) {
             return ((AtomicValue) item).getItemType();
         } else if (item instanceof NodeInfo) {
             NodeInfo node = (NodeInfo) item;
