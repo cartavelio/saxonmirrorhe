@@ -962,6 +962,11 @@ namespace SaxonCS_NUnit {
             try {
                 Processor proc = new Processor(true);
                 proc.SetProperty("http://saxon.sf.net/feature/timing", "true");
+                
+                XsdCompiler sm = proc.NewXsdCompiler();
+                XsdSchema schema = sm.Compile(
+                    new XsdCompiler.SchemaSource(new FileInfo(ConfigTest.DATA_DIR + "books.xsd")));
+
                 XdmItemType isOptionalType = proc.ParseItemType("function(node(), xs:QName) as xs:boolean");
                 proc.RegisterExtensionFunction(new QName("java:s9apitest.TestXslt30Transformer", "isOptional"), 
                         isOptionalType,
@@ -984,10 +989,8 @@ namespace SaxonCS_NUnit {
                 XsltExecutable exec = comp.Compile(style);
                 Xslt30Transformer transformer = exec.Load30();
 
-                SchemaManager sm = proc.SchemaManager;
-                sm.Compile(new XmlTextReader(ConfigTest.DATA_DIR + "books.xsd"));
-                DocumentBuilder builder = proc.NewDocumentBuilder();
-                SchemaValidator schemaValidator = sm.NewSchemaValidator();
+                          DocumentBuilder builder = proc.NewDocumentBuilder();
+                SchemaValidator schemaValidator = schema.NewValidator();
                 builder.SchemaValidator = schemaValidator;
                 XdmNode books = builder.Build(new Uri(ConfigTest.DataDirUri, "books.xml"));
                 
