@@ -250,8 +250,9 @@
             <code java="net.sf.saxon.tree.iter.GroundedIterator">GroundedIterator</code> and <code
                 java="net.sf.saxon.expr.LastPositionFinder">LastPositionFinder</code>. For example:</p>
         
-        <samp>if (iter instanceof LookaheadIterator and ((LookaheadIterator)iter).supportsHasNext() and ((LookaheadIterator)iter).hasNext())...</samp>
-        
+        <example>
+            <samp>if (iter instanceof LookaheadIterator and ((LookaheadIterator)iter).supportsHasNext() and ((LookaheadIterator)iter).hasNext())...</samp>
+        </example>
 
         <h2>NodeInfo</h2>
 
@@ -266,9 +267,7 @@
             visible, areas.</p>
   
         
-        <h2>Receiver</h2>
-        
-        <p>TODO</p>
+
         
  
         <h2>Miscellaneous</h2>
@@ -297,20 +296,17 @@
  
     </category>
     
-    <!--<category name="extensibility">
-        
  
-    </category>-->
-    
-    <!--<category name="optimization">
-      
-  
-    </category>-->
 
-    <!--<category name="installation">
+    <category name="documentation">
+        
+        <p>Sections in the documentation that are specific to the Java or C# products are now tagged as such
+        (using <code>class="javaonly"</code> or <code>class="csonly"</code> on the containing element).
+        This causes the relevant text to be displayed with a colored side-bar; it also allows the text to
+        be displayed or hidden based on a checkbox displayed in the page footer.</p>
  
          
-    </category>-->
+    </category>
 
     <category name="serialization">
         
@@ -325,7 +321,6 @@
         is a better solution to the requirement architecturally because it sits firmly in the serialization arena
         rather than masquerading as an instruction affecting the contents of the result tree.</p>
         
-        <p>TODO: add to documentation.</p>
         
  
     </category>
@@ -347,10 +342,7 @@
                 href="/using-xquery/commandline">Running XQuery from the Command Line</a>.)</p>
         
  
-        <h2>Gizmo Commands</h2>
-        
-        <p>TODO</p>
-        
+ 
  
        
         
@@ -370,7 +362,7 @@
         <p class="javaonly">On the Java platform, the functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
         any encoding supported by the Java VM.</p>
         
-        <p class="csonly">On the Saxon-CS platform, the functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
+        <p class="csonly">On the Saxon-CS platform, the functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> accept
             any encoding supported by the .NET method <code>Encoding.GetEncoding()</code>.</p>
         
         <h2>New Extension Functions</h2>
@@ -414,13 +406,6 @@
             library and the EXPath archive library.</p>
         
  
-        <h2>Extensions to Standard Functions</h2>
-        
-        <p>TODO</p>
-        
- 
-        
-
  
         <h2>Extension Instructions</h2>
         
@@ -459,7 +444,10 @@
             break-when="sum($group!@length) + $next!@length) gt 30" ...&gt;</code> starts a new group based on a calculation
             applied to the current candidate group.</p>
         
-        <p>TODO: documented where?</p>
+        <p>Implemented the proposed <code>array</code> and <code>map</code> attributes as alternatives to <code>select</code>
+        on <code>xsl:for-each</code>, <code>xsl:iterate</code>, and <code>xsl:for-each-group</code>, to allow these instructions
+        to process maps and arrays as well as sequences.</p>
+        
         
         <p>In general, streamability of new constructs introduced beyond XSLT 3.0 has not been addressed in the specification or
             in testing. Constructs that are handled purely at compile time (such as the ternary operator <code>A ?? B !! C</code>)
@@ -467,15 +455,7 @@
         
  
         
-        <h2>XSD extensions</h2>
-        
- 
-
-
-        <p>TODO: other changes - NDW??</p>
-        
-
-        
+   
  
 
     
@@ -487,16 +467,7 @@
   
     </category>
     
-    <!--<category name="sourcedocs">
-        
- 
- 
-    </category>-->
     
-    <!--<category name="xsd11">
- 
-        
-    </category>-->
     
     <category name="xquery-update">
         
@@ -506,10 +477,7 @@
   
     </category>
     
-    <!--<category name="xquery31">
-        
-    </category>-->
-
+   
 
 
 </release>

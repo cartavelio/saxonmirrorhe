@@ -1,0 +1,1020 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article id="v4extensions" title="Experimental 4.0 Extensions">
+   <h1>Experimental 4.0 Extensions</h1>
+
+   <p>A W3C Community Group is working on proposals for extensions to XPath, XSLT, and XQuery, which
+   could eventually become part of a version 4.0 set of specifications.</p>
+
+   <p>Some of these features have been implemented experimentally in Saxon. Generally, the features
+   are not available unless you explicitly enable them. They should not be considered stable: the
+   details are likely to change as the design progresses.</p>
+   
+   <p>With the exception of new functions in the function library, these extensions need to be
+   explicitly enabled. The following mechanisms can be used to enable syntax extensions:</p>
+   
+   <ul>
+      <li><b>Either</b> set the the configuration property
+         <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"
+         /> (use <code>--allowSyntaxExtensions:on</code> on the command line, 
+         or <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</li>
+      <li><b>Or</b> set the language level to 4.0 in a call to an API method such as 
+      <code>XsltCompiler.setXsltLanguageVersion()</code></li>
+      <li><b>Or</b> set the language level to 4.0 in the <code>version</code> attribute
+      of <code>xsl:stylesheet</code>, or in the XQuery declaration in the query prolog.</li>
+   </ul>
+
+   
+      <p>Like other Saxon extensions, these extensions all require Saxon-PE or higher.
+      They are available in Saxon-CS.</p>
+
+      <p>Further information:</p>
+      <nav>
+         <ul/>
+      </nav>
+
+      <section id="new-types" title="New Types">
+         <h1>New Types</h1>
+         <p>A number of new types are introduced, described in the following sections.</p>
+
+         <p>None of these new types introduce new kinds of value; they only provide new ways of constraining the
+         value space.</p>
+
+         <p>Further information:</p>
+         <nav>
+            <ul/>
+         </nav>
+
+         <section id="union-types" title="Union Types">
+            <h1>Union types</h1>
+
+            <aside>Requires Saxon-CS or Saxon-EE, with syntax extensions enabled.</aside>
+
+            <p>A construct of the form <code class="bold"
+                  >union(type1, type2, type3)</code> can be used to define simple 
+      unions of atomic types. For example, <code>union(xs:base64Binary, xs:hexBinary)</code>
+      defines a union type whose members are <code>xs:base64Binary</code> and <code>xs:hexBinary</code>, while
+      <code>union(xs:date, xs:time, xs:dateTime)</code> defines a union type whose members are <code>xs:date</code>,
+      <code>xs:time</code>, and <code>xs:dateTime</code>. These types can conveniently be used in function signatures
+      when writing a function that is designed to take arguments of more than one type.</p>
+
+            <p>The names between the parentheses are strictly QNames (not general ItemTypes) and must refer to named atomic or 
+      union types. If one of the members is a union type then it must be a "generalized atomic type"
+    in the sense of the XPath 3.1 specification: that is, it must not contain any list types,
+    and must not be derived by restriction from another union type.</p>
+
+            <p>The order of member type names is significant, in that it determines the order used for casting or validating strings.</p>
+
+            <p>This construct can be used anywhere that a conventional union
+      type name defined in a schema would be recognized, for example in <code>instance of</code> and <code>cast as</code>
+      expressions, in the <code>as</code> attribute of variable and function declarations, or in <code>typeswitch</code>
+      expressions. The semantics are exactly the same as if the union type were declared in an imported schema and
+    referenced by name. However, it does not require the processor to be schema-aware.</p>
+
+            <p>Union types can also be used in XSLT match patterns, for example a template defined with 
+        <code>match="union(xs:date, xs:time)"</code> will match atomic values of those types.
+      Such a pattern is allocated a default priority designed to reflect the type hierarchy,
+      so if U is a subtype of V, then the pattern corresponding to U will have a higher priority
+      than the pattern corresponding to V. However, the algorithm does not ensure that ambiguous
+      union patterns have the same priority, so ambiguities may go undetected.</p>
+
+            <p>The pattern <code>match="atomic(xs:date)"</code> works in the same way; it can be
+      regarded as syntactic sugar for a union with only one member.</p>
+
+            <p>Two additional Saxon extensions help to improve the usability of union types:</p>
+
+            <ul>
+               <li>A commonly used type can be referenced using a <b>type alias</b>, for example
+          <code>as="type(my:date-or-time)"</code>. Type aliases are available in both XSLT and XQuery,
+          and are described in <a class="bodylink"
+                     href="/v4extensions/syntax-extensions/type-aliases"
+                  >Type Aliases</a>. Type aliases go some way towards
+          hiding the implementation details of the type, and allowing the implementation to be changed
+          without affecting users of the function library; in addition they simply make the code more
+          readable.</li>
+               <li>In XSLT only, elements that have an <code>as</code> attribute to define the type
+          of a variable, function, or parameter, also have an optional <a
+                     class="bodylink code" href="/extensions/attributes/as"
+                     >saxon:as</a> attribute
+          which allows additional type information to be supplied using Saxon extension syntax.
+          If both attributes are present, then the type specified in <code>saxon:as</code>
+          must be a subtype of the type specified in the <code>as</code> attribute. Typical usage
+          might be <code>&lt;xsl:param name="x" as="xs:anyAtomicType" saxon:as="union(xs:date, xs:time, xs:dateTime)"/></code>.
+          This device allows union types to be used without compromising the portability of the stylesheet
+          to an XSLT 3.0 processor that does not recognize Saxon's extension syntax (an XSLT 3.0
+          processor that does not recognize the <code>saxon:as</code> attribute is required to ignore it).</li>
+            </ul>
+
+            <p>For example, the following code defines an XQuery function that formats a date, time, dateTime, or
+    a string in the form of a date, time, or dateTime using the appropriate variant of the format-date/time
+    function:</p>
+
+            <example><samp><![CDATA[declare function local:format(
+              $in as union(xs:dateTime, xs:date, xs:time, xs:string), 
+              $fmt as xs:string) as xs:string {
+   typeswitch ($in) 
+   case xs:dateTime return format-dateTime($in, $fmt)
+   case xs:date return format-date($in, $fmt)
+   case xs:time return format-time($in, $fmt)
+   case xs:string return local:format($in cast as union(xs:dateTime, xs:date, xs:time), $fmt)
+   default return error()
+   };    
+local:format("2016-10-07", $fmt)]]></samp></example>
+         </section>
+         <section id="record-types" title="Record types">
+
+            <h1>Record types</h1>
+
+            <aside>Previously referred to as "tuple types". Saxon continues to recognize the keyword <code>tuple</code>
+       as a synonym of <code>record</code>.</aside>
+
+
+            <p>Wherever an item type can be used (for example, in the type signature of a function or variable,
+    or in an <code>instance of</code> expression), Saxon allows a record type to appear. The syntax is:</p>
+
+            <example><samp>   recordType ::= "record" "(" fieldDef ("," fieldDef)* ("," "*")? ")"
+   fieldDef ::= fieldName "?"? ("as" fieldType)?</samp>
+   fieldType ::= sequenceType | (".." occurrenceIndicator?)</example>
+
+            <p>where <code>fieldName</code> is either an NCName or a string literal.</p>
+
+            <p>A "?" after a <code>fieldName</code> indicates that the field is optional.</p>
+
+            <p>A final ", *" at the end of the list of fields indicates that the record
+    type is <i>extensible</i>: additional fields beyond those that are explicitly declared are permitted to appear in the map.</p>
+
+            <p>If the "as" clause is absent for any field, the assumed type is <code>item()*</code>.</p>
+
+            <p>The special field type ".." allows a record type to be recursive: it is a reference to the containing record type.
+          See <i>Recursive record types</i> below.
+       </p>
+
+            <p>For example:</p>
+
+            <example><samp>record(ssn as xs:string, emp as element(employee))</samp></example>
+
+
+            <p>or: </p>
+
+            <example><samp>record('first name', 'middle initial', 'last name', *)</samp></example>
+
+
+            <p>The instances of a record type are maps. A record type is essentially a way of defining a more
+      precise type for maps. The first example will be satisfied by any map with two entries: an entry whose key is "ssn" and whose
+      value is a string, and an entry whose key is "emp" and whose value is an <code>employee</code> element. The second
+    example matches any map with entries having the keys "first name" and "middle initial" and "last name, regardless of the 
+    types of the values; the map may also contain additional entries, with any key and any value.</p>
+
+            <p>More formally, a value <code>M</code> is an instance of a record type <code>record(N1 as T1, N2 as T2, ...)</code> if
+    and only if all the following conditions are true:</p>
+
+            <ol>
+               <li>
+                  <p>
+                     <code>M is a map</code>
+                  </p>
+               </li>
+               <li>
+                  <p>For every (<code>N</code>, <code>T</code>) pair in the record definition that is not declared optional
+          (that is, there is no "?" after the field name),
+          <code>map:contains(M, N)</code> returns true. </p>
+               </li>
+               <li>
+                  <p>For every (<code>N</code>, <code>T</code>) pair in the record definition, if <code>map:contains(M, N)</code> returns true
+          then <code>map:get(M, N) instance of T</code> also returns true.</p>
+               </li>
+               <li>
+                  <p>If the record type is not extensible (that is, there is no final ", *" after the list of field names), then every key present in the map is a string
+      equal to one of the field names appearing in the record definition, when compared using codepoint collation.</p>
+               </li>
+            </ol>
+
+            <p>So for every field defined in the record definition, the map will typically contain an entry whose key
+    matches the field name and whose value matches the corresponding type. The entry is allowed to be absent only
+    if the type definition indicates that an empty sequence would be acceptable. Additional entries are allowed only if the type definition indicates
+    that it is extensible.</p>
+
+
+            <p>Since a record is a map, fields can be accessed using the lookup syntax <code>$T?NNN</code> where <code>$T</code>
+      is an expression that returns a record, and <code>NNN</code> is the name of the field. A separate 4.0 extension allows the field name
+      to be written as a string in quotes if it is not an NCName, for example $T?"date of birth".</p>
+
+            <p>Using records makes stronger type checking possible. With a general-purpose map, any atomic value can be
+    supplied as a key, and the <code>map:get()</code> function (or a dynamic call on the map as a function) returns
+    an empty sequence if the entry is not present. With records, however, supplying a key value that is not a string,
+    or that is not one of the known field names, results in a static type error if it can be detected at compile time.
+    Furthermore, if <code>$T</code> is known to be a record type, then the type of an 
+      expression such as <code>$T?field</code>
+    can be statically inferred, which again enables better error detection and better optimization.</p>
+
+            <aside>Although <code>$T?N</code> results in a static type error if <code>T</code> is a non-extensible
+      record type that doesn't define field <code>N</code>, a run-time reference <code>$T("N")</code> works
+      the same way as any other dynamic map lookup, returning an empty sequence.</aside>
+
+            <p>Record types are useful where maps are used to hold information with a regular structure;
+    for example when a function accepts maps as input or returns maps as output. Declaring the argument
+    or result type of a function as a record type often gives better information about the expected contents 
+    than when it is declared as a map.</p>
+
+            <p>Record types can be used as patterns, to match maps (regardless whether the value was originally
+      declared as a record or not). This can be especially useful when processing JSON. For example, if
+      a JSON document containing the object <code>{'long': 23.1234, 'lat':55.624}</code> is parsed using the
+      <code>parse-json()</code> or <code>json-doc()</code> functions, then the resulting map can be processed
+      using a template rule declared with <code>match="record(lat, long)"</code>.</p>
+
+            <aside>There is an algorithm to define a default priority for record patterns, but it
+        is provisional. At this release, you should not rely on the default priority of template rules
+      whose match pattern is a record type. It is safest to allocate explicit priorities if there
+      is any ambiguity. The rules for default priority are likely to be refined in later releases.</aside>
+
+            <p>Record types fit into the type hierarchy as subtypes of maps. A record type T1 is a subtype of
+      another record type T2 if every possible instance of T1 is a permitted instance of T2 (this takes into account
+      whether either or both record types are extensible). Similarly, a record type T is a subtype of a map
+      type M if every possible instance of T is a permitted instance of M. By extension, because maps are functions,
+      records are also functions, and record types are thus subtypes of function types.</p>
+
+            <p>To make it easier to use record types without sacrificing portability, Saxon allows you to declare the type in both
+      portable and Saxon-specific syntax, for example 
+        <code>&lt;xsl:param name="location" as="map(xs:string, xs:double)" saxon:as="record(x as xs:double, y as xs:double)"/&gt;</code>.</p>
+
+            <p>A map that contains additional entries beyond those defined in an extensible record type still conforms to the type (so if the expected
+        type of a function argument is <code>record(a as xs:integer, b as xs:integer, *)</code>, then you can supply any
+        map that contains these two fields, even if it also contains others). A consequence of making a record
+        type extensible is that incorrect static references are less likely to result in a compile-time error.</p>
+
+
+            <p>The following XSLT example shows a couple of functions from a library designed to perform
+      complex number arithmetic, where a complex number is defined as the type <code>record(r as
+        xs:double, i as xs:double)</code>:</p>
+
+            <example><samp><![CDATA[<xsl:function name="cx:complex" as="record(r as xs:double, i as xs:double)">
+  <xsl:param name="real" as="xs:double"/>
+  <xsl:param name="imag" as="xs:double"/>
+  <xsl:sequence select="map{'r':$real, 'i':$imag}"/>
+</xsl:function>
+
+<xsl:function name="cx:add" as="record(r as xs:double, i as xs:double)">
+  <xsl:param name="x" as="record(r as xs:double, i as xs:double)"/>
+  <xsl:param name="y" as="record(r as xs:double, i as xs:double)"/>
+  <xsl:sequence select="cx:complex($x?r + $y?r, $x?i + $y?i)"/>
+</xsl:function>]]></samp></example>
+
+            <p>The same functions could be written in XQuery:</p>
+
+            <example><samp><![CDATA[declare function cx:complex ($real as xs:double, $imag as xs:double)
+                 as record(r as xs:double, i as xs:double) {
+  map{'r':$real, 'i':$imag}
+};
+
+declare function cx:add ($x as record(r as xs:double, i as xs:double),
+                         $y as record(r as xs:double, i as xs:double))
+                 as record(r as xs:double, i as xs:double) {
+  cx:number($x?r + $y?r, $x?i + $y?i)
+};]]></samp></example>
+
+            <p>Two additional extensions help to improve the usability of record types:</p>
+
+            <ul>
+               <li>A commonly used type can be referenced using a <b>type alias</b>, for example
+        <code>as="type(cx:complex)"</code>. Type aliases are available in both XSLT and XQuery,
+          and are described in <a class="bodylink"
+                     href="/extensions/syntax-extensions/type-aliases"
+                  >Type Aliases</a>. Type aliases go some way towards
+        hiding the implementation details of the type, and allowing the implementation to be changed
+        without affecting users of the function library; in addition they simply make the code more
+        readable.</li>
+               <li>In XSLT only, elements that have an <code>as</code> attribute to define the type
+        of a variable, function, or parameter, also have an optional <a
+                     class="bodylink code" href="/extensions/attributes/as"
+                     >saxon:as</a> attribute
+        which allows additional type information to be supplied using Saxon extension syntax.
+        If both attributes are present, then the type specified in <code>saxon:as</code>
+        must be a subtype of the type specified in the <code>as</code> attribute. Typical usage
+        might be <code>&lt;xsl:param name="x" as="map(*)" saxon:as="record(r as xs:double, i as xs:double)"/></code>.
+        This device allows record types to be used without compromising the portability of the stylesheet
+        to an XSLT 3.0 processor that does not recognize Saxon's extension syntax (an XSLT 3.0
+        processor that does not recognize the <code>saxon:as</code> attribute is required to ignore it).</li>
+            </ul>
+
+            <h2>Recursive record types</h2>
+
+            <p>The syntax ".." allows a field of a record type to reference the containing record type, thus
+       allowing recursive structures. For example a simple linked list can be declared using the type:</p>
+
+            <example><samp>record(value, next as ..?)</samp></example>
+
+            <p>While a binary tree can be declared as:</p>
+
+            <example><samp>record(left? as .., value, right? as ..)</samp></example>
+
+            <p>It will only be possible to create a finite instance of a recursive record type if the self-reference is
+       made optional, either by making the field itself optional (as in the second example), or by allowing it
+       to take an empty sequence as its value (as in the first example).</p>
+
+            <aside>It is not possible to define recursive structures using type aliases, because a type alias name cannot
+       be used within the definition of the type alias being declared.</aside>
+
+         </section>
+         
+         <section id="enum-types" title="Enumeration Types">
+            <h1>Enumeration Types</h1>
+            
+            <p>An enumeration type defines a set of permitted <code>xs:string</code> values. For example, an enumeration
+            type might be defined as:</p>
+            
+            <sample><code>enum("red", "green", "blue")</code></sample>
+            
+            <p>The values conforming to an enumeration type are strings: the expression <code>$S instance of enum(A, B, C)</code>
+            is true if <code>$S</code> is an instance of <code>xs:string</code> (note: not <code>xs:untypedAtomic</code>
+            or <code>xs:anyURI</code> and is equal (under codepoint collation) to one of A, B, or C.</p>
+            
+            <p>A typical use case is in a function signature. For example the function signature of <code>fn:normalize-unicode()</code>
+            could be restated as <code>function($s as xs:string, $form as enum("NFC", "NFD", "NFKC", "NFKD")) as xs:string</code>.</p>
+         </section>
+
+         <section id="kindtests" title="KindTests">
+            <h1>KindTests</h1>
+
+            <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
+
+            <p>The syntax for the <code>element()</code> and <code>attribute()</code>
+               <code>KindTests</code> is extended to allow constructs of the form</p>
+            <example><samp>element(*:div)</samp></example>
+            <p>or </p>
+            <example><samp>attribute(myns:*, myns:someType)</samp></example>
+            <p>More specifically, the grammar for <code>ElementNameOrWildCard</code>
+               changes from <code>ElementName | "*"</code> to simply <code>NameTest</code>; and similarly <code>AttribNameOrWildCard</code> also 
+               expands simply to <code>NameTest</code>. This change is made largely for orthogonality reasons (there is no reason to have 
+               different rules for the two constructs) and also because it provides some useful extra functionality: for example in XSLT it
+               is now possible to match all elements in a particular namespace having a particular type with a template rule that specifies
+               <code>match="element(my:*, my:type)"</code>.</p>
+
+            <p>The default priority for an XSLT pattern in the form <code>element(X)</code> is always the same as the default priority for
+               <code>X</code>, so for example the default priority of <code>element(my:*)</code> is -0.25. If a type is present, then we
+               follow the principle that the default priority of <code>element(my:*, T)</code> is midway between the priorities of
+               <code>element(*, T)</code> and <code>element(E, T)</code>: that is, 0.125.</p>
+         </section>
+
+         <section id="type-aliases" title="Type aliases">
+            <h1>Type aliases</h1>
+
+            <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon
+        9.8; revised in 10.</aside>
+
+            <p>Wherever an <code>ItemType</code> may appear (for example in a function signature or variable declaration, or
+      in <code>instance of</code> or <code>cast as</code> expressions), the syntax <code
+                  class="bold">type(alias)</code> is permitted,
+      where <code>alias</code> is a name for an item type declared elsewhere. Type aliases are QNames, and prefixes are
+      resolved in the usual way (using the default namespace for elements and types).</p>
+
+            <p>Type aliases are useful because they abstract away from the detail of how a type is
+        implemented: for example <code>type(cx:complex)</code>
+      is more meaningful than <code>record(r as xs:double, i as xs:double)</code>, and it creates more scope for changing the
+      way types are represented as the software evolves. However, type aliases do not provide any real encapsulation or information
+      hiding. Type aliases cannot be used within their own definition, and the definition of a type alias cannot be circular.</p>
+
+            <p>The mapping of type aliases to item types is an extension to the static context of an expression.</p>
+
+            <p>In XSLT, type aliases can be defined using the top-level declaration <a
+                  class="bodylink code" href="/extensions/instructions/item-type"
+               >xsl:item-type</a>:</p>
+
+            <examples>
+               <example>
+                  <samp><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>
+
+<xsl:function name="cx:complex" as="type(cx:complex)">
+  <xsl:param name="r" as="xs:double"/>
+  <xsl:param name="i" as="xs:double"/>
+  <xsl:sequence select="map{'r':$r, 'i':$i}"/>
+</xsl:function>
+
+<xsl:function name="cx:add" as="type(cx:complex)">
+  <xsl:param name="x" as="type(cx:complex)"/>
+  <xsl:param name="y" as="type(cx:complex)"/>
+  <xsl:sequence select="cx:complex($x?r + $y?r, $x?i + $y?i)"/>
+</xsl:function>
+]]></samp>
+               </example>
+            </examples>
+
+            <p>XSLT-defined type aliases are scoped to a package. The usual rules for import precedence apply.</p>
+            
+            <aside>If you want to use the same type aliases in multiple packages, define them in a module of their
+            own, and include that module in each package using <code>xsl:include</code>.</aside>
+
+            <p>Type aliases can be used in XSLT match patterns (see <a class="bodylink"
+                  href="/extensions/xslt-syntax-extensions"
+               >XSLT Syntax Extensions</a>). For example:</p>
+
+            <example>
+               <samp>&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></samp>
+            </example>
+
+            <example>
+               <samp>&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></samp>
+            </example>
+
+            <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for
+        <code>.[. instance of T]</code>. The experimental syntax <code>~T</code> used in earlier releases
+      has been dropped.</p>
+
+            <p>In XQuery, type aliases can be declared in the query prolog using the syntax <code>declare type QName = ItemType;</code>, 
+        for example: <code>declare type cx:complex = record(r as xs:double, i as xs:double);</code>.</p>
+         </section>
+      </section>
+   
+   <section id="new-functions" title="New Functions">
+      <h1>New Functions</h1>
+      <p>A number of new experimental functions become available if XPath 4.0 is enabled.</p>
+      
+      <p>Many of these functions are made available in Saxon 11 in two forms. They are available unconditionally
+      in the Saxon namespace; and if 4.0 extensions are available then they are also available in the
+      standard <code>fn</code> (or where appropriate, the <code>map</code> or <code>array</code> namespace).</p>
+      
+      <h2>fn:all($sequence as item()*, $predicate as function(item()) as xs:boolean</h2>
+      
+      <p>Returns true if every item in <code>$sequence</code> satisfies the predicate.</p>
+      
+      <p>For example, <code>fn:all(*, ->{boolean(self::para)})</code> returns true if every child element of the
+      context item is a <code>para</code> element</p>
+      
+      <h2>fn:characters($string as xs:string) as xs:string*</h2>
+      
+      <p>Splits a string into a sequence of single-character strings.</p>
+      
+      <p>For example, <code>fn:characters("red")</code> returns <code>("r", "e", "d")</code></p>
+      
+      <h2>fn:highest($sequence as item()*) as item()*</h2>
+      
+      <p>Equivalent to <code>fn:highest($sequence, default-collation())</code></p>
+      
+      <h2>fn:highest($sequence as item()*, $collation as xs:string) as item()*</h2>
+      
+      <p>Equivalent to <code>fn:highest($sequence, (), fn:data#1)</code></p>
+      
+      <h2>fn:highest($sequence as item()*, $collation as xs:string?, function(item()) as xs:anyAtomicType)</h2>
+      
+      <p>Returns those items from the input sequence having the highest value for the supplied function,
+      strings being compared using the supplied collation (which defaults to the default collation).</p>
+      
+      <p>For example, <code>fn:highest(//employee, (), ->{number(@salary)})</code> returns those
+      employees having the highest salary.</p>
+      
+      <h2>fn:identity($input as item()*) as ite
+      m()*</h2>
+      
+      <p>Returns the value of the argument, unchanged. Useful in situations where a function must be supplied,
+      but the desired action is to do nothing.</p>
+      
+      <h2>fn:index-where($sequence as item()*, $predicate as function(item()) as xs:boolean</h2>
+      
+      <p>Returns the positions of the items in the input sequence that satisfy the supplied predicate.</p>
+      
+      <p>For example, <code>fn:index-where(("red", "pink", "white", "black"), ->{contains(., "e")})</code> returns <code>(1, 3)</code>.</p>
+      
+      <h2>fn:in-scope-namespaces($in as element()) as map(xs:string, xs:string)</h2>
+      
+      <p>Returns the in-scope namespaces of an element as a map from prefixes to URIs.</p>
+      
+      <h2>fn:is-NaN($in as xs:anyAtomicType) as xs:boolean</h2>
+      
+      <p>Returns true if the supplied value is the <code>xs:float</code> or <code>xs:double</code> value NaN.</p>
+      
+      <p>Returns the in-scope namespaces of an element as a map from prefixes to URIs.</p>
+      
+      <h2>fn:items-after($sequence as item()*, $predicate as function(item()) as xs:boolean</h2>
+      
+      <p>Returns the items in the input sequence that follow the first one that satisfies the supplied predicate.</p>
+      
+      <h2>fn:items-before($sequence as item()*, $predicate as function(item()) as xs:boolean</h2>
+      
+      <p>Returns the items in the input sequence that precede the first one that satisfies the supplied predicate.</p>
+      
+      <h2>fn:items-from($sequence as item()*, $predicate as function(item()) as xs:boolean</h2>
+      
+      <p>Returns the items in the input sequence starting with the first one that satisfies the supplied predicate.</p>
+      
+      <h2>fn:items-until($sequence as item()*, $predicate as function(item()) as xs:boolean</h2>
+      
+      <p>Returns the items in the input sequence up to and including the first one that satisfies the supplied predicate.</p>
+           
+      <h2>fn:lowest($sequence as item()*) as item()*</h2>
+      
+      <p>Equivalent to <code>fn:lowest($sequence, default-collation())</code></p>
+      
+      <h2>fn:lowest($sequence as item()*, $collation as xs:string?) as item()*</h2>
+      
+      <p>Equivalent to <code>fn:lowest($sequence, (), fn:data#1)</code></p>
+      
+      <h2>fn:lowest($sequence as item()*, $collation as xs:string?, function(item()) as xs:anyAtomicType)</h2>
+      
+      <p>Returns those items from the input sequence having the lowest value for the supplied function,
+         strings being compared using the supplied collation (which defaults to the default collation).</p>
+      
+      <p>For example, <code>fn:lowest(//employee, (), ->{number(@salary)})</code> returns those
+         employees having the lowest salary.</p>
+      
+      <h2>fn:parcel($sequence as item()*) as item()</h2>
+      
+      <p>Wraps an arbitrary sequence of items as a <i>parcel</i>: a parcel is a map with a single entry,
+      whose key is the string <code>"parcel"</code> and whose value is the wrapped sequence. Parcels are
+      useful because they enable an array to be treated as a sequence of items, by wrapping each member of the
+      array as a parcel.</p>
+      
+      <h2>fn:parts($in as item()) as map(xs:string, xs:anyAtomicType)</h2>
+      
+      <p>Decomposes a composite "atomic" value into its parts, in the form of a map. For example, an <code>xs:dateTime</code>
+      value is decomposed into year, month, day, hour, minute, second, and timezone. Other values that are decomposable include
+      <code>xs:date</code>, <code>xs:time</code>, <code>xs:duration</code>, <code>xs:QName</code>, and <code>xs:anyURI</code>.
+      For values that are not decomposable, the resulting map contains a single entry whose key is "value" and whose corresponding
+      value is the input value.</p>
+      
+      <h2>fn:range()</h2>
+      
+      <p>Not documented because the specification is likely to change.</p>
+      
+      <h2>fn:slice($input as item()*,
+         $start	 as xs:integer?,
+         $end	 as xs:integer?,
+         $step	 as xs:integer?) as item()*</h2>
+      
+      <p>Selects items from an input sequence, starting at <code>$start</code> (default 1), ending at <code>$end</code> (defaulting
+      to the length of the sequence, and stepping by <code>$step</code> (defaulting to 1). If <code>$start</code> or <code>$end</code>
+      is negative, counting is from the end of the sequence. If <code>$step</code> is negative, the sequence runs backwards.</p>
+      
+      <h2>fn:some($sequence as item()*, $predicate as function(item()) as xs:boolean</h2>
+      
+      <p>Returns true if at least one item in <code>$sequence</code> satisfies the predicate.</p>
+      
+      <h2>fn:unparcel($parcel as map(xs:string, item()*) as item()*</h2>
+      
+      <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?parcel</code>.)</p>
+      
+      <h2>array:of(map(xs:string, item()*)*) as array(*)</h2>
+      
+      <p>Accepts a sequence of parcels (as produced by the <code>fn:parcel()</code> function), and returns an array
+      whose members are the sequences obtained by applying <code>fn:unparcel()</code> to each parcel in turn.</p>
+      
+      <h2>array:members(array(*)) as map(xs:string, item()*)*</h2>
+      
+      <p>Accepts an array as input, and turns it into a sequence of parcels: the inverse of the <code>array:of()</code>
+      function.</p>
+      
+      
+      
+   </section>
+
+      <section id="new-function-syntax" title="New Function Syntax">
+         
+         <h1>New Function Syntax</h1>
+
+         <p>The proposals for XPath 4.0 include some new syntax for declaring and calling functions. This section
+         describes what is experimentally implemented in Saxon 11.</p>
+
+         
+         <nav>
+            <ul/>
+         </nav>
+
+         <section id="simple-inline-functions" title="Simple inline functions">
+            <h1>Simple inline functions</h1>
+
+            <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 9.8.</aside>
+            
+            <h2>Thin arrow notation</h2>
+            
+            <p>For brevity, in an inline function declaration, the keyword <code>function</code> can be replaced
+            with the symbol <code>-></code>. For example, <code>function($a, $b){$a + $b}</code> can be written as
+               <code>->($a, $b){$a + $b}</code>. The syntax is borrowed from Raku (formerly Perl 6), and is reminiscent 
+               of lambda expressions in other languages:
+               <code>(a, b) -> {a + b}</code> in Java, <code>(a, b) => {a + b}</code> in C#.</p>
+            
+            <p>The concise syntax is helpful when writing simple callbacks, for example <code>fold-left($seq, 1, ->($x, $y){$x*$y})</code>
+            to calculate the product of a sequence of numbers.</p>
+            
+            <p>Argument types and return types can be included in the same way as with the full <code>function</code> syntax,
+            though the benefits of conciseness typically apply only when these are omitted.</p>
+            
+            <p>A zero-arity function can be written as, for example, <code>->(){doc('abc.xml')//z}</code>.</p>
+
+            <h2>Context item functions</h2>
+            <p>Simple inline functions taking a single argument can be simplified even further. For example,
+        the expression <code>->{@code}</code> represents a function that takes a single argument (presumably an element node),
+        and returns a selected attribute of that node. A simple inline function takes a single argument with required type <code>item()</code>,
+        and returns any sequence (type <code>item()*</code>). The function body is evaluated with a singleton focus based
+        on the supplied argument value.</p>
+
+            <p>Simple inline functions are particularly convenient when providing functions as arguments to higher-order functions,
+        many of which accept a single item as their one argument.
+        For example, to sort employees in order of salary, you can write:</p>
+            <example><samp>sort(//employee, ->{@salary})</samp></example>
+
+            <aside>Earlier Saxon releases experimented with the notations <code>.{@salary}</code> and <code>fn{@salary}</code>.
+          The former is still allowed in Saxon 11, the latter is dropped.</aside>
+
+            <p>Simple inline functions can access externally-defined local variables in the usual way (that is, they have a closure).</p>
+
+            <p>The expression <code class="bold">->{EXPR}</code> is a syntactic shorthand for:</p>
+            <example><samp>function($x as item()) as item()* {$x!(EXPR)}</samp></example>
+            
+            
+
+
+            <h2>Underscore functions</h2>
+
+            <aside>This feature seems likely to be dropped, but it remains available in Saxon 11.</aside>
+
+            <p>For functions taking more than one argument, or an argument that is not confined to a single
+      item, an abbreviated syntax ("underscore functions") is provided. For example,
+      the expression <code>_{$1 + $2}</code> is a function that takes two arguments and returns their sum.
+      It is equivalent to the expression:</p>
+            <example><samp>function($a1 as item()*, $a2 as item()*) as item()* {$a1 + $a2}</samp></example>
+
+            <p>The arity of an underscore function is determined by the highest-numbered parameter reference
+      appearing within the function. For example, <code>_{$2}</code> is a function that takes two arguments
+      and returns the value of the second argument.</p>
+
+            <p>This syntax can also be used to define a zero-arity function, 
+        for example the following is a function that returns tomorrow's date:</p>
+            <example><samp>_{current-date() + xs:dayTimeDuration('P1D')}</samp></example>
+
+
+         </section>
+         <section id="sequence-variadic-functions" title="Variadic Functions">
+            <h1>Variadic Functions</h1>
+            
+            <p>Variadic functions can be called with a variable number of positional arguments,
+            rather like the <code>concat()</code> function in previous XPath versions.</p>
+            
+            <p>Saxon 11 implements variadic functions, but only for built-in system functions
+            (not for user-defined functions).</p>
+            
+            <p>The sequence-variadic functions available include:</p>
+            
+            <ul>
+               <li><code>fn:concat()</code></li>
+               <li><code>fn:codepoints-to-string()</code></li>
+               <li><code>array:of()</code></li>
+               <li><code>array:members()</code></li>
+            </ul>
+         </section>
+         
+         <section id="keyword-arguments" title="Keyword Arguments">
+            <h1>Keyword Arguments</h1>
+            
+            <p>Where a function declaration requires or permits the last argument to be a map, the entries in the
+            map may be supplied as keyword arguments. For example as an alternative to writing <code>serialize($x, map{"method":"xml", "indent":true()})</code>,
+               you can now write:</p>
+            
+            <sample>serialize($x, method:="xml", indent:=true())</sample>
+            
+            <p>Positional arguments must always precede keyword arguments.</p>
+            
+            <p>Although the feature is most obviously useful for functions like <code>serialize</code> where the final argument is a map following
+            the "option parameter conventions", it can be used anywhere that it's appropriate to supply a map with string-valued keys as the
+            last argument of a function call (including calls to user-defined functions).</p>
+            
+            <aside>The current proposal is undecided as to whether ":" or ":=" should be used after the keyword. Saxon 11 allows either.</aside>
+            
+      </section>
+      </section>
+         
+         <section id="other-xpath-extensions" title="Other XPath 4.0 Extensions">
+            
+            <h1>Other XPath 4.0 Proposed Extensions</h1>
+            
+            <p>This section lists other proposed XPath 4.0 language features that are implemented experimentally
+            in Saxon 11.</p>
+            
+            <nav>
+               <ul/>
+            </nav>
+            
+            <section id="ternary" title="Ternary conditionals">
+               <h1>Ternary Conditionals</h1>
+               
+               <p>The syntax <code><i>condition</i> ?? <i>thenExpr</i> !! <i>elseExpr</i></code> is introduced
+               as an alternative for <code>if (<i>condition</i>) then <i>thenExpr</i> else <i>elseExpr</i></code>.
+               The semantics are identical.</p>
+               
+               <p>The operator syntax is borrowed from Raku (formerly Perl6), other operators such as "?" and ":"
+               being unavailable for the purpose.</p>
+            </section>
+      
+      <section id="otherwise" title="Otherwise operator">
+         <h1>Otherwise operator</h1>
+
+         
+         <p>XPath 4.0 proposes an additional operator: <code class="bold"
+               >otherwise</code>. The expression <code>A otherwise B</code>
+        returns the value of <code>A</code> unless it is an empty sequence, in which case it returns the value of <code>B</code>.
+        For example, the expression:</p>
+
+         <example><samp>chapter[title='Introduction'] otherwise chapter[1]</samp></example>
+
+         <p>returns the chapter(s) entited "Introduction" if such a chapter exists; otherwise it returns the first chapter.</p>
+
+         <p>The precedence of the operator is greater than arithmetic operators (so <code>$n div $m otherwise 1</code>
+        means <code>$n div ($m otherwise 1)</code>), but less than the "union" operator (so <code>a/b/c otherwise 0</code>
+        means <code>(a/b/c) otherwise 0</code>).</p>
+
+
+      </section>
+
+            <section id="short-circuit" title="Short-circuit boolean operators">
+               <h1>Short-circuit boolean operators</h1>
+               
+               <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled.</aside>
+               
+               <p>Two additional boolean operators are proposed: <code class="bold">orElse</code> and
+                  <code class="bold">andAlso</code>.
+                  These have the same effect as <code>or</code> and <code>and</code>, except that there is a guarantee
+                  that the second operand will not be evaluated unnecessarily. This makes it possible to ensure that
+                  evaluating the second operand does not produce an error. For example, the expression:</p>
+               
+               <example><samp>//chapter[pages=0 orElse length div pages]</samp></example>
+               
+               <p>will never fail with a divide-by-zero error, because the division will never be executed if the
+                  value of <code>pages</code> is zero.</p>
+               
+               <p>When the ordinary <code>or</code> and <code>and</code> operators are used, the W3C specification
+                  gives XPath processors license to re-arrange the order of execution, and Saxon will occasionally do so.
+                  Using these operators is therefore advised when the first condition is a guard to prevent the second condition
+                  failing.</p>
+               
+               <p>The same effect can be achieved without relying on extensions, by writing
+                  <code>A orElse B</code> as <code>if (A) then true() else boolean(B)</code>, and rewriting 
+                  <code>X andAlso Y</code> as <code>if (X) then boolean(Y) else false()</code>.</p>
+            </section>
+               
+               <section id="lookup-generalization" title="Lookup Expressions">
+                  <h1>Lookup Expressions: Removal of Restrictions</h1>
+                  
+                  <p>The lookup operator "?" (in both its unary and binary forms) can now be followed by:</p>
+                  
+                  <ul>
+                     <li>A string literal (for example <code>$person?'date of birth'</code>)</li>
+                     <li>A variable reference (for example <code>$array?$index</code>)</li>
+                  </ul>
+                  
+                  <p>The effect is the same as if the string literal or variable were written in parentheses.</p>
+               </section>
+            
+
+      <section id="for-member-expression" title="For-Member Expressions">
+         <h1>For-Member expressions</h1>
+
+         <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
+
+         <p>The <code class="bold"
+            >for member</code> expression is a Saxon extension to XPath 3.1 syntax introduced in Saxon 10. It allows
+      convenient iterative processing of the members of an array.</p>
+
+         <p>For example: </p>
+         <example><samp>for member $m in [(3,5,6), (8,12)] return sum($m)</samp></example>
+         <p>returns the sequence <code>(14, 20)</code>.</p>
+
+         <p>A <code>ForMemberExpr</code> is a new kind of <code>ExprSingle</code>; this means it can be used anywhere a <code>ForExpr</code>
+      or <code>LetExpr</code> is allowed. The syntax is:</p>
+
+         <example><samp>ForMemberExpr ::= "for" "member" SimpleForBinding ("," SimpleForBinding)* "return" ExprSingle</samp></example>
+
+         <p>Here <code>SimpleForBinding</code> takes the same form as in a <code>ForExpr</code>: </p>
+         <example><samp>"$" VarName "in" ExprSingle</samp></example>
+
+         <p>The semantics are as follows:</p>
+
+         <ul>
+            <li>Each expression in a <code>SimpleForBinding</code> must evaluate to a single array.</li>
+            <li>The expression <code>for member $x in X, $y in Y return R</code> is equivalent to 
+          <code>for member $x in X return for member $y in Y return R</code>.</li>
+            <li>The expression <code>for $x in X return R</code> binds the variable <code>$x</code> to each member of the
+        array <code>X</code> in turn, evaluates <code>R</code> with this variable binding in scope, and returns the
+        sequence-concatenation of all the evaluations of <code>R</code>, in order.</li>
+         </ul>
+         
+         <aside>The expression <code>for member $x in $X return f($x)</code> is equivalent to 
+            <code>for $x in array:members($x) return f(unparcel($x))</code></aside>
+
+         <p>The <code>for member</code> expression is currently available only as a free-standing expression; it cannot be
+      used as a clause within an XQuery FLWOR expression.</p>
+
+         <p>Some further examples:</p>
+
+         <example><samp><![CDATA[let $json := '[{"x":1, "y":"one"}, {"x":2, "y":"two"}]'
+return for member $map in parse-json($json) return $map?y]]></samp></example>
+
+         <p>returns <code>"one", "two"</code>.</p>
+
+         <example><samp><![CDATA[let $json := '[[1,2,3], [4,5,6]]'
+return for member $A in parse-json($json), $a in $A return $a*2]]></samp></example>
+
+         <p>returns <code>2, 4, 6, 8, 10, 12</code>.</p>
+
+         <p>Note that the result of the expression is a sequence, not an array.</p>
+      </section>
+         </section>
+
+   <section id="xslt-syntax-extensions" title="XSLT Syntax Extensions">
+      <h1>XSLT 4.0 Syntax Extensions</h1>
+
+      <aside>Requires Saxon-PE or Saxon-EE. Available in Saxon-CS.</aside>
+
+      <p>This section describes features proposed for XSLT 4.0, to the extent they are implemented in Saxon 11.</p>
+
+      <aside>Use of forwards compatibility mode (by specifying <code>version="4.0"</code>, say), does not
+      affect the way these extensions are handled: they are allowed if extensions are enabled, and disallowed
+      if extensions are disabled, regardless of the effective <code>version</code> in the stylesheet.
+    </aside>
+
+      <p>Enabling syntax extensions not only allows the use of the XSLT extensions described in this section,
+    it also allows XPath 4.0 extensions to be used in expressions and sequence types within the stylesheet, 
+    as described in <a class="bodylink" href="/v4extensions/syntax-extensions"
+            >XPath and XQuery Syntax Extensions</a>.</p>
+      
+      <nav>
+         <ul/>
+      </nav>
+      
+      <section id="xsl-item-type" title="The xsl:item-type declaration">
+         <h1>The xsl:item-type declaration</h1>
+         
+         <p>The <code>xsl:item-type</code> declaration declares a type alias for use within a stylesheet.
+            See <a class="bodylink" href="/v4extensions/syntax-extensions/type-aliases">Type Aliases</a> for an overview. For example:</p>
+         
+         <example>
+            <samp><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>]]></samp>
+         </example>
+      </section>
+
+      <section id="match-patterns" title="Match Patterns">
+      <h1>Match Patterns</h1>
+
+      <p>The syntax of match patterns is extended to make it easier to match maps and
+      arrays. As with the XPath syntax extensions, these extensions are available only if explicitly enabled. </p>
+
+      <p>In particular the syntax <code>ma-type predicate*</code> is allowed in a pattern, where <code>ma-type</code>
+      is any of:</p>
+
+      <ol>
+         <li>
+            <code>type(...)</code>
+         </li>
+         <li>
+            <code>atomic(...)</code>
+         </li>
+         <li>
+            <code>union(...)</code>
+         </li>
+         <li>
+            <code>record(...)</code>
+         </li>
+         <li>
+            <code>map(...)</code>
+         </li>
+         <li>
+            <code>array(...)</code>
+         </li>
+      </ol>
+
+      <p>For example if a <a class="bodylink" href="/v4extensions/syntax-extensions/type-aliases"
+            >type alias</a> has been declared:</p>
+
+      <example><samp>&lt;xsl:item-type name="cx:complex" type="record(r as xs:double, i as xs:double)"/></samp></example>
+
+      <p>Then it can be used in a match pattern to match instances of the type, with or without predicates:</p>
+
+      <example><samp>&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></samp></example>
+
+      <example><samp>&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></samp></example>
+
+      <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for
+      <code>.[. instance of type(T)]</code>.</p>
+         
+      </section>
+      <section id="xslt-conditionals" title="Conditional Instructions">
+         <h1>Conditional Instructions</h1>
+
+
+
+      <p>If syntax extensions are enabled, then the <a class="bodylink code"
+            href="/xsl-elements/choose">xsl:choose</a> and <a class="bodylink code"
+            href="/xsl-elements/if">xsl:if</a>
+    instructions are enhanced as follows:</p>
+
+      <ul>
+         <li>
+            <p>Within <code>xsl:choose</code>, the <code>xsl:when</code> and <code>xsl:otherwise</code>
+        instructions can define the returned value using a <code class="bold"
+                  >select</code> attribute in place
+      of a sequence constructor. For example:</p>
+            <example><samp><![CDATA[<xsl:choose>
+  <xsl:when test="$day = 'Monday'" select="1"/>
+  <xsl:when test="$day = 'Tuesday'" select="2"/>
+  <xsl:when test="$day = 'Wednesday'" select="3"/>
+  <xsl:when test="$day = 'Thursday'" select="4"/>
+  <xsl:when test="$day = 'Friday'" select="5"/>
+  <xsl:otherwise select="-1"/>
+</xsl:choose>]]></samp></example>
+         </li>
+         <li>
+            <p>The <code>xsl:if</code> instruction can deliver its results using <code class="bold"
+                  >then</code>
+        and <code class="bold"
+               >else</code> attributes in place of a contained sequence constructor. For example:</p>
+            <example><samp><![CDATA[<xsl:if test="$day = 'Monday'" then="1" else="0"/>]]></samp></example>
+            <p>If the <code>then</code> attribute is present, the <code>xsl:if</code> instruction must
+          be empty (have no children). Either attribute can be used independently; there is no
+        requirement for both to be present.</p>
+         </li>
+      </ul>
+
+      <p>These new forms of <code>xsl:choose</code> and <code>xsl:if</code> are particularly useful
+      to compute the return value of a function, replacing <code>xsl:sequence</code>.</p>
+         
+         <p>The new <code>xsl:switch</code> instruction provides an alternative to <code>xsl:choose</code>.
+         It is best illustrated by example:</p>
+         
+         <example><samp><![CDATA[
+ <xsl:function name="f:days-in-month" as="xs:integer?">
+    <xsl:param name="month-number" as="xs:integer">
+    <xsl:param name="leap-year" as="xs:boolean">
+    <xsl:switch select="$month-number">
+      <xsl:when test="1, 3, 5, 7, 8, 10, 12" select="31"/>
+      <xsl:when test="4, 6, 9, 11" select="30"/>
+      <xsl:when test="2">
+         <xsl:if test="$leap-year" then="29" else="28"/>
+      </xsl:when>
+    </xsl:switch>
+  </xsl:function>]]></samp></example>
+         
+      </section>
+      <section id="separator-attribute" title="Separator Attribute">
+
+      <h1>Separator attribute on <code>xsl:for-each</code> and <code>xsl:apply-templates</code></h1>
+
+      <p>If syntax extensions are enabled, then the <a class="bodylink code"
+            href="/xsl-elements/for-each">xsl:for-each</a> and <a class="bodylink code"
+            href="/xsl-elements/apply-templates">xsl:apply-templates</a>
+      instructions allow a <code>separator</code> attribute, similar to the <code>separator</code> attribute on <code>xsl:value-of</code>.</p>
+
+      <p>The effect of the attribute is as follows. The attribute value template is expanded, once, using the outer context. The resulting
+      string is converted to a text node. This text node is added to the result sequence after processing every item in the (sorted) input
+      sequence, except the last.</p>
+
+      <p>For example, <code>&lt;xsl:apply-templates select="item" separator=", "/></code> inserts a comma and space into the output after
+      processing every item element in the input sequence, except the last</p>
+
+   </section>
+      <section id="iteration-maps-arrays" title="Iterating over Maps and Arrays">
+         <h1>Iterating over Maps and Arrays</h1>
+         
+         <p>The three instructions <code>xsl:for-each</code>, <code>xsl:iterate</code>, and <code>xsl:for-each-group</code>
+         can take an attribute <code>array</code> or <code>map</code> in place of the <code>select</code> attribute.</p>
+         
+         <p>If <code>array</code> is specified, the instruction iterates over the selected array. Specifically, the
+         body of the instruction is evaluated with the context item being a <i>parcel</i> containing the items making
+         up the corresponding member of the array; these items may be extracted with the <code>fn:unparcel()</code>
+         function, or simply with the lookup expression <code>?parcel</code>. For example:</p>
+         
+         <example><samp><![CDATA[
+<xsl:for-each array="[1, 3 to 5, 10 to 20, 31 to 32]" separator=" ">{count(?parcel)}</xsl:for-each>
+            ]]></samp></example>
+         
+         <p>outputs <code>1 3 11 2</code>.</p>
+         
+         <p>If <code>map</code> is specified, the instruction iterates over the selected map. Specifically, the
+            body of the instruction is evaluated with the context item being a map containing two entries:
+         an entry named "key" holding the key, and an entry named "value" holding the corresponding value.
+         The order of entries is undefined (but <code>&lt;xsl:sort select="?key"/></code> can be used to sort them).</p>
+      </section>
+      
+      <section id="break-when" title="Grouping using break-when">
+         <h1>Grouping using break-when</h1>
+         
+         <p>The <code>break-when</code> attribute can be specified on <code>xsl:for-each-group</code> in 
+            place of <code>group-by</code>, <code>group-adjacent</code>, <code>group-starting-with</code>, or 
+            <code>group-ending-with</code>. This allows a new group to be started conditionally based on the contents
+         of the current group so far. For example, <code>break-when="@date lt current-group()[last()]/@date</code>
+         causes a new group to be started whenever the date on the current item is earlier than the date on the
+         last item in the previous group.</p>
+      </section>
+      
+      <section id="xsl-map-duplicates" title="Controlling duplicates on xsl:map">
+         <h1>Controlling duplicates on <code>xsl:map</code></h1>
+         
+         <p>The <code>on-duplicates</code> attribute can be specified on <code>xsl:map</code> to control what happens
+         when two entries in the map would have the same key (in XSLT 3.0 this is always an error). The value
+         of the attribute is an expression, which must evaluate to a function. The function is called when an entry
+         in the map would conflict with an existing entry. It is supplied with two arguments, the value of the existing
+         entry and the value of the new entry, and it returns a new value to be associated with the duplicate key (or it can
+         throw an error, to replicate the default behavior). For example <code>on-duplicates="->($old, $new){$old, $new}</code>
+            causes the new value to be the sequence-concatenation of the supplied values, while 
+            <code>on-duplicates="->($old, $new){$old || ',' || $new}</code> concatenates the values with comma as
+            a separator. Specifying <code>on-duplicates="->($old, $new){$old}</code> takes the first of the duplicates, while 
+            <code>on-duplicates="->($old, $new){$new}</code> takes the last.</p>
+      </section>
+   </section>
+
+
+</article>

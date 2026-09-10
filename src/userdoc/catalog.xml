@@ -13,6 +13,7 @@
   <section ref="saxon-cs">Saxon-CS</section>
   <section ref="extensibility">Extensibility Mechanisms</section>
   <section ref="extensions">Saxon Extensions</section>
+  <section ref="v4extensions">Experimental 4.0 Extensions</section>
   <section ref="samples">Sample Saxon Applications</section>
   <section ref="sql-extension">Saxon SQL Extension</section>
   <section ref="xsl-elements">Reference: XSLT Elements</section>
