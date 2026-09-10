@@ -192,6 +192,15 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
         return tree.getNamePool().getURI(code);
     }
 
+    @Override
+    public boolean hasURI(String ns) {
+        int code = tree.attCode[nodeNr];
+        if (!NamePool.isPrefixed(code)) {
+            return ns.isEmpty();
+        }
+        return getNamePool().getStructuredQName(code).hasURI(ns);
+    }
+
     /**
      * Get the type annotation of this node, if any. The type annotation is represented as
      * SchemaType object.

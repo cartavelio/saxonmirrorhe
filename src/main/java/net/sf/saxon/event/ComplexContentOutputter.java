@@ -328,9 +328,8 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             // It is an error to output a namespace node for the default namespace if the element
             // itself is in the null namespace, as the resulting element could not be serialized
 
-            boolean elementIsInNullNamespace = pendingStartTag.hasURI("");
             if (prefix.isEmpty() && !namespaceUri.isEmpty()) {
-                if (elementIsInNullNamespace) {
+                if (pendingStartTag.hasURI("")) {
                     XPathException err = new XPathException("Cannot output a namespace node for the default namespace ("
                                                                     + namespaceUri + ") when the element is in no namespace");
                     err.setErrorCode(hostLanguage == HostLanguage.XSLT ? "XTDE0440" : "XQDY0102");

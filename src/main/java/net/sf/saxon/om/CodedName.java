@@ -89,7 +89,7 @@ public class CodedName implements NodeName {
      */
     @Override
     public boolean hasURI(String ns) {
-        return getURI().equals(ns);
+        return pool.getStructuredQName(fingerprint).hasURI(ns);
     }
 
     /**
