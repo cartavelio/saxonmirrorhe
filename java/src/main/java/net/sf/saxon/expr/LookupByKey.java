@@ -13,16 +13,14 @@ import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
-import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -31,8 +29,6 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 
@@ -147,11 +143,12 @@ public class LookupByKey extends BinaryExpression {
         }
         //#endif
         isSingleContainer = getLhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
-
+        
         if (!isArrayLookup && !isMapLookup) {
             // TODO: improve error handling here
             if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT &&
                     th.relationship(containerType, ArrayItemType.getInstance()) == Affinity.DISJOINT &&
+                    th.relationship(containerType, JNodeType.ANY_JNODE) == Affinity.DISJOINT &&
                     th.relationship(containerType, AnyExternalObjectType.THE_INSTANCE) == Affinity.DISJOINT) {
                 if (Cardinality.allowsZero(getLhsExpression().getCardinality())) {
                     visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " +
@@ -163,6 +160,19 @@ public class LookupByKey extends BinaryExpression {
                             .asTypeError()
                             .withFailingExpression(this);
                 }
+            } else {
+                final TypeChecker tc = config.getTypeChecker(false);
+                Supplier<RoleDiagnostic> role = () ->
+                        new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 0);
+                setLhsExpression(tc.staticTypeCheck(
+                        getLhsExpression(),
+                        SequenceType.zeroOrMore(
+                                ChoiceItemType.of(MapType.ANY_MAP_TYPE,
+                                                  ArrayItemType.ANY_ARRAY_TYPE,
+                                                  JNodeType.ANY_JNODE,
+                                                  AnyExternalObjectType.THE_INSTANCE)),
+                        role,
+                        visitor));
             }
         }
 
@@ -172,9 +182,9 @@ public class LookupByKey extends BinaryExpression {
         Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 1);
         TypeChecker tc = config.getTypeChecker(false);
         SequenceType req = BuiltInAtomicType.ANY_ATOMIC.zeroOrMore();
-        if (isArrayLookup) {
-            req = BuiltInAtomicType.INTEGER.zeroOrMore();
-        }
+//        if (isArrayLookup) {
+//            req = BuiltInAtomicType.INTEGER.zeroOrMore();
+//        }
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), req, role, visitor));
         isSingleEntry = getRhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
 
@@ -425,7 +435,7 @@ public class LookupByKey extends BinaryExpression {
 
                     }
 
-                } else {
+                } else if (expr.isMapLookup) {
 
                     if (expr.isSingleContainer && expr.isSingleEntry) {
                         ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
@@ -465,6 +475,78 @@ public class LookupByKey extends BinaryExpression {
                         };
 
                     }
+                } else {
+                    // No explicit axis; LHS is not known statically to be an array or map
+                    PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                    PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                    return context -> {
+                        SequenceIterator baseIterator = lhs.iterate(context);
+                        GroundedValue rhsVal;
+                        try {
+                            rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
+                        } catch (UncheckedXPathException e) {
+                            throw e.getXPathException();
+                        }
+                        MappingFunction mappingFunction = SequenceMapper.of(baseItem -> {
+                            switch (baseItem.getGenre()) {
+                                case ARRAY: {
+                                    MappingFunction arrayAccess = SequenceMapper.of(index -> {
+                                        if (index instanceof IntegerValue) {
+                                            int i = ((IntegerValue) index).asSubscript();
+                                            if (i > 0 && i <= ((ArrayItem) baseItem).arrayLength()) {
+                                                GroundedValue member = ((ArrayItem) baseItem).get(i - 1);
+                                                return member.iterate();
+                                            }
+                                        }
+                                        return EmptyIterator.getInstance();
+                                    });
+                                    SequenceIterator rhsIter = rhsVal.iterate();
+                                    return new MappingIterator(rhsIter, arrayAccess);
+                                }
+                                case MAP: {
+                                    SequenceIterator rhsIter = rhsVal.iterate();
+                                    return MappingIterator.map(rhsIter, key ->
+                                            optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) key))
+                                    );
+                                }
+                                case JNODE:
+                                    SequenceIterator rhsIter = rhsVal.iterate();
+                                    final int axis = AxisInfo.CHILD;
+                                    return MappingIterator.map(rhsIter, key -> {
+                                                                   SequenceIterator all = ((JNode) baseItem).iterateAxis(axis);
+                                                                   return new ItemMappingIterator(all, jnode ->
+                                                                           ((JNode) jnode).getSelector().equals(key) ? jnode : null);
+                                                               }
+
+                                    );
+
+                                case EXTERNAL: {
+                                    if (!(rhsVal instanceof StringValue)) {
+                                        throw new XPathException(
+                                                "An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator (" +
+                                                        baseItem.toShortString() + ") is not a singleton string", "XPTY0004")
+                                                .asTypeError()
+                                                .withLocation(expr.getLocation())
+                                                .withFailingExpression(expr);
+                                    }
+                                    String key = ((StringValue) rhsVal).getStringValue();
+                                    final GroundedValue entry = context.getConfiguration().externalObjectAsMap(
+                                            (ObjectValue<?>) baseItem, key).get((StringValue) rhsVal);
+                                    if (entry == null) {
+                                        throw new XPathException("There is no unique method named " + key +
+                                                                         " in the external object of type " + ((ObjectValue<?>) baseItem).getObject().getClass().getName(), "XPTY0004");
+                                    }
+                                    return entry.iterate();
+                                }
+                                default: {
+                                    mustBeArrayOrMap(expr, baseItem);
+                                    return null;
+                                }
+                            }
+                        });
+                        return new MappingIterator(baseIterator, mappingFunction);
+
+                    };
                 }
             } else {
                 // expression uses an explicit axis
@@ -488,19 +570,8 @@ public class LookupByKey extends BinaryExpression {
                                             GroundedValue member = ((ArrayItem) baseItem).get(i - 1);
                                             return member.iterate();
                                         }
-//                                            int subscript = ArrayFunctionSet.checkSubscript(
-//                                                    (IntegerValue) index, ((ArrayItem) baseItem).arrayLength()) - 1;
-//                                            GroundedValue member = ((ArrayItem) baseItem).get(subscript);
-//                                            return member.iterate();
                                     }
-                                        return EmptyIterator.getInstance();
-//                                            throw new XPathException(
-//                                                    "An item on the LHS of the '?' operator (" + expr.getLhsExpression().toShortString() + ") is an array, but a value on the RHS of the operator (" +
-//                                                            baseItem.toShortString() + ") is not an integer", "XPTY0004")
-//                                                    .asTypeError()
-//                                                    .withLocation(expr.getLocation())
-//                                                    .withFailingExpression(expr);
-                                    //}
+                                    return EmptyIterator.getInstance();
                                 });
                                 SequenceIterator rhsIter = rhsVal.iterate();
                                 return new MappingIterator(rhsIter, arrayAccess);
@@ -553,25 +624,6 @@ public class LookupByKey extends BinaryExpression {
         }
     }
 
-    private final static Shape entryShape = new Shape(
-            new Twine8("key"),
-            new Twine8("value"),
-            new Twine8("parent"),
-            new Twine8("ancestors"),
-            new Twine8("root"));
-
-    public static MapItem makeEntry(AtomicValue key, GroundedValue value, Item container) {
-        FunctionItem parent = new SimpleLazyFunction(() -> container, SequenceType.SINGLE_ITEM);
-        Item rootItem = container;
-        List<Item> ancestorItems = new ArrayList<>();
-        ancestorItems.add(container);
-
-        FunctionItem ancestors = new SimpleLazyFunction(
-                () -> SequenceExtent.makeSequenceExtent(ancestorItems), SequenceType.ANY_SEQUENCE);
-        FunctionItem root = new SimpleLazyFunction(
-                () -> rootItem, SequenceType.SINGLE_ITEM);
-        return entryShape.make(key, value, parent, ancestors, root);
-    }
 
 
 

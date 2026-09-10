@@ -75,7 +75,7 @@ DynamicFunctionCall extends Expression {
             return ((MapType)fnType).getValueType().getPrimaryType();
         } else if (fnType instanceof ArrayItemType) {
             return ((ArrayItemType) fnType).getMemberType().getPrimaryType();
-        } else if (fnType instanceof FunctionItemType) {
+        } else if (fnType instanceof SpecificFunctionType) {
             return ((FunctionItemType) fnType).getResultType().getPrimaryType();
         } else if (fnType instanceof AnyFunctionType) {
             return AnyItemType.getInstance();

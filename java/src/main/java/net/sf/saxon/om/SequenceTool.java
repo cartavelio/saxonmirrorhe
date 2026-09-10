@@ -448,6 +448,12 @@ public class SequenceTool {
         }
     }
 
+    public static SequenceType getSequenceType(GroundedValue value, TypeHierarchy th) {
+        ItemType it = getItemType(value, th);
+        int cardinality = value.getLength() <= 1 ? StaticProperty.ALLOWS_ZERO_OR_ONE : StaticProperty.ALLOWS_ONE_OR_MORE;
+        return SequenceType.makeSequenceType(it, cardinality);
+    }
+
     /**
      * Get the UType of the items in a sequence. If the sequence is heterogeneous,
      * the method returns the lowest common supertype. If the sequence is empty, it returns

@@ -236,7 +236,7 @@ public final class SequenceCoercer extends UnaryExpression {
 
     @Override
     public String getExpressionName() {
-        return "coercer";
+        return "coercer{" + requiredType + "}";
     }
 
 

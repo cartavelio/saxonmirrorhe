@@ -10,6 +10,8 @@ package net.sf.saxon.type;
 import com.saxonica.functions.qt4.pin.LabeledItem;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
@@ -208,6 +210,9 @@ public abstract class Type {
             return th == null ? MapType.ANY_MAP_TYPE : ((MapItem)item).getItemType(th);
         } else if (item instanceof ArrayItem) {
             return th == null ? ArrayItemType.ANY_ARRAY_TYPE : new ArrayItemType(((ArrayItem) item).getMemberType(th));
+        } else if (item instanceof JNode) {
+            return th == null ? JNodeType.ANY_JNODE
+                    : new JNodeType(SequenceTool.getSequenceType(((JNode)item).getValue(), th));
         } else { //if (item instanceof FunctionItem) {
             return ((FunctionItem) item).getFunctionItemType();
         }

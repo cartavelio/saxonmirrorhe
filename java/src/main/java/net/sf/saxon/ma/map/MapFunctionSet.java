@@ -614,6 +614,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             }
             return results;
         }
+
     }
 
 

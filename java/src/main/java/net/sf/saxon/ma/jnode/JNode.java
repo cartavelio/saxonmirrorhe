@@ -24,11 +24,10 @@ public abstract class JNode implements Item {
     public abstract GroundedValue getValue();
 
     public SequenceIterator getChildren() {
-        // TODO: avoid materializing the list
-        GroundedValue value = getValue();
+        // TODO: avoid materializing the list         )
         List<JNode> children = new ArrayList<>();
         int position = 1;
-        for (Item item : value.asIterable()) {
+        for (Item item : getValue().asIterable()) {
             if (item instanceof ArrayItem) {
                 int selector = 1;
                 for (GroundedValue member : ((ArrayItem) item).members()) {
@@ -138,6 +137,19 @@ public abstract class JNode implements Item {
             default:
                 throw new IllegalArgumentException("Unrecognized JNode axis number " + axis);
         }
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    @Override
+    public String toString() {
+        return "JNode(" + getValue().toString() + ")";
+    }
+
+    @Override
+    public String toShortString() {
+        return "JNode(" + getValue().toShortString() + ")";
     }
 
     private static class IncrementalIterator implements SequenceIterator {

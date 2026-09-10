@@ -8,6 +8,7 @@
 package net.sf.saxon.type;
 
 
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.trans.Err;
@@ -75,7 +76,7 @@ public class UType {
 
     public static final UType ANY_ATOMIC = new UType(0x0FFFFF00);
 
-    public static final UType ANY = ANY_NODE.union(ANY_ATOMIC).union(FUNCTION).union(EXTENSION);
+    public static final UType ANY = ANY_NODE.union(JNODE).union(ANY_ATOMIC).union(FUNCTION).union(EXTENSION);
 
     
     private final int bits;
@@ -349,6 +350,8 @@ public class UType {
             return ((AtomicValue)item).getUType();
         } else if (item instanceof FunctionItem) {
             return UType.FUNCTION;
+        } else if (item instanceof JNode) {
+            return UType.JNODE;
         } else if (item.getGenre() == Genre.EXTERNAL) {
             return UType.EXTENSION;
         } else {

@@ -16,31 +16,26 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.MapOrArray;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.jnode.JNodeType;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordType;
+import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -49,6 +44,9 @@ import java.util.function.Function;
  * The {@code LookupAllExpression} handles lookup expressions of the form {@code expr?*} (which
  * returns all entries in a map or array) and {@code expr?type(T)} (which returns all entries
  * whose value matches a given sequence type).
+ *
+ * The code handles expressions with any axis (or none), and the LHS may be a map, an array,
+ * a JNode, or any sequence of maps, arrays, and JNodes.
  */
 
 public class LookupByValuePredicate extends UnaryExpression {
@@ -298,85 +296,84 @@ public class LookupByValuePredicate extends UnaryExpression {
             LookupByValuePredicate expr = (LookupByValuePredicate) getExpression();
             int axis = expr.axis;
             Function<GroundedValue, Boolean> predicate = expr.predicate;
+
+
+//            ItemType containerType = expr.getItemType();
+//            boolean isArrayLookup = containerType instanceof ArrayItemType;
+//            boolean isMapLookup = containerType instanceof MapType || containerType instanceof RecordType;
+//            boolean isJNodeLookup = containerType instanceof JNodeType;
+//            boolean isSingleton = !Cardinality.allowsMany(expr.getCardinality());
+
+            // Special case: LHS is a singleton map, axis is unspecified
+
+//            if (expr.axis == -1 && isSingleton && isMapLookup) {
+//                ItemEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
+//                return context -> {
+//                    // TODO: lazy evaluation
+//                    MapItem map = (MapItem)baseEval.eval(context);
+//                    if (map == null) {
+//                        return EmptyIterator.getInstance();
+//                    }
+//                    ZenoSequence results = new ZenoSequence();
+//                    for (KeyValuePair pair : map.keyValuePairs()) {
+//                        if (predicate == null || predicate.apply(pair.value)) {
+//                            results = results.appendSequence(pair.value);
+//                        }
+//                    }
+//                    return results.iterate();
+//                };
+//            }
+//
+//            // Special case: LHS is a singleton array, axis is unspecified
+//
+//            if (expr.axis == -1 && isSingleton && isArrayLookup) {
+//                // TODO: lazy evaluation
+//                ItemEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
+//                return context -> {
+//                    ArrayItem array = (ArrayItem) baseEval.eval(context);
+//                    if (array == null) {
+//                        return EmptyIterator.getInstance();
+//                    }
+//                    ZenoSequence results = new ZenoSequence();
+//                    for (GroundedValue value : array.members()) {
+//                        if (predicate == null || predicate.apply(value)) {
+//                            results = results.appendSequence(value);
+//                        }
+//                    }
+//                    return results.iterate();
+//                };
+//            }
+
+            // General case
+
             PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
-            SequenceType req = SequenceType.ANY_SEQUENCE;
-            TypeHierarchy th = getConfiguration().getTypeHierarchy();
+
             return context -> {
                 SequenceIterator lhs = baseEval.iterate(context);
-                SequenceIterator entries = new MappingIterator(lhs, item -> {
-                    if (item instanceof ArrayItem) {
-                        return new ArrayEntriesIterator((ArrayItem)item);
-                    } else if (item instanceof MapItem) {
-                        return new MapEntriesIterator((MapItem)item);
-                    } else if (item instanceof JNode) {
-                        return ((JNode)item).iterateAxis(axis);
+                return new MappingIterator(lhs, item -> {
+                    JNode jNode;
+                    if (item instanceof MapOrArray) {
+                        jNode = new RootJNode((MapOrArray)item);
                     } else {
-                        return EmptyIterator.getInstance();
+                        jNode = (JNode)item;
                     }
-                });
-
-                if (predicate == null) {
-                    return entries;
-                }
-                return new ItemMappingIterator(entries, item -> {
-                    GroundedValue value = ((JNode)item).getValue();
-                    return predicate.apply(value) ? item : null;
+                    SequenceIterator allNodes = jNode.iterateAxis(axis == -1 ? AxisInfo.CHILD : axis);
+                    SequenceIterator selectedNodes =
+                            predicate == null
+                                    ? allNodes
+                                    : new ItemMappingIterator(allNodes, node -> predicate.apply(node) ? node : null);
+                    if (item instanceof MapOrArray && axis == -1) {
+                        // backwards compatibility case, return the node values. not the nodes
+                        return new MappingIterator(selectedNodes, node -> ((JNode)node).getValue().iterate());
+                    } else {
+                        return selectedNodes;
+                    }
                 });
 
             };
         }
     }
 
-    /**
-     * Iterator over a sequence of entries in an array, delivering them in the form
-     * required by $array?entry::*
-     */
-    public static class ArrayEntriesIterator implements SequenceIterator {
 
-        final ArrayItem container;
-        final Iterator<GroundedValue> baseIterator;
-        int index = 0;
-
-        public ArrayEntriesIterator(ArrayItem arrayItem) {
-            baseIterator = arrayItem.members().iterator();
-            container = arrayItem;
-        }
-
-        @Override
-        public Item next() {
-            if (baseIterator.hasNext()) {
-                GroundedValue value = baseIterator.next();
-                Int64Value key = Int64Value.makeIntegerValue(++index);
-                return LookupExpression.makeEntry(key, value, container);
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Iterator over a sequence of entries in a map, delivering them in the form
-     * required by $map?entry::*
-     */
-    public static class MapEntriesIterator implements SequenceIterator {
-
-        final MapItem container;
-        final Iterator<KeyValuePair> baseIterator;
-
-        public MapEntriesIterator(MapItem mapItem) {
-            baseIterator = mapItem.keyValuePairs().iterator();
-            container = mapItem;
-        }
-
-        @Override
-        public Item next() {
-            if (baseIterator.hasNext()) {
-                KeyValuePair kvp = baseIterator.next();
-                return LookupExpression.makeEntry(kvp.key, kvp.value, container);
-            } else {
-                return null;
-            }
-        }
-    }
 }
 

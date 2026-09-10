@@ -1,5 +1,6 @@
 package net.sf.saxon.type.coercion;
 
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
@@ -26,6 +27,9 @@ public final class ItemCheckingPlan extends CoercionPlan {
      */
 
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
+        if (item instanceof JNode) {
+            return ((JNode)item).getValue();
+        }
         check(item, requiredType, request);
         return item;
     }

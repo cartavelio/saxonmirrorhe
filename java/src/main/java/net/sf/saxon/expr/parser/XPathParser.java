@@ -3732,8 +3732,6 @@ public class XPathParser {
         int axis;
         if (deep) {
             axis = AxisInfo.DESCENDANT;
-            nextToken();
-            token = t.currentToken;
         } else if (token instanceof Token.NameToken && t.peekAhead() == Token.COLON_COLON) {
             checkLanguageVersion40("axis after `?`");
             axis = AxisInfo.getAxisNumber(t.currentName());
