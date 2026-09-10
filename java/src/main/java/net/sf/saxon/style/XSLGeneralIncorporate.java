@@ -105,6 +105,11 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
             XSLStylesheet includedSheet;
             StylesheetModule incModule;
 
+            if (targetDoc == null) {
+                // This implies that the xsl:include is redundant
+                return null;
+            }
+
             DocumentKey key = DocumentFn.computeDocumentKey(href, getBaseURI(), getCompilation().getPackageData(), false);
             includedSheet = (XSLStylesheet)psm.getStylesheetDocument(key);
             if (includedSheet != null) {
