@@ -3021,6 +3021,7 @@ public class XPathParser {
             case "comment":
             case "document-node":
             case "element":
+            case "gnode":
             case "namespace-node":
             case "node":
             case "schema-attribute":
@@ -3030,6 +3031,8 @@ public class XPathParser {
             case "fn":
             case "function":
             case "if":
+            case "item":
+            case "jnode":
             case "switch":
             case "typeswitch":
                 return true;
