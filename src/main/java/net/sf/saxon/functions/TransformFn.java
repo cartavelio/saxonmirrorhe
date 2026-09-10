@@ -769,10 +769,9 @@ public class TransformFn extends SystemFunction implements Callable {
             Controller controller = context.getController();
             if (controller instanceof XsltController) {
                 deliverer = new DelegatingDeliverer(deliverer,
-                                                    ((XsltController) controller).getResultDocumentResolver(),
-                                                    controller.getBaseOutputURI());
+                                                    ((XsltController) controller).getResultDocumentResolver());
             } else {
-                deliverer = new DelegatingDeliverer(deliverer, new StandardResultDocumentResolver(), baseOutputUri);
+                deliverer = new DelegatingDeliverer(deliverer, new StandardResultDocumentResolver());
             }
         }
 
