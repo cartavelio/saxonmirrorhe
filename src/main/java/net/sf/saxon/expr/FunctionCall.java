@@ -78,7 +78,7 @@ public abstract class FunctionCall extends Expression {
     public abstract FunctionItem getTargetFunction(XPathContext context) throws XPathException;
 
     /**
-     * Get the qualified of the function being called
+     * Get the qualified name of the function being called
      *
      * @return the qualified name. May be null if the function is anonymous.
      */

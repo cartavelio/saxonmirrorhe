@@ -192,7 +192,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     }
 
     /**
-     * Get the qualified of the function being called
+     * Get the qualified name of the function being called
      *
      * @return the qualified name
      */
@@ -200,7 +200,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     @Override
     public final StructuredQName getFunctionName() {
         if (name == null) {
-            return function.getFunctionName();
+            return function == null ? null : function.getFunctionName();
         } else {
             return name;
         }
