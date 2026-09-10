@@ -9,7 +9,10 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.StringEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardDiagnostics;
@@ -27,7 +30,10 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -317,6 +323,10 @@ public class MessageInstr extends Instruction {
                 try {
                     errorCode = StructuredQName.fromLexicalQName(
                             code, false, true, expr.getRetainedStaticContext());
+                    if (errorCode.hasURI(NamespaceUri.ERR) && errorCode.getPrefix().isEmpty()) {
+                        // cosmetic - add the err: prefix
+                        errorCode = new StructuredQName("err", NamespaceUri.ERR, errorCode.getLocalPart());
+                    }
                 } catch (XPathException err) {
                     // The spec says we fall back to XTMM9000
                     errorCode = new StructuredQName("err", NamespaceUri.ERR, "XTMM9000");
