@@ -18,15 +18,28 @@ namespace Saxon.Callbacks {
         }
         
         public override object GetEntity(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) {
-            if (resolver is CatalogResourceResolver crr) {
-                return crr.GetEntityResolver().GetXmlResolver().GetEntity(absoluteUri, role, ofObjectToReturn);
+            try
+            {
+                if (resolver is CatalogResourceResolver crr)
+                {
+                    Object resp = crr!.GetEntityResolver()!.GetXmlResolver().GetEntity(absoluteUri, role, ofObjectToReturn);
+                    return resp;
+                }
+            }
+            catch (UriFormatException ex)
+            {
+                // If the parser encounters an entity with a public identifier, it calls GetEntity using
+                // the public identifier as a URI. No, really. I sh*t you not. Somehow, that Uri gets
+                // created by the processor and passed to us, but when we try to pass it to our 
+                // implementation of GetEntity, System.Uri throws a UriFormatException. All we can do
+                // is ignore it. There has to be a system identifier, and the parser will try again with
+                // the actual URI. If this arises in some *other* way, well, resolution will fail, and
+                // that's about all we can do.
+                return null;
             }
 
-            return null; // TODO: implement me
+            return null;
         }
-
-
-
 
         /// <summary>
         /// Resolve a relative URI against a base URI

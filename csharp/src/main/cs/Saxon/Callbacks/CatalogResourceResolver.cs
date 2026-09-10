@@ -93,9 +93,9 @@ namespace Saxon.Callbacks {
                     }
 
                     IResourceResponse? rr = catalogBasedResolver.Resolve(req);
-                    if (rr.Resolved && rr.ResolvedUri != null) {
+                    if (rr.Resolved && rr.Request.GetAbsoluteUri() != null) {
                         TypedStreamSource result = new TypedStreamSource();
-                        result.setSystemId(rr.ResolvedUri.ToString());
+                        result.setSystemId(rr.Request.GetAbsoluteUri()!.ToString());
                         if (rr.Stream != null) {
                             result.setInputStream(rr.Stream);
                         }
