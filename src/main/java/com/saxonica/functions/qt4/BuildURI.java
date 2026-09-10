@@ -1,15 +1,23 @@
 package com.saxonica.functions.qt4;
 
+
 import com.ibm.icu.util.ValueIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
+
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
@@ -18,6 +26,30 @@ import java.util.ArrayList;
  * Supports the fn:build-uri function.
  */
 public class BuildURI extends URIFunctions {
+
+    private static RecordTest.Field f(String name, SequenceType type, boolean optional) {
+        return new RecordTest.Field(name, type, optional);
+    }
+
+    private static RecordTest keyValueRecord = RecordTest.extensible(
+            f("key", SequenceType.SINGLE_STRING, true),
+            f("value", SequenceType.SINGLE_STRING, true)
+    );
+
+    public static RecordTest uriStructureRecord = RecordTest.extensible(
+            f("uri", SequenceType.SINGLE_STRING, true),
+            f("scheme", SequenceType.SINGLE_STRING, true),
+            f("authority", SequenceType.SINGLE_STRING, true),
+            f("userinfo", SequenceType.SINGLE_STRING, true),
+            f("host", SequenceType.SINGLE_STRING, true),
+            f("port", SequenceType.SINGLE_STRING, true),
+            f("path", SequenceType.SINGLE_STRING, true),
+            f("query", SequenceType.SINGLE_STRING, true),
+            f("fragment", SequenceType.SINGLE_STRING, true),
+            f("path-segments", SequenceType.one(new ArrayItemType(SequenceType.SINGLE_STRING)), true),
+            f("query-parameters", SequenceType.one(new ArrayItemType(SequenceType.one(keyValueRecord))), true));
+
+
     @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         MapItem parts = (MapItem) arguments[0].head();
@@ -74,47 +106,36 @@ public class BuildURI extends URIFunctions {
         }
 
         if (parts.get(PATH_SEGMENTS) != null) {
-            GroundedValue value = parts.get(PATH_SEGMENTS);
-            int pos = 0;
-            SequenceIterator iter = value.iterate();
-            GroundedValue svalue = iter.next();
-            while (svalue != null) {
-                if (pos == 0) {
-                    uri.append(hierarchical ? encodePathSegment(svalue) : svalue.getStringValue());
-                } else {
-                    uri.append(pathSeparator);
-                    uri.append(encodePathSegment(svalue));
-                }
-                pos = pos + 1;
-                svalue = iter.next();
+            ArrayItem value = (ArrayItem) parts.get(PATH_SEGMENTS);
+            uri.append(hierarchical ? encodePathSegment(value.get(0)) : value.get(0).getStringValue());
+            for (int pos = 1; pos < value.arrayLength(); pos++) {
+                uri.append(pathSeparator);
+                uri.append(encodePathSegment(value.get(pos)));
             }
-       } else if (parts.get(PATH) != null) {
+        } else if (parts.get(PATH) != null) {
             uri.append(parts.get(PATH).getStringValue());
         }
 
-        if (parts.get(QUERY_PARAMETERS) != null) {
+        if (parts.get(QUERY_SEGMENTS) != null) {
             String sep = "?";
-            MapItem qmap = (MapItem) parts.get(QUERY_PARAMETERS).head();
-            SequenceIterator kiter = qmap.keys();
-            GroundedValue kvalue = kiter.next();
-            while (kvalue != null) {
-                String key = kvalue.getStringValue();
-                GroundedValue vvalue = qmap.get((AtomicValue) kvalue);
-                SequenceIterator viter = vvalue.iterate();
-                GroundedValue value = viter.next();
-                while (value != null) {
+            ArrayItem value = (ArrayItem) parts.get(QUERY_SEGMENTS);
+            for (int pos = 0; pos < value.arrayLength(); pos++) {
+                MapItem param = (MapItem) value.get(pos);
+                if (param.get(KEY) != null || param.get(VALUE) != null) {
                     uri.append(sep);
                     sep = querySeparator;
-                    if (key.isEmpty()) {
-                        uri.append(encodeOtherSegment(value));
+                    if (param.get(KEY) != null) {
+                        if (param.get(VALUE) != null) {
+                            uri.append(encodeOtherSegment(param.get(KEY)));
+                            uri.append("=");
+                            uri.append(encodeOtherSegment(param.get(VALUE)));
+                        } else {
+                            uri.append(encodeOtherSegment(param.get(KEY)));
+                        }
                     } else {
-                        uri.append(encodeOtherSegment(kvalue));
-                        uri.append("=");
-                        uri.append(encodeOtherSegment(value));
+                        uri.append(encodeOtherSegment(param.get(VALUE)));
                     }
-                    value = viter.next();
                 }
-                kvalue = kiter.next();
             }
         } else if (parts.get(QUERY) != null) {
             uri.append("?").append(parts.get(QUERY).getStringValue());

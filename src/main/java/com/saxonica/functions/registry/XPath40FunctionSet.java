@@ -80,7 +80,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         //#if EE==true || PE==true
         register("build-uri", 1, 2, e -> e.populate(BuildURI::new, BuiltInAtomicType.STRING, ONE, LATE | NEW)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE, null)
+                .arg(0, BuildURI.uriStructureRecord, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null));
         //#endif
 
