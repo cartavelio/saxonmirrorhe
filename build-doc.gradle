@@ -978,7 +978,7 @@ task saxonc_doc_pypi(type: Copy, dependsOn: ['saxon_eec_pypi']) {
 
 task saxonc_doxygen(dependsOn: ['saxonc_doc_pypi']) {
   inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
-  outputs.files fileTree(dir: "${buildDir}/build/doc_pypi/documentation")
+  outputs.files fileTree(dir: "${buildDir}/doc_pypi/documentation")
   doLast {
     copy {
       into "${buildDir}/doc_pypi/Saxon.C.API"
@@ -987,9 +987,7 @@ task saxonc_doxygen(dependsOn: ['saxonc_doc_pypi']) {
       include "README.md"
       filter { line ->
         line.replaceAll('@@VERSION@@', saxonVersion)
-          .replace('@@EDITION@@', 'EE')
-          .replace('@@LOGO@@', '/img/saxonica_logo.gif')
-          .replace('@@SOURCES@@', 'src')
+          .replace('@@LOGO@@', "${projectDir}/src/docs/doc/img/saxonica_logo.gif")
           .replace('@@OUTPUT@@', 'documentation')
       }
     }

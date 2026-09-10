@@ -684,21 +684,6 @@ task all_saxonc_releases() {
 
     doLast {
       copy {
-        from "${projectDir}/src/main/c/Saxon.C.API"
-        into "${saxoncReleaseDir}"
-        include "README.md"
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-                  .replace('@@edition@@', edition)
-                  .replace('@@EDITION@@', edition.toUpperCase())
-                  .replace('@@libpath@@', libpath)
-                  .replace('@@location@@', location)
-        }
-      }
-    }
-
-    doLast {
-      copy {
         from "${buildDir}/c/"
         into "${saxoncReleaseDir}/Saxon.C.API/graalvm"
         include "graal*.h"
