@@ -352,13 +352,25 @@ void testXQueryLineNumberError(const char * cwd, sResultCount *sresult){
  cout<<endl<<"Test testXQueryLineNumberError:"<<endl;
     SaxonProcessor * processor = new SaxonProcessor(false);
     XQueryProcessor * queryProc = processor->newXQueryProcessor();
+    if(queryProc == nullptr) {
+        cout<<"Test testXQueryLineNumberError failed to create XQueryProcessor"<<endl;
+        if(processor->exceptionOccurred()) {
+            const char *message = processor->getErrorMessage();
+            cout << "Error Message = " << message << endl;
+            queryProc->exceptionClear();
+        }
+        sresult->failure++;
+        sresult->failureList.push_back("testXQueryLineNumberError");
+        return;
+    }
 	queryProc->clearProperties();
 	queryProc->clearParameters();
-    queryProc->setcwd(cwd);
+    if(cwd != nullptr) {
+        queryProc->setcwd(cwd);
+    }
    queryProc->setProperty("s", "../data/cat.xml");
 
     queryProc->setProperty("qs", "saxon:line-number((//person)[1])");
-    cout<<"Test testXQueryLineNumberError cp0"<<endl;
     const char * result = queryProc->runQueryToString();
     if(result != nullptr){
         sresult->failure++;
@@ -372,7 +384,7 @@ void testXQueryLineNumberError(const char * cwd, sResultCount *sresult){
 		    cout<<"Exception found. "<<endl;
         SaxonApiException * exception = queryProc->getException();
         if(exception != nullptr) {
-            const char *message = queryProc->getErrorMessage();
+            const char *message = exception->getMessage();
             cout << "Error Message = " << message << endl;
             queryProc->exceptionClear();
         }

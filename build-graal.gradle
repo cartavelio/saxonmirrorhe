@@ -65,7 +65,7 @@ task graalJar(
 
 task graalImage(
   dependsOn: ["graalJar"],
-  description: "Builds the GraalVM native image"
+  description: "Builds the GraalVM native image, add '-g' option for debugging"
 ) {
   doLast {
     exec {
@@ -78,7 +78,7 @@ task graalImage(
         "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
         "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
         "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
-        "--shared", '-g'
+        "--shared"
     }
   }
 }
