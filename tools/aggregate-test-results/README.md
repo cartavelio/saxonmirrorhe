@@ -23,6 +23,7 @@ An XProc pipeline that runs one or more gradle test tasks and generates an HTML 
 The workflow is generally:
 
 1. Pull the latest code from whichever branch of `Saxondev` you intend to check, eg. `saxon12` or `main`
+1. Run `./gradlew clean`
 1. Run `src/aggregate_test_results.xpl` (_see [Running from the command-line](#how-to-run), below_), which by default will:
 	1. Run the `aggregated-test-results` gradle task for each SaxonJ product
 	1. Create an XML file containing all the results from the tests run, storing it in the `$output-dir` as `aggregated_test_results.all.xml`
@@ -58,10 +59,10 @@ _Not yet tested with Morgana_
 By default, this pipeline will:
 
 * run the following gradle tasks:
-    * java:aggregated-test-results
-    * java:pe:aggregated-test-results
-    * java:he:aggregated-test-results   
-* store the results in `tools/aggreagate-test-results/tmp/`
+    * `java:aggregated-test-results`
+    * `java:pe:aggregated-test-results`
+    * `java:he:aggregated-test-results`  
+* store the results in `tools/aggreagate-test-results/out/YYYYMMDD/`
 
 ## Inputs <a id="inputs"></a>
 
