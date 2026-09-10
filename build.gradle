@@ -1,3 +1,14 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    // I'll move this to somewhere "real" in the short term
+    maven { url "https://nwalsh.com/maven" }
+  }
+  dependencies {
+    classpath 'com.nwalsh:gradle-docker-container-plugin:0.9.5'
+  }
+}
+
 plugins {
   id "java"
   id "maven-publish"
@@ -10,7 +21,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 import org.gradle.internal.os.OperatingSystem;
-import Docker
+import com.nwalsh.DockerContainer
 
 repositories {
   mavenLocal()
@@ -1732,30 +1743,30 @@ publishing {
 
 task dockerup() {
   doLast {
-    Docker.assertRunning(c_sqlserver)
+    DockerContainer.assertRunning(c_sqlserver)
   }
 }
 
 task dockerdown() {
   doLast {
-    Docker.assertNotRunning(c_sqlserver)
+    DockerContainer.assertNotRunning(c_sqlserver)
   }
 }
 
 task sqlServerStart(dependsOn: ["dockerdown"]) {
   doFirst {
-    Docker.assertDockerAvailable()
-    Docker.assertDockerComposeAvailable()
+    DockerContainer.assertDockerAvailable()
+    DockerContainer.assertDockerComposeAvailable()
     mkdir "${buildDir}/derby/data"
   }
 
   doLast {
     exec {
       workingDir "docker"
-      commandLine Docker.dockerCompose(), "up", "-d"
+      commandLine DockerContainer.dockerCompose(), "up", "-d"
     }
     exec {
-      commandLine Docker.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
+      commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
     }
   }
 }
@@ -1763,11 +1774,11 @@ task sqlServerStart(dependsOn: ["dockerdown"]) {
 task sqlServerLogs(dependsOn: ["dockerup"]) {
   def id = "NA"
   doFirst {
-    id = Docker.containerid(c_sqlserver)
+    id = DockerContainer.containerid(c_sqlserver)
   }
   doLast {
     exec {
-      commandLine Docker.docker(), "logs", id, "-f"
+      commandLine DockerContainer.docker(), "logs", id, "-f"
     }
   }
 }
@@ -1776,7 +1787,7 @@ task sqlServerStop(dependsOn: ["dockerup"]) {
   doLast {
     exec {
       workingDir "docker"
-      commandLine Docker.dockerCompose(), "down"
+      commandLine DockerContainer.dockerCompose(), "down"
     }
   }
 }
