@@ -30,8 +30,11 @@ def create_xdm_dict(proc, mmap):
     Args:
         proc (PySaxonProcessor): PySaxonProcessor object required to create PyXdmValue objects from primitive types
         mmap (dict): The dict of key-value pairs to convert
+    Returns:
+        dict: Dictionary of (PyXdmAtomicValue, PyXdmValue) pairs
     Example:
-        with saxonc.PySaxonProcessor(license=False) as proc:
+        from saxonc import *
+        with PySaxonProcessor(license=False) as saxonproc:
             mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2),
                     "c":saxonproc.make_integer_value(3)}
             xdmdict = create_xdm_dict(saxonproc, mymap)
@@ -117,7 +120,8 @@ cdef class PySaxonProcessor:
     """A PySaxonProcessor acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
     This class is itself the context that needs to be managed (i.e. allocation & release)
     Example:
-        with saxonc.PySaxonProcessor(license=False) as proc:
+        from saxonc import *
+        with PySaxonProcessor(license=False) as proc:
             print("Test SaxonC on Python")
             print(proc.version)
             xdmAtomicval = proc.make_boolean_value(False)
@@ -545,6 +549,11 @@ cdef class PySaxonProcessor:
             dataMap (dict): Dictionary of (PyXdmAtomicValue, PyXdmValue) pairs
         Returns:
             PyXdmMap: The corresponding value
+        Example:
+            mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2),
+                    "c":saxonproc.make_integer_value(3)}
+            xdmdict = create_xdm_dict(saxonproc, mymap)
+            map = saxonproc.make_map(xdmdict)
         """
         cdef int len_ = len(dataMap)
         cdef saxoncClasses.XdmValue ** c_values = self.thisptr.createXdmValueArray(len_)
@@ -1022,6 +1031,7 @@ cdef class PyXslt30Processor:
             PyXsltExecutable: which represents the compiled stylesheet. The PyXsltExecutable is immutable
             and thread-safe; it may be used to run multiple transformations, in series or concurrently.
         Example:
+            xsltproc = saxon_proc.new_xslt30_processor()
             1) executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>
                                              <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' />
                                              <xsl:template match='*'><output><xsl:value-of select='//person[1]'/>
@@ -1029,7 +1039,7 @@ cdef class PyXslt30Processor:
                                                <out><xsl:value-of select='. * 3'/></out>
                                              </xsl:for-each></output></xsl:template></xsl:stylesheet>")
             2) executable = xsltproc.compile_stylesheet(stylesheet_file="test1.xsl", save=True, output_file="test1.sef")
-            3) executable = xsltproc.compile(associated_file="foo.xml")
+            3) executable = xsltproc.compile_stylesheet(associated_file="foo.xml")
         """
         py_error_message = "Error: compile_stylesheet should only contain one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node) (with optional additional arguments: save, output_file)"
         if len(kwds) >3:
@@ -1856,7 +1866,7 @@ cdef class PyXsltExecutable:
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
-            xslt30_proc = saxon_proc.new_xsl30_processor()
+            xslt30_proc = saxon_proc.new_xslt30_processor()
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.transform_to_value(source_file="cat.xml")
             2) executable.set_initial_match_selection("cat.xml")\r
@@ -1943,7 +1953,7 @@ cdef class PyXsltExecutable:
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
-            xslt30_proc = saxon_proc.new_xsl30_processor()
+            xslt30_proc = saxon_proc.new_xslt30_processor()
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.set_initial_match_selection(file_name="cat.xml")\r
                result = executable.apply_templates_returning_value()
@@ -2044,7 +2054,7 @@ cdef class PyXsltExecutable:
         Returns:
             str: Result of the transformation as a str value
         Example:
-            xslt30_proc = saxon_proc.new_xsl30_processor()
+            xslt30_proc = saxon_proc.new_xslt30_processor()
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.set_initial_match_selection(file_name="cat.xml")\r
                content = executable.apply_templates_returning_string()
@@ -2179,7 +2189,7 @@ cdef class PyXsltExecutable:
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
-            xslt30_proc = saxon_proc.new_xsl30_processor()
+            xslt30_proc = saxon_proc.new_xslt30_processor()
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.call_template_returning_value("main")\r
             2) executable.set_initial_match_selection(file_name="cat.xml")\r
