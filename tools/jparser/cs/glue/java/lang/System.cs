@@ -33,6 +33,14 @@ namespace java.lang
             return nanoTime() / 1_000_000L;
         }
 
+        public static HashMap<string, string> getenv() {
+            return new HashMap<string, string>(Sys.Environment.GetEnvironmentVariables())
+        }
+
+        public static string getenv(string name) {
+            return Sys.Environment.GetEnvironmentVariable(name);
+        }
+
         public static java.io.PrintStream @out = null;
         public static java.io.PrintStream err = null;
 

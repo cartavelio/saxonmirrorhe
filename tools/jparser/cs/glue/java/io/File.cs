@@ -6,7 +6,7 @@ namespace java.io {
             
         }
 
-        public File(java.net.URI uri) {
+        public File(System.Uri uri) {
             
         }
         
@@ -14,7 +14,7 @@ namespace java.io {
             
         }
 
-        public java.net.URI toURI() {
+        public System.Uri toURI() {
             return null;
         }
 
@@ -42,7 +42,7 @@ namespace java.io {
         }
 
         public bool enameTo(File newName) {
-            
+            throw new NotImplementedException();
         }
         
         public void createNewFile() {}

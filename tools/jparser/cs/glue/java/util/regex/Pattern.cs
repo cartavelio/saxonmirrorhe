@@ -1,3 +1,5 @@
+using System;
+
 namespace java.util.regex {
     public class Pattern {
         
@@ -14,6 +16,10 @@ namespace java.util.regex {
         }
         public static Pattern compile(string regex, int flags) {
             
+        }
+
+        public string pattern() {
+            throw new NotImplementedException();
         }
 
         public Matcher matcher(string input) {

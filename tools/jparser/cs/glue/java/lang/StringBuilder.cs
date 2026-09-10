@@ -58,6 +58,10 @@ namespace java.lang {
             return this;
         }
 
+        public int indexOf(string str) {
+            return this._builder.ToString().IndexOf(str, StringComparison.InvariantCulture);
+        }
+
         public StringBuilder insert(int index, string str) {
             this._builder.Insert(index, str);
             return this;

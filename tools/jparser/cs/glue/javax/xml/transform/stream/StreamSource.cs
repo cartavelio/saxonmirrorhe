@@ -4,6 +4,10 @@ namespace javax.xml.transform.stream {
     public class StreamSource : javax.xml.transform.Source {
 
         private string systemId;
+
+        public StreamSource() {
+        }
+
         public StreamSource(java.io.File file) {}
 
         public StreamSource(string uri) {
@@ -29,8 +33,15 @@ namespace javax.xml.transform.stream {
             this.systemId = uri;
         }
 
+        public void setInputStream(InputStream stream) {
+            
+        }
         public InputStream getInputStream() {
             return null;
+        }
+
+        public void setReader(Reader reader) {
+            
         }
 
         public Reader getReader() {

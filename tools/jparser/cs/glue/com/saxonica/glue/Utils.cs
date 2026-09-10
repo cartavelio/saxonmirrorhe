@@ -8,6 +8,14 @@ namespace com.saxonica.glue {
         public static long unsignedRightShift(long i, int shift) {
             return (long) ((ulong) i >> shift);
         }
+
+        public static string intToHexString(int i) {
+            throw new NotImplementedException();
+        }
+        
+        public static string longToHexString(long i) {
+            throw new NotImplementedException();
+        }
         
  
         // Test "instanceof" a generic type. For example,

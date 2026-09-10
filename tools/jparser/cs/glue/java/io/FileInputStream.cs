@@ -5,6 +5,9 @@ namespace java.io {
         public FileInputStream(string fileName) {
             
         }
+        public FileInputStream(File file) {
+            
+        }
 
         public void Dispose() {
             throw new NotImplementedException();

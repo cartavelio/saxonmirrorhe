@@ -9,5 +9,9 @@ namespace java.util {
         public static Set<string> getAvailableIDs() {
             throw new NotImplementedException();
         }
+
+        public int getOffset(long date) {
+            return 0;
+        }
     }
 }

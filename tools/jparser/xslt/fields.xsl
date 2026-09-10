@@ -30,10 +30,33 @@
       <xsl:text>)</xsl:text>
    </xsl:template>
    
-   <!-- Identify a static field accessor such as BooleanValue.TRUE -->
+   <!-- Identify an unspecific static field accessor  -->
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][ends-with(f:degenerify(@RESOLVED_TYPE), '.'||scope/name/@identifier)][not(scope/scope)]" 
       priority="18">
-      <xsl:text>{f:rename-generic-type(@RESOLVED_TYPE)}.{name/@identifier}</xsl:text>
+      <xsl:text>{f:renameGenericType(@RESOLVED_TYPE)}.{name/@identifier}</xsl:text>
+   </xsl:template>
+   
+   <!-- Identify a static field accessor on java.lang.System -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.lang.System']" priority="19">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'in'">System.Console.In</xsl:when>
+         <xsl:when test="name/@identifier = 'out'">System.Console.Out</xsl:when>
+         <xsl:when test="name/@identifier = 'err'">System.Console.Error</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Identify a static field accessor on java.lang.Boolean -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.lang.Boolean']" priority="19">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'TRUE'">true</xsl:when>
+         <xsl:when test="name/@identifier = 'FALSE'">false</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:template>
    
    <!-- Identify a static field accessor such as Integer.MAX_VALUE -->
@@ -51,6 +74,24 @@
          <xsl:when test="name/@identifier = 'MAX_VALUE'">System.Int64.MaxValue</xsl:when>
          <xsl:when test="name/@identifier = 'MIN_VALUE'">System.Int64.MinValue</xsl:when>
          <xsl:otherwise>System.Int64.{name/@identifier}</xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Identify a static field accessor such as Short.MAX_VALUE -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.lang.Short']" priority="19">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'MAX_VALUE'">System.Int16.MaxValue</xsl:when>
+         <xsl:when test="name/@identifier = 'MIN_VALUE'">System.Int16.MinValue</xsl:when>
+         <xsl:otherwise>System.Int16.{name/@identifier}</xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Identify a static field accessor such as Byte.MAX_VALUE -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.lang.Byte']" priority="19">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'MAX_VALUE'">127</xsl:when>
+         <xsl:when test="name/@identifier = 'MIN_VALUE'">-128</xsl:when>
+         <xsl:otherwise>System.SByte.{name/@identifier}</xsl:otherwise>
       </xsl:choose>
    </xsl:template>
    
@@ -73,13 +114,43 @@
       <xsl:text>System.Numerics.BigInteger.Zero</xsl:text>
    </xsl:template>
    
+   <!-- Identify static field accessors such as BigDecimal.TEN -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.math.BigDecimal']" priority="19">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='ZERO'">Singulink.Numerics.BigDecimal.Zero</xsl:when>
+         <xsl:when test="name/@identifier='ONE'">Singulink.Numerics.BigDecimal.One</xsl:when>
+         <xsl:when test="name/@identifier='TEN'">(Singulink.Numerics.BigDecimal)10</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Identify static field accessors in java.math.RoundingMode -->
+   <!-- Complication here is that different .NET versions support different sets of rounding modes? -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.math.RoundingMode']" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='CEILING'">System.MidpointRounding.ToPositiveInfinity</xsl:when>
+         <xsl:when test="name/@identifier='DOWN'">System.MidpointRounding.ToZero</xsl:when>
+         <xsl:when test="name/@identifier='FLOOR'">System.MidpointRounding.ToNegativeInfinity</xsl:when>
+         <xsl:when test="name/@identifier='HALF_DOWN'">System.MidpointRounding.ToZero</xsl:when>
+         <xsl:when test="name/@identifier='HALF_EVEN'">System.MidpointRounding.ToEven</xsl:when>
+         <xsl:when test="name/@identifier='HALF_UP'">System.MidpointRounding.AwayFromZero</xsl:when>
+         <xsl:when test="name/@identifier='UNNECESSARY'">System.MidpointRounding.ToZero</xsl:when>
+         <xsl:when test="name/@identifier='UP'">System.MidpointRounding.AwayFromZero</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
  <!--  <xsl:template match="*[$refactoredProperties(name/@identifier)]" priority="20">
       <xsl:value-of select="f:refactor-property-reference(., name/@identifier)"/>
    </xsl:template>-->
    
    <!-- static field accessor for a field in a generic type such as Feature -->
    <xsl:template match="*[@FIELD_TYPE]" priority="25">
-      <xsl:text>{f:rename-generic-type(@FIELD_TYPE)}.{name/@identifier}</xsl:text>
+      <xsl:text>{f:renameGenericType(@FIELD_TYPE)}.{name/@identifier}</xsl:text>
    </xsl:template>
    
    <!-- default rule for field access expressions -->

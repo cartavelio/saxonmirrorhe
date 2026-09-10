@@ -1,5 +1,5 @@
 namespace java.io {
-    public interface InputStream {
+    public interface InputStream : System.IDisposable {
 
         bool markSupported();
 

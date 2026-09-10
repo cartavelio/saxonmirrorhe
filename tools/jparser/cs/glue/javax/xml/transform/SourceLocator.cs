@@ -4,5 +4,6 @@ namespace javax.xml.transform
         int getLineNumber();
         int getColumnNumber();
         string getSystemId();
+        string getPublicId();
     }
 }
