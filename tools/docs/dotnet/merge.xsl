@@ -395,9 +395,10 @@
       </xsl:choose>
     </xsl:variable>
     
-    <!-- Second convert separator '+' to '.' for nested classes -->
+    <!-- Second convert separator '+' to '.' for nested classes.
+          Also remove generic type marker e.g. `1 -->
     <tag kind="see">
-      <xsl:value-of select="concat(translate($class, '+', '.'), $argStr)"/>
+      <xsl:value-of select="concat(replace(translate($class, '+', '.'), '``*[0-9]+', ''), $argStr)"/>
     </tag>
     
   </xsl:template>

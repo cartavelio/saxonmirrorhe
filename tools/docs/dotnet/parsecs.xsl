@@ -92,10 +92,14 @@
               <xsl:variable name="line-pre-arrow" 
                 select="if ($is-property-with-getter) then normalize-space(substring-before($line, '=>')) else $line"/>
               <xsl:variable name="tokens" select="tokenize($line-pre-arrow, '\s')"/>
+              
               <xsl:variable name="is-class" select="$tokens = 'class'"/>
               <xsl:variable name="is-interface" select="$tokens = 'interface'"/>
-              <xsl:variable name="is-delegate" select="$tokens = 'delegate'"/> 
+              <xsl:variable name="is-delegate" select="$tokens = 'delegate'"/>
               <xsl:variable name="is-enum" select="$tokens = 'enum'"/>
+              <xsl:variable name="is-main" select="$is-class or $is-interface or $is-delegate or $is-enum"/>
+              <xsl:variable name="is-member" select="not($is-main)"/>
+              
               <xsl:variable name="is-internal" select="$tokens = 'internal'"/>
               <xsl:variable name="is-public" select="$tokens = 'public'"/>
               <xsl:variable name="is-abstract" select="$tokens = 'abstract'"/>
@@ -103,9 +107,18 @@
               <xsl:variable name="is-override" select="$tokens = 'override'"/>
               <xsl:variable name="is-static" select="$tokens = 'static'"/>
               <xsl:variable name="is-readonly" select="$tokens = 'readonly'"/>
+              
               <xsl:variable name="is-initializer" select="contains($line-pre-arrow, '=')"/>
-              <xsl:variable name="is-method" select="contains($line-pre-arrow, '(') and not($is-initializer)"/>
+              <xsl:variable name="is-method" select="$is-member and contains($line-pre-arrow, '(') and not($is-initializer)"/>
               <xsl:variable name="is-indexer" select="$tokens!starts-with(., 'this[') = true()"/>
+              <xsl:variable name="is-method-or-delegate" select="$is-method or $is-delegate"/>
+              
+              <!-- NOTE: The following don't necessarily capture all properties|fields, but are used
+                to distinguish between the two. -->
+              <xsl:variable name="is-property" select="$is-property-with-getter or (contains($line-pre-arrow, '{') and
+                (contains($line-pre-arrow, 'get;') or contains($line-pre-arrow, 'set;')))"/>
+              <xsl:variable name="is-field" select="$is-member and not($is-initializer) and
+                not($is-property) and ends-with($line, ';')"/>
               
               <xsl:variable name="has-explicit-base" select="($is-enum or $is-class or $is-interface) and contains($line, ':')"/>
               <xsl:variable name="explicitBase" select="if ($has-explicit-base) 
@@ -118,21 +131,21 @@
               <xsl:variable name="line-pre-arrow" select="if ($is-constructor-from-base) then
                 normalize-space(substring-before($line-pre-arrow, ':')) else $line-pre-arrow"/>
               
-              <xsl:variable name="is-generic-type" select="(not($is-method or $is-initializer) and contains($line-pre-base, '&lt;')) or 
-                ($is-method and (substring-before($line-pre-arrow, '(') => tokenize('\s')) => reverse() =>
+              <xsl:variable name="is-generic-type" select="(not($is-method-or-delegate or $is-initializer) and contains($line-pre-base, '&lt;')) or 
+                ($is-method-or-delegate and (substring-before($line-pre-arrow, '(') => tokenize('\s')) => reverse() =>
                 tail() => reverse() => string-join(' ') => contains('&gt;')) or 
                 ($is-initializer and substring-before($line-pre-arrow, '=') => contains('&lt;'))"/>
               
-              <xsl:variable name="is-generic-method" select="$is-method and
+              <xsl:variable name="is-generic-method" select="$is-method-or-delegate and
                 ends-with(normalize-space(substring-before($line-pre-arrow, '(')), '&gt;')"/>
               
-              <xsl:variable name="is-method-on-generic-interface-impl" select="$is-method and
+              <xsl:variable name="is-method-on-generic-interface-impl" select="$is-method-or-delegate and
                 substring-before($line-pre-arrow, '(') => tokenize('\s') => reverse() => head() =>
                 contains('&gt;.')"/>
               
-              <xsl:variable name="method-input" select="if ($is-method) then
+              <xsl:variable name="method-input" select="if ($is-method-or-delegate) then
                 (normalize-space(substring-before(substring-after($line-pre-arrow, '('),')'))) else ''"/>
-              <xsl:variable name="has-args" select="$is-method and ($method-input != '')"/>
+              <xsl:variable name="has-args" select="$is-method-or-delegate and ($method-input != '')"/>
               <!-- Can't always just tokenize $method-input on ','. 
                 This is wrong when some argument has generic type with more than one type parameter. -->
               <xsl:variable name="method-args" as="xs:string*">
@@ -198,14 +211,21 @@
                   <xsl:when test="$is-generic-method">
                     <xsl:sequence select="replace($line-pre-arrow, '^.*\s([A-Za-z0-9_]+)&lt;([A-Za-z0-9_,\s]+)&gt;\s*\(.*', '$1')"/>
                   </xsl:when>
-                  <xsl:when test="$is-method">
+                  <xsl:when test="$is-method-or-delegate">
                     <xsl:sequence select="replace($line-pre-arrow, '^.*\s([A-Za-z0-9_]+)\s*\(.*', '$1')"/>
                   </xsl:when>
                   <xsl:when test="$is-indexer">
                     <xsl:sequence select="'this'"/>
                   </xsl:when>
-                  <xsl:when test="$is-initializer">
+                  <xsl:when test="$is-initializer and not($is-property)">
                     <xsl:analyze-string select="$line-pre-arrow" regex="([A-Za-z0-9_]+)\s*=">
+                      <xsl:matching-substring><xsl:sequence select="regex-group(1)"/></xsl:matching-substring>
+                      <xsl:non-matching-substring></xsl:non-matching-substring>
+                    </xsl:analyze-string>
+                  </xsl:when>
+                  <xsl:when test="$is-initializer and $is-property">
+                    <!-- e.g. Serializer.Processor -->
+                    <xsl:analyze-string select="$line-pre-arrow" regex="([A-Za-z0-9_]+)\s*\{{">
                       <xsl:matching-substring><xsl:sequence select="regex-group(1)"/></xsl:matching-substring>
                       <xsl:non-matching-substring></xsl:non-matching-substring>
                     </xsl:analyze-string>
@@ -391,16 +411,6 @@
                     </xsl:if>
                   </method-or-constructor>
                 </xsl:when>
-                <xsl:when test="$is-initializer">
-                  <field name="{$name}" public="{$is-public}" static="{$is-static}" abstract="{$is-abstract}" 
-                    override="{$is-override}" virtual="{$is-virtual}" readonly="{$is-readonly}"
-                    type="{if ($is-generic-type) then substring-before($type, '&lt;') else $type}" >
-                    <xsl:if test="$is-generic-type">
-                      <!--<xsl:message>generic type field <xsl:value-of select="$name"/></xsl:message>-->
-                      <xsl:sequence select="f:getTypeParamTypes($type)"/>
-                    </xsl:if>
-                  </field>
-                </xsl:when>
                 <xsl:when test="$is-indexer">
                   <indexer name="Item" public="{$is-public}" static="{$is-static}" abstract="{$is-abstract}" 
                     override="{$is-override}" virtual="{$is-virtual}" readonly="{$is-readonly}"
@@ -411,7 +421,17 @@
                     <index type="{$index-tokens[1]}" name="{$index-tokens[2]}"/>
                   </indexer>
                 </xsl:when>
-                <xsl:otherwise>
+                <xsl:when test="$is-field or ($is-initializer and not($is-property))">
+                  <field name="{$name}" public="{$is-public}" static="{$is-static}" abstract="{$is-abstract}" 
+                    override="{$is-override}" virtual="{$is-virtual}" readonly="{$is-readonly}"
+                    type="{if ($is-generic-type) then substring-before($type, '&lt;') else $type}" >
+                    <xsl:if test="$is-generic-type">
+                      <!--<xsl:message>generic type field <xsl:value-of select="$name"/></xsl:message>-->
+                      <xsl:sequence select="f:getTypeParamTypes($type)"/>
+                    </xsl:if>
+                  </field>
+                </xsl:when>
+                <xsl:otherwise> 
                   <property initializer="{$is-initializer}" name="{$name}" public="{$is-public}" static="{$is-static}" readonly="{$is-readonly}" 
                     override="{$is-override}" virtual="{$is-virtual}" abstract="{$is-abstract}" 
                     type="{if ($is-generic-type) then substring-before($type, '&lt;') else $type}">
