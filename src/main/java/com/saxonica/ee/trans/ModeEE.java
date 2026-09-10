@@ -53,8 +53,6 @@ public class ModeEE extends ModePE {
                 fsb.append(name);
             }
             presenter.emitAttribute("useAcc", fsb.toString());
-        } else if ("JS".equals(((ExpressionPresenter.ExportOptions) presenter.getOptions()).target)) {
-            presenter.emitAttribute("useAcc", "");
         }
     }
 
