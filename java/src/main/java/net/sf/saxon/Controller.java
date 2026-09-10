@@ -459,6 +459,11 @@ public class Controller implements ContextOriginator {
         }
         XmlProcessingIncident warning = new XmlProcessingIncident(message, errorCode, locator).asWarning();
         errorReporter.report(warning);
+
+        // User error reporter can make the warning fatal by setting a termination message
+        if (warning.getTerminationMessage() != null) {
+            throw new UncheckedXPathException("Error reporter promoted warning to fatal error: " + warning.getTerminationMessage(), warning.getErrorCode().getLocalName());
+        }
     }
 
     @CSharpReplaceBody(code="reportFatalError(err); throw err;")
