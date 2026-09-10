@@ -5,6 +5,8 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.ResultDocument;
 
 /**
@@ -30,8 +32,10 @@ public class ResultDocumentCompiler extends ToPushCompiler {
         }
         allocateStatic(compiler, instr);
         allocateStatic(compiler, compiledContent);
+        ga.invokeInstanceMethod(Expression.class, "makeElaborator");
+        ga.invokeInstanceMethod(Elaborator.class, "elaborateForPush");
         compiler.generateGetContext();
-        ga.invokeInstanceMethod(ResultDocument.class, "process", Expression.class, XPathContext.class);
+        ga.invokeInstanceMethod(ResultDocument.class, "process", PushEvaluator.class, XPathContext.class);
     }
 
 }

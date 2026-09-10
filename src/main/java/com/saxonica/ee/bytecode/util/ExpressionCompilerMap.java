@@ -48,7 +48,7 @@ public class ExpressionCompilerMap {
         map.put("emptyTextNodeRemover", new EmptyTextNodeRemoverCompiler());
         map.put("equivalent", new EquivalenceComparisonCompiler());
         map.put("errorExpr", new ErrorExpressionCompiler());
-        map.put("FLWOR", new FLWORExpressionCompiler());
+        //map.put("FLWOR", new FLWORExpressionCompiler());
         map.put("filter", new FilterExpressionCompiler());
         map.put("first", new FirstItemExpressionCompiler());
         map.put("att", new FixedAttributeCompiler());

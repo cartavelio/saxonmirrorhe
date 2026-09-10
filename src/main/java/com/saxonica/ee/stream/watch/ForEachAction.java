@@ -168,6 +168,9 @@ public class ForEachAction extends ItemFeed {
             }
             
         } else {
+            if (actionPuller == null) {
+                actionPuller = action.makeElaborator().elaborateForPull();
+            }
             // either the selected nodes are grounded or the action is non-consuming
             XPathContext context = bodyContext;
             ManualIterator iterator = (ManualIterator)context.getCurrentIterator();

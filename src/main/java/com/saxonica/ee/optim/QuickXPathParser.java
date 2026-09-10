@@ -95,6 +95,12 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         }
     }
 
+    /**
+     * Get a {@code long} number that uniquely identifies a sequence of up to 8 tokens.
+     * Note: tokens are identified by numbers in the range 0..255.
+     * @param tokens the list of token numbers. Up to 8 integers in the range 0.255.
+     * @return a key identifying the sequence of tokens.
+     */
     private static long key(List<Integer> tokens) {
         long key = 0L;
         for (int token : tokens) {
@@ -103,6 +109,13 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         return key;
     }
 
+    /**
+     * Get a {@code long} number that uniquely identifies a sequence of up to 8 tokens.
+     * Note: tokens are identified by numbers in the range 0..255.
+     *
+     * @param tokens the array of token numbers. Up to 8 integers in the range 0.255.
+     * @return a key identifying the sequence of tokens.
+     */
     private static long key(Integer... tokens) {
         long key = 0L;
         for (int token : tokens) {

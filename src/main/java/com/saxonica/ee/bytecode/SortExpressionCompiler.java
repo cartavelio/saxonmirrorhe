@@ -25,6 +25,9 @@ public class SortExpressionCompiler extends ToIteratorCompiler {
         int baseIterVar = methodInfo.allocateLocal(SequenceIterator.class);
         ga.storeLocal(baseIterVar);
 
+        allocateStatic(compiler, sorter);
+        ga.invokeInstanceMethod(SortExpression.class, "makeSortKeyEvaluators");
+
         AtomicComparer[] comparators = sorter.getComparators();
         int compsVar = -1;
         if (comparators == null) {

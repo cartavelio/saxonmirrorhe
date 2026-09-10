@@ -16,6 +16,7 @@ import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.Version;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.event.Sink;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.axiom.AxiomObjectModel;
@@ -229,6 +230,9 @@ public class XMarkBenchmark {
                         "' options='" + options + "' when='" + when + "'>");
 
         Processor processor = new Processor(edition.equalsIgnoreCase("EE"));
+        if ("off".equals(generateByteCode)) {
+            processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
+        }
         DocumentBuilder builder = processor.newDocumentBuilder();
         JsonBuilder jsonBuilder = processor.newJsonBuilder();
         XQueryCompiler compiler = processor.newXQueryCompiler();

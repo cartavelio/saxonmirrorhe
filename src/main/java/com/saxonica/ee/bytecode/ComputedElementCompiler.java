@@ -80,7 +80,7 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         ga.dup();
         ga.invokeInstanceMethod(StructuredQName.class, "getLocalPart");
         ga.storeLocal(localNameVar);
-        ga.invokeInstanceMethod(StructuredQName.class, "getURI");
+        ga.invokeInstanceMethod(StructuredQName.class, "getNamespaceUri");
         ga.storeLocal(uriVar);
         ga.push("");
         ga.storeLocal(prefixVar);

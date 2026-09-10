@@ -261,7 +261,7 @@ public class DocumentInstrCompiler extends ToPushCompiler {
             ga.dup();
             ga.ifNonNull(notNull.label());
             ga.pop();
-            ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
+            ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
             ga.goTo(end);
 
             methodInfo.placeLabel(notNull);

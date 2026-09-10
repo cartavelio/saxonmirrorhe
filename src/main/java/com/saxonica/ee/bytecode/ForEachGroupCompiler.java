@@ -4,6 +4,8 @@ import com.saxonica.ee.bytecode.map.CompiledContextMappingFunction;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.ForEachGroup;
 import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.lib.StringCollator;
@@ -125,6 +127,8 @@ public class ForEachGroupCompiler extends ToPushCompiler {
                 ga.dup();
                 //ga.loadLocal(populationVar);
                 allocateStatic(compiler, instr.getSelectExpression());
+                ga.invokeInstanceMethod(Expression.class, "makeElaborator");
+                ga.invokeInstanceMethod(Elaborator.class,"elaborateForPull");
                 // TODO: compile the grouping key expression
                 allocateStatic(compiler, instr.getGroupingKey());
                 compiler.generateGetContext();
@@ -134,7 +138,7 @@ public class ForEachGroupCompiler extends ToPushCompiler {
                     allocateStatic(compiler, instr.getCollation());
                 }
                 ga.push(instr.isComposite());
-                ga.invokeConstructor(GroupAdjacentIterator.class, Expression.class, Expression.class, XPathContext.class, StringCollator.class, Boolean.TYPE);
+                ga.invokeConstructor(GroupAdjacentIterator.class, PullEvaluator.class, Expression.class, XPathContext.class, StringCollator.class, Boolean.TYPE);
                 break;
             }
             case ForEachGroup.GROUP_STARTING:
@@ -143,9 +147,11 @@ public class ForEachGroupCompiler extends ToPushCompiler {
                 ga.dup();
                 //ga.loadLocal(populationVar);
                 allocateStatic(compiler, instr.getSelectExpression());
+                ga.invokeInstanceMethod(Expression.class, "makeElaborator");
+                ga.invokeInstanceMethod(Elaborator.class, "elaborateForPull");
                 allocateStatic(compiler, instr.getGroupingKey());
                 compiler.generateGetContext();
-                ga.invokeConstructor(GroupStartingIterator.class, Expression.class, Pattern.class, XPathContext.class);
+                ga.invokeConstructor(GroupStartingIterator.class, PullEvaluator.class, Pattern.class, XPathContext.class);
                 break;
 
             case ForEachGroup.GROUP_ENDING:
@@ -154,9 +160,11 @@ public class ForEachGroupCompiler extends ToPushCompiler {
                 ga.dup();
                 //ga.loadLocal(populationVar);
                 allocateStatic(compiler, instr.getSelectExpression());
+                ga.invokeInstanceMethod(Expression.class, "makeElaborator");
+                ga.invokeInstanceMethod(Elaborator.class, "elaborateForPull");
                 allocateStatic(compiler, instr.getGroupingKey());
                 compiler.generateGetContext();
-                ga.invokeConstructor(GroupEndingIterator.class, Expression.class, Pattern.class, XPathContext.class);
+                ga.invokeConstructor(GroupEndingIterator.class, PullEvaluator.class, Pattern.class, XPathContext.class);
                 break;
 
             case ForEachGroup.GROUP_BREAKING_WHEN:

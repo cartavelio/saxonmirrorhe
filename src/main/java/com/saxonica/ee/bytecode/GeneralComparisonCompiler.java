@@ -457,6 +457,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
 
         methodInfo.placeLabel(doneConversion1);
         methodInfo.placeLabel(notUntyped1);
+        visitAnnotation(compiler, "generateComparisonCode-label notUntyped1");
 
         //        if (checkTypes &&
         //                    !Type.isComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), Token.isOrderedOperator(op))) {
@@ -484,6 +485,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
             ga.push(((Expression) comparison).getLocation().getLineNumber());
             ga.invokeStaticMethod(Callback.class, "makeNonComparableException", AtomicValue.class, AtomicValue.class, String.class, Integer.TYPE);
             ga.throwException();
+            visitAnnotation(compiler, "generateComparison doneCheckingTypes");
             methodInfo.placeLabel(doneCheckingTypes);
         }
 
@@ -493,12 +495,14 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
 
         if (th.relationship(type0, BuiltInAtomicType.DOUBLE) != Affinity.DISJOINT ||
                 th.relationship(type0, BuiltInAtomicType.FLOAT) != Affinity.DISJOINT) {
+            visitAnnotation(compiler, "generateComparison checking lhs NaN");
             ga.loadArgOrLocal(item0Var);
             ga.invokeInstanceMethod(AtomicValue.class, "isNaN");
             ga.ifTrue(comparison.getSingletonOperator() == Token.FNE ? returnTrue : returnFalse);
         }
         if (th.relationship(type1, BuiltInAtomicType.DOUBLE) != Affinity.DISJOINT ||
                 th.relationship(type1, BuiltInAtomicType.FLOAT) != Affinity.DISJOINT) {
+            visitAnnotation(compiler, "generateComparison checking rhs NaN");
             ga.loadArgOrLocal(item1Var);
             ga.invokeInstanceMethod(AtomicValue.class, "isNaN");
             ga.ifTrue(comparison.getSingletonOperator() == Token.FNE ? returnTrue : returnFalse);
@@ -509,6 +513,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
             switch (op) {
                 case Token.FEQ:
                 case Token.FNE:
+                    visitAnnotation(compiler, "generateComparisonCode - using ContextFreeAtomicComparer " + op);
                     ga.loadLocal(item0Var);
                     ga.loadLocal(item1Var);
                     ga.invokeInstanceMethod(AtomicValue.class, "equals", Object.class);
@@ -521,6 +526,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                 case Token.FLT:
                 case Token.FGE:
                 case Token.FLE:
+                    visitAnnotation(compiler, "generateComparisonCode - using ContextFreeAtomicComparer " + op);
                     ga.loadLocal(item0Var);
                     ga.checkClass(Comparable.class);
                     ga.loadLocal(item1Var);
@@ -532,10 +538,13 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                     throw new IllegalStateException("unknown operator");
 
             }
-        } else if (comparison.getStringCollator() instanceof CodepointCollator) {
+        } else if (BuiltInAtomicType.isStringLike(type0)
+                    && BuiltInAtomicType.isStringLike(type1)
+                    && comparison.getStringCollator() instanceof CodepointCollator) {
             switch (op) {
                 case Token.FEQ:
                 case Token.FNE:
+                    visitAnnotation(compiler, "generateComparisonCode - using CodepointCollator " + Token.tokens[op]);
                     ga.loadLocal(item0Var);
                     ga.checkClass(StringValue.class);
                     ga.loadLocal(item1Var);
@@ -550,7 +559,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                 case Token.FLT:
                 case Token.FGE:
                 case Token.FLE:
-
+                    visitAnnotation(compiler, "generateComparisonCode - using CodepointCollator " + Token.tokens[op]);
                     ga.invokeStaticMethod(CodepointCollator.class, "getInstance");
                     ga.loadLocal(item0Var);
                     ga.invokeInstanceMethod(AtomicValue.class, "getUnicodeStringValue");

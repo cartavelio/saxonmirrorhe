@@ -52,7 +52,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                     try {
                         literalIntValue = Integer.parseInt(literalValue.getUnicodeStringValue().toString());
                     } catch (XPathException e) {
-                        ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
+                        ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
                         return new IteratorDetails(EmptyIterator.class, Item.class);
                     }
                     if (literalIntValue > 0 && literalIntValue < Integer.MAX_VALUE) {
@@ -142,7 +142,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                             // Stack: Item
                             ga.pop();
                             // Stack: <empty>
-                            ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
+                            ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
                             // Stack: EmptyIterator
                             ga.goTo(endLab);
 
@@ -162,7 +162,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
 
 
                     } else {
-                        ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
+                        ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
                         return new IteratorDetails(EmptyIterator.class, Item.class);
 
 
@@ -175,12 +175,12 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                         if (ebv) {
                             compiler.compileToIterator(start);
                         } else {
-                            ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
+                            ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
                             return new IteratorDetails(EmptyIterator.class, Item.class);
                         }
 
                     } catch (XPathException e) {
-                        ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
+                        ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
                         return new IteratorDetails(EmptyIterator.class, Item.class);
                     }
 
@@ -197,7 +197,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                         ga.dup();
                         ga.storeLocal(firstVar);
                         ga.ifNonNull(notNullLab.label());
-                        ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
+                        ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
                         ga.goTo(endLab);
                         seqItrVarCreated = false;
                     }
@@ -210,7 +210,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                     ga.dup();
                     ga.storeLocal(firstVar);
                     ga.ifNonNull(notNullLab.label());
-                    ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
+                    ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
                     ga.goTo(endLab);
                 }
                 methodInfo.placeLabel(notNullLab);
@@ -406,7 +406,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
             ga.goTo(endLab);
         }
         methodInfo.placeLabel(emptyIterLab);
-        ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
+        ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
 
         methodInfo.placeLabel(endLab);
         return new IteratorDetails(SequenceIterator.class, Item.class);

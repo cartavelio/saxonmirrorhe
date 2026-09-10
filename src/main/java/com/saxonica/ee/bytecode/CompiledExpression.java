@@ -3,6 +3,9 @@ package com.saxonica.ee.bytecode;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
@@ -246,6 +249,33 @@ public class CompiledExpression extends Expression {
             XPathException xe = e.getXPathException();
             xe.maybeSetLocation(getInterpretedExpression().getLocation());
             throw e;
+        }
+    }
+
+    public Elaborator getElaborator() {
+        return new CompiledExpressionElaborator();
+    }
+
+    private static class CompiledExpressionElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            CompiledExpression expr = (CompiledExpression) getExpression();
+            return (output, context) -> {
+                try {
+                    expr.byteCode.process(output, context);
+                    return null;
+                } catch (XPathException e) {
+                    e.maybeSetContext(context);
+                    e.maybeSetLocation(expr.getInterpretedExpression().getLocation());
+                    throw e;
+                } catch (UncheckedXPathException uxe) {
+                    XPathException e = uxe.getXPathException();
+                    e.maybeSetContext(context);
+                    e.maybeSetLocation(expr.getInterpretedExpression().getLocation());
+                    throw e;
+                }
+            };
         }
     }
 }

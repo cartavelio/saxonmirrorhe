@@ -4,7 +4,7 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
@@ -340,7 +340,103 @@ public class ByteCodeCandidate extends UnaryExpression  {
      */
     @Override
     public Elaborator getElaborator() {
-        throw new UnsupportedOperationException("Bytecode is currently out of action");
+        return new ByteCodeCandidateElaborator();
+    }
+
+    private static class ByteCodeCandidateElaborator extends PushElaborator {
+
+        Expression interpretedBody;
+        PullEvaluator bodyPull;
+        PushEvaluator bodyPush;
+        ItemEvaluator bodyItem;
+        BooleanEvaluator bodyBool;
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            ByteCodeCandidate expr = (ByteCodeCandidate) getExpression();
+            interpretedBody = expr.getBaseExpression();
+            bodyPull = expr.getBaseExpression().makeElaborator().elaborateForPull();
+            return context -> {
+                Expression body = expr.targetExpression(context, Expression.ITERATE_METHOD);
+                if (body != interpretedBody) {
+                    bodyPull = body.makeElaborator().elaborateForPull();
+                }
+                if (expr.byteCodeMonitor != null) {
+                    long time = System.nanoTime();
+                    SequenceIterator iter = bodyPull.iterate(context);
+                    time = System.nanoTime() - time;
+                    expr.byteCodeMonitor.logExecution(expr, "iterate", time);
+                    return iter;
+                } else {
+                    return bodyPull.iterate(context);
+                }
+            };
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            ByteCodeCandidate expr = (ByteCodeCandidate) getExpression();
+            interpretedBody = expr.getBaseExpression();
+            bodyPush = expr.getBaseExpression().makeElaborator().elaborateForPush();
+            return (output, context) -> {
+                Expression body = expr.targetExpression(context, Expression.PROCESS_METHOD);
+                if (body != interpretedBody) {
+                    bodyPush = body.makeElaborator().elaborateForPush();
+                }
+                if (expr.byteCodeMonitor != null) {
+                    long time = System.nanoTime();
+                    Expression.dispatchTailCall(bodyPush.processLeavingTail(output, context));
+                    time = System.nanoTime() - time;
+                    expr.byteCodeMonitor.logExecution(expr, "process", time);
+                } else {
+                    Expression.dispatchTailCall(bodyPush.processLeavingTail(output, context));
+                }
+                return null;
+            };
+        }
+
+        public ItemEvaluator elaborateForItem() {
+            ByteCodeCandidate expr = (ByteCodeCandidate) getExpression();
+            interpretedBody = expr.getBaseExpression();
+            bodyItem = expr.getBaseExpression().makeElaborator().elaborateForItem();
+            return context -> {
+                Expression body = expr.targetExpression(context, Expression.EVALUATE_METHOD);
+                if (body != interpretedBody) {
+                    bodyItem = body.makeElaborator().elaborateForItem();
+                }
+                if (expr.byteCodeMonitor != null) {
+                    long time = System.nanoTime();
+                    Item result = bodyItem.eval(context);
+                    time = System.nanoTime() - time;
+                    expr.byteCodeMonitor.logExecution(expr, "evaluate", time);
+                    return result;
+                } else {
+                    return bodyItem.eval(context);
+                }
+            };
+        }
+
+        @Override
+        public BooleanEvaluator elaborateForBoolean() {
+            ByteCodeCandidate expr = (ByteCodeCandidate) getExpression();
+            interpretedBody = expr.getBaseExpression();
+            bodyBool = expr.getBaseExpression().makeElaborator().elaborateForBoolean();
+            return context -> {
+                Expression body = expr.targetExpression(context, Expression.EFFECTIVE_BOOLEAN_VALUE);
+                if (body != interpretedBody) {
+                    bodyBool = body.makeElaborator().elaborateForBoolean();
+                }
+                if (expr.byteCodeMonitor != null) {
+                    long time = System.nanoTime();
+                    boolean result = bodyBool.eval(context);
+                    time = System.nanoTime() - time;
+                    expr.byteCodeMonitor.logExecution(expr, "evaluate", time);
+                    return result;
+                } else {
+                    return bodyBool.eval(context);
+                }
+            };
+        }
     }
 }
 

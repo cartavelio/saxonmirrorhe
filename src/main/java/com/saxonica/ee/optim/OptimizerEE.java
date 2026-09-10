@@ -56,20 +56,6 @@ public class OptimizerEE extends Optimizer {
     }
 
     /**
-     * Ask whether an item type is "string-like" in its comparison semantics
-     *
-     * @param type the item type
-     * @return true if the item type is xs:string, xs:anyURI, or xs:untypedAtomic
-     */
-
-    private boolean isStringLike(ItemType type) {
-        int fp = type.getPrimitiveType();
-        return fp == StandardNames.XS_STRING ||
-                fp == StandardNames.XS_ANY_URI ||
-                fp == StandardNames.XS_UNTYPED_ATOMIC;
-    }
-
-    /**
      * Optimize a value comparison
      * @param vc the value comparison expression
      * @param visitor the expression visitor
@@ -236,7 +222,7 @@ public class OptimizerEE extends Optimizer {
                 lhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 isCodepointCollation &&
-                isStringLike(lhs.getItemType())) {
+                BuiltInAtomicType.isStringLike(lhs.getItemType())) {
             return new CompareToStringConstant(lhs, vc.getOperator(), ((StringValue) value1).getUnicodeStringValue());
         }
 
@@ -244,7 +230,7 @@ public class OptimizerEE extends Optimizer {
                 rhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 isCodepointCollation &&
-                isStringLike(rhs.getItemType())) {
+                BuiltInAtomicType.isStringLike(rhs.getItemType())) {
             return new CompareToStringConstant(rhs, Token.inverse(vc.getOperator()), ((StringValue) value0).getUnicodeStringValue());
         }
 
