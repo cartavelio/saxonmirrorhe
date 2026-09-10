@@ -11,6 +11,10 @@
         descriptions of their function, details about their structure and usage, and any information
         specific to the Saxon implementation. Many also have further detailed descriptions and
         examples.</p>
+    
+    <aside><p>This is not intended to be a complete specification of XSLT instructions. It
+    can be used as a quick reference, but it doesn't try to cover every edge case. The main
+    purpose is to provide information specific to the Saxon implementation.</p></aside>
 
     <p>For information about the additional extension elements provided with the Saxon product, see
             <a class="bodylink" href="/extensions/instructions">Extension instructions</a>.</p>
@@ -24,7 +28,7 @@
         official standard.</p>
     
     <p>Also included in this section are descriptions of experimental additions being considered
-    for a possible XSLT version 4.0. These are all clearly marked as being experimental. They are
+    for XSLT version 4.0. These are all clearly marked as being experimental. They are
     available only if explicitly enabled, and they are very likely to change in later versions.</p>
 
    
@@ -3124,6 +3128,18 @@
                 <p>In practice <code>xsl:next-match</code> is nearly always preferable to
                         <code>xsl:apply-imports</code> since the rules for using it are much more
                     flexible and more intuitive.</p>
+                
+                <p>To supply parameters to the called template, one or more <a class="bodylink code"
+                    href="../with-param">xsl:with-param</a> elements may be included. The values
+                    of these parameters are available to the called template. If the
+                    <code>xsl:with-param</code> element specifies <code>tunnel="yes"</code>,
+                    then the parameter is passed transparently through to templates called at any
+                    depth, but it can only be referenced by an <code>xsl:param</code> element that
+                    also specifies <code>tunnel="yes"</code>. If the default value,
+                    <code>tunnel="no"</code> is used, then the parameter value is available only
+                    in the immediately called template, and only if the <code>xsl:param</code>
+                    element specifies <code>tunnel="no"</code> (explicitly or by defaulting the
+                    attribute).</p>
             </details>
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>
