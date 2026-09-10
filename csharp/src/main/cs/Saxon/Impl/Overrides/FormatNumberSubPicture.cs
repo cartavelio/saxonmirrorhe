@@ -34,7 +34,8 @@ namespace Saxon.Impl.Overrides {
             int point = fsb.indexOf(".");
             int intDigits;
             if ((point >= 0)) {
-                int zz = (maxFractionPartSize - minFractionPartSize);
+                int actualFractionSize = fsb.length() - (point + 1);
+                int zz = (actualFractionSize - minFractionPartSize);
                 while ((zz > 0)) {
                     if ((fsb.charAt((fsb.length() - 1)) == '0')) {
                         fsb.setLength((fsb.length() - 1));
