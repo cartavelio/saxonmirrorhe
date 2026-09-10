@@ -432,6 +432,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 System.err.println(err.getMessage());
                 outcome.setException(err.getErrorCode());
                 outcome.setErrorsReported(collector.getErrorCodes());
+                collector.checkLocationInfo(err);
             } catch (Exception err) {
                 err.printStackTrace();
                 System.err.println(err.getMessage());
@@ -530,19 +531,11 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             boolean failure;
             try {
                 if (useXslt30Transformer) {
-                    InitialTransformDetails ini = new InitialTransformDetails();
-                    ini.xsltLanguageVersion = xsltLanguageVersion;
-                    ini.contextItem = contextItem;
-                    ini.initialMode = initialMode.orElse(null);
-                    ini.initialFunction = initialFunction.orElse(null);
-                    ini.initialTemplate = initialTemplate.orElse(null);
-                    ini.initialModeName = initialModeName;
-                    ini.initialMatchSelection = initialMatchSelection;
-                    ini.initialTemplateName = initialTemplateName;
-                    ini.baseOutputUri = baseOutputURI;
-
                     failure = runWithXslt30Transformer(testCase, xpath, outcome, testName,
-                                                       testSetName, env, testInput, sheet, collector, ini);
+                                                       testSetName, env, testInput, sheet, collector,
+                                                       xsltLanguageVersion, contextItem, initialMode.orElse(null),
+                                                       initialFunction.orElse(null), initialTemplate.orElse(null), initialModeName,
+                                                       initialMatchSelection, initialTemplateName, baseOutputURI);
                 } else {
                     failure = runWithXsltTransformer(xpath, outcome, testName, testSetName, env, testInput,
                                                      sheet, collector, contextItem, initialMode.orElse(null), initialModeName,
@@ -587,9 +580,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         XPathCompiler assertionXPath = env.processor.newXPathCompiler();
         assertionXPath.setSchemaAware(env.processor.isSchemaAware());
         assertionXPath.setBaseURI(assertion.get().getBaseURI());
-        if (env.xsltCompiler.getUsedSchema() != null) {
-            assertionXPath.useSchema(env.xsltCompiler.getUsedSchema());
-        }
         copySchemaNamespaces(env, assertionXPath);  // ensure environment has schema namespaces
         boolean success = outcome.testAssertion(assertion.get(), outcome, outcome.getPrincipalResultDoc(), assertionXPath, xpath, debug);
         if (success) {
@@ -728,6 +718,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             //}
         } catch (SaxonApiException err) {
             outcome.setException(err.getErrorCode());
+            collector.checkLocationInfo(err);
             if (collector.getErrorCodes().isEmpty()) {
                 outcome.addReportedError(err.getErrorCode().getLocalName());
             } else {
@@ -755,22 +746,13 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         // For overriding in Javascript driver
     }
 
-    private static class InitialTransformDetails {
-        public String xsltLanguageVersion;
-        public XdmItem contextItem;
-        public XdmNode initialMode;
-        public XdmNode initialFunction;
-        public XdmNode initialTemplate;
-        public QName initialModeName;
-        public XdmValue initialMatchSelection;
-        public QName initialTemplateName;
-        public String baseOutputUri;
-    }
-
     protected boolean runWithXslt30Transformer(XdmNode testCase, XPathCompiler xpath, final TestOutcome outcome,
                                                String testName, String testSetName, Environment env,
                                                XdmNode testInput, XsltExecutable sheet, ErrorCollector collector,
-                                               InitialTransformDetails ini) {
+                                               String xsltLanguageVersion, XdmItem contextItem, XdmNode initialMode,
+                                               XdmNode initialFunction,
+                                               XdmNode initialTemplate, QName initialModeName, XdmValue initialMatchSelection,
+                                               QName initialTemplateName, String baseOutputURI) {
         try {
             boolean assertsSerial =
                 testCase.select(path(child("result"),
@@ -817,13 +799,13 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             globalParams.putAll(caseGlobalParams);  // has to be this way to ensure test-local overrides global
             transformer.setStylesheetParameters(globalParams);
 
-            if (ini.contextItem != null) {
-                transformer.setGlobalContextItem(ini.contextItem);
+            if (contextItem != null) {
+                transformer.setGlobalContextItem(contextItem);
             }
 
             transformer.setErrorReporter(collector);
 
-            transformer.setBaseOutputURI(ini.baseOutputUri);
+            transformer.setBaseOutputURI(baseOutputURI);
 
             transformer.setMessageListener((content, errorCode, terminate, locator) -> {
                 outcome.addXslMessage(content);
@@ -841,17 +823,17 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             XsltController controller = transformer.getUnderlyingController();
 
             Destination dest = null;
-            if (ini.baseOutputUri != null) {
+            if (baseOutputURI != null) {
                 if (resultAsTree && !resultSerialized) {
                     // If we want non-serialized, we need to accumulate any result documents as trees too
                     // But we can't do both, so serializing takes precedence.
                     transformer.setResultDocumentHandler(
-                            new ResultDocHandler(env.processor, outcome, ini.baseOutputUri, false));
+                            new ResultDocHandler(env.processor, outcome, baseOutputURI, false));
                     dest = new XdmDestination();
                     ((XdmDestination)dest).setTreeModel(treeModel);
                 } else {
                     transformer.setResultDocumentHandler(
-                            new ResultDocHandler(env.processor, outcome, ini.baseOutputUri, true));
+                            new ResultDocHandler(env.processor, outcome, baseOutputURI, true));
                 }
             }
             if (resultSerialized) {
@@ -863,21 +845,22 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 src = new StreamSource(env.streamedFile);
             } else if (env.streamedContent != null) {
                 src = new StreamSource(new StringReader(env.streamedContent), "inlineDoc");
-            } else if (ini.initialTemplate == null && ini.contextItem != null) {
-                src = ((XdmNode) ini.contextItem).getUnderlyingNode();
+            } else if (initialTemplate == null && contextItem != null) {
+                src = ((XdmNode) contextItem).getUnderlyingNode();
             }
             if (src != null && !"skip".equals(env.streamedInputValidation)) {
-                SchemaValidator validator = env.xsdSchema.newValidator();
+                Processor processor = sheet.getProcessor();
+                SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
                 src = validator.asSource(src);
             }
 
-            if (src == null && ini.initialFunction == null && ini.initialTemplateName == null && ini.initialModeName == null) {
-                ini.initialTemplateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
+            if (src == null && initialFunction == null && initialTemplateName == null && initialModeName == null) {
+                initialTemplateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
             }
 
             try {
-                if (ini.initialModeName != null) {
-                    transformer.setInitialMode(ini.initialModeName);
+                if (initialModeName != null) {
+                    transformer.setInitialMode(initialModeName);
                 } else {
                     controller.getInitialMode();   /// has the side effect of setting to the unnamed
                 }
@@ -890,11 +873,11 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 }
             }
 
-            if (ini.initialMode != null || ini.initialTemplate != null) {
-                XdmNode init = ini.initialMode == null ? ini.initialTemplate : ini.initialMode;
+            if (initialMode != null || initialTemplate != null) {
+                XdmNode init = initialMode == null ? initialTemplate : initialMode;
                 Map<QName, XdmValue> params = getNamedParameters(xpath, init, false, false);
                 Map<QName, XdmValue> tunnelledParams = getNamedParameters(xpath, init, false, true);
-                if (ini.xsltLanguageVersion.equals("2.0")) {
+                if (xsltLanguageVersion.equals("2.0")) {
                     if (!(params.isEmpty() && tunnelledParams.isEmpty())) {
                         System.err.println("*** Initial template parameters ignored for XSLT 2.0");
                     }
@@ -904,26 +887,26 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 }
             }
 
-            if (ini.initialTemplateName != null) {
-                transformer.setGlobalContextItem(ini.contextItem);
+            if (initialTemplateName != null) {
+                transformer.setGlobalContextItem(contextItem);
                 if (dest == null) {
-                    result = transformer.callTemplate(ini.initialTemplateName);
+                    result = transformer.callTemplate(initialTemplateName);
                 } else {
-                    transformer.callTemplate(ini.initialTemplateName, dest);
+                    transformer.callTemplate(initialTemplateName, dest);
                 }
-            } else if (ini.initialFunction != null) {
-                QName name = getQNameAttribute(xpath, ini.initialFunction, attribute("name"));
-                XdmValue[] params = getParameters(xpath, ini.initialFunction);
+            } else if (initialFunction != null) {
+                QName name = getQNameAttribute(xpath, initialFunction, attribute("name"));
+                XdmValue[] params = getParameters(xpath, initialFunction);
                 if (dest == null) {
                     result = transformer.callFunction(name, params);
                 } else {
                     transformer.callFunction(name, params, dest);
                 }
-            } else if (ini.initialMatchSelection != null) {
+            } else if (initialMatchSelection != null) {
                 if (dest == null) {
-                    result = transformer.applyTemplates(ini.initialMatchSelection);
+                    result = transformer.applyTemplates(initialMatchSelection);
                 } else {
-                    transformer.applyTemplates(ini.initialMatchSelection, dest);
+                    transformer.applyTemplates(initialMatchSelection, dest);
                 }
             } else {
                 if (dest == null) {
@@ -975,6 +958,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                         ": " + err.getCause().getMessage());
             }
             outcome.setException(err.getErrorCode());
+            collector.checkLocationInfo(err);
             if (collector.getErrorCodes().isEmpty()) {
                 if (err.getErrorCode() == null) {
                     outcome.addReportedError("Error_with_no_error_code");
@@ -1006,6 +990,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             }
         } catch (SaxonApiException err) {
             outcome.setException(err.getErrorCode());
+            collector.checkLocationInfo(err);
             if (err.getErrorCode() != null) {
                 collector.getErrorCodes().add(err.getErrorCode().getLocalName());
             }
@@ -1014,6 +999,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             err.printStackTrace();
             System.err.println(err.getMessage());
             outcome.setException(new QName(err.getClass().getName()));
+            collector.checkLocationInfo(err);
             outcome.setErrorsReported(collector.getErrorCodes());
         }
         return sheet;
@@ -1062,6 +1048,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             }
         } catch (SaxonApiException err) {
             outcome.setException(err.getErrorCode());
+            collector.checkLocationInfo(err);
             if (err.getErrorCode() != null) {
                 collector.getErrorCodes().add(err.getErrorCode().getLocalName());
             }
@@ -1070,6 +1057,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             err.printStackTrace();
             System.err.println(err.getMessage());
             outcome.setException(new QName(err.getClass().getName()));
+            collector.checkLocationInfo(err);
             outcome.setErrorsReported(collector.getErrorCodes());
         }
         return pack;

@@ -651,7 +651,8 @@ public class StylesheetPackage extends PackageData {
                     if (!XSLAccept.isCompatible(oldV, acceptedVisibility)) {
                         throw new XPathException("Cannot accept a " + Err.describeVisibility(oldV) +
                                                          " component (" + name + ") from package " + usedPackage.getPackageName()
-                                                         + " with visibility " + Err.describeVisibility(acceptedVisibility), "XTSE3040");
+                                                         + " with visibility " + Err.describeVisibility(acceptedVisibility), "XTSE3040")
+                                .maybeWithLocation(oldC.getActor().getLocation());
                     }
                     newV = acceptedVisibility;
                 } else {
@@ -1111,11 +1112,12 @@ public class StylesheetPackage extends PackageData {
             Location loc = null;
             int count = 0;
             for (SymbolicName name : abstractComponents.keySet()) {
-                if (count++ > 0) {
-                    buff.append(", ");
-                } else {
+                if (loc == null) {
                     loc = abstractComponents.get(name).getActor().getLocation();
                 }
+                if (count++ > 0) {
+                    buff.append(", ");
+                } 
                 buff.append(name.toString());
                 if (buff.length() > 300) {
                     buff.append(" ...");
@@ -1124,7 +1126,7 @@ public class StylesheetPackage extends PackageData {
             }
             throw new XPathException(
                     "The package is not executable, because it contains abstract components: " +
-                            buff, "XTSE3080").withLocation(loc);
+                            buff, "XTSE3080").maybeWithLocation(loc);
         }
     }
 
