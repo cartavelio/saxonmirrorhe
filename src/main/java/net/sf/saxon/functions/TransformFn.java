@@ -57,7 +57,8 @@ public class TransformFn extends SystemFunction implements Callable {
 
     private static final String[] transformOptionNames30 = new String[]{
             "package-name", "package-version", "package-node", "package-location", "static-params", "global-context-item",
-            "template-params", "tunnel-params", "initial-function", "function-params"
+            "template-params", "tunnel-params", "initial-function", "function-params",
+            "enable-assertions"
     };
 
     private final static String dummyBaseOutputUriScheme = "dummy";
@@ -798,6 +799,15 @@ public class TransformFn extends SystemFunction implements Callable {
             transformer.setInitialTemplateParameters(tunnelParams, true);
             transformer.setResourceResolver(context.getResourceResolver());
             transformer.setAssertionsEnabled(enableAssertions);
+
+            if (enableMessages) {
+                if (context.getController() instanceof XsltController) {
+                    transformer.setMessageHandler(((XsltController) context.getController()).getMessageHandler());
+                }
+            } else {
+                transformer.setMessageHandler(msg -> {
+                });
+            }
 
             if (controller instanceof XsltController) {
                 if (enableMessages) {
