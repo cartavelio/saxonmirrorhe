@@ -213,6 +213,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("function-annotations", 1, FunctionAnnotations.class, FunctionAnnotations.RETURN_TYPE, STAR, 0)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null);
 
+        register("get-context", 0, GetContext.class, config.getJavaExternalObjectType(XPathContext.class), ONE, CITEM | LATE);
+
         register("get-pseudo-attribute", 1, GetPseudoAttribute.class, BuiltInAtomicType.STRING, OPT, CITEM | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
 
@@ -634,6 +636,13 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
             }
             c.getDocumentPool().discard(doc.getTreeInfo());
             return doc;
+        }
+    }
+
+    public static class GetContext extends SystemFunction {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            return new ObjectValue<>(context);
         }
     }
 
