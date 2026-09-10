@@ -42,7 +42,9 @@ public class CopyOfFn extends SystemFunction {
                 return item;
             } else {
                 VirtualCopy vc = VirtualCopy.makeVirtualCopy((NodeInfo) item);
-                vc.getTreeInfo().setCopyAccumulators(true);
+                if (getRetainedStaticContext().getPackageData().isXSLT()) {
+                    vc.getTreeInfo().setCopyAccumulators(true);
+                }
                 // TODO: set the base URI
                 return vc;
             }
