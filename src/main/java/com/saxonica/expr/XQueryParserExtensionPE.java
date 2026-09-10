@@ -26,12 +26,12 @@ public class XQueryParserExtensionPE extends SaxonSyntaxExtension {
      */
 
     @Override
-    public void parseTypeAliasDeclaration(XQueryParser p) throws XPathException {
+    public void parseItemTypeDeclaration(XQueryParser p) throws XPathException {
         p.nextToken();
         p.expect(Token.NAME);
         StructuredQName typeName = p.makeStructuredQName(p.getTokenizer().currentTokenValue, NamespaceUri.NULL);
         p.nextToken();
-        p.expect(Token.EQUALS);
+        p.expect(Token.AS);
         p.nextToken();
         ItemType typeDef = p.parseItemType();
         p.getStaticContext().getPackageData().obtainTypeAliasManager().registerTypeAlias(typeName, typeDef);
