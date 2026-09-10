@@ -24,7 +24,7 @@ public class Eval extends Evaluate {
         c2.openStackFrame(pexpr.stackFrameMap);
         for (int i = 1; i < arguments.length; i++) {
             int slot = pexpr.variables[i - 1].getLocalSlotNumber();
-            c2.setLocalVariable(slot, SequenceTool.toGroundedValue(arguments[i].iterate()));
+            c2.setLocalVariable(slot, arguments[i].materialize());
         }
         c2.setCurrentIterator(context.getCurrentIterator());
         return SequenceTool.toLazySequence(pexpr.expression.iterate(c2));
