@@ -30,6 +30,7 @@
     <spec value="xpath31"> Available in XPath 3.1, XSLT 3.0, and XQuery 3.1.</spec>
     <spec value="xpath30"> Available in XPath 3.0, XSLT 3.0, XQuery 3.0, and later versions.</spec>
     <spec value="xpath20"> Available in XPath 2.0, XSLT 2.0, XQuery 1.0, and later versions.</spec>
+    <spec value="xslt40"> Available in the XSLT 4.0 proposal.</spec>
     <spec value="xslt30"> Available in XSLT 3.0.</spec>
     <spec value="xslt20"> Available in XSLT 2.0 and later versions.</spec>  
     <spec value="xslt10"> Available in XSLT 1.0 and later versions.</spec> 
@@ -47,7 +48,7 @@
     <saxon version="RESTRICTIONS_9.6"> Implemented with restrictions in Saxon 9.6.</saxon>
     <saxon version="PARTIAL_9.7"> Partial experimental implementation in Saxon 9.7.</saxon>
     <saxon version="PARTIAL_9.6"> Partial experimental implementation in Saxon 9.6.</saxon>
-    <saxon version="9.5.1.1.experimental"> Running experimentally on 9.5.1.1.</saxon>
+    <saxon version="11_EXPERIMENTAL"> Implemented experimentally since Saxon 11.</saxon>
     
     <saxon version="EE_9.7"> Implemented in Saxon-EE since Saxon 9.7.</saxon>
     <saxon version="EE_9.6"> Implemented in Saxon-EE since Saxon 9.6.</saxon>

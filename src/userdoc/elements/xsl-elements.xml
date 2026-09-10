@@ -576,7 +576,7 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>array</name>
             <description>
-                <p>Experimental: proposed new instruction for XSLT 4.0. It constructs an array, whose
+                <p>Experimental: proposed new XSLT 4.0 instruction. Constructs an array, whose
                 content is established using the contained sequence constructor.</p>
             </description>
             <attributes>
@@ -597,20 +597,27 @@
                 the members of the array will always contain either a single item, or be empty. Empty members
                 translate to the JSON value <code>null</code>.)</p>
                 <p>With <code>composite="yes"</code>, the array members can conveniently be constructed
-                    using the <code>xsl:array-member</code> instruction. However, <code>&lt;xsl:array-member select="1 to 3"/></code>
-                can equally well be written as <code>&lt;xsl:sequence select="parcel(1 to 3)"/></code>, or as
-                    <code>&lt;xsl:sequence select="map{'value': 1 to 3}"/></code>, or <code>&lt;xsl:map key="'value'" select="1 to 3"/></code>.</p>
+                    using the <a class="bodylink code" href="../array-member">xsl:array-member</a>
+                    instruction. In fact, the following constructions are all equivalent:</p>
+                <samp>&lt;xsl:array-member select="1 to 3"/></samp>
+                <samp>&lt;xsl:sequence select="parcel(1 to 3)"/></samp>
+                <samp>&lt;xsl:sequence select="map{'value': 1 to 3}"/></samp>
+                <samp>&lt;xsl:map key="'value'" select="1 to 3"/></samp>
                 <p>A type error occurs if <code>composite="yes"</code> is used and there are items in the sequence that
                 do not match the item type <code>record(value, *)</code> (that is, a map having an entry whose key is the 
                     string "value"). Any other entries in the map are ignored.</p>
-                
+                <p>For more information, see <a class="bodylink"
+                    href="/v4extensions/xslt-syntax-extensions/creating-arrays">Creating arrays</a>.</p>
                 
             </details>
             <in-spec>xslt40</in-spec>
     
-            <saxon-edition>PE</saxon-edition>
-            <status>Present in Saxon 11. Also available in earlier releases under the synonym <code>saxon:array</code>.</status>
+            <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
+            <status>Available from Saxon 11; requires syntax extensions to be enabled. Also available in
+                earlier releases under the synonym 
+                <a class="bodylink code" href="/extensions/instructions/array">saxon:array</a>.</status>
             <see-also name="array-member" type="xsl-elements"/>
+            <!--TODO <see-also name="parcel" type="functions"/>-->
 
         </xsl-element>
     </section>
@@ -619,29 +626,32 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>array-member</name>
             <description>
-                <p>Experimental: proposed new instruction for XSLT 4.0. It constructs a parcel, typically
-                    for use as a member of an array being constructed using <code>&lt;xsl:array composite="yes"></code>.</p>
+                <p>Experimental: proposed new XSLT 4.0 instruction. Constructs a parcel, typically
+                    for use as a member of an array being constructed using <a class="bodylink code"
+                        href="../array">xsl:array</a> with <code>composite="yes"</code>.</p>
             </description>
             <attributes>
                 <attribute name="select" use="optional">The <code>select</code> attribute, or the
                     contained sequence constructor if there is no <code>select</code> attribute, may
                     deliver any sequence. This sequence is wrapped into a <i>parcel</i>, which is an
-                    item of type <code>record(value)</code>: that is, a map with a single entry, whose
+                    item of type <code>record(value, *)</code>: that is, a map with a single entry, whose
                 key is the string "value", and whose corresponding value is the wrapped sequence.</attribute>
             </attributes>
             <details>
                 <p>The intended usage is to deliver a single member of an array being constructed using 
                     <code>&lt;xsl:array composite="yes"></code>. However, the result of the instruction
-                is well-defined whether or not it is used in this way.</p>
-                
-                
+                    is well-defined whether or not it is used in this way.</p>
+                <p>For more information, see <a class="bodylink"
+                    href="/v4extensions/xslt-syntax-extensions/creating-arrays">Creating arrays</a>.</p>
                 
             </details>
             <in-spec>xslt40</in-spec>
             
-            <saxon-edition>PE</saxon-edition>
-            <status>Present in Saxon 11. Also available in earlier releases under the synonym <code>saxon:array-member</code>.</status>
-            <see-also name="array-member" type="xsl-elements"/>
+            <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
+            <status>Available from Saxon 11; requires syntax extensions to be enabled. Also available in
+                earlier releases under the synonym 
+                <a class="bodylink code" href="/extensions/instructions/array-member">saxon:array-member</a>.</status>
+            <see-also name="array" type="xsl-elements"/>
             
         </xsl-element>
     </section>
@@ -2259,7 +2269,7 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>item-type</name>
             <description>
-                <p>Experimental XSLT 4.0 feature. Used to declare a name (or alias) for an item type.</p>
+                <p>Experimental: proposed new XSLT 4.0 declaration. Used to declare a name (or alias) for an item type.</p>
             </description>
             <attributes>
                 <attribute name="name" use="mandatory">
@@ -2279,7 +2289,7 @@
             </details>
             <examples>
                 <example>
-                    <p>Declares and uses a named item type as a synonym for a record type:</p>
+                    <p>Declare and use a named item type as a synonym for a record type:</p>
                     <samp><![CDATA[<xsl:item-type name="complex" as="record(r as xs:double, i as xs:double)"/>
 <xsl:param name="location" select="0.00" as="type(complex)"/>
 <xsl:variable name="location-real-part" select="$location?r" as="xs:double"/>
@@ -2288,15 +2298,20 @@
                 </example>
             </examples>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>PE</saxon-edition>
+            <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
             <status>
-                <p>In the Saxon 11 implementation item type names must be unique within the stylesheet;
+                <p>Available from Saxon 11; requires syntax extensions to be enabled. In the current
+                    implementation item type names must be unique within the stylesheet;
                     import precedences for multiple declarations are not implemented, and item types
                     are not visible in other stylesheet packages. The <code>visibility</code> attribute,
                 if present, must have the value <code>"private"</code>.</p>
                 <p>Saxon 11 requires the type name to be referenced in the form <code>as="type(typename)"</code>,
                 whereas the current XPath 4.0 proposal suggests allowing the simpler <code>as="typename"</code>
                 (which requires type alias names to be distinct from the names of atomic and union types).</p>
+                <p>For more information, see <a class="bodylink"
+                    href="/v4extensions/xslt-syntax-extensions/xsl-item-type">The <code>xsl:item-type</code>
+                    declaration</a> and <a class="bodylink"
+                    href="/v4extensions/new-types/type-aliases">Type aliases</a>.</p>
             </status>
         </xsl-element>
     </section>
@@ -2576,7 +2591,7 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>match</name>
             <description>
-                <p>Matches selected items against an XSLT pattern.</p>
+                <p>Experimental: proposed new XSLT 4.0 instruction. Matches selected items against an XSLT pattern.</p>
             </description>
             <attributes>
                 <attribute name="select" use="optional">Selects the values to be matched against
@@ -2593,15 +2608,19 @@
                 selected item matches the supplied pattern, otherwise false.</p>
                 
                 <p>The instruction will normally be used where an atomic value is expected, for example
-                as the body of a stylesheet function, the body of an <code>xsl:variable</code> with <code>as="xs:boolean"</code>.</p>
+                as the body of a stylesheet function, or the body of an <code>xsl:variable</code> with <code>as="xs:boolean"</code>.</p>
                 
                 <p>Any <code>xsl:fallback</code> children are relevant only if the instruction is executed in
                 forwards-compatibility mode by a processor that doesn't recognize XSLT 4.0 instructions.</p>
+                
+                <p>For more information, see <a class="bodylink"
+                    href="/v4extensions/xslt-syntax-extensions/xsl-match">The <code>xsl:match</code>
+                    instruction</a>.</p>
             </details>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>ALL</saxon-edition>
+            <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
             <status>               
-                <p>Available in Saxon 11; requires XSLT syntax extensions to be enabled.</p>
+                <p>Available from Saxon 11; requires syntax extensions to be enabled.</p>
             </status>
         </xsl-element>
     </section>
@@ -4777,8 +4796,8 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>switch</name>
             <description>
-                <p>Proposed XSLT 4.0 instruction. Used to choose one of a number of alternative outputs, based
-                on the value of a supplied expression</p>
+                <p>Experimental: proposed new XSLT 4.0 instruction. Used to choose one of a number of alternative outputs, based
+                on the value of a supplied expression.</p>
             </description>
             <attributes>
                 <attribute name="select" use="mandatory">Computes an atomic value that is compared with the
@@ -4787,15 +4806,21 @@
             <details>
                 <p>The <code>select</code> attribute contains an expression which must deliver
                 a single atomic value (it is atomized if necessary). This value is compared with
-                the values of the <code>test</code> conditions in each of the contained <code>xsl:when</code>
-                    elements in turn until the first match is found. If a match is found, that <code>xsl:when</code>
-                element is evaluated; if no match is found, the <code>xsl:otherwise</code> element is evaluated;
+                the values of the <code>test</code> conditions in each of the contained <a class="bodylink
+                    code" href="../when">xsl:when</a> elements in turn until the first match is found. If a
+                    match is found, that <code>xsl:when</code> element is evaluated; if no match is found, the
+                    <a class="bodylink code" href="../otherwise">xsl:otherwise</a> element is evaluated;
                 if there is no <code>xsl:otherwise</code> element, the <code>xsl:switch</code> instruction
                 returns an empty sequence.</p>
                 
-                <p>Unlike <code>xsl:choose</code>, the test condition in the <code>xsl:when</code> element is an expression
-                    that can evaluate to any sequence of atomic values. The comparison is done using the "=" operator, so
-                    the test succeeds if any of the values matches.</p>
+                <p>Unlike <a class="bodylink code" href="../choose">xsl:choose</a>, the test condition in the
+                    <code>xsl:when</code> element is an expression that can evaluate to any sequence of atomic
+                    values. The comparison is done using the "=" operator, so the test succeeds if any of the
+                    values matches.</p>
+                
+                <p>For more information, see <a class="bodylink"
+                    href="/v4extensions/xslt-syntax-extensions/xslt-conditionals">Conditional
+                    instructions</a>.</p>
             </details>
             <examples>
                 <example>
@@ -4811,13 +4836,12 @@
                 </example>
             </examples>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>PE EE</saxon-edition>
+            <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
             <status>
-                <p>Implemented experimentally in Saxon 11; syntax extensions must be enabled.</p>
+                <p>Available from Saxon 11; requires syntax extensions to be enabled.</p>
             </status>
             <see-also name="when" type="xsl-elements"/>
             <see-also name="otherwise" type="xsl-elements"/>
-            <see-also name="if" type="xsl-elements"/>
         </xsl-element>
     </section>
 
