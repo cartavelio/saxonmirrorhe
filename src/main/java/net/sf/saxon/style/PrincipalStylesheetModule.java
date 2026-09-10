@@ -306,7 +306,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         if (sheet != null) {
             XPathException warning = new XPathException(
                     "Stylesheet module " + key + " is included or imported more than once. " +
-                            "This is permitted, but may lead to errors or unexpected behavior");
+                            "This is permitted, but may lead to errors or unexpected behavior", SaxonErrorCode.SXWN9019);
             sheet.issueWarning(warning);
         }
         return sheet;

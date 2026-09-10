@@ -906,35 +906,9 @@ public class LetExpression extends Assignation
         public SequenceEvaluator eagerly() {
             final LetExpression expr = (LetExpression) getExpression();
             final SequenceEvaluator selectEval = expr.getSequence().makeElaborator().eagerly();
-            final SequenceEvaluator actionPull = expr.getAction().makeElaborator().eagerly();
+            final SequenceEvaluator actionEval = expr.getAction().makeElaborator().eagerly();
             final int slot = expr.getLocalSlotNumber();
-            return new SequenceEvaluator() {
-                /**
-                 * Evaluate a construct to produce a value (which might be a lazily evaluated Sequence)
-                 *
-                 * @param context the evaluation context
-                 * @return a Sequence (not necessarily grounded)
-                 * @throws XPathException if a dynamic error occurs during the evaluation.
-                 */
-                @Override
-                public Sequence evaluate(XPathContext context) throws XPathException {
-                    int savedOutputState = context.getTemporaryOutputState();
-                    context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
-                    Sequence value = selectEval.evaluate(context);
-                    context.setLocalVariable(slot, value);
-                    context.setTemporaryOutputState(savedOutputState);
-                    return actionPull.evaluate(context);
-                }
-
-                /**
-                 * Get a code identifying the evaluator. Note that the codes are held in SEF files
-                 * so they should be stable.
-                 */
-                @Override
-                public int getEvaluationMethodCode() {
-                    return Evaluators.EAGER_SEQUENCE;
-                }
-            };
+            return new EagerLocalVariableEvaluator(slot, selectEval, actionEval);
         }
 
         @Override
@@ -994,5 +968,45 @@ public class LetExpression extends Assignation
         }
         
     }
+
+    private static class EagerLocalVariableEvaluator implements SequenceEvaluator {
+
+        private final int slot;
+        private final SequenceEvaluator selectEval;
+        private final SequenceEvaluator actionEval;
+
+        public EagerLocalVariableEvaluator(int slot, SequenceEvaluator selectEval, SequenceEvaluator actionEval) {
+            this.slot = slot;
+            this.selectEval = selectEval;
+            this.actionEval = actionEval;
+        }
+
+        /**
+         * Evaluate a construct to produce a value (which might be a lazily evaluated Sequence)
+         *
+         * @param context the evaluation context
+         * @return a Sequence (not necessarily grounded)
+         * @throws XPathException if a dynamic error occurs during the evaluation.
+         */
+        @Override
+        public Sequence evaluate(XPathContext context) throws XPathException {
+            int savedOutputState = context.getTemporaryOutputState();
+            context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
+            Sequence value = selectEval.evaluate(context);
+            context.setLocalVariable(slot, value);
+            context.setTemporaryOutputState(savedOutputState);
+            return actionEval.evaluate(context);
+        }
+
+        /**
+         * Get a code identifying the evaluator. Note that the codes are held in SEF files
+         * so they should be stable.
+         */
+        @Override
+        public int getEvaluationMethodCode() {
+            return Evaluators.EAGER_SEQUENCE;
+        }
+    }
+
 }
 

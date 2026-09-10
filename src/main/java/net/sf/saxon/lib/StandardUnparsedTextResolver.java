@@ -10,6 +10,7 @@ package net.sf.saxon.lib;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.query.InputStreamMarker;
 import net.sf.saxon.resource.EncodingDetector;
+import net.sf.saxon.resource.ParsedContentType;
 import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.resource.TypedStreamSource;
 import net.sf.saxon.trans.XPathException;
@@ -130,7 +131,7 @@ public class StandardUnparsedTextResolver
         if (source instanceof TypedStreamSource) {
             contentType = ((TypedStreamSource) source).getContentType();
             if (contentType != null) {
-                ResourceLoader.ParsedContentType parsedContentType = new ResourceLoader.ParsedContentType(contentType);
+                ParsedContentType parsedContentType = new ParsedContentType(contentType);
                 String contentEncoding = parsedContentType.encoding;
                 if (contentEncoding == null) {
                     encoding = contentEncoding;
