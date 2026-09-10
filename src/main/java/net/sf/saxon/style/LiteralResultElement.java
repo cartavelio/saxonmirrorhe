@@ -62,6 +62,7 @@ public class LiteralResultElement extends StyleElement {
             StandardNames.XSL_USE_WHEN,
             StandardNames.XSL_VALIDATION);
 
+    public LiteralResultElement() {}
 
     /**
      * Determine whether this type of element is allowed to contain a sequence constructor
@@ -311,6 +312,7 @@ public class LiteralResultElement extends StyleElement {
                 true, schemaType,
                 validation);
 
+        inst.setLocation(allocateLocation());
         Expression content = compileSequenceConstructor(exec, decl, true);
 
         if (numberOfAttributes > 0) {

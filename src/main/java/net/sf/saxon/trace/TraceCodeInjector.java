@@ -37,10 +37,12 @@ public class TraceCodeInjector implements CodeInjector {
 
     @Override
     public void process(TraceableComponent component) {
-        Expression newBody = ExpressionTool.injectCode(component.getBody(), this);
-        component.setBody(newBody);
-        ComponentTracer trace = new ComponentTracer(component);
-        component.setBody(trace);
+        if (!(component.getBody() instanceof ComponentTracer)) {
+            Expression newBody = ExpressionTool.injectCode(component.getBody(), this);
+            component.setBody(newBody);
+            ComponentTracer trace = new ComponentTracer(component);
+            component.setBody(trace);
+        }
     }
 
     /**

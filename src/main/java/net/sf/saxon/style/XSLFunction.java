@@ -636,6 +636,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             setParameterDefinitions(fn);
             fn.setResultType(getResultType());
             fn.setLineNumber(getLineNumber());
+            fn.setColumnNumber(getColumnNumber());
             fn.setSystemId(getSystemId());
             fn.obtainDeclaringComponent(this);
             fn.setDeclaredVisibility(getDeclaredVisibility());
