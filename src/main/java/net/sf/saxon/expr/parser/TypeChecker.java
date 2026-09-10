@@ -136,7 +136,7 @@ public class TypeChecker {
                         !(suppliedCard == StaticProperty.EMPTY)) {
                     if (!suppliedItemType.isAtomizable(th)) {
                         String shortItemType;
-                        if (suppliedItemType instanceof RecordType) {
+                        if (suppliedItemType instanceof TupleType) {
                             shortItemType = "a record type";
                         } else if (suppliedItemType instanceof MapType) {
                             shortItemType = "a map type";
