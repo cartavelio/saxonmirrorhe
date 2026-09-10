@@ -701,6 +701,20 @@ task all_saxonc_releases() {
         }
       }
     }
+
+    doLast {
+      copy {
+        from "${projectDir}/src/main/c/pypi/python_saxon"
+        into "${saxoncReleaseDir}/pypi/python_saxon"
+        filter { line ->
+          line.replaceAll('@@VERSION@@', saxonVersion)
+                  .replace('@@edition@@', edition)
+                  .replace('@@EDITION@@', edition.toUpperCase())
+                  .replace('@@libpath@@', libpath)
+                  .replace('@@location@@', "../../")
+        }
+      }
+    }
     doLast {
       copy {
         from "${projectDir}/src/main/c/samples"
