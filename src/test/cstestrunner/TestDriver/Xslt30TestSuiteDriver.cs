@@ -391,9 +391,16 @@ namespace TestDriver {
                 XsltCompiler compiler = env.xsltCompiler;
                 compiler.ErrorReporter = err => {
                     if (!expectStaticError) {
-                        Console.Error.WriteLine("*** STATIC ERROR: " + err.ErrorCode.LocalName + " at " + 
-                                                err.Location.SystemId + "#" + err.Location.LineNumber + 
-                                                "\n   " + err.Message);
+                        string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
+                        Location loc = err.Location;
+                        try {
+                            Console.Error.WriteLine("*** STATIC ERROR: " + code + " at " + 
+                                                    loc.SystemId + "#" + loc.LineNumber + 
+                                                    "\n   " + err.Message);
+                        }
+                        catch (Exception e) {
+                            //Console.Error.WriteLine("*** STATIC ERROR: " + err.Message);
+                        }
                     }
                     outcome.ReportError(err.ErrorCode);
                 };
