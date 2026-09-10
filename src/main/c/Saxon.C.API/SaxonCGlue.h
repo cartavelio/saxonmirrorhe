@@ -11,7 +11,7 @@
 
 
 
-#include <graalvm-ee-12.1.h>
+#include "saxonc_graalvm_isolate.h" //<graalvm-ee-12.1.h>
 
 
 #if defined __linux__ || defined __APPLE__
@@ -89,9 +89,8 @@ typedef struct {
  * <p/>
  */
 typedef struct {
-    char* name; /*!< Internal use only. The name of the parameter. */
-    int64_t value; /*!< Internal use only. The value of the parameter given as a Java object. */
-    char * namespacei; /*!< Internal use only. The namespace string. Not used yet. */
+    int64_t parameterDataRef; /*!< Internal use only. The value of the parameter points to the Java object. */
+
 } sxnc_parameter;
 
 //===============================================================================================//
@@ -100,8 +99,7 @@ typedef struct {
  * <p/>
  */
 typedef struct {
-    char * name; /*!< Internal use only. The name of the property. */
-    char * value; /*!< Internal use only. The string value of the property. */
+    int64_t parameterDataRef; /*!< Internal use only. The value of the parameter points to the Java object. */
 } sxnc_property;
 
 
@@ -111,6 +109,28 @@ extern int64_t cpp;
 
 
 extern const char * failure;
+
+
+// Graalvm entrypoint methods
+void vmLocatorSymbol(graal_isolatethread_t* thread);
+long long int  createSaxonProcessor(graal_isolatethread_t*, int license);
+
+long long int createProcessorData(graal_isolatethread_t*);
+
+long long int createProcessorDataWithCapacity(graal_isolatethread_t*, int cap);
+
+char * getProductVersion(graal_isolatethread_t*, int64_t processorRef);
+
+long long int createDocumentBuilder(graal_isolatethread_t*);
+
+void addProcessorDataPair(graal_isolatethread_t*, int64_t processorDataRef, char * name, int64_t valueRef);
+
+void addProcessorPropertyPair(graal_isolatethread_t*, int64_t processorDataRef, char * name, char * dataRef);
+
+void addProcessorValue(graal_isolatethread_t*,  int64_t processorDataRef, int64_t valueRef);
+
+void setCatalogFile(graal_isolatethread_t*, char * filename);
+
 
 
 //void initSaxonc(sxnc_environment ** environi);
@@ -158,13 +178,13 @@ void graal_tear_down (graal_isolatethread_t *thread);
 /*
  * Get a property from list
  */
-char* getProperty(sxnc_property * properties, int propLen, const char* namespacei, const char * name);
+char* getProperty(sxnc_property * properties, const char * name, const char* value);
 
 
 /*
  * set a parameter
  */
-void setParameter(sxnc_parameter **parameters, int *parLen, int *parCap, const char * namespacei, const char * name, int64_t value);
+void setParameter(sxnc_parameter *parameters, const char * name, sxnc_value * value);
 
 
 /*

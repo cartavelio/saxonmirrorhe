@@ -1,8 +1,10 @@
-#include "SaxonCGlue2.h"
+#include "SaxonCGlue.h"
 
+
+char * resources_dir;
 /*jobject cpp;
 char * dllname;
-char * resources_dir;
+
 int jvmCreated = 0;
 char * tempDllname =
 #if defined (__linux__)
@@ -31,7 +33,7 @@ char * dllPath =
 "C:\\Program Files\\Saxonica\\Saxon@@RELEASE@@C @@VERSION@@";
 #endif*/
 
-/*
+
 
 char * getResourceDirectory() {
 	return resources_dir;
@@ -39,7 +41,7 @@ char * getResourceDirectory() {
 
 char * _getResourceDirectory() {
 	return resources_dir;
-}*/
+}
 
 
 /*

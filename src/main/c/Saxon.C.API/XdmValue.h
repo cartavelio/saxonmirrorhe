@@ -89,7 +89,7 @@ public:
 	 * See methods the functions in SaxonCXPath of the C library
 	 * @param val - Java object
 	 */
-	void addUnderlyingValue(jobject val);
+	void addUnderlyingValue(int64_t val);
 
 
 
@@ -100,14 +100,14 @@ public:
 	 * @param val - Java XdmValue object
 	 * @param arrFlag - Currently not used but allows for overloading of constructor methods
 	 */
-	XdmValue(jobject val, bool arrFlag);
+	XdmValue(int64_t val, bool arrFlag);
 
 	//! A Constructor
 	/**
 	 * Wrap a Java XdmValue object.
 	 * @param val - Java XdmValue object
 	 */
-	XdmValue(jobject val);
+	XdmValue(int64_t val);
 
     //! Destructor.
     /**
@@ -180,7 +180,7 @@ public:
 	  * Get Java XdmValue object.
 	  * @return jobject - The Java object of the XdmValue in its JNI representation
 	  */
-	virtual  jobject getUnderlyingValue();
+	virtual  int64_t getUnderlyingValue();
 
 	/**
 	* Get the type of the object
@@ -206,7 +206,7 @@ protected:
 	int refCount; /*!< The reference count of this XdmValue. If >1 this object should not be deleted */
 private:
 	std::string toStringValue;  /*!< Cached. String representation of the XdmValue, if available */
-	jobjectArray jValues; /*!< If this XdmValue is a sequence we store values as a JNI array object  */
+	int64_t jValues; /*!< If this XdmValue is a sequence we store values as an ProcessorDataAccumulator object  */
 };
 
 #endif /** SAXON_XDMVALUE_H **/

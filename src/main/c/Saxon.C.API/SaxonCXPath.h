@@ -17,10 +17,39 @@
  * <p/>
  */
 typedef struct {
-		jobject xdmvalue; /*!< Internal use only. The value given as a Java object. */
+		int64_t xdmvalue; /*!< Internal use only. The value given as a Java object. */
 	} sxnc_value;
 
 EXTERN_SAXONC
+
+
+long long int j_makeStringValue(graal_isolatethread_t*, char * str);
+
+
+long long int j_makeIntegerValue(graal_isolatethread_t*, int i);
+
+
+
+long long int j_makeDoubleValue(graal_isolatethread_t*, double d);
+
+
+long long int j_makeFloatValue(graal_isolatethread_t*, float);
+
+
+long long int j_makeLongValue(graal_isolatethread_t*, long l);
+
+
+long long int j_makeBooleanValue(graal_isolatethread_t*, bool b);
+
+long long int j_makeQNameValue(graal_isolatethread_t*, char * itype, char *str);
+
+char * getStringValueForXdmItem(graal_isolatethread_t*, int64_h itemRef);
+
+char * getStringValueForXdmValue(graal_isolatethread_t*, int64_h valueRef);
+
+char * xdmItemToString(graal_isolatethread_t*, int64_h valueRef);
+
+
     /**
      * Create boxed Boolean value
      * @param val - boolean value

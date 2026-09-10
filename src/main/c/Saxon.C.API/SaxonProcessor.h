@@ -24,8 +24,8 @@
 
 //#define DEBUG //remove
 //#define MEM_DEBUG //remove
-#define CVERSION "11.1"
-#define CVERSION_API_NO 1110
+#define CVERSION "12.1"
+#define CVERSION_API_NO 1210
 
 
 
@@ -102,11 +102,11 @@ class SaxonApiException;
 
 //! A struct object to represent parameters.
 /*! Internal use only. This struct represents parameters to pass back the Java code. These two arrays acts as a map to represent the parameters. */
-typedef struct {
-    jobjectArray stringArray; /*!< Internal use only. Java array of String objects. */
-    jobjectArray objectArray; /*!< Internal use only. Java Array of objects. The underlying type can be different. */
+/*typedef struct {
+    jobjectArray stringArray;
+    jobjectArray objectArray;
 
-} JParameters;
+} JParameters;*/
 
 
 
@@ -522,7 +522,7 @@ public:
     /**
      * set catalog to be used in Saxon
     */
-    void setCatalog(const char *catalogFile, bool isTracing);
+    void setCatalog(const char *catalogFile);
 
 
     //! Set a configuration property specific to the processor in use.
@@ -632,7 +632,7 @@ public:
     static int jvmCreatedCPP; /*!< Flag to indicate jvm created - used in memory management */
     static sxnc_environment *sxn_environ;/*!< Environment to captures the jni, JVM and handler to the cross compiled SaxonC library. */
     std::string cwd; /*!< current working directory */
-    jobject proc; /*!< Java Processor object */
+
 
 
 /**
@@ -645,19 +645,19 @@ public:
 protected:
 
 
-    jclass xdmAtomicClass; /*!< The XdmAtomicValue instance */
-    jclass versionClass; /*!< The Version instance */
-    jclass procClass; /*!< The SAxon Processor instance */
-    jclass saxonCAPIClass; /*!< The SaxonCAPI instance */
+    //jclass xdmAtomicClass; /*!< The XdmAtomicValue instance */
+    //jclass versionClass; /*!< The Version instance */
+    //jclass procClass; /*!< The SAxon Processor instance */
+    //jclass saxonCAPIClass; /*!< The SaxonCAPI instance */
     std::string cwdV; /*!< current working directory */
     //std::string resources_dir; /*!< current Saxon resources directory */
     std::string versionStr; /*!< The Saxon version string */
     std::map<std::string, XdmValue *> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
     std::map<std::string, std::string> configProperties; /*!< map of properties used for the transformation as (string, string) pairs */
     bool licensei; /*!< indicates whether the Processor requires a Saxon that needs a license file (i.e. Saxon-EE) other a Saxon-HE Processor is created  */
+    int64_t procRef;
 
-
-    JNINativeMethod *nativeMethods; /*!< native methods variable used in extension methods */
+    //JNINativeMethod *nativeMethods; /*!< native methods variable used in extension methods */
     std::vector<JNINativeMethod> nativeMethodVect; /*!< Vector of native methods defined by user */
     SaxonApiException *exception; /*!< SaxonApiException object to capture exceptions thrown from the underlying Java code via JNI */
 
@@ -671,12 +671,12 @@ private:
     void applyConfigurationProperties();
 
     // SaxonC method for internal use
-    static JParameters
+    static int64_t
     createParameterJArray(std::map<std::string, XdmValue *> parameters, std::map<std::string, std::string> properties, int additions = 0);
 
-    static JParameters createParameterJArray2(std::map<std::string, XdmValue *> parameters);
+    static int64_t createParameterJArray2(std::map<std::string, XdmValue *> parameters);
 
-    static jobjectArray createJArray(XdmValue **values, int length);
+    //static jobjectArray createJArray(XdmValue **values, int length);
 
     static const char *checkException();
 };

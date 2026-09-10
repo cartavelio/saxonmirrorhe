@@ -10,7 +10,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SaxonCGlue2.h"
+#include "SaxonCGlue.h"
 
 
 
@@ -26,12 +26,24 @@ typedef struct {
 } sxnc_processor;
 
 EXTERN_SAXONC
+
+
+
+
+// Graalvm entrypoint methods
+char * getProductVersion(graal_isolatethread_t*, int64_t processorRef);
+char * xsltApplyStylesheet(graal_isolatethread_t*, int64_t processorRef, char * cwd, char * sourceFile, char * stylesheet);
+
+
+
 /*
  * Get the Saxon version 
  */
 const char * version(sxnc_environment *environi, int64_t proc);
 
 const char * getProductVariantAndVersion(sxnc_environment * environi, int64_t proc);
+
+
 
 void initSaxonc(sxnc_environment ** environi, sxnc_processor ** proc, sxnc_parameter **param, sxnc_property ** prop,int cap, int propCap);
 
@@ -40,6 +52,8 @@ void freeSaxonc(sxnc_environment ** environi, sxnc_processor ** proc, sxnc_param
 void xsltSaveResultToFile(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char * source, char* stylesheet, char* outputfile, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
 const char * xsltApplyStylesheet1(sxnc_environment *environi, int64_t proc, char * cwd, char * source, char* stylesheet, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
+
+
 
 void executeQueryToFile(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char* outputfile, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
