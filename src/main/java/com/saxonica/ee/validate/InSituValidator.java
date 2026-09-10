@@ -54,7 +54,7 @@ public class InSituValidator {
         Configuration config = root.getConfiguration();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
-        SequenceReceiver endPoint = new NodeUpdater(pipe);
+        SequenceReceiver endPoint = new NodeUpdater(nodeBuffer, pipe);
         // Create the validation pipeline
         ParseOptions options = new ParseOptions();
         options.setSchemaValidationMode(validationMode);
@@ -66,7 +66,7 @@ public class InSituValidator {
             options.setTopLevelElement(NameOfNode.makeName(root).getStructuredQName());
             validator = config.getElementValidator(endPoint, options, Loc.NONE);
         }
-        pipe.setComponent(CopyInformee.class.getName(), new NodeCounter());
+        pipe.setComponent("net.sf.saxon.event.CopyInformee", new NodeCounter(nodeBuffer));
         // Run the validation by invoking the copy() method to send events to the validation pipeline
         root.copy(validator, CopyOptions.ALL_NAMESPACES, Loc.NONE);
     }
@@ -78,12 +78,13 @@ public class InSituValidator {
      * used to trigger updates to the originating nodes.
      */
 
-    private class NodeCounter implements CopyInformee {
+    private static class NodeCounter implements CopyInformee {
 
         int counter = 0;
+        final MutableNodeInfo[] nodeBuffer;
 
-        public NodeCounter() {
-            //setUnderlyingReceiver(next);
+        public NodeCounter(MutableNodeInfo[] nodeBuffer) {
+            this.nodeBuffer = nodeBuffer;
         }
 
         /**
@@ -101,12 +102,14 @@ public class InSituValidator {
 
     }
 
-    private class NodeUpdater extends ProxyReceiver {
+    private static class NodeUpdater extends ProxyReceiver {
 
         private MutableNodeInfo currentElement;
+        final MutableNodeInfo[] nodeBuffer;
 
-        public NodeUpdater(PipelineConfiguration pipe) {
+        public NodeUpdater(MutableNodeInfo[] nodeBuffer, PipelineConfiguration pipe) {
             super(new Sink(pipe));
+            this.nodeBuffer = nodeBuffer;
         }
 
 

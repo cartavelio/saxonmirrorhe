@@ -1,4 +1,4 @@
-package com.saxonica.ee.optim;
+package com.saxonica.ee.parallel;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.event.PipelineConfiguration;

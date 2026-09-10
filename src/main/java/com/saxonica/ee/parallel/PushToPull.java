@@ -1,4 +1,4 @@
-package com.saxonica.ee.stream;
+package com.saxonica.ee.parallel;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.trans.Outcome;

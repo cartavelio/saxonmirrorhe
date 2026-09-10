@@ -136,7 +136,7 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
             return PostureAndSweep.ROAMING_AND_FREE_RANGING;
         }
         return new PostureAndSweep(Streamability.getPosture(action),
-                                   Sweep.wider(Streamability.getSweep(select), Streamability.getSweep(action)));
+                                   Streamability.wider(Streamability.getSweep(select), Streamability.getSweep(action)));
     }
 
 
@@ -170,34 +170,27 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
         final Inversion actionInversion = getActionInversion(true);
 
         if (((ForEachGroup) getExpression()).getAlgorithm() == ForEachGroup.GROUP_BY) {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-                    ForEachGroupParallelAction actor = new ForEachGroupParallelAction(watchManager, (ForEachGroup) getExpression(), out, context);
-                    if (actionInversion != null) {
-                        actor.setInversion(actionInversion);
-                    }
-                    if (selection != null) {
-                        return new Trigger(selection, actor, context);
-                    } else {
-                        return ((TransmissionAdjunct) sa).makeTransmissionFlow(watchManager, select, actor, context);
-                    }
+            return (watchManager, out, context) -> {
+                ForEachGroupParallelAction actor = new ForEachGroupParallelAction(watchManager, (ForEachGroup) getExpression(), out, context);
+                if (actionInversion != null) {
+                    actor.setInversion(actionInversion);
+                }
+                if (selection != null) {
+                    return new Trigger(selection, actor, context);
+                } else {
+                    return ((TransmissionAdjunct) sa).makeTransmissionFlow(watchManager, select, actor, context);
                 }
             };
         } else {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
-                        throws XPathException {
-                    ForEachGroupPartitionAction actor = new ForEachGroupPartitionAction(watchManager, (ForEachGroup) getExpression(), out, context);
-                    if (actionInversion != null) {
-                        actor.setInversion(actionInversion);
-                    }
-                    if (selection != null) {
-                        return new Trigger(selection, actor, context);
-                    } else {
-                        return ((TransmissionAdjunct) sa).makeTransmissionFlow(watchManager, select, actor, context);
-                    }
+            return (watchManager, out, context) -> {
+                ForEachGroupPartitionAction actor = new ForEachGroupPartitionAction(watchManager, (ForEachGroup) getExpression(), out, context);
+                if (actionInversion != null) {
+                    actor.setInversion(actionInversion);
+                }
+                if (selection != null) {
+                    return new Trigger(selection, actor, context);
+                } else {
+                    return ((TransmissionAdjunct) sa).makeTransmissionFlow(watchManager, select, actor, context);
                 }
             };
         }

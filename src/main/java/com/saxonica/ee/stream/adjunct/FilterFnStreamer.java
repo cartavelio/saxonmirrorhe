@@ -7,11 +7,11 @@ import com.saxonica.ee.stream.Sweep;
 import com.saxonica.ee.stream.feed.FilteringFeed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
-import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
-import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
+import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
+import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
@@ -103,10 +103,12 @@ public class FilterFnStreamer extends FilteringAdjunct {
     public FilteringFeed.Filter makeFilter(final XPathContext context, ItemFeed out) throws XPathException {
         final Function function = (Function) ((SystemFunctionCall)getExpression()).getArg(1).evaluateItem(context);
         final Sequence[] args = SequenceTool.makeSequenceArray(1);
-        return (item, position) -> {
+        return new FilteringFeed.FilterLambda((item, position) -> {
             args[0] = item;
-            return ((BooleanValue) function.call(context, args).head()).getBooleanValue() ? FilteringFeed.Filter.MATCHES : FilteringFeed.Filter.SKIP;
-        };
+            return ((BooleanValue) function.call(context, args).head()).getBooleanValue()
+                    ? FilteringFeed.FilterResult.MATCHES
+                    : FilteringFeed.FilterResult.SKIP;
+        });
     }
 
 

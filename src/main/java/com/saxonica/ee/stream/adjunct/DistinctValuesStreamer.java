@@ -63,7 +63,7 @@ public class DistinctValuesStreamer
                     dynamicError(new XPathException("Unknown collation " + collationName, "FOCH0002"));
                 }
             }
-            getResult().open(terminator);
+            getResultFeed().open(terminator);
         }
 
         /**

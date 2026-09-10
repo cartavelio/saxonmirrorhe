@@ -16,8 +16,8 @@ public class Eval extends Evaluate {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         XPathContextMajor c2 = context.newCleanContext();
         Item head = arguments[0].head();
-        ExternalObject oval = (ExternalObject)head;
-        Evaluate.PreparedExpression pexpr = (Evaluate.PreparedExpression)oval.getObject();
+        ExternalObject<Evaluate.PreparedExpression> oval = (ExternalObject<Evaluate.PreparedExpression>)head;
+        Evaluate.PreparedExpression pexpr = oval.getObject();
         c2.setOrigin(pexpr);
         c2.openStackFrame(pexpr.stackFrameMap);
         for (int i = 1; i < arguments.length; i++) {

@@ -395,7 +395,7 @@ public class UserListType extends UserSimpleType implements ListType {
      */
 
     @Override
-    public void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
+    protected void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
         serializer.emitAttribute("variety", "list");
         serializer.emitAttribute("itemType", serializer.getTypeLink(getItemType()));
     }

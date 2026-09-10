@@ -686,7 +686,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         options.setCheckEntityReferences(true);
         if (keepStatistics) {
             latestStatistics = new ValidationStatistics();
-            options.setValidationStatisticsRecipient(latestStatistics.recipient);
+            options.setValidationStatisticsRecipient(latestStatistics.getRecipient());
         }
         Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, config.obtainDefaultSerializationProperties());
         output.setPipelineConfiguration(pipe);

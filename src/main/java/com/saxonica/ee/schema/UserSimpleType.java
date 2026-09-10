@@ -1,7 +1,7 @@
 package com.saxonica.ee.schema;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
@@ -18,7 +18,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
 
 
 /**
@@ -814,7 +816,7 @@ public abstract class UserSimpleType extends UserDefinedType
      */
 
     public static Function getComponentAsFunction(final SimpleType type) {
-        Callable callable = (context, arguments) -> {
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
@@ -898,7 +900,7 @@ public abstract class UserSimpleType extends UserDefinedType
                     if (type == BuiltInAtomicType.ANY_ATOMIC || !type.isAtomicType()) {
                         return EmptySequence.getInstance();
                     } else {
-                        return ((AtomicType) type).getPrimitiveItemType().getComponentAsFunction();
+                        return getComponentAsFunction((AtomicType)(((AtomicType)type).getPrimitiveItemType()));
                     }
                 case "item type definition":
                     if (type.isListType()) {
@@ -919,7 +921,7 @@ public abstract class UserSimpleType extends UserDefinedType
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

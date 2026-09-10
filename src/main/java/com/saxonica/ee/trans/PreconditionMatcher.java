@@ -63,13 +63,12 @@ public class PreconditionMatcher extends RuleSearchState {
      * Get the value of a particular characteristic of the item being matched, evaluating
      * it if it has not already been evaluated, and retaining its value for future use
      * @param chic the characteristic to be evaluated
-     * @param <T> the type of value of this characteristic
      * @return the value of the characteristic
      * @throws XPathException if evaluation of the characteristic failed
      */
 
-    public <T> T obtainCharacteristic(Characteristic<T> chic) throws XPathException {
-        T val = (T)characteristics[chic.getSlotNumber()];
+    public Object obtainCharacteristic(Characteristic chic) throws XPathException {
+        Object val = characteristics[chic.getSlotNumber()];
         if (val == null) {
             val = chic.evaluate(context);
             characteristics[chic.getSlotNumber()] = val;

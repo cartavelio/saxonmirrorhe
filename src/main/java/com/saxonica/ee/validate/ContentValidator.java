@@ -16,15 +16,14 @@ import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static com.saxonica.ee.validate.ContentValidator.Nillability.*;
 
 
 /**
@@ -35,6 +34,7 @@ import static com.saxonica.ee.validate.ContentValidator.Nillability.*;
 
 public abstract class ContentValidator extends ValidatingFilter {
 
+    @CSharpSimpleEnum
     public enum Nillability {
         /**
          * Constant indicating that xsi:nil is allowed but ignored; this is true when we are validating
@@ -59,7 +59,7 @@ public abstract class ContentValidator extends ValidatingFilter {
     private StructuredQName containingElement = null;
     private Location containingElementLocation;
     protected boolean nilled = false;
-    private Nillability nillability = IGNORED;
+    private Nillability nillability = Nillability.IGNORED;
     private ElementDecl elementDecl;
 
     private SchemaType annotation = Untyped.getInstance();
@@ -283,7 +283,7 @@ public abstract class ContentValidator extends ValidatingFilter {
                                                  List<ValidationFailure> failures) throws MissingComponentException {
         Configuration config = pipe.getConfiguration();
         ContentValidator val;
-        Nillability nillability = IGNORED;
+        Nillability nillability = Nillability.IGNORED;
         if (validation == Validation.STRIP && governingType == null) {
             val = new SkipValidator(nextReceiver);
         } else if (validation == Validation.BY_TYPE) {
@@ -320,7 +320,7 @@ public abstract class ContentValidator extends ValidatingFilter {
             return null;
         } else {
             // We have a usable element declaration
-            nillability = decl.isNillable() ? ALLOWED : DISALLOWED;
+            nillability = decl.isNillable() ? Nillability.ALLOWED : Nillability.DISALLOWED;
             config.sealNamespace(decl.getTargetNamespace());
             if (governingType != null && governingType.getFingerprint() == StandardNames.XS_UNTYPED_ATOMIC) {
                 ValidationFailure ve = new ValidationFailure("Cannot use xs:untypedAtomic as governing type for validation");

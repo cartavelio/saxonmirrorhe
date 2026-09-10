@@ -75,7 +75,7 @@ public class SaxonPreprocess extends AnnotationParent {
             xpath = ".";  // for error recovery
         }
 
-        XPathStaticContext env = new XPathStaticContext(getConfiguration());
+        XPathStaticContext env = new XPathStaticContext(this);
         env.setDefaultElementNamespace(defaultNamespace);
         env.setNamespaceResolver(makeNamespaceContext());
         env.setBaseURI(getBaseURI());

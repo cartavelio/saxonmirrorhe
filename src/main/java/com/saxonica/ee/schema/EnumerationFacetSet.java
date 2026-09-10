@@ -1,8 +1,8 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.sort.SimpleTypeComparison;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.sort.CustomMap;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.AtomicArray;
@@ -189,13 +189,14 @@ public class EnumerationFacetSet extends Facet {
 
     @Override
     public Function getFacetAsFunctionItem() {
-        Callable callable = (context, arguments) -> {
+        EnumerationFacetSet facet = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return new StringValue(getName());
                 case "implementation":
-                    return new ObjectValue<>(EnumerationFacetSet.this);
+                    return new ObjectValue<>(facet);
                 case "value":
                     // This is a set of typed values, where each typed value is potentially a list.
                     // We therefore return the string values (bug 4024)
@@ -211,7 +212,7 @@ public class EnumerationFacetSet extends Facet {
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

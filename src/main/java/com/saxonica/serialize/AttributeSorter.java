@@ -19,7 +19,6 @@ import java.util.*;
 public class AttributeSorter extends ProxyReceiver  {
 
     private Map<NodeName, Integer> knownAttributes;             // mapping of named attributes to relative position
-    protected List<AttributeInfo> attributes;
 
     private final static int MIDDLE_GROUND = 10000000;
 
@@ -41,7 +40,7 @@ public class AttributeSorter extends ProxyReceiver  {
 
     public void setOutputProperties(/*@NotNull*/ Properties details) {
         String attOrder;
-        if ("yes".equals(details.get(SaxonOutputKeys.CANONICAL))) {
+        if ("yes".equals(details.getProperty(SaxonOutputKeys.CANONICAL))) {
             attOrder = "";
         } else {
             attOrder = details.getProperty(SaxonOutputKeys.ATTRIBUTE_ORDER);
@@ -71,12 +70,10 @@ public class AttributeSorter extends ProxyReceiver  {
                              AttributeMap attributesIn, NamespaceMap namespaces,
                              Location location, int properties)
             throws XPathException {
-        attributes = Collections.emptyList();
         if (attributesIn.size() <= 1) {
             nextReceiver.startElement(elemName, type, attributesIn, namespaces, location, properties);
         } else {
-            attributes = new ArrayList<>(attributesIn.size());
-            attributesIn.forEach(attributes::add);
+            ArrayList<AttributeInfo> attributes = attributesIn.asList();
             attributes.sort((a, b) -> {
                 NodeName n0 = a.getNodeName();
                 NodeName n1 = b.getNodeName();

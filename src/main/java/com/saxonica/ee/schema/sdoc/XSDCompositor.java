@@ -197,6 +197,7 @@ public class XSDCompositor extends SchemaElement {
 
                 default:
                     illegalElement(child);
+                    break;
             }
         }
     }
@@ -236,8 +237,8 @@ public class XSDCompositor extends SchemaElement {
                     break;
 
                 case StandardNames.XS_GROUP:
-                    ModelGroupParticle modelGroup = ((XSDGroup) child).getGroupReference();
-                    this.modelGroup.addParticle(modelGroup);
+                    ModelGroupParticle modelGroupParticle = ((XSDGroup) child).getGroupReference();
+                    this.modelGroup.addParticle(modelGroupParticle);
                     break;
 
                 case StandardNames.XS_SEQUENCE:

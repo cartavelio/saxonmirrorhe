@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
@@ -128,8 +129,8 @@ public class XSDElement extends SchemaElement {
                     if (!existsAsTopLevel) {
                         String localName = nc.getLocalPart();
                         XSDSchema s = getXSDSchema();
-                        for (NodeInfo ignored : s.children(x -> x instanceof XSDElement &&
-                                localName.equals(x.getAttributeValue("", "name")))) {
+                        for (NodeInfo ignored : s.children(NodeSelector.of(x -> x instanceof XSDElement &&
+                                localName.equals(x.getAttributeValue("", "name"))))) {
                             existsAsTopLevel = true;
                             break;
                         }
@@ -438,6 +439,7 @@ public class XSDElement extends SchemaElement {
                 }
                 default: {
                     illegalElement(child);
+                    break;
                 }
             }
         }

@@ -8,6 +8,8 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpDelegate;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 
 import java.util.Stack;
 
@@ -39,7 +41,7 @@ public class FilteringFeed extends GroundedItemFeed {
 
     @Override
     public void open(Terminator terminator) throws XPathException {
-        getResult().open(terminator);
+        getResultFeed().open(terminator);
         position = 0;
         this.terminated = false;
     }
@@ -47,13 +49,13 @@ public class FilteringFeed extends GroundedItemFeed {
     @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         if (!terminated) {
-            int match = filter.matches(node, ++position);
-            matchStack.push(match == Filter.MATCHES);
+            FilterResult match = filter.matches(node, ++position);
+            matchStack.push(match == FilterResult.MATCHES);
             //nodeKindStack.push(node.getNodeKind());
-            if (match == Filter.MATCHES) {
-                return getResult().startSelectedParentNode(node, locationId);
+            if (match == FilterResult.MATCHES) {
+                return getResultFeed().startSelectedParentNode(node, locationId);
                 //node.notify(getNextOutputter());
-            } else if (match == Filter.DONE && getTerminator() != null) {
+            } else if (match == FilterResult.DONE && getTerminator() != null) {
                 getNextOutputter().close();
                 terminated = true;
                 getTerminator().terminate();
@@ -68,7 +70,7 @@ public class FilteringFeed extends GroundedItemFeed {
             boolean matches = matchStack.pop();
             //int kind = nodeKindStack.pop();
             if (matches) {
-                getResult().endSelectedParentNode(locationId);
+                getResultFeed().endSelectedParentNode(locationId);
             }
         }
     }
@@ -77,10 +79,10 @@ public class FilteringFeed extends GroundedItemFeed {
     public void append(Item item) throws XPathException {
         if (!terminated && !hasFailed()) {
             try {
-                int match = filter.matches(item, ++position);
-                if (match == Filter.MATCHES) {
+                FilterResult match = filter.matches(item, ++position);
+                if (match == FilterResult.MATCHES) {
                     getNextOutputter().append(item);
-                } else if (match == Filter.DONE && getTerminator() != null) {
+                } else if (match == FilterResult.DONE && getTerminator() != null) {
                     getNextOutputter().close();
                     terminated = true;
                     getTerminator().terminate();
@@ -99,13 +101,33 @@ public class FilteringFeed extends GroundedItemFeed {
     }
 
     /**
+     * Three possible results of the Filter#matches operation
+     */
+
+    @CSharpSimpleEnum
+    public enum FilterResult {
+        /**
+         * Item was not matched
+         */
+        SKIP,
+        /**
+         * Item was matched
+         */
+        MATCHES,
+        /**
+         * Item was not matched and no further items need to be tested, they can be treated as non-matching
+         */
+        DONE
+    }
+
+    /**
      * Interface defining the filter function, to be implemented by the caller
      */
 
+    @FunctionalInterface
+    @CSharpDelegate(false)
     public interface Filter {
-        int SKIP = 0;
-        int MATCHES = 1;
-        int DONE = 2;
+
         /**
          * Test whether a given item, at a given position in the sequence, matches the filter
          * @param item the item to be matched
@@ -114,48 +136,42 @@ public class FilteringFeed extends GroundedItemFeed {
          * DONE if this and all future items are to be excluded
          * @throws XPathException if a dynamic error occurs
          */
-        int matches(Item item, int position) throws XPathException;
+        FilterResult matches(Item item, int position) throws XPathException;
+    }
+
+    @FunctionalInterface
+    @CSharpDelegate(true)
+    public interface FilterDelegate {
+        FilterResult matches(Item item, int position) throws XPathException;
+    }
+
+    /**
+     * An implementation of Filter that accepts lambda expressions (C# delegates)
+     */
+
+    public static class FilterLambda implements Filter {
+        private final FilterDelegate delegate;
+        public FilterLambda(FilterDelegate delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public FilterResult matches(Item item, int position) throws XPathException {
+            return delegate.matches(item, position);
+        }
     }
 
     /**
      * A filter that matches everything
      */
 
-    public static class TransparentFilter implements Filter {
-        /**
-         * Test whether a given item, at a given position in the sequence, matches the filter
-         *
-         * @param item     the item to be matched
-         * @param position the 1-based position of the item in the sequence
-         * @return MATCHES if the item is to be included in the result, SKIP if it is to be excluded;
-         * DONE if this and all future items are to be excluded
-         * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
-         */
-        @Override
-        public int matches(Item item, int position) throws XPathException {
-            return MATCHES;
-        }
-    }
+    public static FilterLambda TransparentFilter = new FilterLambda((item, position) -> FilterResult.MATCHES);
 
     /**
      * A filter that matches nothing
      */
 
-    public static class OpaqueFilter implements Filter {
-        /**
-         * Test whether a given item, at a given position in the sequence, matches the filter
-         *
-         * @param item     the item to be matched
-         * @param position the 1-based position of the item in the sequence
-         * @return MATCHES if the item is to be included in the result, SKIP if it is to be excluded;
-         * DONE if this and all future items are to be excluded
-         * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
-         */
-        @Override
-        public int matches(Item item, int position) throws XPathException {
-            return DONE;
-        }
-    }
+    public static FilterLambda OpaqueFilter = new FilterLambda((item, position) -> FilterResult.DONE);
 
 }
 

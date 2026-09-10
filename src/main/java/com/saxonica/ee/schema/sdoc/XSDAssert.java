@@ -104,7 +104,7 @@ public class XSDAssert extends AnnotationParent {
         Configuration config = getConfiguration();
 
 
-        XPathStaticContext env = new XPathStaticContext(config);
+        XPathStaticContext env = new XPathStaticContext(this);
         env.setDefaultElementNamespace(defaultNamespace);
         env.setNamespaceResolver(makeNamespaceContext());
         env.setBaseURI(getBaseURI());

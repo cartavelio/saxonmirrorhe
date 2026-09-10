@@ -3,13 +3,13 @@ package com.saxonica.functions.extfn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BigDecimalValue;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.NumericValue;
 
-import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Implements the saxon:decimal-divide() function
@@ -29,15 +29,15 @@ public class DecimalDivide extends SystemFunction {
      */
 
     @Override
-    public ZeroOrOne<BigDecimalValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NumericValue d1 = (NumericValue)arguments[0].head();
         NumericValue d2 = (NumericValue)arguments[1].head();
         if (d1 == null || d2 == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         int scale = (int) ((IntegerValue)arguments[2].head()).longValue();
-        return new ZeroOrOne<>(new BigDecimalValue(
-                d1.getDecimalValue().divide(d2.getDecimalValue(), scale, BigDecimal.ROUND_DOWN)));
+        return new BigDecimalValue(
+                d1.getDecimalValue().divide(d2.getDecimalValue(), scale, RoundingMode.DOWN));
 
     }
 

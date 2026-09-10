@@ -46,13 +46,9 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
 
         if (selection != null) {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
-                        throws XPathException {
-                    ToJsonAction action = new ToJsonAction(getExpression(), out, context);
-                    return new Trigger(selection, action, context);
-                }
+            return (watchManager, out, context) -> {
+                ToJsonAction action = new ToJsonAction(getExpression(), out, context);
+                return new Trigger(selection, action, context);
             };
         }
         return null;
@@ -60,8 +56,7 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
 
     @Override
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-        ToJsonAction action = new ToJsonAction(getExpression(), out, context);
-        return action;
+        return new ToJsonAction(getExpression(), out, context);
     }
 
     private static class ToJsonAction extends ItemFeed {

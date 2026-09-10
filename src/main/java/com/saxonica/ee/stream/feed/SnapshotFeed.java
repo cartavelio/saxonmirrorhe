@@ -52,7 +52,7 @@ public class SnapshotFeed extends AbsorptionFeed {
 
     @Override
     protected PendingItem makePendingItem(int sequenceNr, FleetingParentNode node) throws XPathException {
-        return new PendingSnapshotAction(sequenceNr, node);
+        return new PendingSnapshotAction(this, sequenceNr, node);
     }
 
     @Override
@@ -66,25 +66,27 @@ public class SnapshotFeed extends AbsorptionFeed {
      * The builder is the builder being used to construct the tree.
      */
 
-    private class PendingSnapshotAction extends PendingItem {
+    private static class PendingSnapshotAction extends PendingItem {
         public int sequence;
         public BuilderMonitor monitor;
         public List<NodeInfo> ancestorList;
+        private final SnapshotFeed feed;
 
-        public PendingSnapshotAction(int sequence, FleetingParentNode node) throws XPathException {
+        public PendingSnapshotAction(SnapshotFeed feed, int sequence, FleetingParentNode node) throws XPathException {
             super(sequence);
+            this.feed = feed;
             this.sequence = sequence;
             ancestorList = SnapshotFn.makeAncestorList(node);
-            monitor = SnapshotFn.openAncestors(node, ancestorList, getContext());
+            monitor = SnapshotFn.openAncestors(node, ancestorList, feed.getContext());
             monitor.markNextNode(node.getNodeKind());
         }
 
         @Override
         public Receiver getGatherer() throws XPathException {
             TinyBuilder builder = (TinyBuilder)monitor.getNextReceiver();
-            if (copyAccumulators) {
+            if (feed.copyAccumulators) {
                 // Ensure that accumulator values are copied
-                return new CopyOfFeed.AccumulatorCopier(watchManager, monitor, builder);
+                return new CopyOfFeed.AccumulatorCopier(feed.watchManager, monitor, builder);
             } else {
                 return monitor;
             }

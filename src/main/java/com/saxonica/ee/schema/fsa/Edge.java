@@ -422,7 +422,7 @@ public class Edge implements Iterable<Edge> {
 
     public static class MaxOccursParticle extends ModelGroupParticle {
 
-        private MaxOccursParticle() {
+        public MaxOccursParticle() {
             super(null, null);
         }
 

@@ -1,12 +1,11 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -130,32 +129,30 @@ public class WhitespaceFacet extends Facet {
 
     @Override
     public Function getFacetAsFunctionItem() {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-                String key = arguments[0].head().getStringValue();
-                switch (key) {
-                    case "class":
-                        return new StringValue(getName());
-                    case "implementation":
-                        return new ObjectValue<>(WhitespaceFacet.this);
-                    case "value":
-                        switch (action) {
-                            case Whitespace.PRESERVE:
-                            default:
-                                return StringValue.bmp("preserve");
-                            case Whitespace.COLLAPSE:
-                                return StringValue.bmp("collapse");
-                            case Whitespace.REPLACE:
-                                return StringValue.bmp("replace");
-                        }
-                    case "fixed":
-                        return BooleanValue.get(isFixed());
-                    default:
-                        return EmptySequence.getInstance();
-                }
+        WhitespaceFacet facet = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
+            String key = arguments[0].head().getStringValue();
+            switch (key) {
+                case "class":
+                    return new StringValue(getName());
+                case "implementation":
+                    return new ObjectValue<>(facet);
+                case "value":
+                    switch (action) {
+                        case Whitespace.PRESERVE:
+                        default:
+                            return StringValue.bmp("preserve");
+                        case Whitespace.COLLAPSE:
+                            return StringValue.bmp("collapse");
+                        case Whitespace.REPLACE:
+                            return StringValue.bmp("replace");
+                    }
+                case "fixed":
+                    return BooleanValue.get(isFixed());
+                default:
+                    return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

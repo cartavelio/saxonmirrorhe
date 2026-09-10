@@ -4,7 +4,7 @@ package com.saxonica.ee.trans;
  * An Outcome represents the result of a task, which might be success or failure
  * <code>T</code> is the class of the result of the task in the event that it is successful
  */
-public class Outcome<T extends Object> {
+public class Outcome<T> {
 
     private T result;
     private Exception exception;

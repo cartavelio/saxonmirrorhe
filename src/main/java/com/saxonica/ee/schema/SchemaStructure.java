@@ -1,7 +1,7 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Item;
@@ -9,6 +9,7 @@ import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaValidationStatus;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -30,7 +31,7 @@ import java.util.Stack;
  * XML Schema document, for diagnostic purposes.
  */
 
-public abstract class SchemaStructure implements Location {
+public abstract class SchemaStructure implements UserSchemaComponent, Location {
 
     private String systemId;    // the URI of the XML entity in which the component is defined
     private int lineNumber;     // the line number of the component definition within that entity
@@ -193,6 +194,23 @@ public abstract class SchemaStructure implements Location {
         return generatedId;
     }
 
+    /**
+     * Checks the validity of this Schema component.
+     *
+     * @param compiler the schema compiler
+     * @return true when this Schema definition is valid, otherwise false.
+     * @throws SchemaException if the ErrorListener decides that an error is fatal.
+     */
+
+    @Override
+    public boolean validate(SchemaCompiler compiler) throws SchemaException {
+        return true;
+    }
+
+    @Override
+    public Function getComponentAsFunction() {
+        return null;
+    }
 
     /**
      * Get the current validation status
@@ -308,7 +326,7 @@ public abstract class SchemaStructure implements Location {
      *
      */
 
-    public void lookForCycles(Stack references, SchemaCompiler compiler)
+    public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler)
             throws SchemaException {
         // no action
     }
@@ -344,7 +362,7 @@ public abstract class SchemaStructure implements Location {
             final String conditionText,
             final NamespaceResolver nsResolver,
             final String baseURI) {
-        Callable callable = (context, arguments) -> {
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "namespace bindings":
@@ -352,7 +370,7 @@ public abstract class SchemaStructure implements Location {
                     Iterator<String> prefixes = nsResolver.iteratePrefixes();
                     while (prefixes.hasNext()) {
                         final String prefix = prefixes.next();
-                        Callable binding = (context1, arguments1) -> {
+                        CallableDelegate binding = new CallableDelegate((context1, arguments1) -> {
                             String key1 = arguments1[0].head().getStringValue();
                             switch (key1) {
                                 case "prefix":
@@ -362,7 +380,7 @@ public abstract class SchemaStructure implements Location {
                                 default:
                                     return EmptySequence.getInstance();
                             }
-                        };
+                        });
                         bindings.add(new CallableFunction(1, binding, SpecificFunctionType.COMPONENT_FUNCTION_TYPE));
                     }
                     return SequenceExtent.makeSequenceExtent(bindings);
@@ -375,7 +393,7 @@ public abstract class SchemaStructure implements Location {
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

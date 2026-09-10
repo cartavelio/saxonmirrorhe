@@ -1,6 +1,6 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
@@ -133,19 +133,21 @@ public class AssertionFacet extends Facet {
     @Override
     public Function getFacetAsFunctionItem() {
         // Contrary to the W3C SCM model, each assertion is delivered as a separate schema component
-        Callable callable = (context, arguments) -> {
+        AssertionFacet facet = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return new StringValue(getName());
                 case "implementation":
-                    return new ObjectValue<>(AssertionFacet.this);
+                    return new ObjectValue<>(facet);
                 case "value":
                     return assertion.getComponentAsFunction();
+
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

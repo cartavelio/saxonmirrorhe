@@ -5,7 +5,6 @@ import net.sf.saxon.pattern.Pattern;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A PatternOptimizer is an agent responsible for optimizing a particular class
@@ -38,7 +37,10 @@ public abstract class PatternOptimizer {
      *   to X".
      */
 
-    public abstract void process(RuleEE rule, Pattern pattern, Map<Precondition, List<RuleEE>> preconditions, Map<Characteristic, Characteristic> characteristics);
+    public abstract void process(RuleEE rule,
+                                     Pattern pattern,
+                                     Map<Precondition, List<RuleEE>> preconditions,
+                                     Map<Characteristic, Characteristic> characteristics);
 
     /**
      * Allocate a new characteristic, that is, a property of nodes or other items that may potentially
@@ -49,8 +51,9 @@ public abstract class PatternOptimizer {
      * @return the supplied characteristic unless there was already an equivalent characteristic in the set, in which
      * case an equivalent characteristic that should be used in place of the new one.
      */
-    protected Characteristic allocateCharacteristic(Map<Characteristic, Characteristic> characteristics, Characteristic newChic) {
-        Set<Characteristic> characteristicSet;
+    protected Characteristic allocateCharacteristic(Map<Characteristic, Characteristic> characteristics,
+                                                    Characteristic newChic) {
+        //Set<Characteristic<T>> characteristicSet;
         Characteristic chic = characteristics.get(newChic);
         if (chic == null) {
             characteristics.put(newChic, newChic);
@@ -64,7 +67,7 @@ public abstract class PatternOptimizer {
         if (preconditions.containsKey(p)) {
             preconditions.get(p).add(rule);
         } else {
-            List<RuleEE> applicableRules = new ArrayList<RuleEE>();
+            List<RuleEE> applicableRules = new ArrayList<>();
             applicableRules.add(rule);
             preconditions.put(p, applicableRules);
         }

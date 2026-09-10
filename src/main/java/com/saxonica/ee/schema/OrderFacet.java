@@ -1,7 +1,7 @@
 package com.saxonica.ee.schema;
 
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
-import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
@@ -121,13 +121,14 @@ public class OrderFacet extends Facet {
 
     @Override
     public Function getFacetAsFunctionItem() {
-        Callable callable = (context, arguments) -> {
+        OrderFacet facet = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return new StringValue(getName());
                 case "implementation":
-                    return new ObjectValue<>(OrderFacet.this);
+                    return new ObjectValue<>(facet);
                 case "value":
                     return new StringValue(getValue());
                 case "fixed":
@@ -135,7 +136,7 @@ public class OrderFacet extends Facet {
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

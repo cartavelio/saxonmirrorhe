@@ -1,5 +1,6 @@
 package com.saxonica.ee.stream.adjunct;
 
+import com.saxonica.ee.parallel.PushToPull;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.watch.StreamWatch;
 import com.saxonica.ee.stream.watch.WatchManager;

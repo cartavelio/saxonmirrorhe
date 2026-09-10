@@ -239,7 +239,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
                     processItems(si, getNextOutputter());
                 }
             }
-            return getResult().startSelectedParentNode(node, locationId);
+            return getResultFeed().startSelectedParentNode(node, locationId);
         }
 
         /**
@@ -253,7 +253,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
          */
         @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
 
         @Override

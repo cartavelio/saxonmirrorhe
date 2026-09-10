@@ -35,7 +35,7 @@ public interface UserSchemaComponent extends SchemaComponent {
      * @throws SchemaException
      */
 
-    void lookForCycles(Stack references, SchemaCompiler compiler)
+    void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler)
             throws SchemaException, MissingComponentException;
 
     /**

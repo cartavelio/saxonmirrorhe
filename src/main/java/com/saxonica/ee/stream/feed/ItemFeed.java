@@ -182,7 +182,7 @@ public abstract class ItemFeed extends ProxyOutputter {
      */
 
     /*@Nullable*/
-    public ItemFeed getResult() {
+    public ItemFeed getResultFeed() {
         return (ItemFeed)getNextOutputter();
     }
 
@@ -205,7 +205,7 @@ public abstract class ItemFeed extends ProxyOutputter {
 
     public void open(Terminator terminator) throws XPathException {
         this.terminator = terminator;
-        getResult().open(terminator);
+        getResultFeed().open(terminator);
     }
 
     /**
@@ -296,7 +296,7 @@ public abstract class ItemFeed extends ProxyOutputter {
         if (expression != null) {
             error.maybeSetLocation(expression.getLocation());
         }
-        ItemFeed next = getResult();
+        ItemFeed next = getResultFeed();
         while (true) {
             if (next instanceof TryCatchAdjunct.TryCatchFeed) {
                 next.dynamicError(error);

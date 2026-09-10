@@ -4,17 +4,23 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import com.saxonica.ee.validate.SchemaAttributeTest;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
 
 /**
  * An XML Schema Attribute Declaration. This includes global attribute declarations,
@@ -529,13 +535,14 @@ public final class AttributeDecl extends SchemaStructure
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = (context, arguments) -> {
+        AttributeDecl thisAttributeDecl = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Attribute Declaration");
                 case "implementation":
-                    return new ObjectValue<>(AttributeDecl.this);
+                    return new ObjectValue<>(thisAttributeDecl);
                 case "name":
                     return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
@@ -543,7 +550,7 @@ public final class AttributeDecl extends SchemaStructure
                 case "type definition":
                     return getType().getComponentAsFunction();
                 case "scope":
-                    Callable scopeFunction = (context1, arguments1) -> {
+                    CallableDelegate scopeFunction = new CallableDelegate((context1, arguments1) -> {
                         String key1 = arguments1[0].head().getStringValue();
                         switch (key1) {
                             case "class":
@@ -563,7 +570,7 @@ public final class AttributeDecl extends SchemaStructure
                             default:
                                 return EmptySequence.getInstance();
                         }
-                    };
+                    });
                     return new CallableFunction(1, scopeFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                 case "value constraint":
                     return getValueConstraintAsFunction(AttributeDecl.this);
@@ -572,7 +579,7 @@ public final class AttributeDecl extends SchemaStructure
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

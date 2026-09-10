@@ -9,7 +9,6 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.SequenceType;
 
 import java.util.EnumSet;
 
@@ -22,8 +21,6 @@ import java.util.EnumSet;
 public class SaxonAssign extends XSLGeneralVariable {
 
     private Assign instruction;
-    private SequenceType requiredType;
-    private final SourceBinding sourceBinding = new SourceBinding(this);
 
     private final static EnumSet<SourceBinding.BindingProperty> allowedAttributes =
             EnumSet.of(SourceBinding.BindingProperty.SELECT);
@@ -70,7 +67,6 @@ public class SaxonAssign extends XSLGeneralVariable {
                 throw err;
             }
             globalVariable.registerReference(instruction);
-            requiredType = globalVariable.getDeclaredType();
         } catch (XPathException err) {
             // variable not declared
             compileError(err.getMessage());

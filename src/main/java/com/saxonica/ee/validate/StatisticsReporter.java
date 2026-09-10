@@ -7,13 +7,12 @@ import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.sapling.SaplingDocument;
 import net.sf.saxon.sapling.SaplingElement;
+import net.sf.saxon.sapling.Saplings;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaType;
 
 import java.util.Map;
 
-import static net.sf.saxon.sapling.Saplings.doc;
-import static net.sf.saxon.sapling.Saplings.elem;
 
 /**
  * Generates statistics relating to a validation episode
@@ -53,7 +52,7 @@ public class StatisticsReporter implements ValidationStatisticsRecipient {
         if (processor == null) {
             throw new IllegalStateException("No destination has been set");
         }
-        SaplingElement coverage = elem("schemaCoverage");
+        SaplingElement coverage = Saplings.elem("schemaCoverage");
         for (Map.Entry<SchemaComponent, Integer> entry : statistics.entrySet()) {
             SchemaComponent component = entry.getKey();
             int count = entry.getValue();
@@ -70,14 +69,14 @@ public class StatisticsReporter implements ValidationStatisticsRecipient {
                 namespace = ((ElementDecl) component).getTargetNamespace();
                 localname = ((ElementDecl) component).getName();
             }
-            coverage = coverage.withChild(elem("component")
+            coverage = coverage.withChild(Saplings.elem("component")
                                               .withAttr("kind", kind)
                                               .withAttr("namespace", namespace)
                                               .withAttr("name", localname)
                                               .withAttr("count", count + ""));
 
         }
-        SaplingDocument report = doc().withChild(coverage);
+        SaplingDocument report = Saplings.doc().withChild(coverage);
         report.send(processor, destination);
 
     }

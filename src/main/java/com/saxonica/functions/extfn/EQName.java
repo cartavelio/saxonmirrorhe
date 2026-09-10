@@ -5,9 +5,9 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.QNameValue;
 
 /**
@@ -30,15 +30,15 @@ public class EQName extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne<QNameValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item first = arguments[0].head();
         if (first == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         String arg = first.getStringValue();
         StructuredQName qname =
                 StructuredQName.fromLexicalQName(arg, false, true, getRetainedStaticContext());
-        return new ZeroOrOne<>(new QNameValue(qname, BuiltInAtomicType.QNAME));
+        return new QNameValue(qname, BuiltInAtomicType.QNAME);
     }
 }
 

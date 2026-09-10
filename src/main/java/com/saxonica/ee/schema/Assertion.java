@@ -5,12 +5,11 @@ import com.saxonica.ee.stream.Sweep;
 import com.saxonica.ee.validate.ValidationContext;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.CollectionFn;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
@@ -26,6 +25,7 @@ import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.StringValue;
 
 import javax.xml.transform.Source;
+import javax.xml.transform.URIResolver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -294,7 +294,7 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
      */
 
     public static void setDocumentsAndCollections(final Configuration config, XPathDynamicContext context) {
-        context.setURIResolver(new StandardURIResolver(config) {
+        context.setURIResolver(new URIResolver() {
             @Override
             public Source resolve(String href, String base) throws XPathException {
                 throw new XPathException("Use of doc() function within an assertion is not allowed", "FODC0002");
@@ -348,20 +348,21 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = (context, arguments) -> {
+        Assertion thisAssertion = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Assertion");
                 case "implementation":
-                    return new ObjectValue<>(this);
+                    return new ObjectValue<>(thisAssertion);
                 case "test":
                     return SchemaStructure.makeXPathExpressionPropertyRecord(
                             conditionText, staticContext.getNamespaceResolver(), staticContext.getStaticBaseURI());
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }

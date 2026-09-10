@@ -30,7 +30,7 @@ public class TryCatchAdjunct extends TransmissionAdjunct implements FeedMaker {
 
         private final ItemFeed originalResult;
         private boolean done = false;
-        private boolean open = false;
+        private boolean opened = false;
 
         TryCatchFeed(Expression exp, ItemFeed out, XPathContext context) {
             super(new ComplexContentOutputter(new SequenceCollector(out.getPipelineConfiguration())), context, true);
@@ -49,7 +49,7 @@ public class TryCatchAdjunct extends TransmissionAdjunct implements FeedMaker {
         public void open(Terminator terminator) throws XPathException {
             originalResult.open(terminator);
             getNextOutputter().open();
-            open = true;
+            opened = true;
         }
 
         /**
@@ -91,7 +91,7 @@ public class TryCatchAdjunct extends TransmissionAdjunct implements FeedMaker {
                 // validation errors in particular may be reported more than once; we only process them the first time
                 return;
             } else {
-                if (!open) {
+                if (!opened) {
                     open(new Terminator());
                 }
                 done = true;

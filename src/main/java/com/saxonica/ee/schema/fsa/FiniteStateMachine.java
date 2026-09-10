@@ -196,8 +196,8 @@ public class FiniteStateMachine {
         } else if (particle.getTerm() instanceof AllModelGroup) {
             // Path not used
         } else {
-            int count = max - min;
-            for (int i = 0; i < count; i++) {
+            int limit = max - min;
+            for (int i = 0; i < limit; i++) {
                 NonDeterminizedState b = compileTerm(compiler, particle, n, subjectType, machine);
                 b.addLambdaTransition(endState);
                 n = b;
@@ -515,10 +515,10 @@ public class FiniteStateMachine {
         // with an end-state of B, otherwise fail
 
         for (State e : finalDerivedStates) {
-            Iterator processedPairIterator = processed.iterator();
+            Iterator<State[]> processedPairIterator = processed.iterator();
             boolean unfound = false;
             while (processedPairIterator.hasNext()) {
-                State[] pair = (State[]) processedPairIterator.next();
+                State[] pair = processedPairIterator.next();
                 if (pair[1].equals(e) && !pair[0].isFinalState()) {
                     unfound = true;
                     break;

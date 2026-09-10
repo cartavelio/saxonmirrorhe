@@ -79,8 +79,8 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                 return null; // no closing brace after embedded expression in AVT
             }
 
-            long key = key(tokenTypes);
-            ExpressionMaker maker = patterns.get(key);
+            long keyValue = key(tokenTypes);
+            ExpressionMaker maker = patterns.get(keyValue);
             if (maker == null) {
                 return null;
             }

@@ -1,21 +1,26 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.z.*;
+import net.sf.saxon.z.IntHashMap;
+import net.sf.saxon.z.IntToIntArrayMap;
+import net.sf.saxon.z.IntToIntHashMap;
+import net.sf.saxon.z.IntToIntMap;
 
 import java.util.*;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
 
 /**
  * An XML Schema Attribute Group Declaration. This represents a named attribute group,
@@ -195,7 +200,7 @@ public final class AttributeGroupDecl extends SchemaStructure
      */
 
     @Override
-    public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException {
+    public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler) throws SchemaException {
         if (compiler.getLanguageVersion() == Configuration.XSD11) {
             // circular attribute groups are not an error in XSD 1.1
             return;
@@ -380,7 +385,7 @@ public final class AttributeGroupDecl extends SchemaStructure
             if (getFixupStatus() == INVALID) {
                 return false;
             }
-            lookForCycles(new Stack(), compiler);
+            lookForCycles(new Stack<SchemaComponent>(), compiler);
         }
         setFixupStatus(VALIDATED);
         return true;
@@ -540,13 +545,13 @@ public final class AttributeGroupDecl extends SchemaStructure
             //int fp = targetName.getFingerprint();
             AttributeUse baseAtt = base.getAttributeUse(targetName);
             if (baseAtt == null || baseAtt.isProhibited()) {
-                AttributeWildcard wild = base.getAttributeWildcard(compiler);
-                if (wild == null) {
+                AttributeWildcard baseWildCard = base.getAttributeWildcard(compiler);
+                if (baseWildCard == null) {
                     compiler.error("Invalid restriction: attribute " + Err.wrap(att.getDisplayName(), Err.ATTRIBUTE) +
                             " is " + (baseAtt == null ? "not defined" : "prohibited") + " in the base type", this);
                     result = false;
                 } else {
-                    if (!wild.getWildcard().matches(att.getTargetComponentName(), false, getConfiguration(), null)) {
+                    if (!baseWildCard.getWildcard().matches(att.getTargetComponentName(), false, getConfiguration(), null)) {
                         compiler.error("Invalid restriction: attribute " + Err.wrap(att.getDisplayName(), Err.ATTRIBUTE) +
                                 " is " + (baseAtt == null ? "not defined" : "prohibited") + " in the base type", this);
                         result = false;
@@ -746,15 +751,14 @@ public final class AttributeGroupDecl extends SchemaStructure
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        AttributeGroupDecl thisDecl = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
                         return StringValue.bmp("Attribute Group Definition");
                     case "implementation":
-                        return new ObjectValue<>(AttributeGroupDecl.this);
+                        return new ObjectValue<>(thisDecl);
                     case "name":
                         return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                     case "target namespace":
@@ -774,8 +778,8 @@ public final class AttributeGroupDecl extends SchemaStructure
                     default:
                         return EmptySequence.getInstance();
                 }
-            }
-        };
+            
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }

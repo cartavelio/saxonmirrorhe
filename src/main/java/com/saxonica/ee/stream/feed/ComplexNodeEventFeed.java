@@ -31,41 +31,31 @@ import net.sf.saxon.value.AtomicValue;
  */
 public abstract class ComplexNodeEventFeed extends ItemFeed {
 
-    //private Outputter out;
-    private boolean open = false;
+    private boolean opened = false;
     private boolean previousAtomic = false;
     protected Outputter next;
 
     public ComplexNodeEventFeed(Expression exp, ItemFeed parentExpressionFeed, XPathContext context) {
         super(exp, parentExpressionFeed, context);
         next = parentExpressionFeed;
-        //out = getResult().getReceiver();
     }
 
     @Override
     public void open(Terminator terminator) throws XPathException {
-        if (!open) {
+        if (!opened) {
             super.open(terminator);
             try {
                 processLeft(getContext());
             } catch (XPathException e) {
                 dynamicError(e);
             }
-            open = true;
+            opened = true;
         }
     }
 
     @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         throw new UnsupportedOperationException();
-//        if (open && !hasFailed()) {
-//            try {
-//                return getResult().startSelectedParentNode(node, locationId);
-//            } catch (XPathException e) {
-//                dynamicError(e);
-//            }
-//        }
-//        return null;
     }
 
     @Override
@@ -75,7 +65,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
                 "Internal streaming error: streamed node cannot be used directly to construct output node",
                 SaxonErrorCode.SXST0067, getExpression().getLocation());
         }
-        if (open && !hasFailed()) {
+        if (opened && !hasFailed()) {
             try {
                 Outputter out = next;
                 if (item instanceof NodeInfo) {
@@ -111,9 +101,9 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
 
     @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
-        if (open && !hasFailed()) {
+        if (opened && !hasFailed()) {
             try {
-                getResult().endSelectedParentNode(locationId);
+                getResultFeed().endSelectedParentNode(locationId);
             } catch (XPathException e) {
                 dynamicError(e);
             }
@@ -122,7 +112,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
 
     @Override
     public void close() throws XPathException {
-        if (open && !hasFailed()) {
+        if (opened && !hasFailed()) {
             try {
                 processRight(getContext());
             } catch (XPathException e) {
@@ -130,7 +120,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
                 return;
             }
             super.close();
-            open = false;
+            opened = false;
         }
     }
 

@@ -4,21 +4,22 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SingleNamespaceSchema;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SchemaURIResolver;
-import net.sf.saxon.lib.StandardEntityResolver;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An xs:import element in an XML Schema document
@@ -175,15 +176,12 @@ public class XSDImport extends AnnotationParent {
                 return;
             } else if (namespace.equals(NamespaceConstant.FN)) {
                 if (!config.isSchemaAvailable(NamespaceConstant.FN)) {
-                    try {
-                        InputSource is = new StandardEntityResolver(config).resolveEntity(null, "http://www.w3.org/2005/xpath-functions.xsd");
-                        if (config.isTiming()) {
-                            config.getLogger().info("Loading schema from resources for: " + NamespaceConstant.FN);
-                        }
-                        source = new SAXSource(is);
-                    } catch (SAXException e) {
-                        throw new SchemaException(e);
-                    } 
+                    List<String> messages = new ArrayList<>();
+                    InputStream in = Version.platform.locateResource("xpath-functions.xsd", messages);
+                    if (config.isTiming()) {
+                        config.getLogger().info("Loading schema from resources for: " + NamespaceConstant.FN);
+                    }
+                    source = new StreamSource(in, "http://www.w3.org/2005/xpath-functions.scm");
                 }
             } else {
                 PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();

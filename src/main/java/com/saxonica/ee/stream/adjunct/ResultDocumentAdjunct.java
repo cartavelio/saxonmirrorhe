@@ -4,6 +4,7 @@ import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
 import com.saxonica.ee.stream.feed.ComplexNodeEventFeed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.FeedMakerDelegate;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
@@ -21,7 +22,7 @@ public class ResultDocumentAdjunct extends ParentConstructorAdjunct {
     public FeedMaker getFeedMaker(final int arg) throws XPathException {
         ResultDocument inst = (ResultDocument)getExpression();
         if (Streamability.getSweep(inst.getContentExpression()) == Sweep.CONSUMING) {
-            return (watchManager, out, context) -> new ResultDocumentFeed(getExpression(), out, context);
+            return new FeedMakerDelegate((watchManager, out, context) -> new ResultDocumentFeed(getExpression(), out, context));
         } else {
             return super.getFeedMaker(arg);
         }

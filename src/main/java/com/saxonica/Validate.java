@@ -22,7 +22,6 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -283,7 +282,7 @@ public class Validate {
             processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION_MODE, validationMode);
             //processor.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, true);
 
-            long startTime = new Date().getTime();
+            long startTime = now();
 
             SchemaManager manager = processor.getSchemaManager();
 
@@ -338,8 +337,8 @@ public class Validate {
             }
 
             if (showTime && !schemaFileNames.isEmpty()) {
-                long endTime = new Date().getTime();
-                config.getLogger().info("Schema checking successful. Time: " + (endTime - startTime) + "ms.");
+                long endTime = now();
+                config.getLogger().info("Schema checking successful. Time: " + (endTime - startTime)/1000000 + "ms.");
                 CommandLineOptions.showMemoryUsed();
                 //TimeUnit.MINUTES.sleep(1); // Useful for getting a heap dump
             }
@@ -602,16 +601,26 @@ public class Validate {
         if (showTime) {
             config.getLogger().info("Processing " + source.getSystemId());
         }
-        long startTime = new Date().getTime();
+        long startTime = now();
 
         for (int r = 0; r < repeat; r++) {      // repeat is for internal testing/timing
             validator.validate(source);
         }
         if (showTime) {
-            long endTime = new Date().getTime();
-            config.getLogger().info("Validation time: " + (endTime - startTime) + "ms.");
+            long endTime = now();
+            config.getLogger().info("Validation time: " + (endTime - startTime)/1000000 + "ms.");
             CommandLineOptions.showMemoryUsed();
         }
+    }
+
+    /**
+     * Get current time in nanoseconds
+     *
+     * @return the current time in nanoseconds (since VM startup)
+     */
+
+    protected static long now() {
+        return System.nanoTime();
     }
 
 

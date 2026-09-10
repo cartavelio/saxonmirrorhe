@@ -82,13 +82,9 @@ public class ChooseAdjunct extends TransmissionAdjunct {
                 }
                 // if no condition matches, or if a matching condition has been processed without reference to the
                 // source document, then return a Watch that never fires
-                return new Trigger(new NodeTestPattern(ErrorType.getInstance()), new ItemFeed(out, context) {
-
-                    @Override
-                    public void append(Item item) {
-                        //
-                    }
-                }, context);
+                return new Trigger(new NodeTestPattern(ErrorType.getInstance()),
+                                   new FilteringFeed(out, context, FilteringFeed.OpaqueFilter),
+                                   context);
             };
         } else {
             return null; // For a consuming condition, we use a feed rather than a watch
@@ -118,92 +114,91 @@ public class ChooseAdjunct extends TransmissionAdjunct {
             throw new XPathException("Streaming xsl:choose: expecting a watch");
             //return new FeedMakerForMotionlessCondition();
         } else {
-            return new FeedMakerForConsumingCondition();
+            return new FeedMakerForConsumingCondition(this, getConsumingCondition());
         }
     }
 
 
-//    private class FeedMakerForMotionlessCondition implements FeedMaker {
-//
-//        final Choose exp = (Choose) getExpression();
-//
-//        public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-//            for (int i=0; i<exp.size(); i++) {
-//                if (exp.getCondition(i).effectiveBooleanValue(context)) {
-//                    Expression action = exp.getAction(i);
-//                    if (i == consumingAction) {
-//                        StreamingAdjunct adj = StreamingAdjunct.makeStreamingAdjunct(context.getConfiguration(), action);
-//                        Watch watch = adj.getWatchMaker(false).makeWatch(watchManager, out, context);
-//                        watchManager.addWatch(watch, true);
-//                    } else {
-//                        return new MotionlessFeed(action, out, context);
-//                    }
-//                }
-//            }
-//            return null;
-//        }
-//    }
+    private static class FeedMakerForConsumingCondition implements FeedMaker {
 
-    private class FeedMakerForConsumingCondition implements FeedMaker {
+        final ChooseAdjunct chooseAdjunct;
+        final Choose expression;
+        final int consumingCondition;
 
-        final Choose exp = (Choose) getExpression();
+        public FeedMakerForConsumingCondition(ChooseAdjunct adjunct, int consumingCondition) {
+            this.chooseAdjunct = adjunct;
+            this.expression = (Choose) adjunct.getExpression();
+            this.consumingCondition = consumingCondition;
+        }
 
         @Override
         public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-            ItemFeed action = new ItemFeed(getExpression(), out, context) {
-                private boolean matched = false;
+            ItemFeed action = new ItemFeedForConsumingCondition(expression, consumingCondition, out, context);
+            // Now construct an input feed that computes the EBV. May be unnecessary since
+            // the optimizer will have already inserted a call of boolean() in the expression tree.
+            return new BooleanFnFeed.Positive(expression, action, context);
+        }
+    }
 
-                /**
-                 * Start evaluating the expression. The default implementation does nothing.
-                 *
-                 * @param terminator used to achieve early exit
-                 * @throws XPathException if a dynamic error occurs
-                 */
-                @Override
-                public void open(Terminator terminator) throws XPathException {
-                    super.open(terminator);
-                    for (int i = 0; i < consumingCondition; i++) {
-                        boolean truth = exp.getCondition(i).effectiveBooleanValue(getContext());
-                        if (truth) {
-                            SequenceIterator iter = exp.getAction(i).iterate(getContext());
-                            processItems(iter, getNextOutputter());
-                            matched = true;
+    private static class ItemFeedForConsumingCondition extends ItemFeed {
+
+        private final int consumingCondition;
+        private boolean matched = false;
+
+        public ItemFeedForConsumingCondition(Expression expression, int consumingCondition,
+                                             ItemFeed out, XPathContext context) {
+            super(expression, out, context);
+            this.consumingCondition = consumingCondition;
+        }
+
+        /**
+         * Start evaluating the expression.
+         *
+         * @param terminator used to achieve early exit
+         * @throws XPathException if a dynamic error occurs
+         */
+        @Override
+        public void open(Terminator terminator) throws XPathException {
+            super.open(terminator);
+            Choose expression = (Choose)getExpression();
+            // evaluate all conditions prior to the consuming condition
+            for (int i = 0; i < consumingCondition; i++) {
+                boolean truth = expression.getCondition(i).effectiveBooleanValue(getContext());
+                if (truth) {
+                    SequenceIterator iter = expression.getAction(i).iterate(getContext());
+                    processItems(iter, getNextOutputter());
+                    matched = true;
+                    break;
+                }
+            }
+        }
+
+        @Override
+        public void append(Item item) throws XPathException {
+            boolean truth = ((BooleanValue) item).getBooleanValue();
+            Choose expression = (Choose) getExpression();
+            Expression selectedAction = null;
+            if (!matched) {
+                if (truth) {
+                    selectedAction = expression.getAction(consumingCondition);
+                } else {
+                    for (int i = 1; i < expression.size(); i++) {
+                        if (expression.getCondition(i).effectiveBooleanValue(getContext())) {
+                            selectedAction = expression.getAction(i);
                             break;
                         }
                     }
                 }
-
-                @Override
-                public void append(Item item) throws XPathException {
-                    boolean truth = ((BooleanValue) item).getBooleanValue();
-                    Expression selectedAction = null;
-                    if (!matched) {
-                        if (truth) {
-                            selectedAction = exp.getAction(consumingCondition);
-                        } else {
-                            for (int i = 1; i < exp.size(); i++) {
-                                if (exp.getCondition(i).effectiveBooleanValue(getContext())) {
-                                    selectedAction = exp.getAction(i);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (selectedAction != null) {
-                        SequenceIterator iter = selectedAction.iterate(getContext());
-                        processItems(iter, getNextOutputter());
-                    }
-                }
-
-            };
-
-            // Now construct an input feed that computes the EBV. May be unnecessary since
-            // the optimizer will have already inserted a call of boolean() in the expression tree.
-            return new BooleanFnFeed.Positive(getExpression(), action, context);
-
+            }
+            if (selectedAction != null) {
+                SequenceIterator iter = selectedAction.iterate(getContext());
+                processItems(iter, getNextOutputter());
+            }
         }
+
+
     }
 
 }
 
-// Copyright Saxonica 2010-2016.
+// Copyright Saxonica 2010-2021.

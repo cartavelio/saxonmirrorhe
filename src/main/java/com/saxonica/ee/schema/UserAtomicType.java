@@ -15,6 +15,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 
@@ -43,11 +44,16 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     private int thresholdForCompilation = 100;
     private boolean uncompilable = false;
 
-    private final static Set<Class<? extends Facet>> STRING_FACETS = new HashSet<>(16);
-    private final static Set<Class<? extends Facet>> BOOLEAN_FACETS = new HashSet<>(16);
-    private final static Set<Class<? extends Facet>> ORDERED_FACETS = new HashSet<>(16);
-    private final static Set<Class<? extends Facet>> CALENDAR_FACETS = new HashSet<>(16);
-    private final static Set<Class<? extends Facet>> DECIMAL_FACETS = new HashSet<>(16);
+    private final static Set<Class<? extends Facet>> STRING_FACETS = newFacetSet();
+    private final static Set<Class<? extends Facet>> BOOLEAN_FACETS = newFacetSet();
+    private final static Set<Class<? extends Facet>> ORDERED_FACETS = newFacetSet();
+    private final static Set<Class<? extends Facet>> CALENDAR_FACETS = newFacetSet();
+    private final static Set<Class<? extends Facet>> DECIMAL_FACETS = newFacetSet();
+
+    private static Set<Class<? extends Facet>> newFacetSet() {
+        // Written this way for C# conversion
+        return new HashSet<Class<? extends Facet>>(16);
+    }
 
     static {
         STRING_FACETS.add(LengthFacet.class);
@@ -654,7 +660,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      */
 
     @Override
-    public void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
+    protected void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
         serializer.emitAttribute("variety", "atomic");
         serializer.emitAttribute("primitiveType", "#" + getPrimitiveItemType().getName());
     }
@@ -666,6 +672,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      *         in its transitive membership
      */
     @Override
+    @CSharpReplaceBody(code="return java.util.Collections.singletonList<net.sf.saxon.type.PlainType>(this);")
     public List<? extends PlainType> getPlainMemberTypes() {
         return Collections.singletonList(this);
     }

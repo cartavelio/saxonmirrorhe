@@ -2,6 +2,7 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.om.Function;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
@@ -11,7 +12,9 @@ import net.sf.saxon.type.SchemaException;
 
 import java.util.Stack;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
 
 /**
  * An XML Schema Attribute Group Reference, corresponding to an
@@ -19,7 +22,7 @@ import static net.sf.saxon.type.SchemaValidationStatus.*;
  */
 
 public final class AttributeGroupReference extends SchemaStructure
-        implements ComponentReference {
+        implements ComponentReference, SchemaComponent {
 
     /**
      * The name of the attribute group referenced, as a StructuredQName
@@ -139,7 +142,7 @@ public final class AttributeGroupReference extends SchemaStructure
             setFixupStatus(INVALID);
             return false;
         }
-        lookForCycles(new Stack(), compiler);
+        lookForCycles(new Stack<SchemaComponent>(), compiler);
         setFixupStatus(VALIDATED);
         setValidationStatus(VALIDATED);
         return true;
@@ -183,7 +186,7 @@ public final class AttributeGroupReference extends SchemaStructure
      */
 
     @Override
-    public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException {
+    public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler) throws SchemaException {
         if (compiler.getLanguageVersion() == Configuration.XSD11) {
             // circular attribute groups are not an error in XSD 1.1
             return;
@@ -278,6 +281,11 @@ public final class AttributeGroupReference extends SchemaStructure
         // no action
     }
 
+    @Override
+    public Function getComponentAsFunction() {
+        // Not supported, because an attribute group reference is not a "true" schema component and is never exported
+        throw new UnsupportedOperationException();
+    }
 }
 
 // Copyright (c) 2004-2020 Saxonica Limited

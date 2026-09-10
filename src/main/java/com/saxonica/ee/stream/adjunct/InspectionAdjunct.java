@@ -31,7 +31,7 @@ public abstract class InspectionAdjunct extends StreamingAdjunct {
             throw new XPathException("No consuming operand found");
         }
         final Expression select = consumer.getChildExpression();
-        if (Streamability.getPosture(select).isIncremental()) {
+        if (Streamability.isIncrementalPosture(Streamability.getPosture(select))) {
             return getInspectionWatchMaker(getExpression(), select, forGrouping);
         } else {
             return null;

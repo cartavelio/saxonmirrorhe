@@ -11,7 +11,7 @@ import net.sf.saxon.trans.XPathException;
  * or not the context item has a parent (or ancestor, respectively) that matches
  * a given pattern
  */
-public class AncestorCharacteristic extends Characteristic<Boolean> {
+public class AncestorCharacteristic extends Characteristic {
 
     private final Pattern pattern;
     private final boolean isParent;

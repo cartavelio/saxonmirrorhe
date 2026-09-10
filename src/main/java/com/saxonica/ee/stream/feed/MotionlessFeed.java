@@ -48,10 +48,10 @@ public class MotionlessFeed extends ItemFeed {
                 // We're assuming that if we process the streaming node, we only do it once.
                 // Test case su-shallow-descent-004
                 selected = true;
-                return getResult().startSelectedParentNode((FleetingParentNode) item, locationId);
+                return getResultFeed().startSelectedParentNode((FleetingParentNode) item, locationId);
             } else {
                 // See bug 4128
-                getResult().append(item);
+                getResultFeed().append(item);
             }
         }
         return null;
@@ -72,7 +72,7 @@ public class MotionlessFeed extends ItemFeed {
     @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         if (selected) {
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
             selected = false;
         }
     }

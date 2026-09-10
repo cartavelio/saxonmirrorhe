@@ -17,7 +17,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
+import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
 
 /**
  * A simple type definition holds all the information about a simpleType

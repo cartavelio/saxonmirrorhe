@@ -1,20 +1,19 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.Inversion;
-import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.FeedMakerDelegate;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
-import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LetExpression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 
 
@@ -30,21 +29,13 @@ public class LetExpressionAdjunctB extends TransmissionAdjunct {
         final Inversion ie = Inversion.invertExpression(action, forGrouping);
         final Inversion route = ie.copy();
         Inversion.PushAction letAction = new Inversion.PushAction();
-        letAction.feedMaker = new FeedMaker() {
-            @Override
-            public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-                return LetExpressionAdjunctB.this.makeItemFeed(watchManager, out, context);
-            }
-        };
+        letAction.feedMaker = new FeedMakerDelegate((watchManager, out, context) ->
+                  LetExpressionAdjunctB.this.makeItemFeed(watchManager, out, context));
         letAction.pushMethod = Expression.ITEM_FEED_METHOD;
         letAction.streamingChildSequence = 0;
         route.prepend(letAction);
-        return new WatchMaker() {
-            @Override
-            public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-                return route.getWatch(watchManager, out, context);
-            }
-        };
+        //noinspection Convert2MethodRef
+        return (watchManager, out, context) -> route.getWatch(watchManager, out, context);
 //        }
     }
 
@@ -68,7 +59,7 @@ public class LetExpressionAdjunctB extends TransmissionAdjunct {
             @Override
             public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
                 if (!hasFailed()) {
-                    return getResult().startSelectedParentNode(node, locationId);
+                    return getResultFeed().startSelectedParentNode(node, locationId);
                 }
                 return null;
             }
@@ -83,7 +74,7 @@ public class LetExpressionAdjunctB extends TransmissionAdjunct {
             @Override
             public void endSelectedParentNode(Location locationId) throws XPathException {
                 if (!hasFailed()) {
-                    getResult().endSelectedParentNode(locationId);
+                    getResultFeed().endSelectedParentNode(locationId);
                 }
             }
         };

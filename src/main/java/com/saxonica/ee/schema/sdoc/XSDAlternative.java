@@ -68,7 +68,7 @@ public class XSDAlternative extends AnnotationParent {
         XPathExpression condition = null;
         Map<StructuredQName, XPathVariable> parameters = new HashMap<StructuredQName, XPathVariable>();
         if (xpath != null) {
-            SchemaElement.XPathStaticContext env = new SchemaElement.XPathStaticContext(getConfiguration());
+            SchemaElement.XPathStaticContext env = new SchemaElement.XPathStaticContext(this);
             env.setDefaultElementNamespace(defaultNamespace);
             env.setBaseURI(getBaseURI());
             env.setXPathLanguageLevel(getXSDSchema().getAllowedExtensions().contains("any-xpath-version") ? 31 : 20);

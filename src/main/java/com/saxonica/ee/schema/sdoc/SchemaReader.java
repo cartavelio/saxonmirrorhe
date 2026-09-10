@@ -19,6 +19,7 @@ import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -222,7 +223,7 @@ public abstract class SchemaReader {
                 schemaBuilder.setSystemId(base);
             }
             LocationCopier copier = new LocationCopier(((NodeInfo) source).getNodeKind() == Type.DOCUMENT);
-            pipe.setComponent(CopyInformee.class.getName(), copier);
+            pipe.setComponent("net.sf.saxon.event.CopyInformee", copier);
         }
 
         // Alternative pipeline for compiled schema documents
@@ -242,23 +243,7 @@ public abstract class SchemaReader {
         options.setErrorReporter(compiler.getErrorReporter());
         try {
             commentStripper.setPipelineConfiguration(pipe);
-            if (Version.platform.isJava() && options.getXMLReader() == null && options.getXMLReaderMaker() == null
-                    && !(source instanceof NodeInfo || source instanceof DOMSource)) {
-                setupSourceWithReader(source, compiler, valve, config, options);
-            } else if ((source instanceof NodeInfo && ((NodeInfo)source).getNodeKind() == Type.ELEMENT) ||
-                    (source instanceof DOMSource && ((DOMSource)source).getNode().getNodeType() == Type.ELEMENT)) {
-                // bug 2217
-                TinyBuilder temp = new TinyBuilder(pipe);
-                temp.setSystemId(source.getSystemId());
-                temp.open();
-                temp.startDocument(ReceiverOption.NONE);
-                Sender.send(source, temp, options);
-                temp.endDocument();
-                temp.close();
-                Sender.send(temp.getCurrentRoot(), valve, options);
-            } else {
-                Sender.send(source, valve, options);
-            }
+            sendSchemaSource(source, compiler, pipe, valve, config, options);
             if (valve.wasDiverted()) {
                 tree = scmBuilder.getTree();
             } else {
@@ -270,7 +255,8 @@ public abstract class SchemaReader {
             //err.printStackTrace();
             Throwable cause = err.getException();
             if (cause != null) {
-                if (cause instanceof SAXParseException) {
+                if (isSAXException(cause)) {
+                    //#if CSHARP==false
                     // This normally means there was an XML parsing error, in which
                     // case it has already been reported. But in the case of Crimson,
                     // the SAXParseException might wrap an exception that happened
@@ -289,6 +275,7 @@ public abstract class SchemaReader {
                         }
                     }
                     // details already reported, don't repeat them
+                    //#endif
                     throw new SchemaException("Failed to parse schema document");
                 } else if (cause instanceof SchemaException) {
                     throw (SchemaException) cause;
@@ -312,6 +299,33 @@ public abstract class SchemaReader {
 
     }
 
+    @CSharpReplaceBody(code="return false;")
+    private static boolean isSAXException(Throwable e) {
+        return e instanceof SAXParseException;
+    }
+
+    @CSharpReplaceBody(code="net.sf.saxon.@event.Sender.send(source, valve, options);")
+    private static void sendSchemaSource(Source source, SchemaCompiler compiler, PipelineConfiguration pipe, Valve valve, Configuration config, ParseOptions options) throws XPathException {
+        if (Version.platform.isJava() && options.getXMLReader() == null && options.getXMLReaderMaker() == null
+                && !(source instanceof NodeInfo || source instanceof DOMSource)) {
+            setupSourceWithReader(source, compiler, valve, config, options);
+        } else if ((source instanceof NodeInfo && ((NodeInfo) source).getNodeKind() == Type.ELEMENT) ||
+                (source instanceof DOMSource && ((DOMSource) source).getNode().getNodeType() == Type.ELEMENT)) {
+            // bug 2217
+            TinyBuilder temp = new TinyBuilder(pipe);
+            temp.setSystemId(source.getSystemId());
+            temp.open();
+            temp.startDocument(ReceiverOption.NONE);
+            Sender.send(source, temp, options);
+            temp.endDocument();
+            temp.close();
+            Sender.send(temp.getCurrentRoot(), valve, options);
+        } else {
+            Sender.send(source, valve, options);
+        }
+    }
+
+//#if CSHARP==false
     public static void setupSourceWithReader(Source source, SchemaCompiler compiler, Valve valve, Configuration config, ParseOptions options) throws XPathException {
 //#if DOTNET==false
         XMLReader parser = config.getStyleParser();
@@ -328,6 +342,7 @@ public abstract class SchemaReader {
         config.reuseStyleParser(parser);
 //#endif
     }
+//#endif
 
     //    public static void main(String[] args) throws Exception {
 //        Configuration config = new EnterpriseConfiguration();

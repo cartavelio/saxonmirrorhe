@@ -127,11 +127,11 @@ public class GlobalExtractor {
 
         GlobalVariable v = globalVariableManager.getEquivalentVariable(expr);
         if (v != null) {
-            GlobalVariableReference ref = new GlobalVariableReference(v);
+            GlobalVariableReference varRef = new GlobalVariableReference(v);
             SequenceType type = SequenceType.makeSequenceType(expr.getItemType(), expr.getCardinality());
-            ref.setStaticType(type, null, expr.getSpecialProperties() | StaticProperty.NO_NODES_NEWLY_CREATED);
-            ref.setRetainedStaticContext(visitor.getStaticContext().makeRetainedStaticContext());
-            return ref;
+            varRef.setStaticType(type, null, expr.getSpecialProperties() | StaticProperty.NO_NODES_NEWLY_CREATED);
+            varRef.setRetainedStaticContext(visitor.getStaticContext().makeRetainedStaticContext());
+            return varRef;
         }
         RetainedStaticContext rsc = expr.getRetainedStaticContext();
         GlobalVariable gvd = new GlobalVariable();

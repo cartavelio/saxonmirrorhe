@@ -10,6 +10,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.SpecificFunctionType;
 
 /**
  * The VendorFunctionLibraryEE represents additions to the set of Saxon vendor-supplied
@@ -57,10 +58,14 @@ public class VendorFunctionSetEE extends BuiltInFunctionSet {
 
         register("marshal-type", 1, CompileXPath.class, MapType.getInstance(), ONE, BuiltInFunctionSet.LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY);
+
         register("parse-sequence-type", 3, CompileXPath.class, MapType.getInstance(), ONE, BuiltInFunctionSet.LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY)
                 .arg(1, NodeKindTest.ELEMENT, ONE, EMPTY)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null);
+
+        register("type", 1, SchemaTypeFn.class, SpecificFunctionType.COMPONENT_FUNCTION_TYPE, OPT, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
     }
 

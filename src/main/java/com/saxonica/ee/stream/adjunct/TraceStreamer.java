@@ -116,7 +116,7 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
                 emit("startElement", node);
             }
             stack.push(node);
-            return getResult().startSelectedParentNode(node, locationId);
+            return getResultFeed().startSelectedParentNode(node, locationId);
         }
 
         /**
@@ -136,7 +136,7 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
             } else {
                 emit("endElement", node);
             }
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
 
         private void emit(String phase, Item val) {

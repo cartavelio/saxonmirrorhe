@@ -9,13 +9,15 @@ import net.sf.saxon.expr.number.Numberer_en;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpDelegate;
+import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.*;
@@ -40,7 +42,7 @@ public class IdValidator extends ValidatingFilter {
     // the set of ID values associated with the element, and we check this list to ensure that two
     // IDs associated with the same element are not considered to conflict.
 
-    private final Stack<Set<String>> stack = new Stack<>();
+    private final IndexedStack<Set<String>> stack = new IndexedStack<>();
     private int level = 0;
     private final HashSet<String> idValues = new HashSet<>(100);
     private final HashSet<String> unresolvedRefs = new HashSet<>(100);
@@ -73,10 +75,10 @@ public class IdValidator extends ValidatingFilter {
             currentElementChecker = allocateChecker(typeCode);
             checkerMap.put(typeCode, currentElementChecker);
         }
-        if (currentElementChecker == SINGLETON_NON_ID_CHECKER) {
+        if (currentElementChecker == NonIdChecker) {
             currentElementChecker = null;
         }
-        stack.push(new HashSet<>(4));
+        stack.push(new HashSet<String>(4));
         level++;
 
         for (AttributeInfo att : attributes) {
@@ -86,7 +88,7 @@ public class IdValidator extends ValidatingFilter {
                 checker = allocateChecker(type);
                 checkerMap.put(type, checker);
             }
-            checker.checkValue(StringView.of(att.getValue()).tidy(), att.getLocation());
+            checker.checkValue(this, StringView.of(att.getValue()).tidy(), att.getLocation());
         }
 
         nextReceiver.startElement(elemName, typeCode, attributes, namespaces, location, properties);
@@ -114,7 +116,7 @@ public class IdValidator extends ValidatingFilter {
         level--;
         stack.pop();
         if (currentElementChecker != null) {
-            currentElementChecker.checkValue(buffer.toUnicodeString(), textLocationId);
+            currentElementChecker.checkValue(this, buffer.toUnicodeString(), textLocationId);
         }
         buffer.clear();
         currentElementChecker = null;
@@ -134,15 +136,15 @@ public class IdValidator extends ValidatingFilter {
         int fingerprint = type.getFingerprint();
         switch (fingerprint) {
             case StandardNames.XS_ID:
-                return new SimpleIdChecker();
+                return SimpleIdChecker;
             case StandardNames.XS_IDREF:
-                return new SimpleIdrefChecker();
+                return SimpleIdRefChecker;
             case StandardNames.XS_IDREFS:
-                return new IdrefListChecker();
+                return IdRefListChecker;
             default:
                 // no system-defined types are subtypes of these three
                 if (fingerprint < 1023) {
-                    return SINGLETON_NON_ID_CHECKER;
+                    return NonIdChecker;
                 }
                 // for user-defined types, we need to check whether it's a subtype of one of these
                 Configuration config = getConfiguration();
@@ -156,35 +158,35 @@ public class IdValidator extends ValidatingFilter {
                         stype = ((ComplexType) type).getSimpleContentType();
                         assert stype != null;
                     } else {
-                        return SINGLETON_NON_ID_CHECKER;
+                        return NonIdChecker;
                     }
                 } else {
                     stype = (SimpleType) type;
                 }
                 if (type.isAtomicType()) {
                     if (type.isIdType()) {
-                        return new SimpleIdChecker();
+                        return SimpleIdChecker;
                     } else if (type.isIdRefType()) {
-                        return new SimpleIdrefChecker();
+                        return SimpleIdRefChecker;
                     } else {
-                        return SINGLETON_NON_ID_CHECKER;
+                        return NonIdChecker;
                     }
                 } else if (stype.isListType()) {
                     SimpleType componentType = ((ListType) stype).getItemType();
                     if (componentType instanceof AtomicType && th.isSubType((AtomicType) componentType, BuiltInAtomicType.ID)) {
-                        return new IdListChecker();
+                        return IdListChecker;
                     } else if (componentType instanceof AtomicType && th.isSubType((AtomicType) componentType, BuiltInAtomicType.IDREF)) {
-                        return new IdrefListChecker();
+                        return IdRefListChecker;
                     } else if (type.isIdType() || type.isIdRefType()) {
-                        return new UnionChecker(stype);   // this handles anything
+                        return getUnionChecker(stype);   // this handles anything
                     } else {
-                        return SINGLETON_NON_ID_CHECKER;
+                        return NonIdChecker;
                     }
                 } else {
                     if (type.isIdType() || type.isIdRefType()) {
-                        return new UnionChecker(stype);
+                        return getUnionChecker(stype);
                     } else {
-                        return SINGLETON_NON_ID_CHECKER;
+                        return NonIdChecker;
                     }
                 }
         }
@@ -312,96 +314,78 @@ public class IdValidator extends ValidatingFilter {
         unresolvedRefs.remove(id);
     }
 
+    @CSharpDelegate(true)
+    @FunctionalInterface
     private interface IdValueChecker {
 
         /**
          * Check an ID, IDREF, or IDREFS value
          *
+         *
+         * @param validator  the containing validator
          * @param value      the value to be checked
          * @param locationId the location where the value appears
          * @throws XPathException if the value is invalid
          */
 
-        void checkValue(UnicodeString value, Location locationId) throws XPathException;
+        void checkValue(IdValidator validator, UnicodeString value, Location locationId) throws XPathException;
     }
 
     /**
      * IdValueChecker for simple values of type xs:ID, or a type derived therefrom by restriction
      */
 
-    private class SimpleIdChecker implements IdValueChecker {
-        @Override
-        public void checkValue(UnicodeString value, Location locationId) throws XPathException {
-            String id = Whitespace.trim(value).toString();
-            processId(id, locationId);
-        }
-    }
+    private final static IdValueChecker SimpleIdChecker = (validator, value, locationId) ->
+            validator.processId(Whitespace.trim(value).toString(), locationId);
 
     /**
      * IdValueChecker for simple values of type xs:IDREF, or a type derived therefrom by restriction
      */
 
-    private class SimpleIdrefChecker implements IdValueChecker {
-        @Override
-        public void checkValue(UnicodeString value, Location locationId) {
+    private final static IdValueChecker SimpleIdRefChecker = (validator, value, locationId) -> {
             String id = Whitespace.trim(value).toString();
             // If the value is empty, it must be nilled: see bug #2301
-            if (!id.isEmpty() && !idValues.contains(id)) {
-                unresolvedRefs.add(id);
+            if (!id.isEmpty() && !validator.idValues.contains(id)) {
+                validator.unresolvedRefs.add(id);
             }
-        }
-    }
+    };
 
     /**
      * IdValueChecker for a list type whose values are all instances of xs:ID or a type derived therefrom
      * by restriction
      */
-
-    private class IdListChecker implements IdValueChecker {
-        @Override
-        public void checkValue(UnicodeString value, Location locationId) throws XPathException {
+    private final static IdValueChecker IdListChecker = (validator, value, locationId) -> {
             String ids = value.toString();
             StringTokenizer tok = new StringTokenizer(ids, " \t\n\r", false);
             while (tok.hasMoreTokens()) {
                 String id = tok.nextToken();
-                processId(id, locationId);
+                validator.processId(id, locationId);
             }
-        }
-    }
+    };
 
     /**
      * IdValueChecker for a list type whose values are all instances of xs:IDREF or a type derived therefrom
      * by restriction. This includes the built-in type xs:IDREFS.
      */
 
-    private class IdrefListChecker implements IdValueChecker {
-        @Override
-        public void checkValue(UnicodeString value, Location locationId) {
+    private final static IdValueChecker IdRefListChecker = (validator, value, locationId) -> {
             String ids = value.toString();
             StringTokenizer tok = new StringTokenizer(ids, " \t\n\r", false);
             while (tok.hasMoreTokens()) {
                 String id = tok.nextToken();
-                if (!idValues.contains(id)) {
-                    unresolvedRefs.add(id);
+                if (!validator.idValues.contains(id)) {
+                    validator.unresolvedRefs.add(id);
                 }
             }
-        }
-    }
+    };
 
     /**
      * IdValueChecker for a general list or union type that includes a member type derived from xs:ID, and/or
      * a member type derived form xs:IDREF, and/or other member types
      */
 
-    private class UnionChecker implements IdValueChecker {
-        private final SimpleType type;
-
-        UnionChecker(SimpleType type) {
-            this.type = type;
-        }
-
-        @Override
-        public void checkValue(UnicodeString value, Location locationId) throws XPathException {
+    private IdValueChecker getUnionChecker(SimpleType type) {
+        return (validator, value, locationId) -> {
             Configuration config = getConfiguration();
             TypeHierarchy th = config.getTypeHierarchy();
             AtomicSequence typedValue = type.getTypedValue(
@@ -417,21 +401,14 @@ public class IdValidator extends ValidatingFilter {
                     }
                 }
             }
-        }
+        };
     }
 
     /**
      * IdValueChecker for types that do not contain any ID or IDREF values
      */
 
-    private static class NonIdChecker implements IdValueChecker {
-        @Override
-        public void checkValue(UnicodeString value, Location locationId) {
-            // do nothing
-        }
-    }
-
-    private static final NonIdChecker SINGLETON_NON_ID_CHECKER = new NonIdChecker();
+    private static final IdValueChecker NonIdChecker = (validator, value, locationId) -> {};
 
 }
 

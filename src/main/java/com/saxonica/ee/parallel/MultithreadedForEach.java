@@ -1,4 +1,4 @@
-package com.saxonica.ee.optim;
+package com.saxonica.ee.parallel;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;

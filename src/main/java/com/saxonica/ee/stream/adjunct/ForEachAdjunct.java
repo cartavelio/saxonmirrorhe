@@ -153,12 +153,7 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
         if (!forGrouping) {
             final Pattern pattern = StreamingPatternMaker.makeStreamingPattern(getExpression(), config, failures);
             if (pattern != null) {
-                return new WatchMaker() {
-                    @Override
-                    public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-                        return new Trigger(pattern, out, context);
-                    }
-                };
+                return (watchManager, out, context) -> new Trigger(pattern, out, context);
             }
         }
 
@@ -174,28 +169,20 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, config, null);
         final StreamingAdjunct sa = StreamingAdjunct.makeStreamingAdjunct(config, select);
         if (selection != null) {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
-                        throws XPathException {
-                    ForEachAction actor = new ForEachAction(watchManager, getExpression(), out, context);
-                    if (actionInversion != null) {
-                        actor.setInversion(actionInversion);
-                    }
-                    return new Trigger(selection, actor, context);
+            return (watchManager, out, context) -> {
+                ForEachAction actor = new ForEachAction(watchManager, getExpression(), out, context);
+                if (actionInversion != null) {
+                    actor.setInversion(actionInversion);
                 }
+                return new Trigger(selection, actor, context);
             };
         } else if (sa instanceof TransmissionAdjunct) {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
-                        throws XPathException {
-                    ForEachAction actor = new ForEachAction(watchManager, getExpression(), out, context);
-                    if (actionInversion != null) {
-                        actor.setInversion(actionInversion);
-                    }
-                    return ((TransmissionAdjunct) sa).makeTransmissionFlow(watchManager, select, actor, context);
+            return (watchManager, out, context) -> {
+                ForEachAction actor = new ForEachAction(watchManager, getExpression(), out, context);
+                if (actionInversion != null) {
+                    actor.setInversion(actionInversion);
                 }
+                return ((TransmissionAdjunct) sa).makeTransmissionFlow(watchManager, select, actor, context);
             };
         } else {
             return sa.getWatchMaker(forGrouping);
@@ -271,7 +258,7 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
         }
 
         // Rule 4
-        Sweep s = Sweep.wider(selectPS.getSweep(), actionPS.getSweep());
+        Sweep s = Streamability.wider(selectPS.getSweep(), actionPS.getSweep());
         PostureAndSweep provisional = new PostureAndSweep(s == Sweep.FREE_RANGING ? Posture.ROAMING : actionPS.getPosture(), s);
 
         if (provisional.getPosture() == Posture.ROAMING && expression instanceof SlashExpression) {

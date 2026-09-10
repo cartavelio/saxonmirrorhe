@@ -5,6 +5,7 @@ import com.saxonica.ee.bytecode.ByteCodeCandidate;
 import com.saxonica.ee.bytecode.CompiledExpression;
 import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
+import com.saxonica.ee.parallel.MultithreadedForEach;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import com.saxonica.ee.trans.TemplateRuleEE;
@@ -199,6 +200,7 @@ public class OptimizerEE extends Optimizer {
                     if (lhs.getCardinality() == StaticProperty.EXACTLY_ONE) {
                         return SystemFunction.makeCall("not", vc.getRetainedStaticContext(), lhs);
                     }
+                    break;
             }
         }
 
@@ -223,6 +225,7 @@ public class OptimizerEE extends Optimizer {
                     if (rhs.getCardinality() == StaticProperty.EXACTLY_ONE) {
                         return SystemFunction.makeCall("not", vc.getRetainedStaticContext(), rhs);
                     }
+                    break;
             }
         }
 
@@ -929,7 +932,7 @@ public class OptimizerEE extends Optimizer {
         if (!(base instanceof FilterExpression)) {
             return f;
         }
-        List<Expression> filters = new ArrayList<>();
+        ArrayList<Expression> filters = new ArrayList<>();
         addTerms(f.getFilter(), filters);
         while (base instanceof FilterExpression && !((FilterExpression)base).isFilterIsPositional()) {
             Expression predicate = ((FilterExpression) base).getFilter();

@@ -36,14 +36,11 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
             final Expression select = scc.getBaseExpression();
             final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
             if (selection != null) {
-                return new WatchMaker() {
-                    @Override
-                    public Trigger makeWatch(WatchManager watchManager, ItemFeed out, final XPathContext context) {
-                        SimpleContentFeed action = new SimpleContentFeed(out);
-                        Trigger watch = new Trigger(selection, action, context);
-                        watch.setPipelineConfiguration(watchManager.getPipelineConfiguration());
-                        return watch;
-                    }
+                return (watchManager, out, context) -> {
+                    SimpleContentFeed action = new SimpleContentFeed(out);
+                    Trigger watch = new Trigger(selection, action, context);
+                    watch.setPipelineConfiguration(watchManager.getPipelineConfiguration());
+                    return watch;
                 };
             }
             return null;

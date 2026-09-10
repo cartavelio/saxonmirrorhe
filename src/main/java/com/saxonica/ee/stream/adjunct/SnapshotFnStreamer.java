@@ -32,12 +32,9 @@ public class SnapshotFnStreamer extends ComposingAdjunct implements FeedMaker {
         Expression select = ((SystemFunctionCall) getExpression()).getArg(0);
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
         if (selection != null) {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) {
-                    SnapshotFeed actor = new SnapshotFeed(watchManager, out, context);
-                    return new Trigger(selection, actor, context);
-                }
+            return (watchManager, out, context) -> {
+                SnapshotFeed actor = new SnapshotFeed(watchManager, out, context);
+                return new Trigger(selection, actor, context);
             };
         }
         return null;

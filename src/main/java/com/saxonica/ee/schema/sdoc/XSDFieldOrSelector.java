@@ -76,7 +76,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
             xpath = ".";  // for error recovery
         }
 
-        XPathStaticContext env = new XPathStaticContext(getConfiguration());
+        XPathStaticContext env = new XPathStaticContext(this);
         env.setDefaultElementNamespace(defaultNS);
         Pattern selector;
         Expression exp;
@@ -120,6 +120,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
                         break;
                     default:
                         error("xs:field/@saxon:order must be 'ascending' or 'descending'");
+                        break;
                 }
 
             }

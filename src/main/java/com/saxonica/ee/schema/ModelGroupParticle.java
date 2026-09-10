@@ -85,7 +85,7 @@ public class ModelGroupParticle extends Particle {
             setFixupStatus(INVALID);
             return false;
         }
-        lookForCycles(new Stack(), compiler);
+        lookForCycles(new Stack<SchemaComponent>(), compiler);
         setFixupStatus(VALIDATED);
         return true;
     }
@@ -104,7 +104,7 @@ public class ModelGroupParticle extends Particle {
      */
 
     @Override
-    public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException, MissingComponentException {
+    public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler) throws SchemaException, MissingComponentException {
         if (references.contains(this)) {
             String err = "The definition of group " +
                     Err.wrap(getTargetComponentName().getDisplayName()) +

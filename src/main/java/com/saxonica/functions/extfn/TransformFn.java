@@ -14,10 +14,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.ExternalObject;
-import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.*;
 
 import javax.xml.transform.TransformerException;
 
@@ -50,17 +47,17 @@ public class TransformFn extends SystemFunction {
 
         /*@Nullable*/
     @Override
-    public ZeroOrOne<NodeInfo> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         try {
-            ExternalObject<PreparedStylesheet> templatesObject = (ExternalObject) arguments[0].head();
+            ExternalObject<PreparedStylesheet> templatesObject = (ExternalObject<PreparedStylesheet>) arguments[0].head();
             if (templatesObject == null) {
-                return ZeroOrOne.empty(); // Should not happen
+                return EmptySequence.getInstance(); // Should not happen
             }
             PreparedStylesheet pss = templatesObject.getObject();
 
             NodeInfo source = (NodeInfo) arguments[1].head();
             if (source == null) {
-                return ZeroOrOne.empty(); // Should not happen
+                return EmptySequence.getInstance(); // Should not happen
             }
             XsltController transformer = pss.newController();
             GlobalParameterSet params = new GlobalParameterSet();
@@ -107,7 +104,7 @@ public class TransformFn extends SystemFunction {
             transformer.setApplyFunctionConversionRulesToExternalVariables(true);
             transformer.initializeController(params);
             transformer.applyTemplates(source, new TreeReceiver(builder));
-            return new ZeroOrOne<>(builder.getCurrentRoot());
+            return builder.getCurrentRoot();
         } catch (TransformerException e) {
             throw XPathException.makeXPathException(e);
         }

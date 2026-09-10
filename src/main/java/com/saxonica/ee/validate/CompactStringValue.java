@@ -8,6 +8,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SingleAtomicIterator;
+import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -113,7 +114,7 @@ public class CompactStringValue implements AtomicSequence {
 
     @Override
     public Iterator<AtomicValue> iterator() {
-        return head().iterator();
+        return new MonoIterator<>(head());
     }
 
     /*@NotNull*/

@@ -1,17 +1,18 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.CallableDelegate;
+import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
 
 /**
@@ -185,26 +186,24 @@ public class PreprocessFacet extends Facet {
 
     @Override
     public Function getFacetAsFunctionItem() {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-                String key = arguments[0].head().getStringValue();
-                switch (key) {
-                    case "class":
-                        return new StringValue(getName());
-                    case "implementation":
-                        return new ObjectValue<>(PreprocessFacet.this);
-                    case "action":
-                        return action.getComponentAsFunction();
-                    case "reverse action":
-                        return reverseAction.getComponentAsFunction();
-                    case "fixed":
-                        return BooleanValue.get(isFixed());
-                    default:
-                        return EmptySequence.getInstance();
-                }
+        PreprocessFacet thisFacet = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
+            String key = arguments[0].head().getStringValue();
+            switch (key) {
+                case "class":
+                    return new StringValue(getName());
+                case "implementation":
+                    return new ObjectValue<>(thisFacet);
+                case "action":
+                    return action.getComponentAsFunction();
+                case "reverse action":
+                    return reverseAction.getComponentAsFunction();
+                case "fixed":
+                    return BooleanValue.get(isFixed());
+                default:
+                    return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }

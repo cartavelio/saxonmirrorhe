@@ -15,6 +15,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.StringValue;
@@ -324,9 +325,10 @@ public abstract class SelectorWatch extends PatternWatch {
      * which is used in the general case.
      */
 
+    @CSharpModifiers(code={"internal", "abstract"})
     static abstract class ValueEntry {
 
-        static ValueEntry makeValueEntry(AtomicSequence[] values) {
+        protected static ValueEntry makeValueEntry(AtomicSequence[] values) {
             switch (values.length) {
                 case 1:
                     return new ValueEntry1(values[0]);
@@ -376,7 +378,7 @@ public abstract class SelectorWatch extends PatternWatch {
          * @return an array of atomic sequences, one per field definition
          */
 
-        abstract AtomicSequence[] getValues();
+        protected abstract AtomicSequence[] getValues();
 
         protected int hash(AtomicSequence value) {
             return value == null ? 0 : SimpleTypeComparison.getInstance().hash(value);
@@ -398,7 +400,7 @@ public abstract class SelectorWatch extends PatternWatch {
         }
 
         @Override
-        AtomicSequence[] getValues() {
+        protected AtomicSequence[] getValues() {
             return values;
         }
 
@@ -448,7 +450,7 @@ public abstract class SelectorWatch extends PatternWatch {
         }
 
         @Override
-        AtomicSequence[] getValues() {
+        protected AtomicSequence[] getValues() {
             return new AtomicSequence[]{value};
         }
 
@@ -479,7 +481,7 @@ public abstract class SelectorWatch extends PatternWatch {
         }
 
         @Override
-        AtomicSequence[] getValues() {
+        protected AtomicSequence[] getValues() {
             return new AtomicSequence[]{value0, value1};
         }
 
@@ -513,7 +515,7 @@ public abstract class SelectorWatch extends PatternWatch {
         }
 
         @Override
-        AtomicSequence[] getValues() {
+        protected AtomicSequence[] getValues() {
             return new AtomicSequence[]{value0, value1, value2};
         }
 
@@ -550,7 +552,7 @@ public abstract class SelectorWatch extends PatternWatch {
         }
 
         @Override
-        AtomicSequence[] getValues() {
+        protected AtomicSequence[] getValues() {
             return new AtomicSequence[]{value0, value1, value2, value3};
         }
 

@@ -466,6 +466,7 @@ public class MultiIndex {
         }
     }
 
+    @FunctionalInterface
     private interface PrimitiveTypeTester {
         void test(BuiltInAtomicType type) throws XPathException;
     }

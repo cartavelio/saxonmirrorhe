@@ -50,7 +50,7 @@ public class Streamability {
             if (o.getUsage() == OperandUsage.TRANSMISSION && ps.getPosture() != Posture.GROUNDED) {
                 return o;
             }
-            if (o.getUsage() == OperandUsage.ABSORPTION && ps.getPosture().isIncremental()) {
+            if (o.getUsage() == OperandUsage.ABSORPTION && isIncrementalPosture(ps.getPosture())) {
                 return o;
             }
         }
@@ -216,7 +216,7 @@ public class Streamability {
                     return new PostureAndSweep(Posture.ROAMING, Sweep.FREE_RANGING);
                 }
                 if (o.isInChoiceGroup()) {
-                    widestInChoiceGroup = Sweep.wider(widestInChoiceGroup, s);
+                    widestInChoiceGroup = wider(widestInChoiceGroup, s);
                     choiceGroupPostures.add(p);
                 } else if (!choiceGroupPostures.isEmpty()) {
                     if (reasons != null) {
@@ -239,7 +239,7 @@ public class Streamability {
         // Rule 2(b) already done
         // Rule 2(c)
         if (!choiceGroupPostures.isEmpty()) {
-            return new PostureAndSweep(Posture.combinedPosture(choiceGroupPostures), widestInChoiceGroup);
+            return new PostureAndSweep(combinedPosture(choiceGroupPostures), widestInChoiceGroup);
         }
         // Rule 2(d)
         if (potentiallyConsumingOperand != null) {
@@ -369,28 +369,28 @@ public class Streamability {
         PostureAndSweep postureAndSweep = getPostureAndSweepIfKnown(exp);
         if (postureAndSweep != null) {
             return postureAndSweep.getPosture();
-        }
-//#if SAXONC != true
-        else if (exp instanceof CompiledExpression) {
+        } else if (isCompiledExpression(exp)) {
             return getPosture(exp.getInterpretedExpression());
-        }
-//#endif
-        else {
+        } else {
             throw new IllegalStateException("getPosture() called when streamability has not yet been computed");
         }
+    }
+
+    private static boolean isCompiledExpression(Expression exp) {
+        boolean result = false;
+        //#if BYTECODE==true
+        result = exp instanceof CompiledExpression;
+        //#endif
+        return result;
     }
 
     public static Sweep getSweep(Expression exp) {
         PostureAndSweep postureAndSweep = getPostureAndSweepIfKnown(exp);
         if (postureAndSweep != null) {
             return postureAndSweep.getSweep();
-        }
-//#if SAXONC != true
-        else if (exp instanceof CompiledExpression) {
+        } else if (isCompiledExpression(exp)) {
             return getSweep(exp.getInterpretedExpression());
-        }
-//#endif
-        else {
+        } else {
             throw new IllegalStateException(exp.getClass().getName() + ".getSweep() called when streamability has not yet been computed");
         }
     }
@@ -492,6 +492,78 @@ public class Streamability {
     }
 
 
+    /**
+     * Return the wider of two sweeps. The order of increasing width is MOTIONLESS, CONSUMING, FREE_RANGING.
+     * @param a the first sweep
+     * @param b the second sweep
+     * @return the wider of the two
+     */
+    public static Sweep wider(Sweep a, Sweep b) {
+        switch (a) {
+            case FREE_RANGING:
+                return a;
+            case CONSUMING:
+                return b == Sweep.FREE_RANGING ? b : a;
+            case MOTIONLESS:
+                return b;
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+    /**
+     * Test whether a supplied posture is either striding or crawling
+     * @param posture the posture to be tested
+     * @return true if this posture is either striding or crawling
+     */
+
+    public static boolean isIncrementalPosture(Posture posture) {
+        return posture == Posture.STRIDING || posture == Posture.CRAWLING;
+    }
+
+    /**
+     * Get the combined posture of a set of postures, as defined in the XSLT 3.0 specification
+     * @param postures the set of postures
+     * @return the combined posture
+     */
+
+    public static Posture combinedPosture(Set<Posture> postures) {
+        if (postures.contains(Posture.ROAMING)) {
+            return Posture.ROAMING;
+        }
+
+        if (postures.isEmpty()) {
+            return Posture.GROUNDED;
+        }
+
+        if (postures.contains(Posture.GROUNDED) && postures.size() == 1) {
+            return Posture.GROUNDED;
+        }
+
+        if (postures.contains(Posture.CLIMBING)) {
+            if (postures.size() == 1) {
+                return Posture.CLIMBING;
+            }
+            if (postures.size() == 2 && postures.contains(Posture.GROUNDED)) {
+                return Posture.CLIMBING;
+            }
+        }
+
+        if (postures.contains(Posture.STRIDING)) {
+            if (postures.size() == 1) {
+                return Posture.STRIDING;
+            }
+            if (postures.size() == 2 && postures.contains(Posture.GROUNDED)) {
+                return Posture.STRIDING;
+            }
+        }
+
+        if (postures.contains(Posture.CRAWLING) && !postures.contains(Posture.CLIMBING)) {
+            return Posture.CRAWLING;
+        }
+
+        return Posture.ROAMING;
+    }
 }
 
 // Copyright (c) 2012-2020 Saxonica Limited

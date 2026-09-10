@@ -156,7 +156,7 @@ public class ApplyTemplatesAction extends ItemFeed {
             switch (action[0]) {
                 case DEEP_COPY: {
                     //currentActivation.isSkipped = true;
-                    ItemFeed out = new NoOpenOrCloseFeed(getResult(), getContext());
+                    ItemFeed out = new NoOpenOrCloseFeed(getResultFeed(), getContext());
                     Watch copyWatch = CopyOfFeed.getWatch(out, AnchorPattern.getInstance(), watchManager, getContext());
                     watchManager.addWatch(copyWatch, true);
                     return null;
@@ -206,7 +206,7 @@ public class ApplyTemplatesAction extends ItemFeed {
                                                        null, new ComplexContentOutputter(streamingSequenceWriter), c2, locationId);
                     }
                     if (applyTemplatesToChildren) {
-                        ItemFeed out = new NoOpenOrCloseFeed(getResult(), localContext);
+                        ItemFeed out = new NoOpenOrCloseFeed(getResultFeed(), localContext);
                         ApplyTemplatesAction actor = new ApplyTemplatesAction(null, out, getContext());
                         actor.setMode(mode);
                         actor.setWatchManager(watchManager);
@@ -215,6 +215,7 @@ public class ApplyTemplatesAction extends ItemFeed {
                         Watch watch = new Trigger(CHILD_NODE_SELECTION, actor, localContext);
                         watchManager.addWatch(watch, true);
                     }
+                    break;
                 }
             }
 
@@ -246,7 +247,7 @@ public class ApplyTemplatesAction extends ItemFeed {
 
         if (inversion != null) {
             //Watch watch = inversion.getWatch(watchManager, new DecomposingFeed(context.getReceiver()), activation.context);
-            Watch watch = inversion.getWatch(watchManager, new NoOpenOrCloseFeed(getResult(), getContext()), localContext);
+            Watch watch = inversion.getWatch(watchManager, new NoOpenOrCloseFeed(getResultFeed(), getContext()), localContext);
             watch.setAnchorNode(node);
             watchManager.addWatch(watch, true);
         }

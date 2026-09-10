@@ -414,7 +414,7 @@ public class ModeEE extends ModePE {
 
 
     @Override
-    public void reportAmbiguity(Item item, Rule r1, Rule r2, XPathContext c)
+    protected void reportAmbiguity(Item item, Rule r1, Rule r2, XPathContext c)
             throws XPathException {
         super.reportAmbiguity(item, r1, r2, c);
     }

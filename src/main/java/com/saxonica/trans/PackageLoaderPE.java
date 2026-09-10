@@ -27,6 +27,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.PackageLoaderHE;
@@ -55,7 +56,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
     @Override
     protected void readSchemaNamespaces(NodeInfo packageElement) throws XPathException {
         Configuration config = getConfiguration();
-        for (NodeInfo varElement : packageElement.children(n -> n.getLocalPart().equals("schema"))) {
+        for (NodeInfo varElement : packageElement.children(NodeSelector.of(n -> n.getLocalPart().equals("schema")))) {
             String ns = varElement.getAttributeValue("", "ns");
             if (!config.isSchemaAvailable(ns) && !ns.equals(NamespaceConstant.ANONYMOUS)) {
                 throw new XPathException(
@@ -132,6 +133,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
             return forEx;
         });
 
+        //#if CSHARP==false
         eMap.put("javaCall", (loader, element) -> {
             StructuredQName name = loader.getQNameAttribute(element, "name");
             Expression[] args = getChildExpressionArray(loader, element);
@@ -179,6 +181,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
             }
             return exp;
         });
+        //#endif
 
         eMap.put("while", (loader, element) -> {
             loader.needsPELicense("saxon:while");

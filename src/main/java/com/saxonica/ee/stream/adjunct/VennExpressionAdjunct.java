@@ -37,13 +37,12 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
      * Convert this expression to a streaming pattern (a pattern used internally to match nodes during
      * push processing of an event stream)
      *
-     *
-     * @param config           the Saxon configuration
+     * @param config the Saxon configuration
      * @return the equivalent pattern if conversion succeeds; otherwise null
      */
     @Override
     public Pattern toStreamingPattern(Configuration config) {
-        VennExpression exp = (VennExpression)getExpression();
+        VennExpression exp = (VennExpression) getExpression();
         Expression e0 = exp.getLhsExpression();
         Expression e1 = exp.getRhsExpression();
         int operator = exp.getOperator();
@@ -81,15 +80,14 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
      * case that all expression that emerge as streamable from this analysis are currently
      * capable of being streamed by Saxon
      *
-     *
-     * @param contextInfo      static information about the context item
-     * @param reasons          the caller may supply a list, in which case the implementation may add to this
+     * @param contextInfo static information about the context item
+     * @param reasons     the caller may supply a list, in which case the implementation may add to this
      */
     @Override
     public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
         // See 19.8.7.4
 
-        VennExpression exp = (VennExpression)getExpression();
+        VennExpression exp = (VennExpression) getExpression();
 
         PostureAndSweep ps0 = Streamability.getStreamability(exp.getLhsExpression(), contextInfo, reasons);
         PostureAndSweep ps1 = Streamability.getStreamability(exp.getRhsExpression(), contextInfo, reasons);
@@ -115,13 +113,13 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         Posture p0 = ps0.getPosture();
         Posture p1 = ps1.getPosture();
         if ((p0 == Posture.STRIDING || p0 == Posture.CRAWLING) && (p1 == Posture.STRIDING || p1 == Posture.CRAWLING)) {
-            return new PostureAndSweep(Posture.CRAWLING, Sweep.wider(ps0.getSweep(), ps1.getSweep()));
+            return new PostureAndSweep(Posture.CRAWLING, Streamability.wider(ps0.getSweep(), ps1.getSweep()));
         }
 
         // Rule 5
         if (reasons != null) {
             reasons.add("Operands of " + Token.tokens[exp.getOperator()] + " expression on line "
-                    + exp.getLocation().getLineNumber() + " have mixed posture");
+                                + exp.getLocation().getLineNumber() + " have mixed posture");
         }
 
         return PostureAndSweep.ROAMING_AND_FREE_RANGING;
@@ -145,28 +143,49 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
                 return new UnionFeed(exp, exp.getLhsExpression(), out, context);
             }
         } else if (operator == Token.INTERSECT) {
-            return new FilteringFeed(out, context, new FilteringFeed.OpaqueFilter());
-//            if (a0consuming) {
-//                return new IntersectFeed(exp, exp.getRhsExpression(), out, context);
-//            } else {
-//                return new IntersectFeed(exp, exp.getLhsExpression(), out, context);
-//            }
+            return new FilteringFeed(out, context, FilteringFeed.OpaqueFilter);
+
         } else if (operator == Token.EXCEPT) {
             if (a0consuming) {
-                return new FilteringFeed(out, context, new FilteringFeed.TransparentFilter());
+                // If the LHS expression is streamed, we deliver its contents and ignore the RHS
+                // expression, which cannot deliver any streamed nodes
+                return new FilteringFeed(out, context, FilteringFeed.TransparentFilter);
             } else {
-                return new FilteringFeed(out, context, new FilteringFeed.OpaqueFilter()) {
-                    @Override
-                    public void open(Terminator terminator) throws XPathException {
-                        super.open(terminator);
-                        processItems(exp.getLhsExpression().iterate(getContext()), getNextOutputter());
-                    }
-                };
+                // If the RHS expression is streamed, we deliver the contents of the LHS operand, and ignore the RHS
+                // expression, which cannot deliver any unstreamed nodes
+                return new FirstOperandOnlyFeed(out, context, exp.getLhsExpression());
+//                return new FilteringFeed(out, context, FilteringFeed.OpaqueFilter) {
+//                    @Override
+//                    public void open(Terminator terminator) throws XPathException {
+//                        super.open(terminator);
+//                        processItems(exp.getLhsExpression().iterate(getContext()), getNextOutputter());
+//                    }
+//                };
             }
         } else {
             throw new UnsupportedOperationException();
         }
 
+    }
+
+    /**
+     * This item feed delivers all the results from the first (unstreamed) operand, and none of the
+     * results from the second (streamed) operand. This is on the basis that it's not possible for
+     * any nodes to be in both results.
+     */
+    private static class FirstOperandOnlyFeed extends FilteringFeed {
+
+        Expression lhs;
+
+        public FirstOperandOnlyFeed(ItemFeed out, XPathContext context, Expression lhs) {
+            super(out, context, FilteringFeed.OpaqueFilter);
+            this.lhs = lhs;
+        }
+
+        public void open(Terminator terminator) throws XPathException {
+            super.open(terminator);
+            processItems(lhs.iterate(getContext()), getNextOutputter());
+        }
     }
 
     /**
@@ -224,9 +243,9 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         @Override
         public void append(Item item) throws XPathException {
             if (atStart) {
-                NodeInfo first = (NodeInfo)nonConsumingIterator.next();
+                NodeInfo first = (NodeInfo) nonConsumingIterator.next();
                 if (first != null) {
-                    if (GlobalOrderComparer.getInstance().compare((NodeInfo)item, first) < 0) {
+                    if (GlobalOrderComparer.getInstance().compare((NodeInfo) item, first) < 0) {
                         nonConsumingIterator = new PrependSequenceIterator(first, nonConsumingIterator);
                         emitNonConsumingOperandAtEnd = true;
                     } else {
@@ -258,7 +277,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
             if (atStart) {
-                NodeInfo first = (NodeInfo)nonConsumingIterator.next();
+                NodeInfo first = (NodeInfo) nonConsumingIterator.next();
                 if (first != null) {
                     if (GlobalOrderComparer.getInstance().compare(node, first) < 0) {
                         nonConsumingIterator = new PrependSequenceIterator(first, nonConsumingIterator);
@@ -273,7 +292,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
                 }
             }
             atStart = false;
-            return getResult().startSelectedParentNode(node, locationId);
+            return getResultFeed().startSelectedParentNode(node, locationId);
         }
 
         /**
@@ -286,7 +305,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
          */
         @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
     }
 

@@ -1,26 +1,25 @@
 package com.saxonica.ee.schema;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.MissingComponentException;
-import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntHashSet;
 
 import java.util.*;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INCOMPLETE;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
 
 /**
  * An XML Schema Model Group. This corresponds to a sequence, choice, or all in the
@@ -246,7 +245,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
      */
 
     @Override
-    public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException {
+    public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler) throws SchemaException {
         references.push(this);
         for (Particle p : getParticles()) {
             p.lookForCycles(references, compiler);
@@ -553,7 +552,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
             for (Particle p : contentModel) {
                 p.fixup(compiler);
             }
-            lookForCycles(new Stack(), compiler);
+            lookForCycles(new Stack<SchemaComponent>(), compiler);
         }
         setFixupStatus(VALIDATED);
         return true;
@@ -589,15 +588,14 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        ModelGroup thisModelGroup = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
                         return StringValue.bmp("Model Group");
                     case "implementation":
-                        return new ObjectValue<>(ModelGroup.this);
+                        return new ObjectValue<>(thisModelGroup);
                     case "compositor":
                         return new StringValue(getCompositorName());
                     case "particles":
@@ -609,8 +607,8 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
                     default:
                         return EmptySequence.getInstance();
                 }
-            }
-        };
+
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

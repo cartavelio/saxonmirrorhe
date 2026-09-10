@@ -66,7 +66,7 @@ public class LaxValidator extends ContentValidator {
 
     /*@Nullable*/
     @Override
-    public ContentValidator getChildValidator() {
+    protected ContentValidator getChildValidator() {
         return childValidator;
     }
 

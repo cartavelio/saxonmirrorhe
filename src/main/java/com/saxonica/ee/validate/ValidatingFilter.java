@@ -142,7 +142,7 @@ public class ValidatingFilter extends ProxyReceiver {
         if (err.getErrorCodeQName() == null) {
             err.setErrorCode(validationContext.getErrorCode());
         }
-        PathMaintainer pm = (PathMaintainer) pipe.getComponent(PathMaintainer.class.getName());
+        PathMaintainer pm = (PathMaintainer) pipe.getComponent("net.sf.saxon.event.PathMaintainer");
         if (pm != null) {
             AbsolutePath path = pm.getAbsolutePath();
             if (locationId instanceof AttributeLocation) {

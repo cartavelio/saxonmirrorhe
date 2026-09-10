@@ -7,7 +7,6 @@ import com.saxonica.ee.stream.feed.FilteringFeed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.List;
@@ -48,12 +47,8 @@ public class FirstItemExpressionAdjunct extends FilteringAdjunct implements Feed
      */
     @Override
     public FilteringFeed.Filter makeFilter(XPathContext context, ItemFeed out) throws XPathException {
-        return new FilteringFeed.Filter() {
-            @Override
-            public int matches(Item item, int position) {
-                return position == 1 ? MATCHES : DONE;
-            }
-        };
+        return new FilteringFeed.FilterLambda((item, position) ->
+                position == 1 ? FilteringFeed.FilterResult.MATCHES : FilteringFeed.FilterResult.DONE);
     }
 
 }

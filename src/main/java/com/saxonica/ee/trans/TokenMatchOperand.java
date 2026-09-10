@@ -25,7 +25,7 @@ import net.sf.saxon.z.IntSet;
  * constant strings; the same set of hash codes will then be compared against each of the
  * string constants in turn.</p>
  */
-public class TokenMatchOperand extends Characteristic<IntSet> {
+public class TokenMatchOperand extends Characteristic {
 
     Expression exp;
 

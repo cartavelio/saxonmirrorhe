@@ -3,10 +3,7 @@ package com.saxonica.ee.stream.adjunct;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
-import com.saxonica.ee.stream.feed.BufferingFilterExpressionFeed;
-import com.saxonica.ee.stream.feed.FeedMaker;
-import com.saxonica.ee.stream.feed.FilteringFeed;
-import com.saxonica.ee.stream.feed.ItemFeed;
+import com.saxonica.ee.stream.feed.*;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
@@ -20,6 +17,9 @@ import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.TypeHierarchy;
 
 import java.util.List;
+
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.MATCHES;
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.SKIP;
 
 
 /**
@@ -122,7 +122,7 @@ public class FilterExpressionAdjunct extends FilteringAdjunct {
 //        final boolean isBuffering =
 //                (f.getActionExpression().getDependencies() & StaticProperty.DEPENDS_ON_LAST) != 0;
         if (isBuffering) {
-            return (watchManager, out, context) -> new BufferingFilterExpressionFeed(getExpression(), out, context);
+            return new FeedMakerDelegate((watchManager, out, context) -> new BufferingFilterExpressionFeed(getExpression(), out, context));
         } else {
             return super.getFeedMaker(arg);
         }
@@ -143,7 +143,7 @@ public class FilterExpressionAdjunct extends FilteringAdjunct {
         }
 
         @Override
-        public int matches(Item item, int position) throws XPathException {
+        public FilteringFeed.FilterResult matches(Item item, int position) throws XPathException {
             iter.setContextItem(item);
             iter.setPosition(position);
             SequenceIterator predicateValue = predicate.iterate(context);

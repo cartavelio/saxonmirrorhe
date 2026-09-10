@@ -80,9 +80,9 @@ public abstract class Precondition {
 
     public static class StringHashPrecondition extends Precondition {
 
-        Characteristic<IntSet> characteristic;
-        int hash;
-        StringCollator collator;
+        private final Characteristic characteristic;
+        private final int hash;
+        private final StringCollator collator;
 
         /**
          * Create a <tt>StringHashPrecondition</tt>
@@ -100,15 +100,15 @@ public abstract class Precondition {
          * @param collator  the collation to be used for comparison
          */
 
-        public StringHashPrecondition(Characteristic<IntSet> characteristic, AtomicMatchKey required, StringCollator collator) {
+        public StringHashPrecondition(Characteristic characteristic, AtomicMatchKey required, StringCollator collator) {
             this.characteristic = characteristic;
             this.collator = collator;
             this.hash = required.hashCode();
         }
 
         @Override
-        public boolean testPrecondition(PreconditionMatcher matcher) throws XPathException {
-            IntSet comparand = matcher.obtainCharacteristic(characteristic);
+        protected boolean testPrecondition(PreconditionMatcher matcher) throws XPathException {
+            IntSet comparand = (IntSet)matcher.obtainCharacteristic(characteristic);
             return comparand.contains(hash);
         }
 
@@ -145,17 +145,17 @@ public abstract class Precondition {
 
     public static class NumericComparisonPrecondition extends Precondition {
 
-        Characteristic<NumericValue> characteristic;
-        long required;
+        private final Characteristic characteristic;
+        private final long required;
 
-        public NumericComparisonPrecondition(Characteristic<NumericValue> characteristic, long required) {
+        public NumericComparisonPrecondition(Characteristic characteristic, long required) {
             this.characteristic = characteristic;
             this.required = required;
         }
 
         @Override
-        public boolean testPrecondition(PreconditionMatcher matcher) throws XPathException {
-            NumericValue comparand = matcher.obtainCharacteristic(characteristic);
+        protected boolean testPrecondition(PreconditionMatcher matcher) throws XPathException {
+            NumericValue comparand = (NumericValue)matcher.obtainCharacteristic(characteristic);
             return !comparand.isNaN() && comparand.compareTo(required) == 0;
         }
 
@@ -191,14 +191,14 @@ public abstract class Precondition {
 
     public static class BooleanPrecondition extends Precondition {
 
-        Characteristic<Boolean> characteristic;
+        private final Characteristic characteristic;
 
         /**
          * Create a precondition that maps directly to a boolean characteristic
          * @param characteristic the boolean characteristic
          */
 
-        public BooleanPrecondition(Characteristic<Boolean> characteristic) {
+        public BooleanPrecondition(Characteristic characteristic) {
             this.characteristic = characteristic;
         }
 
@@ -211,8 +211,8 @@ public abstract class Precondition {
          */
 
         @Override
-        public boolean testPrecondition(PreconditionMatcher matcher) throws XPathException {
-            return matcher.obtainCharacteristic(characteristic);
+        protected boolean testPrecondition(PreconditionMatcher matcher) throws XPathException {
+            return (boolean)matcher.obtainCharacteristic(characteristic);
         }
 
         @Override

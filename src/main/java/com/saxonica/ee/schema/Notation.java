@@ -1,11 +1,9 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -209,15 +207,14 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        Notation thisNotation = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
                         return StringValue.bmp("Notation Declaration");
                     case "implementation":
-                        return new ObjectValue<>(Notation.this);
+                        return new ObjectValue<>(thisNotation);
                     case "name":
                         return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                     case "target namespace":
@@ -237,8 +234,7 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
                     default:
                         return EmptySequence.getInstance();
                 }
-            }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

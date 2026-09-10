@@ -14,11 +14,7 @@ public class OnNonEmptyAdjunct extends TransmissionAdjunct {
 
     @Override
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-        return new FeedToEventBuffer(out, out, context) {
-            {
-                setBuffer(((ConditionalBlockAdjunct.ConditionalBlockFeed)getNextOutputter()).getTentativeContent());
-            }
-
+        FeedToEventBuffer feedToEventBuffer = new FeedToEventBuffer(out, out, context) {
             /**
              * Start evaluating the expression. The default implementation does nothing.
              *
@@ -36,6 +32,8 @@ public class OnNonEmptyAdjunct extends TransmissionAdjunct {
                 getNextOutputter().close();
             }
         };
+        feedToEventBuffer.setBuffer(((ConditionalBlockAdjunct.ConditionalBlockFeed) out).getTentativeContent());
+        return feedToEventBuffer;
     }
 
 

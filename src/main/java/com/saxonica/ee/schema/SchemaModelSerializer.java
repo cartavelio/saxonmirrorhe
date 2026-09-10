@@ -72,11 +72,12 @@ public class SchemaModelSerializer {
         PreparedSchema schema = config.getSuperSchema();
         // System.err.println("Serializing schema " + schema);
         for (SchemaType type : schema.getAllTypes()) {
-            if (type instanceof SimpleTypeDefinition) {
-                type = ((SimpleTypeDefinition)type).getWorkingType();
+            SchemaType sType = type;
+            if (sType instanceof SimpleTypeDefinition) {
+                sType = ((SimpleTypeDefinition)type).getWorkingType();
             }
-            if (type instanceof SerializableSchemaComponent) {
-                serializeComponent((SerializableSchemaComponent) type);
+            if (sType instanceof SerializableSchemaComponent) {
+                serializeComponent((SerializableSchemaComponent) sType);
             }
         }
 
@@ -137,8 +138,8 @@ public class SchemaModelSerializer {
 
     public void emitNamespaceContext(NamespaceResolver resolver) {
         // TODO: maintain a stack of in-scope namespaces
-        for (Iterator iter = resolver.iteratePrefixes(); iter.hasNext(); ) {
-            String prefix = (String) iter.next();
+        for (Iterator<String> iter = resolver.iteratePrefixes(); iter.hasNext(); ) {
+            String prefix = iter.next();
             String uri = resolver.getURIForPrefix(prefix, false);
             namespaceMap = namespaceMap.put(prefix, uri);
         }

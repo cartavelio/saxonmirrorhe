@@ -39,19 +39,17 @@ public class QueryFn extends SystemFunction {
         /*@Nullable*/
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            ExternalObject queryExpression = (ExternalObject) arguments[0].head();
+            ExternalObject<XQueryExpression> queryExpression = (ExternalObject<XQueryExpression>) arguments[0].head();
             if (queryExpression == null) {
                 return null;
             }
-            XQueryExpression exp = (XQueryExpression) queryExpression.getObject();
+            XQueryExpression exp = queryExpression.getObject();
             DynamicQueryContext dqc = new DynamicQueryContext(context.getConfiguration());
 
             if (arguments.length >= 2) {
                 Item source = arguments[1].head();
                 if (source != null) {
                     dqc.setContextItem(source);
-                } else {
-
                 }
             } else {
                 Item co = context.getContextItem();

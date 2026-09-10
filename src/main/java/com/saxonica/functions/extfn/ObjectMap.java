@@ -2,14 +2,14 @@ package com.saxonica.functions.extfn;
 
 import com.saxonica.config.JavaExtensionLibrary;
 import com.saxonica.config.ProfessionalConfiguration;
-import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
@@ -60,7 +60,7 @@ public class ObjectMap extends SystemFunction {
 
     @Override
     public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-        ObjectValue<?> value = (ObjectValue)arguments[0].head();
+        ObjectValue<?> value = (ObjectValue<?>)arguments[0].head();
         return toMap(context.getConfiguration(), value, null);
     }
 
@@ -91,7 +91,7 @@ public class ObjectMap extends SystemFunction {
             CurriedFunction fn = new CurriedFunction(method, boundArgs);
             mapView.initialPut(key, fn);
         }
-        Callable returnThis = (context, args) -> value;
+        CallableDelegate returnThis = new CallableDelegate((context, args) -> value);
         mapView.initialPut("this", new CallableFunction(0, returnThis, AnyFunctionType.getInstance()));
         return mapView;
     }

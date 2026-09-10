@@ -83,7 +83,7 @@ public class VersionControlFilter extends ProxyReceiver {
         }
         if (depthOfHole == 0) {
             boolean ignore = false;
-            attLoop:
+            boolean doneAttributes = false;
             for (AttributeInfo att : attributes) {
                 final NodeName attName = att.getNodeName();
                 if (attName.hasURI(NamespaceConstant.SCHEMA_VERSIONING)) {
@@ -94,7 +94,7 @@ public class VersionControlFilter extends ProxyReceiver {
                                 BigDecimalValue dv = parseDecimalValue(att.getValue());
                                 if (thisVersion.compareTo(dv) < 0) {
                                     ignore = true;
-                                    break attLoop;
+                                    doneAttributes = true;
                                 }
                                 break;
                             }
@@ -102,7 +102,7 @@ public class VersionControlFilter extends ProxyReceiver {
                                 BigDecimalValue dv = parseDecimalValue(att.getValue());
                                 if (thisVersion.compareTo(dv) >= 0) {
                                     ignore = true;
-                                    break attLoop;
+                                    doneAttributes = true;
                                 }
                                 break;
                             }
@@ -111,7 +111,8 @@ public class VersionControlFilter extends ProxyReceiver {
                                 for (StructuredQName name : typesAvailable) {
                                     if (!isAutomaticallyKnownTypeName(name)) {
                                         ignore = true;
-                                        break attLoop;
+                                        doneAttributes = true;
+                                        break;
                                     }
                                 }
                                 break;
@@ -121,7 +122,8 @@ public class VersionControlFilter extends ProxyReceiver {
                                 for (StructuredQName name : typesUnavailable) {
                                     if (!isAutomaticallyKnownTypeName(name)) {
                                         ignore = false;
-                                        break attLoop;
+                                        doneAttributes = true;
+                                        break;
                                     }
                                 }
                                 break;
@@ -130,7 +132,8 @@ public class VersionControlFilter extends ProxyReceiver {
                                 for (StructuredQName name : facetsAvailable) {
                                     if (!isKnownFacetName(name)) {
                                         ignore = true;
-                                        break attLoop;
+                                        doneAttributes = true;
+                                        break;
                                     }
                                 }
                                 break;
@@ -140,13 +143,17 @@ public class VersionControlFilter extends ProxyReceiver {
                                 for (StructuredQName name : facetsUnavailable) {
                                     if (!isKnownFacetName(name)) {
                                         ignore = false;
-                                        break attLoop;
+                                        doneAttributes = true;
+                                        break;
                                     }
                                 }
                                 break;
                             default:
                                 compiler.warning("Unrecognized attribute name " + attName, location);
                                 break;
+                        }
+                        if (doneAttributes) {
+                            break;
                         }
                     } catch (XPathException e) {
                         compiler.error("Invalid value for attribute " + attName +

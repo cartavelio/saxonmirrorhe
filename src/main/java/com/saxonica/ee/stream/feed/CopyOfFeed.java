@@ -137,7 +137,7 @@ public class CopyOfFeed extends AbsorptionFeed {
 
     @Override
     protected PendingItem makePendingItem(int sequenceNr, FleetingParentNode node) {
-        return new PendingCopyAction(sequenceNr, node);
+        return new PendingCopyAction(this, sequenceNr, node);
     }
 
     @Override
@@ -273,18 +273,20 @@ public class CopyOfFeed extends AbsorptionFeed {
      * The builder is the builder being used to construct the tree.
      */
 
-    private class PendingCopyAction extends PendingItem {
+    private static class PendingCopyAction extends PendingItem {
         private TinyBuilder builder;
         private Receiver destination;
         private final FleetingParentNode rootOfCopy;
+        public final CopyOfFeed feed;
 
-        public PendingCopyAction(int sequence, FleetingParentNode node) {
+        public PendingCopyAction(CopyOfFeed feed, int sequence, FleetingParentNode node) {
             super(sequence);
+            this.feed = feed;
             this.rootOfCopy = node;
-            PipelineConfiguration pipe = getPipelineConfiguration();
-            if (valuesReadyToBeOutput.isEmpty() &&
-                (getResult() instanceof DecomposingFeed || getResult() instanceof ComplexNodeEventFeed)) {
-                Outputter r = getNextOutputter();
+            PipelineConfiguration pipe = feed.getPipelineConfiguration();
+            if (feed.valuesReadyToBeOutput.isEmpty() &&
+                (feed.getResultFeed() instanceof DecomposingFeed || feed.getResultFeed() instanceof ComplexNodeEventFeed)) {
+                Outputter r = feed.getNextOutputter();
                 destination = new ProxyOutputter(r) {
                     @Override
                     public void open() {
@@ -310,8 +312,8 @@ public class CopyOfFeed extends AbsorptionFeed {
                 builder = new TinyBuilder(pipe);
                 builder.setStatistics(pipe.getConfiguration().getTreeStatistics().TEMPORARY_TREE_STATISTICS);
                 destination = builder;
-                if (copyAccumulators) {     
-                    destination = new AccumulatorCopier(watchManager, builder, builder);
+                if (feed.copyAccumulators) {
+                    destination = new AccumulatorCopier(feed.watchManager, builder, builder);
                 }
             }
         }
@@ -328,7 +330,7 @@ public class CopyOfFeed extends AbsorptionFeed {
         @Override
         public Receiver getGatherer() throws XPathException {
             Receiver copier = destination;
-            if (!copyNamespaces) {
+            if (!feed.copyNamespaces) {
                 copier = new ProxyReceiver(copier) {
                     @Override
                     public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
@@ -346,12 +348,12 @@ public class CopyOfFeed extends AbsorptionFeed {
                     }
                 };
             }
-            if (validation != Validation.PRESERVE || type != null) {
+            if (feed.validation != Validation.PRESERVE || feed.type != null) {
                 ParseOptions validationOptions = new ParseOptions();
-                validationOptions.setSchemaValidationMode(validation);
-                validationOptions.setTopLevelType(type);
-                Configuration config = getPipelineConfiguration().getConfiguration();
-                Location loc = getExpression() == null ? Loc.NONE : getExpression().getLocation();
+                validationOptions.setSchemaValidationMode(feed.validation);
+                validationOptions.setTopLevelType(feed.type);
+                Configuration config = feed.getPipelineConfiguration().getConfiguration();
+                Location loc = feed.getExpression() == null ? Loc.NONE : feed.getExpression().getLocation();
                 if (rootOfCopy.getNodeKind() == Type.DOCUMENT) {
                     copier = new ComplexContentOutputter(
                             config.getDocumentValidator(copier, rootOfCopy.getBaseURI(), validationOptions, loc));
@@ -361,19 +363,19 @@ public class CopyOfFeed extends AbsorptionFeed {
                         copier = new ComplexContentOutputter(
                                 config.getElementValidator(copier, validationOptions, loc));
                     } catch (XPathException e) {
-                        dynamicError(e);
+                        feed.dynamicError(e);
                         return null;
                     }
                 }
-                PipelineConfiguration newPipe = new PipelineConfiguration(getPipelineConfiguration());
+                PipelineConfiguration newPipe = new PipelineConfiguration(feed.getPipelineConfiguration());
                 newPipe.setErrorReporter(new ErrorReporter() {
                     private int errorCount = 0;
                     @Override
                     public void report(XmlProcessingError error) {
                         if (!error.isWarning() && errorCount++ == 0) {
-                            validationError = XPathException.fromXmlProcessingError(error);
+                            feed.validationError = XPathException.fromXmlProcessingError(error);
                             try {
-                                dynamicError(validationError);
+                                feed.dynamicError(feed.validationError);
                             } catch (XPathException e) {
                                 // no action
                             }
@@ -389,9 +391,9 @@ public class CopyOfFeed extends AbsorptionFeed {
 
         @Override
         public Sequence deliver() throws XPathException {
-            if (hasFailed()) {
-                if (validationError != null) {
-                    throw validationError;
+            if (feed.hasFailed()) {
+                if (feed.validationError != null) {
+                    throw feed.validationError;
                 } else {
                     throw new XPathException("Streamed copy-of has failed. Perhaps a validation error?");
                 }

@@ -106,7 +106,7 @@ public abstract class LengthRangeFacet extends Facet {
                     case "class":
                         return new StringValue(getName());
                     case "implementation":
-                        return new ObjectValue<>(LengthRangeFacet.this);
+                        return new ObjectValue<LengthRangeFacet>(LengthRangeFacet.this);
                     case "value":
                         return new Int64Value(requiredLength, BuiltInAtomicType.NON_NEGATIVE_INTEGER, false);
                     case "fixed":

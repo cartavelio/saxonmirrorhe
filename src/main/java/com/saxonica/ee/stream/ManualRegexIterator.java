@@ -14,11 +14,11 @@ import net.sf.saxon.value.StringValue;
  */
 public class ManualRegexIterator extends ManualIterator implements RegexIterator {
 
-    private final boolean isMatching;
+    private final boolean currentItemMatches;
     private final String[] groups;
 
     public ManualRegexIterator(RegexIterator base) {
-        isMatching = base.isMatching();
+        currentItemMatches = base.isMatching();
         groups = new String[base.getNumberOfGroups()+1];
         for (int i=0; i<groups.length; i++) {
             groups[i] = base.getRegexGroup(i);
@@ -45,7 +45,7 @@ public class ManualRegexIterator extends ManualIterator implements RegexIterator
      */
     @Override
     public boolean isMatching() {
-        return isMatching;
+        return currentItemMatches;
     }
 
     /**

@@ -1,13 +1,13 @@
 package com.saxonica.ee.schema;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
@@ -24,11 +24,11 @@ import java.util.List;
  */
 public class PatternFacet extends Facet {
 
-    Configuration config;
-    UnicodeString requiredValue;
-    RegularExpression regex;
-    String flags = "";
-    boolean noMerge;
+    private final Configuration config;
+    private UnicodeString requiredValue;
+    private RegularExpression regex;
+    private String flags = "";
+    private boolean noMerge;
 
     /**
      * Create a pattern facet
@@ -146,19 +146,20 @@ public class PatternFacet extends Facet {
     @Override
     public Function getFacetAsFunctionItem() {
         // Contrary to the W3C SCM specification, multiple pattern facets are not merged into a single component
-        Callable callable = (context, arguments) -> {
+        PatternFacet facet = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return new StringValue(getName());
                 case "implementation":
-                    return new ObjectValue<>(PatternFacet.this);
+                    return new ObjectValue<>(facet);
                 case "value":
                     return new StringValue(requiredValue);
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

@@ -18,10 +18,9 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.value.AtomicValue;
-import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,9 +59,7 @@ public class Parse extends SystemFunction {
         Configuration config = controller.getConfiguration();
         AtomicValue content = (AtomicValue) arguments[0].head();
         StringReader sr = new StringReader(content.getStringValue());
-        InputSource is = new InputSource(sr);
-        is.setSystemId(getStaticBaseUriString());
-        Source source = new SAXSource(is);
+        Source source = new StreamSource(sr, getStaticBaseUriString());
         Map<String, Sequence> checkedOptions;
         ParseOptions parseOptions;
         if (arguments.length == 1) {

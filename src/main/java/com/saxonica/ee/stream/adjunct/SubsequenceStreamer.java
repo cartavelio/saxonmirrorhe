@@ -10,6 +10,10 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.NumericValue;
 
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.DONE;
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.MATCHES;
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.SKIP;
+
 
 /**
  * Generate streaming code for a subsequence() function call. Also used for expressions such as tail() that compile
@@ -53,7 +57,7 @@ public class SubsequenceStreamer extends FilteringAdjunct implements FeedMaker {
         }
 
         @Override
-        public int matches(Item item, int position) throws XPathException {
+        public FilteringFeed.FilterResult matches(Item item, int position) throws XPathException {
             if (position < first) {
                 return SKIP;
             } else if (position <= last) {

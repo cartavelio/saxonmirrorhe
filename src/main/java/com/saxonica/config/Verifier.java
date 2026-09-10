@@ -7,6 +7,7 @@ import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.DateValue;
 import net.sf.saxon.value.DayTimeDurationValue;
@@ -70,6 +71,7 @@ public class Verifier {
      * @param config the Configuration
      */
 
+    @CSharpModifiers(code={"internal"})
     void displayLicenseMessage(Configuration config) {
         loadPrimaryLicense(config);
         if (config.isTiming()) {
@@ -94,6 +96,7 @@ public class Verifier {
         return primaryLicense.getFeature(name);
     }
 
+    @CSharpModifiers(code = {"internal"})
     final void loadPrimaryLicense(Configuration config) {
         if (DISABLED || status==UNAVAILABLE) {
             throw new LicenseException("Saxon license disabled", LicenseException.NOT_FOUND);
@@ -110,7 +113,7 @@ public class Verifier {
         }
     }
 
-
+    @CSharpModifiers(code = {"internal"})
     final License loadLicense(Configuration config) {
         InputStream is = null;
         try {
@@ -238,6 +241,7 @@ public class Verifier {
      * local licenses
      */
 
+    @CSharpModifiers(code = {"internal"})
     synchronized int registerSecondaryLicense(String dmk) {
         try {
             Base64BinaryValue b64 = new Base64BinaryValue(StringView.of(dmk).tidy());
@@ -261,6 +265,7 @@ public class Verifier {
         status = UNAVAILABLE;
     }
 
+    @CSharpModifiers(code = {"internal"})
     synchronized boolean isFeatureAllowedBySecondaryLicense(int license, int feature) {
         License lic = secondaryLicenses.get(license);
         if (lic == null) {
@@ -295,7 +300,8 @@ public class Verifier {
      * @throws IllegalArgumentException if the key supplied is not a valid OEM license key
      */
 
-    synchronized void supplyLicenseKey(BufferedReader reader) {
+    @CSharpModifiers(code={"internal"})
+    synchronized void supplyLicenseKey(Reader reader) {
         License license = configure(reader, false);
         String value = license.getFeature("Company");
         if (value == null || !value.startsWith("OEM")) {
@@ -308,8 +314,9 @@ public class Verifier {
     }
 
 
-    private static License configure(BufferedReader reader, boolean embedded) {
+    private static License configure(Reader reader, boolean embedded) {
         License license;
+        BufferedReader bufferedReader = new BufferedReader(reader);
         try {
             String line;
             String name;
@@ -318,7 +325,7 @@ public class Verifier {
             Properties features = new Properties();
             license = new License(features);
             String signature = "";
-            while ((line = reader.readLine()) != null) {
+            while ((line = bufferedReader.readLine()) != null) {
                 if (line.trim().indexOf('#') == 0 || line.trim().indexOf('!') == 0) {
                     continue;
                 }
@@ -464,6 +471,7 @@ public class Verifier {
         return sig.verify(signature);
     }
 
+    //#if CSHARP==false
     /**
      * Test program to verify that a license contained in a specific file is valid
      *
@@ -482,12 +490,13 @@ public class Verifier {
             System.err.println("Feature " + s + " = " + license.features.getProperty(s));
         }
     }
+    //#endif
 
     private static class License {
 
         private final Properties features;
 
-        private License(Properties features) {
+        public License(Properties features) {
             this.features = features;
         }
 
@@ -508,7 +517,7 @@ public class Verifier {
             try {
                 String evaluating = features.getProperty("Evaluation");
                 DateValue expiryDate = new DateValue(BMPString.of(expiration));
-                long expiryTimeMillis = expiryDate.getCalendar().getTime().getTime();
+                long expiryTimeMillis = expiryDate.toDateTime().secondsSinceEpoch().longValue()*1000;
                 long time = expiryTimeMillis - System.currentTimeMillis();
                 if ("yes".equals(evaluating) && (time / 300000) % 151 == 0) {
                     // this will put the software out of action for 5 minutes every 11 hours

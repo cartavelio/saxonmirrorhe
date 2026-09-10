@@ -135,7 +135,7 @@ public class ValidationContext extends ConversionRules {
      */
 
     public boolean hasValidationParams() {
-        return validationParams != null && !validationParams.isEmpty();
+        return validationParams != null && validationParams.size() != 0;
     }
 
     /**

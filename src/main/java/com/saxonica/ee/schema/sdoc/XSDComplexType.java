@@ -10,6 +10,8 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Whitespace;
 
+import java.util.Optional;
+
 /**
  * An xs:complexType element in an XML Schema document
  */
@@ -20,7 +22,7 @@ public class XSDComplexType extends SchemaElement {
      * The value of the mixed attribute: true, false, or null (unspecified)
      */
 
-    Boolean mixed;
+    Optional<Boolean> mixed = Optional.empty();
 
     /**
      * Flag indicating whether default attributes (as defined in the xs:schema element) apply to
@@ -114,7 +116,7 @@ public class XSDComplexType extends SchemaElement {
         //  @mixed
         String mixedAtt = Whitespace.trim(atts.getValue("", "mixed"));
         if (mixedAtt != null) {
-            mixed = parseBooleanAttribute("mixed", mixedAtt);
+            mixed = Optional.of(parseBooleanAttribute("mixed", mixedAtt));
         }
 
 
@@ -189,7 +191,7 @@ public class XSDComplexType extends SchemaElement {
         boolean foundComplexContent = false;
 
         // Set the variety provisionally
-        boolean thisMixed = mixed != null && mixed.booleanValue();
+        boolean thisMixed = mixed.isPresent() && mixed.get();
         complexType.setVariety(thisMixed ? ComplexVariety.MIXED : ComplexVariety.ELEMENT_ONLY);
 
         for (NodeInfo child : children()) {
@@ -203,14 +205,14 @@ public class XSDComplexType extends SchemaElement {
                 }
             } else if (fp == StandardNames.XS_COMPLEX_CONTENT) {
                 foundComplexContent = true;
-                Boolean ccMixed = ((XSDComplexContent) child).getMixedAttribute();
+                Optional<Boolean> ccMixed = ((XSDComplexContent) child).getMixedAttribute();
                 if (compiler.getLanguageVersion() == Configuration.XSD11) {
                     // XSD 1.1 bans inconsistent values of the mixed attribute between complexType and complexContent
-                    if (mixed != null && ccMixed != null && !mixed.equals(ccMixed)) {
+                    if (mixed.isPresent() && ccMixed.isPresent() && !mixed.equals(ccMixed)) {
                         error("If mixed is specified on both <complexType> and <complexContent>, they must agree");
                     }
                 }
-                boolean eitherMixed = thisMixed || (ccMixed != null && ccMixed.booleanValue());
+                boolean eitherMixed = thisMixed || (ccMixed.isPresent() && ccMixed.get());
                 complexType.setVariety(eitherMixed ? ComplexVariety.MIXED : ComplexVariety.ELEMENT_ONLY);
             } else if (fp == StandardNames.XS_ASSERT) {
                 if (compiler.getLanguageVersion() == Configuration.XSD10) {

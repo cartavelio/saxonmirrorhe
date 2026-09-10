@@ -11,8 +11,9 @@ import net.sf.saxon.lib.InvalidityReportGenerator;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.s9api.Destination;
-import net.sf.saxon.s9api.Push;
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.push.Document;
+import net.sf.saxon.s9api.push.Element;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
@@ -43,8 +44,8 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
     //private XMLStreamWriter writer;
     private boolean closed = false;
 
-    private Push.Document doc;
-    private Push.Element report;
+    private Document doc;
+    private Element report;
 
     public InvalidityReportGeneratorEE(Configuration config){
         super(config);
@@ -168,7 +169,7 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
         }
         errorCount++;
         try {
-            Push.Element error = report.element("error")
+            Element error = report.element("error")
                     .attribute("line", ifPositive(failure.getLineNumber()))
                     .attribute("column", ifPositive(failure.getColumnNumber()))
                     .attribute("path", failure.getPath().toString())
@@ -284,7 +285,7 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
     @Override
     public void createMetaData() throws XPathException {
         try {
-            Push.Element metadata = report.element("meta-data");
+            Element metadata = report.element("meta-data");
             metadata.element("validator")
                     .attribute("name", Version.getProductName() + "-" + getConfiguration().getEditionCode())
                     .attribute("version", Version.getProductVersion());

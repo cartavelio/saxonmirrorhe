@@ -116,7 +116,7 @@ public class BlockAdjunct extends TransmissionAdjunct implements FeedMaker {
          */
         @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
-            return getResult().startSelectedParentNode(node, locationId);
+            return getResultFeed().startSelectedParentNode(node, locationId);
         }
 
         /**
@@ -130,7 +130,7 @@ public class BlockAdjunct extends TransmissionAdjunct implements FeedMaker {
          */
         @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
     }
 

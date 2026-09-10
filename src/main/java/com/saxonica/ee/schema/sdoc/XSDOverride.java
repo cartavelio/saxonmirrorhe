@@ -231,6 +231,7 @@ public class XSDOverride extends SchemaElement {
                 }
                 default: {
                     illegalElement(child);
+                    break;
                 }
             }
         }

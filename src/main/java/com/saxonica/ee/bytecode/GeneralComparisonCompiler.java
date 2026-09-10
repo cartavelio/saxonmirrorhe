@@ -460,7 +460,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
             ga.loadArgOrLocal(item1Var);
             ga.invokeInstanceMethod(AtomicValue.class, "getPrimitiveType");
             ga.push(Token.isOrderedOperator(comparison.getSingletonOperator()));
-            ga.invokeStaticMethod(Type.class, "isGuaranteedComparable", BuiltInAtomicType.class, BuiltInAtomicType.class, Boolean.TYPE);
+            ga.invokeStaticMethod(Type.class, "isGenerallyComparable", BuiltInAtomicType.class, BuiltInAtomicType.class, Boolean.TYPE);
             ga.ifTrue(doneCheckingTypes);
             ga.loadArgOrLocal(item0Var);
             ga.loadArgOrLocal(item1Var);

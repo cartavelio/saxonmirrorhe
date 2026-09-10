@@ -35,7 +35,7 @@ public class NextIterationFeed extends ItemFeed {
 
     @Override
     public void open(Terminator terminator) throws XPathException {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               getResult().open(terminator);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               getResultFeed().open(terminator);
         WithParam[] actualParams = ((NextIteration) getExpression()).getParameters();
         XPathContext context = getContext();
         if (actualParams.length > 1) {

@@ -2,18 +2,18 @@ package com.saxonica.ee.config;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SchemaURIResolver;
-import net.sf.saxon.lib.StandardEntityResolver;
 import net.sf.saxon.trans.XPathException;
-import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * The default schema resolver used when no other is requested
@@ -106,12 +106,10 @@ public class StandardSchemaResolver implements SchemaURIResolver {
         }
         if (NamespaceConstant.XLINK.equals(targetNamespace)) {
             // Use a local copy of the XLink schema rather than fetching it from the W3C site
-            InputSource is = StandardEntityResolver.fetch("w3c/xlink/xlink.xsd", config);
-            return new Source[]{new SAXSource(is)};
+            return new Source[]{fetchResource("w3c/xlink/xlink.xsd", config)};
         } else if (NamespaceConstant.FN.equals(targetNamespace)) {
             // Use a local copy of the schema rather than fetching it from the W3C site
-            InputSource is = StandardEntityResolver.fetch("xpath-functions.xsd", config);
-            return new Source[]{new SAXSource(is)};
+            return new Source[]{fetchResource("xpath-functions.scm", config)};
         } else {
             try {
                 Source[] sources = new Source[locations.length];
@@ -136,6 +134,17 @@ public class StandardSchemaResolver implements SchemaURIResolver {
                 throw XPathException.makeXPathException(e);
             }
         }
+    }
+
+    public static Source fetchResource(String pathName, Configuration config) {
+        InputStream inputStream = Version.platform.locateResource(pathName, new ArrayList<>());
+        if (inputStream == null) {
+            throw new AssertionError("Failed to load " + pathName + " from the Saxon library");
+        }
+        if (config.isTiming()) {
+            config.getLogger().info("Loading internal schema: " + pathName);
+        }
+        return new StreamSource(inputStream);
     }
 
 }

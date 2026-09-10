@@ -3,16 +3,17 @@ package com.saxonica.ee.stream;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.PathMap;
+import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
-import java.io.PrintStream;
 import java.util.Stack;
 
 /**
@@ -22,8 +23,8 @@ import java.util.Stack;
  */
 public class Projector extends ProxyReceiver {
 
-    private final Stack pathPositionStack;    // entries on this stack are instances of PathMap.PathMapNodeSet
-    private final Stack isCopiedStack;        // entries are booleans to indicate whether the start tag was copied
+    private final Stack<PathMap.PathMapNodeSet> pathPositionStack;    // entries on this stack are instances of PathMap.PathMapNodeSet
+    private final IndexedStack<Boolean> isCopiedStack;        // entries are booleans to indicate whether the start tag was copied
     private int level = 0;
     private int copyAllLevel = Integer.MAX_VALUE;
     private int inputNodes = 0;
@@ -32,6 +33,8 @@ public class Projector extends ProxyReceiver {
     private final NamespaceBinding[] nsStack = new NamespaceBinding[20];
     private int nsStackTop = 0;
     private final int[] nsCountStack = new int[20];
+
+    private final static PathMap.PathMapNodeSet DUMMY_PATHMAP_NODESET = new PathMap.PathMapNodeSet();
 
     /**
      * Create a document projector
@@ -42,8 +45,8 @@ public class Projector extends ProxyReceiver {
 
     public Projector(PathMap.PathMapRoot pathMapRoot, Receiver next) {
         super(next);
-        pathPositionStack = new Stack();
-        isCopiedStack = new Stack();
+        pathPositionStack = new Stack<>();
+        isCopiedStack = new IndexedStack<>();
         pathPositionStack.push(new PathMap.PathMapNodeSet(pathMapRoot));
     }
 
@@ -65,9 +68,9 @@ public class Projector extends ProxyReceiver {
         if (level > copyAllLevel) {
             super.startElement(elemName, type, attributes, namespaces, location, properties);
             elementCopied = true;
-            pathPositionStack.push("dummy");
+            pathPositionStack.push(DUMMY_PATHMAP_NODESET);
         } else {
-            PathMap.PathMapNodeSet state = (PathMap.PathMapNodeSet) pathPositionStack.peek();
+            PathMap.PathMapNodeSet state = pathPositionStack.peek();
             PathMap.PathMapNodeSet newState = new PathMap.PathMapNodeSet();
             boolean foundMatch = false;
             for (PathMap.PathMapNode aState : state) {
@@ -98,7 +101,7 @@ public class Projector extends ProxyReceiver {
             // Add any namespaces that were declared on ancestor elements that haven't been copied through
             int pendingNamespaces = 0;
             for (int i = level - 2; i >= 0; i--) {
-                if ((Boolean) isCopiedStack.get(i)) {
+                if (isCopiedStack.get(i)) {
                     break;
                 } else {
                     pendingNamespaces += nsCountStack[i];
@@ -190,7 +193,7 @@ public class Projector extends ProxyReceiver {
 
     @Override
     public void endElement() throws XPathException {
-        boolean wasCopied = (Boolean) isCopiedStack.pop();
+        boolean wasCopied = isCopiedStack.pop();
         if (wasCopied) {
             super.endElement();
         }
@@ -207,7 +210,7 @@ public class Projector extends ProxyReceiver {
     @Override
     public void endDocument() throws XPathException {
         if (displayStatistics) {
-            outputStatistics(System.err);
+            outputStatistics(getConfiguration().getLogger());
         }
         super.endDocument();
     }
@@ -218,9 +221,9 @@ public class Projector extends ProxyReceiver {
      * @param out the output destination
      */
 
-    public void outputStatistics(PrintStream out) {
-        out.println("Document projection for " + getSystemId());
-        out.println("-- Input nodes " + inputNodes + "; output nodes " + outputNodes +
+    public void outputStatistics(Logger out) {
+        out.info("Document projection for " + getSystemId());
+        out.info("-- Input nodes " + inputNodes + "; output nodes " + outputNodes +
                 "; reduction = " + (100 - (100 * outputNodes) / inputNodes) + "%");
     }
 

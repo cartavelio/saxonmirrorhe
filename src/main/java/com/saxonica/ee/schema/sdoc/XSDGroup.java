@@ -226,6 +226,7 @@ public class XSDGroup extends SchemaElement {
                     break;
                 default:
                     illegalElement(child);
+                    break;
             }
         }
 

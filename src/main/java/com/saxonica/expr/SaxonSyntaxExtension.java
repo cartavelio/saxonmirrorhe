@@ -100,14 +100,14 @@ public class SaxonSyntaxExtension extends ParserExtension {
         int offset = t.currentTokenStartOffset;
 
         XPathParser.InlineFunctionDetails details = new XPathParser.InlineFunctionDetails();
-        details.outerVariables = new IndexedStack<>();
+        details.outerVariables = new IndexedStack<LocalBinding>();
         for (LocalBinding lb : p.getRangeVariables()) {
             details.outerVariables.push(lb);
         }
         details.outerVariablesUsed = new ArrayList<>(4);
         details.implicitParams = new ArrayList<>(4);
         p.inlineFunctionStack.push(details);
-        p.setRangeVariables(new IndexedStack<>());
+        p.setRangeVariables(new IndexedStack<LocalBinding>());
         p.nextToken();
         List<UserFunctionParameter> params = new ArrayList<>(1);
         SequenceType resultType = SequenceType.ANY_SEQUENCE;
@@ -151,14 +151,14 @@ public class SaxonSyntaxExtension extends ParserExtension {
         int offset = t.currentTokenStartOffset;
 
         UnderscoreFunctionDetails details = new UnderscoreFunctionDetails();
-        details.outerVariables = new IndexedStack<>();
+        details.outerVariables = new IndexedStack<LocalBinding>();
         for (LocalBinding lb : p.getRangeVariables()) {
             details.outerVariables.push(lb);
         }
-        details.outerVariablesUsed = new ArrayList<>(4);
-        details.implicitParams = new ArrayList<>(4);
+        details.outerVariablesUsed = new ArrayList<LocalBinding>(4);
+        details.implicitParams = new ArrayList<UserFunctionParameter>(4);
         p.inlineFunctionStack.push(details);
-        p.setRangeVariables(new IndexedStack<>());
+        p.setRangeVariables(new IndexedStack<LocalBinding>());
         p.nextToken();
         SequenceType resultType = SequenceType.ANY_SEQUENCE;
 
@@ -169,7 +169,7 @@ public class SaxonSyntaxExtension extends ParserExtension {
         body.setRetainedStaticContext(p.getStaticContext().makeRetainedStaticContext());
 
         List<UserFunctionParameter> params = details.numberedParams;
-        Expression result = p.makeInlineFunctionValue(p, AnnotationList.EMPTY, details, params, resultType, body);
+        Expression result = XPathParser.makeInlineFunctionValue(p, AnnotationList.EMPTY, details, params, resultType, body);
 
         p.setLocation(result, offset);
         // restore the previous stack of range variables

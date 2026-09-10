@@ -12,6 +12,7 @@ import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +47,10 @@ public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
     }
 
     @Override
-    public ItemFeed makeItemFeed(WatchManager watchManager, final ItemFeed out, final XPathContext context) throws XPathException {
+    @CSharpInnerClass(outer=true, extra={"net.sf.saxon.om.Sequence[] argValues",
+                                         "net.sf.saxon.expr.Component targetComponent",
+                                         "net.sf.saxon.expr.instruct.UserFunction target"})
+    public ItemFeed makeItemFeed(WatchManager watchManager, final ItemFeed resultFeed, final XPathContext context) throws XPathException {
         UserFunctionCall exp = (UserFunctionCall) getExpression();
         final Component targetComponent = exp.getTargetComponent(context);
         final UserFunction target = exp.getTargetFunction(context);
@@ -54,31 +58,34 @@ public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
         for (int i=1; i<argValues.length; i++) {
             argValues[i] = SequenceTool.toGroundedValue(exp.getArg(i).iterate(context));
         }
-        return new ItemFeed(out, context) {
+        return new ItemFeed(resultFeed, context) {
 
             @Override
             public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
                 argValues[0] = node;
-                XPathContextMajor c2 = context.newCleanContext();
+                XPathContextMajor c2 = getContext().newCleanContext();
                 c2.setCurrentComponent(targetComponent);
                 Sequence result =
                         ((UserFunction)targetComponent.getActor()).call(c2, argValues);
-                SequenceTool.supply(result.iterate(), (ItemConsumer<? super Item>) it -> {
+                Item it;
+                SequenceIterator iter = result.iterate();
+                while ((it = iter.next()) != null) {
                     if (it instanceof FleetingParentNode) {
-                        out.startSelectedParentNode((FleetingParentNode) it, locationId);
+                        getResultFeed().startSelectedParentNode((FleetingParentNode) it, locationId);
                     } else {
-                        out.append(it);
+                        getResultFeed().append(it);
                     }
-                });
+                };
                 return null;
             }
 
             @Override
             public void append(Item item) throws XPathException {
                 argValues[0] = item;
-                XPathContext c2 = context.newCleanContext();
+                XPathContext c2 = getContext().newCleanContext();
+                // TODO: why do we call target rather than targetComponent.getActor() as above?
                 Sequence result = target.call(c2, argValues);
-                processItems(result.iterate(), out);
+                processItems(result.iterate(), getResultFeed());
             }
         };
     }

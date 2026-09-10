@@ -7,6 +7,8 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.SchemaException;
 
+import java.util.Optional;
+
 /**
  * An xs:complexContent element in an XML Schema Document
  */
@@ -18,7 +20,7 @@ public class XSDComplexContent extends SchemaElement {
      * The value of the mixed attribute: true, false, or null (unspecified)
      */
 
-    private Boolean mixed = null;
+    private Optional<Boolean> mixed = Optional.empty();
 
     /**
      * Creates a new ComplexContent element
@@ -47,7 +49,7 @@ public class XSDComplexContent extends SchemaElement {
         if (mixedAtt != null) {
             // It's not an error in XSD 1.0 if the value conflicts with an explicit value
             // on the complexType element - this value wins. But in XSD 1.1, the values must be consistent
-            mixed = parseBooleanAttribute("mixed", mixedAtt);
+            mixed = Optional.of(parseBooleanAttribute("mixed", mixedAtt));
         }
 
     }
@@ -91,7 +93,7 @@ public class XSDComplexContent extends SchemaElement {
     }
 
     /*@Nullable*/
-    public Boolean getMixedAttribute() {
+    public Optional<Boolean> getMixedAttribute() {
         return mixed;
     }
 }

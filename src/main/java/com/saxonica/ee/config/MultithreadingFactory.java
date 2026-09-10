@@ -1,8 +1,8 @@
 package com.saxonica.ee.config;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.ee.optim.MultithreadedItemMappingIterator;
-import com.saxonica.ee.trans.ThreadManagerEE;
+import com.saxonica.ee.parallel.MultithreadedItemMappingIterator;
+import com.saxonica.ee.parallel.ThreadManagerEE;
 import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.om.SequenceIterator;

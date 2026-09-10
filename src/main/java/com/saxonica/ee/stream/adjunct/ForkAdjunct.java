@@ -96,17 +96,20 @@ public class ForkAdjunct extends StreamingAdjunct {
 
         return (watchManager, out, context) ->
                 new Trigger(AnchorPattern.getInstance(),
-                            new ForkFeed(getExpression(), out, context, watchManager), context);
+                            new ForkFeed(getExpression(), actionInversions, out, context, watchManager), context);
 
     }
 
-    private class ForkFeed extends ItemFeed {
+    private static class ForkFeed extends ItemFeed {
 
-        WatchManager watchManager;
-        FeedToEventBuffer[] writers;
+        private WatchManager watchManager;
+        private FeedToEventBuffer[] writers;
+        private Inversion[] actionInversions;
 
-        public ForkFeed(Expression exp, ItemFeed result, XPathContext context, WatchManager watchManager) {
+        public ForkFeed(Expression exp, Inversion[] actionInversions, ItemFeed result,
+                        XPathContext context, WatchManager watchManager) {
             super(exp, result, context);
+            this.actionInversions = actionInversions;
             this.watchManager = watchManager;
         }
 

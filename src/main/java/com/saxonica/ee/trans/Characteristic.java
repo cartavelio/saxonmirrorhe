@@ -12,7 +12,7 @@ import net.sf.saxon.trans.rules.RuleSearchState;
  * value of an element's <code>@class</code> attribute is a characteristic that may be used by several
  * preconditions that test for the presence of particular tokens in the value.
  */
-public abstract class Characteristic<T extends Object> {
+public abstract class Characteristic {
 
     int slotNumber;
 
@@ -44,7 +44,7 @@ public abstract class Characteristic<T extends Object> {
      * @throws XPathException if evaluation of the characteristic fails
      */
 
-    public abstract T evaluate(XPathContext context) throws XPathException;
+    public abstract Object evaluate(XPathContext context) throws XPathException;
 
 }
 

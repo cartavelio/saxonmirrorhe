@@ -138,7 +138,7 @@ public class AbsorbingFunctionCallAdjunct extends TransmissionAdjunct {
             if (!started) {
                 started = true;
                 ComponentInversion inversion = targetFunction.getInversion();
-                innerWatch = inversion.getWatch(watchManager, getResult(), localContext);
+                innerWatch = inversion.getWatch(watchManager, getResultFeed(), localContext);
                 innerWatch.open(new Terminator());
             }
         }

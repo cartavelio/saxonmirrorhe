@@ -35,7 +35,7 @@ public class ItemMappingFeed extends GroundedItemFeed {
             }
             if (mapped != null) {
                 if (mapped instanceof FleetingParentNode) {
-                    return getResult().startSelectedParentNode((FleetingParentNode)mapped, locationId);
+                    return getResultFeed().startSelectedParentNode((FleetingParentNode)mapped, locationId);
                 } else {
                     throw new AssertionError("Item mapping feed must map events to events");
                 }
@@ -47,7 +47,7 @@ public class ItemMappingFeed extends GroundedItemFeed {
     @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         if (!hasFailed()) {
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
     }
 
@@ -69,7 +69,7 @@ public class ItemMappingFeed extends GroundedItemFeed {
                 dynamicError(err);
             }
             if (mapped != null) {
-                getResult().append(mapped);
+                getResultFeed().append(mapped);
             }
         }
     }

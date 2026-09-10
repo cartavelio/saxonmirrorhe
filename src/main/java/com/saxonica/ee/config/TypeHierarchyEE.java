@@ -10,7 +10,10 @@ import net.sf.saxon.z.IntSet;
 
 import java.util.Optional;
 
-import static net.sf.saxon.type.Affinity.*;
+import static net.sf.saxon.type.Affinity.SUBSUMED_BY;
+import static net.sf.saxon.type.Affinity.SUBSUMES;
+import static net.sf.saxon.type.Affinity.DISJOINT;
+import static net.sf.saxon.type.Affinity.OVERLAPS;
 
 /**
  * Refinement of the TypeHierarchy class to handle function items and schema-aware types such as schema-element(A).

@@ -9,7 +9,7 @@ import net.sf.saxon.value.NumericValue;
  * Given an expression, this characteristic evaluates the set of hash keys
  * corresponding to the string values of the items selected by that expression
  */
-public class NumericComparisonOperand extends Characteristic<NumericValue> {
+public class NumericComparisonOperand extends Characteristic {
 
     Expression exp;
 

@@ -103,19 +103,15 @@ public class ApplyTemplatesAdjunct extends StreamingAdjunct implements FeedMaker
         final StreamingAdjunct sa = StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), select);
 
         if (selection != null || sa instanceof TransmissionAdjunct) {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
-                        throws XPathException {
-                    Component.M actualMode = instruction.getTargetMode(context);
-                    ApplyTemplatesAction action = new ApplyTemplatesAction(getExpression(), out, context);
-                    action.setMode(actualMode);
-                    action.setWatchManager(watchManager);
-                    if (selection != null) {
-                        return new Trigger(selection, action, context);
-                    } else {
-                        return ((TransmissionAdjunct) sa).makeTransmissionFlow(watchManager, select, action, context);
-                    }
+            return (watchManager, out, context) -> {
+                Component.M actualMode = instruction.getTargetMode(context);
+                ApplyTemplatesAction action = new ApplyTemplatesAction(getExpression(), out, context);
+                action.setMode(actualMode);
+                action.setWatchManager(watchManager);
+                if (selection != null) {
+                    return new Trigger(selection, action, context);
+                } else {
+                    return ((TransmissionAdjunct) sa).makeTransmissionFlow(watchManager, select, action, context);
                 }
             };
         }

@@ -1,5 +1,6 @@
 package com.saxonica.ee.stream;
 
+import com.saxonica.ee.parallel.PushToPull;
 import com.saxonica.ee.stream.watch.StreamWatch;
 import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
@@ -114,7 +115,7 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
             streamable = s.getPosture() == Posture.GROUNDED;
 
             if (!streamable) {
-                if (reasons.isEmpty() && s.getPosture().isIncremental()) {
+                if (reasons.isEmpty() && Streamability.isIncrementalPosture(s.getPosture())) {
                     reasons.add("The instruction returns nodes from the streamed input document.");
                 }
             }

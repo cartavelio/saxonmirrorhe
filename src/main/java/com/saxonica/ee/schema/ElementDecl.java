@@ -4,7 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import com.saxonica.ee.validate.SchemaElementTest;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
@@ -18,7 +18,10 @@ import net.sf.saxon.value.*;
 import javax.xml.transform.SourceLocator;
 import java.util.*;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
 
 /**
  * The object represents an element declaration in the schema. It may be a global element
@@ -64,11 +67,6 @@ public class ElementDecl extends SchemaStructure
     private ValueConstraint valueConstraint;
 
     /**
-     * The Comparable used to compare the fixed value with other values, if there is a fixed value
-     */
-    private final Comparable fixedValueComparable = null;
-
-    /**
      * Flag indicating whether this element declaration is global
      */
     private final boolean global;
@@ -77,7 +75,7 @@ public class ElementDecl extends SchemaStructure
      * Flag indicating whether or not this element declaration is
      * abstract
      */
-    private boolean isAbstract = false;
+    private boolean isAbstractDecl = false;
 
     /**
      * The element name
@@ -569,7 +567,7 @@ public class ElementDecl extends SchemaStructure
 
     @Override
     public boolean isAbstract() {
-        return isAbstract;
+        return isAbstractDecl;
     }
 
     /**
@@ -606,7 +604,7 @@ public class ElementDecl extends SchemaStructure
      */
 
     public void setAbstract(boolean isAbstract) {
-        this.isAbstract = isAbstract;
+        this.isAbstractDecl = isAbstract;
     }
 
     /**
@@ -775,7 +773,7 @@ public class ElementDecl extends SchemaStructure
      */
 
     @Override
-    public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException {
+    public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler) throws SchemaException {
         for (Object reference : references) {
             ElementDecl member = (ElementDecl) reference;
             if (member == this) {
@@ -1156,7 +1154,7 @@ public class ElementDecl extends SchemaStructure
                     compiler.warning(err, this);
                 }
             }
-            lookForCycles(new Stack(), compiler);
+            lookForCycles(new Stack<SchemaComponent>(), compiler);
         }
     }
 
@@ -1317,7 +1315,7 @@ public class ElementDecl extends SchemaStructure
             }
             serializer.emitAttribute("block", dis);
         }
-        serializer.emitAttribute("abstract", isAbstract ? "true" : "false");
+        serializer.emitAttribute("abstract", isAbstractDecl ? "true" : "false");
 
         if (substitutionGroupOwners != null) {
             for (ComponentReference headRef : substitutionGroupOwners) {
@@ -1347,13 +1345,14 @@ public class ElementDecl extends SchemaStructure
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = (context, arguments) -> {
+        ElementDecl thisDecl = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Element Declaration");
                 case "implementation":
-                    return new ObjectValue<>(ElementDecl.this);
+                    return new ObjectValue<>(thisDecl);
                 case "name":
                     return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
@@ -1362,7 +1361,7 @@ public class ElementDecl extends SchemaStructure
                     return getType().getComponentAsFunction();
                 case "type table":
                     if (hasTypeAlternatives()) {
-                        Callable typeTable = (context1, arguments1) -> {
+                        CallableDelegate typeTable = new CallableDelegate((context1, arguments1) -> {
                             String key1 = arguments1[0].head().getStringValue();
                             switch (key1) {
                                 case "class":
@@ -1378,13 +1377,13 @@ public class ElementDecl extends SchemaStructure
                                 default:
                                     return EmptySequence.getInstance();
                             }
-                        };
+                        });
                         return new CallableFunction(1, typeTable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                     } else {
                         return EmptySequence.getInstance();
                     }
                 case "scope":
-                    Callable scopeFunction = (context12, arguments12) -> {
+                    CallableDelegate scopeFunction = new CallableDelegate((context12, arguments12) -> {
                         String key12 = ((StringValue) arguments12[0].head()).getStringValue();
                         switch (key12) {
                             case "class":
@@ -1404,7 +1403,7 @@ public class ElementDecl extends SchemaStructure
                             default:
                                 return EmptySequence.getInstance();
                         }
-                    };
+                    });
                     return new CallableFunction(1, scopeFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                 case "value constraint":
                     return getValueConstraintAsFunction(ElementDecl.this);
@@ -1450,7 +1449,7 @@ public class ElementDecl extends SchemaStructure
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

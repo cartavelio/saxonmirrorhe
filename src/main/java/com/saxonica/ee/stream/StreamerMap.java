@@ -3,12 +3,11 @@ package com.saxonica.ee.stream;
 
 import com.saxonica.ee.stream.adjunct.*;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public class StreamerMap {
 
-    private static final HashMap<String, Class<? extends StreamingAdjunct>> map =
-            new HashMap<>();
+    private static final Map<String, Class<? extends StreamingAdjunct>> map = StreamingAdjunct.emptyAdjunctMap();
 
     static {
         map.put("AccumulatorAfter", AccumulatorAfterStreamer.class);
@@ -52,9 +51,7 @@ public class StreamerMap {
         try {
             Class<? extends StreamingAdjunct> theClass = map.get(f);
             return theClass == null ? null : theClass.newInstance();
-        } catch (InstantiationException e) {
-            throw new AssertionError(e);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             throw new AssertionError(e);
         }
     }

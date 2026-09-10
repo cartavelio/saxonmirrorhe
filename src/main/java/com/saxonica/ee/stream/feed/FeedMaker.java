@@ -6,8 +6,9 @@ import net.sf.saxon.trans.XPathException;
 
 /**
  * An expression that can be evaluated in streaming mode is represented at compile time
- * by a list of FeedMaker objects. At run-time, the makeFeed() method on each of these
- * objects is called to create a list of Feed objects, representing the evaluation
+ * by a list of FeedMaker objects. At run-time, the {@link #makeItemFeed(WatchManager, ItemFeed, XPathContext)}
+ * method on each of these
+ * objects is called to create a list of {@link ItemFeed} objects, representing the evaluation
  * pipeline. The output of the Watch that monitors the actual parsing events is then
  * fed into this pipeline, which eventually delivers its result in the current
  * SequenceReceiver of the XPathContext object.

@@ -65,7 +65,7 @@ public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
             foundFloat = false;
             foundNaN = false;
             lowestCommonSuperType = null;
-            getResult().open(terminator);
+            getResultFeed().open(terminator);
         }
 
         /**

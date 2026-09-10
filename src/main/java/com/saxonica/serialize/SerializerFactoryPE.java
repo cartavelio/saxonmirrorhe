@@ -414,7 +414,19 @@ public class SerializerFactoryPE extends SerializerFactory {
             }
         }
 
-        return (n0, n1) -> {
+        return new PropertyComparator(knownKeys);
+    }
+
+    private static class PropertyComparator implements Comparator<AtomicValue> {
+
+        public final static int MIDDLE_GROUND = 10000000;
+        private final Map<String, Integer> knownKeys;
+
+        public PropertyComparator(Map<String, Integer> knownKeys) {
+            this.knownKeys = knownKeys;
+        }
+        @Override
+        public int compare(AtomicValue n0, AtomicValue n1) {
             int r0 = knownKeys.getOrDefault(n0.getStringValue(), -1);
             int r1 = knownKeys.getOrDefault(n1.getStringValue(), -1);
             if (r0 != -1) {
@@ -429,7 +441,7 @@ public class SerializerFactoryPE extends SerializerFactory {
                 // both null: sort on name
                 return n0.getStringValue().compareTo(n1.getStringValue());
             }
-        };
+        }
     }
 
 

@@ -57,7 +57,7 @@ public class SaxonParam extends AnnotationParent {
         if (select == null) {
             select = "()";
         }
-        XPathStaticContext env = new XPathStaticContext(getConfiguration());
+        XPathStaticContext env = new XPathStaticContext(this);
         env.setNamespaceResolver(makeNamespaceContext());
         env.setBaseURI(getBaseURI());
         env.setXPathLanguageLevel(31);

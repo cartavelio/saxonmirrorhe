@@ -65,17 +65,13 @@ public class IterateAdjunct extends TransmissionAdjunct implements FeedMaker {
 
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, config, null);
         final StreamingAdjunct sa = StreamingAdjunct.makeStreamingAdjunct(config, select);
-        return new WatchMaker() {
-            @Override
-            public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
-                    throws XPathException {
-                IterateAction actor = new IterateAction(watchManager, getExpression(), out, context);
-                actor.setInversion(actionInversion);
-                if (selection != null) {
-                    return new Trigger(selection, actor, context);
-                } else {
-                    return ((TransmissionAdjunct) sa).makeTransmissionFlow(watchManager, select, actor, context);
-                }
+        return (watchManager, out, context) -> {
+            IterateAction actor = new IterateAction(watchManager, getExpression(), out, context);
+            actor.setInversion(actionInversion);
+            if (selection != null) {
+                return new Trigger(selection, actor, context);
+            } else {
+                return ((TransmissionAdjunct) sa).makeTransmissionFlow(watchManager, select, actor, context);
             }
         };
 

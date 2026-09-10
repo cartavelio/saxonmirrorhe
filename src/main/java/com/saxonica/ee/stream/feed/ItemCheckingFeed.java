@@ -47,7 +47,7 @@ public class ItemCheckingFeed extends ItemFeed {
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         if (!hasFailed()) {
             checkItemType(node);
-            return getResult().startSelectedParentNode(node, locationId);
+            return getResultFeed().startSelectedParentNode(node, locationId);
         }
         return null;
     }
@@ -55,7 +55,7 @@ public class ItemCheckingFeed extends ItemFeed {
     @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         if (!hasFailed()) {
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
     }
 
@@ -103,7 +103,7 @@ public class ItemCheckingFeed extends ItemFeed {
     @Override
     public void close() throws XPathException {
         if (!hasFailed()) {
-            getResult().close();
+            getResultFeed().close();
         }
     }
 

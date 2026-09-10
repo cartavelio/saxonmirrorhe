@@ -18,7 +18,7 @@ import net.sf.saxon.z.IntSingletonSet;
  * Given an expression, this characteristic evaluates the set of hash keys
  * corresponding to the string values of the items selected by that expression
  */
-public class GeneralComparisonOperand extends Characteristic<IntSet> {
+public class GeneralComparisonOperand extends Characteristic {
 
     Expression exp;
     boolean multiValued;

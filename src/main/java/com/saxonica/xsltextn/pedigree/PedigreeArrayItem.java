@@ -5,7 +5,6 @@ import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.GroundedValue;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -96,24 +95,13 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
 
     @Override
     public Iterable<GroundedValue> members() {
-        Iterator<GroundedValue> base = super.members().iterator();
-        return () -> new Iterator<GroundedValue>() {
-
-            int index = 0;
-
-            @Override
-            public boolean hasNext() {
-                return base.hasNext();
-            }
-
-            @Override
-            public GroundedValue next() {
-                GroundedValue val = base.next();
-                Pedigree ped = new Pedigree(PedigreeArrayItem.this, index++);
-                return ped.makePedigreeValue(val);
-            }
-        };
-
+        List<GroundedValue> memberValues = new ArrayList<>();
+        int index = 0;
+        for (GroundedValue val : super.members()) {
+            Pedigree ped = new Pedigree(PedigreeArrayItem.this, index++);
+            memberValues.add(ped.makePedigreeValue(val));
+        }
+        return memberValues;
     }
 
     /**
@@ -124,6 +112,11 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
     @Override
     public Pedigree getPedigree() {
         return pedigree;
+    }
+
+    @Override
+    public ArrayItem getBaseItem() {
+        return super.getBaseItem();
     }
 }
 

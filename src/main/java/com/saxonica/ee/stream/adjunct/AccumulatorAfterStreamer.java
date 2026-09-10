@@ -47,7 +47,7 @@ public class AccumulatorAfterStreamer extends InspectionAdjunct implements FeedM
              */
             @Override
             public void endSelectedParentNode(Location locationId) throws XPathException {
-                processItems(getExpression().iterate(getContext()), getResult());
+                processItems(getExpression().iterate(getContext()), getResultFeed());
             }
 
         };

@@ -226,14 +226,11 @@ public class StylesheetPackageEE extends StylesheetPackage {
     }
 
     private void exportOutputDefinition(Properties properties, ExpressionPresenter presenter) {
-        for (Map.Entry<Object, Object> prop : properties.entrySet()) {
+        for (String name : properties.stringPropertyNames()) {
             presenter.startElement("property");
-            String key = prop.getKey().toString();
-            if (key.startsWith("{")) {
-                key = "Q" + key;
-            }
+            String key = name.startsWith("{") ? "Q" + name : name;
             presenter.emitAttribute("name", key);
-            String val = prop.getValue().toString();
+            String val = properties.getProperty(name);
             if (key.equals("use-character-maps")) {
                 val = val.replace("{", "Q{");
             }

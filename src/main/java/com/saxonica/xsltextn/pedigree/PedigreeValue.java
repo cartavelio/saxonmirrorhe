@@ -1,7 +1,5 @@
 package com.saxonica.xsltextn.pedigree;
 
-import net.sf.saxon.om.Item;
-
 /**
  * A <code>PedigreeValue</code> is a map or array together with a {@link Pedigree}
  * indicating how that map or array was selected within a JSON-like tree structure.
@@ -21,12 +19,12 @@ public interface PedigreeValue {
 
     Pedigree getPedigree();
 
-    /**
-     * Get the base item, that is, the map or array that is wrapped by this {@code PedigreeValue}
-     * @return the base item.
-     */
-
-    Item getBaseItem();
+//    /**
+//     * Get the base item, that is, the map or array that is wrapped by this {@code PedigreeValue}
+//     * @return the base item.
+//     */
+//
+//    Item getBaseItem();
 
     /**
      * Get the root of the pedigree tree: that is, retrace the steps used to select this

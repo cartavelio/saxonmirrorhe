@@ -4,12 +4,12 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.fsa.*;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import com.saxonica.ee.stream.Sweep;
-import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.FixedAttribute;
 import net.sf.saxon.expr.instruct.FixedElement;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.*;
@@ -24,9 +24,11 @@ import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.SourceLocator;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
 
 /**
  * A user-defined complex type (that is, any complex type other than xs:anyType)
@@ -50,7 +52,7 @@ public class UserComplexType extends UserDefinedType
     /**
      * The abstract flag for this UserComplexType
      */
-    private boolean isAbstract = false;
+    private boolean _abstract = false;
 
     /**
      * Boolean indicating whether this complex type's content model uses xs:all
@@ -111,7 +113,7 @@ public class UserComplexType extends UserDefinedType
      * The finite state machine for validating against this complex type
      */
 
-    private FiniteStateMachine machine = new FiniteStateMachine(this, false);
+    private FiniteStateMachine machine;
 
     /**
      * Flag to indicate that the type has been compiled
@@ -174,6 +176,7 @@ public class UserComplexType extends UserDefinedType
         setLocator(locator);
         attributes = new AttributeGroupDecl(config);
         attributes.setLocator(locator);
+        machine = new FiniteStateMachine(this, false);
     }
 
     /**
@@ -404,9 +407,9 @@ public class UserComplexType extends UserDefinedType
                         map.put(key, att);
                     }
                 }
-                Iterator iter2 = map.valueIterator();
+                Iterator<AttributeUse> iter2 = map.valueIterator();
                 while (iter2.hasNext()) {
-                    extendedAttributes.addAttributeUse((AttributeUse) iter2.next());
+                    extendedAttributes.addAttributeUse(iter2.next());
                 }
                 AttributeWildcard wat = getAttributeGroup().getAttributeWildcard(compiler);
                 if (wat != null) {
@@ -438,7 +441,7 @@ public class UserComplexType extends UserDefinedType
 
     @Override
     public boolean isAbstract() {
-        return isAbstract;
+        return _abstract;
     }
 
     /**
@@ -520,9 +523,9 @@ public class UserComplexType extends UserDefinedType
                 ModelGroupParticle gpref = (ModelGroupParticle) extendedParticle;
                 while (true) {
                     Particle part;
-                    Iterator iter = group.getParticles().iterator();
+                    Iterator<Particle> iter = group.getParticles().iterator();
                     if (iter.hasNext()) {
-                        part = (Particle) iter.next();
+                        part = iter.next();
                     } else {
                         throw new IllegalStateException("Empty group");
                     }
@@ -723,7 +726,7 @@ public class UserComplexType extends UserDefinedType
      */
 
     public void setAbstract(boolean isAbstract) {
-        this.isAbstract = isAbstract;
+        this._abstract = isAbstract;
     }
 
     /**
@@ -864,7 +867,13 @@ public class UserComplexType extends UserDefinedType
         if (assertions == null) {
             return Collections.emptySet();
         } else {
-            return assertions.stream().filter(a -> a.getSweep() == sweep).collect(Collectors.toSet());
+            HashSet<Assertion> filtered = new HashSet<>(assertions.size());
+            for (Assertion a : assertions) {
+                if (a.getSweep() == sweep) {
+                    filtered.add(a);
+                }
+            }
+            return filtered;
         }
     }
 
@@ -881,7 +890,7 @@ public class UserComplexType extends UserDefinedType
      */
 
     @Override
-    public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException, MissingComponentException {
+    public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler) throws SchemaException, MissingComponentException {
         for (Object reference : references) {
             if (((SchemaType) reference).isSameType(this)) {
                 compiler.error("The definition of the complex type " + getDescription() +
@@ -989,7 +998,7 @@ public class UserComplexType extends UserDefinedType
 
         SchemaType base = getBaseType();
         if (base instanceof UserComplexType) {
-            lookForCycles(new Stack(), compiler);
+            lookForCycles(new Stack<SchemaComponent>(), compiler);
             result = ((UserComplexType) base).validate(compiler);
             // Copy assertions from the base type to this type
             for (Assertion a : ((UserComplexType) base).getAssertions()) {
@@ -1214,8 +1223,8 @@ public class UserComplexType extends UserDefinedType
                         return false;
                     }
                     Particle p = makeExtendedParticle(compiler);
-                    boolean b = p.validate(compiler);
-                    if (!b) {
+                    boolean validParticle = p.validate(compiler);
+                    if (!validParticle) {
                         setValidationStatus(INVALID);
                         return false;
                     }
@@ -1374,10 +1383,10 @@ public class UserComplexType extends UserDefinedType
             for (AttributeUse au : attributes.getAttributeUses()) {
                 StructuredQName fp = au.getTargetComponentName();
                 if (base instanceof UserComplexType) {
-                    SchemaType b = base;
-                    while (b instanceof UserComplexType) {
-                        int derivation = b.getDerivationMethod();
-                        SchemaType g = b.getBaseType();
+                    SchemaType baseComplexType = base;
+                    while (baseComplexType instanceof UserComplexType) {
+                        int derivation = baseComplexType.getDerivationMethod();
+                        SchemaType g = baseComplexType.getBaseType();
                         if (g instanceof UserComplexType && derivation == Derivation.DERIVATION_RESTRICTION) {
                             AttributeUse baseAttributeUse =
                                     ((UserComplexType) g).getCombinedAttributeGroup().getAttributeUse(fp);
@@ -1401,7 +1410,7 @@ public class UserComplexType extends UserDefinedType
                                 }
                             }
                         }
-                        b = g;
+                        baseComplexType = g;
                     }
                 }
             }
@@ -1420,10 +1429,10 @@ public class UserComplexType extends UserDefinedType
                 while (extensionElementIter.hasNext()) {
                     int fp = extensionElementIter.next();
                     if (base instanceof UserComplexType) {
-                        SchemaType b = base;
-                        while (b instanceof UserComplexType) {
-                            int derivation = b.getDerivationMethod();
-                            SchemaType g = b.getBaseType();
+                        SchemaType particleBaseType = base;
+                        while (particleBaseType instanceof UserComplexType) {
+                            int derivation = particleBaseType.getDerivationMethod();
+                            SchemaType g = particleBaseType.getBaseType();
                             if (g instanceof UserComplexType && derivation == Derivation.DERIVATION_RESTRICTION) {
                                 SchemaType original = ((UserComplexType) g).getElementParticleType(fp, false);
                                 if (original != null) {
@@ -1443,7 +1452,7 @@ public class UserComplexType extends UserDefinedType
                                     }
                                 }
                             }
-                            b = g;
+                            particleBaseType = g;
                         }
                     }
                 }
@@ -1453,19 +1462,19 @@ public class UserComplexType extends UserDefinedType
         // Register this extension with the types it is extending, so that they know all the possible
         // elements and attributes that can appear in the content of that type.
 
-        SchemaType b = base;
+        SchemaType baseType = base;
         while (true) {
-            if (b instanceof UserDefinedType) {
-                if (b instanceof SimpleTypeDefinition) {
-                    b = ((SimpleTypeDefinition) b).getWorkingType();
+            if (baseType instanceof UserDefinedType) {
+                if (baseType instanceof SimpleTypeDefinition) {
+                    baseType = ((SimpleTypeDefinition) baseType).getWorkingType();
                 }
-                ((UserDefinedType) b).registerExtensionType(this);
-                b = b.getBaseType();
-            } else if (b instanceof SimpleType && ((SimpleType) b).isBuiltInType()) {
+                ((UserDefinedType) baseType).registerExtensionType(this);
+                baseType = baseType.getBaseType();
+            } else if (baseType instanceof SimpleType && ((SimpleType) baseType).isBuiltInType()) {
                 // A user-defined complex type with simple content can be derived by extension from
                 // (and therefore be substitutable for) a built-in simple type
-                compiler.getPreparedSchema().registerExtensionOfBuiltInType(b.getFingerprint(), this);
-                b = b.getBaseType();
+                compiler.getPreparedSchema().registerExtensionOfBuiltInType(baseType.getFingerprint(), this);
+                baseType = baseType.getBaseType();
             } else {
                 break;
             }
@@ -1885,7 +1894,7 @@ public class UserComplexType extends UserDefinedType
             return extendedParticle;
         }
         if (compiler != null) {
-            lookForCycles(new Stack(), compiler);
+            lookForCycles(new Stack<SchemaComponent>(), compiler);
         }
         if (getDerivationMethod() == Derivation.DERIVATION_EXTENSION) {
             // For derivation by extension, construct a new Sequence compositor
@@ -3241,170 +3250,162 @@ public class UserComplexType extends UserDefinedType
     }
 
     public static Function getComponentAsFunction(final ComplexType type) {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-                String key = arguments[0].head().getStringValue();
-                switch (key) {
-                    case "class":
-                        return StringValue.bmp("Complex Type Definition");
-                    case "implementation":
-                        return new ObjectValue<>(type);
-                    case "name":
-                        if (type.isAnonymousType()) {
-                            return EmptySequence.getInstance();
-                        } else {
-                            return new StringValue(type.getName(), BuiltInAtomicType.NCNAME);
-                        }
-                    case "target namespace":
-                        if (type.isAnonymousType()) {
-                            return EmptySequence.getInstance();
-                        } else {
-                            return new AnyURIValue((type.getTargetNamespace()));
-                        }
-                    case "base type definition":
-                        return type.getBaseType().getComponentAsFunction();
-                    case "final": {
-                        List<AtomicValue> list = new ArrayList<>();
-                        int f = type.getFinalProhibitions();
-                        if ((f & Derivation.DERIVATION_RESTRICTION) != 0) {
-                            list.add(StringValue.bmp("restriction"));
-                        }
-                        if ((f & Derivation.DERIVATION_EXTENSION) != 0) {
-                            list.add(StringValue.bmp("extension"));
-                        }
-                        return new AtomicArray(list);
-                    }
-                    case "context":
-                        if (type instanceof UserComplexType && !type.isAnonymousType()) {
-                            return EmptySequence.getInstance();
-                        } else {
-                            // TODO
-                            return EmptySequence.getInstance();
-                        }
-                    case "derivation method":
-                        return new StringValue(
-                                type.getDerivationMethod() == Derivation.DERIVATION_RESTRICTION ? "restriction" : "extension");
-                    case "abstract":
-                        return BooleanValue.get(type.isAbstract());
-                    case "attribute uses":
-                        if (type instanceof UserComplexType) {
-                            List<Item> list = new ArrayList<>();
-                            for (AttributeUse use : ((UserComplexType) type).getAttributeGroup().getLocalAttributes()) {
-                                list.add(use.getComponentAsFunction());
-                            }
-                            return SequenceExtent.makeSequenceExtent(list);
-                        } else {
-                            return EmptySequence.getInstance();
-                        }
-                    case "attribute wildcard":
-                        if (type instanceof UserComplexType) {
-                            AttributeWildcard wild = ((UserComplexType) type).getAttributeGroup().getLocalAttributeWildcard();
-                            return wild.getComponentAsFunction();
-                        } else {
-                            // TODO: AnyType has a wildcard?
-                            return EmptySequence.getInstance();
-                        }
-                    case "content type":
-                        Callable contentType = new Callable() {
-                            @Override
-                            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-                                String key = arguments[0].head().getStringValue();
-                                switch (key) {
-                                    case "class":
-                                        return StringValue.bmp("Content Type");
-                                    case "variety":
-                                        String variety;
-                                        switch (type.getVariety()) {
-                                            case ELEMENT_ONLY:
-                                                variety = "element-only";
-                                                break;
-                                            case EMPTY:
-                                                variety = "empty";
-                                                break;
-                                            case MIXED:
-                                                variety = "mixed";
-                                                break;
-                                            case SIMPLE:
-                                            default:
-                                                variety = "simple";
-                                                break;
-                                        }
-                                        return StringValue.bmp(variety);
-                                    case "particle":
-                                        if (type.getVariety() == ComplexVariety.MIXED || type.getVariety() == ComplexVariety.ELEMENT_ONLY) {
-                                            return ((UserComplexType) type).getParticle().getComponentAsFunction();
-                                            // TODO: what about anyType, etc?
-                                        } else {
-                                            return EmptySequence.getInstance();
-                                        }
-
-                                    case "open content":
-                                        if (type instanceof UserComplexType) {
-                                            final UserComplexType ctype = (UserComplexType) type;
-                                            final String mode = ctype.getOpenContentModeString();
-                                            if ("interleave".equals(mode) || "suffix".equals(mode)) {
-                                                Callable open = new Callable() {
-                                                    @Override
-                                                    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-                                                        String key = arguments[0].head().getStringValue();
-                                                        switch (key) {
-                                                            case "class":
-                                                                return StringValue.bmp("Open Content");
-                                                            case "mode":
-                                                                return new StringValue(mode);
-                                                            case "wildcard":
-                                                                return ctype.getOpenContentWildcard().getComponentAsFunction();
-                                                            default:
-                                                                return EmptySequence.getInstance();
-                                                        }
-                                                    }
-                                                };
-                                                return new CallableFunction(1, open, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
-                                            } else {
-                                                return EmptySequence.getInstance();
-                                            }
-                                        } else {
-                                            return EmptySequence.getInstance();
-                                        }
-                                    case "simple type definition":
-                                        if (type.isSimpleContent()) {
-                                            return type.getSimpleContentType().getComponentAsFunction();
-                                        } else {
-                                            return EmptySequence.getInstance();
-                                        }
-                                    default:
-                                        return EmptySequence.getInstance();
-                                }
-                            }
-                        };
-                        return new CallableFunction(1, contentType, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
-                    case "prohibited substitutions": {
-                        List<AtomicValue> list = new ArrayList<>();
-                        int s = type.getBlock();
-                        if ((s & Derivation.DERIVATION_EXTENSION) != 0) {
-                            list.add(StringValue.bmp("extension"));
-                        }
-                        if ((s & Derivation.DERIVATION_RESTRICTION) != 0) {
-                            list.add(StringValue.bmp("restriction"));
-                        }
-                        return new AtomicArray(list);
-                    }
-                    case "assertions":
-                        if (type instanceof UserComplexType) {
-                            List<Item> list = new ArrayList<>();
-                            for (Assertion assertion : ((UserComplexType) type).getAssertions()) {
-                                list.add(assertion.getComponentAsFunction());
-                            }
-                            return SequenceExtent.makeSequenceExtent(list);
-                        } else {
-                            return EmptySequence.getInstance();
-                        }
-                    default:
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
+            String key = arguments[0].head().getStringValue();
+            switch (key) {
+                case "class":
+                    return StringValue.bmp("Complex Type Definition");
+                case "implementation":
+                    return new ObjectValue<>(type);
+                case "name":
+                    if (type.isAnonymousType()) {
                         return EmptySequence.getInstance();
+                    } else {
+                        return new StringValue(type.getName(), BuiltInAtomicType.NCNAME);
+                    }
+                case "target namespace":
+                    if (type.isAnonymousType()) {
+                        return EmptySequence.getInstance();
+                    } else {
+                        return new AnyURIValue((type.getTargetNamespace()));
+                    }
+                case "base type definition":
+                    return type.getBaseType().getComponentAsFunction();
+                case "final": {
+                    List<AtomicValue> list = new ArrayList<>();
+                    int f = type.getFinalProhibitions();
+                    if ((f & Derivation.DERIVATION_RESTRICTION) != 0) {
+                        list.add(StringValue.bmp("restriction"));
+                    }
+                    if ((f & Derivation.DERIVATION_EXTENSION) != 0) {
+                        list.add(StringValue.bmp("extension"));
+                    }
+                    return new AtomicArray(list);
                 }
+                case "context":
+                    if (type instanceof UserComplexType && !type.isAnonymousType()) {
+                        return EmptySequence.getInstance();
+                    } else {
+                        // TODO
+                        return EmptySequence.getInstance();
+                    }
+                case "derivation method":
+                    return new StringValue(
+                            type.getDerivationMethod() == Derivation.DERIVATION_RESTRICTION ? "restriction" : "extension");
+                case "abstract":
+                    return BooleanValue.get(type.isAbstract());
+                case "attribute uses":
+                    if (type instanceof UserComplexType) {
+                        List<Item> list = new ArrayList<>();
+                        for (AttributeUse use : ((UserComplexType) type).getAttributeGroup().getLocalAttributes()) {
+                            list.add(use.getComponentAsFunction());
+                        }
+                        return SequenceExtent.makeSequenceExtent(list);
+                    } else {
+                        return EmptySequence.getInstance();
+                    }
+                case "attribute wildcard":
+                    if (type instanceof UserComplexType) {
+                        AttributeWildcard wild = ((UserComplexType) type).getAttributeGroup().getLocalAttributeWildcard();
+                        return wild.getComponentAsFunction();
+                    } else {
+                        // TODO: AnyType has a wildcard?
+                        return EmptySequence.getInstance();
+                    }
+                case "content type":
+                    CallableDelegate content = new CallableDelegate((context2, arguments2) -> {
+                            String key2 = arguments2[0].head().getStringValue();
+                            switch (key2) {
+                                case "class":
+                                    return StringValue.bmp("Content Type");
+                                case "variety":
+                                    String variety;
+                                    switch (type.getVariety()) {
+                                        case ELEMENT_ONLY:
+                                            variety = "element-only";
+                                            break;
+                                        case EMPTY:
+                                            variety = "empty";
+                                            break;
+                                        case MIXED:
+                                            variety = "mixed";
+                                            break;
+                                        case SIMPLE:
+                                        default:
+                                            variety = "simple";
+                                            break;
+                                    }
+                                    return StringValue.bmp(variety);
+                                case "particle":
+                                    if (type.getVariety() == ComplexVariety.MIXED || type.getVariety() == ComplexVariety.ELEMENT_ONLY) {
+                                        return ((UserComplexType) type).getParticle().getComponentAsFunction();
+                                        // TODO: what about anyType, etc?
+                                    } else {
+                                        return EmptySequence.getInstance();
+                                    }
+
+                                case "open content":
+                                    if (type instanceof UserComplexType) {
+                                        final UserComplexType ctype = (UserComplexType) type;
+                                        final String mode = ctype.getOpenContentModeString();
+                                        if ("interleave".equals(mode) || "suffix".equals(mode)) {
+                                            CallableDelegate open = new CallableDelegate((context3, arguments3) -> {
+                                                String key3 = arguments[0].head().getStringValue();
+                                                switch (key3) {
+                                                    case "class":
+                                                        return StringValue.bmp("Open Content");
+                                                    case "mode":
+                                                        return new StringValue(mode);
+                                                    case "wildcard":
+                                                        return ctype.getOpenContentWildcard().getComponentAsFunction();
+                                                    default:
+                                                        return EmptySequence.getInstance();
+                                                }
+                                            });
+                                            return new CallableFunction(1, open, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
+                                        } else {
+                                            return EmptySequence.getInstance();
+                                        }
+                                    } else {
+                                        return EmptySequence.getInstance();
+                                    }
+                                case "simple type definition":
+                                    if (type.isSimpleContent()) {
+                                        return type.getSimpleContentType().getComponentAsFunction();
+                                    } else {
+                                        return EmptySequence.getInstance();
+                                    }
+                                default:
+                                    return EmptySequence.getInstance();
+                            }
+
+                    });
+                    return new CallableFunction(1, content, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
+                case "prohibited substitutions": {
+                    List<AtomicValue> list = new ArrayList<>();
+                    int s = type.getBlock();
+                    if ((s & Derivation.DERIVATION_EXTENSION) != 0) {
+                        list.add(StringValue.bmp("extension"));
+                    }
+                    if ((s & Derivation.DERIVATION_RESTRICTION) != 0) {
+                        list.add(StringValue.bmp("restriction"));
+                    }
+                    return new AtomicArray(list);
+                }
+                case "assertions":
+                    if (type instanceof UserComplexType) {
+                        List<Item> list = new ArrayList<>();
+                        for (Assertion assertion : ((UserComplexType) type).getAssertions()) {
+                            list.add(assertion.getComponentAsFunction());
+                        }
+                        return SequenceExtent.makeSequenceExtent(list);
+                    } else {
+                        return EmptySequence.getInstance();
+                    }
+                default:
+                    return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }

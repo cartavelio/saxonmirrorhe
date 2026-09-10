@@ -7,9 +7,12 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.value.BooleanValue;
+
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.MATCHES;
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.SKIP;
 
 
 /**
@@ -28,15 +31,14 @@ public class ItemsFromStreamer extends FilterFnStreamer {
      *          if a dynamic evaluation error occurs
      */
     @Override
+    @CSharpInnerClass(outer = false, extra = {"net.sf.saxon.expr.XPathContext context", "net.sf.saxon.om.Function function"})
     public FilteringFeed.Filter makeFilter(final XPathContext context, ItemFeed out) throws XPathException {
         final Function function = (Function) ((SystemFunctionCall)getExpression()).getArg(1).evaluateItem(context);
-        final Sequence[] args = SequenceTool.makeSequenceArray(1);
         return new FilteringFeed.Filter() {
             boolean started = false;
             @Override
-            public int matches(Item item, int position) throws XPathException {
-                args[0] = item;
-                boolean match = started || ((BooleanValue) function.call(context, args).head()).getBooleanValue();
+            public FilteringFeed.FilterResult matches(Item item, int position) throws XPathException {
+                boolean match = started || ((BooleanValue) function.call(context, new Sequence[]{item}).head()).getBooleanValue();
                 if (match) {
                     started = true;
                     return MATCHES;

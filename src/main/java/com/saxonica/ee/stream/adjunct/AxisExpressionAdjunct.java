@@ -16,6 +16,7 @@ import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,8 @@ public class AxisExpressionAdjunct extends StreamingAdjunct {
                     out = new FilteringFeed(
                             out,
                             context,
-                            (item, position) -> position == 1 ? FilteringFeed.Filter.MATCHES : FilteringFeed.Filter.DONE);
+                            new FilteringFeed.FilterLambda((item, position)
+                                   -> position == 1 ? FilteringFeed.FilterResult.MATCHES : FilteringFeed.FilterResult.DONE));
                 }
                 return new Trigger(pattern, out, context);
             };
@@ -160,7 +162,7 @@ public class AxisExpressionAdjunct extends StreamingAdjunct {
                             return new PostureAndSweep(Posture.STRIDING, Sweep.CONSUMING);
                         }
                         // drop through
-
+                        CSharp.emitCode("goto default;");
                     default:
                         addFreeRangingMessage(exp, axis, contextPosture, reasons);
                         return PostureAndSweep.ROAMING_AND_FREE_RANGING;

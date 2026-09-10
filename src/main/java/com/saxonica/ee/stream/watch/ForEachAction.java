@@ -108,7 +108,7 @@ public class ForEachAction extends ItemFeed {
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         if (actionIsConsuming) {
             startSelectedNode(node);
-            ItemFeed thisFeed = new NoOpenOrCloseFeed(getResult(), bodyContext);
+            ItemFeed thisFeed = new NoOpenOrCloseFeed(getResultFeed(), bodyContext);
             Watch watch = inversion.getWatch(watchManager, thisFeed, bodyContext);
             watch.setAnchorNode(node);
             watchManager.addWatch(watch, true);
@@ -120,7 +120,7 @@ public class ForEachAction extends ItemFeed {
 
             //localContext.setCurrentTemplateRule(rule);     // TODO: clear current template rule
             SequenceIterator stepIter = action.iterate(bodyContext);
-            processItems(stepIter, getResult());
+            processItems(stepIter, getResultFeed());
             return null;
         }
     }
@@ -147,7 +147,7 @@ public class ForEachAction extends ItemFeed {
         if (actionIsConsuming && it instanceof FleetingParentNode) {
             // consuming, typically striding or crawling nodes
             XPathContext cxt = bodyContext;
-            ItemFeed thisFeed = new NoOpenOrCloseFeed(getResult(), cxt);
+            ItemFeed thisFeed = new NoOpenOrCloseFeed(getResultFeed(), cxt);
             Watch watch = inversion.getWatch(watchManager, thisFeed, cxt);
             if (watch.matchesNode((FleetingParentNode)it, cxt)) {
                 // not sure about this path, I don't think it is exercised by the test suite (MHK Aug 2017)

@@ -43,26 +43,20 @@ public abstract class ComposingAdjunct extends StreamingAdjunct {
         }
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
         if (selection != null) {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) {
-                    PipelineConfiguration pipe = watchManager.getPipelineConfiguration();
-                    ItemFeed action = makeComposingAction(watchManager, out, context);
-                    Trigger watch = new Trigger(selection, action, context);
-                    watch.setPipelineConfiguration(pipe);
-                    return watch;
-                }
+            return (watchManager, out, context) -> {
+                PipelineConfiguration pipe = watchManager.getPipelineConfiguration();
+                ItemFeed action = makeComposingAction(watchManager, out, context);
+                Trigger watch = new Trigger(selection, action, context);
+                watch.setPipelineConfiguration(pipe);
+                return watch;
             };
         }
-        if (Streamability.getPosture(select).isIncremental()) {
+        if (Streamability.isIncrementalPosture(Streamability.getPosture(select))) {
             final StreamingAdjunct adjunct = StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), select);
             if (adjunct instanceof TransmissionAdjunct) {
-                return new WatchMaker() {
-                    @Override
-                    public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-                        ItemFeed action = makeComposingAction(watchManager, out, context);
-                        return ((TransmissionAdjunct)adjunct).makeTransmissionFlow(watchManager, select, action, context);
-                    }
+                return (watchManager, out, context) -> {
+                    ItemFeed action = makeComposingAction(watchManager, out, context);
+                    return ((TransmissionAdjunct)adjunct).makeTransmissionFlow(watchManager, select, action, context);
                 };
             }
         }

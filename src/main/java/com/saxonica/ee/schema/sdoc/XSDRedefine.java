@@ -168,6 +168,7 @@ public class XSDRedefine extends SchemaElement {
                 }
                 default: {
                     illegalElement(child);
+                    break;
                 }
             }
         }

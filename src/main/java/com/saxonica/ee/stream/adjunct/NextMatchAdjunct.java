@@ -3,11 +3,9 @@ package com.saxonica.ee.stream.adjunct;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
-import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.NextMatchAction;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
-import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -41,17 +39,12 @@ public class NextMatchAdjunct extends StreamingAdjunct {
 
     @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
-
-        return new WatchMaker() {
-            @Override
-            public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
-                    throws XPathException {
-                Component.M actualMode = context.getCurrentMode();
-                NextMatchAction actor = new NextMatchAction(getExpression(), out, context);
-                actor.setMode(actualMode);
-                actor.setWatchManager(watchManager);
-                return new Trigger(AnchorPattern.getInstance(), actor, context);
-            }
+        return (watchManager, out, context) -> {
+            Component.M actualMode = context.getCurrentMode();
+            NextMatchAction actor = new NextMatchAction(getExpression(), out, context);
+            actor.setMode(actualMode);
+            actor.setWatchManager(watchManager);
+            return new Trigger(AnchorPattern.getInstance(), actor, context);
         };
     }
 

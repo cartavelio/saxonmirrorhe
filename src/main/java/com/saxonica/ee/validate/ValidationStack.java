@@ -78,8 +78,8 @@ public class ValidationStack extends ValidatingFilter {
         this.initialType = initialType;
         final PipelineConfiguration pipe = next.getPipelineConfiguration();
         setPipelineConfiguration(pipe);
-        assertionBuilder = (AssertionTreeBuilder) pipe.getComponent(AssertionTreeBuilder.class.getName());
-        watchManager = (WatchManager) pipe.getComponent(WatchManager.class.getName());
+        assertionBuilder = (AssertionTreeBuilder) pipe.getComponent("com.saxonica.ee.validate.AssertionTreeBuilder");
+        watchManager = (WatchManager) pipe.getComponent("com.saxonica.ee.stream.watch.WatchManager");
     }
 
     @Override
@@ -268,7 +268,7 @@ public class ValidationStack extends ValidatingFilter {
                     }
                 }
 
-                SchemaType type = initial.getSchemaType();
+                SchemaType initialSchemaType = initial.getSchemaType();
 
                 List<NamespaceBinding> additionalNamespaces = new ArrayList<>();
                 AttributeMap validatedAttributes = initial.validateAttributes(attributes, additionalNamespaces);
@@ -276,7 +276,7 @@ public class ValidationStack extends ValidatingFilter {
                     namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
                 }
 
-                if (initial instanceof SimpleContentValidator && type.isIdType()) {
+                if (initial instanceof SimpleContentValidator && initialSchemaType.isIdType()) {
                     pipe.getErrorReporter().report(
                             new XmlProcessingIncident("During validation, using an ID element at the outermost level has no effect").asWarning());
                 }
@@ -290,8 +290,8 @@ public class ValidationStack extends ValidatingFilter {
                 }
                 outputReceiver.startElement(elemName, annotation, validatedAttributes, namespaces, location, properties);
 
-                if (type instanceof UserComplexType && ((UserComplexType) type).hasAssertions()) {
-                    prepareForAssertions(elemName, type, validatedAttributes, namespaces, location, properties, pipe);
+                if (initialSchemaType instanceof UserComplexType && ((UserComplexType) initialSchemaType).hasAssertions()) {
+                    prepareForAssertions(elemName, initialSchemaType, validatedAttributes, namespaces, location, properties, pipe);
                 }
 
                 stack.push(initial);
@@ -414,34 +414,8 @@ public class ValidationStack extends ValidatingFilter {
                 Inversion inversion = Inversion.invertExpression(a.getCondition().getInternalExpression(), false);
                     // TODO: precompute the inversion
 
-                ItemFeed assertionResultHandler = new SinkFeed(context) {
-                    /**
-                     * Supply one item towards the streamed input of the expression
-                     *
-                     * @param item the item to be supplied
-                     */
-                    @Override
-                    public void append(Item item) throws XPathException {
-                        if (item instanceof BooleanValue && !((BooleanValue)item).getBooleanValue()) {
-                            String message = "Element " + elemName + " does not satisfy assertion";
-                            if (a.getMessage() != null) {
-                                message += ". " + a.getMessage();
-                            } else {
-                                message += " " + Whitespace.collapseWhitespace(StringView.of(a.getConditionText()).tidy());
-                            }
+                ItemFeed assertionResultHandler = new AssertionResultHandler(this, a, elemName, context);
 
-                            ValidationFailure error = new ValidationFailure(message);
-                            error.setLocator(location);
-                            error.setConstraintReference(1, "sec-cvc-assertion", "0");
-                            reportValidationError(error, true, location);
-                        }
-                    }
-
-                    @Override
-                    public boolean handlesAppend() {
-                        return true;
-                    }
-                };
                 assertionResultHandler.setPipelineConfiguration(pipe);
                 ItemFeed booleanCapture = new BooleanFnFeed.Positive(null, assertionResultHandler, context);
                 Trigger assertionWatch = inversion.getWatch(watchManager, booleanCapture, context);
@@ -461,6 +435,50 @@ public class ValidationStack extends ValidatingFilter {
             builder.startElement(elemName, Untyped.INSTANCE, validatedAttributes, namespaces, location, properties);
             builderDepth = 0;
             assertionBuilder.activate(builder);
+        }
+    }
+
+    private static class AssertionResultHandler extends SinkFeed {
+
+        private final ValidationStack validationStack;
+        private final Assertion assertion;
+        private final NodeName elementName;
+
+        public AssertionResultHandler(ValidationStack validationStack,
+                                      Assertion assertion,
+                                      NodeName elementName,
+                                      XPathContext context) {
+            super(context);
+            this.validationStack = validationStack;
+            this.assertion = assertion;
+            this.elementName = elementName;
+        }
+
+        /**
+         * Supply one item towards the streamed input of the expression
+         *
+         * @param item the item to be supplied
+         */
+        @Override
+        public void append (Item item) throws XPathException {
+            if (item instanceof BooleanValue && !((BooleanValue) item).getBooleanValue()) {
+                String message = "Element " + elementName + " does not satisfy assertion";
+                if (assertion.getMessage() != null) {
+                    message += ". " + assertion.getMessage();
+                } else {
+                    message += " " + Whitespace.collapseWhitespace(StringView.of(assertion.getConditionText()).tidy());
+                }
+
+                ValidationFailure error = new ValidationFailure(message);
+                error.setLocator(assertion);
+                error.setConstraintReference(1, "sec-cvc-assertion", "0");
+                validationStack.reportValidationError(error, true, assertion);
+            }
+        }
+
+        @Override
+        public boolean handlesAppend () {
+            return true;
         }
     }
 

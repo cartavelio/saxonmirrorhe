@@ -40,7 +40,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * is an element or attribute
      */
 
-    private boolean containingDeclarationIsElement = true;
+    private boolean containingDeclarationIsElementNode = true;
 
     /**
      * The derivation method, for example SchemaType.DERIVATION_RESTRICTION
@@ -372,7 +372,7 @@ public abstract class UserDefinedType extends SchemaStructure
 
     public void setContainingDeclaration(StructuredQName declarationName, boolean isElement) {
         containingDeclarationName = declarationName;
-        containingDeclarationIsElement = isElement;
+        containingDeclarationIsElementNode = isElement;
     }
 
     /**
@@ -392,7 +392,7 @@ public abstract class UserDefinedType extends SchemaStructure
         }
         if (containingDeclarationName != null) {
             return "of " +
-                    (containingDeclarationIsElement ? "element " : "attribute ") +
+                    (containingDeclarationIsElementNode ? "element " : "attribute ") +
                     containingDeclarationName.getDisplayName();
         }
         String sysId = getSystemId();
@@ -425,7 +425,7 @@ public abstract class UserDefinedType extends SchemaStructure
      */
 
     public boolean containingDeclarationIsElement() {
-        return containingDeclarationIsElement;
+        return containingDeclarationIsElementNode;
     }
 
     /**

@@ -143,7 +143,7 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
             if (++position == insertPosition) {
                 doInsertion();
             }
-            return getResult().startSelectedParentNode(node, locationId);
+            return getResultFeed().startSelectedParentNode(node, locationId);
         }
 
         /**
@@ -157,7 +157,7 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          */
         @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
     }
 
@@ -240,7 +240,7 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          */
         @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
-            return getResult().startSelectedParentNode(node, locationId);
+            return getResultFeed().startSelectedParentNode(node, locationId);
         }
 
         /**
@@ -254,7 +254,7 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          */
         @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
     }
 

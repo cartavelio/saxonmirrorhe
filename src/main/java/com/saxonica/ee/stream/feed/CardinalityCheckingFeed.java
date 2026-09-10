@@ -51,7 +51,7 @@ public class CardinalityCheckingFeed extends ItemFeed {
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         if (!hasFailed()) {
             checkCount();
-            return getResult().startSelectedParentNode(node, locationId);
+            return getResultFeed().startSelectedParentNode(node, locationId);
         }
         return null;
     }
@@ -59,7 +59,7 @@ public class CardinalityCheckingFeed extends ItemFeed {
     @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         if (!hasFailed()) {
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
     }
 

@@ -20,11 +20,13 @@ import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.AnchorPattern;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
 
 import java.util.List;
 
@@ -62,17 +64,17 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
                 if (!e.isCallOn(MapFunctionSet.MapEntry.class)) {
                     return super.computeStreamability(contextInfo, reasons);
                 }
-                PostureAndSweep ps = Streamability.getStreamability(e, contextInfo, reasons);
-                if (ps.getPosture() == Posture.ROAMING || ps.getSweep() == Sweep.FREE_RANGING) {
+                PostureAndSweep operandPS = Streamability.getStreamability(e, contextInfo, reasons);
+                if (operandPS.getPosture() == Posture.ROAMING || operandPS.getSweep() == Sweep.FREE_RANGING) {
                     Streamability.setPostureAndSweep(block, PostureAndSweep.ROAMING_AND_FREE_RANGING);
                     return PostureAndSweep.ROAMING_AND_FREE_RANGING;
                 } else {
-                    sweep = Sweep.wider(sweep, ps.getSweep());
+                    sweep = Streamability.wider(sweep, operandPS.getSweep());
                 }
             }
-            PostureAndSweep ps = new PostureAndSweep(Posture.GROUNDED, sweep);
-            Streamability.setPostureAndSweep(block, ps);
-            return ps;
+            PostureAndSweep resultPS = new PostureAndSweep(Posture.GROUNDED, sweep);
+            Streamability.setPostureAndSweep(block, resultPS);
+            return resultPS;
         }
     }
 
@@ -105,7 +107,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
 
         return (watchManager, out, context) ->
                 new Trigger(AnchorPattern.getInstance(),
-                            new NewMapForkingFeed(getExpression(), out, context, watchManager), context);
+                            new NewMapForkingFeed(getExpression(), this, out, context, watchManager), context);
 
     }
 
@@ -119,13 +121,15 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
      * each being a consuming construct.
      */
 
-    private class NewMapForkingFeed extends ItemFeed {
+    private static class NewMapForkingFeed extends ItemFeed {
 
+        private final NewMapStreamer streamer;
         private final WatchManager watchManager;
-        private HashTrieMap resultMap;
+        private MapItem resultMap;
 
-        NewMapForkingFeed(Expression exp, ItemFeed result, XPathContext context, WatchManager watchManager) {
+        NewMapForkingFeed(Expression exp, NewMapStreamer streamer, ItemFeed result, XPathContext context, WatchManager watchManager) {
             super(exp, result, context);
+            this.streamer = streamer;
             this.watchManager = watchManager;
         }
 
@@ -139,48 +143,12 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             resultMap = new HashTrieMap();
-            final Operand[] actions = getChildren();
+            final Operand[] actions = streamer.getChildren();
             for (int i = 0; i < actions.length; i++) {
                 Expression action = actions[i].getChildExpression();
                 if (Streamability.getSweep(action) == Sweep.CONSUMING) {
-                    ItemFeed feed = new ItemFeed(getResult(), getContext()) {
-
-                        // This feed handles a single entry in the map{} being constructed
-
-                        @Override
-                        public void open(Terminator terminator) {
-                            // No action here
-                        }
-
-                        @Override
-                        public void append(Item item) throws XPathException {
-                            for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
-                                // there will only be one key/value pair, created by map:entry
-                                if (resultMap.get(pair.key) != null) {
-                                    XPathException err = new XPathException(
-                                            "Duplicate key value in map: " + Err.depict(pair.key), "XTDE3365");
-                                    dynamicError(err);
-                                } else {
-                                    resultMap = resultMap.addEntry(pair.key, pair.value);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void close() {
-                            // No action here;
-                        }
-
-                        @Override
-                        public void setHasFailed() {
-                            NewMapForkingFeed.this.setHasFailed();
-                        }
-                    };
-//                    if (Streamability.getPosture(action) != Posture.GROUNDED) {
-//                        // test si-fork-006
-//                        feed = new CopyOfFeed(watchManager, feed, getContext());
-//                    }
-                    watchManager.addWatch(actionInversions[i].getWatch(watchManager, feed, getContext()), true);
+                    ItemFeed feed = new SingleProngFeed(getExpression(), getResultFeed(), getContext(), this);
+                    watchManager.addWatch(streamer.actionInversions[i].getWatch(watchManager, feed, getContext()), true);
                 } else {
                     MapItem sm = (MapItem) action.evaluateItem(getContext());
                     for (KeyValuePair pair : sm.keyValuePairs()) {
@@ -240,14 +208,65 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
             resultMap = null;
         }
 
+        public boolean containsKey(AtomicValue key) {
+            return resultMap.get(key) != null;
+        }
+
+        public void addEntry(AtomicValue key, GroundedValue value) {
+            resultMap = resultMap.addEntry(key, value);
+        }
+
     }
+
+    private static class SingleProngFeed extends ItemFeed {
+
+        //private HashTrieMap resultMap;
+        private final NewMapForkingFeed forkingFeed;
+
+        public SingleProngFeed(Expression expression, ItemFeed out, XPathContext context, NewMapForkingFeed forkingFeed) {
+            super(expression, out, context);
+            this.forkingFeed = forkingFeed;
+        }
+
+        // This feed handles a single entry in the map{} being constructed
+
+        @Override
+        public void open(Terminator terminator) {
+            // No action here
+        }
+
+        @Override
+        public void append(Item item) throws XPathException {
+            for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
+                // there will only be one key/value pair, created by map:entry
+                if (forkingFeed.containsKey(pair.key)) {
+                    XPathException err = new XPathException(
+                            "Duplicate key value in map: " + Err.depict(pair.key), "XTDE3365");
+                    dynamicError(err);
+                } else {
+                    forkingFeed.addEntry(pair.key, pair.value);
+                }
+            }
+        }
+
+        @Override
+        public void close() {
+            // No action here;
+        }
+
+        @Override
+        public void setHasFailed() {
+            forkingFeed.setHasFailed();
+        }
+    }
+
 
     /**
      * A simple feed handles the case where there is only one consuming subexpression, often
      * a for-each loop of some kind delivering multiple map entries for nodes in document order.
      */
 
-    private class NewMapSimpleFeed extends ItemFeed {
+    private static class NewMapSimpleFeed extends ItemFeed {
 
         HashTrieMap resultMap;
 

@@ -1,10 +1,11 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -17,7 +18,9 @@ import javax.xml.transform.SourceLocator;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
 
 /**
  * A Model Group Definition: a schema component corresponding to a top-level (named) xs:group
@@ -127,7 +130,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
      */
 
     @Override
-    public void lookForCycles(Stack references, SchemaCompiler compiler)
+    public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler)
             throws SchemaException {
         if (references.contains(this)) {
             String err = "The definition of group " +
@@ -237,26 +240,26 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-                String key = arguments[0].head().getStringValue();
-                switch (key) {
-                    case "class":
-                        return StringValue.bmp("Model Group Definition");
-                    case "implementation":
-                        return new ObjectValue<>(ModelGroupDefinition.this);
-                    case "name":
-                        return new StringValue(getName(), BuiltInAtomicType.NCNAME);
-                    case "target namespace":
-                        return new AnyURIValue(getTargetNamespace());
-                    case "model group":
-                        return ModelGroupDefinition.super.getComponentAsFunction();
-                    default:
-                        return EmptySequence.getInstance();
-                }
+        ModelGroupDefinition thisDefinition = this;
+        Function modelGroupFunction = super.getComponentAsFunction();
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
+            String key = arguments[0].head().getStringValue();
+            switch (key) {
+                case "class":
+                    return StringValue.bmp("Model Group Definition");
+                case "implementation":
+                    return new ObjectValue<>(thisDefinition);
+                case "name":
+                    return new StringValue(getName(), BuiltInAtomicType.NCNAME);
+                case "target namespace":
+                    return new AnyURIValue(getTargetNamespace());
+                case "model group":
+                    return modelGroupFunction;
+                default:
+                    return EmptySequence.getInstance();
             }
-        };
+
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

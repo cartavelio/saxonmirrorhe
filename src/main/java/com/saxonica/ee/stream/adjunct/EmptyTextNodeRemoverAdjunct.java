@@ -31,14 +31,11 @@ public class EmptyTextNodeRemoverAdjunct extends StreamingAdjunct implements Fee
             final Expression select = scc.getBaseExpression();
             final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
             if (selection != null) {
-                return new WatchMaker() {
-                    @Override
-                    public Trigger makeWatch(WatchManager watchManager, ItemFeed out, final XPathContext context) {
-                        SimpleContentFeed action = new SimpleContentFeed(out);
-                        Trigger watch = new Trigger(selection, action, context);
-                        watch.setPipelineConfiguration(watchManager.getPipelineConfiguration());
-                        return watch;
-                    }
+                return (watchManager, out, context) -> {
+                    SimpleContentFeed action = new SimpleContentFeed(out);
+                    Trigger watch = new Trigger(selection, action, context);
+                    watch.setPipelineConfiguration(watchManager.getPipelineConfiguration());
+                    return watch;
                 };
             }
             return null;
@@ -50,8 +47,8 @@ public class EmptyTextNodeRemoverAdjunct extends StreamingAdjunct implements Fee
     @Override
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
           return new FilteringFeed(out, context,
-                                   (item, position) ->
-                                           (!AdjacentTextNodeMerger.isTextNode(item) || !item.getUnicodeStringValue().isEmpty()) ? FilteringFeed.Filter.MATCHES : FilteringFeed.Filter.SKIP);
+                                   new FilteringFeed.FilterLambda((item, position) ->
+                                           (!AdjacentTextNodeMerger.isTextNode(item) || !item.getUnicodeStringValue().isEmpty()) ? FilteringFeed.FilterResult.MATCHES : FilteringFeed.FilterResult.SKIP));
     }
 }
 

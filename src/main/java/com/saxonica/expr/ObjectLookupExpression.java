@@ -40,7 +40,6 @@ public class ObjectLookupExpression extends LookupExpression {
             } else {
                 return ErrorType.getInstance();
             }
-
         }
         return AnyItemType.getInstance();
     }
@@ -144,7 +143,7 @@ public class ObjectLookupExpression extends LookupExpression {
             GroundedValue rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
             String key = rhs.getUnicodeStringValue().toString();
             return ItemMappingIterator.map(baseIterator,
-                    item -> (Item) config.externalObjectAsMap((ObjectValue) item, key).get((StringValue) rhs));
+                    item -> (Item) config.externalObjectAsMap((ObjectValue<?>) item, key).get((StringValue) rhs));
         }
 
     }

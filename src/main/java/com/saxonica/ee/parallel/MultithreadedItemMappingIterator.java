@@ -1,4 +1,4 @@
-package com.saxonica.ee.optim;
+package com.saxonica.ee.parallel;
 
 import com.saxonica.ee.config.MultithreadingFactory;
 import net.sf.saxon.expr.ItemMappingFunction;
@@ -31,12 +31,17 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
         // prime the queue
         int n = 0;
         int prime = maxThreads * 3; // bug 3958
-        while (++n < prime) {
-            Item item = base.next();
-            if (item == null) {
-                return;
+        try {
+            while (++n < prime) {
+                Item item = base.next();
+                if (item == null) {
+                    return;
+                }
+                mapOneItem(item);
             }
-            mapOneItem(item);
+        } catch (UncheckedXPathException e) {
+            close();
+            throw e.getXPathException();
         }
     }
 
@@ -97,6 +102,7 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
     @Override
     public void close() {
         super.close();
+        getBaseIterator().close();
         service.shutdown();
     }
 

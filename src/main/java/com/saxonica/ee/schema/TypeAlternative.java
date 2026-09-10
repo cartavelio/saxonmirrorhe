@@ -1,7 +1,7 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NamespaceResolver;
@@ -217,13 +217,14 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = (context, arguments) -> {
+        TypeAlternative thisTypeAlternative = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Type Alternative");
                 case "implementation":
-                    return new ObjectValue<>(this);
+                    return new ObjectValue<>(thisTypeAlternative);
                 case "test":
                     return SchemaStructure.makeXPathExpressionPropertyRecord(conditionText, namespaceContext, baseURI);
                 case "type definition":
@@ -231,7 +232,7 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }

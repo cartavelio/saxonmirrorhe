@@ -116,8 +116,7 @@ public class FleetingElementNode extends FleetingParentNode {
                             ((NameTest)nodeTest).getFingerprint(), getConfiguration().getNamePool());
                     return att==null ? EmptyIterator.ofNodes() : SingleNodeIterator.makeIterator(makeAttributeNode(att));
                 } else {
-                    final AttributeIterator base = new AttributeIterator(
-                            this, attributes, (e, a) -> ((FleetingElementNode)e).makeAttributeNode(a));
+                    final AttributeIterator base = new AttributeIterator(this, attributes);
                     return new Navigator.AxisFilter(base, nodeTest);
                 }
 
@@ -137,7 +136,7 @@ public class FleetingElementNode extends FleetingParentNode {
      * @return the attribute node.
      */
 
-    private FleetingNode makeAttributeNode(AttributeInfo attInfo) {
+    public FleetingNode makeAttributeNode(AttributeInfo attInfo) {
         Objects.requireNonNull(attInfo);
         FleetingNode attr = new FleetingNode();
         attr.setParent(this);

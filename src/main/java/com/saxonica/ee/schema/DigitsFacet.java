@@ -1,12 +1,11 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -135,26 +134,24 @@ public abstract class DigitsFacet extends Facet {
 
     @Override
     public Function getFacetAsFunctionItem() {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-                String key = arguments[0].head().getStringValue();
-                switch (key) {
-                    case "class":
-                        return new StringValue(getName());
-                    case "implementation":
-                        return new ObjectValue<>(DigitsFacet.this);
-                    case "value":
-                        BuiltInAtomicType type = DigitsFacet.this instanceof TotalDigitsFacet ?
-                                                          BuiltInAtomicType.POSITIVE_INTEGER : BuiltInAtomicType.NON_NEGATIVE_INTEGER;
-                        return new Int64Value(requiredValue, type, false);
-                    case "fixed":
-                        return BooleanValue.get(isFixed());
-                    default:
-                        return EmptySequence.getInstance();
-                }
+        DigitsFacet facet = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
+            String key = arguments[0].head().getStringValue();
+            switch (key) {
+                case "class":
+                    return new StringValue(getName());
+                case "implementation":
+                    return new ObjectValue<>(facet);
+                case "value":
+                    BuiltInAtomicType type = DigitsFacet.this instanceof TotalDigitsFacet ?
+                                                      BuiltInAtomicType.POSITIVE_INTEGER : BuiltInAtomicType.NON_NEGATIVE_INTEGER;
+                    return new Int64Value(requiredValue, type, false);
+                case "fixed":
+                    return BooleanValue.get(isFixed());
+                default:
+                    return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

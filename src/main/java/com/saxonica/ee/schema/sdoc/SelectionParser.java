@@ -164,7 +164,9 @@ public class SelectionParser extends XPathParser {
 
                     default:
                         grumble("Unexpected token " + currentTokenDisplay() + " after axis name");
+                        break;
                 }
+                break;
             case Token.AXIS:
                 int axis = AxisInfo.getAxisNumber(t.currentTokenValue);
                 if (axis != AxisInfo.CHILD && axis != AxisInfo.ATTRIBUTE) {
@@ -186,9 +188,12 @@ public class SelectionParser extends XPathParser {
 
                     default:
                         grumble("Unexpected token " + currentTokenDisplay() + " after axis name");
+                        break;
                 }
+                break;
             default:
                 grumble("Unexpected token " + currentTokenDisplay() + " in path expression");
+                break;
         }
         return null;
     }

@@ -11,6 +11,7 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaException;
 
@@ -66,11 +67,11 @@ public class XSDSchema extends SchemaElement {
     private String targetNamespace;
 
     /**
-     * isChameleon is set to true when this schema document is included or redefined by one that specifies
+     * chameleon is set to true when this schema document is included or redefined by one that specifies
      * its effective target namespace. When this is set, names that would normally have been resolved using
      * the default namespace are instead resolved using the target namespace.
      */
-    private boolean isChameleon = false;
+    private boolean chameleon = false;
 
     /**
      * A set containing all the namespaces imported into this schema document. Note that schema import is
@@ -209,7 +210,7 @@ public class XSDSchema extends SchemaElement {
      */
 
     public boolean isChameleon() {
-        return isChameleon;
+        return chameleon;
     }
 
     /**
@@ -251,7 +252,7 @@ public class XSDSchema extends SchemaElement {
                 // if no target namespace specified for an included schema document, adopt the target
                 // namespace of the including schema
                 targetNamespace = referrer.getXSDSchema().getTargetNamespace();
-                isChameleon = true;
+                chameleon = true;
             } else {
                 targetNamespace = "";
                 ((EnterpriseConfiguration) config).addSurrogateSchema("");
@@ -427,7 +428,7 @@ public class XSDSchema extends SchemaElement {
     protected void validateChildren(SchemaCompiler compiler) throws SchemaException {
         // The usual order of processing is changed to handle defaultOpenContent first (before any xs:redefine)
         // - see test open042
-        for (NodeInfo child : children(XSDDefaultOpenContent.class::isInstance)) {
+        for (NodeInfo child : children(NodeSelector.of(c -> c instanceof XSDDefaultOpenContent))) {
             ((SchemaElement) child).validateSubtree(compiler);
         }
         for (NodeInfo child : children()) {

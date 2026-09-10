@@ -6,7 +6,8 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.value.AtomicValue;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A <tt>PedigreeMapItem</tt> represents an XDM map together with a {@link Pedigree}:
@@ -68,23 +69,13 @@ public class PedigreeMapItem extends DelegatingMapItem implements PedigreeValue 
 
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        Iterator<KeyValuePair> base = super.keyValuePairs().iterator();
-        return () -> new Iterator<KeyValuePair>() {
-
-            @Override
-            public boolean hasNext() {
-                return base.hasNext();
-            }
-
-            @Override
-            public KeyValuePair next() {
-                KeyValuePair val = base.next();
-                Pedigree ped = new Pedigree(PedigreeMapItem.this, val.key);
-                GroundedValue newValue = ped.makePedigreeValue(val.value);
-                return new KeyValuePair(val.key, newValue);
-            }
-        };
-
+        List<KeyValuePair> pairs = new ArrayList<>();
+        for (KeyValuePair val : super.keyValuePairs()) {
+            Pedigree ped = new Pedigree(PedigreeMapItem.this, val.key);
+            GroundedValue newValue = ped.makePedigreeValue(val.value);
+            pairs.add(new KeyValuePair(val.key, newValue));
+        }
+        return pairs;
     }
 
     /**

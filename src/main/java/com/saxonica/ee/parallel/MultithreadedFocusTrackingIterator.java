@@ -1,4 +1,4 @@
-package com.saxonica.ee.optim;
+package com.saxonica.ee.parallel;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
@@ -8,7 +8,7 @@ import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 /**
  * This is a thread-safe version of the parent class {@link FocusTrackingIterator}. It is identical
- * to the superclass except that the methods a synchronized. It is used when there is any possibility
+ * to the superclass except that the methods are synchronized. It is used when there is any possibility
  * that the iterator will be used from multiple threads.
  * <p>The class is not designed to allow arbitrary multi-threaded operation. For example, one thread
  * might exhaust the input after another thread has called {@link #hasNext()}, causing the first thread

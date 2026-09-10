@@ -365,7 +365,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
 
         getMemberTypeReferences();
 
-        lookForCycles(new Stack(), compiler);
+        lookForCycles(new Stack<SchemaComponent>(), compiler);
         setValidationStatus(VALIDATED);
         return result;
     }
@@ -395,7 +395,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      */
 
     @Override
-    public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException {
+    public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler) throws SchemaException {
         for (Object reference : references) {
             if (((SchemaType) reference).isSameType(this)) {
                 compiler.error("The definition of the union type " + getDescription() +
@@ -610,7 +610,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      */
 
     @Override
-    public void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
+    protected void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
         serializer.emitAttribute("variety", "union");
         StringBuilder sb = new StringBuilder(64);
         for (TypeReference ref : getMemberTypeReferences()) {

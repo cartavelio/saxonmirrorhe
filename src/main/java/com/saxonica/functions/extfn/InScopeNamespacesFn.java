@@ -3,9 +3,9 @@ package com.saxonica.functions.extfn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
 
 /**
@@ -19,17 +19,17 @@ import net.sf.saxon.value.StringValue;
 public class InScopeNamespacesFn extends SystemFunction {
 
     @Override
-    public ZeroOrOne<MapItem> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo element = (NodeInfo)arguments[0].head();
         NamespaceMap nsMap = element.getAllNamespaces();
         if (nsMap == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         DictionaryMap dict = new DictionaryMap();
         for (NamespaceBinding binding : nsMap) {
             dict.initialPut(binding.getPrefix(),new StringValue(binding.getURI()));
         }
-        return new ZeroOrOne<>(dict);
+        return dict;
     }
 
 }

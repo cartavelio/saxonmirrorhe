@@ -19,7 +19,9 @@ public class TailExpressionAdjunct extends FilteringAdjunct {
     @Override
     public FilteringFeed.Filter makeFilter(XPathContext context, ItemFeed out)  {
         final int start = ((TailExpression)getExpression()).getStart();
-        return (item, position) -> position >= start ? FilteringFeed.Filter.MATCHES : FilteringFeed.Filter.SKIP;
+        return new FilteringFeed.FilterLambda((item, position) -> position >= start
+                ? FilteringFeed.FilterResult.MATCHES
+                : FilteringFeed.FilterResult.SKIP);
     }
 
 }

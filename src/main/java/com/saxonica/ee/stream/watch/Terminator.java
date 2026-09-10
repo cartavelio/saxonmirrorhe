@@ -1,6 +1,7 @@
 package com.saxonica.ee.stream.watch;
 
 import net.sf.saxon.trans.QuitParsingException;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 /**
  * A Terminator provides a method that can be called to cause early termination of a streaming pass
@@ -16,6 +17,7 @@ public class Terminator {
         return THE_INSTANCE;
     }
 
+    @CSharpModifiers(code={"public", "virtual"})
     public void terminate() throws QuitParsingException {
         // do nothing
     }

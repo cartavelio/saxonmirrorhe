@@ -1,11 +1,9 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
@@ -283,15 +281,14 @@ public abstract class Particle extends SimpleComponentReference implements UserS
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        Particle thisParticle = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
                         return StringValue.bmp("Particle");
                     case "implementation":
-                        return new ObjectValue<>(Particle.this);
+                        return new ObjectValue<>(thisParticle);
                     case "min occurs":
                         return new Int64Value(getMinOccurs(), BuiltInAtomicType.NON_NEGATIVE_INTEGER, false);
                     case "max occurs":
@@ -305,8 +302,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
                     default:
                         return EmptySequence.getInstance();
                 }
-            }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

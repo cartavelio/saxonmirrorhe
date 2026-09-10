@@ -1,14 +1,16 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.XPathException;
@@ -213,15 +215,9 @@ public abstract class IdentityConstraint extends SchemaStructure
 
     public void typeCheck(final SchemaCompiler compiler, SchemaType contextType) throws XPathException {
         final EnterpriseConfiguration config = compiler.getConfiguration();
-        IndependentContext env = new IndependentContext(config) {
-            {
-                setSchemaAware(true);
-            }
-            @Override
-            public void issueWarning(String s, Location locator) {
-                compiler.warning(s, IdentityConstraint.this);
-            }
-        };
+        IndependentContext env = new IndependentContext(config);
+        env.setWarningHandler((message, loc) -> compiler.warning(message, this));
+        env.setSchemaAware(true);
         ExpressionVisitor visitor = ExpressionVisitor.make(env);
         ItemType contextItemType = new ContentTypeTest(Type.ELEMENT, contextType, config, false);
         ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, true);
@@ -247,8 +243,11 @@ public abstract class IdentityConstraint extends SchemaStructure
                     // we allow AnyType because although it has mixed content, it has subtypes that are simple types, which would be OK.
                     compiler.warning("The node selected by the field expression must have a simple type, or a complex type with simple content", field);
                 }
+                @SuppressWarnings("ConstantConditions")
                 boolean listValued = contentType.isSimpleType() && ((SimpleType)contentType).isListType();
-                if (atomizedType != null && atomizedType.isAtomicType() && contentType != BuiltInAtomicType.ANY_ATOMIC) {
+                if (atomizedType != null
+                        && ((ItemType)atomizedType).isAtomicType()
+                        && contentType != BuiltInAtomicType.ANY_ATOMIC) {
                     field.setBuiltInBaseType((BuiltInAtomicType) atomizedType.getBuiltInBaseType(), listValued);
                 }
             }
@@ -323,13 +322,14 @@ public abstract class IdentityConstraint extends SchemaStructure
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = (context, arguments) -> {
+        IdentityConstraint thisConstraint = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Identity-Constraint Definition");
                 case "implementation":
-                    return new ObjectValue<>(this);
+                    return new ObjectValue<>(thisConstraint);
                 case "name":
                     return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
@@ -357,7 +357,7 @@ public abstract class IdentityConstraint extends SchemaStructure
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }

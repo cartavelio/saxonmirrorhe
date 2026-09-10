@@ -157,8 +157,8 @@ public class AllElementValidator extends AttributeValidator {
                 } else {
                     String reason = "";
                     if (wildcards.size() == 1) {
-                        Iterator it = wildcards.iterator();
-                        ElementWildcard wildcard = (ElementWildcard) it.next();
+                        Iterator<ElementWildcard> it = wildcards.iterator();
+                        ElementWildcard wildcard = it.next();
                         reason = ". " + wildcard.getWildcard().reasonForNonMatch(elemName, true, config, type);
                     }
                     reportNotAllowed(elemName, location, reason);

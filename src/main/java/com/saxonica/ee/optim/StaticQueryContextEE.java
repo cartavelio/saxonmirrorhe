@@ -18,9 +18,8 @@ import net.sf.saxon.trans.XPathException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A version of StaticQueryContext for Saxon-EE, that extends the capability by allowing compilation of library
@@ -28,8 +27,8 @@ import java.util.Map;
  */
 public class StaticQueryContextEE extends StaticQueryContextPE {
 
-    private final Map<String, QueryLibrary> compiledLibraries =
-            Collections.synchronizedMap(new HashMap<String, QueryLibrary>());
+    private final Map<String, QueryLibrary> compiledLibraries = new ConcurrentHashMap<>();
+            //Collections.synchronizedMap(new HashMap<String, QueryLibrary>());
     private boolean schemaAware;
     private boolean streaming;
 

@@ -6,14 +6,13 @@ import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.resource.Loader;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
+import net.sf.saxon.value.EmptySequence;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.Calendar;
 
 /**
  * Extension function to determined the last-modified date of a file
@@ -40,10 +39,10 @@ public class LastModified extends SystemFunction {
      */
 
     @Override
-    public ZeroOrOne<DateTimeValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item item = arguments[0].head();
         if (item == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         String suppliedURI = item.getStringValue();
         URI absoluteURI;
@@ -82,11 +81,9 @@ public class LastModified extends SystemFunction {
         }
 
         if (lastMod == 0) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(lastMod);
-        return new ZeroOrOne<>(new DateTimeValue(c, true));
+        return DateTimeValue.fromJavaTime(lastMod);
     }
 
 }

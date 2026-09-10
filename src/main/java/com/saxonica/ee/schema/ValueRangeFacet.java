@@ -2,11 +2,13 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
-import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.*;
@@ -208,13 +210,14 @@ public abstract class ValueRangeFacet extends Facet {
 
     @Override
     public Function getFacetAsFunctionItem() {
-        Callable callable = (context, arguments) -> {
+        ValueRangeFacet thisFacet = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp(getName());
                 case "implementation":
-                    return new ObjectValue<>(this);
+                    return new ObjectValue<>(thisFacet);
                 case "value":
                     return requiredValue;
                 case "fixed":
@@ -222,7 +225,7 @@ public abstract class ValueRangeFacet extends Facet {
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

@@ -14,13 +14,13 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeImpl;
-
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.Whitespace;
@@ -128,7 +128,7 @@ public abstract class SchemaElement extends ElementImpl {
 
     public void processAllAttributes() throws SchemaException {
         prepareAttributes();
-        for (NodeInfo child : children(SchemaElement.class::isInstance)) {
+        for (NodeInfo child : children(NodeSelector.of(SchemaElement.class::isInstance))) {
             ((SchemaElement) child).processAllAttributes();
         }
     }
@@ -218,7 +218,7 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     protected void validateChildren(SchemaCompiler compiler) throws SchemaException {
-        for (NodeInfo child : children(SchemaElement.class::isInstance)) {
+        for (NodeInfo child : children(NodeSelector.of(SchemaElement.class::isInstance))) {
             ((SchemaElement) child).validateSubtree(compiler);
         }
     }
@@ -276,7 +276,7 @@ public abstract class SchemaElement extends ElementImpl {
      * @throws SchemaException if the containing PreparedSchema cannot be found
      */
 
-    protected SingleNamespaceSchema getSchema() throws SchemaException {
+    public SingleNamespaceSchema getSchema() throws SchemaException {
         return getXSDSchema().getSchema();
     }
 
@@ -1191,10 +1191,14 @@ public abstract class SchemaElement extends ElementImpl {
         }
     }
 
-    protected class XPathStaticContext extends IndependentContext {
+    protected static class XPathStaticContext extends IndependentContext {
 
-        public XPathStaticContext(Configuration config) {
-            super(config);
+        private final SchemaElement schemaElement;
+
+        public XPathStaticContext(SchemaElement schemaElement) {
+            super(schemaElement.getConfiguration());
+            this.schemaElement = schemaElement;
+            Configuration config = schemaElement.getConfiguration();
             getPackageData().setSchemaAware(true);
 
             FunctionLibraryList lib = new FunctionLibraryList();
@@ -1218,14 +1222,14 @@ public abstract class SchemaElement extends ElementImpl {
 
         @Override
         public NamespaceResolver getNamespaceResolver() {
-            return getAllNamespaces();
+            return schemaElement.getAllNamespaces();
         }
 
         /*@Nullable*/
         @Override
         public Executable getExecutable() {
             try {
-                return getXSDSchema().getExecutable();
+                return schemaElement.getXSDSchema().getExecutable();
             } catch (SchemaException e) {
                 return null;
             }

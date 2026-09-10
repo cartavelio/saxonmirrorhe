@@ -285,13 +285,14 @@ public abstract class Facet {
                 lf.setValue(value);
                 return lf;
             }
-            case "enumeration":
+            case "enumeration": {
                 EnumerationFacet ef = new EnumerationFacet();
                 ef.setValue(value);
                 // The enumeration value might contain a QName. We don't know yet, so we have to save the
                 // namespace context just in case.
                 ef.setNamespaceContext(resolver);
                 return ef;
+            }
             case "length": {
                 LengthFacet lf = new LengthFacet();
                 lf.setValue(value);
@@ -337,26 +338,26 @@ public abstract class Facet {
                 df.setValue(value);
                 return df;
             }
-            case "explicitTimezone":
+            case "explicitTimezone": {
                 ExplicitTimezoneFacet tf = new ExplicitTimezoneFacet();
                 tf.setValue(value);
                 return tf;
-
-            case "whiteSpace":
+            }
+            case "whiteSpace": {
                 WhitespaceFacet wf = new WhitespaceFacet();
                 wf.setValue(value);
                 return wf;
-
-            case "order":
+            }
+            case "order": {
                 OrderFacet of = new OrderFacet();
                 of.setValue(value);
                 return of;
-
-            case "distinct":
+            }
+            case "distinct": {
                 DistinctFacet df = new DistinctFacet();
                 df.setValue(value);
                 return df;
-
+            }
             default:
                 throw new SchemaException("Unknown facet: " + name);
         }

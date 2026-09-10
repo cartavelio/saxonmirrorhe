@@ -580,20 +580,18 @@ public class FleetingNode implements NodeInfo {
         switch (getNodeKind()) {
             case Type.ATTRIBUTE:
                 getParent().generateId(buffer);
-                buffer.append('a');
-                buffer.append(((FleetingElementNode)getParent()).getAttributeIndex(getURI(), getLocalPart())+"");
+                buffer.append('a').append(((FleetingElementNode) getParent()).getAttributeIndex(getURI(), getLocalPart()));
                 break;
             case Type.NAMESPACE:
                 getParent().generateId(buffer);
-                buffer.append('n');
-                buffer.append(((FleetingElementNode) getParent()).getNamespaceNodeIndex(getLocalPart()) + "");
+                buffer.append('n').append(((FleetingElementNode) getParent()).getNamespaceNodeIndex(getLocalPart()));
                 break;
             case Type.DOCUMENT:
-                buffer.append("s" + Math.abs(getTreeInfo().getDocumentNumber()));
+                buffer.append("s").append(Math.abs(getTreeInfo().getDocumentNumber()));
                 break;
             default:
-                buffer.append("s" + Math.abs(getTreeInfo().getDocumentNumber()));
-                buffer.append("f" + nodeNumber);
+                buffer.append("s").append(Math.abs(getTreeInfo().getDocumentNumber())).append("f").append(nodeNumber);
+                break;
         }
     }
 

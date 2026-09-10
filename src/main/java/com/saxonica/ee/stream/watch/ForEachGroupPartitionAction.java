@@ -114,10 +114,10 @@ public class ForEachGroupPartitionAction extends ItemFeed {
         popIter.setContextItem(node);
         popIter.incrementPosition();
         anchorNode = node;
-        boolean startNewGroup = boundaryTester.notifyItem();
+        boolean needToStartNewGroup = boundaryTester.notifyItem();
         //System.err.println("FEG start new group = " + startNewGroup);
         if (actionIsConsuming) {
-            if (startNewGroup) {
+            if (needToStartNewGroup) {
                 startNewGroup(node);
                 closeAtEndElement = true;
                 return currentGroupFeed.startSelectedParentNode(node, locationId);
@@ -136,7 +136,7 @@ public class ForEachGroupPartitionAction extends ItemFeed {
             }
             return currentGroupFeed.startSelectedParentNode(node, locationId);
         } else {
-            maybeStartNewGroup(node, startNewGroup);
+            maybeStartNewGroup(node, needToStartNewGroup);
             return null;
         }
     }
@@ -168,14 +168,14 @@ public class ForEachGroupPartitionAction extends ItemFeed {
         ManualIterator popIter = (ManualIterator) populationContext.getCurrentIterator();
         popIter.setContextItem(node);
         popIter.incrementPosition();
-        boolean startNewGroup = boundaryTester.notifyItem();
+        boolean needToStartNewGroup = boundaryTester.notifyItem();
         if (actionIsConsuming) {
-            if (startNewGroup) {
+            if (needToStartNewGroup) {
                 startNewGroup(node);
             }
             currentGroupFeed.append(node);
         } else {
-            maybeStartNewGroup(node, startNewGroup);
+            maybeStartNewGroup(node, needToStartNewGroup);
         }
     }
 
@@ -198,7 +198,7 @@ public class ForEachGroupPartitionAction extends ItemFeed {
             firstItemsIter.setCurrentGroupingKey(((GroupAdjacentTester) boundaryTester).getCurrentGroupingKey());
         }
         if (node instanceof FleetingNode) {
-            ItemFeed thisFeed = new NoOpenOrCloseFeed(getResult(), bodyContext);
+            ItemFeed thisFeed = new NoOpenOrCloseFeed(getResultFeed(), bodyContext);
             Trigger watch = getInversion().getWatch(watchManager, thisFeed, bodyContext);
             final Pattern pattern = watch.getSelection();
             ItemFeed actionFeed = watch.getAction();
@@ -209,10 +209,10 @@ public class ForEachGroupPartitionAction extends ItemFeed {
             if (pattern instanceof AnchorPattern) {
                 currentGroupFeed = actionFeed;
             } else {
-                FilteringFeed.Filter filter =
+                FilteringFeed.Filter filter = new FilteringFeed.FilterLambda(
                         (item, position) -> pattern.matchesBeneathAnchor((NodeInfo)item, anchorNode, bodyContext)
-                                ? FilteringFeed.Filter.MATCHES
-                                : FilteringFeed.Filter.SKIP;
+                                ? FilteringFeed.FilterResult.MATCHES
+                                : FilteringFeed.FilterResult.SKIP);
                 currentGroupFeed = new FilteringFeed(actionFeed, getContext(), filter);
                 if (pattern instanceof AncestorQualifiedPattern) {
                     // This typically means we need to watch for ./xxx or current-group()/xxx
@@ -235,11 +235,11 @@ public class ForEachGroupPartitionAction extends ItemFeed {
     }
 
     private ItemFeed findCurrentGroupFeed() throws XPathException {
-        ItemFeed thisFeed = new NoOpenOrCloseFeed(getResult(), bodyContext);
+        ItemFeed thisFeed = new NoOpenOrCloseFeed(getResultFeed(), bodyContext);
         Trigger watch = getInversion().getWatch(watchManager, thisFeed, bodyContext);
         ItemFeed feed = watch.getAction();
         while (!(feed.getExpression() instanceof CurrentGroupCall)) {
-            feed = feed.getResult();
+            feed = feed.getResultFeed();
         }
         return feed;
 

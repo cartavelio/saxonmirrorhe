@@ -98,7 +98,7 @@ public class ShallowDescentFunctionCallAdjunct extends TransmissionAdjunct {
 
         // Rule 7
         if (p0 == Posture.GROUNDED) {
-            return new PostureAndSweep(Posture.GROUNDED, Sweep.wider(ps0.getSweep(), ps1.getSweep()));
+            return new PostureAndSweep(Posture.GROUNDED, Streamability.wider(ps0.getSweep(), ps1.getSweep()));
         }
 
         // Rule 8a
@@ -126,14 +126,10 @@ public class ShallowDescentFunctionCallAdjunct extends TransmissionAdjunct {
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
 
         if (selection != null) {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
-                        throws XPathException {
-                    ShallowDescentFunctionCallAction action = new ShallowDescentFunctionCallAction(getExpression(), out, context);
-                    action.setWatchManager(watchManager);
-                    return new Trigger(selection, action, context);
-                }
+            return (watchManager, out, context) -> {
+                ShallowDescentFunctionCallAction action = new ShallowDescentFunctionCallAction(getExpression(), out, context);
+                action.setWatchManager(watchManager);
+                return new Trigger(selection, action, context);
             };
         }
         return null;
@@ -204,7 +200,7 @@ public class ShallowDescentFunctionCallAdjunct extends TransmissionAdjunct {
             if (!started) {
                 started = true;
                 ComponentInversion inversion = targetFunction.getInversion();
-                innerWatch = inversion.getWatch(watchManager, getResult(), localContext);
+                innerWatch = inversion.getWatch(watchManager, getResultFeed(), localContext);
                 innerWatch.open(new Terminator());
             }
         }

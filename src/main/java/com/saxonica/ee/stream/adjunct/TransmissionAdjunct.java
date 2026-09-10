@@ -31,13 +31,8 @@ public abstract class TransmissionAdjunct extends StreamingAdjunct implements Fe
     @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         Posture posture = Streamability.getPosture(getExpression());
-        if (posture.isIncremental()) {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-                    return makeTransmissionFlow(watchManager, getExpression(), out, context);
-                }
-            };
+        if (Streamability.isIncrementalPosture(posture)) {
+            return (watchManager, out, context) -> makeTransmissionFlow(watchManager, getExpression(), out, context);
         } else {
             return null;
         }

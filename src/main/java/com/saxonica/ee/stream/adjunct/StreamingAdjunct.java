@@ -4,6 +4,7 @@ import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.feed.BufferingFeed;
 import com.saxonica.ee.stream.feed.CallableFeed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.FeedMakerDelegate;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
@@ -17,7 +18,10 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.FunctionStreamability;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.Cardinality;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +48,13 @@ import java.util.Map;
 
 public class StreamingAdjunct {
 
-    private static final Map<String, Class<? extends StreamingAdjunct>> adjunctMap = new HashMap<>(50);
+    private static final Map<String, Class<? extends StreamingAdjunct>> adjunctMap = emptyAdjunctMap();
+
+    @CSharpReplaceBody(code="return new System.Collections.Generic.Dictionary<string, System.Type>();")
+    public static Map<String, Class<? extends StreamingAdjunct>> emptyAdjunctMap() {
+        // written this way to enable C# transpilation
+        return new HashMap<>(50);
+    }
 
     private static void map(String s, Class<? extends StreamingAdjunct> a) {
         adjunctMap.put(s, a);
@@ -146,14 +156,7 @@ public class StreamingAdjunct {
                 return new LetExpressionAdjunct();
             }
         } else if (exp instanceof StreamInstr) {
-            final StreamInstr stream = (StreamInstr)exp;
-            return new StreamingAdjunct() {
-                @Override
-                public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
-                    Streamability.getStreamability(stream.getHref(), contextInfo, reasons);
-                    return new PostureAndSweep(Posture.GROUNDED, Streamability.getSweep(stream.getHref()));
-                }
-            };
+            return adjunctForStreamInstr((StreamInstr) exp);
         } else if (exp instanceof SystemFunctionCall) {
             SystemFunctionCall call = (SystemFunctionCall)exp;
             String streamerName = call.getTargetFunction().getStreamerName();
@@ -217,11 +220,23 @@ public class StreamingAdjunct {
             }
             try {
                 return aClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (Exception e) {
                 throw new AssertionError(e);
             }
         }
         return new StreamingAdjunct();
+    }
+
+    @NotNull
+    @CSharpInnerClass(outer=false, extra={"com.saxonica.ee.stream.StreamInstr stream"})
+    private static StreamingAdjunct adjunctForStreamInstr(final StreamInstr stream) {
+        return new StreamingAdjunct() {
+            @Override
+            public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
+                Streamability.getStreamability(stream.getHref(), contextInfo, reasons);
+                return new PostureAndSweep(Posture.GROUNDED, Streamability.getSweep(stream.getHref()));
+            }
+        };
     }
 
     /**
@@ -399,7 +414,7 @@ public class StreamingAdjunct {
         if (getExpression() instanceof StaticFunctionCall && !allowsMany) {
             final Function fn = ((StaticFunctionCall)getExpression()).getTargetFunction();
             final Expression[] args = ((StaticFunctionCall) getExpression()).getArguments();
-            return (watchManager, out, context) -> new CallableFeed(fn, out, context, args);
+            return new FeedMakerDelegate((watchManager, out, context) -> new CallableFeed(fn, out, context, args));
         }
 
         // Fallback code for an expression that accepts a sequence as its streamed input, but has no
@@ -413,7 +428,7 @@ public class StreamingAdjunct {
         co.getOperand().setOperandRole(new OperandRole(0, streamingOp.getUsage()));
         Streamability.setPostureAndSweep(co, Streamability.getPostureAndSweepIfKnown(proxy));
 
-        return (watchManager, out, context) -> new BufferingFeed(getExpression(), out, context);
+        return new FeedMakerDelegate((watchManager, out, context) -> new BufferingFeed(getExpression(), out, context));
     }
 
 

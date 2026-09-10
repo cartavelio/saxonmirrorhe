@@ -9,6 +9,9 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.IntegerValue;
 
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.MATCHES;
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.SKIP;
+
 
 /**
  * Generate streaming code for a remove() function call.
@@ -36,7 +39,7 @@ public class RemoveStreamer extends FilteringAdjunct implements FeedMaker {
         }
 
         @Override
-        public int matches(Item item, int position) {
+        public FilteringFeed.FilterResult matches(Item item, int position) {
             return position != removeIndex ? MATCHES : SKIP;
         }
     }

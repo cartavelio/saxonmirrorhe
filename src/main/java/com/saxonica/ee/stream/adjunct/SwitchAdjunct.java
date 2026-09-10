@@ -4,6 +4,7 @@ import com.saxonica.ee.optim.SwitchExpression;
 import com.saxonica.ee.stream.Inversion;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
+import com.saxonica.ee.stream.feed.FilteringFeed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.NoOpenFeed;
 import com.saxonica.ee.stream.watch.Terminator;
@@ -83,13 +84,9 @@ public class SwitchAdjunct extends TransmissionAdjunct {
 
             // if no condition matches, or if a matching condition has been processed without reference to the
             // source document, then return a Watch that never fires
-            return new Trigger(new NodeTestPattern(ErrorType.getInstance()), new ItemFeed(out, context) {
-
-                @Override
-                public void append(Item item) {
-                    //
-                }
-            }, context);
+            return new Trigger(new NodeTestPattern(ErrorType.getInstance()),
+                               new FilteringFeed(out, context, FilteringFeed.OpaqueFilter),
+                               context);
         };
     }
 

@@ -194,8 +194,8 @@ public class DeepUpdate extends Instruction {
                 // If two updates affect the same parent/ancestor at some level in the
                 // tree, then the updates need to be cumulative, so we keep track of a mapping
                 // from items in the original tree to the items that replace them in the new tree
-                if (substitutions.containsKey(parent)) {
-                    latestParent = substitutions.get(parent);
+                if (substitutions.containsKey((Item)parent)) {
+                    latestParent = substitutions.get((Item)parent);
                 }
                 if (latestParent instanceof ArrayItem) {
                     val = ((ArrayItem) latestParent).put(pedigree.getIndex(), val);

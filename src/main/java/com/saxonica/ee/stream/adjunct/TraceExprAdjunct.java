@@ -109,7 +109,7 @@ public class TraceExprAdjunct extends TransmissionAdjunct implements FeedMaker {
             if (listener != null) {
                 listener.enter(info, Collections.emptyMap(), getContext());
             }
-            return getResult().startSelectedParentNode(node, locationId);
+            return getResultFeed().startSelectedParentNode(node, locationId);
         }
 
         /**
@@ -126,7 +126,7 @@ public class TraceExprAdjunct extends TransmissionAdjunct implements FeedMaker {
             if (listener != null) {
                 listener.leave(info);
             }
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
         
     }

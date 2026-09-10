@@ -14,6 +14,9 @@ import net.sf.saxon.tree.util.Navigator;
 
 import java.util.List;
 
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.MATCHES;
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.SKIP;
+
 
 /**
  * Streaming code for an outermost() function call.
@@ -57,7 +60,7 @@ public class OutermostStreamer extends FilteringAdjunct implements FeedMaker {
         }
 
         @Override
-        public int matches(Item item, int position) {
+        public FilteringFeed.FilterResult matches(Item item, int position) {
             if (previous==null ||
                     !Navigator.isAncestorOrSelf(previous, (NodeInfo)item)) {
                 previous = (NodeInfo)item;

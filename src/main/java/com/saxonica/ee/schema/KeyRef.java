@@ -7,7 +7,11 @@ import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaException;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
+
 
 /**
  * This class represents an xs:keyRef identity constraint in a schema

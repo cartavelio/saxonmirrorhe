@@ -9,6 +9,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.Statistics;
 import net.sf.saxon.tree.tiny.TinyBuilder;
+import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
@@ -22,7 +23,7 @@ import java.util.Stack;
 public class AttributeInheritor extends ProxyReceiver {
 
     private AttributeMap bufferedAttributes;
-    private final Stack<AttributeMap> inheritedAttributeStack = new Stack<>();
+    private final IndexedStack<AttributeMap> inheritedAttributeStack = new IndexedStack<>();
     private final Stack<NodeName> elementNameStack = new Stack<>();
     private final Stack<NamespaceMap> namespaceMapStack = new Stack<>();
     private boolean empty = true;

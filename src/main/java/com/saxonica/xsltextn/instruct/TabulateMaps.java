@@ -188,14 +188,14 @@ public class TabulateMaps extends Instruction {
             Pedigree pedigree = ((PedigreeValue)selected).getPedigree();
             PedigreeValue parent = pedigree.getContainer();
             int level = 0;
-            List<AtomicValue> keys = new LinkedList<>();
+            LinkedList<AtomicValue> keys = new LinkedList<>();
             while (parent != null) {
                 level++;
                 Item latestParent = (Item) parent;
                 if (latestParent instanceof ArrayItem) {
-                    keys.add(0, new Int64Value(pedigree.getIndex() + 1));
+                    keys.addFirst(new Int64Value(pedigree.getIndex() + 1));
                 } else if (latestParent instanceof MapItem) {
-                    keys.add(0, pedigree.getKey());
+                    keys.addFirst(pedigree.getKey());
                     for (KeyValuePair kvp : ((MapItem) latestParent).keyValuePairs()) {
                         AtomicValue k = kvp.key;
                         if (!k.isIdentical(pedigree.getKey())) {

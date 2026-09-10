@@ -370,7 +370,7 @@ public class AllModelGroup extends ModelGroup {
      * @return a map from element name fingerprints to element declarations
      */
 
-    public IntHashMap getDeclarationMap() {
+    public IntHashMap<ElementDecl> getDeclarationMap() {
         return declarationMap;
     }
 

@@ -16,7 +16,6 @@ import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.expr.parser.ExpressionAction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.expr.parser.PathMap;
@@ -35,7 +34,6 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
-
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 
@@ -65,28 +63,25 @@ public class XQueryExpressionEE extends XQueryExpression {
 
         if (config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
             final PackageData pd = mainModule.getPackageData();
-            ExpressionTool.processExpressionTree(expression, null, new ExpressionAction() {
-                @Override
-                public boolean process(Expression exp, Object result) throws XPathException {
-                    if (exp instanceof StreamInstr) {
-                        Expression fallback = ((StreamInstr) exp).prepareForStreaming(pd);
-                        if (fallback != exp) {
-                            if (exp == expression) {
-                                // the xsl:stream instruction is top-level
-                                expression = fallback;
-                            } else {
-                                Expression parent = exp.getParentExpression();
-                                for (Operand o : parent.operands()) {
-                                    if (o.getChildExpression() == exp) {
-                                        o.setChildExpression(fallback);
-                                    }
+            ExpressionTool.processExpressionTree(expression, null, (expr, result) -> {
+                if (expr instanceof StreamInstr) {
+                    Expression fallback = ((StreamInstr) expr).prepareForStreaming(pd);
+                    if (fallback != expr) {
+                        if (expr == expression) {
+                            // the xsl:stream instruction is top-level
+                            expression = fallback;
+                        } else {
+                            Expression parent = expr.getParentExpression();
+                            for (Operand o : parent.operands()) {
+                                if (o.getChildExpression() == expr) {
+                                    o.setChildExpression(fallback);
                                 }
                             }
-                            return true;
                         }
+                        return true;
                     }
-                    return false;
                 }
+                return false;
             });
         }
 

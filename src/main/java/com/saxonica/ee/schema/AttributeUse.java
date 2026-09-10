@@ -1,12 +1,15 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -445,13 +448,14 @@ public final class AttributeUse extends SimpleComponentReference
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = (context, arguments) -> {
+        AttributeUse thisAttributeUse = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Attribute Use");
                 case "implementation":
-                    return new ObjectValue<>(AttributeUse.this);
+                    return new ObjectValue<>(thisAttributeUse);
                 case "required":
                     return BooleanValue.get(isRequired());
                 case "attribute declaration":
@@ -463,7 +467,7 @@ public final class AttributeUse extends SimpleComponentReference
                 default:
                     return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 

@@ -96,7 +96,7 @@ public class CurrentMergeGroupStreamer extends TransmissionAdjunct {
          */
         @Override
         public void close() throws XPathException {
-            getResult().open(getTerminator());
+            getResultFeed().open(getTerminator());
             getNextOutputter().append(group.get(0));
             getNextOutputter().close();
         }

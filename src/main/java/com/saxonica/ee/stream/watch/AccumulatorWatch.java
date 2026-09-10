@@ -29,11 +29,13 @@ import net.sf.saxon.trans.SimpleMode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
+import java.util.Optional;
 import java.util.Stack;
 
 /**
@@ -55,7 +57,7 @@ public class AccumulatorWatch extends PatternWatch {
     private final SimpleMode preDescentMode;
     private final SimpleMode postDescentMode;
 
-    private final Stack<Sequence> preDescentStack = new Stack<>();
+    private final IndexedStack<Sequence> preDescentStack = new IndexedStack<>();
     private final Stack<ComplexContentOutputter> captureStack = new Stack<>();
 
     private Sequence currentValue;
@@ -63,7 +65,7 @@ public class AccumulatorWatch extends PatternWatch {
     private FleetingNode lastPredescentNode = null;
     private FleetingNode lastPostdescentNode = null;
 
-    private AccumulatorFn.Phase beingComputed = null;
+    private Optional<AccumulatorFn.Phase> beingComputed = Optional.empty();
 
 
     // localContext contains the iterator over the nodes selected by the apply-templates instruction,
@@ -141,9 +143,9 @@ public class AccumulatorWatch extends PatternWatch {
         Rule rule = preDescentMode.getRule(node, context);
         Sequence value = currentValue;
         if (rule != null) {
-            beingComputed = AccumulatorFn.Phase.BEFORE;
+            beingComputed = Optional.of(AccumulatorFn.Phase.BEFORE);
             value = applyRule(node, rule);
-            beingComputed = null;
+            beingComputed = Optional.empty();
             currentValue = value;
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
@@ -167,8 +169,21 @@ public class AccumulatorWatch extends PatternWatch {
         return null;
     }
 
+    private static boolean valueIsException(Sequence value) {
+        return value instanceof Item
+                && ((Item) value).getGenre() == Genre.EXTERNAL
+                && ((ExternalObject<?>) value).getObject() instanceof XPathException;
+    }
+
+    private void detectErrorValue(Sequence value) throws XPathException {
+        if (valueIsException(value)) {
+            throw (XPathException) ((ExternalObject<?>) value).getObject();
+        }
+    }
+
+
     private Sequence applyRule(FleetingNode node, Rule rule) throws XPathException {
-        if (currentValue instanceof ExternalObject && ((ExternalObject<?>) currentValue).getObject() instanceof XPathException) {
+        if (valueIsException(currentValue)) {
             return currentValue;
         }
         AccumulatorRule target = (AccumulatorRule) rule.getAction();
@@ -198,7 +213,7 @@ public class AccumulatorWatch extends PatternWatch {
         }
     }
 
-    private static void setAtDepth(Stack<Sequence> stack, int depth, Sequence value) {
+    private static void setAtDepth(IndexedStack<Sequence> stack, int depth, Sequence value) {
         if (depth >= stack.size()) {
             stack.push(value);
         } else {
@@ -207,7 +222,7 @@ public class AccumulatorWatch extends PatternWatch {
     }
 
     public boolean isBeingComputed(AccumulatorFn.Phase phase) {
-        return beingComputed == phase;
+        return beingComputed.isPresent() && beingComputed.get() == phase;
     }
 
     /**
@@ -236,9 +251,9 @@ public class AccumulatorWatch extends PatternWatch {
         lastPredescentNode = node;
         Rule rule = preDescentMode.getRule(item, context);
         if (rule != null) {
-            beingComputed = AccumulatorFn.Phase.BEFORE;
+            beingComputed = Optional.of(AccumulatorFn.Phase.BEFORE);
             currentValue = applyRule(node, rule);
-            beingComputed = null;
+            beingComputed = Optional.empty();
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
                                                                     " BEFORE " + Navigator.getPath(node) + ": " + Err.depictSequence(currentValue));
@@ -248,9 +263,9 @@ public class AccumulatorWatch extends PatternWatch {
         setAtDepth(preDescentStack, depth, currentValue);
         rule = postDescentMode.getRule(item, context);
         if (rule != null) {
-            beingComputed = AccumulatorFn.Phase.AFTER;
+            beingComputed = Optional.of(AccumulatorFn.Phase.AFTER);
             currentValue = applyRule(node, rule);
-            beingComputed = null;
+            beingComputed = Optional.empty();
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
                                                                     " AFTER " + Navigator.getPath(node) + ": " + Err.depictSequence(currentValue));
@@ -280,9 +295,9 @@ public class AccumulatorWatch extends PatternWatch {
         lastPostdescentNode = node;
         Rule rule = postDescentMode.getRule(node, context);
         if (rule != null) {
-            beingComputed = AccumulatorFn.Phase.AFTER;
+            beingComputed = Optional.of(AccumulatorFn.Phase.AFTER);
             currentValue = applyRule(node, rule);
-            beingComputed = null;
+            beingComputed = Optional.empty();
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
                                                                     " AFTER " + Navigator.getPath(node) + ": " + Err.depictSequence(currentValue));
@@ -308,12 +323,6 @@ public class AccumulatorWatch extends PatternWatch {
         Sequence value = preDescentStack.get(node.getDepth());
         detectErrorValue(value);
         return value;
-    }
-
-    private void detectErrorValue(Sequence value) throws XPathException {
-        if (value instanceof ExternalObject && ((ExternalObject<?>) value).getObject() instanceof XPathException) {
-            throw (XPathException) ((ExternalObject<?>) value).getObject();
-        }
     }
 
     public Sequence getPreDescentValueAtDepth(int depth) throws XPathException {

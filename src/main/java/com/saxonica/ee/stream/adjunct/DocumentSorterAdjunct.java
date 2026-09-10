@@ -213,7 +213,7 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
 
         @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
-            return getResult().startSelectedParentNode(node, locationId);
+            return getResultFeed().startSelectedParentNode(node, locationId);
         }
 
         @Override
@@ -227,7 +227,7 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
 
         @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
-            getResult().endSelectedParentNode(locationId);
+            getResultFeed().endSelectedParentNode(locationId);
         }
 
         @Override

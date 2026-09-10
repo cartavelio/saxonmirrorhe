@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.MissingComponentException;
+import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.z.IntHashSet;
@@ -12,7 +13,12 @@ import javax.xml.transform.SourceLocator;
 import java.util.Collection;
 import java.util.Stack;
 
-import static net.sf.saxon.type.SchemaValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.INCOMPLETE;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
+
 
 /**
  * A reference to an element declaration within the content model of a complex type.
@@ -139,7 +145,7 @@ public class ElementParticle extends Particle {
     }
 
     @Override
-    public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException, MissingComponentException {
+    public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler) throws SchemaException, MissingComponentException {
         tryToResolve(compiler, false);
     }
 

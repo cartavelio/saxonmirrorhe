@@ -81,7 +81,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         public boolean isActive = true;
         public List<Watch> watches = new ArrayList<>();
 
-        private void addWatch(Watch watch) {
+        public void addWatch(Watch watch) {
             if (isActive) {
                 watches.add(watch);
             }
@@ -109,7 +109,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         long docNr = config.getDocumentNumberAllocator().allocateStreamedDocumentNumber();
         documentNode = new FleetingDocumentNode(docNr);
         documentNode.setConfiguration(config);
-        pipe.setComponent(WatchManager.class.getName(), this);
+        pipe.setComponent("com.saxonica.ee.stream.watch.WatchManager", this);
 
     }
 
@@ -804,7 +804,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         addWatch(multiWatch, true);
     }
 
-    private static class ClosedownAction {
+    protected static class ClosedownAction {
         public static final int DEACTIVATE = 0;
         public static final int CLOSE = 1;
         public Watch watch;

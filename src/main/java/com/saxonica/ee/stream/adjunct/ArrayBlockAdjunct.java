@@ -66,10 +66,9 @@ public class ArrayBlockAdjunct extends TransmissionAdjunct implements FeedMaker 
             SquareArrayConstructor block = (SquareArrayConstructor)getExpression();
             members = new ArrayList<>();
             for (int i = 0; i < consumingArg; i++) {
-                List<Item> member = new ArrayList<>();
                 Expression child = block.getOperanda().getOperand(i).getChildExpression();
-                SequenceTool.supply(child.iterate(getContext()), (ItemConsumer<? super Item>) member::add);
-                members.add(SequenceExtent.makeSequenceExtent(member));
+                GroundedValue member = SequenceExtent.from(child.iterate(getContext()));
+                members.add(member);
             }
         }
 
@@ -99,10 +98,9 @@ public class ArrayBlockAdjunct extends TransmissionAdjunct implements FeedMaker 
             SquareArrayConstructor block = (SquareArrayConstructor)getExpression();
             Outputter result = getNextOutputter();
             for (int i = consumingArg + 1; i < block.getOperanda().getNumberOfOperands(); i++) {
-                List<Item> member = new ArrayList<>();
-                Expression child = block.getOperand(i).getChildExpression();
-                SequenceTool.supply(child.iterate(getContext()), (ItemConsumer<? super Item>) member::add);
-                members.add(SequenceExtent.makeSequenceExtent(member));
+                Expression child = block.getOperanda().getOperand(i).getChildExpression();
+                GroundedValue member = SequenceExtent.from(child.iterate(getContext()));
+                members.add(member);
             }
             ArrayItem resultArray = new SimpleArrayItem(members);
             result.append(resultArray);

@@ -130,7 +130,7 @@ public class FieldChecker extends AbstractReceiver {
                 } else if (type.isAtomicType()) {
                     // We only need an instance of the primitive type for ID checking; checking against facets
                     // is done separately.
-                    AtomicType prim = ((AtomicType)type).getPrimitiveItemType();
+                    AtomicType prim = (AtomicType)((AtomicType)type).getPrimitiveItemType();
                     StringConverter converter = prim.getStringConverter(getConfiguration().getConversionRules());
                     val = converter.convertString(value).asAtomic();
                     if (type instanceof UserAtomicType) {
@@ -206,7 +206,7 @@ public class FieldChecker extends AbstractReceiver {
                 } else if (contentType.isAtomicType()) {
                     // We've already validated the value, and for equality matching we only need a value of the
                     // correct primitive type.
-                    AtomicType prim = ((AtomicType)contentType).getPrimitiveItemType();
+                    AtomicType prim = (AtomicType)((AtomicType)contentType).getPrimitiveItemType();
                     StringConverter converter = prim.getStringConverter(getConfiguration().getConversionRules());
                     val = converter.convertString(fieldVal).asAtomic();
                     if (contentType instanceof UserAtomicType) {

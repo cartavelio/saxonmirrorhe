@@ -200,6 +200,7 @@ public class XSDIdentityConstraint extends SchemaElement {
                 }
                 default: {
                     illegalElement(child);
+                    break;
                 }
             }
         }

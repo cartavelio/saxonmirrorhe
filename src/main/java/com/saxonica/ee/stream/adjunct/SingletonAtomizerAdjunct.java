@@ -1,14 +1,11 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.StreamingPatternMaker;
-import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.TypedValueFeed;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
-import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SingletonAtomizer;
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.pattern.Pattern;
 
 /**
@@ -22,14 +19,11 @@ public class SingletonAtomizerAdjunct extends StreamingAdjunct {
         Expression select = ((SingletonAtomizer) getExpression()).getBaseExpression();
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
         if (selection != null) {
-            return new WatchMaker() {
-                @Override
-                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) {
-                    TypedValueFeed action = new TypedValueFeed(out, context);
-                    Trigger watch = new Trigger(selection, action, context);
-                    watch.setPipelineConfiguration(watchManager.getPipelineConfiguration());
-                    return watch;
-                }
+            return (watchManager, out, context) -> {
+                TypedValueFeed action = new TypedValueFeed(out, context);
+                Trigger watch = new Trigger(selection, action, context);
+                watch.setPipelineConfiguration(watchManager.getPipelineConfiguration());
+                return watch;
             };
         }
         return null;

@@ -7,6 +7,7 @@ import com.saxonica.expr.ObjectLookupExpression;
 import com.saxonica.expr.SaxonSyntaxExtension;
 import com.saxonica.expr.StaticQueryContextPE;
 import com.saxonica.expr.XQueryParserExtensionPE;
+import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
 import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.functions.extfn.ObjectMap;
 import com.saxonica.functions.extfn.VendorFunctionSetPE;
@@ -44,6 +45,7 @@ import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.StyleNodeFactory;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.ObjectValue;
@@ -51,6 +53,7 @@ import net.sf.saxon.value.ObjectValue;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import java.io.BufferedReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -171,12 +174,12 @@ public class ProfessionalConfiguration extends Configuration {
         }
         try {
             return instantiateConfiguration(className, classLoader);
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-//#if DOTNET==true
+//#if DOTNET==true && CSHARP==false
     /**
      * Declare a mapping from a specific namespace URI to a .NET class
      * @param uri - the namespace URI of the function name
@@ -227,7 +230,7 @@ public class ProfessionalConfiguration extends Configuration {
      * retained mainly for compatibility, and also because there are a few cases where it cannot easily be replaced,
      * for example when using composite feature URIs to delegate configuration options to the XML parser.</p>
      *
-     * @param name  the URI identifying the property to be set. See the class {@link net.sf.saxon.lib.FeatureKeys} for
+     * @param feature identifies the property to be set. See the class {@link net.sf.saxon.lib.Feature} for
      *              constants representing the property names that can be set.
      * @param value the value of the property
      * @throws IllegalArgumentException if the property name is not recognized or if the value is not
@@ -235,35 +238,27 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
     @Override
-    public void setConfigurationProperty(String name, Object value) {
+    @CSharpModifiers(code = {"public", "override"})
+    protected void setFeature(FeatureData feature, Object value) {
+        String name = feature.uri;
+        int code = feature.code;
         if (name.equals("http://saxonica.com/oem-data")) {
             supplyLicenseKey(new BufferedReader(new StringReader((String) value)));
-        } else {
-            if (FeatureIndex.exists(name)) {
-                setFeature(FeatureIndex.getData(name), value);
-            } else if (name.startsWith(FeatureKeys.XML_PARSER_FEATURE) || name.startsWith(FeatureKeys.XML_PARSER_PROPERTY)) {
-                super.setConfigurationProperty(name, value);
-            } else {
-                super.setConfigurationProperty(name, value);
-            }
-        }
-    }
-
-    @Override
-    public <T> void setConfigurationProperty(Feature<T> feature, T value) {
-        if (feature == Feature.ALLOW_OLD_JAVA_URI_FORMAT) {
-            internalSetBooleanProperty(FeatureCode.ALLOW_OLD_JAVA_URI_FORMAT, FeatureKeys.ALLOW_OLD_JAVA_URI_FORMAT, value);
-            boolean b = requireBoolean(FeatureKeys.ALLOW_OLD_JAVA_URI_FORMAT, value);
-            ((JavaExtensionLibrary) getExtensionBinder("java")).setStrictJavaUriFormat(!b);
-        } else if (feature == Feature.LICENSE_FILE_LOCATION) {
+        } else if (code == FeatureCode.LICENSE_FILE_LOCATION) {
             synchronized(verifier) {
                 verifier.loadLicense((String) value);
                 licenseFound = true;
                 licenseNotFound = false;
                 setLicensedFeatures();
             }
+            //#if CSHARP==false
+        } else if (code == FeatureCode.ALLOW_OLD_JAVA_URI_FORMAT) {
+            internalSetBooleanProperty(FeatureCode.ALLOW_OLD_JAVA_URI_FORMAT, FeatureKeys.ALLOW_OLD_JAVA_URI_FORMAT, value);
+            boolean b = requireBoolean(FeatureKeys.ALLOW_OLD_JAVA_URI_FORMAT, value);
+            ((JavaExtensionLibrary) getExtensionBinder("java")).setStrictJavaUriFormat(!b);
+            //#endif
         } else {
-            super.setConfigurationProperty(feature, value);
+            super.setFeature(feature, value);
         }
     }
 
@@ -276,7 +271,7 @@ public class ProfessionalConfiguration extends Configuration {
      * @throws IllegalArgumentException if the key supplied is not a valid OEM license key
      */
 
-    public void supplyLicenseKey(BufferedReader reader) {
+    public void supplyLicenseKey(Reader reader) {
         verifier.supplyLicenseKey(reader);
         licenseFound = true;
         licenseNotFound = false;
@@ -456,8 +451,8 @@ public class ProfessionalConfiguration extends Configuration {
             SerializerFactoryPE sf = new SerializerFactoryPE(this) {
 
                 @Override
-                public Receiver getReceiver(Result result, SerializationProperties params, PipelineConfiguration pipe) throws XPathException {
-                    Receiver r = super.getReceiver(result, params, pipe);
+                public Receiver getReceiver(Result result, SerializationProperties parameters, PipelineConfiguration pipe) throws XPathException {
+                    Receiver r = super.getReceiver(result, parameters, pipe);
                     if (r instanceof EvaluationNuisance) {
                         return r;
                     } else {
@@ -751,6 +746,7 @@ public class ProfessionalConfiguration extends Configuration {
             builtInExtensionLibraryList.addFunctionLibrary(MapFunctionSet.getInstance());
             builtInExtensionLibraryList.addFunctionLibrary(ArrayFunctionSet.getInstance());
             builtInExtensionLibraryList.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
+            builtInExtensionLibraryList.addFunctionLibrary(EXPathBinaryFunctionSet.getInstance());
             if (getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
                 builtInExtensionLibraryList.addFunctionLibrary(EXPathFileFunctionSet.getInstance());
                 OnDemandFunctionSet sql = new OnDemandFunctionSet(
@@ -902,6 +898,7 @@ public class ProfessionalConfiguration extends Configuration {
         return ObjectMap.toMap(this, value, required);
     }
 
+    //#if CSHARP==false
     /**
      * Make an object lookup expression: supports the construct X?Y where X is an external Java object.
      * Requires Saxon-PE or higher
@@ -916,6 +913,7 @@ public class ProfessionalConfiguration extends Configuration {
     public Expression makeObjectLookupExpression(Expression lhs, Expression rhs) throws XPathException {
         return new ObjectLookupExpression(lhs, rhs);
     }
+    //#endif
 
     /**
      * Resolve a Source.

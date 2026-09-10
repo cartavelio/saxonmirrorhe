@@ -39,7 +39,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
     private Map<AtomicMatchKey, AtomicValue> originalValues;
     private final Operand defaultActionOp;
     private final StringCollator collation;
-    private boolean isInstruction;
+    private boolean _isInstruction;
 
     public final static OperandRole SUBJECT =
             new OperandRole(0, OperandUsage.ABSORPTION, SequenceType.SINGLE_ATOMIC);
@@ -93,7 +93,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
      */
 
     public void setInstruction(boolean inst) {
-        isInstruction = inst;
+        _isInstruction = inst;
     }
 
     /**
@@ -105,7 +105,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
 
     @Override
     public boolean isInstruction() {
-        return isInstruction;
+        return _isInstruction;
     }
 
 

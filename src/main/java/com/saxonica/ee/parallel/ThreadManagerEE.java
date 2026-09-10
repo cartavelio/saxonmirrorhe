@@ -1,6 +1,7 @@
-package com.saxonica.ee.trans;
+package com.saxonica.ee.parallel;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.trans.Outcome;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.trans.XPathException;
 

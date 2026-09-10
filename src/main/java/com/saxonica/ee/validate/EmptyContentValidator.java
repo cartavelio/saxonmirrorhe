@@ -61,7 +61,7 @@ public class EmptyContentValidator extends AttributeValidator {
     }
 
     @Override
-    public ContentValidator getChildValidator() {
+    protected ContentValidator getChildValidator() {
         // error paths only
         return new AnyTypeValidator(getNextReceiver());
     }

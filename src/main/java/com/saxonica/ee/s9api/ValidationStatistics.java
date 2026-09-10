@@ -16,14 +16,21 @@ import java.util.Map;
  */
 public class ValidationStatistics {
 
-    private final List<Map<SchemaComponent, Integer>> collectedStats = new ArrayList<Map<SchemaComponent, Integer>>();
+    private final List<Map<SchemaComponent, Integer>> collectedStats = new ArrayList<>();
 
-    protected ValidationStatisticsRecipient recipient = new ValidationStatisticsRecipient() {
-        @Override
-        public void notifyValidationStatistics(Map<SchemaComponent, Integer> statistics)  {
-            collectedStats.add(statistics);
+    private ValidationStatisticsRecipient recipient;
+
+    public ValidationStatisticsRecipient getRecipient() {
+        if (recipient == null) {
+            recipient = new ValidationStatisticsRecipient() {
+                @Override
+                public void notifyValidationStatistics(Map<SchemaComponent, Integer> statistics) {
+                    collectedStats.add(statistics);
+                }
+            };
         }
-    };
+        return recipient;
+    }
 
     public void report(Processor processor, Destination destination) throws SaxonApiException {
         if (collectedStats.size() > 0) {

@@ -18,6 +18,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
@@ -168,7 +169,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
             info.collation = loader.getConfiguration().getCollation(element.getAttributeValue("", "coll"));
             info.commonlhs = loader.getExpressionWithRole(element, "value");
             info.defaultAction = loader.getExpressionWithRole(element, "default");
-            for (NodeInfo aCase : element.children(n -> n.getLocalPart().equals("case"))) {
+            for (NodeInfo aCase : element.children(NodeSelector.of(n -> n.getLocalPart().equals("case")))) {
                 Expression val = loader.getFirstChildExpression(aCase);
                 AtomicValue av = (AtomicValue) ((Literal) val).getGroundedValue();
                 info.values.add(av);

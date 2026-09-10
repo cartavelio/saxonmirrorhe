@@ -23,12 +23,12 @@ public class NoCloseFeed extends ItemFeed {
     // effect is to suppress the repeated open/close calls. Test case stream-agg-018.
     @Override
     public void open(Terminator terminator) throws XPathException {
-        getResult().open(terminator);
+        getResultFeed().open(terminator);
     }
 
     @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
-        return getResult().startSelectedParentNode(node, locationId);
+        return getResultFeed().startSelectedParentNode(node, locationId);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class NoCloseFeed extends ItemFeed {
 
     @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
-        getResult().endSelectedParentNode(locationId);
+        getResultFeed().endSelectedParentNode(locationId);
     }
 
     @Override

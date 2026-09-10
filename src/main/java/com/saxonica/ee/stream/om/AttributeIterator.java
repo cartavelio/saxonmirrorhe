@@ -5,10 +5,8 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.type.Type;
 
-import java.util.Iterator;
-import java.util.function.BiFunction;
+import java.util.List;
 
 
 /**
@@ -19,10 +17,9 @@ import java.util.function.BiFunction;
 
 final public class AttributeIterator implements AxisIterator, LookaheadIterator {
 
-    private final NodeInfo element;
-    private final Iterator<AttributeInfo> attributeIter;
-
-    private final BiFunction<NodeInfo, AttributeInfo, NodeInfo> attributeMaker;
+    private final FleetingElementNode element;
+    private final List<AttributeInfo> attributeList;
+    private int position;
 
     /**
      * Constructor
@@ -31,13 +28,10 @@ final public class AttributeIterator implements AxisIterator, LookaheadIterator 
      *                  but if it is not an element the enumeration will be empty
      */
 
-    public AttributeIterator(NodeInfo element, AttributeMap attributes, BiFunction<NodeInfo, AttributeInfo, NodeInfo> attributeMaker) {
-        if (element.getNodeKind() != Type.ELEMENT) {
-            throw new IllegalArgumentException("Not an element node");
-        }
+    public AttributeIterator(FleetingElementNode element, AttributeMap attributes) {
         this.element = element;
-        this.attributeMaker = attributeMaker;
-        attributeIter = attributes.iterator();
+        this.attributeList = attributes.asList();
+        this.position = 0;
     }
 
     @Override
@@ -53,7 +47,7 @@ final public class AttributeIterator implements AxisIterator, LookaheadIterator 
 
     @Override
     public boolean hasNext() {
-        return attributeIter.hasNext();
+        return position < attributeList.size() - 1;
     }
 
     /**
@@ -63,9 +57,9 @@ final public class AttributeIterator implements AxisIterator, LookaheadIterator 
     /*@Nullable*/
     @Override
     public NodeInfo next() {
-        if (attributeIter.hasNext()) {
-            AttributeInfo info = attributeIter.next();
-            return attributeMaker.apply(element, info);
+        if (hasNext()) {
+            AttributeInfo info = attributeList.get(position++);
+            return element.makeAttributeNode(info);
         } else {
             return null;
         }

@@ -28,6 +28,9 @@ import net.sf.saxon.value.AtomicValue;
 
 import java.util.*;
 
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.MATCHES;
+import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.SKIP;
+
 
 /**
  * This watch implements xsl:for-each-group in streaming mode, in cases where the population is being forked
@@ -126,7 +129,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
     /*@Nullable*/
     @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
-        List<AtomicMatchKey> comparisonKey = new ArrayList<AtomicMatchKey>();
+        List<AtomicMatchKey> comparisonKey = new ArrayList<>();
         AtomicArray key = getGroupingKey(node, comparisonKey);
         anchorNode = node;
         List<List<AtomicMatchKey>> separateKeys;
@@ -137,16 +140,16 @@ public class ForEachGroupParallelAction extends ForEachAction {
         } else {
             separateKeys = new ArrayList<>(comparisonKey.size());
             distinctKeys = new ArrayList<>();
-            Set<AtomicMatchKey> duplicates = new HashSet<AtomicMatchKey>(separateKeys.size());
-            int k = 0;
+            Set<AtomicMatchKey> duplicates = new HashSet<>();
+            int kk = 0;
             for (AtomicMatchKey oneKey : comparisonKey) {
                 if (duplicates.add(oneKey)) {
-                    List<AtomicMatchKey> singleKey = new ArrayList<AtomicMatchKey>(1);
+                    List<AtomicMatchKey> singleKey = new ArrayList<>(1);
                     singleKey.add(oneKey);
                     separateKeys.add(singleKey);
-                    distinctKeys.add(key.itemAt(k));
+                    distinctKeys.add(key.itemAt(kk));
                 }
-                k++;
+                kk++;
             }
         }
 
@@ -179,12 +182,8 @@ public class ForEachGroupParallelAction extends ForEachAction {
                         gp.feed = actionFeed;
                         gp.feed.open(getTerminator());
                     } else {
-                        FilteringFeed.Filter filter = new FilteringFeed.Filter() {
-                            @Override
-                            public int matches(Item item, int position) throws XPathException {
-                                return pattern.matchesBeneathAnchor((NodeInfo) item, anchorNode, bodyContext) ? MATCHES : SKIP;
-                            }
-                        };
+                        FilteringFeed.Filter filter = new FilteringFeed.FilterLambda((item, position) ->
+                                pattern.matchesBeneathAnchor((NodeInfo) item, anchorNode, bodyContext) ? MATCHES : SKIP);
                         gp.feed = new FilteringFeed(actionFeed, getContext(), filter);
                         if (pattern instanceof AncestorQualifiedPattern) {
                             // This typically means we need to watch for ./xxx or current-group()/xxx
@@ -224,7 +223,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
                 currentItemFeed = groupFeeds.get(0);
                 result = currentItemFeed.startSelectedParentNode(node, locationId);
             } else {
-                currentItemFeed = new ForkingFeed(groupFeeds, getResult(), getContext());
+                currentItemFeed = new ForkingFeed(groupFeeds, getResultFeed(), getContext());
                 result = currentItemFeed.startSelectedParentNode(node, locationId);
             }
         }
@@ -296,7 +295,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
 
             if (isActionConsuming()) {
                 if (newGroup) {
-                    ItemFeed thisFeed = new NoOpenOrCloseFeed(getResult(), getBodyContext());
+                    ItemFeed thisFeed = new NoOpenOrCloseFeed(getResultFeed(), getBodyContext());
                     Trigger watch = getInversion().getWatch(getWatchManager(), thisFeed, gp.bodyContext);
                     gp.feed = watch.getAction();
                     gp.feed.open(getTerminator());
@@ -305,7 +304,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
             } else {
                 if (newGroup) {
                     Expression action = ((ForEachGroup) getExpression()).getActionExpression();
-                    SequenceTool.supply(action.iterate(gp.bodyContext), (ItemConsumer<? super Item>) getResult()::append);
+                    SequenceTool.supply(action.iterate(gp.bodyContext), item -> getResultFeed().append(item));
                 }
             }
         }

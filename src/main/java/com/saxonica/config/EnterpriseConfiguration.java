@@ -6,6 +6,8 @@ import com.saxonica.ee.config.*;
 import com.saxonica.ee.extfn.VendorFunctionSetEE;
 import com.saxonica.ee.extfn.js.IXSLElementFactory;
 import com.saxonica.ee.optim.*;
+import com.saxonica.ee.parallel.MultithreadedFocusTrackingIterator;
+import com.saxonica.ee.parallel.ThreadManagerEE;
 import com.saxonica.ee.schema.*;
 import com.saxonica.ee.schema.sdoc.SchemaDocument;
 import com.saxonica.ee.schema.sdoc.SchemaReader;
@@ -23,12 +25,14 @@ import com.saxonica.ee.update.PendingUpdateListImpl;
 import com.saxonica.ee.update.XQueryParserExtensionEE;
 import com.saxonica.ee.validate.*;
 import com.saxonica.expr.XQueryParserExtensionPE;
+import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
 import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.trans.ModePE;
 import com.saxonica.xsltextn.style.Saxon6ElementFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
@@ -36,7 +40,6 @@ import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.GroupIterator;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.MathFunctionSet;
 import net.sf.saxon.functions.registry.ExsltCommonFunctionSet;
@@ -64,23 +67,16 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.style.XSLTemplate;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringValue;
-import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -100,17 +96,17 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     private HashMap<String, Integer> namespaceStatus = new HashMap<>();
     private int[] occurrenceLimits = {100, 250};
     private SchemaURIResolver schemaURIResolver = null;
-    private final SchemaURIResolver standardSchemaResolver = new StandardSchemaResolver(this);
-    private transient PreparedSchema superSchema = new PreparedSchema(this);
+    private final SchemaURIResolver standardSchemaResolver;
+    private transient PreparedSchema superSchema;
     private String debugByteCodeDirectory = "Saxon-bytecode";
     private int resultDocumentThreadsLimit = Runtime.getRuntime().availableProcessors();
     private int thresholdForCompilingTypes = 100;
     private int thresholdForInliningFunctions = 100;
     private int maxCompiledClasses = 10000;
-    private Boolean streamabilityEnabled = null;
+    private Optional<Boolean> streamabilityEnabled = Optional.empty();
     private final ConcurrentHashMap<String, RegularExpression> regexCache = new ConcurrentHashMap<>();
     private long regexAttempts = 0;
-    private MultithreadingFactory multithreadingFactory = new MultithreadingFactory(this);
+    private MultithreadingFactory multithreadingFactory;
     //#if BYTECODE == true
         private ByteCodeMonitor byteCodeMonitor;
     //#endif
@@ -122,6 +118,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     public EnterpriseConfiguration() {
         super();
+        multithreadingFactory = new MultithreadingFactory(this);
         internalSetBooleanProperty(FeatureCode.ALLOW_MULTITHREADING, FeatureKeys.ALLOW_MULTITHREADING, true);
         internalSetBooleanProperty(FeatureCode.GENERATE_BYTE_CODE, FeatureKeys.GENERATE_BYTE_CODE, true);
         setStaticQueryContextFactory(new StaticQueryContextFactory() {
@@ -132,6 +129,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         });
         optimizerOptions = OptimizerOptions.FULL_EE_OPTIMIZATION;
         defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
+        standardSchemaResolver = new StandardSchemaResolver(this);
+        superSchema = new PreparedSchema(this);
     }
 
     @Override
@@ -166,12 +165,13 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      *                                  a valid value for the named property
      */
 
+    @CSharpModifiers(code = {"public", "override"})
     @Override
-    public <T> void setConfigurationProperty(Feature<T> feature, T value) {
+    protected void setFeature(FeatureData feature, Object value) {
         int code = feature.code;
         FeatureData featureData = FeatureIndex.getData(code);
         String name = featureData.uri;
-        switch (feature.code) {
+        switch (code) {
             case FeatureCode.GENERATE_BYTE_CODE: {
                 if (value instanceof Boolean) {
                     internalSetBooleanProperty(code, name, value);
@@ -204,10 +204,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 }
                 break;
             }
-            case FeatureCode.DEBUG_BYTE_CODE_DIR:
+            case FeatureCode.DEBUG_BYTE_CODE_DIR: {
                 debugByteCodeDirectory = value.toString();
                 break;
-            case FeatureCode.OCCURRENCE_LIMITS:
+            }
+            case FeatureCode.OCCURRENCE_LIMITS: {
                 String val = value.toString();
                 int comma = val.indexOf(',');
                 if (comma < 1) {
@@ -218,20 +219,24 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 int max = Integer.parseInt(val.substring(comma + 1));
                 setOccurrenceLimits(min, max);
                 break;
-            case FeatureCode.RESULT_DOCUMENT_THREADS:
+            }
+            case FeatureCode.RESULT_DOCUMENT_THREADS: {
                 resultDocumentThreadsLimit = requireInteger(name, value);
                 break;
-            case FeatureCode.SCHEMA_URI_RESOLVER:
+            }
+            case FeatureCode.SCHEMA_URI_RESOLVER: {
                 if (!(value instanceof SchemaURIResolver)) {
                     throw new IllegalArgumentException(
                             "SCHEMA_URI_RESOLVER value must be an instance of net.sf.saxon.lib.SchemaURIResolver");
                 }
                 setSchemaURIResolver((SchemaURIResolver) value);
                 break;
-            case FeatureCode.SCHEMA_URI_RESOLVER_CLASS:
+            }
+            case FeatureCode.SCHEMA_URI_RESOLVER_CLASS: {
                 setSchemaURIResolver(
                         (SchemaURIResolver) instantiateClassName(name, value, SchemaURIResolver.class));
                 break;
+            }
             case FeatureCode.STREAMABILITY: {
                 String s = requireString(name, value);
                 switch (s) {
@@ -250,33 +255,25 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 }
                 break;
             }
-            case FeatureCode.THRESHOLD_FOR_COMPILING_TYPES:
+            case FeatureCode.THRESHOLD_FOR_COMPILING_TYPES: {
                 thresholdForCompilingTypes = requireInteger(name, value);
                 break;
-            case FeatureCode.THRESHOLD_FOR_FUNCTION_INLINING:
+            }
+            case FeatureCode.THRESHOLD_FOR_FUNCTION_INLINING: {
                 thresholdForInliningFunctions = requireInteger(name, value);
                 break;
-            case FeatureCode.MAX_COMPILED_CLASSES:
+            }
+            case FeatureCode.MAX_COMPILED_CLASSES: {
                 maxCompiledClasses = requireInteger(name, value);
                 break;
-            default:
-                super.setConfigurationProperty(feature, value);
+            }
+            default: {
+                super.setFeature(feature, value);
                 break;
+            }
 
         }
     }
-
-//    /**
-//     * Read the configuration file an construct a new Configuration (the real one)
-//     *
-//     * @param source the source of the configuration file
-//     * @return the Configuration that will be used for real work
-//     * @throws net.sf.saxon.trans.XPathException if, for example, the configuration file is invalid
-//     */
-//    @Override
-//    protected Configuration readConfigurationFile(Source source) throws XPathException {
-//        return new ConfigurationReaderPE().makeConfiguration(source);
-//    }
 
     /**
      * Get a property of the configuration
@@ -287,37 +284,32 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @throws IllegalArgumentException thrown if the property is not one that Saxon recognizes.
      */
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getConfigurationProperty(Feature<T> feature) {
+    protected Object getFeature (FeatureData feature) {
         int code = feature.code;
         if (booleanFeatures.contains(code)) {
-            return (T) Boolean.valueOf(getBooleanProperty((Feature<Boolean>)feature));
+            return super.getFeature(feature);
         }
         switch (code) {
-
             case FeatureCode.DEBUG_BYTE_CODE_DIR:
-                return (T) debugByteCodeDirectory;
-
+                return debugByteCodeDirectory;
             case FeatureCode.OCCURRENCE_LIMITS:
-                return (T) (occurrenceLimits[0] + "," + occurrenceLimits[1]);
+                return (occurrenceLimits[0] + "," + occurrenceLimits[1]);
             case FeatureCode.THRESHOLD_FOR_COMPILING_TYPES:
-                return (T) Integer.valueOf(thresholdForCompilingTypes);
+                return thresholdForCompilingTypes;
             case FeatureCode.THRESHOLD_FOR_FUNCTION_INLINING:
-                return (T) Integer.valueOf(thresholdForInliningFunctions);
+                return thresholdForInliningFunctions;
             case FeatureCode.MAX_COMPILED_CLASSES:
-                return (T) Integer.valueOf(maxCompiledClasses);
-
+                return maxCompiledClasses;
             case FeatureCode.RESULT_DOCUMENT_THREADS:
-                return (T) Integer.valueOf(resultDocumentThreadsLimit);
+                return resultDocumentThreadsLimit;
             case FeatureCode.SCHEMA_URI_RESOLVER:
-                return (T) getSchemaURIResolver();
+                return getSchemaURIResolver();
             case FeatureCode.SCHEMA_URI_RESOLVER_CLASS:
-                return (T) getSchemaURIResolver().getClass().getName();
+                return getSchemaURIResolver().getClass().getName();
             case FeatureCode.STREAMABILITY:
-                return (T) (isStreamabilityEnabled() ? "standard" : "off");
+                return isStreamabilityEnabled() ? "standard" : "off";
             default:
-                return super.getConfigurationProperty(feature);
+                return super.getFeature(feature);
         }
     }
 
@@ -448,10 +440,13 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             builtInExtensionLibraryList.addFunctionLibrary(MapFunctionSet.getInstance());
             builtInExtensionLibraryList.addFunctionLibrary(ArrayFunctionSet.getInstance());
             builtInExtensionLibraryList.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
+            builtInExtensionLibraryList.addFunctionLibrary(EXPathBinaryFunctionSet.getInstance());
             if (getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
                 builtInExtensionLibraryList.addFunctionLibrary(EXPathFileFunctionSet.getInstance());
+                //#if CSHARP==false
                 OnDemandFunctionSet sql = new OnDemandFunctionSet(this, NamespaceConstant.SQL, "com.saxonica.functions.sql.SQLFunctionSet");
                 builtInExtensionLibraryList.addFunctionLibrary(sql);
+                //#endif
             }
         }
         return builtInExtensionLibraryList;
@@ -652,11 +647,13 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     public void addSchemaSource(Source schemaSource, /*@Nullable*/ ErrorReporter errorReporter) throws SchemaException {
         try {
+            //#if CSHARP==false
             if (schemaSource instanceof SAXSource && getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
                 // This option is provided to allow the parser set by applications such as Ant to be overridden by
                 // the parser requested using FeatureKeys.SOURCE_PARSER or FeatureKeys.STYLE_PARSER
                 ((SAXSource) schemaSource).setXMLReader(null);
             }
+            //#endif
             SchemaCompiler compiler = newSchemaCompiler();
             if (errorReporter != null) {
                 compiler.setErrorReporter(errorReporter);
@@ -757,12 +754,12 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 addSchemaForXsiNamespace();
                 break;
             case NamespaceConstant.FN:
-                InputSource is = StandardEntityResolver.fetch("xpath-functions.scm", this);
-                if (is == null) {
-                    throw new IllegalStateException("Failed to read internal copy of xpath-functions.scm");
+                InputStream in = Version.platform.locateResource("xpath-functions.scm", new ArrayList<String>());
+                if (isTiming()) {
+                    getLogger().info("Loading schema from resources for: " + NamespaceConstant.FN);
                 }
                 try {
-                    addSchemaSource(new StreamSource(is.getByteStream()), makeErrorReporter());
+                    addSchemaSource(new StreamSource(in), makeErrorReporter());
                 } catch (SchemaException e) {
                     throw new IllegalStateException("Failed to load internal copy of xpath-functions.scm");
                 }
@@ -980,138 +977,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     public void clearSchemaCache() {
         superSchema = new PreparedSchema(this);
         namespaceStatus = new HashMap<>();
-    }
-
-    /**
-     * Get information about the schema in the form of a function item. Supports the extension function
-     * saxon:schema
-     *
-     * @return a function item corresponding to the Schema (whole-schema) component
-     */
-
-    @Override
-    public Function getSchemaAsFunctionItem() {
-        Callable schemaFunction = (context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
-            switch (key) {
-                case "class":
-                    return StringValue.bmp("Schema");
-                case "type definitions": {
-                    List<Item> list = new ArrayList<>();
-                    for (SchemaType st : getSuperSchema().getAllTypes()) {
-                        list.add(st.getComponentAsFunction());
-                    }
-                    return SequenceExtent.makeSequenceExtent(list);
-                }
-                case "attribute declarations": {
-                    List<Item> list = new ArrayList<>();
-                    for (AttributeDecl decl : getSuperSchema().getAttributeDeclarations()) {
-                        list.add(decl.getComponentAsFunction());
-                    }
-                    return SequenceExtent.makeSequenceExtent(list);
-
-                }
-                case "element declarations": {
-                    List<Item> list = new ArrayList<>();
-                    for (ElementDecl decl : getSuperSchema().getElementDeclarations()) {
-                        list.add(decl.getComponentAsFunction());
-                    }
-                    return SequenceExtent.makeSequenceExtent(list);
-                }
-                case "attribute group definitions": {
-                    List<Item> list = new ArrayList<>();
-                    for (AttributeGroupDecl group : getSuperSchema().getAllAttributeGroups()) {
-                        list.add(group.getComponentAsFunction());
-                    }
-                    return SequenceExtent.makeSequenceExtent(list);
-
-                }
-                case "model group definitions": {
-                    List<Item> list = new ArrayList<>();
-                    for (ModelGroupDefinition group : getSuperSchema().getAllModelGroups())  {
-                        list.add(group.getComponentAsFunction());
-                    }
-                    return SequenceExtent.makeSequenceExtent(list);
-
-                }
-                case "notation declarations": {
-                    List<Item> list = new ArrayList<>();
-                    for (Notation notation : superSchema.getAllNotations()) {
-                        list.add(notation.getComponentAsFunction());
-                    }
-                    return SequenceExtent.makeSequenceExtent(list);
-
-                }
-                case "identity-constraint definitions": {
-                    List<Item> list = new ArrayList<>();
-                    for (IdentityConstraint constraint : getSuperSchema().getIdentityConstraints()) {
-                        list.add(constraint.getComponentAsFunction());
-                    }
-                    return SequenceExtent.makeSequenceExtent(list);
-
-                }
-                default:
-                    return EmptySequence.getInstance();
-
-            }
-        };
-        return new CallableFunction(1, schemaFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
-
-    }
-
-    /**
-     * Get information about the schema in the form of a function item. Supports the extension function
-     * saxon:schema
-     *
-     * @param kind the component kind, e.g. "element declaration"
-     * @param name the component name
-     * @return a function item corresponding to the selected component, or null if it does not exist.
-     * @throws XPathException if the first argument does not identify a valid kind of component
-     */
-
-    @Override
-    public Function getSchemaComponentAsFunctionItem(String kind, QNameValue name) throws XPathException {
-        if (kind.equals("type definition")) {
-            SchemaType type = getSchemaType(name.getStructuredQName());
-            return type == null ? null : type.getComponentAsFunction();
-
-        }
-        StructuredQName nn = name.getStructuredQName();
-        switch (kind) {
-            case "attribute declaration": {
-                AttributeDecl decl = (AttributeDecl) getAttributeDeclaration(nn);
-                return decl == null ? null : decl.getComponentAsFunction();
-
-            }
-            case "element declaration": {
-                ElementDecl decl = (ElementDecl) getElementDeclaration(nn);
-                return decl == null ? null : decl.getComponentAsFunction();
-
-            }
-            case "attribute group definition": {
-                AttributeGroupDecl decl = getSuperSchema().getAttributeGroup(nn);
-                return decl == null ? null : decl.getComponentAsFunction();
-
-            }
-            case "model group definition": {
-                ModelGroupDefinition decl = getSuperSchema().getGroup(nn);
-                return decl == null ? null : decl.getComponentAsFunction();
-
-            }
-            case "notation declarations": {
-                Notation decl = getSuperSchema().getNotation(nn);
-                return decl == null ? null : decl.getComponentAsFunction();
-
-            }
-            case "identity-constraint definitions": {
-                IdentityConstraint decl = getSuperSchema().getIdentityConstraint(nn);
-                return decl == null ? null : decl.getComponentAsFunction();
-
-            }
-            default:
-                throw new XPathException("Unknown component kind " + kind);
-
-        }
     }
 
 
@@ -1379,12 +1244,12 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             xsi.setValidationContext(vc);
 
             PathMaintainer pathMaintainer = new PathMaintainer(stb);
-            pipe.setComponent(PathMaintainer.class.getName(), pathMaintainer);
+            pipe.setComponent("net.sf.saxon.event.PathMaintainer", pathMaintainer);
 
             DocumentValidator dv = new DocumentValidator(pathMaintainer, hostLanguage == HostLanguage.XSLT ? "XTTE1550" : "XQDY0061");
 
             LocationCopier copier = new LocationCopier(true);
-            pipe.setComponent(CopyInformee.class.getName(), copier);
+            pipe.setComponent("net.sf.saxon.event.CopyInformee", copier);
 
             vc.startValidation(systemId);
 
@@ -1546,7 +1411,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             AssertionTreeBuilder atb = new AssertionTreeBuilder(destination, retainComments);
             atb.setPipelineConfiguration(pipe);
             vc.setAssertionTreeBuilder(atb);
-            pipe.setComponent(AssertionTreeBuilder.class.getName(), atb);
+            pipe.setComponent("com.saxonica.ee.validate.AssertionTreeBuilder", atb);
             destination = atb;
         }
         return destination;
@@ -1583,17 +1448,17 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         }
         SimpleType type = decl.getSimpleType();
         if (type.isNamespaceSensitive()) {
-            ValidationFailure err = new ValidationFailure("Cannot create a parentless attribute whose " +
+            ValidationFailure nsErr = new ValidationFailure("Cannot create a parentless attribute whose " +
                                                                   "type is namespace-sensitive (such as xs:QName)");
-            err.setSchemaType(type);
-            err.setErrorCode("XTTE1545");
-            throw err.makeException();
+            nsErr.setSchemaType(type);
+            nsErr.setErrorCode("XTTE1545");
+            throw nsErr.makeException();
         }
-        ValidationFailure err = type.validateContent(value, DummyNamespaceResolver.getInstance(), getConversionRules());
-        if (err != null) {
-            err.setSchemaType(type);
-            err.setErrorCode(validation == Validation.STRICT ? "XTTE1510" : "XTTE1515");
-            throw err.makeException();
+        ValidationFailure contentErr = type.validateContent(value, DummyNamespaceResolver.getInstance(), getConversionRules());
+        if (contentErr != null) {
+            contentErr.setSchemaType(type);
+            contentErr.setErrorCode(validation == Validation.STRICT ? "XTTE1510" : "XTTE1515");
+            throw contentErr.makeException();
         }
         return type;
     }
@@ -1804,7 +1669,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     public void setStreamabilityEnabled(boolean enabled) {
-        this.streamabilityEnabled = enabled;
+        this.streamabilityEnabled = Optional.of(enabled);
     }
 
     /**
@@ -1814,11 +1679,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public boolean isStreamabilityEnabled() {
-        if (streamabilityEnabled == null) {
-            streamabilityEnabled = isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT)
-                    || isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY);
+        if (streamabilityEnabled.isEmpty()) {
+            streamabilityEnabled = Optional.of(isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT)
+                    || isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY));
         }
-        return streamabilityEnabled;
+        return streamabilityEnabled.get();
     }
 
     /**
@@ -2049,9 +1914,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     public RegularExpression compileRegularExpression(UnicodeString regex, String flags, String hostLanguage, List<String> warnings) throws XPathException {
         if (optimizerOptions.isSet(OptimizerOptions.REGEX_CACHE)) {
             regexAttempts++;
-            StringBuilder buff = new StringBuilder((int)Long.min(regex.estimatedLength()+flags.length()+hostLanguage.length()+1, Integer.MAX_VALUE));
-            buff.append(hostLanguage).append(flags).append('=').append(regex.toString());
-            String key = buff.toString();
+            String key = hostLanguage + flags + '=' + regex.toString();
             RegularExpression re = regexCache.get(key);
             if (re == null) {
                 re = super.compileRegularExpression(regex, flags, hostLanguage, warnings);

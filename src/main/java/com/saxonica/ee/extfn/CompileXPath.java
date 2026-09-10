@@ -26,7 +26,6 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.PublicStylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetPackage;
@@ -94,13 +93,11 @@ public class CompileXPath extends SystemFunction {
         StringValue type = (StringValue) options.get(StringValue.bmp("type"));
         final String exprText = content.getStringValue();
 
-        IndependentContext env = new IndependentContext(configuration) {
-            @Override
-            public void issueWarning(String s, Location locator) {
-                String message = "In dynamic expression {" + exprText + "}: " + s;
-                context.getController().warning(message, null, null);
-            }
-        };
+        IndependentContext env = new IndependentContext(configuration);
+        env.setWarningHandler((msg, locator) -> {
+            String message = "In dynamic expression {" + exprText + "}: " + msg;
+            context.getController().warning(message, null, null);
+        });
 
         BooleanValue backwards = (BooleanValue) options.get(StringValue.bmp("backwardCompatibility"));
         env.setBackwardsCompatibilityMode(backwards != null && backwards.getBooleanValue());
@@ -160,59 +157,20 @@ public class CompileXPath extends SystemFunction {
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 SequenceExtent s = (SequenceExtent) locals.get(key);
-                String st = ((StringValue)s.itemAt(2)).getStringValue();
-                int slot = (int) ((Int64Value)s.itemAt(1)).longValue();
-                if (slot > maxSlot){
+                String staticType = s.itemAt(2).getStringValue();
+                int slot = (int) ((Int64Value) s.itemAt(1)).longValue();
+                if (slot > maxSlot) {
                     maxSlot = slot;
                 }
                 XPathVariable v = env.declareVariable(StructuredQName.fromClarkName(key.getStringValue()));
                 v.setSlotNumber(slot);
-                v.setRequiredType(makeType(st));
+                v.setRequiredType(makeType(staticType));
             }
         }
 
         FunctionLibraryList libraryList = new FunctionLibraryList();
-        ExecutableFunctionLibrary userFunctionLibrary = new ExecutableFunctionLibrary(context.getController().getConfiguration()) {
-            final HashMap<SymbolicName.F, UserFunction> lib = new HashMap<>();
+        ExecutableFunctionLibrary userFunctionLibrary = new LocalFunctionLibrary(context.getConfiguration());
 
-            @Override
-            public boolean isAvailable(SymbolicName.F functionName) {
-                return lib.containsKey(functionName);
-            }
-
-
-            @Override
-            public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
-                UserFunction fn = lib.get(functionName);
-                UserFunctionParameter[] params = new UserFunctionParameter[staticArgs.length];
-                int i = 0;
-                for (Expression s : staticArgs) {
-                    UserFunctionParameter p = new UserFunctionParameter();
-                    p.setRequiredType(SequenceType.ANY_SEQUENCE);
-                    params[i++] = p;
-                }
-                fn.setParameterDefinitions(params);
-                UserFunctionCall call = new UserFunctionCall();
-                call.setArguments(staticArgs);
-                call.setFunctionName(functionName.getComponentName());
-                return call;
-            }
-
-            @Override
-            public FunctionLibrary copy() {
-                return null;
-            }
-
-            @Override
-            public void addFunction(UserFunction fn) {
-                lib.put(new SymbolicName.F(fn.getFunctionName(), fn.getArity()), fn);
-            }
-
-            @Override
-            public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) {
-                return lib.get(functionName);
-            }
-        };
 
         FunctionLibraryList libraryList0 = ((StylesheetPackage) getRetainedStaticContext().getPackageData()).getFunctionLibrary();
         for (FunctionLibrary lib : libraryList0.getLibraryList()) {
@@ -260,9 +218,9 @@ public class CompileXPath extends SystemFunction {
                 fn.setDeclaringComponent(component);
                 fn.setResultType(reqType);
                 /* The function may need a body, which is assumed to have been compiled and is defined in XSLT.
-                * For the present we'll leave a string that identifies the body requirement.
-                * Note that this may fail when there is a type clash when the result is NOT a string */
-                fn.setBody(new StringLiteral("BODY("+nameArity +")"));
+                 * For the present we'll leave a string that identifies the body requirement.
+                 * Note that this may fail when there is a type clash when the result is NOT a string */
+                fn.setBody(new StringLiteral("BODY(" + nameArity + ")"));
 
                 UserFunctionParameter[] params = new UserFunctionParameter[arity];
                 int i = 0;
@@ -299,7 +257,7 @@ public class CompileXPath extends SystemFunction {
             }
         } catch (XPathException e) {
             XPathException err = new XPathException("Static error in XPath expression supplied to saxon:compile-XPath: " +
-                    e.getMessage() + ". Expression: {" + exprText + "}");
+                                                            e.getMessage() + ". Expression: {" + exprText + "}");
             err.setErrorCode("XTDE3160");
             throw err;
         }
@@ -322,6 +280,56 @@ public class CompileXPath extends SystemFunction {
 
         return result;
     }
+
+    private static class LocalFunctionLibrary extends ExecutableFunctionLibrary {
+
+        final HashMap<SymbolicName.F, UserFunction> lib = new HashMap<>();
+
+        public LocalFunctionLibrary(Configuration config) {
+            super(config);
+        }
+
+        @Override
+        public boolean isAvailable(SymbolicName.F functionName) {
+            return lib.containsKey(functionName);
+        }
+
+        @Override
+        public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext
+                env, List<String> reasons) {
+            UserFunction fn = lib.get(functionName);
+            UserFunctionParameter[] params = new UserFunctionParameter[staticArgs.length];
+            int i = 0;
+            for (Expression s : staticArgs) {
+                UserFunctionParameter p = new UserFunctionParameter();
+                p.setRequiredType(SequenceType.ANY_SEQUENCE);
+                params[i++] = p;
+            }
+            fn.setParameterDefinitions(params);
+            UserFunctionCall call = new UserFunctionCall();
+            call.setArguments(staticArgs);
+            call.setFunctionName(functionName.getComponentName());
+            return call;
+        }
+
+        @Override
+        public FunctionLibrary copy() {
+            return null;
+        }
+
+        @Override
+        public void addFunction(UserFunction fn) {
+            lib.put(new SymbolicName.F(fn.getFunctionName(), fn.getArity()), fn);
+        }
+
+        @Override
+        public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) {
+            return lib.get(functionName);
+        }
+    }
+
+
+
 
     private SequenceType makeType(String type) {
         SequenceType result = SequenceType.ANY_SEQUENCE;

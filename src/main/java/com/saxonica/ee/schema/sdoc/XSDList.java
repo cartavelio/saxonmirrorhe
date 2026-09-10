@@ -133,6 +133,7 @@ public class XSDList extends SchemaElement {
                 }
                 default: {
                     illegalElement(child);
+                    break;
                 }
             }
         }

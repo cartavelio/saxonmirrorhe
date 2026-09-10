@@ -1,12 +1,10 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.CallableDelegate;
+import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
@@ -432,7 +430,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         if (namespaces == null) {
             return;
         }
-        Iterator iter = namespaces.iterator();
+        Iterator<String> iter = namespaces.iterator();
         boolean first = true;
         while (iter.hasNext()) {
             if (first) {
@@ -440,7 +438,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
             } else {
                 sb.append(' ');
             }
-            String s = (String) iter.next();
+            String s = iter.next();
             sb.append(s.isEmpty() ? "##local" : s);
         }
     }
@@ -587,7 +585,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         String ranking = "skip lax strict";
         int r1 = ranking.indexOf(processContents);
         int r2 = ranking.indexOf(other.processContents);
-        return Integer.valueOf(r1).compareTo(r2);
+        return Integer.compare(r1, r2);
     }
 
     /**
@@ -853,73 +851,69 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
 
     @Override
     public Function getComponentAsFunction() {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-                String key = arguments[0].head().getStringValue();
-                switch (key) {
-                    case "class":
-                        return StringValue.bmp("Wildcard");
-                    case "implementation":
-                        return new ObjectValue<>(Wildcard.this);
-                    case "namespace constraint":
-                        Callable constraintFunction = new Callable() {
-                            @Override
-                            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-                                String key = arguments[0].head().getStringValue();
-                                switch (key) {
-                                    case "class":
-                                        return StringValue.bmp("Namespace Constraint");
-                                    case "variety":
-                                        if (allowsAny()) {
-                                            return StringValue.bmp("any");
-                                        } else if (allowedNamespaces != null) {
-                                            return StringValue.bmp("enumeration");
-                                        } else {
-                                            return StringValue.bmp("not");
-                                        }
-                                    case "namespaces":
-                                        if (allowsAny()) {
-                                            return EmptySequence.getInstance();
-                                        } else {
-                                            Set<String> namespaces = allowedNamespaces != null ? allowedNamespaces : disallowedNamespaces;
-                                            List<AtomicValue> list = new ArrayList<>(namespaces.size());
-                                            for (String ns : namespaces) {
-                                                list.add(new AnyURIValue(ns));
-                                            }
-                                            return new AtomicArray(list);
-                                        }
-                                    case "disallowed names":
-                                        List<AtomicValue> list = new ArrayList<>();
-                                        if (disallowsDefinedNames) {
-                                            list.add(StringValue.bmp("defined"));
-                                        }
-                                        if (disallowsDefinedSiblings) {
-                                            list.add(StringValue.bmp("definedSiblings"));
-                                        }
-                                        NamePool pool = getConfiguration().getNamePool();
-                                        IntIterator iter = disallowedQNames.iterator();
-                                        while (iter.hasNext()) {
-                                            int fp = iter.next();
-                                            String uri = pool.getURI(fp);
-                                            String local = pool.getLocalName(fp);
-                                            QNameValue value = new QNameValue("", uri, local);
-                                            list.add(value);
-                                        }
-                                        return new AtomicArray(list);
-                                    default:
-                                        return EmptySequence.getInstance();
+        Wildcard thisWildcard = this;
+        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
+            String key = arguments[0].head().getStringValue();
+            switch (key) {
+                case "class":
+                    return StringValue.bmp("Wildcard");
+                case "implementation":
+                    return new ObjectValue<>(thisWildcard);
+                case "namespace constraint":
+                    CallableDelegate constraintFunction = new CallableDelegate((context1, arguments1) -> {
+                        String key1 = arguments[0].head().getStringValue();
+                        switch (key1) {
+                            case "class":
+                                return StringValue.bmp("Namespace Constraint");
+                            case "variety":
+                                if (allowsAny()) {
+                                    return StringValue.bmp("any");
+                                } else if (allowedNamespaces != null) {
+                                    return StringValue.bmp("enumeration");
+                                } else {
+                                    return StringValue.bmp("not");
                                 }
-                            }
-                        };
-                        return new CallableFunction(1, constraintFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
-                    case "process contents":
-                        return new StringValue(getProcessContents());
-                    default:
-                        return EmptySequence.getInstance();
-                }
+                            case "namespaces":
+                                if (allowsAny()) {
+                                    return EmptySequence.getInstance();
+                                } else {
+                                    Set<String> namespaces = allowedNamespaces != null ? allowedNamespaces : disallowedNamespaces;
+                                    List<AtomicValue> uriList = new ArrayList<>(namespaces.size());
+                                    for (String ns : namespaces) {
+                                        uriList.add(new AnyURIValue(ns));
+                                    }
+                                    return new AtomicArray(uriList);
+                                }
+                            case "disallowed names":
+                                List<AtomicValue> disallowedList = new ArrayList<>();
+                                if (disallowsDefinedNames) {
+                                    disallowedList.add(StringValue.bmp("defined"));
+                                }
+                                if (disallowsDefinedSiblings) {
+                                    disallowedList.add(StringValue.bmp("definedSiblings"));
+                                }
+                                NamePool pool = getConfiguration().getNamePool();
+                                IntIterator iter = disallowedQNames.iterator();
+                                while (iter.hasNext()) {
+                                    int fp = iter.next();
+                                    String uri = pool.getURI(fp);
+                                    String local = pool.getLocalName(fp);
+                                    QNameValue value = new QNameValue("", uri, local);
+                                    disallowedList.add(value);
+                                }
+                                return new AtomicArray(disallowedList);
+                            default:
+                                return EmptySequence.getInstance();
+                        }
+
+                    });
+                    return new CallableFunction(1, constraintFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
+                case "process contents":
+                    return new StringValue(getProcessContents());
+                default:
+                    return EmptySequence.getInstance();
             }
-        };
+        });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }

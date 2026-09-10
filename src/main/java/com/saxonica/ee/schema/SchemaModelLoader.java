@@ -95,7 +95,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
         try {
             for (Fixup fixup : fixups) {
-                fixup.apply();
+                fixup.apply(this);
             }
 
             // Fix up the edges in all finite state machines
@@ -170,6 +170,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                         " in " + handlerStack.peek().getClass().getName());
             }
         }
+        handler.setSchemaModelLoader(this);
         handlerStack.push(handler);
         try {
             handler.processElementStart(elementName.getLocalPart(), attributes);
@@ -205,7 +206,14 @@ public class SchemaModelLoader extends ProxyReceiver {
      * in the SCM serialization.
      */
 
-    private interface SCMNodeHandler {
+    private abstract static class SCMNodeHandler {
+        
+        // The design here is distorted by the constraints of inner classes in C#
+        protected SchemaModelLoader loader;
+        
+        public void setSchemaModelLoader(SchemaModelLoader loader) {
+            this.loader = loader;
+        }
 
         /**
          * Process an element start tag together with its attributes
@@ -215,7 +223,7 @@ public class SchemaModelLoader extends ProxyReceiver {
          * @throws SchemaException if the data is invalid
          */
 
-        void processElementStart(String localName, AttributeMap attributes) throws SchemaException;
+        public abstract void processElementStart(String localName, AttributeMap attributes) throws SchemaException;
 
         /**
          * Handle a child element of the element currently being processed.
@@ -224,13 +232,13 @@ public class SchemaModelLoader extends ProxyReceiver {
          * @return an SCMNodeHandler which will be used to process the child element
          */
 
-        SCMNodeHandler handleChildElement(String localName);
+        public abstract SCMNodeHandler handleChildElement(String localName);
 
         /**
          * Process the element end tag
          */
 
-        void processElementEnd();
+        public abstract void processElementEnd();
 
     }
 
@@ -238,18 +246,18 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle the schema element (the outermost element of the SCM document)
      */
 
-    private class SchemaHandler implements SCMNodeHandler {
+    private static class SchemaHandler extends SCMNodeHandler {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String xsdVersion = attributes.getValue("", "xsdVersion");
             if (xsdVersion != null &&
-                    xsdVersion.compareTo(config.getConfigurationProperty(Feature.XSD_VERSION)) > 0) {
+                    xsdVersion.compareTo(loader.config.getConfigurationProperty(Feature.XSD_VERSION)) > 0) {
                 throw new SchemaException("Imported schema component model requires XSD version " + xsdVersion);
             }
-            dmk = attributes.getValue("", "dmk");
-            if (dmk != null) {
-                schema.setLocalLicenseId(config.registerLocalLicense(dmk));
+            loader.dmk = attributes.getValue("", "dmk");
+            if (loader.dmk != null) {
+                loader.schema.setLocalLicenseId(loader.config.registerLocalLicense(loader.dmk));
             }
         }
 
@@ -292,7 +300,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an element declaration in the SCM schema document
      */
 
-    private class ElementHandler implements SCMNodeHandler {
+    private static class ElementHandler extends SCMNodeHandler {
 
         private ElementDecl elementDecl;
 
@@ -315,6 +323,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+            EnterpriseConfiguration config = loader.config;
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
@@ -327,17 +336,17 @@ public class SchemaModelLoader extends ProxyReceiver {
             int finalSet = parseFinalOrBlock("final",
                     finalAtt,
                     Derivation.DERIVATION_EXTENSION |
-                                                     Derivation.DERIVATION_RESTRICTION |
-                                                     Derivation.DERIVE_BY_SUBSTITUTION);
+                    Derivation.DERIVATION_RESTRICTION |
+                    Derivation.DERIVE_BY_SUBSTITUTION);
             String blockAtt = attributes.getValue("", "block");
             int blockSet = parseFinalOrBlock("block",
                     blockAtt,
                     Derivation.DERIVATION_EXTENSION |
-                                                     Derivation.DERIVATION_RESTRICTION |
-                                                     Derivation.DERIVE_BY_SUBSTITUTION);
+                    Derivation.DERIVATION_RESTRICTION |
+                    Derivation.DERIVE_BY_SUBSTITUTION);
             elementDecl = new ElementDecl(config, isGlobal, null);
             elementDecl.setGeneratedId(id);
-            components.put(id, elementDecl);
+            loader.components.put(id, elementDecl);
             elementDecl.setElementName(new StructuredQName("", namespace, name));
             elementDecl.setAbstract(isAbstract);
             elementDecl.setNillable(isNillable);
@@ -352,11 +361,11 @@ public class SchemaModelLoader extends ProxyReceiver {
                     int fp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, type.substring(1));
                     elementDecl.setTypeReference(new TypeReference(fp, config, null));
                 } else {
-                    fixups.add(new Fixup(elementDecl, type, FIXUP_ELEMENT_TYPE));
+                    loader.fixups.add(new Fixup(elementDecl, type, FIXUP_ELEMENT_TYPE));
                 }
             }
             if (isGlobal) {
-                schema.addElementDecl(elementDecl);
+                loader.schema.addElementDecl(elementDecl);
             }
 
         }
@@ -370,7 +379,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a substitution group affiliation
      */
 
-    public class SubstitutionGroupAffiliationHandler implements SCMNodeHandler {
+    private static class SubstitutionGroupAffiliationHandler extends SCMNodeHandler {
 
         private final ElementDecl elementDecl;
 
@@ -393,7 +402,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         public void processElementStart(String localName, AttributeMap attributes) {
             String head = attributes.getValue("", "ref");
             if (head != null) {
-                fixups.add(new Fixup(elementDecl, head, FIXUP_ELEMENT_SUBSTITUTION_GROUP));
+                loader.fixups.add(new Fixup(elementDecl, head, FIXUP_ELEMENT_SUBSTITUTION_GROUP));
             }
         }
 
@@ -406,7 +415,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an alternative type for an element declaration
      */
 
-    public class AlternativeTypeHandler implements SCMNodeHandler {
+    private static class AlternativeTypeHandler extends SCMNodeHandler {
 
         private final ElementDecl elementDecl;
 
@@ -427,13 +436,14 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+            EnterpriseConfiguration config = loader.config;
             String xpathText = attributes.getValue("", "test");
             String xmlBase = attributes.getValue(NamespaceConstant.XML, "base");
             String defaultNamespace = attributes.getValue("", "defaultNamespace");
             String type = attributes.getValue("", "type");
             XPathEvaluator evaluator = new XPathEvaluator(config);
             IndependentContext env = (IndependentContext) evaluator.getStaticContext();
-            env.setNamespaceResolver(namespaceResolver);
+            env.setNamespaceResolver(loader.namespaceResolver);
             env.setDefaultElementNamespace(defaultNamespace);
             env.setBaseURI(xmlBase);
             XPathExpression condition;
@@ -442,16 +452,16 @@ public class SchemaModelLoader extends ProxyReceiver {
             } catch (XPathException err) {
                 throw new SchemaException(err);
             }
-            TypeAlternative alt = new TypeAlternative(config, condition, xpathText);
+            TypeAlternative alt = new TypeAlternative(loader.config, condition, xpathText);
             alt.setBaseURI(xmlBase);
             alt.setDefaultElementNamespace(defaultNamespace);
-            alt.setNamespaceContext(NamespaceMap.fromNamespaceResolver(namespaceResolver));
+            alt.setNamespaceContext(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
             alt.setParameters(new HashMap<>());
             if (type.startsWith("#")) {
                 int fp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, type.substring(1));
-                alt.setTypeReference(new TypeReference(fp, config, null));
+                alt.setTypeReference(new TypeReference(fp, loader.config, null));
             } else {
-                fixups.add(new Fixup(alt, type, FIXUP_ALTERNATIVE_TYPE));
+                loader.fixups.add(new Fixup(alt, type, FIXUP_ALTERNATIVE_TYPE));
             }
             elementDecl.addTypeAlternative(alt);
         }
@@ -465,10 +475,9 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an identity constraint reference in an element declaratoin
      */
 
-    private class IdentityConstraintReferenceHandler implements SCMNodeHandler {
+    private static class IdentityConstraintReferenceHandler extends SCMNodeHandler {
 
         private final ElementDecl container;
-        private IdentityConstraintReference constraintRef;
 
         public IdentityConstraintReferenceHandler(ElementDecl container) {
             this.container = container;
@@ -484,9 +493,9 @@ public class SchemaModelLoader extends ProxyReceiver {
 
             String ref = attributes.getValue("", "ref");
 
-            constraintRef = new IdentityConstraintReference();
+            IdentityConstraintReference constraintRef = new IdentityConstraintReference();
             container.addIdentityConstraint(constraintRef);
-            fixups.add(new Fixup(constraintRef, ref, FIXUP_IDENTITY_CONSTRAINT_REF));
+            loader.fixups.add(new Fixup(constraintRef, ref, FIXUP_IDENTITY_CONSTRAINT_REF));
 
         }
 
@@ -500,7 +509,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an identity constraint (key, keyref, unique)
      */
 
-    public class IdentityConstraintHandler implements SCMNodeHandler {
+    private static class IdentityConstraintHandler extends SCMNodeHandler {
 
         private IdentityConstraint identityConstraint;
 
@@ -535,24 +544,24 @@ public class SchemaModelLoader extends ProxyReceiver {
             switch (localName) {
                 case "unique":
                     ic = new Unique();
-                    components.put(id, ic);
+                    loader.components.put(id, ic);
                     //kind = StandardNames.XS_UNIQUE;
                     break;
                 case "key":
                     ic = new Key();
-                    components.put(id, ic);
+                    loader.components.put(id, ic);
                     //kind = StandardNames.XS_KEY;
                     break;
                 case "keyref":
                     ic = new KeyRef();
-                    components.put(id, ic);
-                    fixups.add(new Fixup(ic, key, FIXUP_KEYREF_KEY));
+                    loader.components.put(id, ic);
+                    loader.fixups.add(new Fixup(ic, key, FIXUP_KEYREF_KEY));
                     //kind = StandardNames.XS_KEYREF;
                     break;
                 default:
                     throw new AssertionError("unknown IdentityConstraint " + localName);
             }
-            ic.setConfiguration(config);
+            ic.setConfiguration(loader.config);
             ic.setConstraintName(nameCode);
             identityConstraint = ic;
         }
@@ -566,7 +575,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a selector or field within an identity constraint (key, keyref, unique)
      */
 
-    public class SelectorHandler implements SCMNodeHandler {
+    private static class SelectorHandler extends SCMNodeHandler {
 
         private final IdentityConstraint identityConstraint;
 
@@ -590,8 +599,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             String xpath = attributes.getValue("", "xpath");
             boolean isField = localName.equals("field");
             String defaultNamespace = attributes.getValue("", "defaultNamespace");
-            IndependentContext env = new IndependentContext(config);
-            env.setNamespaceResolver(NamespaceMap.fromNamespaceResolver(namespaceResolver));
+            IndependentContext env = new IndependentContext(loader.config);
+            env.setNamespaceResolver(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
             env.setDefaultElementNamespace(defaultNamespace);
             //env.setBaseURI(xmlBase);
             Pattern selector;
@@ -603,13 +612,13 @@ public class SchemaModelLoader extends ProxyReceiver {
             if (isField) {
                 IdentityField idf = new IdentityField(xpath);
                 idf.setSelection(selector);
-                idf.setNamespaceContext(NamespaceMap.fromNamespaceResolver(namespaceResolver));
+                idf.setNamespaceContext(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
                 idf.setXPathDefaultNamespace(defaultNamespace);
                 identityConstraint.addField(idf);
             } else {
                 IdentitySelector ids = new IdentitySelector(xpath);
                 ids.setSelection(selector);
-                ids.setNamespaceContext(NamespaceMap.fromNamespaceResolver(namespaceResolver));
+                ids.setNamespaceContext(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
                 ids.setXPathDefaultNamespace(defaultNamespace);
                 identityConstraint.setSelector(ids);
             }
@@ -625,7 +634,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an attribute declaration in the SCM schema document
      */
 
-    private class AttributeHandler implements SCMNodeHandler {
+    private static class AttributeHandler extends SCMNodeHandler {
 
         private AttributeDecl attributeDecl;
 
@@ -652,9 +661,9 @@ public class SchemaModelLoader extends ProxyReceiver {
             String type = attributes.getValue("", "type");
             String defaultValue = attributes.getValue("", "default");
 
-            attributeDecl = new AttributeDecl(config, isGlobal);
-            components.put(id, attributeDecl);
-            attributeDecl.setAttributeName(attributeName, config.getNamePool().allocateFingerprint(namespace, name));
+            attributeDecl = new AttributeDecl(loader.config, isGlobal);
+            loader.components.put(id, attributeDecl);
+            attributeDecl.setAttributeName(attributeName, loader.config.getNamePool().allocateFingerprint(namespace, name));
             attributeDecl.setInheritable(isInheritable);
 
             if (defaultValue != null) {
@@ -664,15 +673,15 @@ public class SchemaModelLoader extends ProxyReceiver {
 
             if (type != null) {
                 if (type.startsWith("#")) {
-                    int fp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, type.substring(1));
-                    attributeDecl.setTypeReference(new TypeReference(fp, config, null));
+                    int fp = loader.config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, type.substring(1));
+                    attributeDecl.setTypeReference(new TypeReference(fp, loader.config, null));
                 } else {
-                    fixups.add(new Fixup(attributeDecl, type, FIXUP_ATTRIBUTE_TYPE));
+                    loader.fixups.add(new Fixup(attributeDecl, type, FIXUP_ATTRIBUTE_TYPE));
                 }
             }
 
             if (isGlobal) {
-                schema.addAttributeDecl(attributeDecl);
+                loader.schema.addAttributeDecl(attributeDecl);
             }
 
         }
@@ -688,7 +697,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * or an anonymous type.
      */
 
-    private class ComplexTypeHandler implements SCMNodeHandler {
+    private static class ComplexTypeHandler extends SCMNodeHandler {
 
         UserComplexType complexType;
 
@@ -720,16 +729,17 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+            EnterpriseConfiguration config = loader.config;
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
             int fp;
             if (name == null) {
-                fp = config.getNamePool().allocateFingerprint(NamespaceConstant.ANONYMOUS, id);
+                fp = loader.config.getNamePool().allocateFingerprint(NamespaceConstant.ANONYMOUS, id);
                 name = id;
                 namespace = NamespaceConstant.ANONYMOUS;
             } else {
-                fp = config.getNamePool().allocateFingerprint(namespace, name);
+                fp = loader.config.getNamePool().allocateFingerprint(namespace, name);
             }
             String base = attributes.getValue("", "base");
             String variety = attributes.getValue("", "variety");
@@ -739,14 +749,14 @@ public class SchemaModelLoader extends ProxyReceiver {
             complexType = new UserComplexType(config, null);
             complexType.setEmptyCombinedAttributeGroup();
             //complexType.setSaxonDebug(true);
-            components.put(id, complexType);
+            loader.components.put(id, complexType);
             complexType.setTypeName(new StructuredQName("", namespace, name), fp);
             if (base != null) {
                 if (base.startsWith("#")) {
                     int basefp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, base.substring(1));
                     complexType.setBaseTypeReference(new TypeReference(basefp, config, null));
                 } else {
-                    fixups.add(new Fixup(complexType, base, FIXUP_COMPLEX_TYPE_BASE_TYPE));
+                    loader.fixups.add(new Fixup(complexType, base, FIXUP_COMPLEX_TYPE_BASE_TYPE));
                 }
             }
             ComplexVariety varietyCode = ComplexVariety.ELEMENT_ONLY;
@@ -772,13 +782,13 @@ public class SchemaModelLoader extends ProxyReceiver {
                     int typefp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, simpleType.substring(1));
                     complexType.setSimpleContentTypeReference(new TypeReference(typefp, config, null));
                 } else {
-                    fixups.add(new Fixup(complexType, simpleType, FIXUP_COMPLEX_TYPE_SIMPLE_TYPE));
+                    loader.fixups.add(new Fixup(complexType, simpleType, FIXUP_COMPLEX_TYPE_SIMPLE_TYPE));
                 }
             }
             if (name == null) {
-                schema.addAnonymousType(complexType);
+                loader.schema.addAnonymousType(complexType);
             } else {
-                schema.addType(complexType);
+                loader.schema.addType(complexType);
             }
             String blockAtt = attributes.getValue("", "block");
             int blockSet = parseFinalOrBlock("block",
@@ -805,13 +815,13 @@ public class SchemaModelLoader extends ProxyReceiver {
      * anonymous simple type
      */
 
-    private class SimpleTypeHandler implements SCMNodeHandler {
+    private static class SimpleTypeHandler extends SCMNodeHandler {
 
         private UserSimpleType simpleType;
 
         @Override
         public SCMNodeHandler handleChildElement(String localName) {
-            if (Facet.isFacetName(localName, getConfiguration().getXsdVersion()) || localName.equals("assert")) {
+            if (Facet.isFacetName(localName, loader.config.getXsdVersion()) || localName.equals("assert")) {
                 return new FacetHandler(simpleType);
             } else if (localName.equals("preprocess")) {
                 return new PreprocessHandler(simpleType);
@@ -822,6 +832,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+            EnterpriseConfiguration config = loader.config;
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
@@ -832,7 +843,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 namespace = NamespaceConstant.ANONYMOUS;
                 // TODO: this won't be unique if loading several SCM schemas
             } else {
-                fingerprint = config.getNamePool().allocateFingerprint(namespace, name);
+                fingerprint = loader.config.getNamePool().allocateFingerprint(namespace, name);
             }
             String base = attributes.getValue("", "base");
             String variety = attributes.getValue("", "variety");
@@ -848,23 +859,23 @@ public class SchemaModelLoader extends ProxyReceiver {
             } else {
                 throw new SchemaException("Unknown simple type variety: " + variety);
             }
-            components.put(id, simpleType);
+            loader.components.put(id, simpleType);
             simpleType.setTypeName(new StructuredQName("", namespace, name), fingerprint);
             if (base != null) {
                 if (base.startsWith("#")) {
-                    int fp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, base.substring(1));
-                    simpleType.setBaseTypeReference(new TypeReference(fp, config, null));
+                    int fp = loader.config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, base.substring(1));
+                    simpleType.setBaseTypeReference(new TypeReference(fp, loader.config, null));
                 } else {
-                    fixups.add(new Fixup(simpleType, base, FIXUP_SIMPLE_TYPE_BASE_TYPE));
+                    loader.fixups.add(new Fixup(simpleType, base, FIXUP_SIMPLE_TYPE_BASE_TYPE));
                 }
             }
 
             if (itemType != null) {
                 if (itemType.startsWith("#")) {
-                    int fp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, itemType.substring(1));
-                    ((UserListType) simpleType).setItemTypeReference(new TypeReference(fp, config, null));
+                    int fp = loader.config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, itemType.substring(1));
+                    ((UserListType) simpleType).setItemTypeReference(new TypeReference(fp, loader.config, null));
                 } else {
-                    fixups.add(new Fixup(simpleType, itemType, FIXUP_SIMPLE_TYPE_ITEM_TYPE));
+                    loader.fixups.add(new Fixup(simpleType, itemType, FIXUP_SIMPLE_TYPE_ITEM_TYPE));
                 }
             }
             if (memberTypes != null) {
@@ -872,19 +883,19 @@ public class SchemaModelLoader extends ProxyReceiver {
                 while (st.hasMoreTokens()) {
                     String memberType = st.nextToken();
                     if (memberType.startsWith("#")) {
-                        int fp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, memberType.substring(1));
-                        ((UserUnionType) simpleType).addMemberTypeReference(new TypeReference(fp, config, null));
+                        int fp = loader.config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, memberType.substring(1));
+                        ((UserUnionType) simpleType).addMemberTypeReference(new TypeReference(fp, loader.config, null));
                     } else {
-                        fixups.add(new Fixup(simpleType, memberType, FIXUP_SIMPLE_TYPE_MEMBER_TYPE));
+                        loader.fixups.add(new Fixup(simpleType, memberType, FIXUP_SIMPLE_TYPE_MEMBER_TYPE));
                     }
 
                 }
 
             }
             if (name == null) {
-                schema.addAnonymousType(simpleType);
+                loader.schema.addAnonymousType(simpleType);
             } else {
-                schema.addType(simpleType);
+                loader.schema.addType(simpleType);
             }
         }
 
@@ -898,12 +909,12 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a named attribute group definition in the SCM Schema Document
      */
 
-    private class AttributeGroupHandler implements SCMNodeHandler {
+    private static class AttributeGroupHandler extends SCMNodeHandler {
 
         final AttributeGroupDecl group;
 
         public AttributeGroupHandler() {
-            group = new AttributeGroupDecl(config);
+            group = new AttributeGroupDecl(loader.config);
         }
 
         @Override
@@ -928,9 +939,9 @@ public class SchemaModelLoader extends ProxyReceiver {
                 nameCode = new StructuredQName("", namespace, name);
             }
 
-            components.put(id, group);
+            loader.components.put(id, group);
             group.setAttributeGroupName(nameCode);
-            schema.addAttributeGroup(group);
+            loader.schema.addAttributeGroup(group);
         }
 
         @Override
@@ -943,7 +954,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a named attribute group definition in the SCM Schema Document
      */
 
-    private class NotationHandler implements SCMNodeHandler {
+    private static class NotationHandler extends SCMNodeHandler {
 
         @Override
         public SCMNodeHandler handleChildElement(String localName) {
@@ -952,7 +963,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            Notation notation = new Notation(config, null);
+            Notation notation = new Notation(loader.config, null);
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
@@ -968,8 +979,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             notation.setNotationSystemId(systemId);
             String publicId = attributes.getValue("", "publicId");
             notation.setNotationPublicId(publicId);
-            components.put(id, notation);
-            schema.addNotation(notation);
+            loader.components.put(id, notation);
+            loader.schema.addNotation(notation);
         }
 
         @Override
@@ -982,7 +993,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a named model group definition in the SCM Schema document
      */
 
-    private class ModelGroupDefinitionHandler extends ModelGroupHandler {
+    private static class ModelGroupDefinitionHandler extends ModelGroupHandler {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
@@ -990,10 +1001,10 @@ public class SchemaModelLoader extends ProxyReceiver {
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
             StructuredQName modelGroupName = new StructuredQName("", namespace, name);
-            ModelGroupDefinition mgd = new ModelGroupDefinition(config, null);
+            ModelGroupDefinition mgd = new ModelGroupDefinition(loader.config, null);
             mgd.setModelGroupName(modelGroupName);
-            components.put(id, mgd);
-            schema.addGroup(mgd);
+            loader.components.put(id, mgd);
+            loader.schema.addGroup(mgd);
             group = mgd;
         }
 
@@ -1007,7 +1018,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an attribute use component in the SCM schema document
      */
 
-    private class AttributeUseHandler implements SCMNodeHandler {
+    private static class AttributeUseHandler extends SCMNodeHandler {
 
         private final SchemaComponent container;
         private AttributeUse attributeUse;
@@ -1033,7 +1044,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             String ref = attributes.getValue("", "ref");
             String defaultValue = attributes.getValue("", "default");
 
-            attributeUse = new AttributeUse(config);
+            attributeUse = new AttributeUse(loader.config);
             attributeUse.setInheritable(isInheritable ? 1 : 0);
             if (container instanceof UserComplexType) {
                 ((UserComplexType) container).addNonInheritedAttributeUse(attributeUse);
@@ -1047,7 +1058,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, StringView.tidy(defaultValue));
                 attributeUse.setValueConstraint(vc);
             }
-            fixups.add(new Fixup(attributeUse, ref, FIXUP_ATTRIBUTE_USE_DECLARATION));
+            loader.fixups.add(new Fixup(attributeUse, ref, FIXUP_ATTRIBUTE_USE_DECLARATION));
 
         }
 
@@ -1060,7 +1071,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a facet definition in the SCM Schema document
      */
 
-    private class FacetHandler implements SCMNodeHandler {
+    private static class FacetHandler extends SCMNodeHandler {
 
         private final UserSimpleType simpleType;
 
@@ -1083,9 +1094,9 @@ public class SchemaModelLoader extends ProxyReceiver {
                 boolean namespaceSensitive = toBoolean(attributes.getValue("", "namespaceSensitive"));
                 NamespaceResolver resolver = null;
                 if (namespaceSensitive) {
-                    resolver = NamespaceMap.fromNamespaceResolver(namespaceResolver);
+                    resolver = NamespaceMap.fromNamespaceResolver(loader.namespaceResolver);
                 }
-                Facet facet = Facet.makeFacet(localName, value, config, resolver);
+                Facet facet = Facet.makeFacet(localName, value, loader.config, resolver);
                 String fixed = attributes.getValue("", "fixed");
                 if (fixed != null) {
                     facet.setFixed(toBoolean(fixed));
@@ -1111,7 +1122,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a saxon:preprocess facet definition in the SCM Schema document
      */
 
-    private class PreprocessHandler implements SCMNodeHandler {
+    private static class PreprocessHandler extends SCMNodeHandler {
 
         private final UserSimpleType simpleType;
         private final PreprocessFacet facet;
@@ -1152,7 +1163,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * model group
      */
 
-    private class ParticleHandler implements SCMNodeHandler {
+    private static class ParticleHandler extends SCMNodeHandler {
 
         private final SchemaComponent container;
         private Particle particle;
@@ -1177,6 +1188,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+            EnterpriseConfiguration config = loader.config;
             switch (localName) {
                 case "elementParticle":
                     particle = new ElementParticle(config, null);
@@ -1210,15 +1222,15 @@ public class SchemaModelLoader extends ProxyReceiver {
 
             if (particle instanceof ElementParticle) {
                 String ref = attributes.getValue("", "ref");
-                fixups.add(new Fixup(particle, ref, FIXUP_ELEMENT_PARTICLE_REF));
+                loader.fixups.add(new Fixup(particle, ref, FIXUP_ELEMENT_PARTICLE_REF));
             } else if (particle instanceof ModelGroupParticle) {
                 String ref = attributes.getValue("", "ref");
                 if (ref != null) {
-                    fixups.add(new Fixup(particle, ref, FIXUP_MODEL_GROUP_PARTICLE_REF));
+                    loader.fixups.add(new Fixup(particle, ref, FIXUP_MODEL_GROUP_PARTICLE_REF));
                 }
             } else if (particle instanceof ElementWildcard) {
                 String ref = attributes.getValue("", "ref");
-                fixups.add(new Fixup(particle, ref, FIXUP_ELEMENT_WILDCARD_REF));
+                loader.fixups.add(new Fixup(particle, ref, FIXUP_ELEMENT_WILDCARD_REF));
             } else {
                 throw new IllegalStateException("Unknown particle " + particle.getClass().getName());
             }
@@ -1242,7 +1254,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an unnamed model group, that is, a sequence, choice, or all.
      */
 
-    private class ModelGroupHandler implements SCMNodeHandler {
+    private static class ModelGroupHandler extends SCMNodeHandler {
 
         private final ModelGroupParticle referrer;
         protected ModelGroup group;
@@ -1288,7 +1300,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             if (referrer != null) {
                 referrer.setTarget(group);
             }
-            anonComponents.add(group);
+            loader.anonComponents.add(group);
         }
 
         @Override
@@ -1300,7 +1312,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an assertion in the SCM schema document.
      */
 
-    private class AssertionHandler implements SCMNodeHandler {
+    private static class AssertionHandler extends SCMNodeHandler {
 
         private final Object container;
 
@@ -1322,15 +1334,15 @@ public class SchemaModelLoader extends ProxyReceiver {
 
             XPathEvaluator evaluator;
             if (container instanceof UserComplexType) {
-                evaluator = new XSDAssert.CustomizedXPath(config);
+                evaluator = new XSDAssert.CustomizedXPath(loader.config);
             } else {
-                evaluator = new XPathEvaluator(config);
+                evaluator = new XPathEvaluator(loader.config);
             }
             IndependentContext env = (IndependentContext) evaluator.getStaticContext();
-            env.setNamespaceResolver(NamespaceMap.fromNamespaceResolver(namespaceResolver));
+            env.setNamespaceResolver(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
             env.setBaseURI(xmlBase);
             env.setDefaultElementNamespace(defaultNamespace);
-            env.getPackageData().setLocalLicenseId(schema.getLocalLicenseId());
+            env.getPackageData().setLocalLicenseId(loader.schema.getLocalLicenseId());
             env.setSchemaAware(true);
             boolean isSimple = (container instanceof UserSimpleType) ||
                     (container instanceof UserComplexType && ((UserComplexType) container).isSimpleContent());
@@ -1344,7 +1356,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             } catch (XPathException err) {
                 throw new SchemaException(err);
             }
-            Assertion assertion = new Assertion(config, condition, valueVariable, new HashMap<>(), xpathText);
+            Assertion assertion = new Assertion(loader.config, condition, valueVariable, new HashMap<>(), xpathText);
             assertion.setStaticContext(env);
             if (sweep != null) {
                 assertion.setSweep(Sweep.valueOf(sweep));
@@ -1376,7 +1388,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an open content element in the SCM schema document.
      */
 
-    private class OpenContentHandler implements SCMNodeHandler {
+    private static class OpenContentHandler extends SCMNodeHandler {
 
         private final UserComplexType container;
 
@@ -1398,9 +1410,9 @@ public class SchemaModelLoader extends ProxyReceiver {
             String mode = attributes.getValue("", "mode");
             String wildcardRef = attributes.getValue("", "wildcard");
             if (mode.equals("suffix")) {
-                fixups.add(new Fixup(container, wildcardRef, FIXUP_COMPLEX_TYPE_OPEN_CONTENT_SUFFIX));
+                loader.fixups.add(new Fixup(container, wildcardRef, FIXUP_COMPLEX_TYPE_OPEN_CONTENT_SUFFIX));
             } else {
-                fixups.add(new Fixup(container, wildcardRef, FIXUP_COMPLEX_TYPE_OPEN_CONTENT_INTERLEAVE));
+                loader.fixups.add(new Fixup(container, wildcardRef, FIXUP_COMPLEX_TYPE_OPEN_CONTENT_INTERLEAVE));
             }
         }
 
@@ -1413,7 +1425,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a attribute wildcard in the SCM schema document.
      */
 
-    private class AttributeWildcardHandler implements SCMNodeHandler {
+    private static class AttributeWildcardHandler extends SCMNodeHandler {
 
         private final SchemaComponent container;
 
@@ -1428,7 +1440,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            AttributeWildcard awc = new AttributeWildcard((EnterpriseConfiguration) getConfiguration());
+            AttributeWildcard awc = new AttributeWildcard((EnterpriseConfiguration) loader.getConfiguration());
             if (container instanceof AttributeGroupDecl) {
                 ((AttributeGroupDecl) container).setAnyAttribute(awc);
             } else if (container instanceof UserComplexType) {
@@ -1437,7 +1449,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 throw new IllegalArgumentException(container.getClass().getName());
             }
             String ref = attributes.getValue("", "ref");
-            fixups.add(new Fixup(awc, ref, FIXUP_ATTRIBUTE_WILDCARD_REF));
+            loader.fixups.add(new Fixup(awc, ref, FIXUP_ATTRIBUTE_WILDCARD_REF));
         }
 
         @Override
@@ -1449,7 +1461,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a fixed value element in the SCM schema document.
      */
 
-    private class ValueConstraintHandler implements SCMNodeHandler {
+    private static class ValueConstraintHandler extends SCMNodeHandler {
 
         private final SchemaComponent container;
         private final ArrayList<AtomicValue> atomicValues = new ArrayList<>(4);
@@ -1500,7 +1512,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an Item element within a Fixed value
      */
 
-    private class ItemHandler implements SCMNodeHandler {
+    private static class ItemHandler extends SCMNodeHandler {
 
         private final ValueConstraintHandler container;
 
@@ -1516,14 +1528,14 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String type = attributes.getValue("", "type");
-            BuiltInAtomicType t = (BuiltInAtomicType) config.getSchemaType(
+            BuiltInAtomicType t = (BuiltInAtomicType) loader.config.getSchemaType(
                 new StructuredQName("", NamespaceConstant.SCHEMA, type.substring(1)));
             String value = attributes.getValue("", "value");
             String namespace = attributes.getValue("", "namespace");
             AtomicValue typedValue;
             try {
                 if (namespace == null) {
-                    typedValue = t.getTypedValue(StringView.tidy(value), null, config.getConversionRules()).head();
+                    typedValue = t.getTypedValue(StringView.tidy(value), null, loader.config.getConversionRules()).head();
                 } else {
                     String[] parts = NameChecker.getQNameParts(value);
                     if (t.equals(BuiltInAtomicType.QNAME)) {
@@ -1550,7 +1562,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a wildcard within an element or attribute wildcard component
      */
 
-    private class WildcardHandler implements SCMNodeHandler {
+    private static class WildcardHandler extends SCMNodeHandler {
 
         public WildcardHandler() {
         }
@@ -1564,10 +1576,10 @@ public class SchemaModelLoader extends ProxyReceiver {
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
 
             Wildcard wildcard = new Wildcard();
-            wildcard.setConfiguration((EnterpriseConfiguration) getConfiguration());
+            wildcard.setConfiguration((EnterpriseConfiguration) loader.getConfiguration());
             String id = attributes.getValue("", "id");
             if (id != null) {
-                components.put(id, wildcard);
+                loader.components.put(id, wildcard);
             }
             String processContents = attributes.getValue("", "processContents");
             wildcard.setProcessContents(processContents);
@@ -1600,7 +1612,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
             String disallowedQNames = attributes.getValue("", "notQName");
             if (disallowedQNames != null) {
-                NamePool pool = getNamePool();
+                NamePool pool = loader.getNamePool();
                 StringTokenizer st = new StringTokenizer(disallowedQNames, " \r\t\n");
                 while (st.hasMoreTokens()) {
                     String token = st.nextToken();
@@ -1626,7 +1638,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a finite state machine within a complex type
      */
 
-    private class FiniteStateMachineHandler implements SCMNodeHandler {
+    private static class FiniteStateMachineHandler extends SCMNodeHandler {
 
         private final FiniteStateMachine fsm;
         //private IntHashMap forwardReferences = new IntHashMap();
@@ -1668,7 +1680,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle a state within a finite state machine
      */
 
-    private class FiniteStateMachineStateHandler implements SCMNodeHandler {
+    private static class FiniteStateMachineStateHandler extends SCMNodeHandler {
 
         private final FiniteStateMachineHandler fsmHandler;
         private DeterminizedState state;
@@ -1696,7 +1708,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 state = new DeterminizedState(fsm);
             }
             String isFinal = attributes.getValue("", "final");
-            state.setFinalState(toBoolean(isFinal));
+            state.setFinalState(toBoolean(isFinal)) ;
             String min = attributes.getValue("", "minOccurs");
             String max = attributes.getValue("", "maxOccurs");
             if (min != null && max != null) {
@@ -1709,7 +1721,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 leavingEdge.termId = "##afterMax";
                 leavingEdge.fromState = Integer.parseInt(stateNumber);
                 leavingEdge.toState = Integer.parseInt(afterMax);
-                pendingEdges.add(leavingEdge);
+                loader.pendingEdges.add(leavingEdge);
             }
         }
 
@@ -1722,7 +1734,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Handle an Edge within a finite state machine
      */
 
-    private class FiniteStateMachineEdgeHandler implements SCMNodeHandler {
+    private static class FiniteStateMachineEdgeHandler extends SCMNodeHandler {
 
         private final FiniteStateMachineHandler fsm;
         private final DeterminizedState state;
@@ -1746,7 +1758,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             pe.fromState = state.getStateNumber();
             pe.toState = targetState;
             pe.termId = term;
-            pendingEdges.add(pe);
+            loader.pendingEdges.add(pe);
         }
 
         @Override
@@ -1797,7 +1809,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * @throws SchemaException if a failure occurs
      */
 
-    public int parseFinalOrBlock(String attrName, String finalValue, int allowed) throws SchemaException {
+    public static int parseFinalOrBlock(String attrName, String finalValue, int allowed) throws SchemaException {
         if (finalValue == null) {
             return 0;
         }
@@ -1872,7 +1884,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * Object defining a fixup action, something to be done when all the data has been read
      */
 
-    private class Fixup {
+    private static class Fixup {
 
         private final Object source;
         private final String targetId;
@@ -1884,35 +1896,35 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.property = property;
         }
 
-        public void apply() {
+        public void apply(SchemaModelLoader loader) {
             switch (property) {
                 case FIXUP_ELEMENT_TYPE: {
-                    ((ElementDecl) source).setTypeReference(makeTypeReference(targetId));
+                    ((ElementDecl) source).setTypeReference(loader.makeTypeReference(targetId));
                     break;
                 }
                 case FIXUP_ELEMENT_SUBSTITUTION_GROUP: {
-                    ElementDecl head = (ElementDecl) components.get(targetId);
+                    ElementDecl head = (ElementDecl) loader.components.get(targetId);
                     ((ElementDecl) source).addSubstitutionGroupHead(head.getComponentName());
                     break;
                 }
                 case FIXUP_ALTERNATIVE_TYPE: {
-                    ((TypeAlternative) source).setTypeReference(makeTypeReference(targetId));
+                    ((TypeAlternative) source).setTypeReference(loader.makeTypeReference(targetId));
                     break;
                 }
                 case FIXUP_ATTRIBUTE_TYPE: {
-                    ((AttributeDecl) source).setTypeReference(makeTypeReference(targetId));
+                    ((AttributeDecl) source).setTypeReference(loader.makeTypeReference(targetId));
                     break;
                 }
                 case FIXUP_COMPLEX_TYPE_BASE_TYPE: {
-                    ((UserComplexType) source).setBaseTypeReference(makeTypeReference(targetId));
+                    ((UserComplexType) source).setBaseTypeReference(loader.makeTypeReference(targetId));
                     break;
                 }
                 case FIXUP_COMPLEX_TYPE_SIMPLE_TYPE: {
-                    ((UserComplexType) source).setSimpleContentTypeReference(makeTypeReference(targetId));
+                    ((UserComplexType) source).setSimpleContentTypeReference(loader.makeTypeReference(targetId));
                     break;
                 }
                 case FIXUP_COMPLEX_TYPE_OPEN_CONTENT_SUFFIX: {
-                    Wildcard wildcard = (Wildcard) components.get(targetId);
+                    Wildcard wildcard = (Wildcard) loader.components.get(targetId);
                     ((UserComplexType) source).setOpenContentWildcard(wildcard, "suffix", true);
                     FiniteStateMachine fsm = ((UserComplexType) source).getFiniteStateMachine();
                     if (fsm != null) {
@@ -1921,7 +1933,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                     break;
                 }
                 case FIXUP_COMPLEX_TYPE_OPEN_CONTENT_INTERLEAVE: {
-                    Wildcard wildcard = (Wildcard) components.get(targetId);
+                    Wildcard wildcard = (Wildcard) loader.components.get(targetId);
                     ((UserComplexType) source).setOpenContentWildcard(wildcard, "interleave", true);
                     FiniteStateMachine fsm = ((UserComplexType) source).getFiniteStateMachine();
                     if (fsm != null) {
@@ -1930,53 +1942,53 @@ public class SchemaModelLoader extends ProxyReceiver {
                     break;
                 }
                 case FIXUP_SIMPLE_TYPE_ITEM_TYPE: {
-                    ((UserListType) source).setItemTypeReference(makeTypeReference(targetId));
+                    ((UserListType) source).setItemTypeReference(loader.makeTypeReference(targetId));
                     break;
                 }
                 case FIXUP_SIMPLE_TYPE_MEMBER_TYPE: {
-                    ((UserUnionType) source).addMemberTypeReference(makeTypeReference(targetId));
+                    ((UserUnionType) source).addMemberTypeReference(loader.makeTypeReference(targetId));
                     break;
                 }
                 case FIXUP_SIMPLE_TYPE_BASE_TYPE: {
-                    ((UserSimpleType) source).setBaseTypeReference(makeTypeReference(targetId));
+                    ((UserSimpleType) source).setBaseTypeReference(loader.makeTypeReference(targetId));
                     break;
                 }
                 case FIXUP_ATTRIBUTE_USE_DECLARATION: {
-                    final SchemaComponent target = components.get(targetId);
+                    final SchemaComponent target = loader.components.get(targetId);
                     ((AttributeUse) source).setTarget(target);
                     ((AttributeUse) source).setTargetComponentName(((AttributeDecl) target).getComponentName());
                     break;
                 }
                 case FIXUP_ATTRIBUTE_WILDCARD_REF: {
-                    final SchemaComponent target = components.get(targetId);
+                    final SchemaComponent target = loader.components.get(targetId);
                     ((AttributeWildcard) source).setWildcard((Wildcard) target);
                     break;
                 }
                 case FIXUP_ELEMENT_PARTICLE_REF: {
-                    SchemaComponent target = components.get(targetId);
+                    SchemaComponent target = loader.components.get(targetId);
                     ((ElementParticle) source).setTarget(target);
                     ((ElementParticle) source).setTargetComponentName(((ElementDecl) target).getComponentName());
                     break;
                 }
                 case FIXUP_ELEMENT_WILDCARD_REF: {
-                    final SchemaComponent target = components.get(targetId);
+                    final SchemaComponent target = loader.components.get(targetId);
                     ((ElementWildcard) source).setWildcard((Wildcard) target);
                     break;
                 }
                 case FIXUP_MODEL_GROUP_PARTICLE_REF: {
-                    SchemaComponent target = components.get(targetId);
+                    SchemaComponent target = loader.components.get(targetId);
                     ((ModelGroupParticle) source).setTarget(target);
                     ((ModelGroupParticle) source).setTargetComponentName(((ModelGroupDefinition) target).getModelGroupName());
                     break;
                 }
                 case FIXUP_KEYREF_KEY: {
-                    IdentityConstraint target = (IdentityConstraint) components.get(targetId);
+                    IdentityConstraint target = (IdentityConstraint) loader.components.get(targetId);
                     ((KeyRef) source).setTargetKey(target);
                     ((KeyRef) source).setTargetComponentName(target.getConstraintName());
                     break;
                 }
                 case FIXUP_IDENTITY_CONSTRAINT_REF: {
-                    IdentityConstraint target = (IdentityConstraint) components.get(targetId);
+                    IdentityConstraint target = (IdentityConstraint) loader.components.get(targetId);
                     ((IdentityConstraintReference) source).setTarget(target);
                     break;
                 }

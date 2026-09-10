@@ -26,7 +26,7 @@ public abstract class DelegatingFeed extends ItemFeed {
 
     /*@Nullable*/
     @Override
-    public ItemFeed getResult() {
+    public ItemFeed getResultFeed() {
         ProxyOutputter proxy = (ProxyOutputter)getNextOutputter();
         return (ItemFeed) proxy.getNextOutputter();
     }

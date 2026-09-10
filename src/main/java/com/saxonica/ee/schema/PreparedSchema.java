@@ -35,7 +35,7 @@ import java.util.*;
  * must happen in a single thread.</p>
  */
 
-public class PreparedSchema extends SchemaStructure implements NotationSet {
+public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
 
     public static final int NAMESPACE_UNKNOWN = 1;
     public static final int NAMESPACE_UNDER_CONSTRUCTION = 2;
@@ -182,7 +182,7 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      * Set the configuration
      */
 
-    @Override
+    //@Override
     public void setConfiguration(EnterpriseConfiguration config) {
         this.config = config;
     }
@@ -191,7 +191,7 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      * Get the configuration
      */
 
-    @Override
+    //@Override
     public EnterpriseConfiguration getConfiguration() {
         return config;
     }
@@ -316,10 +316,9 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      */
 
     public void addAttributeDecl(AttributeDecl attribute) {
-
+        AttributeDecl oldDecl = attributesByName.put(attribute.getComponentName(), attribute);
         // index it within this schema by its name
-        if (attributesByName.put(attribute.getComponentName(), attribute) != attribute) {
-
+        if (oldDecl != attribute) {
             // register it for fixup and validation
             attributesByFingerprint.put(attribute.getFingerprint(), attribute);
             addComponent(attribute);
@@ -609,7 +608,8 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
             notations = new HashMap<>(20);
         }
         Map<StructuredQName, Notation> nn = notations;
-        if (nn.put(notation.getNotationName(), notation) != notation) {
+        Notation oldNotation = nn.put(notation.getNotationName(), notation);
+        if (oldNotation != notation) {
             addComponent(notation);
             targetNamespaces.add(notation.getTargetNamespace());
         }
@@ -653,7 +653,8 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
         if (identityConstraints == null) {
             identityConstraints = new HashMap<>(20);
         }
-        if (identityConstraints.put(constraint.getConstraintName(), constraint) != constraint) {
+        IdentityConstraint oldConstraint = identityConstraints.put(constraint.getConstraintName(), constraint);
+        if (oldConstraint != constraint) {
             addComponent(constraint);
             targetNamespaces.add(constraint.getTargetNamespace());
         }
@@ -1131,8 +1132,11 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      * @throws SchemaException if the two hash maps contain conflicting definitions for the same component
      */
 
-    private static <T> Map<StructuredQName, T> combine(
-        Map<StructuredQName, T> m1, Map<StructuredQName, T> m2, String kind) throws SchemaException {
+    //@CSharpTypeBounds(bounds = {"T:class"})
+    private static <T extends SchemaComponent> Map<StructuredQName, T> combine(
+                Map<StructuredQName, T> m1,
+                Map<StructuredQName, T> m2,
+                String kind) throws SchemaException {
         if (m1 == null) {
             return m2;
         }
@@ -1143,15 +1147,10 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
         for (StructuredQName k1 : m1.keySet()) {
             T v1 = m1.get(k1);
             T v2 = m2.get(k1);
-            if (v2 != null && v2 != v1) {
-                String loc1 = v1.getClass().getName();
-                if (v1 instanceof SchemaStructure) {
-                    loc1 = "line " + ((SchemaStructure) v1).getLineNumber() + " of " + ((SchemaStructure) v1).getSystemId();
-                }
-                String loc2 = v2.getClass().getName();
-                if (v2 instanceof SchemaStructure) {
-                    loc2 = "line " + ((SchemaStructure) v2).getLineNumber() + " of " + ((SchemaStructure) v2).getSystemId();
-                }
+            //noinspection RedundantCast  (needed for C#)
+            if (v2 != null && (net.sf.saxon.type.SchemaComponent)v2 != (net.sf.saxon.type.SchemaComponent)v1) {
+                String loc1 = identify(v1);
+                String loc2 = identify(v2);
                 if (!loc1.equals(loc2)) {
                     throw new SchemaException(kind + " " +
                         k1.getDisplayName() +
@@ -1167,6 +1166,17 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
         return result;
     }
 
+    private static String identify(SchemaComponent component) {
+        if (component instanceof SchemaStructure) {
+            SchemaStructure ss = (SchemaStructure) component;
+            return "line " + ss.getLineNumber() + " of " + ss.getSystemId();
+        } else if (component instanceof SchemaType) {
+            return ((SchemaType)component).getEQName();
+        } else {
+            return component.getClass().getName();
+        }
+    }
+
     /**
      * Combine two hash maps containing schema components indexed by fingerprint
      *
@@ -1178,7 +1188,10 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      * @throws SchemaException if the two hash maps contain conflicting definitions for the same component
      */
 
-    private static <T> IntHashMap<T> combine(IntHashMap<T> m1, IntHashMap<T> m2, NamePool pool, String kind) throws SchemaException {
+    //@CSharpTypeBounds(bounds = {"T:com.saxonica.ee.schema.SchemaStructure"})
+    private static <T extends SchemaStructure> IntHashMap<T>  combine
+            (IntHashMap<T> m1, IntHashMap<T> m2, NamePool pool, String kind)
+            throws SchemaException {
         if (m1 == null) {
             return m2;
         }
@@ -1192,14 +1205,8 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
             T v1 = m1.get(k1);
             T v2 = m2.get(k1);
             if (v2 != null && v2 != v1) {
-                String loc1 = v1.getClass().getName();
-                if (v1 instanceof SchemaStructure) {
-                    loc1 = "line " + ((SchemaStructure) v1).getLineNumber() + " of " + ((SchemaStructure) v1).getSystemId();
-                }
-                String loc2 = v2.getClass().getName();
-                if (v2 instanceof SchemaStructure) {
-                    loc2 = "line " + ((SchemaStructure) v2).getLineNumber() + " of " + ((SchemaStructure) v2).getSystemId();
-                }
+                String loc1 = identify(v1);
+                String loc2 = identify(v2);
                 if (!loc1.equals(loc2)) {
                     throw new SchemaException(kind + " " +
                         pool.getEQName(k1) +

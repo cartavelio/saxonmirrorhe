@@ -5,11 +5,10 @@ import com.saxonica.xsltextn.pedigree.PedigreeValue;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
 
 /**
@@ -31,7 +30,7 @@ import net.sf.saxon.value.Int64Value;
 public class PedigreeFn extends SystemFunction {
 
     @Override
-    public ZeroOrOne<MapItem> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item in = arguments[0].head();
         if (in instanceof PedigreeValue) {
             DictionaryMap result = new DictionaryMap();
@@ -45,9 +44,9 @@ public class PedigreeFn extends SystemFunction {
             if (pedigree.getKey() != null) {
                 result.initialPut("key", pedigree.getKey());
             }
-            return new ZeroOrOne<>(result);
+            return result;
         } else {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
     }
 

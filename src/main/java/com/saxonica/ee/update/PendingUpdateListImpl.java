@@ -27,7 +27,10 @@ public class PendingUpdateListImpl implements PendingUpdateList {
 
     private final Configuration config;
 
-    private final IntHashMap<List<PendingUpdateAction>> lists = new IntHashMap<>(PutAction.PHASE + 1);  // one list per phase of the apply process
+    private final IntHashMap<List<PendingUpdateAction>> lists =
+            new IntHashMap<List<PendingUpdateAction>>(PutAction.PHASE + 1);
+            // one list per phase of the apply process
+
     private final Set<MutableNodeInfo> affectedTrees = new HashSet<>();
 
     private final Set<NodeInfo> renamedNodes = new HashSet<>();
@@ -64,7 +67,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
     public void add(PendingUpdateAction action) throws XPathException {
         int phase = action.getApplyPhase();
         if (lists.get(phase) == null) {
-            lists.put(phase, new ArrayList<>(4));
+            lists.put(phase, new ArrayList<PendingUpdateAction>(4));
         }
 
         if (action instanceof RenameAction) {
@@ -142,7 +145,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
 
     private void addAttributeAction(NodeInfo element, PendingUpdateAction action) {
         List<PendingUpdateAction> actions =
-                attributeActions.computeIfAbsent(element, k -> new ArrayList<>(2));
+                attributeActions.computeIfAbsent(element, k -> new ArrayList<PendingUpdateAction>(2));
         actions.add(action);
         packages.add(action.getOriginator().getPackageData());
     }
@@ -276,9 +279,9 @@ public class PendingUpdateListImpl implements PendingUpdateList {
         finalCheck();
         // Do everything except the put() actions
         for (int phase = 0; phase < PutAction.PHASE; phase++) {
-            Collection<PendingUpdateAction> list = lists.get(phase);
-            if (list != null) {
-                for (PendingUpdateAction action : list) {
+            Collection<PendingUpdateAction> actionList = lists.get(phase);
+            if (actionList != null) {
+                for (PendingUpdateAction action : actionList) {
                     action.apply(context, affectedTrees);
                 }
             }

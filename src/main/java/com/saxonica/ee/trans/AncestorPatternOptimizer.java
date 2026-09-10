@@ -26,8 +26,10 @@ public class AncestorPatternOptimizer extends PatternOptimizer {
         return pattern instanceof AncestorQualifiedPattern;
     }
 
-    @Override
-    public void process(RuleEE rule, Pattern pattern, Map<Precondition, List<RuleEE>> preconditions, Map<Characteristic, Characteristic> characteristics) {
+    public void process(RuleEE rule,
+                        Pattern pattern,
+                        Map<Precondition, List<RuleEE>> preconditions,
+                        Map<Characteristic, Characteristic> characteristics) {
         Pattern anc = ((AncestorQualifiedPattern) pattern).getUpperPattern();
         boolean isParent = ((AncestorQualifiedPattern) pattern).getUpwardsAxis() == AxisInfo.PARENT;
         AncestorCharacteristic chic = new AncestorCharacteristic(anc, isParent);

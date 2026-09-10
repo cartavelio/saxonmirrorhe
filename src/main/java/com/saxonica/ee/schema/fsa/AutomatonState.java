@@ -7,6 +7,7 @@ import net.sf.saxon.om.CodedName;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.jiter.ConcatenatingIterable;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaException;
@@ -34,7 +35,7 @@ public abstract class AutomatonState implements State {
 
     private Edge maxTransition;
 
-    private boolean isFinalState = false;
+    private boolean _isFinalState = false;
 
     // A state can hold a counter; logically this represents a collection of N different states, one for each
     // possible value of the counter. The counter is not part of this object, because the FSM is immutable. But
@@ -66,7 +67,7 @@ public abstract class AutomatonState implements State {
 
     @Override
     public boolean isFinalState() {
-        return isFinalState && min < 1;
+        return _isFinalState && min < 1;
     }
 
     /**
@@ -76,7 +77,7 @@ public abstract class AutomatonState implements State {
      */
 
     public boolean isConditionallyFinalState() {
-        return isFinalState;
+        return _isFinalState;
     }
 
     /**
@@ -86,7 +87,7 @@ public abstract class AutomatonState implements State {
      */
 
     public void setFinalState(boolean finalState) {
-        this.isFinalState = finalState;
+        this._isFinalState = finalState;
     }
 
     /**
@@ -202,10 +203,10 @@ public abstract class AutomatonState implements State {
             }
         }
 
-        Wildcard thiscard = (Wildcard) transition.getTerm();
+        Wildcard transitionWildcard = (Wildcard) transition.getTerm();
         if (specificTransitions != null && compiler.getLanguageVersion() == Configuration.XSD10) {
             for (Edge other : iterateSpecificTransitions()) {
-                if (thiscard.matches(((ElementDecl) other.getTerm()).getTargetNamespace())) {
+                if (transitionWildcard.matches(((ElementDecl) other.getTerm()).getTargetNamespace())) {
                     throw new SchemaException(
                             "Ambiguous content model, element " +
                                     Err.wrap(((ElementDecl) other.getTerm()).getDisplayName(), Err.ELEMENT) +
@@ -377,27 +378,27 @@ public abstract class AutomatonState implements State {
      */
 
     @Override
-    public CharSequence listAllowedElements() {
-        List<String> allowed = new ArrayList<String>(10);
+    public String listAllowedElements() {
+        List<String> allowed = new ArrayList<>(10);
         getAllowedElements(allowed);
         if (allowed.isEmpty()) {
             return "No further elements are allowed at this position";
         } else {
-            StringBuffer sb = new StringBuffer(allowed.size() * 30);
+            StringBuilder sb = new StringBuilder(allowed.size() * 30);
             sb.append("Expected");
             if (allowed.size() > 1) {
                 sb.append(" one of");
             }
             sb.append(": ");
-            Iterator iter = allowed.iterator();
+            Iterator<String> iter = allowed.iterator();
             while (iter.hasNext()) {
-                String s = (String) iter.next();
+                String s = iter.next();
                 sb.append(s);
                 if (iter.hasNext()) {
                     sb.append(", ");
                 }
             }
-            return sb;
+            return sb.toString();
         }
     }
 
@@ -436,14 +437,19 @@ public abstract class AutomatonState implements State {
         if (specificTransitions == null) {
             return Collections.emptyList();
         } else if (specificTransitions instanceof Edge) {
-            return (Edge) specificTransitions;
-        } else if (specificTransitions instanceof List) {
+            return specificTransitions;
+        } else if (specificTransitionsIsList()) {
             //noinspection unchecked
             return (List<Edge>) specificTransitions;
         } else {
             //noinspection unchecked
             return ((IntHashMap<Edge>) specificTransitions).valueSet();
         }
+    }
+
+    @CSharpReplaceBody(code="return specificTransitions is List<Edge>;")
+    private boolean specificTransitionsIsList() {
+        return specificTransitions instanceof List;
     }
 
     /**
@@ -601,46 +607,6 @@ public abstract class AutomatonState implements State {
 
 
     /**
-     * Internal class to iterate over all the transitions (edges) allowed from this state.
-     * This is actually a general-purpose class to concatenate two iterators
-     */
-
-    private static class EdgeIterator implements Iterator<Edge> {
-
-        Iterator<Edge>[] iter;
-        int which;
-
-
-        public EdgeIterator(Iterator<Edge> specific, Iterator wild) {
-            iter = new Iterator[]{specific, wild};
-            which = 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            while (true) {
-                if (iter[which].hasNext()) {
-                    return true;
-                }
-                which++;
-                if (which >= iter.length) {
-                    return false;
-                }
-            }
-        }
-
-        @Override
-        public Edge next() {
-            return iter[which].next();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("remove() not supported on EdgeIterator");
-        }
-    }
-
-    /**
      * Serialize this state as part of the serialization of a schema component model
      *
      * @param serializer used to output the model
@@ -650,7 +616,7 @@ public abstract class AutomatonState implements State {
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         serializer.startElement("state");
         serializer.emitAttribute("nr", stateNumber + "");
-        if (isFinalState) {
+        if (_isFinalState) {
             serializer.emitAttribute("final", "true");
         }
         if (requiresCounter()) {

@@ -7,10 +7,7 @@ import net.sf.saxon.pattern.SchemaNodeTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
-import net.sf.saxon.z.IntHashMap;
-import net.sf.saxon.z.IntPredicateProxy;
-import net.sf.saxon.z.IntSet;
-import net.sf.saxon.z.IntSetPredicate;
+import net.sf.saxon.z.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -122,7 +119,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
         }
         final byte[] nodeKindArray = tree.getNodeKindArray();
         final int[] nameCodeArray = tree.getNameCodeArray();
-        return nodeNr -> {
+        return IntPredicateLambda.of(nodeNr -> {
             if ((nodeKindArray[nodeNr] & 0x0f)  != Type.ELEMENT) {
                 return false;
             }
@@ -133,7 +130,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
             } catch (MissingComponentException e) {
                 return false;
             }
-        };
+        });
     }
 
     /**
