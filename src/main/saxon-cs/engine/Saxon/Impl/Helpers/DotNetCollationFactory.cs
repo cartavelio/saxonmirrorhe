@@ -33,7 +33,7 @@ namespace Saxon.Impl.Helpers {
             // rules attribute works only on Java platform
 
             if (props.getProperty("rules") != null) {
-                throw new XPathException("Rules parameter is not supported in collation URIs on Saxon-CS");
+                throw new XPathException("Rules parameter is not supported in collation URIs on SaxonCS");
             }
 
             // Start with the lang attribute
