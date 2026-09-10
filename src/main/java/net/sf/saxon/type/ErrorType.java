@@ -112,6 +112,11 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
         return Collections.emptyList();
     }
 
+    @Override
+    public Iterable<? extends ItemType> getAlternatives() {
+        return Collections.emptyList();
+    }
+
     /**
      * Determine whether this is a built-in type or a user-defined type
      */

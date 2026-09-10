@@ -59,10 +59,7 @@ public interface UnionType extends ItemType, CastingTarget, ChoiceType {
 
     List<? extends PlainType> getPlainMemberTypes() throws MissingComponentException;
 
-    default Iterable<? extends ItemType> getAlternatives() {
-        return getPlainMemberTypes();
-    }
-
+    Iterable<? extends ItemType> getAlternatives();
     /**
      * Get the result type of a cast operation to this union type, as a sequence type.
      *

@@ -1,4 +1,6 @@
+using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Primitives;
 using Saxon.Ejava.net;
 using Sys = System;
 namespace Saxon.Impl.Helpers {
@@ -55,6 +57,9 @@ namespace Saxon.Impl.Helpers {
             if (uri.IsWellFormedOriginalString()) {
                 return true;
             }
+            if (new System.Uri(new System.Uri("http://www.w3.org/"), uri).IsWellFormedOriginalString()) {
+                return true;
+            }
             
             string original = uri.OriginalString;
             int index = 0;
@@ -70,18 +75,16 @@ namespace Saxon.Impl.Helpers {
 
                 index += 3;
             }
-            // if (original.Contains("%")) {
-            //     // If the original contains "%" check that it's followed by two hex digits
-            //     return false;
-            // }
+
+
             
-            string escaped = System.Uri.EscapeUriString(original);
-            if (uri.IsAbsoluteUri) {
-                if (new System.Uri(escaped).IsWellFormedOriginalString()) {
-                    return true;
-                }
-            }
-            else {
+            // string escaped = System.Uri.EscapeDataString(original);
+            // if (uri.IsAbsoluteUri) {
+            //     if (new System.Uri(escaped).IsWellFormedOriginalString()) {
+            //         return true;
+            //     }
+            // }
+            // else {
                 // The first path segment of a relative URI reference cannot contain a ":"
                 int slash = original.IndexOf('/');
                 if (slash < 0) {
@@ -93,12 +96,29 @@ namespace Saxon.Impl.Helpers {
                     return false;
                 }
 
-                if (new System.Uri(new System.Uri("http://www.w3.org/"), escaped).IsWellFormedOriginalString()) {
-                    return true;
-                }
-            }
+                // if (new System.Uri(new System.Uri("http://www.w3.org/"), escaped).IsWellFormedOriginalString()) {
+                //     return true;
+                // }
+            //}
 
             return false;
+        }
+
+        public static string EscapeFilePath(System.Uri s) {
+            StringBuilder builder = new();
+            bool first = true;
+            string input = s.ToString();
+            int colon = input.IndexOf(':');
+            foreach (string part in input.Substring(colon+1).Split('/')) {
+                if (first) {
+                    first = false;
+                } else {
+                    builder.Append('/');
+                }
+                builder.Append(System.Uri.EscapeDataString(part));
+            }
+
+            return input.Substring(0, colon+1) + builder.ToString();
         }
 
     }
