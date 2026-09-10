@@ -1986,7 +1986,9 @@ cdef class PyXsltExecutable:
     def __init__(self, processor):
         """
         Creates a new instance, keeping a reference to its PySaxonProcessor
-        :param processor:
+
+        Args:
+            processor (PySaxonProcessor): The processor
         """
         self.processor = processor
         self.__parameters = {}
@@ -2345,14 +2347,14 @@ cdef class PyXsltExecutable:
         appearing as children of the xsl:template element.
 
         Args:
-        	tunnel (bool): True if these values are to be used for setting tunnel parameters;
-        	    False if they are to be used for non-tunnel parameters. The default is false.
+            tunnel (bool): True if these values are to be used for setting tunnel parameters;
+                False if they are to be used for non-tunnel parameters. The default is false.
             parameters (dict): the parameters to be used for the initial template supplied as key-value pairs.
 
         Example:
-        	1)::
+            1)::
 
-        	    paramArr = {'a':saxonproc.make_integer_value(12), 'b': saxonproc.make_integer_value(5)}
+                paramArr = {'a':saxonproc.make_integer_value(12), 'b': saxonproc.make_integer_value(5)}
                 xsltproc.set_initial_template_parameters(False, paramArr)
 
             2)::
@@ -2512,6 +2514,7 @@ cdef class PyXsltExecutable:
             1)::
 
                 executable.transform_to_file(source_file="cat.xml", output_file="result.xml")
+
             2)::
 
                 executable.set_initial_match_selection("cat.xml")\r
@@ -2583,10 +2586,12 @@ cdef class PyXsltExecutable:
             1)::
 
                 result = executable.transform_to_value(source_file="cat.xml")
+
             2)::
 
                 executable.set_initial_match_selection("cat.xml")\r
                 result = executable.transform_to_value()
+
             3)::
 
                 node = saxon_proc.parse_xml(xml_text="<in/>")\r
@@ -2648,10 +2653,12 @@ cdef class PyXsltExecutable:
                 executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
 
             1)::
+
                 executable.set_initial_match_selection(file_name="cat.xml")\r
                 result = executable.apply_templates_returning_value()
 
             2)::
+
                 result = executable.apply_templates_returning_value(source_file="cat.xml")
         """
         cdef const char * c_sourcefile = NULL
@@ -2712,13 +2719,13 @@ cdef class PyXsltExecutable:
 
                 executable.set_initial_match_selection(file_name="cat.xml")
                 content = executable.apply_templates_returning_string()
-			    print(content)
+                print(content)
 
             2)::
 
                 node = saxon_proc.parse_xml(xml_text="<in/>")
                 content = executable.apply_templates_returning_string(xdm_value=node)
-			    print(content)
+                print(content)
         """
         cdef const char * c_sourcefile = NULL
         encoding = "UTF-8"
@@ -2800,7 +2807,7 @@ cdef class PyXsltExecutable:
         Invoke a transformation by calling a named template and return the result as a PyXdmValue.
 
         Args:
-			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
+            template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: base_output_uri (str) which is used for resolving relative URIs in
                 the href attribute of the xsl:result-document instruction.
 
@@ -2818,7 +2825,8 @@ cdef class PyXsltExecutable:
 
             1)::
 
-                result = executable.call_template_returning_value("main")\r
+                result = executable.call_template_returning_value("main")
+
             2)::
 
                 executable.set_global_context_item(file_name="cat.xml")\r
@@ -2844,7 +2852,7 @@ cdef class PyXsltExecutable:
         Invoke a transformation by calling a named template and return the result as a string.
 
         Args:
-			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
+            template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: base_output_uri (str) which is used for resolving relative URIs in
                 the href attribute of the xsl:result-document instruction. Also accept the keyword 'encoding' (str)
                 to specify the encoding of the output string. This must match the encoding specified by xsl:output
@@ -2875,7 +2883,7 @@ cdef class PyXsltExecutable:
 
                 executable.set_global_context_item(file_name="cat.xml")\r
                 result = executable.call_template_returning_string()
-			    print(result)
+                print(result)
         """
         cdef const char * c_templateName = NULL
         cdef const char * c_string = NULL
@@ -2907,7 +2915,7 @@ cdef class PyXsltExecutable:
         output file as an argument or using the set_output_file method.
 
         Args:
-			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
+            template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: output_file (str), and base_output_uri (str) which is used for
                 resolving relative URIs in the href attribute of the xsl:result-document instruction.
 
@@ -2933,7 +2941,7 @@ cdef class PyXsltExecutable:
                 executable.set_global_context_item(file_name="cat.xml")\r
                 executable.set_output_file("result.xml")\r
                 executable.call_template_returning_file()
-			    print(result)
+                print(result)
         """
         cdef char * c_outputfile = NULL
         cdef const char * c_templateName = NULL
@@ -2959,9 +2967,9 @@ cdef class PyXsltExecutable:
         Invoke a transformation by calling a named function and return the result as a PyXdmValue.
 
         Args:
-			function_name: The name of the function to invoke, in clark notation {uri}local
-			arguments: Pointer array of PyXdmValue objects - the values of the arguments to be supplied
-			    to the function.
+            function_name: The name of the function to invoke, in clark notation {uri}local
+            arguments: Pointer array of PyXdmValue objects - the values of the arguments to be supplied
+                to the function.
             **kwargs: Possible keyword arguments
 
         Returns:
@@ -3012,9 +3020,9 @@ cdef class PyXsltExecutable:
         Invoke a transformation by calling a named function and return the result as a serialized string.
 
         Args:
-			function_name (str): The name of the function to invoke, in clark notation {uri}local
-			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
-			    to the function.
+            function_name (str): The name of the function to invoke, in clark notation {uri}local
+            args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
+                to the function.
             **kwargs: Possible keyword arguments: base_output_uri (str). Also accept the keyword 'encoding' (str) to
                 specify the encoding of the output string. This must match the encoding specified by xsl:output in
                 the stylesheet, or as specified using set_property() on this PyXsltExecutable. If not specified
@@ -3036,7 +3044,7 @@ cdef class PyXsltExecutable:
                 result = executable.call_function_returning_string("{http://localhost/example}func", [])
 
             2)::
-                executable.set_global_context_item(file_name="cat.xml")\r
+                executable.set_global_context_item(file_name="cat.xml")
                 result = executable.call_function_returning_string("{http://localhost/test}add", [saxonproc.make_integer_value(2)])
         """
         cdef const char * c_functionName = NULL
@@ -3071,10 +3079,9 @@ cdef class PyXsltExecutable:
         the output file as an argument or using the set_output_file method.
 
         Args:
-			function_name(str): The name of the function to invoke, in clark notation {uri}local
-			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
-			    to the function.
-
+            function_name: The name of the function to invoke, in clark notation {uri}local
+            args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
+                to the function.
             **kwargs: Possible keyword arguments: output_file (str) and base_output_uri (str)
 
         Raises:
@@ -3088,11 +3095,11 @@ cdef class PyXsltExecutable:
             1)::
 
                 executable.set_output_file("result.xml")
-			    executable.call_function_returning_file("{http://localhost/example}func", [])
+                executable.call_function_returning_file("{http://localhost/example}func", [])
 
             2)::
 
-                executable.set_global_context_item(file_name="cat.xml")\r
+                executable.set_global_context_item(file_name="cat.xml")
                 executable.call_function_returning_file("{http://localhost/test}add", [saxonproc.make_integer_value(2)], output_file="result.xml")
         """
         cdef const char * c_functionName = NULL
