@@ -42,13 +42,9 @@ public final class NotationValue extends QualifiedNameValue {
             throw new XPathException("Malformed local name in NOTATION: '" + localName + '\'', "FORG0001");
         }
         prefix = prefix == null ? "" : prefix;
-        if (check && uri.isEmpty() && prefix.length() != 0) {
+        if (check && uri.isEmpty() && !prefix.isEmpty()) {
             throw new XPathException("NOTATION has null namespace but non-empty prefix", "FOCA0002");
         }
-    }
-
-    public NotationValue(String prefix, String uri, String localName, boolean check) throws XPathException {
-        this(prefix, NamespaceUri.of(uri), localName, check);
     }
 
     /**

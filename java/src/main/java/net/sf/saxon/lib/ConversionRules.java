@@ -7,7 +7,6 @@
 
 package net.sf.saxon.lib;
 
-import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NotationSet;
 import net.sf.saxon.om.StandardNames;
@@ -32,10 +31,7 @@ public class ConversionRules {
     private NotationSet notationSet; // may be null
     private URIChecker uriChecker;
     private boolean allowYearZero = true;
-    private TypeHierarchy typeHierarchy; // may be null
 
-    private final LFUCache<Integer, Converter> converterCache =
-            new LFUCache<>(100, true);
 
     /**
      * Default conversion rules. Changed in Saxon 9.9 so these are the XSD 1.1 rules (year zero allowed in dates,
@@ -74,14 +70,6 @@ public class ConversionRules {
         cr.notationSet = notationSet;
         cr.uriChecker = uriChecker;
         cr.allowYearZero = allowYearZero;
-        cr.typeHierarchy = typeHierarchy;
-        cr.converterCache.clear();
-    }
-
-
-
-    public void setTypeHierarchy(TypeHierarchy typeHierarchy) {
-        this.typeHierarchy = typeHierarchy;
     }
 
     /**
@@ -119,6 +107,12 @@ public class ConversionRules {
 
     public void setNotationSet(/*@Nullable*/ NotationSet notations) {
         this.notationSet = notations;
+    }
+
+    public ConversionRules withNotationSet(NotationSet notations) {
+        ConversionRules rules2 = copy();
+        rules2.setNotationSet(notations);
+        return rules2;
     }
 
     /**
@@ -196,7 +190,7 @@ public class ConversionRules {
 
     /*@Nullable*/
     public Converter getConverter(AtomicType source, AtomicType target) {
-        // Handle some common cases before looking in the cache
+        // Handle some common cases first
         if (source == target) {
             return StringConverter.IdentityConverter.INSTANCE;
         } else if (source == BuiltInAtomicType.STRING || source == BuiltInAtomicType.UNTYPED_ATOMIC) {
@@ -206,19 +200,204 @@ public class ConversionRules {
         } else if (target == BuiltInAtomicType.UNTYPED_ATOMIC) {
             return Converter.ToUntypedAtomicConverter.INSTANCE;
         }
-        // For a lookup key, use the primitive type of the source type (always 10 bits) and the
-        // fingerprint of the target type (20 bits)
-        int key = (source.getPrimitiveType() << 20) | target.getFingerprint();
-        Converter converter = converterCache.get(key);
-        if (converter == null) {
-            converter = makeConverter(source, target);
-            if (converter != null) {
-                converterCache.put(key, converter);
+
+        int tt = target.getFingerprint();
+        int tp = target.getPrimitiveType();
+        int st = source.getPrimitiveType();
+
+        if ((st == StandardNames.XS_STRING || st == StandardNames.XS_UNTYPED_ATOMIC) &&
+                (tp == StandardNames.XS_STRING || tp == StandardNames.XS_UNTYPED_ATOMIC)) {
+            return makeStringConverter(target);
+        }
+
+        if (!target.isPrimitiveType()) {
+            @SuppressWarnings("RedundantCast")
+            AtomicType primTarget = (AtomicType) target.getPrimitiveItemType();
+            if (source == primTarget) {
+                return new Converter.DownCastingConverter(target, this);
+            } else if (st == StandardNames.XS_STRING || st == StandardNames.XS_UNTYPED_ATOMIC) {
+                return makeStringConverter(target);
+            } else if (tt == StandardNames.XS_ERROR) {
+                return new Converter.ConverterToError();
             } else {
-                return null;
+                Converter stageOne = getConverter(source, primTarget);
+                if (stageOne == null) {
+                    return null;
+                }
+                Converter stageTwo = new Converter.DownCastingConverter(target, this);
+                return new Converter.TwoPhaseConverter(stageOne, stageTwo);
             }
         }
-        return converter;
+
+
+        if (st == tt) {
+            // we are casting between subtypes of the same primitive type.
+            if (Subsumption.derivesFrom(source, target)) {
+                return new Converter.UpCastingConverter(target);
+            }
+            @SuppressWarnings("RedundantCast")
+            Converter upcast = new Converter.UpCastingConverter((AtomicType) source.getPrimitiveItemType());
+            Converter downcast = new Converter.DownCastingConverter(target, this);
+            return new Converter.TwoPhaseConverter(upcast, downcast);
+        }
+
+        return switch (tt) {
+            case StandardNames.XS_UNTYPED_ATOMIC -> Converter.ToUntypedAtomicConverter.INSTANCE;
+            case StandardNames.XS_STRING -> Converter.ToStringConverter.INSTANCE;
+            case StandardNames.XS_FLOAT -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        new StringConverter.StringToFloat(this);
+                case StandardNames.XS_DOUBLE, StandardNames.XS_DECIMAL, StandardNames.XS_INTEGER,
+                     StandardNames.XS_NUMERIC -> Converter.NumericToFloat.INSTANCE;
+                case StandardNames.XS_BOOLEAN -> Converter.BooleanToFloat.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_DOUBLE, StandardNames.XS_NUMERIC -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING -> stringToDouble;
+                case StandardNames.XS_FLOAT, StandardNames.XS_DECIMAL, StandardNames.XS_INTEGER,
+                     StandardNames.XS_NUMERIC -> Converter.NumericToDouble.INSTANCE;
+                case StandardNames.XS_BOOLEAN -> Converter.BooleanToDouble.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_DECIMAL -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        StringConverter.StringToDecimal.INSTANCE;
+                case StandardNames.XS_FLOAT -> Converter.FloatToDecimal.INSTANCE;
+                case StandardNames.XS_DOUBLE -> Converter.DoubleToDecimal.INSTANCE;
+                case StandardNames.XS_INTEGER -> Converter.IntegerToDecimal.INSTANCE;
+                case StandardNames.XS_NUMERIC -> Converter.NumericToDecimal.INSTANCE;
+                case StandardNames.XS_BOOLEAN -> Converter.BooleanToDecimal.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_INTEGER -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        StringConverter.StringToInteger.INSTANCE;
+                case StandardNames.XS_FLOAT -> Converter.FloatToInteger.INSTANCE;
+                case StandardNames.XS_DOUBLE -> Converter.DoubleToInteger.INSTANCE;
+                case StandardNames.XS_DECIMAL -> Converter.DecimalToInteger.INSTANCE;
+                case StandardNames.XS_NUMERIC -> Converter.NumericToInteger.INSTANCE;
+                case StandardNames.XS_BOOLEAN -> Converter.BooleanToInteger.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_DURATION -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        StringConverter.StringToDuration.INSTANCE;
+                case StandardNames.XS_DAY_TIME_DURATION, StandardNames.XS_YEAR_MONTH_DURATION ->
+                        new Converter.UpCastingConverter(BuiltInAtomicType.DURATION);
+                default -> null;
+            };
+            case StandardNames.XS_YEAR_MONTH_DURATION -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        StringConverter.StringToYearMonthDuration.INSTANCE;
+                case StandardNames.XS_DURATION, StandardNames.XS_DAY_TIME_DURATION ->
+                        Converter.DurationToYearMonthDuration.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_DAY_TIME_DURATION -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        StringConverter.StringToDayTimeDuration.INSTANCE;
+                case StandardNames.XS_DURATION, StandardNames.XS_YEAR_MONTH_DURATION ->
+                        Converter.DurationToDayTimeDuration.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_DATE_TIME -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        new StringConverter.StringToDateTime(this);
+                case StandardNames.XS_DATE -> Converter.DateToDateTime.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_TIME -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING -> StringConverter.StringToTime.INSTANCE;
+                case StandardNames.XS_DATE_TIME -> Converter.DateTimeToTime.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_DATE -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING -> new StringConverter.StringToDate(this);
+                case StandardNames.XS_DATE_TIME -> Converter.DateTimeToDate.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_G_YEAR_MONTH -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        new StringConverter.StringToGYearMonth(this);
+                case StandardNames.XS_DATE -> Converter.TwoPhaseConverter.makeTwoPhaseConverter(
+                        BuiltInAtomicType.DATE, BuiltInAtomicType.DATE_TIME, BuiltInAtomicType.G_YEAR_MONTH, this);
+                case StandardNames.XS_DATE_TIME -> Converter.DateTimeToGYearMonth.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_G_YEAR -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        new StringConverter.StringToGYear(this);
+                case StandardNames.XS_DATE ->
+                        Converter.TwoPhaseConverter.makeTwoPhaseConverter(BuiltInAtomicType.DATE, BuiltInAtomicType.DATE_TIME,
+                                                                          BuiltInAtomicType.G_YEAR, this);
+                case StandardNames.XS_DATE_TIME -> Converter.DateTimeToGYear.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_G_MONTH_DAY -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        StringConverter.StringToGMonthDay.INSTANCE;
+                case StandardNames.XS_DATE ->
+                        Converter.TwoPhaseConverter.makeTwoPhaseConverter(BuiltInAtomicType.DATE, BuiltInAtomicType.DATE_TIME,
+                                                                          BuiltInAtomicType.G_MONTH_DAY, this);
+                case StandardNames.XS_DATE_TIME -> Converter.DateTimeToGMonthDay.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_G_DAY -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING -> StringConverter.StringToGDay.INSTANCE;
+                case StandardNames.XS_DATE ->
+                        Converter.TwoPhaseConverter.makeTwoPhaseConverter(BuiltInAtomicType.DATE, BuiltInAtomicType.DATE_TIME,
+                                                                          BuiltInAtomicType.G_DAY, this);
+                case StandardNames.XS_DATE_TIME -> Converter.DateTimeToGDay.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_G_MONTH -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        StringConverter.StringToGMonth.INSTANCE;
+                case StandardNames.XS_DATE ->
+                        Converter.TwoPhaseConverter.makeTwoPhaseConverter(BuiltInAtomicType.DATE, BuiltInAtomicType.DATE_TIME,
+                                                                          BuiltInAtomicType.G_MONTH, this);
+                case StandardNames.XS_DATE_TIME -> Converter.DateTimeToGMonth.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_BOOLEAN -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        StringConverter.StringToBoolean.INSTANCE;
+                case StandardNames.XS_FLOAT, StandardNames.XS_DOUBLE, StandardNames.XS_DECIMAL,
+                     StandardNames.XS_INTEGER, StandardNames.XS_NUMERIC -> Converter.NumericToBoolean.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_BASE64_BINARY -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        StringConverter.StringToBase64Binary.INSTANCE;
+                case StandardNames.XS_HEX_BINARY -> Converter.HexBinaryToBase64Binary.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_HEX_BINARY -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        StringConverter.StringToHexBinary.INSTANCE;
+                case StandardNames.XS_BASE64_BINARY -> Converter.Base64BinaryToHexBinary.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_ANY_URI -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        new StringConverter.StringToAnyURI(this);
+                default -> null;
+            };
+            case StandardNames.XS_QNAME -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        new StringConverter.StringToQName(this);
+                case StandardNames.XS_NOTATION -> Converter.NotationToQName.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_NOTATION -> switch (st) {
+                case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
+                        new StringConverter.StringToNotation(this);
+                case StandardNames.XS_QNAME -> Converter.QNameToNotation.INSTANCE;
+                default -> null;
+            };
+            case StandardNames.XS_ANY_ATOMIC_TYPE -> StringConverter.IdentityConverter.INSTANCE;
+            default -> throw new IllegalArgumentException("Unknown primitive type " + tt);
+        };
     }
 
     /**
@@ -288,259 +467,6 @@ public class ConversionRules {
     }
 
     /**
-     * Create a converter that handles conversion from one primitive type to another.
-     * <p>This method is intended for internal use only. The approved way to get a converter is using the
-     * factory method {@link net.sf.saxon.lib.ConversionRules#getConverter(net.sf.saxon.type.AtomicType, net.sf.saxon.type.AtomicType)}}</p>
-     *
-     * @param sourceType the type of the value to be converted
-     * @param targetType the type of the result of the conversion
-     * @return the converter if one is available; or null if no conversion is possible
-     */
-
-    /*@Nullable*/
-    private Converter makeConverter(AtomicType sourceType, AtomicType targetType) {
-        if (sourceType == targetType) {
-            return StringConverter.IdentityConverter.INSTANCE;
-        }
-
-        int tt = targetType.getFingerprint();
-        int tp = targetType.getPrimitiveType();
-        int st = sourceType.getPrimitiveType();
-
-        if ((st == StandardNames.XS_STRING || st == StandardNames.XS_UNTYPED_ATOMIC) &&
-                (tp == StandardNames.XS_STRING || tp == StandardNames.XS_UNTYPED_ATOMIC)) {
-            return makeStringConverter(targetType);
-        }
-
-        if (!targetType.isPrimitiveType()) {
-            @SuppressWarnings("RedundantCast")
-            AtomicType primTarget = (AtomicType)targetType.getPrimitiveItemType();
-            if (sourceType == primTarget) {
-                return new Converter.DownCastingConverter(targetType, this);
-            } else if (st == StandardNames.XS_STRING || st == StandardNames.XS_UNTYPED_ATOMIC) {
-                return makeStringConverter(targetType);
-            } else if (tt == StandardNames.XS_ERROR) {
-                return new Converter.ConverterToError();
-            } else {
-                Converter stageOne = makeConverter(sourceType, primTarget);
-                if (stageOne == null) {
-                    return null;
-                }
-                Converter stageTwo = new Converter.DownCastingConverter(targetType, this);
-                return new Converter.TwoPhaseConverter(stageOne, stageTwo);
-            }
-        }
-
-
-        if (st == tt) {
-            // we are casting between subtypes of the same primitive type.
-            if (typeHierarchy != null && typeHierarchy.isSubType(sourceType, targetType)) {
-                return new Converter.UpCastingConverter(targetType);
-            }
-            @SuppressWarnings("RedundantCast")
-            Converter upcast = new Converter.UpCastingConverter((AtomicType)sourceType.getPrimitiveItemType());
-            Converter downcast = new Converter.DownCastingConverter(targetType, this);
-            return new Converter.TwoPhaseConverter(upcast, downcast);
-        }
-
-        switch (tt) {
-            case StandardNames.XS_UNTYPED_ATOMIC:
-                return Converter.ToUntypedAtomicConverter.INSTANCE;
-            case StandardNames.XS_STRING:
-                return Converter.ToStringConverter.INSTANCE;
-            case StandardNames.XS_FLOAT:
-                switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC:
-                    case StandardNames.XS_STRING:
-                        return new StringConverter.StringToFloat(this);
-                    case StandardNames.XS_DOUBLE:
-                    case StandardNames.XS_DECIMAL:
-                    case StandardNames.XS_INTEGER:
-                    case StandardNames.XS_NUMERIC:
-                        return Converter.NumericToFloat.INSTANCE;
-                    case StandardNames.XS_BOOLEAN:
-                        return Converter.BooleanToFloat.INSTANCE;
-                    default:
-                        return null;
-                }
-            case StandardNames.XS_DOUBLE:
-            case StandardNames.XS_NUMERIC:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING -> stringToDouble;
-                    case StandardNames.XS_FLOAT, StandardNames.XS_DECIMAL, StandardNames.XS_INTEGER,
-                         StandardNames.XS_NUMERIC -> Converter.NumericToDouble.INSTANCE;
-                    case StandardNames.XS_BOOLEAN -> Converter.BooleanToDouble.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_DECIMAL:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToDecimal.INSTANCE;
-                    case StandardNames.XS_FLOAT -> Converter.FloatToDecimal.INSTANCE;
-                    case StandardNames.XS_DOUBLE -> Converter.DoubleToDecimal.INSTANCE;
-                    case StandardNames.XS_INTEGER -> Converter.IntegerToDecimal.INSTANCE;
-                    case StandardNames.XS_NUMERIC -> Converter.NumericToDecimal.INSTANCE;
-                    case StandardNames.XS_BOOLEAN -> Converter.BooleanToDecimal.INSTANCE;
-                    default -> null;
-                };
-
-            case StandardNames.XS_INTEGER:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToInteger.INSTANCE;
-                    case StandardNames.XS_FLOAT -> Converter.FloatToInteger.INSTANCE;
-                    case StandardNames.XS_DOUBLE -> Converter.DoubleToInteger.INSTANCE;
-                    case StandardNames.XS_DECIMAL -> Converter.DecimalToInteger.INSTANCE;
-                    case StandardNames.XS_NUMERIC -> Converter.NumericToInteger.INSTANCE;
-                    case StandardNames.XS_BOOLEAN -> Converter.BooleanToInteger.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_DURATION:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToDuration.INSTANCE;
-                    case StandardNames.XS_DAY_TIME_DURATION, StandardNames.XS_YEAR_MONTH_DURATION ->
-                            new Converter.UpCastingConverter(BuiltInAtomicType.DURATION);
-                    default -> null;
-                };
-            case StandardNames.XS_YEAR_MONTH_DURATION:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToYearMonthDuration.INSTANCE;
-                    case StandardNames.XS_DURATION, StandardNames.XS_DAY_TIME_DURATION ->
-                            Converter.DurationToYearMonthDuration.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_DAY_TIME_DURATION:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToDayTimeDuration.INSTANCE;
-                    case StandardNames.XS_DURATION, StandardNames.XS_YEAR_MONTH_DURATION ->
-                            Converter.DurationToDayTimeDuration.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_DATE_TIME:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            new StringConverter.StringToDateTime(this);
-                    case StandardNames.XS_DATE -> Converter.DateToDateTime.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_TIME:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToTime.INSTANCE;
-                    case StandardNames.XS_DATE_TIME -> Converter.DateTimeToTime.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_DATE:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            new StringConverter.StringToDate(this);
-                    case StandardNames.XS_DATE_TIME -> Converter.DateTimeToDate.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_G_YEAR_MONTH:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            new StringConverter.StringToGYearMonth(this);
-                    case StandardNames.XS_DATE -> Converter.TwoPhaseConverter.makeTwoPhaseConverter(
-                            BuiltInAtomicType.DATE, BuiltInAtomicType.DATE_TIME, BuiltInAtomicType.G_YEAR_MONTH, this);
-                    case StandardNames.XS_DATE_TIME -> Converter.DateTimeToGYearMonth.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_G_YEAR:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            new StringConverter.StringToGYear(this);
-                    case StandardNames.XS_DATE ->
-                            Converter.TwoPhaseConverter.makeTwoPhaseConverter(BuiltInAtomicType.DATE, BuiltInAtomicType.DATE_TIME,
-                                                                              BuiltInAtomicType.G_YEAR, this);
-                    case StandardNames.XS_DATE_TIME -> Converter.DateTimeToGYear.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_G_MONTH_DAY:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToGMonthDay.INSTANCE;
-                    case StandardNames.XS_DATE ->
-                            Converter.TwoPhaseConverter.makeTwoPhaseConverter(BuiltInAtomicType.DATE, BuiltInAtomicType.DATE_TIME,
-                                                                              BuiltInAtomicType.G_MONTH_DAY, this);
-                    case StandardNames.XS_DATE_TIME -> Converter.DateTimeToGMonthDay.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_G_DAY:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToGDay.INSTANCE;
-                    case StandardNames.XS_DATE ->
-                            Converter.TwoPhaseConverter.makeTwoPhaseConverter(BuiltInAtomicType.DATE, BuiltInAtomicType.DATE_TIME,
-                                                                              BuiltInAtomicType.G_DAY, this);
-                    case StandardNames.XS_DATE_TIME -> Converter.DateTimeToGDay.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_G_MONTH:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToGMonth.INSTANCE;
-                    case StandardNames.XS_DATE ->
-                            Converter.TwoPhaseConverter.makeTwoPhaseConverter(BuiltInAtomicType.DATE, BuiltInAtomicType.DATE_TIME,
-                                                                              BuiltInAtomicType.G_MONTH, this);
-                    case StandardNames.XS_DATE_TIME -> Converter.DateTimeToGMonth.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_BOOLEAN:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToBoolean.INSTANCE;
-                    case StandardNames.XS_FLOAT, StandardNames.XS_DOUBLE, StandardNames.XS_DECIMAL,
-                         StandardNames.XS_INTEGER, StandardNames.XS_NUMERIC -> Converter.NumericToBoolean.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_BASE64_BINARY:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToBase64Binary.INSTANCE;
-                    case StandardNames.XS_HEX_BINARY -> Converter.HexBinaryToBase64Binary.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_HEX_BINARY:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            StringConverter.StringToHexBinary.INSTANCE;
-                    case StandardNames.XS_BASE64_BINARY -> Converter.Base64BinaryToHexBinary.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_ANY_URI:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            new StringConverter.StringToAnyURI(this);
-                    default -> null;
-                };
-            case StandardNames.XS_QNAME:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            new StringConverter.StringToQName(this);
-                    case StandardNames.XS_NOTATION -> Converter.NotationToQName.INSTANCE;
-                    default -> null;
-                };
-            case StandardNames.XS_NOTATION:
-                return switch (st) {
-                    case StandardNames.XS_UNTYPED_ATOMIC, StandardNames.XS_STRING ->
-                            new StringConverter.StringToNotation(this);
-                    case StandardNames.XS_QNAME -> Converter.QNameToNotation.INSTANCE;
-                    default -> null;
-                };
-
-            case StandardNames.XS_ANY_ATOMIC_TYPE:
-                return StringConverter.IdentityConverter.INSTANCE;
-
-            default:
-                throw new IllegalArgumentException("Unknown primitive type " + tt);
-        }
-    }
-
-    /**
      * Static factory method to get a StringConverter for a specific target type
      *
      * @param targetType the target type of the conversion
@@ -549,7 +475,7 @@ public class ConversionRules {
      */
 
     /*@NotNull*/
-    public StringConverter makeStringConverter(/*@NotNull*/ final AtomicType targetType) {
+    public StringConverter makeStringConverter(final AtomicType targetType) {
 
         int tt = targetType.getPrimitiveType();
         if (targetType.isBuiltInType()) {

@@ -1049,8 +1049,6 @@ public class Configuration implements SourceResolver {
         if (theConversionRules == null) {
             synchronized(this) {
                 ConversionRules cv = new ConversionRules();
-                cv.setTypeHierarchy(getTypeHierarchy());
-                cv.setNotationSet(null);
                 if (xsdVersion == XSD10) {
                     cv.setStringToDoubleConverter(StringToDouble.getInstance());
                     cv.setURIChecker(StandardURIChecker.getInstance());
