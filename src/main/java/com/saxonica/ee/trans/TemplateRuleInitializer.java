@@ -36,7 +36,7 @@ public class TemplateRuleInitializer {
     private final XSLTemplate xslTemplate;
     private final ComponentDeclaration decl;
     private final StructuredQName modeName;
-    private TemplateRuleEE templateRule;
+    private final TemplateRuleEE templateRule;
     private boolean firstTime = true;
 
     TemplateRuleInitializer(Compilation comp, ComponentDeclaration decl, TemplateRuleEE templateRule) {
