@@ -448,7 +448,7 @@ EndGlobal
   <xsl:for-each select="$package">
     <xsl:choose>
       <xsl:when test=". = 'AngleSharp'">
-        <PackageReference Include="AngleSharp" Version="1.2.0" />
+        <PackageReference Include="AngleSharp" Version="1.5.2" />
       </xsl:when>
       <xsl:when test=". = 'DotNet.Bundle'">
         <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
