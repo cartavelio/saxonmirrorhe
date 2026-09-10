@@ -456,7 +456,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     if (!NameChecker.isValidNCName(values.get(3))) {
                         return null;
                     }
-                    return new LookupExpression(varRef, new StringLiteral(values.get(3)));
+                    return new LookupExpression(varRef, LookupExpression.Modifier.CONTENT, new StringLiteral(values.get(3)));
                 });
 
         // $name = string-literal - variable reference = string literal

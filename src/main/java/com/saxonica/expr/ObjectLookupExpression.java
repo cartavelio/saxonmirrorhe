@@ -31,7 +31,7 @@ public class ObjectLookupExpression extends LookupExpression {
     private FunctionItem reflexiveFunction = null;
 
     public ObjectLookupExpression(Expression start, Expression step) {
-        super(start, step);
+        super(start, Modifier.CONTENT, step);
     }
 
     @Override
