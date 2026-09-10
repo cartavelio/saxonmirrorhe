@@ -5,6 +5,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.CachedSchemaSource;
 import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
+import com.saxonica.ee.schema.XSLImportSchemaEE;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
@@ -72,8 +73,8 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
             // Scan the declarations in reverse order, that is, highest precedence first
             for (int i = topLevel.size() - 1; i >= 0; i--) {
                 ComponentDeclaration decl = topLevel.get(i);
-                if (decl.getSourceElement() instanceof XSLImportSchema) {
-                    XSLImportSchema is = (XSLImportSchema) decl.getSourceElement();
+                if (decl.getSourceElement() instanceof XSLImportSchemaEE) {
+                    XSLImportSchemaEE is = (XSLImportSchemaEE) decl.getSourceElement();
                     Source source = is.asSource(schemaCompiler);
                     if (source != null) {
                         sources.add(source);

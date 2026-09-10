@@ -5,16 +5,14 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.style;
+package com.saxonica.ee.schema;
 
-import com.saxonica.ee.schema.CachedSchemaSource;
-import com.saxonica.ee.schema.PreparedSchema;
-import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.sdoc.SchemaReader;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.style.XSLImportSchema;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Schema;
@@ -29,19 +27,7 @@ import javax.xml.transform.Source;
  * in a stylesheet
  */
 
-public class XSLImportSchema extends StyleElement {
-
-    /**
-     * Ask whether this node is a declaration, that is, a permitted child of xsl:stylesheet
-     * (including xsl:include and xsl:import).
-     *
-     * @return true for this element
-     */
-
-    @Override
-    public boolean isDeclaration() {
-        return true;
-    }
+public class XSLImportSchemaEE extends XSLImportSchema {
 
     @Override
     protected void prepareAttributes() {
@@ -65,16 +51,6 @@ public class XSLImportSchema extends StyleElement {
             compileError("The zero-length string is not a valid namespace URI. " +
                     "For a schema with no namespace, omit the namespace attribute");
         }
-    }
-
-    @Override
-    public void validate(ComponentDeclaration decl) throws XPathException {
-        checkTopLevel("XTSE0010", false);
-    }
-
-    @Override
-    public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
-        //
     }
 
     public Source asSource(SchemaCompiler schemaCompiler) throws XPathException {
@@ -168,9 +144,6 @@ public class XSLImportSchema extends StyleElement {
 
     }
 
-    @Override
-    public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
-        // No action. The effect of import-schema is compile-time only
-    }
+
 }
 

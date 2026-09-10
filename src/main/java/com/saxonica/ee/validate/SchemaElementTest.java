@@ -139,7 +139,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
             try {
                 boolean ok = decl != null && !(((TinyTree) tree).isNilled(nodeNr) && !decl.isNillable()) /*&& !decl.isAbstract()*/ &&
                         matchesAnnotation(decl.getType(), ((TinyTree) tree).getSchemaType(nodeNr), decl.getConfiguration().getTypeHierarchy());
-                System.err.println(((TinyTree)tree).getConfiguration().getNamePool().getDisplayName(nameCodeArray[nodeNr] & 0xfffff) + " = " + ok);
+                //System.err.println(((TinyTree)tree).getConfiguration().getNamePool().getDisplayName(nameCodeArray[nodeNr] & 0xfffff) + " = " + ok);
                 return ok;
             } catch (MissingComponentException e) {
                 return false;
