@@ -1946,7 +1946,7 @@
             <p>The <code>put()</code> function is implemented using the same run-time support code
                as <code>xsl:result-document</code>, and it currently imposes similar restrictions:
                for example, it must not be called from within a variable initialization or function
-               body, and it must to write to a URI that has been read during the execution of the
+               body, and it must not write to a URI that has been read during the execution of the
                query; also, two calls on <code>put()</code> must not write to the same URI. However,
                it does use the XQuery semantics for resolving the relative URI.</p>
          </li>
