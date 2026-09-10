@@ -168,7 +168,7 @@ public class XdmMap extends XdmFunctionItem {
 
             @Override
             public boolean isEmpty() {
-                return base.isEmpty();
+                return base.isEmptyMap();
             }
 
             @Override
@@ -242,9 +242,24 @@ public class XdmMap extends XdmFunctionItem {
      * Returns <code>true</code> if this map contains no key-value mappings.
      *
      * @return <code>true</code> if this map contains no key-value mappings
+     * @deprecated since 12.9, because this method does not respect the semantics
+     * of the method it overrides, which is designed to test whether the value
+     * is an empty sequence. Use {@link #isEmptyMap()} instead.
      */
     @Override
+    @Deprecated
     public boolean isEmpty() {
+        return getUnderlyingValue().isEmpty();
+    }
+
+    /**
+     * Returns <code>true</code> if this map contains no key-value mappings.
+     *
+     * @return <code>true</code> if this map contains no key-value mappings
+     * @since 12.9
+     */
+
+    public boolean isEmptyMap() {
         return getUnderlyingValue().isEmpty();
     }
 

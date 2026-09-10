@@ -435,7 +435,7 @@ public class Query {
                     Reader jsonReader = new BufferedReader(
                                     new InputStreamReader(new FileInputStream(sourceJsonFileName), StandardCharsets.UTF_8));
                     XdmValue jsonTree = parseJson(processor, jsonReader);
-                    if (!jsonTree.isEmpty()) {
+                    if (!jsonTree.isEmptySequence()) {
                         evaluator.setContextItem(jsonTree.itemAt(0));
                     }
                 } catch (IOException e) {

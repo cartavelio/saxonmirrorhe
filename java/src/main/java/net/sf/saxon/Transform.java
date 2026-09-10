@@ -1439,7 +1439,7 @@ public class Transform {
                     Reader jsonReader = new BufferedReader(
                             new InputStreamReader(new FileInputStream(jsonSource), StandardCharsets.UTF_8));
                     XdmValue jsonTree = Query.parseJson(processor, jsonReader);
-                    if (!jsonTree.isEmpty()) {
+                    if (!jsonTree.isEmptySequence()) {
                         transformer.setGlobalContextItem(jsonContextItem = jsonTree.itemAt(0));
                     }
                 } catch (IOException e) {

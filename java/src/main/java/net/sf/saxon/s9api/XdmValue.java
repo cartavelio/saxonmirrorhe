@@ -220,11 +220,27 @@ public class XdmValue implements Iterable<XdmItem> {
 
     /**
      * Ask whether the sequence is empty
+     *
      * @return true if the value is an empty sequence
      * @since 10.1
+     * @deprecated since 12.9, because the overriding method in {@link XdmMap} tests
+     * whether the value is an empty map (and thus, a sequence of length one). Use
+     * {@link #isEmptySequence} instead.
      */
 
+    @Deprecated
     public boolean isEmpty() {
+        return value.head() == null;
+    }
+
+    /**
+     * Ask whether the sequence is empty
+     *
+     * @return true if the value is an empty sequence
+     * @since 12.9
+     */
+
+    public boolean isEmptySequence() {
         return value.head() == null;
     }
 
