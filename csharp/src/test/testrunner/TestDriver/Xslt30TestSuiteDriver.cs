@@ -87,8 +87,8 @@ namespace TestDriver {
 
             needsPE.Add("feature/Saxon-PE");
             needsPE.Add("feature/dynamic_evaluation");
+            needsPE.Add("languages_for_numbering");
 
-            //needsEE.Add("languages_for_numbering");
             needsEE.Add("feature/streaming");
             needsEE.Add("feature/schema_aware");
             needsEE.Add("feature/Saxon-EE");
@@ -1363,9 +1363,6 @@ namespace TestDriver {
 
                 case "ignore_doc_failure":
                     return inverse;
-                
-                case "languages_for_numbering":
-                    return value.Equals("en") || inverse;
 
                 case "combinations_for_numbering":
                     if (value.Equals("COPTIC EPACT DIGIT ONE") || value.Equals("SINHALA ARCHAIC DIGIT ONE") 

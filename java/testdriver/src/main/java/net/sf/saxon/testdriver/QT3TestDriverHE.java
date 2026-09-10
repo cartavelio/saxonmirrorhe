@@ -249,8 +249,7 @@ public class QT3TestDriverHE extends TestDriver {
         } else if ("directory-as-collection-uri".equals(type)) {
             return "true".equals(value) != inverse;
         } else if ("language".equals(type)) {
-            return isSupportedLanguage(value);
-            //return ("en".equals(value) || "de".equals(value) || "fr".equals(value) || "it".equals(value) || "xib".equals(value)) != inverse;
+            return isSupportedLanguage(value) != inverse;
         } else if ("calendar".equals(type)) {
             return ("AD".equals(value) || "ISO".equals(value)) != inverse;
         } else if ("put".equals(type)) {
