@@ -2702,6 +2702,7 @@ public class XPathParser {
                     case Token.SUFFIX:
                     case Token.STAR:
                     case Token.NODEKIND:
+                    case Token.LPAR:
                         AxisExpression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE, parseNodeTest(Type.ATTRIBUTE));
                         setLocation(ae2);
                         return ae2;
@@ -2730,6 +2731,7 @@ public class XPathParser {
                     case Token.SUFFIX:
                     case Token.STAR:
                     case Token.NODEKIND:
+                    case Token.LPAR:
                         Expression ax = new AxisExpression(axis, parseNodeTest(principalNodeType));
                         setLocation(ax);
                         return ax;
@@ -3069,6 +3071,10 @@ public class XPathParser {
         int tok = t.currentToken;
         String tokv = t.currentTokenValue;
         switch (tok) {
+            case Token.LPAR:
+                checkLanguageVersion40();
+                return parseUnionNodeTest(nodeType);
+
             case Token.NAME:
                 nextToken();
                 return makeNameTest(nodeType, tokv, nodeType == Type.ELEMENT);
@@ -3095,6 +3101,18 @@ public class XPathParser {
                 grumble("Unrecognized node test");
                 throw new XPathException(""); // unreachable instruction
         }
+    }
+
+    protected NodeTest parseUnionNodeTest(short nodeType) throws XPathException {
+        nextToken();
+        NodeTest test = parseNodeTest(nodeType);
+        while (t.currentToken == Token.UNION && !t.currentTokenValue.equals("union")) {
+            nextToken();
+            test = new CombinedNodeTest(test, Token.UNION, parseNodeTest(nodeType));
+        }
+        expect(Token.RPAR);
+        nextToken();
+        return test;
     }
 
     /**
