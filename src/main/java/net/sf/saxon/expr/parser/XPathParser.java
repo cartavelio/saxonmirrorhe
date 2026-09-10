@@ -34,6 +34,7 @@ import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.ExpressionContext;
 import net.sf.saxon.style.SourceBinding;
 import net.sf.saxon.style.StylesheetPackage;
@@ -912,6 +913,9 @@ public class XPathParser {
                     CastingTarget at;
                     if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("union")) {
                         // Saxon 9.8 / XPath 4.0 proposed extension
+                        at = (CastingTarget) parseItemType();
+                    } else if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")){
+                        //XPath 4.0 proposed extension
                         at = (CastingTarget) parseItemType();
                     } else {
                         expect(Token.NAME);
@@ -2111,8 +2115,8 @@ public class XPathParser {
 
         while (true) {
             if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")) {
-                EnumerationType type = parseEnumType();
-                memberTypes.add(type);
+                EnumerationUnionType type = parseEnumType();
+                memberTypes.addAll(type.getMemberTypes());
             } else {
                 expect(Token.NAME);
                 if (scanOnly) {
@@ -2158,15 +2162,16 @@ public class XPathParser {
      * @throws XPathException if a syntax error is found
      */
 
-    public EnumerationType parseEnumType() throws XPathException {
+    public EnumerationUnionType parseEnumType() throws XPathException {
         // The initial "enum(" has been read
         checkLanguageVersion40();
         nextToken();
-        Set<String> values = new HashSet<>(6);
+        List<AtomicType> singletonEnums = new ArrayList<>();
 
         while (true) {
             expect(Token.STRING_LITERAL);
-            values.add(t.currentTokenValue);
+            UnicodeString val = StringTool.fromCharSequence(t.currentTokenValue);
+            singletonEnums.add(new SingletonEnumType(val));
             nextToken();
             if (t.currentToken == Token.RPAR) {
                 break;
@@ -2178,7 +2183,8 @@ public class XPathParser {
             }
         }
         nextToken();
-        return new EnumerationType(values);
+
+        return new EnumerationUnionType(singletonEnums);
 
     }
 

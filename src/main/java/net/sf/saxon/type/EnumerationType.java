@@ -31,7 +31,7 @@ import java.util.Set;
  */
 
 // TODO: this implementation is bizarre...
-public class EnumerationType implements AtomicType {
+public class EnumerationType implements AtomicType, CastingTarget {
 
     private Set<String> values;
 
@@ -179,7 +179,9 @@ public class EnumerationType implements AtomicType {
     }
 
     /**
-     * Test whether a given item conforms to this type
+     * Test whether a given item conforms to this type. A value is an instance of an enumeration
+     * type only if it is annotated with a SingletonEnumType whose allowed value is one
+     * of the values in the enumeration.
      *
      * @param item The item to be tested
      * @param th   The type hierarchy cache. Currently used only when matching function items.
@@ -188,8 +190,8 @@ public class EnumerationType implements AtomicType {
     @Override
     public boolean matches(Item item, TypeHierarchy th) {
         return item instanceof AtomicValue &&
-                ((AtomicValue)item).getPrimitiveType() == BuiltInAtomicType.STRING &&
-                values.contains(item.getStringValue());
+                ((AtomicValue) item).getItemType() instanceof SingletonEnumType &&
+                ((SingletonEnumType) ((AtomicValue) item).getItemType()).allowsValue(item.getUnicodeStringValue());
     }
 
     /**

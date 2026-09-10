@@ -20,31 +20,34 @@ import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
- * Proposed extension for XPath 4.0: an enumeration type is a way of defining a subtype of xs:string,
- * with a defined set of permitted values, without recourse to a schema or schema-awareness.
- *
- * <p>The XPath syntax proposed is <code>enum("A", "B", "C")</code></p>
+ * Represents the type enum("X") - an enumeration type with a single permitted xs:string value.
+ * The significance of this is that all enumeration types are regarded as unions of singleton
+ * enumeration types; and an individual xs:string instance can be annotated with a singleton
+ * enum type, but not with a union type.
  */
 
-// TODO: this implementation is bizarre...
-public class EnumerationType implements AtomicType {
+public class SingletonEnumType implements AtomicType {
 
-    private Set<String> values;
+    private final UnicodeString value;
 
     /**
-     * Create an enumeration type permitting a defined set of values
-     * @param values the values to be permitted
+     * Create an enumeration type permitting a defined value
+     * @param value the value to be permitted
      */
-    public EnumerationType(Set<String> values) {
-        this.values = values;
+    public SingletonEnumType(UnicodeString value) {
+        this.value = value;
     }
 
-    public boolean allowsValue(String value) {
-        return values.contains(value);
+    public UnicodeString getValue() {
+        return value;
+    }
+
+    public boolean allowsValue(UnicodeString value) {
+        return this.value.equals(value);
     }
 
     /**
@@ -62,11 +65,11 @@ public class EnumerationType implements AtomicType {
     @Override
     public ValidationFailure validate(AtomicValue primValue, UnicodeString lexicalValue, ConversionRules rules) {
         if (primValue.getPrimitiveType() == BuiltInAtomicType.STRING
-                && values.contains(primValue.getStringValue())) {
+                && allowsValue(primValue.getUnicodeStringValue())) {
             return null;
         } else {
             return new ValidationFailure("The string '" + primValue.getStringValue() +
-                                                 " is not valid for the enumeration type " + toString());
+                                                 " is not valid for the enumeration type");
         }
     }
 
@@ -188,12 +191,10 @@ public class EnumerationType implements AtomicType {
     @Override
     public boolean matches(Item item, TypeHierarchy th) {
         return item instanceof AtomicValue &&
-                ((AtomicValue)item).getPrimitiveType() == BuiltInAtomicType.STRING &&
-                values.contains(item.getStringValue());
+                ((AtomicValue) item).getItemType().equals(this);
     }
 
     /**
-     * Redeclare getPrimitiveItemType() to return a more specific result type
      * Get the primitive item type corresponding to this item type.
      * For anyAtomicValue and union types it is Type.ATOMIC_VALUE. For numeric it is Type.NUMBER.
      * For other atomic types it is the primitive type as defined in XML Schema,
@@ -283,7 +284,7 @@ public class EnumerationType implements AtomicType {
      */
     @Override
     public String getBasicAlphaCode() {
-        return "E"; // TBA
+        return "E"; // TODO: define alphacodes for enumeration types
     }
 
     /**
@@ -342,7 +343,7 @@ public class EnumerationType implements AtomicType {
      */
     @Override
     public AtomicSequence getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules) throws ValidationException {
-        return new StringValue(value);
+        return new StringValue(value, this);
     }
 
     /**
@@ -360,7 +361,12 @@ public class EnumerationType implements AtomicType {
      */
     @Override
     public ValidationFailure validateContent(UnicodeString value, NamespaceResolver nsResolver, ConversionRules rules) {
-        return null;
+        if (allowsValue(value)) {
+            return null;
+        } else {
+            return new ValidationFailure("The string '" + value +
+                                                 " is not valid for the enumeration type");
+        }
     }
 
     /**
@@ -608,7 +614,7 @@ public class EnumerationType implements AtomicType {
      */
     @Override
     public boolean isSameType(SchemaType other) {
-        return other instanceof EnumerationType && values.equals(((EnumerationType)other).values);
+        return other instanceof SingletonEnumType && value.equals(((SingletonEnumType)other).value);
     }
 
     /**
@@ -631,22 +637,7 @@ public class EnumerationType implements AtomicType {
      */
 
     public String toString() {
-        StringBuilder fsb = new StringBuilder(256);
-        fsb.append("enum(");
-        for (String st : values) {
-            char delim = '"';
-            if (st.indexOf('"') >= 0) {
-                if (st.indexOf('\'') > 0) {
-                    delim = '`';
-                } else {
-                    delim = '\'';
-                }
-            }
-            fsb.append(delim).append(st).append(delim).append(", ");
-        }
-        fsb.setLength(fsb.length() - 2);
-        fsb.append(")");
-        return fsb.toString();
+        return "enum(\"" + value + "\")";
     }
 
     /**
@@ -713,6 +704,24 @@ public class EnumerationType implements AtomicType {
     @Override
     public AtomicType getType() {
         return this;
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     * @param obj the reference object with which to compare.
+     * @return {@code true} if this object is the same as the obj
+     * argument; {@code false} otherwise.
+     * @see #hashCode()
+     * @see HashMap
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof SingletonEnumType && this.value.equals(((SingletonEnumType)obj).value);
+    }
+
+    @Override
+    public int hashCode()  {
+        return value.hashCode();
     }
 
     //#if SCHEMA==true

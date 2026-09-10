@@ -155,6 +155,17 @@
         <p>The JSON serializer recognises the <code>xs:QName</code> value <code>fn:null</code>
         as a representation of the JSON null value.</p>
         
+        <p>The implementation of enumeration types has been aligned with the current specification.
+        Most practical use cases are unaffected, but:</p>
+        
+        <ul>
+            <li><p>Casting a string to an enumeration type is now allowed</p></li>
+            <li><p>The test <code>"A" instance of enum("A", "B")</code> now returns false;
+            for an <code>instance of</code> test to work, the string must be converted to the
+            enumeration type; this can be done with an explicit cast, or it can be done
+            implicitly by applying the coercion rules.</p></li>
+        </ul>
+        
         <h2>Dropped experimental features</h2>
         
         <p>Some proposed enhancements that didn't survive into the current 4.0 draft specifications
