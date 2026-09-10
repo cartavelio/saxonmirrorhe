@@ -4429,27 +4429,26 @@ zend_function_entry SaxonProcessor_methods[] = {
 	{nullptr, nullptr, nullptr}};
 
 zend_function_entry xdmValue_methods[] = {
-    PHP_ME(XdmValue, __construct, arginfo_saxonc_xdmval_construct,
-           ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+    PHP_ME(XdmValue, __construct, arginfo_saxonc_xdmval_construct,ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
     PHP_ME(XdmValue, __destruct, arginfo_saxonc_xdmval_destruct,ZEND_ACC_PUBLIC)
-	PHP_ME(XdmValue, __toString, arginfo_saxonc_xdmval_toString,ZEND_ACC_PUBLIC)
-	PHP_ME(XdmValue, getHead, arginfo_saxonc_xdmval_getHead,ZEND_ACC_PUBLIC)
-	PHP_ME(XdmValue, itemAt, arginfo_saxonc_xdmval_itemAt,ZEND_ACC_PUBLIC)
-	PHP_ME(XdmValue, size, arginfo_saxonc_xdmval_size,ZEND_ACC_PUBLIC)
-	PHP_ME(XdmValue, addXdmItem,arginfo_saxonc_xdmval_addXdmItem,ZEND_ACC_PUBLIC)
-	{nullptr, nullptr, nullptr}};
+    PHP_ME(XdmValue, __toString, arginfo_saxonc_xdmval_toString,ZEND_ACC_PUBLIC)
+    PHP_ME(XdmValue, getHead, arginfo_saxonc_xdmval_getHead,ZEND_ACC_PUBLIC)
+    PHP_ME(XdmValue, itemAt, arginfo_saxonc_xdmval_itemAt,ZEND_ACC_PUBLIC)
+    PHP_ME(XdmValue, size, arginfo_saxonc_xdmval_size,ZEND_ACC_PUBLIC)
+    PHP_ME(XdmValue, addXdmItem,arginfo_saxonc_xdmval_addXdmItem,ZEND_ACC_PUBLIC)
+    {nullptr, nullptr, nullptr}};
 
 zend_function_entry xdmItem_methods[] = {
-    PHP_ME(XdmItem, __construct, arginfo_saxonc_xdmitem_construct,ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(XdmItem, __destruct, arginfo_saxonc_xdmitem_destruct,ZEND_ACC_PUBLIC)
-    PHP_ME(XdmItem, __toString,arginfo_saxonc_xdmitem_toString,ZEND_ACC_PUBLIC)
-    PHP_ME(XdmItem, getStringValue,arginfo_saxonc_xdmitem_getStringValue, ZEND_ACC_PUBLIC)
-    PHP_ME(XdmItem, isAtomic, arginfo_saxonc_xdmitem_isAtomic,ZEND_ACC_PUBLIC)
+  PHP_ME(XdmItem, __construct, arginfo_saxonc_xdmitem_construct,ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+  PHP_ME(XdmItem, __destruct, arginfo_saxonc_xdmitem_destruct,ZEND_ACC_PUBLIC)
+  PHP_ME(XdmItem, __toString,arginfo_saxonc_xdmitem_toString,ZEND_ACC_PUBLIC)
+  PHP_ME(XdmItem, getStringValue,arginfo_saxonc_xdmitem_getStringValue, ZEND_ACC_PUBLIC)
+  PHP_ME(XdmItem, isAtomic, arginfo_saxonc_xdmitem_isAtomic,ZEND_ACC_PUBLIC)
 	PHP_ME(XdmItem, isNode, arginfo_saxonc_xdmitem_isNode,ZEND_ACC_PUBLIC)
-    PHP_ME(XdmItem, isMap, arginfo_saxonc_xdmitem_isMap,ZEND_ACC_PUBLIC)
-    PHP_ME(XdmItem, isArray, arginfo_saxonc_xdmitem_isArray,ZEND_ACC_PUBLIC)
-    PHP_ME(XdmItem, isFunctionItem, arginfo_saxonc_xdmitem_isFunctionItem,ZEND_ACC_PUBLIC)
-	PHP_ME(XdmItem, getAtomicValue,arginfo_saxonc_xdmitem_getAtomicValue,ZEND_ACC_PUBLIC)
+  PHP_ME(XdmItem, isMap, arginfo_saxonc_xdmitem_isMap,ZEND_ACC_PUBLIC)
+  PHP_ME(XdmItem, isArray, arginfo_saxonc_xdmitem_isArray,ZEND_ACC_PUBLIC)
+  PHP_ME(XdmItem, isFunctionItem, arginfo_saxonc_xdmitem_isFunctionItem,ZEND_ACC_PUBLIC)
+  PHP_ME(XdmItem, getAtomicValue,arginfo_saxonc_xdmitem_getAtomicValue,ZEND_ACC_PUBLIC)
 	PHP_ME(XdmItem, getNodeValue,arginfo_saxonc_xdmitem_getNodeValue,ZEND_ACC_PUBLIC)
 	PHP_ME(XdmItem, getMap,arginfo_saxonc_xdmitem_getMap,ZEND_ACC_PUBLIC)
 	PHP_ME(XdmItem, getArray,arginfo_saxonc_xdmitem_getArray,ZEND_ACC_PUBLIC)
@@ -4528,22 +4527,14 @@ zend_function_entry xdmFunctionItem_methods[] = {
 zend_function_entry xdmMap_methods[] = {
     PHP_ME(XdmMap, __construct, arginfo_saxonc_xdmmap_construct,
            ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-        PHP_ME(XdmMap, __destruct, arginfo_saxonc_xdmmap_destruct,
-               ZEND_ACC_PUBLIC) PHP_ME(XdmMap, __toString,
-                                       arginfo_saxonc_xdmmap_toString,
-                                       ZEND_ACC_PUBLIC)
-            PHP_ME(XdmMap, mapSize, arginfo_saxonc_xdmmap_mapSize,
-                   ZEND_ACC_PUBLIC)
-                PHP_ME(XdmMap, get, arginfo_saxonc_xdmmap_get, ZEND_ACC_PUBLIC)
-                    PHP_ME(XdmMap, put, arginfo_saxonc_xdmmap_put,
-                           ZEND_ACC_PUBLIC)
-                        PHP_ME(XdmMap, isEmpty, arginfo_saxonc_xdmmap_isEmpty,
-                               ZEND_ACC_PUBLIC)
-                            PHP_ME(XdmMap, containsKey,
-                                   arginfo_saxonc_xdmmap_containsKey,
-                                   ZEND_ACC_PUBLIC)
-                                PHP_ME(XdmMap, keys, arginfo_saxonc_xdmmap_keys,
-                                       ZEND_ACC_PUBLIC)
+        PHP_ME(XdmMap, __destruct, arginfo_saxonc_xdmmap_destruct,ZEND_ACC_PUBLIC)
+        PHP_ME(XdmMap, __toString,arginfo_saxonc_xdmmap_toString,ZEND_ACC_PUBLIC)
+        PHP_ME(XdmMap, mapSize, arginfo_saxonc_xdmmap_mapSize,ZEND_ACC_PUBLIC)
+        PHP_ME(XdmMap, get, arginfo_saxonc_xdmmap_get, ZEND_ACC_PUBLIC)
+        PHP_ME(XdmMap, put, arginfo_saxonc_xdmmap_put,ZEND_ACC_PUBLIC)
+        PHP_ME(XdmMap, isEmpty, arginfo_saxonc_xdmmap_isEmpty,ZEND_ACC_PUBLIC)
+        PHP_ME(XdmMap, containsKey,arginfo_saxonc_xdmmap_containsKey,ZEND_ACC_PUBLIC)
+        PHP_ME(XdmMap, keys, arginfo_saxonc_xdmmap_keys,ZEND_ACC_PUBLIC)
     /*PHP_ME(XdmMap,  asMap,      arginfo_saxonc_xdmmap_asMap, ZEND_ACC_PUBLIC)
     PHP_ME(XdmMap,  values,      arginfo_saxonc_xdmmap_values,
     ZEND_ACC_PUBLIC)*/

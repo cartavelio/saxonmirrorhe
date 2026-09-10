@@ -907,6 +907,24 @@ public function testSingle()
     $this->assertEquals($item, "<person>text1</person>");
     }
 
+public function testArray()
+{
+    $xp = self::$saxonProc->newXPathProcessor();
+
+    $item = $xp->evaluateSingle("[1,2,3]");
+    $this->assertInstanceOf(
+        Saxon\XdmItem::class,
+        $item
+    );
+    $this->assertTrue($item->isArray());
+    $arrVal = $item->getArray();
+    $alen = $arrVal->arrayLength();
+    for($i = 0; $i < $alen; $i++) {
+        $arrVal->get($i);
+    }
+    $this->assertEquals($arrVal, "[1,2,3]");
+    }
+
 
 // define an extension function
 function userFunction($param2)
