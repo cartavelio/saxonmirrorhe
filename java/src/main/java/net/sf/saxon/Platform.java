@@ -111,6 +111,20 @@ public interface Platform {
     InputStream locateResource(String filename, List<String> messages);
 
     /**
+     * Read a resource file issued with the Saxon product
+     * <p>Where {@link locateResource} looks only for the filename (e.g., categories.xml),
+     * this method looks for a path (e.g., /net/sf/saxon/resources/categories.xml).
+     * It's used in the C# version of Platform to search for resources in the assembly.</p>
+     *
+     * @param path the path of the file to be read
+     * @param messages List to be populated with messages in the event of failure
+     * @return an InputStream for reading the file/resource
+     */
+
+    /*@Nullable*/
+    InputStream locateResourcePath(String path, List<String> messages);
+
+    /**
      * Diagnostic method to list the embedded resources contained in the loaded software
      */
 

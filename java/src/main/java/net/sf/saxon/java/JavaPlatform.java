@@ -85,17 +85,21 @@ public class JavaPlatform implements Platform {
         return Locale.getDefault().getCountry();
     }
 
+    /*@Nullable*/
+    public InputStream locateResource(String filename, List<String> messages) {
+        return locateResourcePath("net/sf/saxon/data/" + filename, messages);
+    }
+
     /**
      * Read a resource file issued with the Saxon product
      *
-     * @param filename the filename of the file to be read
+     * @param path the filename of the file to be read
      * @param messages List to be populated with messages in the event of failure
      * @return an InputStream for reading the file/resource
      */
 
     /*@Nullable*/
-    public InputStream locateResource(String filename, List<String> messages) {
-        filename = "net/sf/saxon/data/" + filename;
+    public InputStream locateResourcePath(String path, List<String> messages) {
         ClassLoader loader = null;
         try {
             loader = Thread.currentThread().getContextClassLoader();
@@ -106,10 +110,10 @@ public class JavaPlatform implements Platform {
         InputStream in = null;
 
         if (loader != null) {
-            URL u = loader.getResource(filename);
-            in = loader.getResourceAsStream(filename);
+            URL u = loader.getResource(path);
+            in = loader.getResourceAsStream(path);
             if (in == null) {
-                messages.add("Cannot read " + filename + " file located using ClassLoader " +
+                messages.add("Cannot read " + path + " file located using ClassLoader " +
                                      loader + " - continuing\n");
             }
         }
@@ -117,9 +121,9 @@ public class JavaPlatform implements Platform {
         if (in == null) {
             loader = Configuration.class.getClassLoader();
             if (loader != null) {
-                in = loader.getResourceAsStream(filename);
+                in = loader.getResourceAsStream(path);
                 if (in == null) {
-                    messages.add("Cannot read " + filename + " file located using ClassLoader " +
+                    messages.add("Cannot read " + path + " file located using ClassLoader " +
                                          loader + " - continuing\n");
                 }
             }
@@ -127,13 +131,13 @@ public class JavaPlatform implements Platform {
 
         if (in == null) {
             // Means we're in a very strange class-loading environment, things are getting desperate
-            URL url = ClassLoader.getSystemResource(filename);
+            URL url = ClassLoader.getSystemResource(path);
             if (url != null) {
                 try {
                     in = url.openStream();
                 } catch (IOException ioe) {
                     messages.add("IO error " + ioe.getMessage() +
-                                         " reading " + filename + " located using getSystemResource(): using defaults");
+                                         " reading " + path + " located using getSystemResource(): using defaults");
                 }
             }
         }

@@ -38,7 +38,7 @@ import javax.xml.transform.Source;
  */
 
 @CSharpInjectMembers(code={
-          "public Saxon.Api.XdmNode ToXdmNode(Saxon.Api.Processor processor) {"
+          "public Saxon.Api.XdmNode toXdmNode(Saxon.Api.Processor processor) {"
         + "            try {"
         + "                return (Saxon.Api.XdmNode)(Saxon.Api.XdmValue.Wrap(toNodeInfo(processor.Implementation)));"
         + "            } catch (Saxon.Hej.trans.XPathException e) {"
