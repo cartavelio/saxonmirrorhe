@@ -20,8 +20,7 @@ class SaxonProcessor;
 class SaxonApiException;
 class XdmValue;
 class XdmItem;
-//enum class UnprefixedElementMatchingPolicy;
-
+// enum class UnprefixedElementMatchingPolicy;
 
 /*! An <code>XPathProcessor</code> represents a factory to compile, load and
  * execute XPath expressions. <p/>

@@ -160,7 +160,7 @@ void XsltExecutable::setInitialTemplateParameters(
     std::map<std::string, XdmValue *> _itparameters, bool _tunnel) {
   for (std::map<std::string, XdmValue *>::iterator itr = _itparameters.begin();
        itr != _itparameters.end(); itr++) {
-       
+
     parameters["itparam:" + std::string(itr->first)] = itr->second;
     itr->second->incrementRefCount();
   }
@@ -813,14 +813,14 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
-    if (getenv("SAXONC_DEBUG_FLAG")) {
-      std::cerr << "C++ DEBUG callTemplateReturningValue cp0" << std::endl;
-    }
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "C++ DEBUG callTemplateReturningValue cp0" << std::endl;
+  }
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
-      if (getenv("SAXONC_DEBUG_FLAG")) {
-        std::cerr << "C++ DEBUG callTemplateReturningValue cp1" << std::endl;
-      }
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "C++ DEBUG callTemplateReturningValue cp1" << std::endl;
+  }
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
@@ -976,17 +976,18 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
           SaxonProcessor::sxn_environ->thread, (void *)procRef,
           (char *)cwdXE.c_str(), (char *)filename);
     }
-    if(saxonMessageListenerRef == -2) {
-         exceptionFound = true;
-         throw SaxonApiException();
+    if (saxonMessageListenerRef == -2) {
+      exceptionFound = true;
+      throw SaxonApiException();
     }
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-            std::cerr<<"C++: setSaveXslMessage saxonMessageListenerRef = "<<((long)saxonMessageListenerRef)<<std::endl;
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "C++: setSaveXslMessage saxonMessageListenerRef = "
+                << ((long)saxonMessageListenerRef) << std::endl;
     }
   } else {
-    if(saxonMessageListenerRef > 0) {
+    if (saxonMessageListenerRef > 0) {
       j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-          (void *)saxonMessageListenerRef);
+                        (void *)saxonMessageListenerRef);
     }
     saxonMessageListenerRef = -1;
     setProperty("m", "off");
@@ -995,8 +996,9 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
 
 XdmValue *XsltExecutable::getXslMessages() {
   if (getenv("SAXONC_DEBUG_FLAG")) {
-            std::cerr<<"C++: getXslMessages saxonMessageListenerRef = "<<((long)saxonMessageListenerRef)<<std::endl;
-    }
+    std::cerr << "C++: getXslMessages saxonMessageListenerRef = "
+              << ((long)saxonMessageListenerRef) << std::endl;
+  }
   if (saxonMessageListenerRef > 0) {
     allocFn fn = operator new;
     long long *results =
@@ -1006,7 +1008,7 @@ XdmValue *XsltExecutable::getXslMessages() {
     if (results != nullptr) {
       int sizex = results[0];
       if (getenv("SAXONC_DEBUG_FLAG")) {
-        std::cerr<<"C++: getXslMessages size= "<<sizex<<std::endl;
+        std::cerr << "C++: getXslMessages size= " << sizex << std::endl;
       }
       XdmValue *value = new XdmValue();
       for (int i = 1; i <= sizex; i++) {
@@ -1020,8 +1022,7 @@ XdmValue *XsltExecutable::getXslMessages() {
       }
       delete[] results;
       return value;
-
-    } 
+    }
   }
   return nullptr;
 }

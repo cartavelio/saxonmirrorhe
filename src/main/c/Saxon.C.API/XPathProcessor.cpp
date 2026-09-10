@@ -202,22 +202,20 @@ void XPathProcessor::setContextFile(const char *filename) {
   }
 }
 
-/*void XPathProcessor::setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy){
-    std::map<std::string, std::string>::iterator it;
-    it = properties.find("uemp:");
-    if (it != properties.end()) {
-      std::string valuei = it->second;
-      parameters.erase("uemp:");
+/*void
+XPathProcessor::setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy
+policy){ std::map<std::string, std::string>::iterator it; it =
+properties.find("uemp:"); if (it != properties.end()) { std::string valuei =
+it->second; parameters.erase("uemp:");
     }
     setProperty("uemp:", std::to_string(int(policy)).c_str());
 }
 
-UnprefixedElementMatchingPolicy XPathProcessor::getUnprefixedElementMatchingPolicy()  {
-    std::map<std::string, std::string>::iterator it;
-    it = properties.find("uemp:");
-    if (it != properties.end()) {
-      int valuei = stoi(it->second);
-      return UnprefixedElementMatchingPolicy(valuei);
+UnprefixedElementMatchingPolicy
+XPathProcessor::getUnprefixedElementMatchingPolicy()  { std::map<std::string,
+std::string>::iterator it; it = properties.find("uemp:"); if (it !=
+properties.end()) { int valuei = stoi(it->second); return
+UnprefixedElementMatchingPolicy(valuei);
     }
     return UnprefixedElementMatchingPolicy::DEFAULT_NAMESPACE;
 } */
