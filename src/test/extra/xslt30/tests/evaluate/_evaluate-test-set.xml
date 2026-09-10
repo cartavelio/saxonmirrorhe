@@ -7,7 +7,7 @@
    <test-case name="evaluate-001">
       <description>Test saxon:expression() extension function, with an argument that is a string literal containing a call to a stylesheet function. See bug 1952318</description>
       <created by="Michael Kay" on="2014-04-13"/>
-      <modified by="Michael Kay" on="2022-03-22" make the called function have public visibility: see bug 5402"/>
+      <modified by="Michael Kay" on="2022-03-22" change="make the called function have public visibility: see bug 5402"/>
       <dependencies>
          <spec value="XSLT20+"/>
          <feature value="Saxon-PE"/>
@@ -192,7 +192,7 @@
    <test-case name="evaluate-010">
       <description>test call on format-number() and other functions within saxon:evaluate.</description>
       <created by="Michael Kay" on="2014-04-13"/>
-      <modified by="Michael Kay" on="2022-03-22" make the called function have public visibility: see bug 5402"/>
+      <modified by="Michael Kay" on="2022-03-22" change="make the called function have public visibility: see bug 5402"/>
       <dependencies>
          <spec value="XSLT20+"/>
          <feature value="Saxon-PE"/>
