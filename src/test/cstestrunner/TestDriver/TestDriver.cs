@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using JFeatureKeys = net.sf.saxon.lib.FeatureKeys;
 using javax.xml.transform.stream;
 using System.Diagnostics;
+using System.Linq;
 using ICU4N.Text;
 using Singulink.Numerics;
 
@@ -52,7 +53,7 @@ namespace TestRunner {
         public abstract string catalogNamespace();
 
 
-        public class DefaultFeedbackListener : IFeedbackListener {
+        private class DefaultFeedbackListener : IFeedbackListener {
             public void Feedback(int passed, int failed, int total) {
                 //Console.WriteLine("Done " + (passed + failed) + " of " + total);
                 //Trace.WriteLine("Done " + (passed + failed) + " of " + total);
@@ -89,8 +90,8 @@ namespace TestRunner {
         }
 
         public int Failures {
-            get { return failures; }
-            set { failures = value; }
+            get => failures;
+            set => failures = value;
         }
 
         public bool Unfolded {
@@ -340,11 +341,9 @@ namespace TestRunner {
                 }
 
                 Console.WriteLine("Loading exceptions file " + exceptionsFile.AbsolutePath);
-                var exceptionsDoc = exceptBuilder.Build(exceptionsFile);
-                IEnumerator<XdmNode> iter = exceptionsDoc.EnumerateAxis(XdmAxis.Descendant, new QName("", "exception"));
-
-                while (iter.MoveNext()) {
-                    XdmNode entry = iter.Current;
+                XdmNode exceptionsDoc = exceptBuilder.Build(exceptionsFile);
+                
+                foreach(XdmNode entry in exceptionsDoc.Select(Steps.Descendant("exception"))) {
                     string testName = entry.GetAttributeValue(testCase);
                     if (testName == null) {
                         testName = "$" + entry.GetAttributeValue(testSet);
@@ -352,35 +351,20 @@ namespace TestRunner {
 
                     string runVal = entry.GetAttributeValue(run);
                     string editionVal = entry.GetAttributeValue(edition);
-                    if (runVal == null) {
-                        runVal = "false";
-                    }
+                    runVal ??= "false";
+                    editionVal ??= saxonEdition;
 
-                    if (editionVal == null) {
-                        editionVal = saxonEdition;
-                    }
-
-                    bool appliesThisEdition = false;
                     string[] substrings = Regex.Split(editionVal.Trim(), "\\s+");
-                    foreach (String ed in substrings) {
-                        if (ed.Equals(saxonEdition)) {
-                            appliesThisEdition = true;
-                            break;
-                        }
-                    }
+                    bool appliesThisEdition = substrings.Any(ed => ed.Equals(saxonEdition));
 
                     if (appliesThisEdition) {
-                        if (runVal.Equals("false")) {
-                            string[] substrings2 = Regex.Split(testName.Trim(), "\\s+");
-                            foreach (String tc in substrings2) {
+                        if (runVal == "false") {
+                            foreach (string tc in Regex.Split(testName.Trim(), "\\s+")) {
                                 exceptionsMap.Add(tc, entry);
                             }
                         }
                         else {
-                            IEnumerator<XdmNode> iter2 = entry.EnumerateAxis(XdmAxis.Child, new QName("optimization"));
-                            bool moved = iter.MoveNext();
-                            if (moved) {
-                                XdmNode optim = iter2.Current;
+                            foreach (XdmNode optim in entry.Children("optimization")) {
                                 optimizationAssertions.Add(testName, optim.GetAttributeValue("assert"));
                             }
                         }
@@ -433,7 +417,8 @@ namespace TestRunner {
                         try {
                             env = globalEnvironments[envName];
                         }
-                        catch (Exception e) {
+                        catch (Exception) {
+                            env = null;
                         }
                     }
 
@@ -447,14 +432,13 @@ namespace TestRunner {
                         try {
                             env = localEnvironments[envName];
                         }
-                        catch (Exception e) {
+                        catch (Exception) {
+                            env = null;
                         }
                     }
 
                     if (env == null) {
                         System.Console.WriteLine("*** Unknown environment " + envName);
-                        //println("*** Unknown environment " + envName);
-                        //writeTestcaseElement(testCaseName, "fail", "Environment " + envName + " not found", null);
                         failures++;
                         failingTestCases.Add(testCaseName);
                         return null;
@@ -483,7 +467,6 @@ namespace TestRunner {
 
 
         private void processTestSet(DocumentBuilder catbuilder, XPathCompiler xpc, XdmNode testSetNode) {
-            string testName;
             startTestSetElement(testSetNode);
             Uri testSetFile =
                 new Uri(Path.GetFullPath(testSuiteDir + "/" + testSetNode.GetAttributeValue(new QName("file"))));
@@ -501,7 +484,7 @@ namespace TestRunner {
                     .Then(Steps.Child("dependency")))) {
                     if (!EnsureDependencySatisfied(dependency, localEnvironments["default"])) {
                         foreach (XdmNode testCase in testSetDocNode.Select(Steps.Descendant("test-case"))) {
-                            String testCaseName = testCase.GetAttributeValue("name");
+                            string testCaseName = testCase.GetAttributeValue("name");
                             resultsDoc.writeTestcaseElement(testCaseName, "n/a", "test-set dependencies not satisfied");
                             notrun++;
                         }
@@ -515,8 +498,8 @@ namespace TestRunner {
                 foreach (XdmNode dependency in testSetDocNode.Select(Steps.Path("test-set", "dependencies", "*"))) {
                     if (!EnsureDependencySatisfied(dependency, localEnvironments["default"])) {
                         foreach (XdmNode testCase in testSetDocNode.Select(Steps.Descendant("test-case"))) {
-                            String type = dependency.NodeName.LocalName;
-                            String value = testCase.GetAttributeValue("value");
+                            string type = dependency.NodeName.LocalName;
+                            string value = testCase.GetAttributeValue("value");
                             if (value == null) {
                                 value = type;
                             }
@@ -544,8 +527,7 @@ namespace TestRunner {
                 if (testPattern == null) {
                     foreach (XdmNode env in testSetDocNode.Select(Steps.Descendant("environment")
                         .Where(Predicates.HasAttribute("name")))) {
-                        // xpc.Evaluate("//environment[@name]", testSetDocNode)) {
-                        String envName = env.GetAttributeValue("name");
+                        string envName = env.GetAttributeValue("name");
                         if (!unsharedEnvironments.Contains(envName)) {
                             try {
                                 Environment.processEnvironment(this, xpc, env, localEnvironments,
@@ -558,22 +540,17 @@ namespace TestRunner {
                     }
                 }
 
-                IEnumerator<XdmNode> testEnum =
-                    testSetDocNode.Select(Steps.Path("/", "test-set", "@name")).GetEnumerator();
-                if (testEnum.MoveNext() == false) {
-                    Console.WriteLine("Test-set does not have a @name attribute");
+                string testSet = testSetDocNode.Children("test-set").First().GetAttributeValue("name");
+                if (testSet == null) {
+                    Console.WriteLine("Missing test-set/@name");
                     return;
                 }
-
-                string testSet = testEnum.Current.GetStringValue();
 
                 if (SkipBecauseSlow(testSet)) {
                     return;
                 }
 
-                IEnumerable<XdmNode> enumerable = testSetDocNode.Select(Steps.Descendant("test-case"));
-
-                foreach (XdmNode testCase in enumerable) {
+                foreach (XdmNode testCase in testSetDocNode.Select(Steps.Descendant("test-case"))) {
                     string name = testCase.GetAttributeValue("name");
                     if (testPattern == null || testPattern.Match(name).Success) {
                         println("-s:" + testSet + " -t:" + name);
@@ -639,7 +616,7 @@ namespace TestRunner {
         public abstract bool EnsureDependencySatisfied(XdmNode dependency, Environment env);
         
         public static void experiment() {
-            Console.WriteLine("LittleEndian? " + BitConverter.IsLittleEndian);
+            //Console.WriteLine("LittleEndian? " + BitConverter.IsLittleEndian);
             // double d = 1e100 / 3;
             // Console.WriteLine(d);
             // BigDecimal dec = BigDecimal.FromDouble(d, false);

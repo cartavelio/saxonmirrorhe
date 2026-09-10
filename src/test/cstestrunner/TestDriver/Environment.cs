@@ -87,15 +87,17 @@ namespace TestRunner {
             environment.processor.Implementation.setLogger(new TestDriver.MyLogger());
 
             //environment.processor.SetProperty(JFeatureKeys.TRACE_EXTERNAL_FUNCTIONS, "true");
+            string version = SpecAttr.VersionOf(spec);
+            string xpVersion = version == "3.0" ? "3.1" : version;
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
             environment.xpathCompiler.BaseUri = baseURI;
-            environment.xpathCompiler.XPathLanguageVersion = SpecAttr.VersionOf(spec);
+            environment.xpathCompiler.XPathLanguageVersion = xpVersion;
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
             environment.xqueryCompiler.BaseUri = baseURI;
-            environment.xqueryCompiler.XQueryLanguageVersion = SpecAttr.VersionOf(spec);
+            environment.xqueryCompiler.XQueryLanguageVersion = xpVersion;
             environment.xsltCompiler = environment.processor.NewXsltCompiler();
             environment.xsltCompiler.BaseUri = baseURI;
-            environment.xsltCompiler.XsltLanguageVersion = SpecAttr.VersionOf(spec);
+            environment.xsltCompiler.XsltLanguageVersion = version;
 
             if (unfolded) {
                 // environment.xqueryCompiler.Implementation.setCodeInjector(new LazyLiteralInjector()); //TODO
@@ -107,9 +109,9 @@ namespace TestRunner {
 
         private static void DeclareOutputControls(TestRunner.TestDriver driver, XPathCompiler xpc, XdmItem env,
             Environment environment) {
-            String needsTree = xpc.Evaluate("string((output/@tree,'yes')[1])", env).ToString();
+            string needsTree = xpc.Evaluate("string((output/@tree,'yes')[1])", env).ToString();
             environment.outputTree = "yes".Equals(needsTree);
-            String needsSerialization = xpc.Evaluate("string((output/@serialize,'no')[1])", env).ToString();
+            string needsSerialization = xpc.Evaluate("string((output/@serialize,'no')[1])", env).ToString();
             environment.outputSerialize = "yes".Equals(needsSerialization);
         }
 
@@ -126,7 +128,7 @@ namespace TestRunner {
                 XPathCompiler xpc, XdmNode env, SysCollGen.Dictionary<string, Environment> environments,
                 Environment defaultEnvironment) {
             Environment environment = new Environment();
-            String name = env.GetAttributeValue(new QName("name"));
+            string name = env.GetAttributeValue(new QName("name"));
             if (name != null) {
                 System.Console.WriteLine("Loading environment " + name);
             }
@@ -139,16 +141,17 @@ namespace TestRunner {
             }
 
             // AutoActivate.activate(environment.processor);
-
+            string version = SpecAttr.VersionOf(driver.Spec);
+            string xpVersion = version == "3.0" ? "3.1" : version;
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
             environment.xpathCompiler.BaseUri = env.BaseUri;
-            environment.xpathCompiler.XPathLanguageVersion = SpecAttr.VersionOf(driver.Spec);
+            environment.xpathCompiler.XPathLanguageVersion = xpVersion;
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
             environment.xqueryCompiler.BaseUri = env.BaseUri;
-            environment.xqueryCompiler.XQueryLanguageVersion = SpecAttr.VersionOf(driver.Spec);
+            environment.xqueryCompiler.XQueryLanguageVersion = xpVersion;
             if (driver.Spec.ToString().Contains("XT")) {
                 environment.xsltCompiler = environment.processor.NewXsltCompiler();
-                environment.xsltCompiler.XsltLanguageVersion = SpecAttr.VersionOf(driver.Spec);
+                environment.xsltCompiler.XsltLanguageVersion = version;
             }
 
             if (driver.Unfolded) {
@@ -156,6 +159,7 @@ namespace TestRunner {
             }
 
             DocumentBuilder builder = environment.processor.NewDocumentBuilder();
+            builder.IsLineNumbering = true;
             builder.TreeModel = driver.TreeModel;
             environment.sourceDocs = new SysCollGen.Dictionary<string, XdmNode>();
             if (environments != null && name != null) {
@@ -163,6 +167,7 @@ namespace TestRunner {
                     environments.Add(name, environment);
                 }
                 catch (Exception) {
+                    // no action
                 }
             }
 
@@ -812,7 +817,8 @@ namespace TestRunner {
         }
 
 
-        // Environment implements XmlResolver
+        // Environment implements XmlResolver (though it relies on the caller accepting a Source object
+        // as the return value, which is somewhat unorthodox...)
         
         public override object GetEntity(Uri href, string role, Type ofObjectToReturn) {
             XdmNode node = null;
@@ -858,7 +864,7 @@ namespace TestRunner {
                 }
             }
             else {
-                return node.Implementation;
+                return node.Implementation.asActiveSource();
             }
         }
 

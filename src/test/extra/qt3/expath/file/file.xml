@@ -537,17 +537,18 @@
     <created by="Michael Kay" on="2012-06-11"/>
     <modified by="John Lumley" on="2014-08-11" change="consistent EXPath naming"/>
     <environment ref="EXPath-file"/>
-    <test> (if (file:exists("sandpit/test2.txt")) then file:delete("sandpit/test2.txt") else ()),
-      file:append-text("sandpit/test2.txt", ("a"), "UTF-8"), file:append-text("sandpit/test2.txt",
-      ("b"), "UTF-8"), file:append-text("sandpit/test2.txt", ("c"), "UTF-8"),
-      file:append-text("sandpit/test2.txt", ("&#xa3;"), "UTF-8") </test>
+    <test> 
+      (if (file:exists("sandpit/test2.txt")) then file:delete("sandpit/test2.txt") else ()),
+      file:append-text("sandpit/test2.txt", ("a"), "UTF-8"), 
+      file:append-text("sandpit/test2.txt", ("b"), "UTF-8"), 
+      file:append-text("sandpit/test2.txt", ("c"), "UTF-8"),
+      file:append-text("sandpit/test2.txt", ("&#xa3;"), "UTF-8") 
+    </test>
     <result>
       <all-of>
         <assert-empty/>
         <assert>Q{http://expath.org/ns/file}read-text("sandpit/test2.txt") eq "abc&#xa3;"</assert>
-        <assert>xs:hexBinary(Q{http://expath.org/ns/file}read-binary("sandpit/test2.txt")) eq
-          xs:hexBinary("616263C2A3")</assert>
-        <!-- TODO: allow leading BOM? -->
+        <assert>xs:hexBinary(Q{http://expath.org/ns/file}read-binary("sandpit/test2.txt")) eq xs:hexBinary("616263C2A3")</assert>
       </all-of>
     </result>
   </test-case>

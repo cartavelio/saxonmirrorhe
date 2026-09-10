@@ -48,14 +48,13 @@ namespace TestRunner {
         }
 
         private TestDriver driver;
-        private SingleResultDoc principalResult = new SingleResultDoc();
+        private SingleResultDoc principalResult = new ();
         private SysCollGen.HashSet<QName> errorsReported;
         private Exception exception;
         private string comment;
-        private SysCollGen.HashSet<XdmNode> xslMessages = new SysCollGen.HashSet<XdmNode>();
+        private SysCollGen.List<XdmNode> xslMessages = new ();
 
-        private SysCollGen.Dictionary<Uri, SingleResultDoc> xslResultDocuments =
-            new SysCollGen.Dictionary<Uri, SingleResultDoc>();
+        private SysCollGen.Dictionary<Uri, SingleResultDoc> xslResultDocuments = new ();
 
         private string wrongError;
         private bool warningsReported;

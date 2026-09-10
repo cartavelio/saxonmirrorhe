@@ -8,6 +8,10 @@
          <content><![CDATA[<doc/>]]></content>
       </source>
    </environment>
+   
+   <dependencies>
+      <saxon:platform value="J" xmlns:saxon="http://saxon.sf.net/"/>
+   </dependencies>
 
    <test-case name="ExsltDate-001">
       <description>Exslt date/time extensions</description>

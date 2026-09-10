@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <test-set xmlns:xs="http://www.w3.org/2001/XMLSchema"
-          xmlns="http://www.w3.org/2012/10/xslt-test-catalog" name="sql">
+          xmlns="http://www.w3.org/2012/10/xslt-test-catalog" name="sql"
+          xmlns:saxon="http://saxon.sf.net/">
   <description>Tests sql</description>
 
   <!-- You can configure different driver/database combinations. At the
@@ -69,6 +70,7 @@
 
    <dependencies>
      <feature value="Saxon-PE"/>
+     <saxon:platform value="J"/>
    </dependencies>
 
    <test-case name="Jsql-001">

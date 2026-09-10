@@ -153,10 +153,10 @@
           "lib/netstandard2.0/Microsoft.Extensions.Primitives.dll": {}
         }
       },
-      "Singulink.Numerics.BigDecimal/1.0.2": {
+      "Singulink.Numerics.BigDecimal/2.0.0": {
         "type": "package",
         "dependencies": {
-          "Singulink.Numerics.BigIntegerExtensions": "1.1.0",
+          "Singulink.Numerics.BigIntegerExtensions": "2.0.0",
           "System.Runtime.CompilerServices.Unsafe": "5.0.0"
         },
         "compile": {
@@ -166,13 +166,13 @@
           "lib/netstandard2.1/Singulink.Numerics.BigDecimal.dll": {}
         }
       },
-      "Singulink.Numerics.BigIntegerExtensions/1.1.0": {
+      "Singulink.Numerics.BigIntegerExtensions/2.0.1": {
         "type": "package",
         "compile": {
-          "lib/netstandard2.0/Singulink.Numerics.BigIntegerExtensions.dll": {}
+          "lib/net5.0/Singulink.Numerics.BigIntegerExtensions.dll": {}
         },
         "runtime": {
-          "lib/netstandard2.0/Singulink.Numerics.BigIntegerExtensions.dll": {}
+          "lib/net5.0/Singulink.Numerics.BigIntegerExtensions.dll": {}
         }
       },
       "System.Collections.Immutable/5.0.0": {
@@ -204,8 +204,8 @@
           "ICU4N.LanguageData": "60.1.0-alpha.354",
           "ICU4N.RegionData": "60.1.0-alpha.354",
           "ICU4N.Transliterator": "60.1.0-alpha.354",
-          "Singulink.Numerics.BigDecimal": "1.0.2",
-          "Singulink.Numerics.BigIntegerExtensions": "1.1.0",
+          "Singulink.Numerics.BigDecimal": "2.0.0",
+          "Singulink.Numerics.BigIntegerExtensions": "2.0.1",
           "System.Collections.Immutable": "5.0.0"
         },
         "compile": {
@@ -470,10 +470,10 @@
         "microsoft.extensions.primitives.nuspec"
       ]
     },
-    "Singulink.Numerics.BigDecimal/1.0.2": {
-      "sha512": "ryrW8KiWyIwbixo7zL9IvcyeHqv2LE2qZcl7UhBohHaVvee0Y/mY4YkpbIzHE/g7j110yiaq5q8uFRlyOgG+3Q==",
+    "Singulink.Numerics.BigDecimal/2.0.0": {
+      "sha512": "UdvBIp1zlkeb4Ptg8tmkRYPSamikWR3MJtoVlSS6s2yUVt43tUwZ3jCE0+0BB9ESGelCcwq9tWriIa22xjII/w==",
       "type": "package",
-      "path": "singulink.numerics.bigdecimal/1.0.2",
+      "path": "singulink.numerics.bigdecimal/2.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -484,21 +484,23 @@
         "lib/netstandard2.1/Singulink.Numerics.BigDecimal.dll",
         "lib/netstandard2.1/Singulink.Numerics.BigDecimal.pdb",
         "lib/netstandard2.1/Singulink.Numerics.BigDecimal.xml",
-        "singulink.numerics.bigdecimal.1.0.2.nupkg.sha512",
+        "singulink.numerics.bigdecimal.2.0.0.nupkg.sha512",
         "singulink.numerics.bigdecimal.nuspec"
       ]
     },
-    "Singulink.Numerics.BigIntegerExtensions/1.1.0": {
-      "sha512": "Lx6hqyI481nt//LvuGwtwtt+qJ7lTr45lsYFYo1bH6AfrxGkIVsqyqSbphnAuIF0G20SEKb+vyNncsd+q5IVwg==",
+    "Singulink.Numerics.BigIntegerExtensions/2.0.1": {
+      "sha512": "cJNZmie8+9ohOowHx7T9axSS6M7N5+tb+Xy+z2qNGesnVShnrfdyRZXmnKi3/7drQcxUcVDYxV84ruFI82pQpA==",
       "type": "package",
-      "path": "singulink.numerics.bigintegerextensions/1.1.0",
+      "path": "singulink.numerics.bigintegerextensions/2.0.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Singulink Icon 128x128.png",
+        "lib/net5.0/Singulink.Numerics.BigIntegerExtensions.dll",
+        "lib/net5.0/Singulink.Numerics.BigIntegerExtensions.xml",
         "lib/netstandard2.0/Singulink.Numerics.BigIntegerExtensions.dll",
         "lib/netstandard2.0/Singulink.Numerics.BigIntegerExtensions.xml",
-        "singulink.numerics.bigintegerextensions.1.1.0.nupkg.sha512",
+        "singulink.numerics.bigintegerextensions.2.0.1.nupkg.sha512",
         "singulink.numerics.bigintegerextensions.nuspec"
       ]
     },
