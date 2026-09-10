@@ -157,7 +157,7 @@ public class Copy extends ElementCreator {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Schema schema = getValidationOptions().getSchema();
+        Schema schema = getSchema();
         Copy copy = new Copy(
                 copyNamespaces, bequeathNamespacesToChildren, schema, getSchemaType(), getValidationAction());
         ExpressionTool.copyLocationInfo(this, copy);

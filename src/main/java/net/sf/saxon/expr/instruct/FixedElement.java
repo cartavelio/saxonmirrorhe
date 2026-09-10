@@ -62,7 +62,8 @@ public class FixedElement extends ElementCreator {
                         NamespaceMap namespaceBindings,
                         boolean inheritNamespacesToChildren,
                         boolean inheritNamespacesFromParent,
-                        Schema schema, SchemaType schemaType,
+                        Schema schema,
+                        SchemaType schemaType,
                         int validation) {
         this.elementName = elementName;
         this.namespaceBindings = namespaceBindings;
@@ -164,7 +165,7 @@ public class FixedElement extends ElementCreator {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Schema schema = getValidationOptions().getSchema();
+        Schema schema = getSchema();
         FixedElement fe = new FixedElement(elementName, namespaceBindings, bequeathNamespacesToChildren,
                                            inheritNamespacesFromParent, schema, getSchemaType(), getValidationAction());
         fe.setContentExpression(getContentExpression().copy(rebindings));

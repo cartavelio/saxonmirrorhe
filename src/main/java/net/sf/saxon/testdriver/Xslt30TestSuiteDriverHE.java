@@ -579,6 +579,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         XPathCompiler assertionXPath = env.processor.newXPathCompiler();
         assertionXPath.setSchemaAware(env.processor.isSchemaAware());
         assertionXPath.setBaseURI(assertion.get().getBaseURI());
+        if (env.xsltCompiler.getUsedSchema() != null) {
+            assertionXPath.useSchema(env.xsltCompiler.getUsedSchema());
+        }
         copySchemaNamespaces(env, assertionXPath);  // ensure environment has schema namespaces
         boolean success = outcome.testAssertion(assertion.get(), outcome, outcome.getPrincipalResultDoc(), assertionXPath, xpath, debug);
         if (success) {

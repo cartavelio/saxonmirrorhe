@@ -217,7 +217,7 @@ public class ComputedElement extends ElementCreator {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Schema schema = getValidationOptions().getSchema();
+        Schema schema = getSchema();
         ComputedElement ce = new ComputedElement(
                 getNameExp().copy(rebindings), getNamespaceExp() == null ? null : getNamespaceExp().copy(rebindings),
                 /*defaultNamespace,*/ schema, getSchemaType(),

@@ -79,6 +79,7 @@ public class XsltCompiler {
     private final Processor processor;
     private final Configuration config;
     private final CompilerInfo compilerInfo;
+    private XsdSchema usedSchema;
 
 
     /**
@@ -122,6 +123,11 @@ public class XsltCompiler {
     public void useSchema(XsdSchema schema) {
         compilerInfo.setSchemaAware(true);
         compilerInfo.preLoadSchema(schema.getUnderlyingSchema());
+        usedSchema = schema;
+    }
+
+    public XsdSchema getUsedSchema() {
+        return usedSchema;
     }
 
     /**

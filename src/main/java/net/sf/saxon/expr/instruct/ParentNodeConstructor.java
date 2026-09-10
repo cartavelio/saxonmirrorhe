@@ -32,7 +32,7 @@ public abstract class ParentNodeConstructor extends Instruction
             new OperandRole(0, OperandUsage.ABSORPTION, SequenceType.ANY_SEQUENCE);
 
     protected Operand contentOp;
-    private ParseOptions validationOptions = new ParseOptions();
+    private ParseOptions validationOptions = null;
 
     /**
      * Flag set to true if validation=preserve and no schema type supplied for validation; also true
@@ -110,6 +110,11 @@ public abstract class ParentNodeConstructor extends Instruction
     @Override
     public int getValidationAction() {
         return validationOptions == null ? Validation.PRESERVE : validationOptions.getSchemaValidationMode();
+    }
+
+
+    public Schema getSchema() {
+        return validationOptions == null ? null : validationOptions.getSchema();
     }
 
     /**
