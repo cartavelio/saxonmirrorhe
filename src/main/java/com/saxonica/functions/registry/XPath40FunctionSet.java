@@ -5,6 +5,7 @@ import com.saxonica.functions.qt4.*;
 import com.saxonica.functions.qt4.csv.CsvToArrays;
 import com.saxonica.functions.qt4.csv.CsvToXml;
 import com.saxonica.functions.qt4.csv.ParseCsv;
+import com.saxonica.functions.qt4.ixml.InvisibleXmlFn;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
@@ -359,6 +360,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("intersperse", 2, e -> e.populate(Intersperse::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null));
+
+        register("invisible-xml", 1, 2, e -> e.populate(InvisibleXmlFn::new, AnyItemType.getInstance(), OPT, 0)
+                .arg(0, AnyItemType.getInstance(), OPT, null)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
+                .setOptionDetails(InvisibleXmlFn.getOptionDetails()));
 
         register("is-NaN", 1, e -> e.populate(IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
