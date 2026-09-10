@@ -56,7 +56,7 @@ public final class ArrayCoercionPlan extends CoercionPlan {
             }
             return new SimpleArrayItem(result);
         } else {
-            throw coercionError(item, requiredType, request);
+            throw coercionError(item, requiredType, request, null);
         }
     }
 

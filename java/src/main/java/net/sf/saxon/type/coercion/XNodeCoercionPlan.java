@@ -50,7 +50,7 @@ public final class XNodeCoercionPlan extends CoercionPlan {
                 if (content.itemAt(0) instanceof NodeInfo) {
                     return content;
                 } else {
-                    throw coercionError(item, requiredType, request);
+                    throw coercionError(item, requiredType, request, null);
                 }
             } else {
                 List<Item> result = new ArrayList<>();
@@ -58,7 +58,7 @@ public final class XNodeCoercionPlan extends CoercionPlan {
                     if (requiredType.matches(it)) {
                         return content;
                     } else {
-                        throw coercionError(it, requiredType, request);
+                        throw coercionError(it, requiredType, request, null);
                     }
                 }
                 return SequenceExtent.makeSequenceExtent(result);
@@ -68,12 +68,12 @@ public final class XNodeCoercionPlan extends CoercionPlan {
             GroundedValue val = ((Parcel) item).getValue();
             for (Item it : val.asIterable()) {
                 if (!requiredType.matches(it)) {
-                    throw coercionError(item, requiredType, request);
+                    throw coercionError(item, requiredType, request, null);
                 }
             }
             return val;
         }
-        throw coercionError(item, requiredType, request);
+        throw coercionError(item, requiredType, request, null);
     }
 
 

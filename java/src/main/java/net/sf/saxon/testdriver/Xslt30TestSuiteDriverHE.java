@@ -350,6 +350,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
             XsltCompiler compiler = env.xsltCompiler;
             compiler.setErrorReporter(collector);
+            compiler.setCompileForExport(export);
             initPatternOptimization(compiler);
             compiler.clearParameters();
             prepareForSQL(compiler.getProcessor());
@@ -1006,7 +1007,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                                           XsltExecutable sheet, ErrorCollector collector, Source styleSource) {
         try {
             if (export && isExportable(testName) && !compiler.isSchemaAware()) {
-                sheet = exportStylesheet(testName, testSetName, compiler, sheet, styleSource);
+                sheet = exportStylesheet(testName, testSetName, compiler, styleSource);
             } else if (sheet == null) {
                 sheet = compiler.compile(styleSource);
             }
@@ -1035,19 +1036,18 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                          || testName.equals("try-046"));        // format of stack trace after error
     }
 
-    protected XsltExecutable exportStylesheet(String testName, String testSetName, XsltCompiler compiler, XsltExecutable sheet, Source styleSource) throws SaxonApiException {
+    protected XsltExecutable exportStylesheet(String testName, String testSetName, XsltCompiler compiler, Source styleSource) throws SaxonApiException {
         try {
             File exportFile = new File(resultsDir + "/export/" + testSetName + "/" + testName + ".sef");
             XsltPackage compiledPack = compiler.compilePackage(styleSource);
             compiledPack.save(exportFile);
-            sheet = reloadExportedStylesheet(compiler, exportFile);
+            return reloadExportedStylesheet(compiler, exportFile);
         } catch (SaxonApiException e) {
             compiler.getErrorReporter().report(new XmlProcessingException(XPathException.makeXPathException(e)));
             //System.err.println(e.getMessage());
             //e.printStackTrace();  //temporary, for debugging
             throw e;
         }
-        return sheet;
     }
 
     protected XsltExecutable reloadExportedStylesheet(XsltCompiler compiler, File exportFile) throws SaxonApiException {

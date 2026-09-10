@@ -41,6 +41,11 @@ public class EnumerationUnionType extends LocalUnionType {
     }
 
     @Override
+    public boolean isAtomicType() {
+        return true;
+    }
+
+    @Override
     public double getDefaultPriority() {
         return 0.25;
     }

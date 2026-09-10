@@ -2637,7 +2637,7 @@ public class XPathParser {
     }
     
     /**
-     * Parse a PathExpresssion. This includes "true" path expressions such as A/B/C, and also
+     * Parse a PathExpression. This includes "true" path expressions such as A/B/C, and also
      * constructs that may start a path expression such as a variable reference $name or a
      * parenthesed expression (A|B). Numeric and string literals also come under this heading.
      *
@@ -2804,25 +2804,28 @@ public class XPathParser {
 
         // When the filter is applied to an Axis step, the nodes are considered in
         // axis order. In all other cases they are considered in document order
-        boolean reverse = (step instanceof AxisExpression) &&
-                !AxisInfo.isForwards[((AxisExpression) step).getAxis()];
-
+        boolean isAxisStep = step instanceof GeneralizedAxisExpression;
+        boolean reverse = isAxisStep && !AxisInfo.isForwards[((GeneralizedAxisExpression)step).getAxis()];
         while (true) {
             if (t.currentToken == Token.LSQB) {
                 step = parsePredicate(step);
-            } else if (t.currentToken == Token.LPAREN) {
-                // dynamic function call (XQuery 3.0/XPath 3.0 syntax)
-                step = parseDynamicFunctionCall(step, null);
-                setLocation(step);
-            } else if (t.currentToken == Token.QMARK) {
-                step = parseLookup(step);
-                setLocation(step);
-            } else if (t.currentToken == Token.METHOD_CALL) {
-                step = parseMethodCall(step);
-                setLocation(step);
-            } else if (t.currentToken == Token.QMARK_LSQB) {
-                step = parseFilterExprAM(step);
-                setLocation(step);
+            } else if (!isAxisStep) {
+                if (t.currentToken == Token.LPAREN) {
+                    // dynamic function call (XQuery 3.0/XPath 3.0 syntax)
+                    step = parseDynamicFunctionCall(step, null);
+                    setLocation(step);
+                } else if (t.currentToken == Token.QMARK) {
+                    step = parseLookup(step);
+                    setLocation(step);
+                } else if (t.currentToken == Token.METHOD_CALL) {
+                    step = parseMethodCall(step);
+                    setLocation(step);
+                } else if (t.currentToken == Token.QMARK_LSQB) {
+                    step = parseFilterExprAM(step);
+                    setLocation(step);
+                } else {
+                    break;
+                }
             } else {
                 break;
             }

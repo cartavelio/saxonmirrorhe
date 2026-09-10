@@ -55,6 +55,7 @@ public class CompilerInfo {
     private boolean assertionsEnabled = false;
     private String targetEdition = "HE";
     private boolean relocatable = false;
+    private boolean compileForExport = false;
     private Iterable<QueryLibrary> queryLibraries;
     private OptimizerOptions optimizerOptions;
     private NamespaceUri defaultNamespaceForElementsAndTypes = NamespaceUri.NULL;
@@ -121,6 +122,7 @@ public class CompilerInfo {
         languageVersion = info.languageVersion;
         preLoadedSchemata = new HashMap<>(info.preLoadedSchemata);
         stubFunctionLibrary = info.stubFunctionLibrary;
+        compileForExport = info.compileForExport;
 
 
         //#if CSHARP==false
@@ -163,6 +165,7 @@ public class CompilerInfo {
     }
 
     //#if CSHARP==false
+
     /**
      * Set the URI Resolver to be used in this compilation episode.
      *
@@ -348,9 +351,8 @@ public class CompilerInfo {
     }
 
 
-
-
     //#if CSHARP==false
+
     /**
      * Get the URI Resolver being used in this compilation episode.
      *
@@ -361,7 +363,7 @@ public class CompilerInfo {
 
     public URIResolver getURIResolver() {
         if (resourceResolver instanceof ResourceResolverWrappingURIResolver) {
-            return ((ResourceResolverWrappingURIResolver)resourceResolver).getWrappedURIResolver();
+            return ((ResourceResolverWrappingURIResolver) resourceResolver).getWrappedURIResolver();
         } else {
             return null;
         }
@@ -370,6 +372,7 @@ public class CompilerInfo {
 
     /**
      * Get the ResourceResolver being used
+     *
      * @return the current ResourceResolver. Defaults to null.
      */
 
@@ -406,6 +409,7 @@ public class CompilerInfo {
     //#endif
 
     //#if CSHARP==false
+
     /**
      * Set the ErrorListener to be used during this compilation episode
      *
@@ -440,6 +444,7 @@ public class CompilerInfo {
     /**
      * Set an error reporter: that is, a used-supplied object that is to receive
      * notification of static errors found in the stylesheet
+     *
      * @param reporter the object to be notified of static errors
      */
 
@@ -668,7 +673,6 @@ public class CompilerInfo {
     }
 
 
-
     /**
      * Import a set of stub functions (names and signatures) from a JSON file.
      * These functions will be added to the static context of the stylesheet, but any attempt to
@@ -677,6 +681,7 @@ public class CompilerInfo {
      * available on the target platform; this option will therefore normally be used when
      * compiling with -nogo. If compiling from the Transform command line, the stub
      * library can be specified using the option <code>-stublib:filename</code>.
+     *
      * @param jsonSignatures The file containing JSON signatures. The format is
      *                       described at {@link com.saxonica.ee.extfn.js.StubFunctionLibrary}.
      * @throws XPathException if the JSON file is invalid
@@ -687,6 +692,7 @@ public class CompilerInfo {
 
     /**
      * Get any function library that has been imported using {@link #importStubFunctionLibrary(StreamSource)}
+     *
      * @return the imported stub function library, or null if none has been imported.
      */
 
@@ -694,6 +700,29 @@ public class CompilerInfo {
         return stubFunctionLibrary;
     }
 
+    /**
+     * Say whether any stylesheet being compiled by this compiler should be compiled with export in mind;
+     * that is, whether a SEF file is to be created from the compiled package. It can be useful to set
+     * this flag to inhibit compile-time optimisations that are unhelpful when creating a SEF file. Notably,
+     * pre-evaluating functions like fn:invisible-xml may create function items that cannot be exported
+     * to a SEF file, and this flag inhibits such pre-evaluation.
+     *
+     * @param exportable true if stylesheets are to be compiled with export (to a SEF file) in mind.
+     */
 
+    public void setCompileForExport(boolean exportable) {
+        compileForExport = exportable;
+    }
+
+    /**
+     * Ask whether any stylesheet being compiled by this compiler will be compiled with export in mind;
+     * that is, whether {@link #setCompileForExport(boolean)} has been called.
+     *
+     * @return true if {@link #setCompileForExport(boolean)} has been called
+     */
+
+    public boolean isCompileForExport() {
+        return compileForExport;
+    }
 }
 

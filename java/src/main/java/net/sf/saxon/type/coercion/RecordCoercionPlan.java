@@ -43,23 +43,28 @@ public final class RecordCoercionPlan extends CoercionPlan {
                  GroundedValue val = suppliedMap.get(key);
                  if (val == null) {
                      if (!test.isOptionalField(s)) {
-                         throw coercionError(item, requiredType, request);
+                         throw coercionError(item, requiredType, request, "Field '" + s + "' is required");
                      }
                  } else {
                      SequenceType fieldType = test.getFieldType(s);
                      if (fieldType != null) {
                          CoercionPlan fieldPlan = fieldType.getPrimaryType().getCoercionPlan(40);
-                         if (!fieldType.matches(val)) {
+                         if (fieldType.matches(val)) {
+                             builder.put(key.getUnicodeStringValue(), val);
+                         } else {
                              Supplier<RoleDiagnostic> fieldRoleSupplier = () ->
                                      new RoleDiagnostic(RoleDiagnostic.OPTION, s, 0);
                              CoercionRequest subRequest = new CoercionRequest(
                                      SequenceType.ANY_SEQUENCE,
                                      request.config, fieldRoleSupplier, request.locator);
                              SequenceIterator convertedValue =
-                                     fieldPlan.coerceSequence(val.iterate(), fieldType, subRequest);
+                                     null;
+                             try {
+                                 convertedValue = fieldPlan.coerceSequence(val.iterate(), fieldType, subRequest);
+                             } catch (XPathException e) {
+                                 throw coercionError(item, requiredType, request, "Failed to convert value of field '" + s + "': " + e.getMessage());
+                             }
                              builder.put(key.getUnicodeStringValue(), SequenceTool.toGroundedValue(convertedValue));
-                         } else {
-                             builder.put(key.getUnicodeStringValue(), val);
                          }
                      }
                  }
@@ -67,7 +72,7 @@ public final class RecordCoercionPlan extends CoercionPlan {
             return builder.getCompletedMapConfidently();
 
         } else {
-            throw coercionError(item, requiredType, request);
+            throw coercionError(item, requiredType, request, null);
         }
     }
 

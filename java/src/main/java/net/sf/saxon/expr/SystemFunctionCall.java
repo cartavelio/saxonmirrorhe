@@ -25,6 +25,7 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 
@@ -62,6 +63,10 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
     @Override
     public Expression preEvaluate(ExpressionVisitor visitor) throws XPathException {
         SystemFunction target = getTargetFunction();
+        if (visitor.isOptimizeForExport() && target.getResultItemType() instanceof FunctionItemType) {
+            // suppress early evaluation if the result needs to be exported to a SEF file
+            return this;
+        }
         if ((target.getDetails().properties & BuiltInFunctionSet.LATE) == 0) {
             return super.preEvaluate(visitor);
         } else {

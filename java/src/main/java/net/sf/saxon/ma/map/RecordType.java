@@ -68,7 +68,7 @@ public class RecordType implements FunctionItemType {
                 f("primitive-type", SequenceType.one(
                         new SpecificFunctionType(SequenceType.one(SCHEMA_TYPE_RECORD))), true),
                 f("variety", SequenceType.one(
-                        EnumerationUnionType.of("atomic", "list", "union", "empty", "simple", "element-only", "mixed")), false),
+                        EnumerationUnionType.of("atomic", "list", "union", "empty", "simple", "element-only", "mixed")), true),
                 f("members", SequenceType.one(
                         new SpecificFunctionType(SequenceType.zeroOrMore(SCHEMA_TYPE_RECORD))), true),
                 f("simple-content-type", SequenceType.one(

@@ -171,7 +171,11 @@ public abstract class StyleElement extends ElementImpl {
      */
 
     public ExpressionVisitor makeExpressionVisitor() {
-        return ExpressionVisitor.make(getStaticContext());
+        ExpressionVisitor visitor = ExpressionVisitor.make(getStaticContext());
+        if (compilation.getCompilerInfo().isCompileForExport()) {
+            visitor.setOptimizeForExport(true);
+        }
+        return visitor;
     }
 
     /**

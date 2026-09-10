@@ -15,6 +15,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
+import net.sf.saxon.ma.jnode.RootJNodeType;
 import net.sf.saxon.ma.jnode.SpecificJNodeType;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
@@ -24,6 +25,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeChar;
@@ -33,10 +35,7 @@ import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>An AlphaCode is a compact, context-independent string representation of a SequenceType</p>
@@ -127,6 +126,7 @@ import java.util.Set;
  * <li>FA: array(*) </li>
  *
  * <li>J: jnode(). Parameters k for the key type (defaulting to string), s for the key value (as a string), c for the content type</li>
+ * <li>JR: root jnode(). Parameter c for the content type.</li>
  *
  * <li>E: xs:error </li>
  *
@@ -663,13 +663,14 @@ public class AlphaCode {
      * Convert an AlphaCode to a SequenceType
      *
      * @param input  the input alphacode
+     * @param config
      * @param schema the schema (which must contain any user-defined types that are
      *               referenced in the Alphacode)
      * @return the corresponding SequenceType
      * @throws IllegalArgumentException if the input is not a valid AlphaCode
      */
 
-    public static SequenceType toSequenceType(String input, Schema schema) {
+    public static SequenceType toSequenceType(String input, Configuration config, Schema schema) {
         TreeCallBack callBack = new TreeCallBack();
         AlphaCodeParser<AlphaCodeTree> parser = new AlphaCodeParser<>(input, callBack);
         AlphaCodeTree tree = parser.parseType(null);
@@ -681,14 +682,15 @@ public class AlphaCode {
      * may be omitted, or may be "1": any other value is treated as an error.
      *
      * @param input  the input alphacode
+     * @param config
      * @param schema the imported schema (which must contain any user-defined types that are
      *               referenced in the Alphacode)
      * @return the corresponding SequenceType
      * @throws IllegalArgumentException if the input is not a valid AlphaCode
      */
 
-    public static ItemType toItemType(String input, Schema schema) {
-        SequenceType st = toSequenceType(input, schema);
+    public static ItemType toItemType(String input, Configuration config, Schema schema) {
+        SequenceType st = toSequenceType(input, config, schema);
         if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
             throw new IllegalArgumentException("Supplied alphacode has a cardinality other than 1");
         }
@@ -771,142 +773,120 @@ public class AlphaCode {
 //                    itemType = new MultipleNodeKindTest(u);
 //                }
             } else {
-                int kind = Type.XNODE;
-                if (principal.length() >= 2) {
-                    kind = switch (principal.substring(0, 2)) {
-                        case "NT" -> Type.TEXT;
-                        case "NC" -> Type.COMMENT;
-                        case "NN" -> Type.NAMESPACE;
-                        case "NP" -> Type.PROCESSING_INSTRUCTION;
-                        case "ND" -> Type.DOCUMENT;
-                        case "NE" -> Type.ELEMENT;
-                        case "NA" -> Type.ATTRIBUTE;
-                        default -> kind;
-                    };
-                }
+//                int kind = Type.XNODE;
+//                if (principal.length() >= 2) {
+//                    kind = switch (principal.substring(0, 2)) {
+//                        case "NT" -> Type.TEXT;
+//                        case "NC" -> Type.COMMENT;
+//                        case "NN" -> Type.NAMESPACE;
+//                        case "NP" -> Type.PROCESSING_INSTRUCTION;
+//                        case "ND" -> Type.DOCUMENT;
+//                        case "NE" -> Type.ELEMENT;
+//                        case "NA" -> Type.ATTRIBUTE;
+//                        default -> kind;
+//                    };
+//                }
                 String name = tree.name;
-                QNameTest partialNameTest = null;
-                if (name != null && name.contains("*")) {
-                    if (name.startsWith("*:")) {
-                        partialNameTest = new LocalQNameTest(name.substring(2));
-                    } else if (name.endsWith("}*")) {
-                        String uri = name.substring(2, name.length() - 2);
-                        partialNameTest = new NamespaceQNameTest(NamespaceUri.of(uri));
-                    }
+                QNameTest qNameTest = null;
+                if (name != null) {
+                    qNameTest = parseNameTest(tree.name, config);
                 }
-                if (partialNameTest != null) {
-                    itemType = new NamedXNodeType(kind, partialNameTest, config);
-                } else {
-                    StructuredQName qName = name == null ? null : StructuredQName.fromEQName40(name);
-                    switch (principal) {
-                        case "N":
-                            itemType = AnyXNodeType.getInstance();
-                            break;
-                        case "NT":
-                            itemType = NodeKindType.TEXT;
-                            break;
-                        case "NC":
-                            itemType = NodeKindType.COMMENT;
-                            break;
-                        case "NN":
-                            if (name == null) {
-                                itemType = NodeKindType.NAMESPACE;
-                            } else {
-                                itemType = new NamedXNodeType(Type.NAMESPACE,
-                                                              new StructuredQName("", NamespaceUri.NULL, qName.getLocalPart()),
-                                                              config);
-                            }
-                            break;
-                        case "NP":
-                            if (name == null) {
-                                itemType = NodeKindType.PROCESSING_INSTRUCTION;
-                            } else {
-                                itemType = new NamedXNodeType(Type.PROCESSING_INSTRUCTION,
-                                                              new StructuredQName("", NamespaceUri.NULL, qName.getLocalPart()),
-                                                              config);
-                            }
-                            break;
-                        case "ND":
-                            AlphaCodeTree elementType = tree.elementType;
-                            if (elementType == null) {
-                                itemType = NodeKindType.DOCUMENT;
-                            } else {
-                                ItemType e = sequenceTypeFromTree(elementType, schema).getPrimaryType();
-                                itemType = new DocumentNodeType((XNodeType) e);
-                            }
-                            break;
-                        case "NE":
-                            if (contentType == null) {
-                                itemType = qName == null
-                                        ? NodeKindType.ELEMENT
-                                        : new NamedXNodeType(Type.ELEMENT,
-                                                             new StructuredQName("", qName.getNamespaceUri(), qName.getLocalPart()),
-                                                             config);
-                                ;
-                            } else {
-                                QNameTest nameTest = qName == null
-                                        ? AnyQNameTest.getInstance()
-                                        : new SpecificQNameTest(
-                                                new StructuredQName("", qName.getNamespaceUri(), qName.getLocalPart()),
-                                                config.getNamePool());
-
-                                itemType = new NamedXNodeType(Type.ELEMENT, nameTest, contentType, nillable, config);
-                            }
-                            break;
-                        case "NA":
-                            if (contentType == null) {
-                                itemType = qName == null
-                                        ? NodeKindType.ATTRIBUTE
-                                        : new NamedXNodeType(Type.ATTRIBUTE, qName, config);
-                                ;
-                            } else {
-                                QNameTest nameTest = qName == null
-                                        ? AnyQNameTest.getInstance()
-                                        : new SpecificQNameTest(new StructuredQName("", qName.getNamespaceUri(), qName.getLocalPart()), config.getNamePool());
-
-                                itemType = new NamedXNodeType(Type.ATTRIBUTE, nameTest, contentType, false, config);
-                            }
-                            break;
-                        case "NES": {
-                            assert qName != null;
-                            IElementDecl decl = schema.getElementDecl(qName);
-                            if (decl != null) {
-                                try {
-                                    itemType = schema.makeSchemaElementTest(decl.getFingerprint());
-                                } catch (MissingComponentException e) {
-                                    //
-                                } catch (SchemaException e) {
-                                    throw new IllegalArgumentException(e);
-                                }
-                            }
-                            if (itemType == null) {
-                                itemType = new NamedXNodeType(Type.ELEMENT, qName, config);
-                            }
-                            break;
+                StructuredQName qName = (qNameTest instanceof SpecificQNameTest spec) ? spec.getStructuredQName() : null;
+                switch (principal) {
+                    case "N":
+                        itemType = AnyXNodeType.getInstance();
+                        break;
+                    case "NT":
+                        itemType = NodeKindType.TEXT;
+                        break;
+                    case "NC":
+                        itemType = NodeKindType.COMMENT;
+                        break;
+                    case "NN":
+                        if (name == null) {
+                            itemType = NodeKindType.NAMESPACE;
+                        } else {
+                            itemType = new NamedXNodeType(Type.NAMESPACE, qNameTest, config);
                         }
-                        case "NAS": {
-                            assert qName != null;
-                            IAttributeDecl decl = schema.getAttributeDecl(qName);
-                            if (decl != null) {
-                                try {
-                                    itemType = schema.makeSchemaAttributeTest(decl.getFingerprint());
-                                } catch (MissingComponentException e) {
-                                    //
-                                } catch (SchemaException e) {
-                                    throw new IllegalArgumentException(e);
-                                }
-                            }
-                            if (itemType == null) {
-                                itemType = new NamedXNodeType(Type.ATTRIBUTE, qName, config);
-                            }
-                            break;
+                        break;
+                    case "NP":
+                        if (name == null) {
+                            itemType = NodeKindType.PROCESSING_INSTRUCTION;
+                        } else {
+                            itemType = new NamedXNodeType(Type.PROCESSING_INSTRUCTION, qNameTest, config);
                         }
-                        default:
-                            itemType = AnyXNodeType.getInstance();
-                            break;
+                        break;
+                    case "ND":
+                        AlphaCodeTree elementType = tree.elementType;
+                        if (elementType == null) {
+                            itemType = NodeKindType.DOCUMENT;
+                        } else {
+                            ItemType e = sequenceTypeFromTree(elementType, schema).getPrimaryType();
+                            itemType = new DocumentNodeType((XNodeType) e);
+                        }
+                        break;
+                    case "NE":
+                        if (contentType == null) {
+                            itemType = name == null
+                                    ? NodeKindType.ELEMENT
+                                    : new NamedXNodeType(Type.ELEMENT,
+                                                         qNameTest,
+                                                         config);
+                            ;
+                        } else {
+                            itemType = new NamedXNodeType(Type.ELEMENT, qNameTest, contentType, nillable, config);
+                        }
+                        break;
+                    case "NA":
+                        if (contentType == null) {
+                            itemType = name == null
+                                    ? NodeKindType.ATTRIBUTE
+                                    : new NamedXNodeType(Type.ATTRIBUTE, qNameTest, config);
+                            ;
+                        } else {
+                            itemType = new NamedXNodeType(Type.ATTRIBUTE, qNameTest, contentType, false, config);
+                        }
+                        break;
+                    case "NES": {
+                        assert name != null;
+                        IElementDecl decl = schema.getElementDecl(qName);
+                        if (decl != null) {
+                            try {
+                                itemType = schema.makeSchemaElementTest(decl.getFingerprint());
+                            } catch (MissingComponentException e) {
+                                //
+                            } catch (SchemaException e) {
+                                throw new IllegalArgumentException(e);
+                            }
+                        }
+                        if (itemType == null) {
+                            itemType = new NamedXNodeType(Type.ELEMENT, qName, config);
+                        }
+                        break;
                     }
+                    case "NAS": {
+                        assert qName != null;
+                        IAttributeDecl decl = schema.getAttributeDecl(qName);
+                        if (decl != null) {
+                            try {
+                                itemType = schema.makeSchemaAttributeTest(decl.getFingerprint());
+                            } catch (MissingComponentException e) {
+                                //
+                            } catch (SchemaException e) {
+                                throw new IllegalArgumentException(e);
+                            }
+                        }
+                        if (itemType == null) {
+                            itemType = new NamedXNodeType(Type.ATTRIBUTE, qName, config);
+                        }
+                        break;
+                    }
+                    default:
+                        itemType = AnyXNodeType.getInstance();
+                        break;
                 }
             }
+
         } else if (principal.startsWith("G")) {
             itemType = AnyGNodeType.getInstance();
         } else if (principal.equals("J")) {
@@ -915,10 +895,10 @@ public class AlphaCode {
             if (valueType == null) {
                 itemType = AnyJNodeType.getInstance();
             } else if (tree.keyType != null) {
-                AtomicType keyItemType = (AtomicType)sequenceTypeFromTree(tree.keyType, schema).getPrimaryType();
+                AtomicType keyItemType = (AtomicType) sequenceTypeFromTree(tree.keyType, schema).getPrimaryType();
                 String lexicalKey = tree.content;
                 try {
-                    keyValue = (AtomicValue)keyItemType.getTypedValue(StringView.of(lexicalKey), null, ConversionRules.DEFAULT);
+                    keyValue = (AtomicValue) keyItemType.getTypedValue(StringView.of(lexicalKey), null, ConversionRules.DEFAULT);
                 } catch (ValidationException e) {
                     throw new AssertionError(e);
                 }
@@ -927,6 +907,8 @@ public class AlphaCode {
                 itemType = new SpecificJNodeType(valueType);
             }
             //itemType = AnyJNodeType.getInstance();
+        } else if (principal.equals("JR")) {
+            itemType = new RootJNodeType(sequenceTypeFromTree(tree.valueType, schema));
         } else if (principal.startsWith("F")) {
             if (principal.equals("FA")) {
                 AlphaCodeTree valueType = tree.valueType;
@@ -935,24 +917,19 @@ public class AlphaCode {
                 } else {
                     itemType = new ArrayItemType(sequenceTypeFromTree(valueType, schema));
                 }
-            } else if (principal.equals("FM")) {
+            } else if (principal.startsWith("FM")) {
                 if (tree.name != null) {
                     StructuredQName qName = StructuredQName.fromEQName40(tree.name);
                     if (qName.hasURI(NamespaceUri.FN)) {
-                        if (qName.getLocalPart().equals("node-type-annotation")) {
-                            return SequenceType.one(RecordType.SCHEMA_TYPE_RECORD);
-                        } else {
-                            throw new IllegalArgumentException("Unknown record type name " + tree.name);
-                        }
+                        itemType = config.getBuiltInRecordType(qName.getLocalPart());
                     } else {
                         throw new IllegalArgumentException("Named record type not in FN namespace");
                     }
-                }
-                if (tree.fieldNames == null) {
+                } else if (tree.fieldNames == null) {
                     AlphaCodeTree keyType = tree.keyType;
                     AlphaCodeTree valueType = tree.valueType;
                     if (keyType != null && valueType != null) {
-                        AtomicType a = (AtomicType) sequenceTypeFromTree(keyType, schema).getPrimaryType();
+                        PlainType a = (PlainType) sequenceTypeFromTree(keyType, schema).getPrimaryType();
                         SequenceType v = sequenceTypeFromTree(valueType, schema);
                         itemType = new MapType(a, v);
                     } else {
@@ -1023,6 +1000,30 @@ public class AlphaCode {
         return SequenceType.makeSequenceType(itemType, cardinality);
     }
 
+    private static QNameTest parseNameTest(String test, Configuration config) {
+        if (test.contains("|")) {
+            // TODO: disregard a vertical bar within a namespace URI
+            StringTokenizer st = new StringTokenizer(test, "|");
+            List<QNameTest> tests = new ArrayList<>();
+            while (st.hasMoreTokens()) {
+                String token = st.nextToken();
+                tests.add(parseNameTest(token, config));
+            }
+            return new UnionQNameTest(tests);
+        } else if (test.contains("*")) {
+            if (test.startsWith("*:")) {
+                return new LocalQNameTest(test.substring(2));
+            } else if (test.endsWith("}*")) {
+                String uri = test.substring(2, test.length() - 2);
+                return new NamespaceQNameTest(NamespaceUri.of(uri));
+            } else {
+                return AnyQNameTest.getInstance();
+            }
+        } else {
+            return new SpecificQNameTest(StructuredQName.fromEQName40(test), config.getNamePool());
+        }
+    }
+
     private static AlphaCodeTree makeTree(SequenceType sequenceType) {
         AlphaCodeTree tree = makeTree(sequenceType.getPrimaryType());
         if (sequenceType.getCardinality() != StaticProperty.EXACTLY_ONE) {
@@ -1035,14 +1036,18 @@ public class AlphaCode {
         AlphaCodeTree result = new AlphaCodeTree();
         result.principal = primary.getBasicAlphaCode();
         result.cardinality = "1";
-        if (primary instanceof AtomicType && !((AtomicType) primary).isBuiltInType()) {
-            result.name = ((AtomicType) primary).getEQName();
-        } else if (primary instanceof EnumerationUnionType enumType) {
+        if (primary instanceof EnumerationUnionType enumType) {
             result.principal = "ASE";
             result.enumValues = new ArrayList<>();
             for (ItemType et : enumType.getMemberTypes()) {
-                result.enumValues.add(((SingletonEnumType)et).getValue().toString());
+                result.enumValues.add(((SingletonEnumType) et).getValue().toString());
             }
+        } else if (primary instanceof SingletonEnumType sEnumType) {
+            result.principal = "ASE";
+            result.enumValues = new ArrayList<>(1);
+            result.enumValues.add(sEnumType.getValue().toString());
+        } else if (primary instanceof AtomicType at && !at.isBuiltInType()) {
+            result.name = at.getEQName();
         } else if (primary instanceof UnionType) {
             StructuredQName name = ((UnionType) primary).getTypeName();
             if (name.hasURI(NamespaceUri.SCHEMA)) {
@@ -1120,8 +1125,8 @@ public class AlphaCode {
                 SequenceType[] argTypes = ((FunctionItemType) primary).getArgumentTypes();
                 if (argTypes != null) {
                     List<AlphaCodeTree> argMaps = new ArrayList<>();
-                    for (SequenceType at : argTypes) {
-                        argMaps.add(makeTree(at));
+                    for (SequenceType argType : argTypes) {
+                        argMaps.add(makeTree(argType));
                     }
                     result.argTypes = argMaps;
                 }
@@ -1134,6 +1139,8 @@ public class AlphaCode {
                 result.keyType = makeTree(jt.getSelector().getItemType());
                 result.content = jt.getSelector().getStringValue();
             }
+        } else if (primary instanceof RootJNodeType rjt) {
+            result.valueType = makeTree(rjt.getValueType());
         } else if (primary instanceof ExternalObjectType) {
             result.name = ((ExternalObjectType) primary).getName();
         }

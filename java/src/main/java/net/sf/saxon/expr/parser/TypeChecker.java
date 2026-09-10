@@ -108,6 +108,7 @@ public class TypeChecker {
         boolean forceCoercion = (reqItemType instanceof SpecificFunctionType && !(supplied instanceof SequenceCoercer));
 
         if (!forceCoercion) {
+            // Unless coercion is forced, if the supplied type is a subtype of the required type, no action is needed
             if (supplied instanceof Literal && ((Literal)supplied).isInstance(req, th)) {
                 return supplied;
             }
@@ -183,7 +184,7 @@ public class TypeChecker {
         if (uSupplied.overlaps(uRequired)) {
             return true;
         }
-        if (uSupplied == UType.JNODE) {
+        if (uSupplied.overlaps(UType.JNODE)) {
             return true;
         }
 //        if ((supplied instanceof ArrayItemType || supplied instanceof MapType) &&

@@ -216,7 +216,7 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
             }
             out.endElement();
         } else {
-
+            String flags = "";
             if (target instanceof UnionCastableFunction) {
                 // Bug 2611. Bug 3822.
                 final UnionType targetType = ((UnionConstructorFunction) target).getTargetType();
@@ -245,9 +245,9 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
                 final UnionType targetType = ((UnionConstructorFunction) target).getTargetType();
                 out.startElement("cast", this);
                 if (targetType instanceof LocalUnionType) {
-                    out.emitAttribute("to", AlphaCode.fromItemType(targetType));
+                    out.emitAttribute("as", AlphaCode.fromItemType(targetType));
                 } else{
-                    out.emitAttribute("as", targetType.toExportString());
+                    out.emitAttribute("to", targetType.getStructuredQName().getEQName());
                 }
                 out.emitAttribute("flags", "u" + (((UnionConstructorFunction) target).isAllowEmpty() ? "e" : ""));
                 for (Operand o : operands()) {

@@ -432,6 +432,7 @@ public class Transform {
                 export = true;
                 jit = false;
                 compiler.setJustInTimeCompilation(jit);
+                compiler.setCompileForExport(true);
                 if (!"".equals(value)) {
                     exportOutputFileName = CommandLineOptions.coerceImplicitOutputURI(value);
                 }

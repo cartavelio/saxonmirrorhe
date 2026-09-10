@@ -150,7 +150,8 @@ public class CallableFunction extends AbstractFunction {
             out.emitAttribute("tag", tag);
             out.endElement();
         } else {
-            throw new UnsupportedOperationException("An untagged CallableFunction is a transient value that cannot be exported");
+            throw new UnsupportedOperationException("An untagged CallableFunction is a transient value that cannot be exported. " +
+                    "It may be possible to fix this by calling XsltCompiler.setCompileForExport(true).");
         }
     }
 }

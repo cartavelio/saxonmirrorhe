@@ -878,7 +878,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         destination.startElement("axis", this);
         destination.emitAttribute("name", AxisInfo.axisName[axis]);
         if (test == null) {
-            destination.emitAttribute("nodeTest", AlphaCode.fromItemType(AnyXNodeType.getInstance()));
+            destination.emitAttribute("nodeTest", AlphaCode.fromItemType(AnyGNodeType.getInstance()));
         } else if (test instanceof ItemType it) {
             destination.emitAttribute("nodeTest", AlphaCode.fromItemType(it));
         } else {

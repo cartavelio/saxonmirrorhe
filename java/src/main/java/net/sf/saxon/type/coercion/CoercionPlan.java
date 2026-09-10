@@ -109,25 +109,30 @@ public abstract class CoercionPlan {
      */
     protected final void check(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         if (!requiredType.matches(item)) {
-            throw coercionError(item, requiredType, request);
+            throw coercionError(item, requiredType, request, null);
         }
     }
 
     /**
      * Create an exception object representing a coercion error
-     * @param value the input value to the coercion
+     *
+     * @param value        the input value to the coercion
      * @param requiredType the required item type
-     * @param request the coercion request details
+     * @param request      the coercion request details
+     * @param explanation   further explanation of the reason for failure; may be null
      * @return an exception for the caller to throw
      */
 
-    protected XPathException coercionError(Sequence value, ItemType requiredType, CoercionRequest request) {
+    protected XPathException coercionError(Sequence value, ItemType requiredType, CoercionRequest request, String explanation) {
         RoleDiagnostic role = request.roleSupplier.get();
         String representation = value instanceof Item ? Err.depict((Item)value) : value.toString();
-        return new XPathException(
-                "Failed to convert the " + role.getMessage() + ": " +
-                        "Cannot convert " + representation + " to "
-                        + requiredType)
+        String message = "Failed to convert the " + role.getMessage() + ": " +
+                "Cannot convert " + representation + " to "
+                + requiredType;
+        if (explanation != null) {
+            message = message + ". " + explanation;
+        }
+        return new XPathException(message)
                 .withErrorCode(role.getErrorCode())
                 .withLocation(request.locator);
     }

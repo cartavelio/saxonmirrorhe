@@ -60,7 +60,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
 
     public NamedXNodeType(int nodeKind, QNameTest nameTest, SchemaType schemaType, boolean nillable, Configuration config) {
         this.kind = nodeKind;
-        this.nameTest = nameTest;
+        this.nameTest = nameTest == null ? AnyQNameTest.getInstance() : nameTest;
         this.schemaType = schemaType;
         this.config = config;
         this.nillable = nillable;

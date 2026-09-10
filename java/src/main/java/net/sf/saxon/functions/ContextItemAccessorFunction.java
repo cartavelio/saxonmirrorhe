@@ -108,8 +108,9 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
     @Override
     @CSharpModifiers(code={"public", "override"})
     public Expression makeFunctionCall(Expression[] arguments) {
-        boolean is40 = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
-        Expression arg = is40 ? new ContextValueExpression() : new ContextItemExpression();
+//        boolean is40 = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
+//        Expression arg = is40 ? new ContextValueExpression() : new ContextItemExpression();
+        Expression arg = new ContextItemExpression();
         if (getFunctionName().hasURI(NamespaceUri.SAXON)) {
             BuiltInFunctionSet.Entry entry = getDetails();
             try {

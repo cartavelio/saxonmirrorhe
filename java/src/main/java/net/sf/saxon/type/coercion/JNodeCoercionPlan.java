@@ -37,7 +37,7 @@ public final class JNodeCoercionPlan extends CoercionPlan {
         if (item instanceof MapOrArray) {
             return RootJNode.obtainRootJNode((MapOrArray)item);
         }
-        throw coercionError(item, requiredType, request);
+        throw coercionError(item, requiredType, request, null);
     }
 
 

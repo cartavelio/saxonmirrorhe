@@ -30,7 +30,7 @@ public class DecimalCoercionPlan extends AtomicCoercionPlan {
                 return item;
             }
         } catch (ValidationException e) {
-            throw coercionError(item, requiredType, request);
+            throw coercionError(item, requiredType, request, null);
         }
     }
 

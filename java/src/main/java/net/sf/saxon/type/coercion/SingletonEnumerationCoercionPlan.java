@@ -20,7 +20,7 @@ public class SingletonEnumerationCoercionPlan extends AtomicCoercionPlan {
         if (enumType.matchesString(atom.getUnicodeStringValue())) {
             return new StringValue(atom.getUnicodeStringValue(), enumType);
         } else {
-            throw coercionError(atom, requiredType, request);
+            throw coercionError(atom, requiredType, request, null);
         }
     }
     @Override
@@ -32,7 +32,7 @@ public class SingletonEnumerationCoercionPlan extends AtomicCoercionPlan {
         } else if (enumType.matchesString(atom.getUnicodeStringValue())) {
             return new StringValue(atom.getUnicodeStringValue(), enumType);
         } else {
-            throw coercionError(atom, requiredType, request);
+            throw coercionError(atom, requiredType, request, null);
         }
     }
 

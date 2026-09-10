@@ -336,7 +336,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
         // process any xsl:use-package, xsl:include and xsl:import elements
 
-        spliceUsePackages((XSLPackage) getRootElement(), getRootElement().getCompilation());
+        spliceUsePackages((XSLPackage) getRootElement(), compilation);
 
         if (Compilation.TIMING) {
             timer.report("spliceIncludes");

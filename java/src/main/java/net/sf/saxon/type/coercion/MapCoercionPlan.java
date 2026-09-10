@@ -70,7 +70,7 @@ public final class MapCoercionPlan extends CoercionPlan {
                 }
             }
         } else {
-            throw coercionError(item, requiredType, request);
+            throw coercionError(item, requiredType, request, null);
         }
     }
 

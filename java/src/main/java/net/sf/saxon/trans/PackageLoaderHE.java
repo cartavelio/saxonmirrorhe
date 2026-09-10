@@ -795,7 +795,9 @@ public class PackageLoaderHE implements IPackageLoader {
         BuiltInRuleSet base;
         if (onNoMatch != null) {
             String asAtt = modeElement.getAttributeValue(NamespaceUri.NULL, "as");
-            SequenceType requiredType = asAtt == null ? SequenceType.ANY_SEQUENCE : AlphaCode.toSequenceType(asAtt, pack.getImportedSchema(""));
+            SequenceType requiredType = asAtt == null ?
+                    SequenceType.ANY_SEQUENCE :
+                    AlphaCode.toSequenceType(asAtt, config, pack.getImportedSchema(""));
             boolean copyNamespaces = !flags.contains("n");
             base = Mode.getBuiltInRuleSetForCode(onNoMatch, requiredType, copyNamespaces);
             mode.setBuiltInRuleSet(base);
@@ -1395,7 +1397,7 @@ public class PackageLoaderHE implements IPackageLoader {
             return SequenceType.ANY_SEQUENCE;
         } else {
             try {
-                return AlphaCode.toSequenceType(attValue, getSchema());
+                return AlphaCode.toSequenceType(attValue, config, getSchema());
             } catch (IllegalArgumentException | IllegalStateException e) {
                 throw new XPathException("Invalid alpha code " + element.getDisplayName() + "/@" + name + "='" + attValue + "': " + e.getMessage());
             }
@@ -1408,7 +1410,7 @@ public class PackageLoaderHE implements IPackageLoader {
             return AnyItemType.INSTANCE;
         } else {
             try {
-                return AlphaCode.toItemType(attValue, getSchema());
+                return AlphaCode.toItemType(attValue, config, getSchema());
             } catch (IllegalArgumentException | IllegalStateException e) {
                 throw new XPathException("Invalid alpha code " + element.getDisplayName() + "/@" + name + "='" + attValue + "': " + e.getMessage());
             }
@@ -1452,7 +1454,7 @@ public class PackageLoaderHE implements IPackageLoader {
             return parseCombinedNodeTest(attValue, axis);
         } else {
             try {
-                ItemType it = AlphaCode.toItemType(attValue, getSchema());
+                ItemType it = AlphaCode.toItemType(attValue, config, getSchema());
                 if (it instanceof NodeTest nt) {
                     return nt;
                 }
@@ -1701,7 +1703,6 @@ public class PackageLoaderHE implements IPackageLoader {
         licensableConstructs.put("stream", "EE");
         licensableConstructs.put("switch", "EE");
 
-        licensableConstructs.put("acFnRef", "PE");
         licensableConstructs.put("assign", "PE");
         licensableConstructs.put("do", "PE");
         licensableConstructs.put("javaCall", "PE");
@@ -1709,6 +1710,41 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     static {
+
+        eMap.put("acFnRef", (loader, element) -> {
+            StructuredQName name = loader.getQNameAttribute(element, "name");
+            SchemaType type = loader.getSchema().getSchemaType(name);
+
+            NamespaceResolver resolver = null;
+
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
+            if (flags == null) {
+                flags = "";
+            }
+            if (flags.contains("l")) {
+                if (type instanceof ListType lt) {
+                    if (lt.isNamespaceSensitive()) {
+                        RetainedStaticContext rsc = loader.makeRetainedStaticContext(element);
+                        resolver = rsc.getNamespaceMap();
+                    }
+                    ListConstructorFunction fn = new ListConstructorFunction(lt, resolver, flags.contains("e"));
+                    return new FunctionLiteral(fn);
+                } else {
+                    throw new XPathException("No list type " + name.getEQName() + " found");
+                }
+            } else {
+                if (type instanceof AtomicType at) {
+                    if (at.isNamespaceSensitive()) {
+                        RetainedStaticContext rsc = loader.makeRetainedStaticContext(element);
+                        resolver = rsc.getNamespaceMap();
+                    }
+                    AtomicConstructorFunction fn = new AtomicConstructorFunction(at, resolver);
+                    return new FunctionLiteral(fn);
+                } else {
+                    throw new XPathException("No atomic type " + name.getEQName() + " found");
+                }
+            }
+        });
 
         eMap.put("among", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
@@ -1820,10 +1856,16 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("atomic", (loader, element) -> {
             String valAtt = element.getAttributeValue(NamespaceUri.NULL, "val");
-            AtomicType type = (AtomicType) loader.parseAlphaCodeForItemType(element, "type");
-            AtomicValue val = type.getStringConverter(loader.config.getConversionRules())
-                    .convertString(StringView.of(valAtt).tidy()).asAtomic();
-            return Literal.makeLiteral(val);
+            ItemType type = loader.parseAlphaCodeForItemType(element, "type");
+            if (type instanceof AtomicType at) {
+                AtomicValue val = at.getStringConverter(loader.config.getConversionRules())
+                        .convertString(StringView.of(valAtt).tidy()).asAtomic();
+                return Literal.makeLiteral(val);
+            } else if (type instanceof EnumerationUnionType enut) {
+                return Literal.makeLiteral(new StringValue(valAtt));
+            } else {
+                throw new IllegalStateException("Unrecognized atomic type: " + type);
+            }
         });
 
         eMap.put("atomSing", (loader, element) -> {
@@ -1923,27 +1965,31 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         eMap.put("cast", (loader, element) -> {
+            // Expect either an "as" attribute containing the alphacode of an item type,
+            // or a "to" attribute containing the name of a schema type
             Expression body = loader.getFirstChildExpression(element);
             String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             boolean allowEmpty = flags.contains("e");
+            String toAtt = element.getAttributeValue(NamespaceUri.NULL, "to");
+            StructuredQName typeName = toAtt == null ? null : StructuredQName.fromEQName40(toAtt);
+            String asAtt = element.getAttributeValue(NamespaceUri.NULL, "as");
+            ItemType itemType = asAtt == null ? null : loader.parseAlphaCode(element, "as").getPrimaryType();
             if (flags.contains("a")) {
-                SequenceType seqType = loader.parseAlphaCode(element, "as");
-                return new CastExpression(body, (AtomicType) seqType.getPrimaryType(), allowEmpty);
+                // Atomic type
+                return new CastExpression(body, (AtomicType) itemType, allowEmpty);
             } else if (flags.contains("l")) {
-                StructuredQName typeName = StructuredQName.fromEQName40((element.getAttributeValue(NamespaceUri.NULL, "as")));
                 SchemaType type = loader.getSchema().getSchemaType(typeName);
                 NamespaceResolver resolver = element.getAllNamespaces();
                 ListConstructorFunction ucf = new ListConstructorFunction((ListType) type, resolver, allowEmpty);
                 return new StaticFunctionCall(ucf, new Expression[]{body});
             } else if (flags.contains("u")) {
-                if (element.getAttributeValue(NamespaceUri.NULL, "as") != null) {
-                    StructuredQName typeName = StructuredQName.fromEQName40((element.getAttributeValue(NamespaceUri.NULL, "as")));
+                if (toAtt != null) {
                     SchemaType type = loader.getSchema().getSchemaType(typeName);
                     NamespaceResolver resolver = element.getAllNamespaces();
                     UnionConstructorFunction ucf = new UnionConstructorFunction((UnionType) type, resolver, allowEmpty);
                     return new StaticFunctionCall(ucf, new Expression[]{body});
                 } else {
-                    LocalUnionType type = (LocalUnionType) loader.parseAlphaCode(element, "to").getPrimaryType();
+                    LocalUnionType type = (LocalUnionType) itemType;
                     NamespaceResolver resolver = element.getAllNamespaces();
                     UnionConstructorFunction ucf = new UnionConstructorFunction(type, resolver, allowEmpty);
                     return new StaticFunctionCall(ucf, new Expression[]{body});
@@ -2181,7 +2227,7 @@ public class PackageLoaderHE implements IPackageLoader {
             inst.setBequeathNamespacesToChildren(flags.contains("i"));
             inst.setInheritNamespacesFromParent(flags.contains("n"));
             if (sType != null) {
-                SequenceType st = AlphaCode.toSequenceType(sType, loader.getSchema());
+                SequenceType st = AlphaCode.toSequenceType(sType, loader.getConfiguration(), loader.getSchema());
                 inst.setSelectItemType(st.getPrimaryType());
             }
             return inst;
@@ -2266,7 +2312,11 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("dec", (loader, element) -> {
             String val = element.getAttributeValue(NamespaceUri.NULL, "val");
-            return Literal.makeLiteral(BigDecimalValue.makeDecimalValue(val, false).asAtomic());
+            AtomicValue av = BigDecimalValue.makeDecimalValue(val, false).asAtomic();
+            if (av instanceof IntegerValue) {
+                av = new BigDecimalValue(((IntegerValue) av).getDecimalValue());
+            }
+            return Literal.makeLiteral(av);
         });
 
         eMap.put("doc", (loader, element) -> {
@@ -2400,6 +2450,9 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("error", (loader, element) -> {
             String message = element.getAttributeValue(NamespaceUri.NULL, "message");
             String code = element.getAttributeValue(NamespaceUri.NULL, "code");
+            if (code == null) {
+                code = "XXXX9999";
+            }
             boolean isTypeErr = "1".equals(element.getAttributeValue(NamespaceUri.NULL, "isTypeErr"));
             return new ErrorExpression(message, code, isTypeErr);
         });
@@ -2928,7 +2981,7 @@ public class PackageLoaderHE implements IPackageLoader {
             String typeAtt = element.getAttributeValue(NamespaceUri.NULL, "type");
             if (typeAtt != null) {
                 final StylesheetPackage pack = loader.getPackStack().peek();
-                type = AlphaCode.toSequenceType(typeAtt, pack.getImportedSchema(""));
+                type = AlphaCode.toSequenceType(typeAtt, loader.getConfiguration(), pack.getImportedSchema(""));
             }
             return new LookupAllExpression(select);
         });
@@ -3479,7 +3532,7 @@ public class PackageLoaderHE implements IPackageLoader {
             SuppliedParameterReference ref = new SuppliedParameterReference(slot);
             String sType = element.getAttributeValue(NamespaceUri.NULL, "sType");
             if (sType != null) {
-                ref.setSuppliedType(AlphaCode.toSequenceType(sType, loader.getSchema()));
+                ref.setSuppliedType(AlphaCode.toSequenceType(sType, loader.getConfiguration(), loader.getSchema()));
             }
             return ref;
         });

@@ -24,6 +24,7 @@ public class ExpressionVisitor  {
     private StaticContext staticContext;
     private boolean optimizeForStreaming = false;
     private boolean optimizeForPatternMatching = false;
+    private boolean optimizeForExport = false;
     private final Configuration config;
     private Optimizer optimizer;
     private int depth = 0;
@@ -161,6 +162,26 @@ public class ExpressionVisitor  {
     public boolean isOptimizeForPatternMatching() {
         return optimizeForPatternMatching;
     }
+
+    /**
+     * Tell the visitor to optimize expressions for export to a SEF file
+     * @param option true if optimizing for pattern matching
+     */
+
+    public void setOptimizeForExport(boolean option) {
+        optimizeForExport = option;
+    }
+
+    /**
+     * Ask whether the visitor is to optimize expressions for export to a SEF file
+     *
+     * @return true if optimizing for pattern matching
+     */
+
+    public boolean isOptimizeForExport() {
+        return optimizeForExport;
+    }
+
 
     /**
      * Get the target environment for which we are optimizing

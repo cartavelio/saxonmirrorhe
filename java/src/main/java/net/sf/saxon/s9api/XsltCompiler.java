@@ -1217,6 +1217,29 @@ public class XsltCompiler {
         compilerInfo.setUnprefixedElementMatchingPolicy(unprefixedElementMatchingPolicy);
     }
 
+    /**
+     * Say whether any stylesheet being compiled by this compiler should be compiled with export in mind;
+     * that is, whether a SEF file is to be created from the compiled package. It can be useful to set
+     * this flag to inhibit compile-time optimisations that are unhelpful when creating a SEF file. Notably,
+     * pre-evaluating functions like fn:invisible-xml may create function items that cannot be exported
+     * to a SEF file, and this flag inhibits such pre-evaluation.
+     * @param exportable true if stylesheets are to be compiled with export (to a SEF file) in mind.
+     */
+
+    public void setCompileForExport(boolean exportable) {
+        compilerInfo.setCompileForExport(exportable);
+    }
+
+    /**
+     * Ask whether any stylesheet being compiled by this compiler will be compiled with export in mind;
+     * that is, whether {@link #setCompileForExport(boolean)} has been called.
+     * @return true if {@link #setCompileForExport(boolean)} has been called
+     */
+
+    public boolean isCompileForExport() {
+        return compilerInfo.isCompileForExport();
+    }
+
 
 }
 

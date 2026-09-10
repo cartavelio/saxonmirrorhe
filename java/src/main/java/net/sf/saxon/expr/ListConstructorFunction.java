@@ -11,6 +11,7 @@ import net.sf.saxon.functions.AbstractFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AnyURIValue;
@@ -160,6 +161,14 @@ public class ListConstructorFunction extends AbstractFunction {
             throw failure.makeException();
         }
         return targetType.getTypedValue(cs, nsResolver, rules);
+    }
+
+    @Override
+    public void export(ExpressionPresenter out) throws XPathException {
+        out.startElement("acFnRef");
+        out.emitAttribute("name", targetType.getStructuredQName().getEQName());
+        out.emitAttribute("flags", allowEmpty ? "le" : "l");
+        out.endElement();
     }
 }
 

@@ -54,7 +54,7 @@ public class FunctionItemCoercionPlan extends CoercionPlan {
             //return item;
             return new CoercedFunction((FunctionItem) item, (SpecificFunctionType) requiredType, is40, is40);
         } else {
-            throw coercionError(item, requiredType, request);
+            throw coercionError(item, requiredType, request, null);
         }
     }
 
