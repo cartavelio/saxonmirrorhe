@@ -267,18 +267,17 @@ public abstract class Verifier {
                                                LicenseException.EXPIRED);
                 } else if (daysLeft < -15) {
                     System.err.println("Saxon " + licenseDesc + " has expired. \n*** You are using the software without lawful authority. ***"
-                                               + "\nYou must obtain a new license immediately.");
-
-                } else {
-                    System.err.println("Saxon " + licenseDesc + " has expired. \n*** You are using the software without lawful authority. ***"
-                                               + "\nYou must obtain a new license immediately; meanwhile a delay of " + Math.abs(daysLeft) * 2 +
-                                               " seconds will be imposed. This delay will increase every day.");
+                            + "\nYou must obtain a new license immediately; meanwhile a delay of " + Math.abs(daysLeft) * 2 +
+                            " seconds will be imposed. This delay will increase every day.");
                     try {
                         Thread.sleep(Math.abs(daysLeft) * 2000);
                     } catch (InterruptedException e) {
                         throw new LicenseException("Saxon license " + licenseDesc + " has expired",
-                                                   LicenseException.EXPIRED);
+                                LicenseException.EXPIRED);
                     }
+                } else {
+                    System.err.println("Saxon " + licenseDesc + " has expired. \n*** You are using the software without lawful authority. ***"
+                            + "\nYou must obtain a new license immediately.");
                 }
             }
             DateValue licenseIssued = new DateValue(BMPString.of(features.getProperty("Issued").substring(0, 10) + 'Z'));
