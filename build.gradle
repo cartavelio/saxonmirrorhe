@@ -1764,6 +1764,8 @@ publishing {
         version = saxonVersion
         artifact mavenPeSaxonJar
         artifact mavenPeJavadocJar
+        artifact mavenPeSqlJar
+        artifact mavenPeSqlSourcesJar
         artifact mavenPeTestJar
         artifact mavenPeTestSourcesJar
       }
@@ -1791,8 +1793,10 @@ publishing {
         version = saxonVersion
         artifact mavenEeSaxonJar
         artifact mavenEeJavadocJar
-        artifact mavenPeTestJar
-        artifact mavenPeTestSourcesJar
+        artifact mavenEeSqlJar
+        artifact mavenEeSqlSourcesJar
+        artifact mavenEeTestJar
+        artifact mavenEeTestSourcesJar
       }
     }
   }
