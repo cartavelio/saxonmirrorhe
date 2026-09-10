@@ -55,22 +55,7 @@ def testSuiteMatrix = [
       "XP31": [
         "": [:]
       ],
-      "XQ30": [
-        "": [:]
-      ],
       "XQ31": [
-        "": [:]
-      ]
-    ],
-    "qt4": [
-      "_class": "net.sf.saxon.testdriver.QT3TestDriverHE",
-      "_exceptions": "${projectDir}/src/test/exceptions/qt4.xml",
-      "_depends": ["cloneQT4TestSuite"],
-
-      "XP40": [
-        "": [:]
-      ],
-      "XQ40": [
         "": [:]
       ]
     ],
@@ -93,9 +78,6 @@ def testSuiteMatrix = [
       "XP31": [
         "": [:]
       ],
-      "XQ30": [
-        "": [:]
-      ],
       "XQ31": [
         "": [:]
       ]
@@ -105,9 +87,6 @@ def testSuiteMatrix = [
       "_exceptions": "${projectDir}/src/test/exceptions/qt3extra.xml",
 
       "XP31": [
-        "": [:]
-      ],
-      "XQ30": [
         "": [:]
       ],
       "XQ31": [
@@ -154,11 +133,6 @@ def testSuiteMatrix = [
         "": [:],
         "bc": ["bytecode": "on"]
       ],
-      "XQ30": [
-        "": [:],
-        "bc": ["bytecode": "on"],
-        "unfold": ["unfolded": "on"],
-      ],
       "XQ31": [
         "": [:],
         "bc": ["bytecode": "on"],
@@ -178,10 +152,6 @@ def testSuiteMatrix = [
         "bc": ["bytecode": "on"]
       ],
       "XQ10": [
-        "": [:],
-        "bc": ["bytecode": "on"]
-      ],
-      "XQ30": [
         "": [:],
         "bc": ["bytecode": "on"]
       ],
@@ -254,10 +224,6 @@ def testSuiteMatrix = [
       "_depends": ["cloneQT3TestSuite"],
 
       "XP31": [
-        "": [:],
-        "unfolded": ["unfolded": "on"]
-      ],
-      "XQ30": [
         "": [:],
         "unfolded": ["unfolded": "on"]
       ],
