@@ -4,6 +4,8 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.fsa.FiniteStateMachine;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import com.saxonica.ee.stream.Sweep;
+import com.saxonica.functions.qt4.ElementsToMaps;
+import com.saxonica.functions.qt4.JsonLayout;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
@@ -2726,33 +2728,33 @@ public class UserComplexType extends UserDefinedType
      * @param disabledLayouts layouts that cannot be used because they have been disabled
      */
 
-    public String getPreferredJsonLayout(Schema schema, Set<String> disabledLayouts) {
+    public ElementsToMaps.ElementPlan getPreferredJsonLayout(Schema schema, Set<JsonLayout> disabledLayouts) {
         boolean noAttributes = !allowsAttributes(schema);
         if (isEmptyContent()) {
             // Rule 7c(ii)
-            if (noAttributes && !disabledLayouts.contains("empty")) {
-                return "empty";
+            if (noAttributes && !disabledLayouts.contains(JsonLayout.EMPTY)) {
+                return new ElementsToMaps.ElementPlan(JsonLayout.EMPTY);
             }
-            if (!disabledLayouts.contains("empty-plus")) {
-                return "empty-plus";
+            if (!disabledLayouts.contains(JsonLayout.EMPTY_PLUS)) {
+                return new ElementsToMaps.ElementPlan(JsonLayout.EMPTY_PLUS);
             }
         }
-        if (isSimpleContent() && !disabledLayouts.contains("simple-plus")) {
+        if (isSimpleContent() && !disabledLayouts.contains(JsonLayout.SIMPLE_PLUS)) {
             // Rule 7c(iii)
             SimpleType st = getSimpleContentType();
             if (st.isZeroLength()) {
-                if (noAttributes && !disabledLayouts.contains("empty")) {
-                    return "empty";
+                if (noAttributes && !disabledLayouts.contains(JsonLayout.EMPTY)) {
+                    return new ElementsToMaps.ElementPlan(JsonLayout.EMPTY);
                 }
-                if (!disabledLayouts.contains("empty-plus")) {
-                    return "empty-plus";
+                if (!disabledLayouts.contains(JsonLayout.EMPTY_PLUS)) {
+                    return new ElementsToMaps.ElementPlan(JsonLayout.EMPTY_PLUS);
                 }
             }
-            if (noAttributes && !disabledLayouts.contains("simple")) {
-                return "simple";
+            if (noAttributes && !disabledLayouts.contains(JsonLayout.SIMPLE)) {
+                return new ElementsToMaps.ElementPlan(JsonLayout.SIMPLE);
             }
-            if (!disabledLayouts.contains("simple-plus")) {
-                return "simple-plus";
+            if (!disabledLayouts.contains(JsonLayout.SIMPLE_PLUS)) {
+                return new ElementsToMaps.ElementPlan(JsonLayout.SIMPLE_PLUS);
             }
         }
         if (!isMixedContent()) { // implies element-only content
@@ -2764,7 +2766,7 @@ public class UserComplexType extends UserDefinedType
             try {
                 gatherAllPermittedChildren(schema, children, false);
             } catch (SchemaException e) {
-                return "mixed";
+                return new ElementsToMaps.ElementPlan(JsonLayout.MIXED);
             }
             boolean uniqueChildren = true;
             if (noWildcards) {
@@ -2782,22 +2784,22 @@ public class UserComplexType extends UserDefinedType
             }
 
             if (children.size() == 1 && noWildcards && !uniqueChildren) {
-                if (noAttributes && !disabledLayouts.contains("list")) {
-                    return "list";
+                if (noAttributes && !disabledLayouts.contains(JsonLayout.LIST)) {
+                    return new ElementsToMaps.ElementPlan(JsonLayout.LIST);
                 }
-                if (!disabledLayouts.contains("list-plus")) {
+                if (!disabledLayouts.contains(JsonLayout.LIST_PLUS)) {
                     IntIterator iter = children.iterator();
                     int fp = iter.hasNext() ? iter.next() : -1;
-                    return "list-plus/" + fp;
+                    return new ElementsToMaps.ElementPlan(JsonLayout.LIST_PLUS, fp);
                 }
             }
             if (noWildcards && uniqueChildren && !disabledLayouts.contains("record")) {
-                return "record";
+                return new ElementsToMaps.ElementPlan(JsonLayout.RECORD);
             }
-            return "sequence";
+            return new ElementsToMaps.ElementPlan(JsonLayout.SEQUENCE);
         }
 
-        return "mixed";
+        return new ElementsToMaps.ElementPlan(JsonLayout.MIXED);
 
     }
 }

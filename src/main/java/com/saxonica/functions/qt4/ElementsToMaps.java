@@ -48,7 +48,8 @@ public class ElementsToMaps extends SystemFunction {
                                  SequenceType.SINGLE_STRING, new StringValue("@"));
         options.addAllowedOption("uniform",
                                  SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        options.addAllowedOption("return-plan",
+        options.addAllowedOption("return-plan",  // experimental option to return a plan for later use, by
+                                                 // feeding it bacl to the 'layouts' option
                                  SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("name-format",
                                  SequenceType.one(EnumerationUnionType.of("local", "lexical", "eqname", "default")));
@@ -63,15 +64,18 @@ public class ElementsToMaps extends SystemFunction {
     @CSharpSimpleEnum
     public enum NameFormat {LEXICAL, LOCAL, DEFAULT, EQNAME}
 
-    public enum Layout {EMPTY, EMPTY_PLUS, SIMPLE, SIMPLE_PLUS, LIST, LIST_PLUS, RECORD, SEQUENCE, MIXED, XML}
-
-    public class LayoutWithChildFingerprint {
-        public Layout layout;
+    public static class ElementPlan {
+        public JsonLayout layout;
         public int childFingerprint;
 
-        public LayoutWithChildFingerprint(Layout layout) {
+        public ElementPlan(JsonLayout layout) {
             this.layout = layout;
             this.childFingerprint = -1;
+        }
+
+        public ElementPlan(JsonLayout layout, int childFingerprint) {
+            this.layout = layout;
+            this.childFingerprint = childFingerprint;
         }
     }
 
@@ -85,12 +89,12 @@ public class ElementsToMaps extends SystemFunction {
         public Configuration config;
         public Schema schema;
         public IntToIntHashMap uniformityData = null;
-        public IntHashMap<Layout> layoutMap = new IntHashMap<>();
-        public Set<String> disabledLayouts = Collections.emptySet();
+        public IntHashMap<ElementPlan> layoutMap = new IntHashMap<>();
+        public Set<JsonLayout> disabledLayouts = Collections.emptySet();
         public NameFormat nameFormat = NameFormat.DEFAULT;
         public String attributeMarker = "@";
         public Stack<StructuredQName> elementNameStack = new Stack<>();
-        public boolean returnPlan = false;
+
 
         /**
          * Construct a string used as a map key in the output, to represent an element
@@ -212,7 +216,7 @@ public class ElementsToMaps extends SystemFunction {
             if (disabledLayouts != null) {
                 cc.disabledLayouts = new HashSet<>();
                 for (Item d : disabledLayouts.asIterable()) {
-                    cc.disabledLayouts.add(d.getStringValue());
+                    cc.disabledLayouts.add(layoutOf(d.getStringValue()));
                 }
             }
             initLayoutMap(cc, checkedOptions, context.getConfiguration());
@@ -230,13 +234,13 @@ public class ElementsToMaps extends SystemFunction {
                 while (iter.hasNext()) {
                     int fp = iter.next();
                     StructuredQName name = pool.getStructuredQName(fp);
-                    String layout = getInferredLayout(cc, cc.uniformityData.get(fp));
+                    ElementPlan layout = getInferredLayout(cc, cc.uniformityData.get(fp));
                     mb.put(new QNameValue(name, BuiltInAtomicType.QNAME),
-                           new StringValue(layout));
+                           new StringValue(layout.layout.toString()));
                 }
                 return mb.getCompletedMapConfidently();
             }
-            //System.err.println(showUniformityData(cc.uniformityData, context.getNamePool()));
+            System.err.println(showUniformityData(cc.uniformityData, context.getNamePool()));
         }
 
         SequenceIterator in = val.iterate();
@@ -256,32 +260,33 @@ public class ElementsToMaps extends SystemFunction {
         for (KeyValuePair pair : val.keyValuePairs()) {
              StructuredQName qn = ((QNameValue)pair.key).getStructuredQName();
              int fp = config.getNamePool().allocateFingerprint(qn.getNamespaceUri(), qn.getLocalPart());
-             cc.layoutMap.put(fp, layoutOf(((StringValue)pair.value).getStringValue()));
+             cc.layoutMap.put(fp, new ElementPlan(
+                     layoutOf(((StringValue)pair.value).getStringValue())));
         }
     }
 
-    private Layout layoutOf(String name) {
+    private JsonLayout layoutOf(String name) {
         switch (name) {
             case "empty":
-                return Layout.EMPTY;
+                return JsonLayout.EMPTY;
             case "empty-plus":
-                return Layout.EMPTY_PLUS;
+                return JsonLayout.EMPTY_PLUS;
             case "simple":
-                return Layout.SIMPLE;
+                return JsonLayout.SIMPLE;
             case "simple-plus":
-                return Layout.SIMPLE_PLUS;
+                return JsonLayout.SIMPLE_PLUS;
             case "list":
-                return Layout.LIST;
+                return JsonLayout.LIST;
             case "list-plus":
-                return Layout.LIST_PLUS;
+                return JsonLayout.LIST_PLUS;
             case "record":
-                return Layout.RECORD;
+                return JsonLayout.RECORD;
             case "sequence":
-                return Layout.SEQUENCE;
+                return JsonLayout.SEQUENCE;
             case "mixed":
-                return Layout.MIXED;
+                return JsonLayout.MIXED;
             case "xml":
-                return Layout.XML;
+                return JsonLayout.XML;
             default:
                 throw new IllegalArgumentException(name);
         }
@@ -425,33 +430,28 @@ public class ElementsToMaps extends SystemFunction {
 
     private MapItem processElement(NodeInfo element, ConversionContext cc) throws XPathException {
         // First see if an explicit layout has been chosen for this element in the supplied options
-        Layout explicitLayout = cc.layoutMap.get(element.getFingerprint());
+        ElementPlan explicitLayout = cc.layoutMap.get(element.getFingerprint());
         if (explicitLayout != null) {
-            return processElementWithLayout(element, cc, explicitLayout, "explicit", -1);
+            return processElementWithLayout(element, cc, explicitLayout.layout, "explicit", explicitLayout.childFingerprint);
         } else {
             // If the element is schema-validated, use schema information
             SchemaType type = element.getSchemaType();
             if (!(type == AnyType.getInstance() || type == Untyped.getInstance())) {
                 if (type instanceof SimpleType) {
                     // Rule 7b
-                    if (!cc.disabledLayouts.contains("empty") && ((SimpleType)type).isZeroLength()) {
+                    if (!cc.disabledLayouts.contains(JsonLayout.EMPTY) && ((SimpleType)type).isZeroLength()) {
                         return makeEmptyElementContent(element, cc);
                     }
-                    if (!cc.disabledLayouts.contains("simple")) {
+                    if (!cc.disabledLayouts.contains(JsonLayout.SIMPLE)) {
                         return makeSimpleElementContent(element, cc);
                     }
                     return makeMixedElementContent(element, cc, false);
                 } else {
                     // Rule 7c
                     ComplexType cType = (ComplexType) type;
-                    LayoutWithChildFingerprint preferred = cType.getPreferredJsonLayout(cc.schema, cc.disabledLayouts);
-                    String suffix = "";
-                    int sep = layout.indexOf("/");
-                    if (sep > 0) {
-                        suffix = layout.substring(sep + 1);
-                        layout = layout.substring(0, sep);
-                    }
-                    return processElementWithLayout(element, cc, layout, "schema", suffix.isEmpty() ? -1 : Integer.parseInt(suffix));
+                    ElementPlan layoutWith = cType.getPreferredJsonLayout(cc.schema, cc.disabledLayouts);
+                    return processElementWithLayout(
+                            element, cc, layoutWith.layout, "schema", layoutWith.childFingerprint);
                 }
             } else {
                 int properties;
@@ -463,20 +463,14 @@ public class ElementsToMaps extends SystemFunction {
                     properties = getElementProperties(element, 0);
                 }
 
-                String layout = getInferredLayout(cc, properties);
-                String suffix = "";
-                int sep = layout.indexOf("/");
-                if (sep > 0) {
-                    suffix = layout.substring(sep + 1);
-                    layout = layout.substring(0, sep);
-                }
-                return processElementWithLayout(element, cc, layout, "inferred", suffix.isEmpty() ? -1 : Integer.parseInt(suffix));
+                ElementPlan plan = getInferredLayout(cc, properties);
+                return processElementWithLayout(element, cc, plan.layout, "inferred", plan.childFingerprint);
 
             }
         }
     }
 
-    private LayoutWithChildFingerprint getInferredLayout(ConversionContext cc, int properties)  {
+    private ElementPlan getInferredLayout(ConversionContext cc, int properties)  {
         boolean hasAttributes = (properties & HAS_ATTRIBUTES) != 0;
         boolean hasChildElements = (properties & HAS_CHILD_ELEMENTS) != 0;
         boolean hasWhitespaceTextNodes = (properties & HAS_WHITESPACE_TEXT_NODES) != 0;
@@ -487,51 +481,51 @@ public class ElementsToMaps extends SystemFunction {
         if (!(hasChildElements || hasWhitespaceTextNodes || hasNonWhitespaceTextNodes)) {
             // Rule 6a
             if (!hasAttributes && !cc.disabledLayouts.contains("empty")) {
-                return new LayoutWithChildFingerprint(Layout.EMPTY);
+                return new ElementPlan(JsonLayout.EMPTY);
             }
             if (!cc.disabledLayouts.contains("empty-plus")) {
-                return new LayoutWithChildFingerprint(Layout.EMPTY_PLUS);
+                return new ElementPlan(JsonLayout.EMPTY_PLUS);
             }
         }
         if (!hasChildElements) {
             // Rule 6b
             if (!hasAttributes && !cc.disabledLayouts.contains("simple")) {
-                return new LayoutWithChildFingerprint(Layout.SIMPLE);
+                return new ElementPlan(JsonLayout.SIMPLE);
             }
             if (!cc.disabledLayouts.contains("simple-plus")) {
-                return new LayoutWithChildFingerprint(Layout.SIMPLE_PLUS);
+                return new ElementPlan(JsonLayout.SIMPLE_PLUS);
             }
         }
         if (!hasNonWhitespaceTextNodes) {
             // Rule 6c
             if (hasRepeatedChildElements && !hasDiverseChildElements) {
                 // Rule 6c(i)
-                if (!hasAttributes && !cc.disabledLayouts.contains("list")) {
-                    return new LayoutWithChildFingerprint(Layout.LIST);;
+                if (!hasAttributes && !cc.disabledLayouts.contains(JsonLayout.LIST)) {
+                    return new ElementPlan(JsonLayout.LIST);
                 }
-                if (!cc.disabledLayouts.contains("list-plus")) {
+                if (!cc.disabledLayouts.contains(JsonLayout.LIST_PLUS)) {
                     int childFp = (properties & NamePool.FP_MASK);
                     if (childFp != 0) {
-                        new LayoutWithChildFingerprint(Layout.LIST_PLUS, childFp);
+                        return new ElementPlan(JsonLayout.LIST_PLUS, childFp);
                     } else {
-                        new LayoutWithChildFingerprint(Layout.LIST_PLUS);
+                        return new ElementPlan(JsonLayout.LIST_PLUS);
                     }
                 }
             }
-            if (!hasRepeatedChildElements && !cc.disabledLayouts.contains("record")) {
+            if (!hasRepeatedChildElements && !cc.disabledLayouts.contains(JsonLayout.RECORD)) {
                 // Rule 6c(ii)
-                return "record";
+                return new ElementPlan(JsonLayout.RECORD);
             }
-            if (!cc.disabledLayouts.contains("sequence")) {
+            if (!cc.disabledLayouts.contains(JsonLayout.SEQUENCE)) {
                 // Rule 6c(iii)
-                return "sequence";
+                return new ElementPlan(JsonLayout.SEQUENCE);
             }
         }
         // Rule 6d
-        return "mixed";
+        return new ElementPlan(JsonLayout.MIXED);
     }
 
-    private MapItem processElementWithLayout(NodeInfo element, ConversionContext cc, Layout explicitLayout, String reason, int childFingerprint) throws XPathException {
+    private MapItem processElementWithLayout(NodeInfo element, ConversionContext cc, JsonLayout explicitLayout, String reason, int childFingerprint) throws XPathException {
         switch (explicitLayout) {
             case EMPTY:
                 return makeEmptyElementContent(element, cc);

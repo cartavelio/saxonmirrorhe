@@ -1,5 +1,6 @@
-package com.saxonica.functions.qt4;public class JsonLayout {
-}
+package com.saxonica.functions.qt4;
+
+public enum JsonLayout {EMPTY, EMPTY_PLUS, SIMPLE, SIMPLE_PLUS, LIST, LIST_PLUS, RECORD, SEQUENCE, MIXED, XML}
 
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");

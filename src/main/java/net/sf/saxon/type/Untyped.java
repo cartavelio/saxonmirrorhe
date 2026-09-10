@@ -8,6 +8,8 @@
 package net.sf.saxon.type;
 
 import com.saxonica.ee.schema.UserComplexType;
+import com.saxonica.functions.qt4.ElementsToMaps;
+import com.saxonica.functions.qt4.JsonLayout;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -647,8 +649,8 @@ public enum Untyped implements ComplexType {
      * xdm-to-json function. The result is a layout name, such as "record", "list", "mixed", "sequence"
      */
     @Override
-    public String getPreferredJsonLayout(Schema schema, Set<String> disabledLayouts) {
-        return "mixed";
+    public ElementsToMaps.ElementPlan getPreferredJsonLayout(Schema schema, Set<JsonLayout> disabledLayouts) {
+        return new ElementsToMaps.ElementPlan(JsonLayout.MIXED);
     }
 
     //#if SCHEMA==true
