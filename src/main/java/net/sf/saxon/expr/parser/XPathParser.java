@@ -1735,33 +1735,6 @@ public class XPathParser {
         }
         actions.add(thenExp);
         nextToken();
-        while (isKeyword("else")) {
-            nextToken();
-            if (tryKeyword("if")) {
-                expect(Token.LPAREN);
-                nextToken();
-                condition = parseExpression();
-                readToken(Token.RPAREN);
-                readToken(Token.LCURLY);
-                thenExp = parseExpression();
-                readToken(Token.RCURLY);
-                conditions.add(condition);
-                actions.add(thenExp);
-            } else {
-                readToken(Token.LCURLY);
-                Expression elseExp;
-                if (t.currentToken == Token.RCURLY) {
-                    elseExp = Literal.makeEmptySequence();
-                } else {
-                    elseExp = parseExpression();
-                    expect(Token.RCURLY);
-                }
-                nextToken();
-                conditions.add(Literal.makeLiteral(BooleanValue.TRUE));
-                actions.add(elseExp);
-                break;
-            }
-        }
         Choose result = new Choose(conditions.toArray(new Expression[]{}), actions.toArray(new Expression[]{}));
         setLocation(result);
         return result;
