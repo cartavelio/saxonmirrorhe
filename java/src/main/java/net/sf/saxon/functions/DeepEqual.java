@@ -139,7 +139,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         public boolean normalizeSpace = false;
         public boolean stripSpace = false;
         public boolean processingInstructionsSignificant = false;
-        //public boolean textBoundariesSignificant = true;
+        public boolean textBoundariesSignificant = true;
         public boolean timezonesSignificant = false;
         public boolean typeAnnotationsSignificant = false;
         public boolean typeVarietySignificant = true;
@@ -228,6 +228,11 @@ public class DeepEqual extends CollatingFunctionFixed {
             if (itemsEqual != null) {
                 itemsEqualFn = (FunctionItem)itemsEqual.head();
             }
+            // In 3.1, comments and processing instructions are ignored, but boundaries between
+            // text nodes are not. So <a>x<?pi?>y</a> is not deep-equal to <a>xy</a>, not because
+            // of the presence of the processing instruction, but because the number of text nodes
+            // is different. This crazy rule disappears in 4.0.
+            textBoundariesSignificant = version < 40;
         }
 
         private void setBooleanOption(Map<String, GroundedValue> map, String optionName) throws XPathException {
@@ -726,8 +731,10 @@ public class DeepEqual extends CollatingFunctionFixed {
                 SequenceIterator c1 = n1.iterateChildAxis(NodePredicateLambda.of(node -> !isIgnorable((NodeInfo)node, options)));
                 SequenceIterator c2 = n2.iterateChildAxis(NodePredicateLambda.of(node -> !isIgnorable((NodeInfo)node, options)));
 
-                c1 = mergeAdjacentTextNodes(c1);
-                c2 = mergeAdjacentTextNodes(c2);
+                if (!options.textBoundariesSignificant) {
+                    c1 = mergeAdjacentTextNodes(c1);
+                    c2 = mergeAdjacentTextNodes(c2);
+                }
 
                 while (true) {
                     NodeInfo d1 = (NodeInfo)c1.next();
