@@ -182,7 +182,7 @@ public class XSLItemType extends StyleElement {
             if (resolved == null) {
                 // If one type alias contains a reference to another, then for the time being
                 // we represent it using a DraftItemType
-                return new DraftItemType(typeName, this);
+                return new DraftItemType(typeName, this, getContainingLocation());
             } else {
                 return resolved;
             }

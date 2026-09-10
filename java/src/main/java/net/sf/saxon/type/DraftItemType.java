@@ -1,8 +1,10 @@
 package net.sf.saxon.type;
 
+import net.sf.saxon.expr.Locatable;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.Stack;
@@ -17,14 +19,16 @@ import java.util.Stack;
  * if for some reason the type is actually used before it has been resolved (which should not happen).</p>
  */
 
-public class DraftItemType extends ErrorType {
+public class DraftItemType extends ErrorType implements Locatable {
 
     private final StructuredQName name;
     private final StaticContext queryModule;
+    private final Location location;
 
-    public DraftItemType(StructuredQName name, StaticContext queryModule) {
+    public DraftItemType(StructuredQName name, StaticContext queryModule, Location location) {
         this.name = name;
         this.queryModule = queryModule;
+        this.location = location;
     }
 
     public StructuredQName getTargetName() {
@@ -61,15 +65,21 @@ public class DraftItemType extends ErrorType {
     public ItemType resolveAliases(Stack<Object> path) throws XPathException {
         ItemType target = queryModule.resolveTypeAlias(getTargetName());
         if (target == null) {
-            throw new XPathException("Item type " + name.getEQName() + " is not defined in the static context", "XPST0051");
+            throw new XPathException("Item type " + name.getEQName() +
+                                             " is not defined in the static context", "XPST0051", getLocation());
         }
         if (path.contains(getTargetName())) {
-            throw new XPathException("Definition of item type " + name.getEQName() + " is cyclic", "XQST0140");
+            throw new XPathException("Definition of item type " + name.getEQName()
+                                             + " is cyclic", "XQST0140", getLocation());
         }
         path.push(getTargetName());
         ItemType finalTarget = target.resolveAliases(path);
         path.pop();
         return finalTarget;
+    }
+
+    public Location getLocation() {
+        return location;
     }
 }
 
