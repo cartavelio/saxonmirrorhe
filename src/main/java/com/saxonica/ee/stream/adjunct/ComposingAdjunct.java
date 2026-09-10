@@ -26,8 +26,8 @@ public abstract class ComposingAdjunct extends StreamingAdjunct {
      *
      * @param watchManager the watch manager
      * @param out the destination of composed items
-     * @param context XPath evaluation context
-     * @return a the relevant ItemFeed
+     * @param context the XPath evaluation context
+     * @return the relevant ItemFeed
      */
 
     public abstract ItemFeed makeComposingAction(WatchManager watchManager, ItemFeed out, XPathContext context);

@@ -1,26 +1,45 @@
 package com.saxonica.ee.stream.adjunct;
 
+import com.saxonica.ee.stream.PostureAndSweep;
+import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.TypedValueFeed;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
+import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.type.coercion.AtomicCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.CoercionRequest;
 import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.List;
+
 
 /**
- * Streaming adjunct class for an atomizer (or call on the data() function)
+ * Streaming adjunct class for a coercer() (which implements the coercion rules)
  */
 public class CoercerAdjunct extends ComposingAdjunct implements FeedMaker {
+
+    @Override
+    public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
+        SequenceCoercer coercer = (SequenceCoercer) getExpression();
+        ItemType requiredType = coercer.getItemType();
+        if (requiredType.getGenre() == Genre.NODE) {
+            Expression operand = coercer.getOperand().getChildExpression();
+            return Streamability.getStreamability(operand, contextInfo, reasons);
+        }
+        return super.computeStreamability(contextInfo, reasons);
+    }
+
     @Override
     public ItemFeed makeComposingAction(WatchManager watchManager, ItemFeed out, XPathContext context) {
         //return new TypedValueFeed(out, context);
@@ -29,17 +48,18 @@ public class CoercerAdjunct extends ComposingAdjunct implements FeedMaker {
 
     @Override
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context)  {
+        SequenceCoercer coercer = (SequenceCoercer) getExpression();
         CoercionPlan plan = ((SequenceCoercer)getExpression()).getCoercionPlan();
-//        ItemType requiredType = ((SequenceCoercer) getExpression()).getItemType();
-//        CoercionRequest request = new CoercionRequest(
-//                SequenceType.ANY_SEQUENCE, context.getConfiguration(),
-//                ((SequenceCoercer) getExpression()).getRoleSupplier(), getExpression().getLocation())
 
         if (plan instanceof AtomicCoercionPlan) {
-            return new TypedValueFeed(out, context);
-        } else {
-            return new CoercingItemFeed(getExpression(), out, context);
+
+            UType supplied = coercer.getOperand().getChildExpression().getItemType().getUType();
+            if (supplied.overlaps(UType.ANY_NODE)) {
+                CoercingItemFeed converter = new CoercingItemFeed(getExpression(), out, context);
+                return new TypedValueFeed(converter, context);
+            }
         }
+        return new CoercingItemFeed(getExpression(), out, context);
     }
 
     public static class CoercingItemFeed extends ItemFeed {

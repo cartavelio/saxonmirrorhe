@@ -5,6 +5,8 @@ import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.Controller;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
@@ -31,7 +33,6 @@ public class CopyAdjunct extends StreamingAdjunct implements FeedMaker {
     }
 
     private static class CopyFeed extends ComplexNodeEventFeed {
-        XPathContext context;
         int nodeKind;
 
 
@@ -50,10 +51,11 @@ public class CopyAdjunct extends StreamingAdjunct implements FeedMaker {
                     case Type.DOCUMENT: {
 
                         if (!expression.isPreservingTypes()) {
-                            Schema schema = expression.getRetainedStaticContext().getPackageData().getImportedSchema();
+                            Controller controller = context.getController();
+                            Configuration config = controller.getConfiguration();
                             ParseOptions options = expression.getValidationOptions()
                                 .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-                            Receiver val = schema.getDocumentValidator(
+                            Receiver val = config.getDocumentValidator(
                                     next, node.getBaseURI(), options, expression.getLocation());
                             next = new ComplexContentOutputter(val);
                         }
@@ -70,11 +72,12 @@ public class CopyAdjunct extends StreamingAdjunct implements FeedMaker {
                                         : ReceiverOption.DISINHERIT_NAMESPACES;
 
                         if (!expression.isPreservingTypes()) {
-                            Schema schema = expression.getRetainedStaticContext().getPackageData().getImportedSchema();
+                            Controller controller = context.getController();
+                            assert controller != null;
                             ParseOptions options = expression.getValidationOptions()
                                     .withTopLevelElement(elemName.getStructuredQName());
                             try {
-                                Receiver val = schema.getElementValidator(
+                                Receiver val = context.getConfiguration().getElementValidator(
                                         next, options, expression.getLocation());
                                 next = new ComplexContentOutputter(val);
                             } catch (ValidationException e) {

@@ -77,11 +77,10 @@ public class QuickXPathParser implements XPathParser.Accelerator {
             return null;
         }
         try {
+            t.setFinishCondition(finished);
             t.tokenize(expression, start, -1);
 
             List<Token> tokens = new ArrayList<>();
-            List<String> tokenValues = new ArrayList<>();
-
             while (t.currentToken != Token.EOF) {
                 if (tokens.size() > 6) {
                     return null;
