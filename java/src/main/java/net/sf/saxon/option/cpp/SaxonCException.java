@@ -331,7 +331,12 @@ public class SaxonCException  {
     @CEntryPoint(name = "j_clearException")
     public static void clearException(IsolateThread thread) {
         SaxonCCurrentException.clear();
-        errorReporter = new SaxonCErrorReporter();
+    }
+
+    @CEntryPoint(name = "j_clearStaticExceptions")
+    public static void clearStaticException(IsolateThread thread) {
+        SaxonCCurrentException.clear();
+        errorReporter.reset();
         errorOutputFile = null;
 
     }
