@@ -7,16 +7,17 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.pin.pin.LabeledArrayItem;
+import com.saxonica.ee.pin.pin.LabeledMapItem;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.functions.hof.ForEachFn;
-import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.ShapedMap;
 import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -38,6 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import static net.sf.saxon.expr.DeepLookupAllExpression.modifiedIterator;
 
 
 /**
@@ -293,10 +296,17 @@ public class DeepLookupExpression extends BinaryExpression {
                     SequenceIterator lhsIter = lhs.iterate(context);
                     Item lhsItem;
                     while ((lhsItem = lhsIter.next()) != null) {
-                        gatherRecursiveContent(lhsItem, content, item -> finalKeySet.get(((SingleEntryMap) item).getKey()) != null);
+                        if (lhsItem instanceof ArrayItem && !(lhsItem instanceof LabeledArrayItem)) {
+                            lhsItem = LabeledArrayItem.makePinnedArrayItem((ArrayItem)lhsItem);
+                        }
+                        if (lhsItem instanceof MapItem && !(lhsItem instanceof LabeledMapItem)) {
+                            lhsItem = LabeledMapItem.makePinnedMapItem((MapItem) lhsItem);
+                        }
+                        gatherRecursiveContent(lhsItem, content,
+                                               item -> finalKeySet.get((AtomicValue)((ShapedMap) item).get("key")) != null);
                     }
                     SequenceIterator selectedEntries = new ListIterator.Of<>(content);
-                    return new MappingIterator(selectedEntries, item -> ((SingleEntryMap) item).getValue().iterate());
+                    return modifiedIterator(selectedEntries, expr.modifier);
                 };
             } else {
                 PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
@@ -314,10 +324,11 @@ public class DeepLookupExpression extends BinaryExpression {
                     SequenceIterator lhsIter = lhs.iterate(context);
                     Item lhsItem;
                     while ((lhsItem = lhsIter.next()) != null) {
-                        gatherRecursiveContent(lhsItem, content, item -> finalKeySet.get(((SingleEntryMap) item).getKey()) != null);
+                        gatherRecursiveContent(lhsItem, content,
+                                               item -> finalKeySet.get((AtomicValue)((ShapedMap) item).get("key")) != null);
                     }
                     SequenceIterator selectedEntries = new ListIterator.Of<>(content);
-                    return new MappingIterator(selectedEntries, item -> ((SingleEntryMap) item).getValue().iterate());
+                    return modifiedIterator(selectedEntries, expr.modifier);
                 };
             }
         }
@@ -332,11 +343,9 @@ public class DeepLookupExpression extends BinaryExpression {
      */
     private static SequenceIterator immediateContent(Item item)  {
         if (item instanceof MapItem) {
-            return ((MapItem)item).entries();
+            return new LookupAllExpression.MapEntriesIterator((MapItem)item);
         } else if (item instanceof ArrayItem) {
-            return new ForEachFn.PositionalMappingIterator(
-                    ((ArrayItem) item).parcels(),
-                    (parcel, pos) -> new SingleEntryMap(Int64Value.makeIntegerValue(pos), ((Parcel)parcel).getValue()));
+            return new LookupAllExpression.ArrayEntriesIterator((ArrayItem)item);
         } else {
             return EmptyIterator.getInstance();
         }
@@ -358,7 +367,7 @@ public class DeepLookupExpression extends BinaryExpression {
             if (matcher.test(child)) {
                 result.add(child);
             }
-            for (Item childItem : ((SingleEntryMap)child).getValue().asIterable()) {
+            for (Item childItem : ((ShapedMap)child).get("value").asIterable()) {
                 gatherRecursiveContent(childItem, result, matcher);
             }
         }

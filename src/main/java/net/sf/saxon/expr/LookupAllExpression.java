@@ -342,7 +342,7 @@ public class LookupAllExpression extends UnaryExpression {
      * Iterator over a sequence of entries in an array, delivering them in the form
      * required by $array?entry::*
      */
-    private static class ArrayEntriesIterator implements SequenceIterator {
+    public static class ArrayEntriesIterator implements SequenceIterator {
 
         final ArrayItem container;
         final Iterator<GroundedValue> baseIterator;
@@ -369,7 +369,7 @@ public class LookupAllExpression extends UnaryExpression {
      * Iterator over a sequence of entries in a map, delivering them in the form
      * required by $map?entry::*
      */
-    private static class MapEntriesIterator implements SequenceIterator {
+    public static class MapEntriesIterator implements SequenceIterator {
 
         final MapItem container;
         final Iterator<KeyValuePair> baseIterator;

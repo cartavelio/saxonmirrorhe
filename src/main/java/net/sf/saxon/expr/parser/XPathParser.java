@@ -3559,6 +3559,7 @@ public class XPathParser {
         Expression result;
         LookupExpression.Modifier modifier = LookupExpression.Modifier.CONTENT;
         if (token == Token.AXIS) {
+            checkLanguageVersion40();
             switch (t.currentTokenValue) {
                 case "content":
                     //modifier = LookupExpression.LookupModifier.CONTENT;
@@ -3663,7 +3664,7 @@ public class XPathParser {
                                          SequenceType type,
                                          boolean deep) {
         if (deep) {
-            return new DeepLookupAllExpression(lhs, type);
+            return new DeepLookupAllExpression(lhs, modifier, type);
         } else {
             return new LookupAllExpression(lhs, modifier, type);
         }

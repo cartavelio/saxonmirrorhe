@@ -140,10 +140,10 @@ public class Gizmo {
                    "schema {filename} -- load XSD 1.1 schema for use in validation",
                    this::schema);
         addCommand("set",
-                   "set {variable} {expression} -- set variable to value of expression",
+                   "set {variable} = {expression} -- set variable to value of expression",
                    this::set);
         addCommand("show",
-                   "show {expression} -- display content of all selected nodes",
+                   "show {expression} -- display value of expression",
                    this::show);
         addCommand("strip",
                    "strip -- delete whitespace text nodes",
@@ -173,6 +173,9 @@ public class Gizmo {
     public Gizmo(String[] args) {
         initSubCommands();
         config = Configuration.newConfiguration();
+        // TODO: temporary
+        config.setResourceResolver(request -> null);
+        // TODO: above is temporary
         boolean allow40 = config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY);
         if (allow40) {
             config.setConfigurationProperty(Feature.ALLOW_SYNTAX_EXTENSIONS, true);
@@ -954,6 +957,7 @@ public class Gizmo {
                 StringWriter sw = new StringWriter();
                 SerializationProperties props = new SerializationProperties();
                 props.setProperty("method", "adaptive");
+                props.setProperty("indent", "yes");
                 Receiver r = config.getSerializerFactory().getReceiver(new StreamResult(sw), props);
                 r.append(item);
                 sysOut.println(sw.toString());
