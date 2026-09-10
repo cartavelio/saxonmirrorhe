@@ -109,7 +109,7 @@ public class ParseXml extends SystemFunction implements Callable {
                 } catch (XPathException e) {
                     throw e.withErrorCode("FODC0008");
                 }
-                SchemaType type = context.getConfiguration().getSchemaType(typeName);
+                SchemaType type = pd.getImportedSchema().getSchemaType(typeName);
                 if (type == null) {
                     throw new XPathException("Unknown type " + eqName, "FODC0008");
                 }

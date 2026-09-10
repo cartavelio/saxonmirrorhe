@@ -474,32 +474,11 @@ public class ItemTypeFactory {
             int attributeFP = config.getNamePool().allocateFingerprint(name.getNamespaceUri(), name.getLocalName());
             nameTest = new NameTest(Type.ATTRIBUTE, attributeFP, config.getNamePool());
         }
-
-        if (schemaType != null) {
-            requireSchema();
-            StructuredQName name1 = new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName());
-            SchemaType type = schema.getSchemaType(name1);
-            if (type == null) {
-                throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
-            }
-            contentTest = new ContentTypeTest(Type.ATTRIBUTE, type, config, false);
-        }
-        if (contentTest == null) {
-            if (nameTest == null) {
-                return getNodeKindTest(XdmNodeKind.ATTRIBUTE);
-            } else {
-                return new ConstructedItemType(nameTest, config);
-            }
-        } else {
-            if (nameTest == null) {
-                return new ConstructedItemType(contentTest, config);
-            } else {
-                CombinedNodeTest combo = new CombinedNodeTest(
-                        nameTest,
-                        Token.INTERSECT,
-                        contentTest);
-                return new ConstructedItemType(combo, config);
-
+        if (schemaTypeName != null) {
+            schemaType = schema.getSchemaType(
+                    new StructuredQName("", schemaTypeName.getNamespaceUri(), schemaTypeName.getLocalName()));
+            if (schemaType == null) {
+                throw new SaxonApiException("Unknown schema type " + schemaTypeName.getClarkName());
             }
             contentTest = new ContentTypeTest(
                     Type.ATTRIBUTE, nameTest.getQNameTest(), schemaType, false, config);

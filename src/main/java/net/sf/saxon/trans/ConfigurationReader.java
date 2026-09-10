@@ -844,7 +844,7 @@ public class ConfigurationReader implements Receiver {
                     }
                     //#endif
                 } else if ("schemaDocument".equals(localName)) {
-                    throw new NotImplementedException();
+                    throw new UnsupportedOperationException();
 //                    try {
 //                        Source source = getInputSource(content);
 //                        targetConfig.addSchemaSource(source);
@@ -852,7 +852,7 @@ public class ConfigurationReader implements Receiver {
 //                        errors.add(new XmlProcessingException(e));
 //                    }
                 } else if ("schemaComponentModel".equals(localName)) {
-                    throw new NotImplementedException();
+                    throw new UnsupportedOperationException();
 //                    try {
 //                        Source source = getInputSource(content);
 //                        targetConfig.importComponents(source);
