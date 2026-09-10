@@ -14,6 +14,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -108,23 +109,12 @@ public interface UnionType extends ItemType, CastingTarget {
     @Override
     default Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item.getGenre() == ATOMIC) {
-            StringBuilder message = new StringBuilder(256);
-            message.append("The required type is a union type allowing any of ");
-
-            String punctuation = "(";
-            try {
-                for (PlainType member: getPlainMemberTypes()) {
-                    message.append(punctuation);
-                    punctuation = ", ";
-                    message.append(member.getTypeName().getDisplayName());
-                }
-            } catch (MissingComponentException e) {
-                message.append("*member types unobtainable*");
-            }
-            message.append("), but the supplied type ");
-            message.append(((AtomicValue)item).getItemType().getDisplayName());
-            message.append(" is not any of these");
-            return Optional.of(message.toString());
+            String message = "This is a union type, and the supplied value "
+                    + Err.depict(item)
+                    + " of type "
+                    + ((AtomicValue) item).getItemType().getDisplayName()
+                    + " does not match any of its member types";
+            return Optional.of(message);
         } else {
             return Optional.empty();
         }

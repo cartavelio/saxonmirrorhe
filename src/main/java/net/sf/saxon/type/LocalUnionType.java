@@ -45,6 +45,18 @@ public class LocalUnionType implements PlainType, UnionType {
         return new StructuredQName("", NamespaceUri.ANONYMOUS, "U" + hashCode());
     }
 
+    @Override
+    public String getDescription() {
+        StringBuilder builder = new StringBuilder("union(");
+        for (AtomicType at : memberTypes) {
+            builder.append(at.getDescription());
+            builder.append(", ");
+        }
+        builder.setLength(builder.length() - 2);
+        builder.append(")");
+        return builder.toString();
+    }
+
     /**
      * Creates a new Union type.
      *

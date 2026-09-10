@@ -66,6 +66,9 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
             return null;
         }
         final NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
+        if (uri.equals(NamespaceUri.ANONYMOUS)) {
+            return null;
+        }
         final String localName = functionName.getComponentName().getLocalPart();
         final SchemaType type = config.getSchemaType(new StructuredQName("", uri, localName));
         if (type == null || type.isComplexType()) {

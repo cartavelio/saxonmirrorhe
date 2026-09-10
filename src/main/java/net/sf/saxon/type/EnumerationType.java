@@ -139,7 +139,7 @@ public class EnumerationType implements AtomicType {
      */
     @Override
     public StructuredQName getTypeName() {
-        return null;
+        return new StructuredQName("", NamespaceUri.ANONYMOUS, "E" + hashCode());
     }
 
     @Override
@@ -624,7 +624,7 @@ public class EnumerationType implements AtomicType {
 
     public String toString() {
         StringBuilder fsb = new StringBuilder(256);
-        fsb.append("union(");
+        fsb.append("enum(");
         for (String st : values) {
             char delim = '"';
             if (st.indexOf('"') >= 0) {

@@ -29,5 +29,12 @@ public interface HyperType {
      */
 
     boolean isNamespaceSensitive();
+
+    /**
+     * Get a description of the type for use in diagnostics. For a named type, this will be the
+     * display name of the type. For an anonymous type, it will be a description of the type.
+     */
+
+    String getDescription();
 }
 
