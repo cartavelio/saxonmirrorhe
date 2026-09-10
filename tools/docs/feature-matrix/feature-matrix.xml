@@ -680,14 +680,15 @@
     <details link="localization/number-formatting" name="Formatting Numbers"/>
     <products>
       <product level="Basic" J="HE" C="HE">
-        <description J="HE" C="HE"><p>By default, English is the only language supported for formatting
-          numbers as words. A further set of installable numberers are available to provide support for some
-          other European languages: Danish (da), German (de), French (fr), Belgium French (fr-BE), Italian
-          (it), Dutch (nl), Belgium Flemish (nl-BE), and Swedish (sv).</p></description>
+        <description J="HE" C="HE"><p>At the <i>Basic</i> level, English is the only language supported for
+          formatting numbers as words "out of the box". A further set of installable numberers are available to
+          provide support for some other European languages: Danish (da), German (de), French (fr), Belgium
+          French (fr-BE), Italian (it), Dutch (nl), Belgium Flemish (nl-BE), and Swedish (sv).</p></description>
       </product>
       <product level="Basic Adv" J="PE" C="PE">
-        <description><p>Full support for formatting numbers as words in different languages is provided using
-          the <a href="http://site.icu-project.org/" class="bodylink">ICU4J library</a>.</p></description>
+        <description><p>At the <i>Advanced</i> level, full support for formatting numbers as words in
+          different languages is provided using the <a href="http://site.icu-project.org/"
+            class="bodylink">ICU4J library</a>.</p></description>
       </product>
     </products>
   </feature>
@@ -696,19 +697,20 @@
     <shortName>Formatting dates</shortName>
     <details link="localization/date-formatting" name="Formatting Dates"/>
     <products>
-      <product level="Basic" J="HE" C="HE">
-        <description J="HE" C="HE"><p>By default, English is the only language supported for formatting
-          dates as words.</p></description>
+      <product level="Basic" J="HE" C="HE" JS="HE">
+        <description J="HE" C="HE" JS="HE"><p>At the <i>Basic</i> level, English is the only language
+          supported for formatting dates as words.</p></description>
       </product>
       <product level="Basic Adv" J="PE" C="PE" CS="PE">
-        <description generic="true"><p>Full support for formatting dates as words in different languages is
-          provided using the <a href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the
-          relevant platform (ICU4J for SaxonJ and SaxonC, ICU4N for SaxonCS).</p></description>
-        <alt-description J="PE" C="PE"><p>Full support for formatting dates as words in different languages is
-          provided using the <a href="http://site.icu-project.org/" class="bodylink">ICU4J
-            library</a>.</p></alt-description>
-        <alt-description CS="PE"><p>Full support for formatting dates as words in different languages is
-          provided using the ICU4N library.</p></alt-description>
+        <description generic="true"><p>At the <i>Advanced</i> level, full support for formatting dates as
+          words in different languages is provided using the <a href="http://site.icu-project.org/"
+            class="bodylink">ICU library</a> for the relevant platform (ICU4J for SaxonJ and SaxonC, ICU4N for
+          SaxonCS).</p></description>
+        <alt-description J="PE" C="PE"><p>At the <i>Advanced</i> level, full support for formatting dates as
+          words in different languages is provided using the <a href="http://site.icu-project.org/"
+            class="bodylink">ICU4J library</a>.</p></alt-description>
+        <alt-description CS="PE"><p>At the <i>Advanced</i> level, full support for formatting dates as words
+          in different languages is provided using the ICU4N library.</p></alt-description>
       </product>
     </products>
   </feature>
@@ -718,21 +720,25 @@
     <details link="localization/sorting-and-collations" name="Sorting and Collations"/>
     <products>
       <product level="Basic" J="HE" C="HE">
-        <description J="HE" C="HE"><p>Run-time localization support for sorting and comparison of strings,
-          building on the capabilities of the Java Virtual Machine.</p></description>
+        <description J="HE" C="HE"><p>At the <i>Basic</i> level, support for sorting and comparison of strings
+          using the Unicode Collation Algorithm uses the collation facilities available directly from the
+          JDK.</p></description>
       </product>
       <product level="Basic Adv" J="PE" C="PE" CS="PE" JS="HE">
-        <description generic="true"><p>Run-time localization support for sorting and comparison of strings, building on the
-          capabilities of the <a href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the
+        <description generic="true"><p>At the <i>Advanced</i> level, support for sorting and comparison of
+          strings using the Unicode Collation Algorithm uses the collation facilities available from the
+          <a href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the
           relevant platform for Saxon 11 products (ICU4J for SaxonJ and SaxonC, ICU4N for SaxonCS), and using
           the <code>Intl.Collator</code> JavaScript API for SaxonJS.</p></description>
-        <alt-description J="PE" C="PE"><p>Run-time localization support for sorting and comparison of strings,
-          building on the capabilities of the <a href="http://site.icu-project.org/" class="bodylink">ICU4J
-            library</a>.</p></alt-description>
-        <alt-description CS="PE"><p>Run-time localization support for sorting and comparison of strings,
-          building on the capabilities of the ICU4N library.</p></alt-description>
-        <alt-description JS="HE"><p>Run-time localization support for sorting and comparison of strings,
-          in the browser using <code>Intl.Collator</code>.</p></alt-description>
+        <alt-description J="PE" C="PE"><p>At the <i>Advanced</i> level, support for sorting and comparison of
+          strings using the Unicode Collation Algorithm uses the collation facilities available from the
+          <a href="http://site.icu-project.org/" class="bodylink">ICU4J library</a>.</p></alt-description>
+        <alt-description CS="PE"><p>At the <i>Advanced</i> level, support for sorting and comparison of
+          strings using the Unicode Collation Algorithm uses the collation facilities available from the ICU4N
+          library.</p></alt-description>
+        <alt-description JS="HE"><p>At the <i>Advanced</i> level, support for sorting and comparison of
+          strings using the Unicode Collation Algorithm uses the collation facilities available from the
+          <code>Intl.Collator</code> JavaScript API.</p></alt-description>
       </product>
     </products>
   </feature>
