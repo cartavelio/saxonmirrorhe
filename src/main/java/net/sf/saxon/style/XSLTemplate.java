@@ -176,6 +176,10 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         return getObjectName();
     }
 
+    public String getDiagnosticId() {
+        return diagnosticId;
+    }
+
     @Override
     public SymbolicName getSymbolicName() {
         if (getTemplateName() == null) {
@@ -191,6 +195,10 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
     public boolean isMayOmitContextItem() {
         return mayOmitContextItem;
+    }
+
+    public SequenceType getRequiredType() {
+        return requiredType;
     }
 
 

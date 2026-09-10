@@ -130,7 +130,7 @@ public class SimpleMode extends Mode {
         for (Map.Entry<String, Object> entry : getActivePart().explicitPropertyValues.entrySet()) {
             String prop = entry.getKey();
             Object value = entry.getValue();
-            if (value.equals("##conflict##")) {
+            if ("##conflict##".equals(value)) {
                 throw new XPathException(
                         "For " + getLabel() +
                                 ", there are conflicting values for xsl:mode/@" +

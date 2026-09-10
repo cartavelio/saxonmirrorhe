@@ -19,7 +19,7 @@ import java.util.*;
  */
 public class UnionQNameTest implements QNameTest {
 
-    Set<QNameTest> tests;
+    private final Set<QNameTest> tests;
 
     public UnionQNameTest(List<QNameTest> tests) {
         this.tests = new HashSet<>(tests);
@@ -27,6 +27,10 @@ public class UnionQNameTest implements QNameTest {
 
     public UnionQNameTest(QNameTest... test) {
         this.tests = new HashSet<>(Arrays.asList(test));
+    }
+
+    public Set<QNameTest> getTests() {
+        return tests;
     }
 
     /**

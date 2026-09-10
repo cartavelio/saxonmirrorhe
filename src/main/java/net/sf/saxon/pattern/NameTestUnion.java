@@ -151,7 +151,7 @@ public class NameTestUnion extends NodeTest {
 
     @Override
     public final double getDefaultPriority() {
-        return 1.0;
+        return -0.25;
     }
 
     /**

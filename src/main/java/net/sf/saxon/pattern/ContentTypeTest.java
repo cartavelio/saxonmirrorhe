@@ -180,11 +180,12 @@ public class ContentTypeTest extends NodeTest {
 
     @Override
     public final double getDefaultPriority() {
-        // TODO: QT4 issue 1394, the spec needs to define the rules for new nodetest options
         if (nameTest instanceof AnyQNameTest) {
             return 0;
         } else if (nameTest instanceof SpecificQNameTest) {
             return 0.25;
+        } else if (nameTest instanceof NameTestUnion) {
+            return 0.125;
         } else if (nameTest instanceof LocalQNameTest || nameTest instanceof NamespaceQNameTest) {
             return 0.125;
         } else {
