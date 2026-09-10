@@ -963,6 +963,11 @@ task saxonc_api_doc(
       rename {
         "saxonc.html"
       }
+      filter { line ->
+        line.contains("saxoncee.html")
+                ? line.replace("saxoncee.html", "saxonc.html")
+                : line
+      }
     }
   }
 }
