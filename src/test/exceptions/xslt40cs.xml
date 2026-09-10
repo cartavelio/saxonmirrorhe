@@ -111,6 +111,26 @@
     <created by="Michael Kay" on="2020-09-09"/>
     <reason>The streaming spec allows calling last() on a grounding consuming sequence but we don't know how to implement this.</reason>
   </exception>
+  
+  <exception test-case="function-40-012" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2023-03-02"/>
+    <reason>Imposing a temporary restriction on default function parameters until spec clarified.</reason>
+  </exception>
+  
+  <exception test-case="next-match-420" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2023-03-30"/>
+    <reason>Default priorities on record type patterns are not implemented.</reason>
+  </exception>
+  
+  <exception test-case="current-401" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2023-03-30"/>
+    <reason>Dynamic evaluation of fn:current#0 is not implemented.</reason>
+  </exception>
+  
+  <exception test-case="number-4801" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2023-03-30"/>
+    <reason>ICU spellout numbering names not recognized.</reason>
+  </exception>
 
 
 </exceptions>
