@@ -682,5 +682,13 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
                     getRetainedStaticContext());
         }
     }
+
+    @Override
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
+        if (other instanceof SystemFunction sf ) {
+            return this.arity == sf.arity && this.details == sf.details;
+        }
+        return false;
+    }
 }
 

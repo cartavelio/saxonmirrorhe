@@ -1899,9 +1899,17 @@ public class XQueryParser extends XPathParser {
                         grumble("Default values for function parameters require XQuery 4.0 to be enabled");
                     }
                     foundDefault = true;
+                    Expression defaultValue;
                     nextToken();
-                    Expression defaultValue = parseExprSingle();
-                    defaultValue.setRetainedStaticContext(env.makeRetainedStaticContext());
+                    if (isKeywordPair("context", "value")) {
+                        nextToken();
+                        nextToken();
+                        // Use a call on the XSLT current() function as a placeholder
+                        defaultValue = SystemFunction.makeCall("current", env.makeRetainedStaticContext());
+                    } else {
+                        defaultValue = parseExprSingle();
+                        defaultValue.setRetainedStaticContext(env.makeRetainedStaticContext());
+                    }
                     arg.setDefaultValueExpression(() -> defaultValue);
                     arg.setRequired(false);
                 } else if (foundDefault) {
@@ -2533,7 +2541,7 @@ public class XQueryParser extends XPathParser {
             readKeyword("in");
             Expression collection = parseExprSingle();
 
-            // Generate "for $temp in $arr!array:members(.) let $x := $temp?value
+            // Generate "for $temp in $arr!array:members(.) let $x := jvalue($temp)
             // or       "for $temp in $map!map:entries(.) let $x := $temp?key
 
             if (iterand != ForQualifier.FOR_ITEM) {
@@ -2562,14 +2570,13 @@ public class XQueryParser extends XPathParser {
                 checkForClauseAllowingEmpty(flwor, clause);
             }
             if (iterand == ForQualifier.FOR_MEMBER) {
-                // Generate "let $x as T := $temp?value"
+                // Generate "let $x as T := jvalue($temp)"
                 LetClause letClause = new LetClause();
                 final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, iterandType);
                 letClause.setRangeVariable(letBinding);
                 LocalVariableReference tempRef = new LocalVariableReference(clause.getRangeVariable());
-                LookupExpression lookup = new LookupExpression(tempRef,
-                                                               new StringLiteral("value"));
-                letClause.initSequence(flwor, lookup);
+                Expression jValueCall = SystemFunction.makeCall("jvalue", env.makeRetainedStaticContext(), tempRef);
+                letClause.initSequence(flwor, jValueCall);
                 declareRangeVariable(letBinding);
                 clauseList.add(letClause);
             } else if (iterand == ForQualifier.FOR_VALUE) {

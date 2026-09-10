@@ -558,8 +558,7 @@ public class UserFunctionReference extends Expression
             if (this == other) {
                 return true;
             }
-            if (other instanceof BoundUserFunction) {
-                BoundUserFunction buf = (BoundUserFunction) other;
+            if (other instanceof BoundUserFunction buf) {
                 return getTargetFunction() == buf.getTargetFunction() && getArity() == buf.getArity();
             }
             return false;

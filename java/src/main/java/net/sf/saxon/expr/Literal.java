@@ -490,7 +490,6 @@ public class Literal extends Expression {
     protected int computeHashCode() {
         if (value instanceof AtomicSequence) {
             return SimpleTypeComparison.getInstance().hash((AtomicSequence) value);
-            // TODO: why this comparator - what are we using this hash code for?
         } else {
             return super.computeHashCode();
         }

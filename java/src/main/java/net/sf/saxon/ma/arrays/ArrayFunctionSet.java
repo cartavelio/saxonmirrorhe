@@ -301,16 +301,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
             register("of-members", 1, e -> e.populate(ArrayOfMembers::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                    .arg(0, RecordType.VALUE_RECORD, STAR, null));
-
-            register("members", 1, e -> e.populate(ArrayMembers::new, RecordType.VALUE_RECORD, STAR, 0)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
-
-            register("of-members-2814", 1, e -> e.populate(ArrayOfMembers2814::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, AnyJNodeType.getInstance(), STAR, null));
 
-            register("members-2814", 1, e -> e.populate(ArrayMembers2814::new, AnyJNodeType.getInstance(), STAR, 0)
+            register("members", 1, e -> e.populate(ArrayMembers::new, AnyJNodeType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
+
 
         }
         //#endif
@@ -838,14 +833,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     /**
      * Implementation of the proposed XP40 function array:members(array(*)) =&gt; record(value)*
      */
-    public static class ArrayMembers extends SystemFunction {
-
-        @Override
-        public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-            ArrayItem input = (ArrayItem) arguments[0].head();
-            return arrayMembers(input);
-        }
-    }
 
     public static GroundedValue arrayMembers2814(ArrayItem input) {
         List<JNode> parcels = new ArrayList<>(input.arrayLength());
@@ -862,7 +849,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     /**
      * Implementation of the proposed XP40 function array:members(array(*)) =&gt; record(value)*
      */
-    public static class ArrayMembers2814 extends SystemFunction {
+    public static class ArrayMembers extends SystemFunction {
 
         @Override
         public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
@@ -900,28 +887,12 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
     }
 
-    /**
-     * Implementation of the proposed XP40 function array:of(parcel*) =&gt; array
-     */
-    public static class ArrayOfMembers extends ArrayGeneratingFunction {
 
-        @Override
-        public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-            List<GroundedValue> members = new ArrayList<>(expectedSize());
-            SequenceIterator parcels = arguments[0].iterate();
-            for (MapItem parcel; (parcel = (MapItem)parcels.next()) != null; ) {
-                members.add(parcel.getU(valueRecordKey));
-            }
-            return makeArray(members);
-        }
-
-
-    }
 
     /**
      * Implementation of the proposed XP40 function array:of(jnode*) =&gt; array
      */
-    public static class ArrayOfMembers2814 extends ArrayGeneratingFunction {
+    public static class ArrayOfMembers extends ArrayGeneratingFunction {
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {

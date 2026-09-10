@@ -27,6 +27,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TinyBuilder;
+import net.sf.saxon.type.EnumerationUnionType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.*;
 import org.xml.sax.InputSource;
@@ -42,11 +43,11 @@ import java.util.List;
 public class ParseXmlFragment extends SystemFunction implements Callable {
 
     public static OptionsParameter makeOptionsParameter(int version) {
-        OptionsParameter parseOptions = new OptionsParameter(version);
-        parseOptions.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
-        parseOptions.addAllowedOption("retain-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        parseOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        return parseOptions;
+        OptionsParameter options = new OptionsParameter(version);
+        options.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
+        options.addAllowedOption("retain-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        options.addAllowedOption("strip-space", SequenceType.one(EnumerationUnionType.of("all", "none", "conditional")), new StringValue("conditional"));
+        return options;
     }
 
     /**
@@ -70,8 +71,9 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                 baseUri = checkedOptions.asString("base-uri");
             }
             boolean stripSpace = false;
-            if (checkedOptions.containsKey("strip-space")) {
-                stripSpace = checkedOptions.asBoolean("strip-space", false);
+            String strip = checkedOptions.asString("strip-space");
+            if (strip.equals("all")) {
+                stripSpace = true;
             }
             return evalParseXmlFragment(input, baseUri, stripSpace, context);
         }

@@ -16,6 +16,8 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.AbstractFunction;
+import net.sf.saxon.functions.DeepEqual;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -196,6 +198,31 @@ public class InlineFunctionItem extends AbstractFunction {
             throw new RuntimeException(message, err2);
         }
         return result;
+    }
+
+    @Override
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
+        if (other instanceof InlineFunctionItem ifi) {
+            if (this.getArity() != ifi.getArity()) {
+                return false;
+            }
+            for (int i = 0; i < getArity(); i++) {
+                SequenceType thisType = parameters[i].getRequiredType();
+                SequenceType otherType = ifi.parameters[i].getRequiredType();
+                if (!thisType.equals(otherType)) {
+                    return false;
+                }
+            }
+            if (!declaredResultType.equals(ifi.declaredResultType)) {
+                return false;
+            }
+            if (!body.equals(ifi.body)) {
+                return false;
+            }
+            return true;
+        } else {
+            return super.deepEqual40(other, context, options);
+        }
     }
 }
 

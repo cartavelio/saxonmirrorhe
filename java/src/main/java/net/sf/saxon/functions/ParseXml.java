@@ -24,6 +24,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
+import net.sf.saxon.type.EnumerationUnionType;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationException;
@@ -45,7 +46,7 @@ public class ParseXml extends SystemFunction implements Callable {
         options.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
         options.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("retain-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        options.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        options.addAllowedOption("strip-space", SequenceType.one(EnumerationUnionType.of("all", "none", "conditional")), new StringValue("conditional"));
         options.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
@@ -146,14 +147,15 @@ public class ParseXml extends SystemFunction implements Callable {
                 //#endif
             }
 
-            if (checkedOptions.containsKey("strip-space")) {
-                parseOptions = parseOptions.withSpaceStrippingRule(
-                        checkedOptions.asBoolean("strip-space", false)
-                                ? validating
-                                    ? IgnorableSpaceStrippingRule.INSTANCE
-                                    : AllElementsSpaceStrippingRule.INSTANCE
-                                : NoElementsSpaceStrippingRule.INSTANCE);
+            String strip = checkedOptions.asString("strip-space");
+            SpaceStrippingRule rule;
+            if (strip.equals("all")) {
+                rule = AllElementsSpaceStrippingRule.INSTANCE;
+            } else {
+                rule = NoElementsSpaceStrippingRule.INSTANCE;
             }
+            parseOptions = parseOptions.withSpaceStrippingRule(rule);
+
 
             if (checkedOptions.containsKey("xinclude")) {
                 try {

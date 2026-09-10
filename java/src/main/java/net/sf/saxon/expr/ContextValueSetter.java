@@ -184,11 +184,10 @@ public class ContextValueSetter extends BinaryExpression
      */
 
     public boolean equals(Object other) {
-        if (!(other instanceof ContextValueSetter)) {
-            return false;
+        if (other instanceof ContextValueSetter p) {
+            return getLhsExpression().isEqual(p.getLhsExpression()) && getRhsExpression().isEqual(p.getRhsExpression());
         }
-        ContextValueSetter p = (ContextValueSetter) other;
-        return getLhsExpression().isEqual(p.getLhsExpression()) && getRhsExpression().isEqual(p.getRhsExpression());
+        return false;
     }
 
     /**

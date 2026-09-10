@@ -359,36 +359,22 @@ public class NamespaceUri {
      */
 
     public static NamespaceUri getUriForConventionalPrefix(String prefix) {
-        switch (prefix) {
-            case "xsl":
-                return XSLT;
-            case "fn":
-                return FN;
-            case "xml":
-                return XML;
-            case "xs":
-                return SCHEMA;
-            case "xsi":
-                return SCHEMA_INSTANCE;
-            case "err":
-                return ERR;
-            case "ixsl":
-                return IXSL;
-            case "js":
-                return GLOBAL_JS;
-            case "saxon":
-                return SAXON;
-            case "vv":
-                return SAXON_GENERATED_VARIABLE;
-            case "math":
-                return MATH;
-            case "map":
-                return MAP_FUNCTIONS;
-            case "array":
-                return ARRAY_FUNCTIONS;
-            default:
-                return null;
-        }
+        return switch (prefix) {
+            case "xsl" -> XSLT;
+            case "fn" -> FN;
+            case "xml" -> XML;
+            case "xs" -> SCHEMA;
+            case "xsi" -> SCHEMA_INSTANCE;
+            case "err" -> ERR;
+            case "ixsl" -> IXSL;
+            case "js" -> GLOBAL_JS;
+            case "saxon" -> SAXON;
+            case "vv" -> SAXON_GENERATED_VARIABLE;
+            case "math" -> MATH;
+            case "map" -> MAP_FUNCTIONS;
+            case "array" -> ARRAY_FUNCTIONS;
+            default -> null;
+        };
     }
 
     /**

@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.AbstractFunction;
+import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -203,5 +204,29 @@ public class CurriedFunction extends AbstractFunction {
         }
         out.endElement();
         out.endElement();
+    }
+
+    @Override
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
+        if (other instanceof CurriedFunction cf) {
+            if (this.getArity() != cf.getArity()) {
+                return false;
+            }
+            if (!Arrays.deepEquals(boundValues, cf.boundValues)) {
+                return false;
+            }
+            if (!getFunctionItemType().equals(cf.getFunctionItemType())) {
+                return false;
+            }
+            if (!Arrays.equals(unboundArgumentMap, cf.unboundArgumentMap)) {
+                return false;
+            }
+            if (!targetFunction.deepEqual40(cf.targetFunction, context, options)) {
+                return false;
+            }
+            return true;
+        } else {
+            return super.deepEqual40(other, context, options);
+        }
     }
 }

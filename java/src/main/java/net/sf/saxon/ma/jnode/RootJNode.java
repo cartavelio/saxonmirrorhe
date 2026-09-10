@@ -14,6 +14,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -25,17 +26,17 @@ import net.sf.saxon.value.Int64Value;
 import java.util.Iterator;
 
 /**
- * A root JNode that wraps a map or array
+ * A root JNode; it can wrap any kind of value
  */
 public class RootJNode extends JNode {
 
-    private final MapOrArray value;
+    private final GroundedValue value;
 
     /**
      * Construct a JNode that wraps a given map or array
      * @param value the map or array to be wrapped
      */
-    public RootJNode(MapOrArray value) {
+    public RootJNode(GroundedValue value) {
         // TODO: avoid multiple JNodes for the same map or array
         this.value = value;
     }
@@ -49,7 +50,7 @@ public class RootJNode extends JNode {
      * @return the wrapped value/content
      */
     @Override
-    public MapOrArray getContent() {
+    public GroundedValue getContent() {
         return value;
     }
 
@@ -88,8 +89,10 @@ public class RootJNode extends JNode {
     public SequenceIterator getChildren() {
         if (value instanceof MapItem) {
             return new JNodeMapIterator(this);
-        } else {
+        } else if (value instanceof ArrayItem) {
             return new JNodeArrayIterator(this);
+        } else {
+            return EmptyIterator.INSTANCE;
         }
     }
 
@@ -97,7 +100,8 @@ public class RootJNode extends JNode {
      * Get an iterator over the child axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
+     * @param predicate a condition that the nodes must satisfy
+     *                  (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override

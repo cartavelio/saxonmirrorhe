@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -129,6 +130,24 @@ public class LocalVariableReference extends VariableReference {
                         " are allocated on the stack frame");
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof LocalVariableReference ov) {
+            if (binding == ov.binding) {
+                return true;
+            }
+            if (binding instanceof UserFunctionParameter ufp1 && ov.binding instanceof UserFunctionParameter ufp2) {
+                return ufp1.getLocalSlotNumber() == ufp2.getLocalSlotNumber();
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected int computeHashCode() {
+        return 0;
     }
 
     /**
