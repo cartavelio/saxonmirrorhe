@@ -1,6 +1,5 @@
 package com.saxonica.config;
 
-import com.saxonica.Validate;
 import com.saxonica.ee.domino.DominoTreeModel;
 import com.saxonica.functions.extfn.EXPathArchive.Archive;
 import net.sf.saxon.Configuration;
@@ -103,9 +102,8 @@ public class NativePlatformPE extends NativePlatform {
 
     @CEntryPoint(name = "j_run_validate", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_run_validate(IsolateThread thread, ObjectHandle processorDataRef){
-
+//#if EE==true
         String[] args;
-
 
         if(processorDataRef == WordFactory.nullPointer()) {
             return SaxonCAPI.STATUS_FAIL;
@@ -114,9 +112,11 @@ public class NativePlatformPE extends NativePlatform {
            args = processorDataAccumulator.getParameterNames();
         }
 
-        Validate.main(args);
+        com.saxonica.Validate.main(args);
+//#endif
 
         return SaxonCAPI.STATUS_OK;
+
     }
 
 
