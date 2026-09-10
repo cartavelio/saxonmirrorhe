@@ -337,7 +337,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(0, Type.XNODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
 
         register("namespace-uri-for-prefix", 2, e -> e.populate(NamespaceForPrefix::new, BuiltInAtomicType.ANY_URI, OPT, 0)
-                .arg(0, ChoiceItemType.of(BuiltInAtomicType.NCNAME, EnumerationUnionType.of("")), OPT, null)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, NodeKindType.ELEMENT, ONE | INS, null));
 
         register("namespace-uri-from-QName", 1, e -> e.populate(AccessorFn.NamespaceUriFromQName::new, BuiltInAtomicType.ANY_URI, OPT, CARD0)
