@@ -387,6 +387,10 @@ task dotnetTestDrivers(
   inputs.files fileTree(dir: "${projectDir}/src/test/cstestrunner")
   outputs.file "${buildDir}/testdrivers/bin/Release/TestDrivers.${csver}.nupkg"
 
+  doFirst {
+    delete "${buildDir}/testdrivers/bin/Release/TestDrivers.${csver}.nupkg"
+  }
+
   doLast {
     copy {
       from "${projectDir}/tools/saxon-cs"
@@ -401,12 +405,19 @@ task dotnetTestDrivers(
       commandLine dotnetex, 'restore', 'TestDrivers.sln', '--verbosity', 'Normal'
     }
   }
+
   doLast {
     exec {
       workingDir = "${projectDir}/build/testdrivers"
       commandLine dotnetex, 'build', 'TestDrivers.sln', '--verbosity', 'Normal',
         '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
         "-p:Version=${csver}", "-p:PackageVersion=${csver}"
+    }
+  }
+
+  doLast {
+    if (!systemOs.isWindows()) {
+      signExe("${buildDir}/testdrivers/bin/Release/TestDrivers.${csver}.nupkg")
     }
   }
 }
@@ -417,6 +428,10 @@ task dotnetExamples(
   inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/samples/cs/Examples.cs")
   outputs.file "${buildDir}/examples/bin/Release/Examples.${csver}.nupkg"
+
+  doFirst {
+    delete "${buildDir}/examples/bin/Release/Examples.${csver}.nupkg"
+  }
 
   doLast {
     copy {
@@ -432,12 +447,19 @@ task dotnetExamples(
       commandLine dotnetex, 'restore', 'Examples.sln', '--verbosity', 'Normal'
     }
   }
+
   doLast {
     exec {
       workingDir = "${buildDir}/examples"
       commandLine dotnetex, 'build', 'Examples.sln', '--verbosity', 'Normal',
         '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
         "-p:Version=${csver}", "-p:PackageVersion=${csver}"
+    }
+  }
+
+  doLast {
+    if (!systemOs.isWindows()) {
+      signExe("${buildDir}/examples/bin/Release/Examples.${csver}.nupkg")
     }
   }
 }
@@ -448,6 +470,14 @@ task dotnetRelease(
   inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
   outputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
+  outputs.file "${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg"
+
+  doFirst {
+    // Delete them if they exist so that they always get rewritten
+    // so that the subsequent attempt to sign them doesn't fail.
+    delete "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
+    delete "${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg"
+  }
 
   doLast {
     copy {
@@ -486,7 +516,9 @@ task dotnetRelease(
 
   doLast {
     signExe("${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll")
-    signExe("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
+    if (!systemOs.isWindows()) {
+      signExe("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
+    }
   }
 }
 
@@ -515,11 +547,7 @@ task dotnetPublish(
     println("Published SaxonCS release for ${csplatform}")
   }
   doLast {
-    if (systemOs.isWindows()) {
-      signExe("${buildDir}/cs/bin/Release/net5.0/${csrid}/publish/SaxonCS.exe")
-    } else {
-      signExe("${buildDir}/cs/bin/Release/net5.0/${csrid}/publish/SaxonCS")
-    }
+    signExe("${buildDir}/cs/bin/Release/net5.0/${csrid}/publish/SaxonCS", true)
   }
 }
 

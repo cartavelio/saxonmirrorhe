@@ -306,14 +306,21 @@ def signJar(String jarfile) {
   }
 }
 
-def signExe(String exefile) {
+def signExe(String binfile, boolean exefile) {
   // It's convenient to leave this in build.gradle because of the exec closure.
+  if (exefile && systemOs.isWindows()) {
+    binfile += ".exe"
+  }
   if (jarsigner.makeSignedExes) {
-    println("Signing ${exefile}...")
+    println("Signing ${binfile}...")
     exec {
-      commandLine jarsigner.signExeCommand(exefile)
+      commandLine jarsigner.signExeCommand(binfile)
     }
   }
+}
+
+def signExe(String binfile) {
+  signExe(binfile, false)
 }
 
 // ============================================================
