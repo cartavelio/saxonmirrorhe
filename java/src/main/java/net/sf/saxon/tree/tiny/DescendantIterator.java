@@ -38,7 +38,8 @@ final class DescendantIterator implements SequenceIterator {
      *
      * @param tree        the containing TinyTree
      * @param node        the node whose descendants are required
-     * @param predicate   test to be satisfied by each returned node
+     * @param predicate   test to be satisfied by each returned node. May be null
+     *                    to indicate that all nodes are to be returned
      */
 
     DescendantIterator(TinyTree tree, TinyNodeImpl node, NodePredicate predicate) {
@@ -75,7 +76,7 @@ final class DescendantIterator implements SequenceIterator {
             }
             if (tree.nodeKind[nextNodeNr] == Type.TEXTUAL_ELEMENT) {
                 NodeInfo text = ((TinyTextualElement)tree.getNode(nextNodeNr)).getTextNode();
-                if (predicate.test(text)) {
+                if (predicate==null || predicate.test(text)) {
                     pending = text;
                 }
             }
