@@ -1,5 +1,9 @@
 .gradle/
 build/
+java_*.hprof
+/.idea/
+/src/test/testdata/temp/
+/src/test/testdata/sandpit/
 
 # Auto-generated sources
 /src/main/java/net/sf/saxon/lib/Feature.java
