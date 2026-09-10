@@ -913,7 +913,7 @@
                   <xsl:call-template name="indent"/>
                   <xsl:text>  case </xsl:text>
                   <xsl:choose>
-                     <xsl:when test="$enumType">{$firstLabel/@RESOLVED_TYPE}.{if (not($isSimpleEnum)) then 'InnerEnum.' else ''}{name/@identifier}</xsl:when>
+                     <xsl:when test="$enumType">{f:renameType($firstLabel/@RESOLVED_TYPE)}.{if (not($isSimpleEnum)) then 'InnerEnum.' else ''}{name/@identifier}</xsl:when>
                      <xsl:otherwise>
                         <xsl:apply-templates select="."/>
                      </xsl:otherwise>
@@ -1601,6 +1601,14 @@
       <xsl:text>{@value}</xsl:text>
    </xsl:template>
    
+   <xsl:template match="*[@nodeType='LongLiteralExpr'][matches(@value, '^0x[89a-f]')]" priority="20">
+      <xsl:text>unchecked((long){@value})</xsl:text>
+   </xsl:template>
+   
+   <xsl:template match="*[@nodeType='IntegerLiteralExpr'][matches(@value, '^0x[89a-f]')]" priority="20">
+      <xsl:text>unchecked((int){@value})</xsl:text>
+   </xsl:template>
+   
    <xsl:template match="*[@nodeType='InstanceOfExpr']">
       <!-- Translating "A instanceof B" to "A is B" is OK as a general strategy, but it fails on generics -->
       <xsl:text>(</xsl:text>
@@ -1748,15 +1756,15 @@
    
    <!-- match enumeration constants and qualify them with the enumeration class name -->
    <xsl:template match="*[@nodeType='NameExpr'][@ENUM_TYPE][matches(name/@identifier, '^[A-Z0-9_]+$')]" priority="20">
-      <xsl:text>{f:escapeDottedName(@ENUM_TYPE)}.{name/@identifier}</xsl:text>
+      <xsl:text>/*explicit enum*/ {f:escapeDottedName(@ENUM_TYPE)}.{name/@identifier}</xsl:text>
    </xsl:template>
-   
+
    <!-- some enumeration constants aren't marked with @ENUM_TYPE and qualify them with the enumeration class name -->
    <xsl:template match="*[not(self::selector)]
                          [@nodeType='NameExpr']
                          [matches(name/@identifier, '^[A-Z0-9_]+$')]
                          [key('digestClassKey', @RESOLVED_TYPE, $digest)/self::enum]" priority="18">
-      <xsl:text>{f:escapeDottedName(@RESOLVED_TYPE)}.{name/@identifier}</xsl:text>
+      <xsl:text>/*implicit enum*/ {f:escapeDottedName(f:renameType(@RESOLVED_TYPE))}.{name/@identifier}</xsl:text>
    </xsl:template>
    
    <!-- match a reference to a field of an outer class -->

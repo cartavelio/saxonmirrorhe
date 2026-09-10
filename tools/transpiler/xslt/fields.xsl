@@ -105,7 +105,20 @@
       <xsl:choose>
          <xsl:when test="name/@identifier = 'POSITIVE_INFINITY'">System.Double.PositiveInfinity</xsl:when>
          <xsl:when test="name/@identifier = 'NEGATIVE_INFINITY'">System.Double.NegativeInfinity</xsl:when>
+         <xsl:when test="name/@identifier = 'MAX_VALUE'">System.Double.MaxValue</xsl:when>
+         <xsl:when test="name/@identifier = 'MIN_VALUE'">System.Double.MinValue</xsl:when>
          <xsl:otherwise>System.Double.{name/@identifier}</xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Identify a static field accessor such as Float.POSITIVE_INFINITY -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.lang.Float']" priority="19">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'POSITIVE_INFINITY'">System.Single.PositiveInfinity</xsl:when>
+         <xsl:when test="name/@identifier = 'NEGATIVE_INFINITY'">System.Single.NegativeInfinity</xsl:when>
+         <xsl:when test="name/@identifier = 'MAX_VALUE'">System.Single.MaxValue</xsl:when>
+         <xsl:when test="name/@identifier = 'MIN_VALUE'">System.Single.MinValue</xsl:when>
+         <xsl:otherwise>System.Single.{name/@identifier}</xsl:otherwise>
       </xsl:choose>
    </xsl:template>
    
@@ -123,9 +136,16 @@
       </xsl:choose>
    </xsl:template>
    
-   <!-- Identify the static field accessor BigInteger.ZERO -->
-   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.math.BigInteger'][name/@identifier='ZERO']" priority="19">
-      <xsl:text>System.Numerics.BigInteger.Zero</xsl:text>
+   <!-- Identify static field accessors such asd BigInteger.ZERO -->
+   
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.math.BigInteger']" priority="19">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='ZERO'">System.Numerics.BigInteger.Zero</xsl:when>
+         <xsl:when test="name/@identifier='ONE'">System.Numerics.BigInteger.One</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:template>
    
    <!-- Identify static field accessors such as BigDecimal.TEN -->
