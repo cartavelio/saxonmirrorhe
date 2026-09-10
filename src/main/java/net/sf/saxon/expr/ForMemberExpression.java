@@ -22,6 +22,7 @@ import net.sf.saxon.value.IntegerValue;
  * are sequence-concatenated.
  */
 
+
 public class ForMemberExpression extends Assignation {
 
     /**
