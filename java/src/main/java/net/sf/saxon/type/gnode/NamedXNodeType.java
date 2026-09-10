@@ -156,6 +156,11 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
         return -1;
     }
 
+    @Override
+    public ItemType getPrimitiveItemType() {
+        return NodeKindType.makeNodeKindTest(kind);
+    }
+
     /**
      * Get the corresponding StructuredQName: the name that all nodes must have
      * if they are to satisfy the predicate
@@ -383,11 +388,15 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
     }
 
     public String toString() {
+        String displayedType = "";
+        if (schemaType != AnyType.INSTANCE && schemaType != Untyped.INSTANCE && schemaType != BuiltInAtomicType.UNTYPED_ATOMIC) {
+            displayedType = ", " + schemaType.getEQName();
+        }
         return switch (kind) {
             case Type.ELEMENT
-                    -> "element(" + nameTest.toString() + ", " + schemaType.getEQName() + ')';
+                    -> "element(" + nameTest.toString() + displayedType + ')';
             case Type.ATTRIBUTE
-                    -> "attribute(" + nameTest.toString() + ", " + schemaType.getEQName() + ')';
+                    -> "attribute(" + nameTest.toString() + displayedType + ')';
             case Type.PROCESSING_INSTRUCTION
                     -> "processing-instruction(" + nameTest.toString() + ")";
             case Type.NAMESPACE
