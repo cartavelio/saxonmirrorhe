@@ -472,10 +472,10 @@ EndGlobal
         <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.2" />
       </xsl:when>
       <xsl:when test=". = 'XmlResolver'">
-        <PackageReference Include="XmlResolver" Version="6.0.21" />
+        <PackageReference Include="XmlResolver" Version="6.0.22" />
       </xsl:when>
       <xsl:when test=". = 'XmlResolverData'">
-        <PackageReference Include="XmlResolverData" Version="6.0.21" />
+        <PackageReference Include="XmlResolverData" Version="6.0.22" />
       </xsl:when>
       <xsl:when test=". = 'coverlet.collector'">
         <PackageReference Include="coverlet.collector" Version="6.0.4"/>
