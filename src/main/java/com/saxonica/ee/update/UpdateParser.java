@@ -118,7 +118,7 @@ public class UpdateParser {
             }
             p.expect(Token.DOLLAR);
             p.nextToken();
-            p.expect(Token.NAME);
+            p.expectName();
             String var = t.currentTokenValue;
 
             LetExpression v = new LetExpression();

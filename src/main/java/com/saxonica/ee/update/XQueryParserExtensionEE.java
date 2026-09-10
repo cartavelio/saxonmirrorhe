@@ -61,7 +61,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
         }
         foundRevalidationDeclaration = true;
         p.nextToken();
-        p.expect(Token.NAME);
+        p.expectName();
         int val;
         Tokenizer t = p.getTokenizer();
         if ("strict".equals(t.currentTokenValue)) {
