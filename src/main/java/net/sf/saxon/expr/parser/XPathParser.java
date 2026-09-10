@@ -4814,7 +4814,8 @@ public class XPathParser {
 
     private static LocalBinding findOuterXSLTVariable(
             StructuredQName qName, IndexedStack<InlineFunctionDetails> inlineFunctionStack, StaticContext env) {
-        SourceBinding decl = ((ExpressionContext) env).getStyleElement().bindLocalVariable(qName);
+        StructuredQName attName = ((ExpressionContext) env).getAttributeName();
+        SourceBinding decl = ((ExpressionContext) env).getStyleElement().bindLocalVariable(qName, attName);
         if (decl != null) {
             InlineFunctionDetails details = inlineFunctionStack.get(0);
             LocalBinding innermostBinding;
