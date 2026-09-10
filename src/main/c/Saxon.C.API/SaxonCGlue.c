@@ -6,11 +6,11 @@ char * resources_dir;
 int jvmCreated = 0;
 char * tempDllname =
 #if defined (__linux__)
-"/libsaxoneec.so";
+"/libsaxon@@release@@c.so";
 #elif  defined (__APPLE__) && defined(__MACH__)
-"/libsaxoneec.dylib";
+"/libsaxon@@release@@c.dylib";
 #else
-"\\libsaxoneec.dll";
+"\\libsaxon@@release@@c.dll";
 #endif
 
 char * tempResources_dir =
@@ -28,7 +28,7 @@ char * dllPath =
 #elif  defined (__APPLE__) && defined(__MACH__)
 "/usr/local/lib";
 #else
-"C:\\Program Files\\Saxonica\\SaxonEEC@@VERSION@@";
+"C:\\Program Files\\Saxonica\\Saxon@@RELEASE@@C@@VERSION@@";
 #endif
 
 /*
