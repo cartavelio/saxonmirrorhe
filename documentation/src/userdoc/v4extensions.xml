@@ -450,8 +450,11 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
         <code>.[. instance of T]</code>. The experimental syntax <code>~T</code> used in earlier releases
       has been dropped.</p>
 
-         <p>In XQuery, type aliases can be declared in the query prolog using the syntax <code>declare type QName = ItemType;</code>, 
-        for example: <code>declare type cx:complex = record(r as xs:double, i as xs:double);</code>.</p>
+         <p>In XQuery, type aliases can be declared in the query prolog. From Saxon 12.4, the syntax
+            is <code>declare item-type QName as ItemType;</code>, for example: <code>declare
+               item-type cx:complex as record(r as xs:double, i as xs:double);</code>. For Saxon
+            12.3 and earlier, the syntax was <code>declare type QName = ItemType;</code>,
+            for example: <code>declare type cx:complex = record(r as xs:double, i as xs:double);</code>.</p>
 
          <p>For further details see <a class="bodylink" href="/xsl-elements/item-type"
                >xsl:item-type</a>.</p>
