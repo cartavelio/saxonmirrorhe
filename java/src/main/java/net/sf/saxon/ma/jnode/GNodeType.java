@@ -177,5 +177,15 @@ public class GNodeType implements ItemType {
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         return Optional.empty();
     }
+
+    /**
+     * Return a string representation of this ItemType.
+     *
+     * @return the string representation
+     */
+    @Override
+    public String toString() {
+        return "gnode()";
+    }
 }
 

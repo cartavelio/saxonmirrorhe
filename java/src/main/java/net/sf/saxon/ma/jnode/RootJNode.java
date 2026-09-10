@@ -7,6 +7,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
@@ -15,33 +16,62 @@ import net.sf.saxon.value.Int64Value;
 
 import java.util.Iterator;
 
+/**
+ * A root JNode that wraps a map or array
+ */
 public class RootJNode extends JNode {
 
     private final MapOrArray value;
 
+    /**
+     * Construct a JNode that wraps a given map or array
+     * @param value the map or array to be wrapped
+     */
     public RootJNode(MapOrArray value) {
+        // TODO: avaid multiple JNodes for the same map or array
         this.value = value;
     }
 
+    /**
+     * Get the value/content property of the JNode
+     * @return the wrapped value/content
+     */
     @Override
     public MapOrArray getValue() {
         return value;
     }
 
+    /**
+     * Get the position property of the JNode
+     * @return always absent for a root JNode: return -1
+     */
     @Override
     public int getPosition() {
         return -1;
     }
 
+    /**
+     * Get the selector property of the JNode
+     * @return always absent for a root JNode: return null
+     */
     @Override
     public AtomicValue getSelector() {
         return null;
     }
 
+    /**
+     * Get the parent property of the JNode
+     * @return always absent for a root JNode: return null
+     */
     @Override
     public JNode getParent() {
         return null;
     }
+
+    /**
+     * Get the children of the JNode
+     * @return a sequence of JNodes that wrap the array members or map entries
+     */
 
     @Override
     public SequenceIterator getChildren() {
@@ -61,7 +91,7 @@ public class RootJNode extends JNode {
      */
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-        if (predicate == null) {
+        if (predicate == null || predicate == NodeKindTest.ELEMENT /* meaning child::*  */ ) {
             return getChildren();
         }
         return Navigator.filter(getChildren(), predicate);

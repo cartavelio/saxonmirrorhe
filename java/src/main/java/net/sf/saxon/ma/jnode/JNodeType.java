@@ -225,9 +225,9 @@ public class JNodeType extends NodeTest {
     @Override
     public String toString() {
         if (this == ANY_JNODE) {
-            return "JNode()";
+            return "jnode()";
         } else {
-            return "JNode(" + valueType.toString() + ")";
+            return "jnode(" + valueType.toString() + ")";
         }
     }
 }

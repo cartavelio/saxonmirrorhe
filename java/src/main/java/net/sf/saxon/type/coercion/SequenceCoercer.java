@@ -60,8 +60,15 @@ public final class SequenceCoercer extends UnaryExpression {
 
         ItemType requiredItemType = requiredType.getPrimaryType();
         if (requiredItemType.getGenre() == Genre.XNODE) {
-            Expression result = new ItemChecker(sequence,requiredItemType, role);
+            Expression result = new ItemChecker(sequence, requiredItemType, role);
             if (!Cardinality.subsumes(requiredType.getCardinality(),sequence.getCardinality())) {
+                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
+            }
+            return result;
+        }
+        if (requiredItemType.getGenre() == Genre.JNODE) {
+            Expression result = new ItemChecker(sequence, requiredItemType, role);
+            if (!Cardinality.subsumes(requiredType.getCardinality(), sequence.getCardinality())) {
                 result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
             }
             return result;

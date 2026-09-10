@@ -378,6 +378,13 @@ public final class SequenceType {
             AnyGNodeTest.getInstance().zeroOrMore();
 
     /**
+     * A type that allows a sequence of zero or one GNodes
+     */
+
+    public static final SequenceType OPTIONAL_GNODE =
+            AnyGNodeTest.getInstance().zeroOrOne();
+
+    /**
      * A type that allows a sequence of zero or more string values
      */
     public static final SequenceType STRING_SEQUENCE =

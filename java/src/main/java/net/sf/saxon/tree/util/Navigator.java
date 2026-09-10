@@ -1334,9 +1334,9 @@ public final class Navigator {
 
         /*@Nullable*/
         @Override
-        public NodeInfo next() {
+        public GNode next() {
             while (true) {
-                NodeInfo next = (NodeInfo)base.next();
+                GNode next = (GNode)base.next();
                 if (next == null) {
                     return null;
                 }

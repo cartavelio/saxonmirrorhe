@@ -2120,8 +2120,8 @@ public class XPathParser {
                 readToken(Token.LPAREN);
                 readToken(Token.RPAREN);
                 return AnyItemType.getInstance();
-            case "GNode":
-                checkLanguageVersion40("GNode() item type");
+            case "gnode":
+                checkLanguageVersion40("gnode() item type");
                 nextToken();
                 readToken(Token.LPAREN);
                 readToken(Token.RPAREN);
@@ -2137,8 +2137,8 @@ public class XPathParser {
             case "schema-element":
             case "schema-attribute":
                 return parseKindTest();
-            case "JNode":
-                checkLanguageVersion40("JNode() item type");
+            case "jnode":
+                checkLanguageVersion40("jnode() item type");
                 nextToken();
                 readToken(Token.LPAREN);
                 if (t.currentToken == Token.RPAREN) {
@@ -2804,7 +2804,7 @@ public class XPathParser {
                 step = parseDynamicFunctionCall(step, null);
                 setLocation(step);
             } else if (t.currentToken == Token.QMARK || t.currentToken == Token.QMARK_QMARK) {
-                step = parseLookup40J(step);
+                step = parseLookup(step);
                 setLocation(step);
             } else if (t.currentToken == Token.QMARK_LSQB) {
                 step = parseFilterExprAM(step);
@@ -3637,29 +3637,7 @@ public class XPathParser {
         
         Expression result;
         LookupExpression.Modifier modifier = LookupExpression.Modifier.CONTENT;
-        if (token instanceof Token.NameToken && t.peekAhead() == Token.COLON_COLON) {
-            checkLanguageVersion40("modifiers after `?`");
-            switch (t.currentName()) {
-                case "content":
-                    //modifier = LookupExpression.LookupModifier.CONTENT;
-                    break;
-                case "key":
-                    modifier = LookupExpression.Modifier.KEY;
-                    break;
-                case "value":
-                    modifier = LookupExpression.Modifier.VALUE;
-                    break;
-                case "entry":
-                    modifier = LookupExpression.Modifier.ENTRY;
-                    break;
-                default:
-                    grumble("Unknown modifier after '?' operator: " + t.currentName());
-                    break;
-            }
-            nextToken();
-            readToken(Token.COLON_COLON);
-            token = t.currentToken;
-        }
+
         if (token instanceof Token.NameToken) {
             String name = t.currentName();
             if (!NameChecker.isValidNCName(StringTool.codePoints(name))) {

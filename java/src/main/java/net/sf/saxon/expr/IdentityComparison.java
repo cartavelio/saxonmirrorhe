@@ -13,6 +13,7 @@ import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -95,11 +96,11 @@ public final class IdentityComparison extends BinaryExpression {
         Supplier<RoleDiagnostic> role0 =
                 () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 0);
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-        setLhsExpression(tc.staticTypeCheck(getLhsExpression(), SequenceType.OPTIONAL_NODE, role0, visitor));
+        setLhsExpression(tc.staticTypeCheck(getLhsExpression(), SequenceType.OPTIONAL_GNODE, role0, visitor));
 
         Supplier<RoleDiagnostic> role1 =
                 () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 1);
-        setRhsExpression(tc.staticTypeCheck(getRhsExpression(), SequenceType.OPTIONAL_NODE, role1, visitor));
+        setRhsExpression(tc.staticTypeCheck(getRhsExpression(), SequenceType.OPTIONAL_GNODE, role1, visitor));
 
         if (!Cardinality.allowsZero(getLhsExpression().getCardinality()) && !Cardinality.allowsZero(getRhsExpression().getCardinality())) {
             generateIdEmulation = false;
@@ -181,7 +182,7 @@ public final class IdentityComparison extends BinaryExpression {
     /*@Nullable*/
     @Override
     public BooleanValue evaluateItem(XPathContext context) throws XPathException {
-        NodeInfo node0 = getNode(getLhsExpression(), context);
+        GNode node0 = getNode(getLhsExpression(), context);
         if (node0 == null) {
             if (generateIdEmulation) {
                 return BooleanValue.get(getNode(getRhsExpression(), context) == null);
@@ -189,7 +190,7 @@ public final class IdentityComparison extends BinaryExpression {
             return null;
         }
 
-        NodeInfo node1 = getNode(getRhsExpression(), context);
+        GNode node1 = getNode(getRhsExpression(), context);
         if (node1 == null) {
             if (generateIdEmulation) {
                 return BooleanValue.FALSE;
@@ -202,32 +203,32 @@ public final class IdentityComparison extends BinaryExpression {
 
     @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
-        NodeInfo node0 = getNode(getLhsExpression(), context);
+        GNode node0 = getNode(getLhsExpression(), context);
         if (node0 == null) {
             return generateIdEmulation && getNode(getRhsExpression(), context) == null;
         }
 
-        NodeInfo node1 = getNode(getRhsExpression(), context);
+        GNode node1 = getNode(getRhsExpression(), context);
         return node1 != null && compareIdentity(node0, node1);
 
     }
 
-    private boolean compareIdentity(NodeInfo node0, NodeInfo node1) {
+    private boolean compareIdentity(GNode node0, GNode node1) {
 
         switch (operator) {
             case IS:
                 return node0.equals(node1);
             case PRECEDES:
-                return GlobalOrderComparer.getInstance().compare(node0, node1) < 0;
+                return GlobalOrderComparer.getInstance().compare((NodeInfo)node0, (NodeInfo)node1) < 0;
             case FOLLOWS:
-                return GlobalOrderComparer.getInstance().compare(node0, node1) > 0;
+                return GlobalOrderComparer.getInstance().compare((NodeInfo)node0, (NodeInfo)node1) > 0;
             default:
                 throw new UnsupportedOperationException("Unknown node identity test");
         }
     }
 
-    private static NodeInfo getNode(Expression exp, XPathContext c) throws XPathException {
-        return (NodeInfo) exp.evaluateItem(c);
+    private static GNode getNode(Expression exp, XPathContext c) throws XPathException {
+        return (GNode) exp.evaluateItem(c);
     }
 
 

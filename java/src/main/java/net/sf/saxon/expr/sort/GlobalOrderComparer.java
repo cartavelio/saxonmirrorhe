@@ -33,7 +33,7 @@ public final class GlobalOrderComparer implements Comparator<NodeInfo> {
     }
 
     @Override
-    public int compare(NodeInfo a, /*@NotNull*/ NodeInfo b) {
+    public int compare(NodeInfo a, NodeInfo b) {
         if (a == b) {
             return 0;
         }

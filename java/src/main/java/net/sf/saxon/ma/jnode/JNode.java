@@ -87,12 +87,12 @@ public abstract class JNode implements GNode {
      */
     @Override
     public String toString() {
-        return "JNode(" + getValue().toString() + ")";
+        return "jnode(" + getValue().toString() + ")";
     }
 
     @Override
     public String toShortString() {
-        return "JNode(" + getValue().toShortString() + ")";
+        return "jnode(" + getValue().toShortString() + ")";
     }
 
     public abstract SequenceIterator getChildren();

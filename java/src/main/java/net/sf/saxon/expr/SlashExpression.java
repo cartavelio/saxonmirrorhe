@@ -1081,7 +1081,7 @@ public class SlashExpression extends BinaryExpression
             PullEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPull();
             if (expr.contextFree && expr.getStep() instanceof AxisExpression) {
                 AxisExpression step = (AxisExpression)expr.getStep();
-                return context -> MappingIterator.map(select.iterate(context), item -> step.iterate((NodeInfo)item));
+                return context -> MappingIterator.map(select.iterate(context), item -> step.iterate((GNode)item));
             } else {
                 @SuppressWarnings("Convert2MethodRef")
                 ContextMappingFunction mapper = cxt -> action.iterate(cxt);
