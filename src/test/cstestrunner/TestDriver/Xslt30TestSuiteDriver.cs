@@ -986,7 +986,7 @@ namespace TestDriver {
             XsltExecutable sheet, Stream styleSource) {
             try {
                 Uri fileUri = new Uri(resultsDir + "/export/" + testSetName + "/" + testName + ".sef");
-                Stream exportFile = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                Stream exportFile = new FileStream(fileUri.AbsolutePath, FileMode.Create, FileAccess.Write);
 
                 XsltPackage compiledPack = compiler.CompilePackage(styleSource);
                 compiledPack.Save(exportFile);
