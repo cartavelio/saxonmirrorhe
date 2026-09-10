@@ -1,3 +1,4 @@
+using SysExcept = System.Exception;
 namespace java.lang {
     public class AssertionError : Exception {
         public AssertionError()  {
@@ -6,10 +7,10 @@ namespace java.lang {
         public AssertionError(string str) : base(str) {
             
         }
-        public AssertionError(Throwable cause) : base(cause) {
+        public AssertionError(SysExcept cause) : base(cause) {
 
         }
-        public AssertionError(string str, Throwable cause) : base(str, cause) {
+        public AssertionError(string str, SysExcept cause) : base(str, cause) {
 
         }
 

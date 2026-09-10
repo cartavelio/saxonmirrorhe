@@ -9,7 +9,7 @@ using net.sf.saxon.tree.iter;
 using net.sf.saxon.tree.util;
 using net.sf.saxon.tree.wrapper;
 
-namespace com.saxonica.dotnetdom {
+namespace Saxon.Impl.Dom {
     public class DotNetNodeWrapper : AbstractNodeWrapper, SteppingNode, SiblingCountingNode {
         private XmlNode node;
         private short nodeKind;
@@ -409,8 +409,8 @@ namespace com.saxonica.dotnetdom {
                 ix++;
                 return current;
             }
-            public java.util.EnumSet<SequenceIteratorProperty> getProperties() {
-                return java.util.EnumSet<SequenceIteratorProperty>.of(SequenceIteratorProperty.LOOKAHEAD);
+            public SequenceIteratorProperty getProperties() {
+                return SequenceIteratorProperty.LOOKAHEAD;
             }
         
             /* Expanding default method forEach from interface UnfailingIterator */
@@ -543,8 +543,8 @@ namespace com.saxonica.dotnetdom {
                     return null;
                 }
             }
-            public java.util.EnumSet<SequenceIteratorProperty> getProperties() {
-                return java.util.EnumSet<SequenceIteratorProperty>.of(SequenceIteratorProperty.LOOKAHEAD);
+            public SequenceIteratorProperty getProperties() {
+                return SequenceIteratorProperty.LOOKAHEAD;
             }
         
             /* Expanding default method forEach from interface UnfailingIterator */

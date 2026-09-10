@@ -9,20 +9,20 @@ namespace java.util
     {
         public static void fill<T>(T[] array, T value)
         {
-            //SysArray.Fill<T>(array, value);  // Needs .NET 5.
-            for (int i = 0; i < array.Length; i++)
-            {
-                array[i] = value;
-            }
+            SysArray.Fill<T>(array, value);  // Needs .NET 5.
+            // for (int i = 0; i < array.Length; i++)
+            // {
+            //     array[i] = value;
+            // }
         }
         
         public static void fill<T>(T[] array, int start, int end, T value)
         {
-            //SysArray.Fill<T>(array, value);  // Needs .NET 5.
-            for (int i = start; i < end; i++)
-            {
-                array[i] = value;
-            }
+            SysArray.Fill<T>(array, value, start, end - start);  // Needs .NET 5.
+            // for (int i = start; i < end; i++)
+            // {
+            //     array[i] = value;
+            // }
         }
 
         public static T[] copyOf<T>(T[] source, int length) {
@@ -35,8 +35,8 @@ namespace java.util
             throw new NotImplementedException();
         }
 
-        public static java.util.List<T> asList<T>(params T[] array) {
-            return new ArrayList<T>(new SysCollGen.List<T>(array));
+        public static SysCollGen.List<T> asList<T>(params T[] array) {
+            return new SysCollGen.List<T>(array);
         }
 
         public static void sort<T>(T[] array) {

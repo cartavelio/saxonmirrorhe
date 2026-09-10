@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Management.Instrumentation;
 
 namespace Saxon.Impl.Helpers {
     public class IteratorFromEnumerator<T> : java.util.Iterator<T> {
