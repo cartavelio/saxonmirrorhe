@@ -134,8 +134,8 @@ public class Feature<T> {
     </xsl:template>
 
 
-    <xsl:template match="name" mode="FeatureKeys.cs"><!-- TODO or public static readonly ??? -->
-        <xsl:text>&#xa;&#xa;    public const String </xsl:text>
+    <xsl:template match="name" mode="FeatureKeys.cs">
+        <xsl:text>&#xa;&#xa;    public const string </xsl:text>
         <xsl:value-of select="."/>
         <xsl:text> = </xsl:text>
     </xsl:template>
