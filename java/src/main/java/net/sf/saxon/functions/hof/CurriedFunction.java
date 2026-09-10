@@ -212,8 +212,13 @@ public class CurriedFunction extends AbstractFunction {
             if (this.getArity() != cf.getArity()) {
                 return false;
             }
-            if (!Arrays.deepEquals(boundValues, cf.boundValues)) {
+            if (boundValues.length != cf.boundValues.length) {
                 return false;
+            }
+            for (int i = 0; i < boundValues.length; i++) {
+                if (!DeepEqual.deepEqual(boundValues[i].iterate(), cf.boundValues[i].iterate(), context, options)) {
+                    return false;
+                }
             }
             if (!getFunctionItemType().equals(cf.getFunctionItemType())) {
                 return false;
