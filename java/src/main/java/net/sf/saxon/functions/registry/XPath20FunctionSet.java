@@ -8,15 +8,13 @@
 package net.sf.saxon.functions.registry;
 
 import net.sf.saxon.expr.ContextItemExpression;
-import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.Error;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
-import net.sf.saxon.transpile.CSharp;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.NumericType;
-import net.sf.saxon.type.Type;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.Int64Value;
@@ -348,7 +346,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(0, Type.XNODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
 
         register("namespace-uri-for-prefix", 2, e -> e.populate(NamespaceForPrefix::new, BuiltInAtomicType.ANY_URI, OPT, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .arg(0, ChoiceItemType.of(BuiltInAtomicType.NCNAME, EnumerationUnionType.of("")), OPT, null)
                 .arg(1, NodeKindType.ELEMENT, ONE | INS, null));
 
         register("namespace-uri-from-QName", 1, e -> e.populate(AccessorFn.NamespaceUriFromQName::new, BuiltInAtomicType.ANY_URI, OPT, CARD0)
