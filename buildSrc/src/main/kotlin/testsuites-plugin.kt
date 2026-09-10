@@ -119,17 +119,41 @@ abstract class TestSuitesExtension
     }
   }
 
-  fun exceptions(suite: String): Provider<RegularFile> {
+  fun exceptions(suite: String, language: String): Provider<RegularFile> {
     // N.B. The exceptionsDir is set appropriately in the Java/C# configuration
     return when (suite) {
-      "qt3" -> exceptionsDir.file("qt3.xml")
+      "qt3" -> {
+        if (language.contains("4")) {
+          exceptionsDir.file("qt4.xml")
+        } else {
+          exceptionsDir.file("qt3.xml")
+        }
+      }
+      "qt4" -> {
+        if (language.contains("3")) {
+          exceptionsDir.file("qt3.xml")
+        } else {
+          exceptionsDir.file("qt4.xml")
+        }
+      }
+      "xslt30" -> {
+        if (language.contains("4")) {
+          exceptionsDir.file("xslt40.xml")
+        } else {
+          exceptionsDir.file("xslt30.xml")
+        }
+      }
+      "xslt40" -> {
+        if (language.contains("3")) {
+          exceptionsDir.file("xslt30.xml")
+        } else {
+          exceptionsDir.file("xslt40.xml")
+        }
+      }
       "qt3extra" -> exceptionsDir.file("qt3extra.xml")
       "expath" -> exceptionsDir.file("expath.xml")
-      "xslt30" -> exceptionsDir.file("xslt30.xml")
       "xslt30extra" -> exceptionsDir.file("xslt30extra.xml")
       "xsltfromqt4" -> exceptionsDir.file("qt4-xslt.xml")
-      "qt4" -> exceptionsDir.file("qt4.xml")
-      "xslt40" -> exceptionsDir.file("xslt40.xml")
       "xsd" -> exceptionsDir.file("xsd11.xml")
       "xsdextra" -> exceptionsDir.file("xsd-extra.xml")
       else -> throw GradleException("Unknown exceptions for test suite: ${suite}")
@@ -149,7 +173,7 @@ abstract class TestSuitesExtension
       this.suiteDir = suiteDir(suite)
       this.testargs = testargs
       this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
-      exceptionsFile = exceptions(suite)
+      exceptionsFile = exceptions(suite, language)
       reportingRootDir = layout.buildDirectory.dir("test-results")
       classpath.from(testclasspath)
     }
@@ -175,7 +199,7 @@ abstract class TestSuitesExtension
     val driverClass = "com.saxonica.testdriver.ee.SchemaTestSuiteDriver"
 
     val directory = suiteDir(suite)
-    val exceptionsFile = exceptions(suite)
+    val exceptionsFile = exceptions(suite, language)
 
     val catalog = "catalog.xml"
 
@@ -227,7 +251,6 @@ abstract class TestSuitesExtension
 
     val thisSuite = tasks.register<CSharpRunner>(taskName) {
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
-      dependsOn("dotnetBuild")
       dependsOn("dotnetBuildTestDrivers")
       this.edition = plugin.edition
       this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
@@ -240,7 +263,7 @@ abstract class TestSuitesExtension
       this.dotnetBuildType = plugin.dotnetBuildType
       this.platform = plugin.platform
       this.testargs = testargs
-      exceptionsFile = exceptions(suite)
+      exceptionsFile = exceptions(suite, language)
       reportingRootDir = layout.buildDirectory.dir("test-results")
     }
 
@@ -267,7 +290,7 @@ abstract class TestSuitesExtension
     val xsdVersion = "11"
 
     val directory = suiteDir(suite)
-    val exceptionsFile = exceptions(suite)
+    val exceptionsFile = exceptions(suite, language)
 
     val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
 
