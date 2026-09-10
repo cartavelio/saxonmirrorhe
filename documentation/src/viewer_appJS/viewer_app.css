@@ -399,16 +399,14 @@ td .qt4 {
 	min-height: 2em;
 }
 code.qt4,
-span.qt4 {
+span.qt4,
+a.qt4{
+	padding-left: 0em;
+	padding-right: 1.5em;
+	border-left: 0em;
 	background-size: 1.25em;
 	min-height: 1em;
 	background-position-x: right -1.5em;
-}
-.flink-qt4 {
-   padding-right: .5em;
-   border-right: .5em;
-   border-right-style: solid;
-   border-color: #F7E44F;
 }
 .signature, .fullsignature {
     font-size:inherit;

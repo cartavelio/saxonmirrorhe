@@ -127,7 +127,7 @@
   <xsl:variable name="namespace" select="ancestor::section/@id"/>
   <xsl:variable name="default.platform"
    select="doc($implement-path)/implement/default[@id = $namespace]/@platform"/>
-  <xsl:variable name="class" select="if (@class) then concat('flink flink-', @class) else 'flink'"/>
+  <xsl:variable name="class" select="if (@class) then concat('flink ', @class) else 'flink'"/>
   <span class="{$class}" data-href="{fc:name}" data-ns="{fc:namespace-ref(fc:name/@namespace)}"
    data-platform="{(.//fc:saxon-edition/@platform, $default.platform, 'ALL')[1]}">
    <xsl:value-of select="fc:name"/>

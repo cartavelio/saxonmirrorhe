@@ -51,9 +51,10 @@
             </xsl:if>
             <ul>
                 <xsl:for-each select="(ancestor::article|ancestor::section)[last()]/(article|section)[not($except = @id)]">
+                    <xsl:variable name="class" select="if (@class) then concat('link ', @class) else 'link'"/>
                     <li>
                         <p>
-                            <span class="link" data-href="{@id}">
+                            <span class="{$class}" data-href="{@id}">
                                 <xsl:value-of select="@title"/>
                             </span>
                             <xsl:if test="@summary">

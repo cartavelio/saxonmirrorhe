@@ -126,6 +126,7 @@
     <xsl:template match="fc:function" mode="index">
         <p>
             <a href="{fc:name}">
+                <xsl:copy-of select="@class"/>
                 <xsl:value-of select="fc:name"/>
             </a>
         </p>
@@ -134,6 +135,7 @@
     <!--  Function pages for each function. -->
     <xsl:template match="fc:function" mode="f">
         <section id="{fc:name}" title="{fc:name}">
+            <xsl:copy-of select="@class"/>
 
             <xsl:variable name="MyFunction" select="."/>
             <xsl:variable name="namespace" select="ancestor::section/@id"/>

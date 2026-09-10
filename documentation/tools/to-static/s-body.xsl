@@ -58,6 +58,7 @@
                          <li>
                               <p>
                                    <a href="{$href}">
+                                        <xsl:copy-of select="@class"/>
                                         <xsl:value-of select="@title"/>
                                    </a>
                                    <xsl:if test="@summary">
