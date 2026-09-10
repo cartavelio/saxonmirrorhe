@@ -15,7 +15,6 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
 import static com.saxonica.ee.schema.ValueConstraint.Variety.FIXED;
 
 /**
@@ -131,7 +130,7 @@ public class ValueConstraint {
      */
 
     public Sequence asFunction() {
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":

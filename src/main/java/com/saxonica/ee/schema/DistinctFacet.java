@@ -10,7 +10,6 @@ import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.*;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
 
 /**
  * The saxon:distinct facet on a list type can be used to constrain the list to contain distinct values.
@@ -93,7 +92,7 @@ public class DistinctFacet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         DistinctFacet facet = this;
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":

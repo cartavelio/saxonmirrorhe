@@ -7,7 +7,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
+
 
 /**
  * Represents a whitespace facet on a schema-defined simple type
@@ -130,7 +130,7 @@ public class WhitespaceFacet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         WhitespaceFacet facet = this;
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":

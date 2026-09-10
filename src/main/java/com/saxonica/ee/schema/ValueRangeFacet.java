@@ -14,7 +14,7 @@ import net.sf.saxon.value.*;
 
 import java.math.BigInteger;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
+
 import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
 
 /**
@@ -218,7 +218,7 @@ public abstract class ValueRangeFacet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         ValueRangeFacet thisFacet = this;
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":

@@ -8,7 +8,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.*;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
+
 
 /**
  * Abstract class for the three facets length, minLength, and maxLength.
@@ -94,7 +94,7 @@ public abstract class LengthRangeFacet extends Facet {
 
     @Override
     public FunctionItem getFacetAsFunctionItem() {
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
                 String key = arg.head().getStringValue();
                 switch (key) {
                     case "class":

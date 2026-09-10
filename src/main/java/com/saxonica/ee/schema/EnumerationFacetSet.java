@@ -13,7 +13,7 @@ import net.sf.saxon.value.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
+
 
 /**
  * Represents the set of enumeration values defined on a single simple type, This is a "virtual" facet
@@ -184,7 +184,7 @@ public class EnumerationFacetSet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         EnumerationFacetSet facet = this;
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":

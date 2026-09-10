@@ -11,7 +11,7 @@ import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
+
 
 /**
  * Represents the preprocess facet on a schema-defined simple type. This is a pre-lexical facet
@@ -184,7 +184,7 @@ public class PreprocessFacet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         PreprocessFacet thisFacet = this;
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":

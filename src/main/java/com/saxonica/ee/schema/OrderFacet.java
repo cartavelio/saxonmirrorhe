@@ -9,7 +9,7 @@ import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.*;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
+
 
 /**
  * The saxon:order facet on a list type can be used to constrain the list to be in ascending or descending order.
@@ -121,7 +121,7 @@ public class OrderFacet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         OrderFacet facet = this;
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":

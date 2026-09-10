@@ -15,7 +15,7 @@ import net.sf.saxon.value.StringValue;
 
 import java.util.List;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
+
 
 /**
  * Represents a pattern facet on a schema-defined simple type
@@ -145,7 +145,7 @@ public class PatternFacet extends Facet {
     public FunctionItem getFacetAsFunctionItem() {
         // Contrary to the W3C SCM specification, multiple pattern facets are not merged into a single component
         PatternFacet facet = this;
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":

@@ -7,7 +7,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
+
 
 /**
  * Represents either of the facets totalDigits or fractionDigits
@@ -135,7 +135,7 @@ public abstract class DigitsFacet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         DigitsFacet facet = this;
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":

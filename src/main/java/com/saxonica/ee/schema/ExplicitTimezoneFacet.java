@@ -8,7 +8,7 @@ import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.*;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
+
 
 /**
  * Represents an explicitTimezone facet on a schema-defined simple type derived from date, time, dateTime,
@@ -121,7 +121,7 @@ public class ExplicitTimezoneFacet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         ExplicitTimezoneFacet facet = this;
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":

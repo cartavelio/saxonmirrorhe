@@ -12,7 +12,7 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.StringValue;
 
-import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
+
 
 /**
  * Represents an assertion facet on a schema-defined simple type.
@@ -133,7 +133,7 @@ public class AssertionFacet extends Facet {
     public FunctionItem getFacetAsFunctionItem() {
         // Contrary to the W3C SCM model, each assertion is delivered as a separate schema component
         AssertionFacet facet = this;
-        return accessorFunction(arg -> {
+        return SchemaStructure.accessorFunction(arg -> {
             String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
