@@ -132,6 +132,16 @@ SaxonApiException::SaxonApiException(const char * m){
 
 	}
 
+	const char * SaxonApiException::getMessageWithErrorCode() {
+
+	    if(!cppException) {
+            allocFn fn = operator new;
+            return j_getErrorMessageWithErrorCode(SaxonProcessor::sxn_environ->thread, (void *)fn);
+	    }
+	    return message;
+
+	}
+
 
     const char * SaxonApiException::getCombinedStaticErrorMessages(){
         allocFn fn = operator new;
