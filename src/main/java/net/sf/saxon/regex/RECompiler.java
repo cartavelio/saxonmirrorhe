@@ -41,15 +41,14 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A regular expression compiler class.  This class compiles a pattern string into a
- * regular expression program interpretable by the RE evaluator class.  The 'recompile'
- * command line tool uses this compiler to pre-compile regular expressions for use
- * with RE.  For a description of the syntax accepted by RECompiler and what you can
- * do with regular expressions, see the documentation for the RE matcher class.
+ * A regular expression compiler.  This class compiles a pattern string into a
+ * regular expression program interpretable by the {@link REMatcher}.  The compiler
+ * implements the regular expression syntax defined by XSD versions 1.0 and 1.1,
+ * and XPath versions up to 4.0.
  *
- * @author <a href="mailto:jonl@muppetlabs.com">Jonathan Locke</a>
- * @author <a href="mailto:gholam@xtra.co.nz">Michael McCallum</a>
- * @version $Id: RECompiler.java 518156 2007-03-14 14:31:26Z vgritsenko $
+ * <p>The code was originally based on the Apache Jakarta regex engine. The runtime has
+ * been completely rewritten, but the syntax analysis code remains.</p>
+ *
  * @see net.sf.saxon.regex.REMatcher
  */
 

@@ -36,7 +36,8 @@ import net.sf.saxon.z.IntPredicateProxy;
 import java.util.List;
 
 /**
- * A class that holds compiled regular expressions.
+ * A class that holds compiled regular expressions. These are created using the
+ * {@link RECompiler}, and evaluated using the {@link REMatcher}.
  */
 
 public class REProgram {
@@ -51,15 +52,13 @@ public class REProgram {
     protected int minimumLength = 0;
     protected int fixedLength = -1;
     protected int optimizationFlags;      // Optimization flags (REProgram.OPT_*)
-    protected int maxParens = -1;
+    protected int maxParens;
     protected int backtrackingLimit = -1;
 
     /**
-     * Constructs a program object from a character array
-     * @param operation Array with RE opcode instructions in it. The "next"
-     * @param parens       Count of parens in the program
-     *                     pointers within the operations must already have been converted to absolute
-     *                     offsets.
+     * Constructs a program object
+     * @param operation    The top-level operation, the root of an operation tree
+     * @param parens       Count of capturing parens in the program.
      * @param flags the regular expression flags
      */
     public REProgram(Operation operation, int parens, REFlags flags) {

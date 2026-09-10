@@ -197,7 +197,7 @@ public class OpSequence extends Operation {
 
         // A stack of iterators, one for each piece in the sequence
         final Stack<IntIterator> iterators = new Stack<>();
-        final REMatcher.State savedState =
+        final REMatcher.CapturedGroupState savedState =
                 containsCapturingExpressions() ? matcher.captureState() : null;
         final int backtrackingLimit = matcher.getProgram().getBacktrackingLimit();
 
