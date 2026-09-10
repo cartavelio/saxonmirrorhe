@@ -319,6 +319,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null));
 
+        register("function-annotations", 1, e -> e.populate(FunctionAnnotations::new,
+                                                            new MapType(BuiltInAtomicType.QNAME, SequenceType.ATOMIC_SEQUENCE),
+                                                            ONE, 0)
+                .arg(0, AnyFunctionType.getInstance(), ONE, null));
+
         register("graphemes", 1, e -> e.populate(GraphemesFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
 

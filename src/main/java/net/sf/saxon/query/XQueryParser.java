@@ -829,7 +829,6 @@ public class XQueryParser extends XPathParser {
                         && !qName.equals(Annotation.VARIADIC)) {
                     grumble("Unrecognized variable or function annotation " + qName.getDisplayName(), "XQST0045");
                 }
-                annotation.addAnnotationParameter(Int64Value.ZERO); // MHK 2024-07-15 - Why?
             } else if (isReservedInQuery(uri)) {
                 grumble("The annotation " + t.currentName() + " is in a reserved namespace", "XQST0045");
             } else {

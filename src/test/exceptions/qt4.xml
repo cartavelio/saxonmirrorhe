@@ -12,7 +12,7 @@
    
  
 
-   <exception test-set="misc-BuiltInKeywords" 
+   <!--<exception test-set="misc-BuiltInKeywords" 
       test-case=" Keywords-array-deep-update-1
       Keywords-array-of-members-1
       Keywords-fn-build-uri-1
@@ -28,7 +28,7 @@
        " run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-17"/>
       <reason>Functions not implemented</reason>
-   </exception>
+   </exception>-->
    
    <!--<exception test-set="misc-BuiltInKeywords" 
       test-case="Keywords-map-of-1
@@ -186,10 +186,10 @@
       <reason>Function fn:message not yet implemented</reason>
    </exception>
    
-   <exception test-set="fn-function-annotations" run="false" report="n/a">
+   <!--<exception test-set="fn-function-annotations" run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Function fn:function-annotations not yet implemented</reason>
-   </exception>
+   </exception>-->
    
 
    <exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
