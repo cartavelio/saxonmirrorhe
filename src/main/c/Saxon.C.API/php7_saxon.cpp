@@ -21,6 +21,7 @@ JNINativeMethod phpMethods[] =
 
 zend_object_handlers saxonProcessor_object_handlers;
 
+
 zend_object_handlers xdmValue_object_handlers;
 zend_object_handlers xdmItem_object_handlers;
 zend_object_handlers xdmNode_object_handlers;
@@ -32,6 +33,7 @@ zend_object_handlers xdmArray_object_handlers;
 zend_class_entry *saxonProcessor_ce;
 
 
+
 zend_class_entry *xdmValue_ce;
 zend_class_entry *xdmItem_ce;
 zend_class_entry *xdmNode_ce;
@@ -39,13 +41,16 @@ zend_class_entry *xdmAtomicValue_ce;
 zend_class_entry *xdmFunctionItem_ce;
 zend_class_entry *xdmMap_ce;
 zend_class_entry *xdmArray_ce;
+
 zend_class_entry *xsltExecutable_ce;
+
 
 #include "php7_Xslt30Processor.cpp"
 #include "php7_XsltExecutable.cpp"
 #include "php7_XPathProcessor.cpp"
 #include "php7_XQueryProcessor.cpp"
 #include "php7_SchemaValidator.cpp"
+#include "php7_DocumentBuilder.cpp"
 
 void SaxonProcessor_free_storage(zend_object *object)
 {
@@ -467,8 +472,8 @@ PHP_METHOD(SaxonProcessor, isSchemaAware)
     saxonProcessor = obj->saxonProcessor;
     if (saxonProcessor != nullptr) {
          if(saxonProcessor->isSchemaAwareProcessor()){
-		RETURN_TRUE;
- 	}
+		    RETURN_TRUE;
+ 	    }
     }
     RETURN_FALSE;
 }
@@ -750,6 +755,40 @@ PHP_METHOD(SaxonProcessor, createAtomicValue)
         }
     } else {
        
+        RETURN_NULL();
+    }
+}
+
+PHP_METHOD(SaxonProcessor, newDocumentBuilder)
+{
+    if (ZEND_NUM_ARGS()>0) {
+        WRONG_PARAM_COUNT;
+    }
+    SaxonProcessor * proc;
+    DocumentBuilder * documentBuilder = nullptr;
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+
+    assert (obj != nullptr);
+    proc = obj->saxonProcessor;
+    assert (proc != nullptr);
+    if (proc != nullptr) {
+        if (object_init_ex(return_value, documentBuilder_ce) != SUCCESS) {
+            RETURN_NULL();
+        } else {
+
+            zend_object* vvobj = Z_OBJ_P(return_value);
+            documentBuilder_object * vobj = (documentBuilder_object *)((char *)vvobj - XtOffsetOf(documentBuilder_object, std));
+            assert (vobj != nullptr);
+            documentBuilder = proc->newDocumentBuilder();
+            if(documentBuilder == nullptr) {
+                RETURN_NULL();
+            }
+            vobj->documentBuilder = documentBuilder;
+        }
+    } else {
+
         RETURN_NULL();
     }
 }
@@ -3220,6 +3259,7 @@ zend_function_entry SaxonProcessor_methods[] = {
     PHP_ME(SaxonProcessor,  parseXmlFromUri,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  setcwd,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  newXPathProcessor,     nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor,  newDocumentBuilder,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  newXslt30Processor,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  newXQueryProcessor,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  newSchemaValidator,     nullptr, ZEND_ACC_PUBLIC)
@@ -3356,6 +3396,14 @@ PHP_MINIT_FUNCTION(saxon)
    
    // saxonProcessor_object_handlers.clone_obj = nullptr;
 
+    INIT_CLASS_ENTRY(ce, "Saxon\\DocumentBuilder", DocumentBuilder_methods);
+    documentBuilder_ce = zend_register_internal_class(&ce);
+    documentBuilder_ce->create_object = documentBuilder_create_handler;
+    memcpy(&documentBuilder_object_handlers, zend_get_std_object_handlers(), sizeof(documentBuilder_object_handlers));
+    documentBuilder_object_handlers.offset = XtOffsetOf(documentBuilder_object, std);
+    documentBuilder_object_handlers.free_obj = DocumentBuilder_free_storage;
+    documentBuilder_object_handlers.dtor_obj = DocumentBuilder_destroy_storage;
+
 
     INIT_CLASS_ENTRY(ce, "Saxon\\XSLT30Processor", Xslt30Processor_methods);
     xslt30Processor_ce = zend_register_internal_class(&ce);
@@ -3474,7 +3522,8 @@ PHP_MINFO_FUNCTION(saxon)
 {
     php_info_print_table_start();
     php_info_print_table_header(2, "saxonc", "enabled");
-    php_info_print_table_row(2, "SaxonC EXT version", "11.3");
+    php_info_print_table_row(2, "SaxonC EXT version", "1.3");
+    php_info_print_table_row(2, "Saxon", "10.4");
     php_info_print_table_row(2, "Excelsior JET", "15.3 MP1");
     php_info_print_table_end();
     DISPLAY_INI_ENTRIES();

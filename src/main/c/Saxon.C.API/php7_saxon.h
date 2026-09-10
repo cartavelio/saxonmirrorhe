@@ -95,6 +95,12 @@ struct saxonProcessor_object {
     zend_object std;
 };
 
+struct documentBuilder_object {
+
+    DocumentBuilder * documentBuilder;
+    zend_object std;
+};
+
 
 struct xqueryProcessor_object {
     XQueryProcessor *xqueryProcessor;
@@ -173,7 +179,7 @@ struct xsltExecutable_object {
 
 
 #define PHP_SAXON_EXTNAME  "saxonc"
-#define PHP_SAXON_EXTVER   "11.1"
+#define PHP_SAXON_EXTVER   "11.3"
 
 /*
  * Class:     com_saxonica_functions_extfn_PhpCall_PhpFunctionCall
@@ -215,12 +221,32 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SaxonProcessor, newXQueryProcessor);
     PHP_METHOD(SaxonProcessor, newXPathProcessor);
     PHP_METHOD(SaxonProcessor, newSchemaValidator);
+    PHP_METHOD(SaxonProcessor, newDocumentBuilder);
     PHP_METHOD(SaxonProcessor,  version);
     PHP_METHOD(SaxonProcessor,  isSchemaAware);
     PHP_METHOD(SaxonProcessor,  release);
     PHP_METHOD(SaxonProcessor,  exceptionClear);
     PHP_METHOD(SaxonProcessor,  exceptionOccurred);
     PHP_METHOD(SaxonProcessor,  getErrorMessage);
+
+
+
+    PHP_METHOD(DocumentBuilder,  __destruct);
+    PHP_METHOD(DocumentBuilder, setLineNumbering);
+    PHP_METHOD(DocumentBuilder, isLineNumbering);
+    PHP_METHOD(DocumentBuilder, setSchemaValidator);
+    PHP_METHOD(DocumentBuilder, getSchemaValidator);
+    PHP_METHOD(DocumentBuilder, setDTDValidation);
+    PHP_METHOD(DocumentBuilder, isDTDValidation);
+    PHP_METHOD(DocumentBuilder, setBaseUri);
+    PHP_METHOD(DocumentBuilder, getBaseUri);
+    PHP_METHOD(DocumentBuilder, parseXmlFromString);
+    PHP_METHOD(DocumentBuilder, parseXmlFromFile);
+    PHP_METHOD(DocumentBuilder, parseXmlFromUri);
+    PHP_METHOD(DocumentBuilder, exceptionOccurred);
+    PHP_METHOD(DocumentBuilder, exceptionClear);
+    PHP_METHOD(DocumentBuilder, getErrorMessage);
+    PHP_METHOD(DocumentBuilder, getErrorCode);
 
 
 

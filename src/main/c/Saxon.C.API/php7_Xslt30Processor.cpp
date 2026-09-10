@@ -175,7 +175,7 @@ PHP_METHOD(Xslt30Processor, transformFileToValue)
 
 
 PHP_METHOD(Xslt30Processor, setParameter){
-std::cerr<<"setPara called ======"<<std::endl;
+
    Xslt30Processor *xslt30Processor;
    char * name;
    zval* oth;
