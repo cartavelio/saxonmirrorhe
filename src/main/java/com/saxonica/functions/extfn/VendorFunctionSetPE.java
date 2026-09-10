@@ -167,6 +167,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("EQName", 1, EQName.class, BuiltInAtomicType.QNAME, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
 
+        register("escape-NCName", 1, EscapeNCName.class, BuiltInAtomicType.NCNAME, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY);
+
         register("eval", 10, Eval.class, AnyItemType.getInstance(), STAR, CITEM)
                 .arg(0, config.getJavaExternalObjectType(Evaluate.PreparedExpression.class), ONE, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
@@ -474,6 +477,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
 
         register("type-annotation", 1, TypeAnnotationFn.class, BuiltInAtomicType.QNAME, OPT, 0)
                 .arg(0, AnyItemType.getInstance(), OPT, null);
+
+        register("unescape-NCName", 1, UnescapeNCName.class, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, BuiltInAtomicType.NCNAME, ONE, EMPTY);
 
         register("unindexed", 1, Unindexed.class, AnyItemType.getInstance(), STAR, CTRL)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance());
