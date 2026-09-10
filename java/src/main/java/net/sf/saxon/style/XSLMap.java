@@ -124,7 +124,13 @@ public class XSLMap extends StyleElement implements AutoDocumentInhibitor {
         } else {
             GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(
                     getCompilation().getCompilerInfo().getXsltVersion());
-            optionsBuilder.put(new StringValue("duplicates"), MapItem.xslMapDuplicatesAction);
+            if (getCompilation().getCompilerInfo().getTargetEdition().startsWith("JS")) {
+                optionsBuilder.put(new StringValue("duplicates"), StringValue.bmp("reject"));
+                optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"),
+                        StringValue.bmp("XTDE3365"));
+            } else {
+                optionsBuilder.put(new StringValue("duplicates"), MapItem.xslMapDuplicatesAction);
+            }
             optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
             optionsExp = Literal.makeLiteral(optionsBuilder.getCompletedMap());
         }
