@@ -1,10 +1,10 @@
 package com.saxonica.ee.xtupdate;
 
 import com.saxonica.ee.update.InsertExpression;
+import com.saxonica.ee.update.InsertPosition;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
@@ -84,21 +84,21 @@ public class SaxonInsert extends ExtensionInstruction {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression content = compileSequenceConstructor(exec, decl, false);
-        InsertExpression.InsertPosition pos = interpretPosition(positionAtt);
+        InsertPosition pos = interpretPosition(positionAtt);
         return new InsertExpression(content, select, pos, Validation.PRESERVE, true, true);
     }
 
-    public static InsertExpression.InsertPosition interpretPosition(String p) {
+    public static InsertPosition interpretPosition(String p) throws XPathException {
         switch (p) {
-            case "first": return InsertExpression.InsertPosition.FIRST;
-            case "last": return InsertExpression.InsertPosition.LAST;
-            case "before": return InsertExpression.InsertPosition.BEFORE;
-            case "after": return InsertExpression.InsertPosition.AFTER;
-            default: return null;
+            case "first": return InsertPosition.FIRST;
+            case "last": return InsertPosition.LAST;
+            case "before": return InsertPosition.BEFORE;
+            case "after": return InsertPosition.AFTER;
+            default: throw new XPathException("Unknown insert position: " + p);
         }
     }
 
-    public static String encodePosition(InsertExpression.InsertPosition p) {
+    public static String encodePosition(InsertPosition p) {
         switch (p) {
             case FIRST:
                 return "first";

@@ -6,6 +6,7 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.GeneralComparison;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.OperatorInfo;
 import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.NumericComparer;
@@ -57,7 +58,7 @@ public class GeneralComparisonMinimaxFeed extends AtomicItemFeed {
         operator = gc.getSingletonOperator();
         // Adjust the expression so the streamed argument is effectively first
         if (pushedArg == 1) {
-            operator = OperatorSymbol.inverse(operator);
+            operator = OperatorInfo.inverse(operator);
         }
         pullOperand = pushedArg==0 ? gc.getRhsExpression() : gc.getLhsExpression();
         predicate = makeTest(operator);

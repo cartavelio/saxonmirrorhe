@@ -1,6 +1,7 @@
 package com.saxonica.ee.update;
 
 import com.saxonica.expr.DeepUpdate2;
+import com.saxonica.expr.UpdateTarget;
 import com.saxonica.expr.XQueryParserExtensionPE;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.Tokenizer;
@@ -138,20 +139,25 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
             parser.grumble("update map/array syntax requires 4.0 to be enabled");
         }
 
+
+        UpdateTarget target;
+        parser.nextToken();
+        if (parser.isKeyword("map")) {
+            target = UpdateTarget.MAP;
+        } else if (parser.isKeyword("array")) {
+            target = UpdateTarget.ARRAY;
+        } else {
+            parser.grumble("Expected 'map' or 'array' after 'update'");
+            return null;
+        }
+
         parser.nextToken();
         Expression rootExpr = parser.parseExprSingle();
-        if (!parser.isKeyword("replace")) {
-            parser.grumble("expected keyword 'replace'");
-        }
-        parser.nextToken();
+        parser.readKeyword("replace");
         Expression selectExpr = parser.parseExprSingle();
-        if (!parser.isKeyword("with")) {
-            parser.grumble("expected keyword 'with");
-        }
-        parser.nextToken();
+        parser.readKeyword("with");
         Expression actionExpr = parser.parseExprSingle();
-
-        return new DeepUpdate2(DeepUpdate2.UpdateTarget.UNKNOWN, rootExpr, selectExpr, actionExpr);   // TODO: fixme
+        return new DeepUpdate2(target, rootExpr, selectExpr, actionExpr);
     }
 
 

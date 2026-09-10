@@ -41,7 +41,6 @@ public class DeepUpdate2 extends Instruction {
     private final Operand selectOp;
     private final Operand actionOp;
 
-    public static enum UpdateTarget { MAP, ARRAY, UNKNOWN };
 
 
     public DeepUpdate2(UpdateTarget operation, Expression root, Expression select, Expression action) {

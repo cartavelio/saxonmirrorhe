@@ -36,7 +36,7 @@ public class InsertExpression extends BasicUpdatingExpression {
     private final Operand sourceOp;
     private final Operand targetOp;
 
-    public static enum InsertPosition {BEFORE, AFTER, FIRST, LAST, INTO};
+    ;
     /**
      * Create an InsertExpression
      *

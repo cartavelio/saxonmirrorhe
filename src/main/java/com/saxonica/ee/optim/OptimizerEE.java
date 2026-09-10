@@ -229,7 +229,7 @@ public class OptimizerEE extends Optimizer {
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 isCodepointCollation &&
                 BuiltInAtomicType.isStringLike(rhs.getItemType())) {
-            return new CompareToStringConstant(rhs, OperatorSymbol.inverse(vc.getOperator()), ((StringValue) value0).getUnicodeStringValue());
+            return new CompareToStringConstant(rhs, OperatorInfo.inverse(vc.getOperator()), ((StringValue) value0).getUnicodeStringValue());
         }
 
         // optimize comparison against an integer literal
@@ -243,7 +243,7 @@ public class OptimizerEE extends Optimizer {
         if (value0 instanceof Int64Value &&
                 rhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 NumericType.isNumericType(rhs.getItemType())) {
-            return new CompareToIntegerConstant(rhs, OperatorSymbol.inverse(vc.getOperator()), ((Int64Value) value0).longValue());
+            return new CompareToIntegerConstant(rhs, OperatorInfo.inverse(vc.getOperator()), ((Int64Value) value0).longValue());
         }
 
         // optimize (boolean expression) == (boolean literal)
@@ -323,7 +323,7 @@ public class OptimizerEE extends Optimizer {
         sequence = sequence.unordered(true, false);
 
         AtomicValue literalOperand = (AtomicValue) ((Literal) (inverted ? vc.getLhsExpression() : vc.getRhsExpression())).getGroundedValue();
-        OperatorSymbol op = inverted ? OperatorSymbol.inverse(vc.getOperator()) : vc.getOperator();
+        OperatorSymbol op = inverted ? OperatorInfo.inverse(vc.getOperator()) : vc.getOperator();
 
         if (isZero(literalOperand)) {
             if (op == OperatorSymbol.FEQ || op == OperatorSymbol.FLE) {

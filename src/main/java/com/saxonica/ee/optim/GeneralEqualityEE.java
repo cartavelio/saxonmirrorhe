@@ -118,7 +118,7 @@ public class GeneralEqualityEE extends GeneralComparison {
 
     @Override
     protected GeneralComparison getInverseComparison() {
-        GeneralEqualityEE gc = new GeneralEqualityEE(getRhsExpression(), OperatorSymbol.inverse(operator), getLhsExpression());
+        GeneralEqualityEE gc = new GeneralEqualityEE(getRhsExpression(), OperatorInfo.inverse(operator), getLhsExpression());
         gc.setRetainedStaticContext(getRetainedStaticContext());
         return gc;
     }

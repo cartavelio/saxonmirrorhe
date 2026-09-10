@@ -82,20 +82,13 @@ public class QuickXPathParser implements XPathParser.Accelerator {
             List<Token> tokenTypes = new ArrayList<>();
             List<String> tokenValues = new ArrayList<>();
 
-            while (t.currentToken != Token.EOF && t.currentToken != finished) {
+            while (t.currentToken != Token.EOF) {
                 if (tokenTypes.size() > 6) {
                     return null;
                 }
                 tokenTypes.add(t.currentToken);
                 tokenValues.add(t.currentTokenValue);
                 t.next();
-                if (t.currentToken == Token.RCURLY) {
-                    t.lookAhead();
-                }
-            }
-
-            if (t.currentToken != finished) {
-                return null; // no closing brace after embedded expression in AVT
             }
 
             String keyValue = key(tokenTypes);
@@ -115,7 +108,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
     }
 
     /**
-     * Get a key that uniquely identifies a sequence of  tokens.
+     * Get a key that uniquely identifies a sequence of tokens.
      *
      * @param tokens the list of token numbers. Up to 8 integers in the range 0.255.
      * @return a key identifying the sequence of tokens.

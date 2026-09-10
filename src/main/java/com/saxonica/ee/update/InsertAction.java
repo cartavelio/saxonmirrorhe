@@ -16,7 +16,7 @@ public class InsertAction extends PendingUpdateAction {
 
     private final NodeInfo[] content;
     private final MutableNodeInfo targetNode;
-    private final InsertExpression.InsertPosition position;
+    private final InsertPosition position;
     private final boolean inheritNamespaces;
 
     /**
@@ -31,7 +31,7 @@ public class InsertAction extends PendingUpdateAction {
      *                   or last child of the target node.
      */
 
-    public InsertAction(NodeInfo[] content, MutableNodeInfo targetNode, InsertExpression.InsertPosition position, boolean inherit) {
+    public InsertAction(NodeInfo[] content, MutableNodeInfo targetNode, InsertPosition position, boolean inherit) {
         this.content = content;
         this.targetNode = targetNode;
         this.position = position;
@@ -111,7 +111,7 @@ public class InsertAction extends PendingUpdateAction {
 
     @Override
     public int getApplyPhase() {
-        return (position == InsertExpression.InsertPosition.INTO ? 1 : 2);
+        return (position == InsertPosition.INTO ? 1 : 2);
     }
 }
 

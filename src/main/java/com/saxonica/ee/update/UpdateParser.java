@@ -158,18 +158,18 @@ public class UpdateParser {
         p.nextToken(); // We already know this is "node" or "nodes"
         Expression source = p.parseExprSingle();
 
-        InsertExpression.InsertPosition position = InsertExpression.InsertPosition.INTO;
+        InsertPosition position = InsertPosition.INTO;
         if (p.tryKeyword("after")) {
-            position = InsertExpression.InsertPosition.AFTER;
+            position = InsertPosition.AFTER;
         } else if (p.tryKeyword("before")) {
-            position = InsertExpression.InsertPosition.BEFORE;
+            position = InsertPosition.BEFORE;
         } else if (p.tryKeyword("into")) {
-            position = InsertExpression.InsertPosition.INTO;
+            position = InsertPosition.INTO;
         } else if (p.tryKeyword("as")) {
             if (p.tryKeyword("first")) {
-                position = InsertExpression.InsertPosition.FIRST;
+                position = InsertPosition.FIRST;
             } else if (p.tryKeyword("last")) {
-                position = InsertExpression.InsertPosition.LAST;
+                position = InsertPosition.LAST;
             } else {
                 p.grumble("insert position must be one of: before | after | as first into | as last into | into");
             }

@@ -1,6 +1,7 @@
 package com.saxonica.xsltextn.style;
 
 import com.saxonica.expr.DeepUpdate2;
+import com.saxonica.expr.UpdateTarget;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.Expression;
@@ -80,7 +81,7 @@ public class SaxonDeepUpdate extends ExtensionInstruction {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return new ForEach(root,
-                           new DeepUpdate2(DeepUpdate2.UpdateTarget.UNKNOWN, new ContextItemExpression(), select, action));
+                           new DeepUpdate2(UpdateTarget.UNKNOWN, new ContextItemExpression(), select, action));
     }
 
 
