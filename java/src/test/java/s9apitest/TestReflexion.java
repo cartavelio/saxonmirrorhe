@@ -1,10 +1,16 @@
 package s9apitest;
 
+import com.saxonica.ee.extfn.VendorFunctionSetEE;
+import com.saxonica.functions.extfn.ReadBinaryResource;
 import jaxptest.ConfigTest;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -928,6 +934,42 @@ public class TestReflexion {
             fail();
         }
     }
+
+    @Test
+    public void testOverrideSaxonMethod() {
+        try {
+            VendorFunctionSetEE.getInstance().importFunctionSet(new OverridingFunctionSet());
+            Processor proc = new Processor(true);
+            XPathCompiler compiler = proc.newXPathCompiler();
+            XPathExecutable exp = compiler.compile(
+                    "Q{http://saxon.sf.net/}read-binary-resource('file:///users/mike/Desktop/temp/test.xml')");
+            XdmValue result = exp.load().evaluateSingle();
+            fail("call should not have succeeeded");
+        } catch (SaxonApiException e) {
+            assertTrue(e.getMessage().contains("Access to function not allowed"));
+        }
+    }
+
+    private static class OverridingFunctionSet extends BuiltInFunctionSet {
+
+        public OverridingFunctionSet() {
+            register("read-binary-resource", 1, e -> e.populate(LocalReadBinaryResource::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
+                    .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        }
+
+        public NamespaceUri getNamespace() {
+            return NamespaceUri.SAXON;
+        }
+    }
+
+    private static class LocalReadBinaryResource extends ReadBinaryResource {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            throw new XPathException("Access to function not allowed");
+        }
+    }
+
+
 
 }
 
