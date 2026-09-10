@@ -14,6 +14,7 @@ import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.type.Schema;
 import org.w3c.dom.Document;
@@ -777,6 +778,7 @@ public abstract class TestDriver {
     protected void copySchemaNamespaces(Environment env, XPathCompiler testXpc) {
         Schema schema = env.xqueryCompiler.getUnderlyingStaticContext().getPreLoadedSchema();
         if (schema != null) {
+            ((IndependentContext)testXpc.getUnderlyingStaticContext()).setImportedSchema(schema);
             testXpc.getUnderlyingStaticContext().getPackageData().setImportedSchema("", schema);
         }
     }
