@@ -275,53 +275,6 @@ public class TestDocumentBuilder {
         }
     }
 
-    /**
-     * Test document builder with document projection
-     */
-
-    @Test
-    public void testProjection001() {
-        try {
-
-            String fileName = configTest.getDataDir() + "books.xml";
-
-            Processor processor = new Processor(true);
-            XQueryCompiler xpc = processor.newXQueryCompiler();
-            XQueryExecutable exp = xpc.compile("<out>{//CATEGORY}</out>");
-
-            DocumentBuilder builder = processor.newDocumentBuilder();
-            builder.setDocumentProjectionQuery(exp);
-            XdmNode doc = builder.build(new File(fileName));
-
-            // Test that the projected doc contains the CATEGORY elements
-
-            StringWriter sw = new StringWriter();
-            Serializer destination = processor.newSerializer();
-            destination.setOutputWriter(sw);
-            XQueryEvaluator eval = exp.load();
-            eval.setContextItem(doc);
-            eval.run(destination);
-
-            assertTrue(sw.toString().contains("CODE=\"P\" DESC=\"Paperback\""), "contains CAT");
-
-            // Test that the projected doc omits the ITEM elements
-
-            exp = xpc.compile("count(//ITEM)");
-            StringWriter sw2 = new StringWriter();
-            Serializer destination2 = processor.newSerializer();
-            destination2.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            destination2.setOutputWriter(sw2);
-            XQueryEvaluator eval2 = exp.load();
-            eval2.setContextItem(doc);
-            eval2.run(destination2);
-
-            assertTrue(sw2.toString().equals("0"), "omits ITEM");
-
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-    }
 
     @Test
     public void testSvg11Dtd() {

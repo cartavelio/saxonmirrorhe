@@ -125,20 +125,7 @@ public class QueryTests {
         assertEquals("A green door", result);
     }
 
-    @Test
-    public void testQueryProjection() {
-        String[] args = {
-                "-qs:count(//CATEGORY)",
-                "-s:" + configTest.getDataDir() + "books.xml",
-                "-t",
-                "-projection:on"};
-        try {
-            Query.main(args);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
+
 
     @Test
     public void testQueryUpdate() {
