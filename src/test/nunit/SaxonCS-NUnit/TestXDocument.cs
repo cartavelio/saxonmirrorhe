@@ -15,7 +15,7 @@ using Saxon.Hej.tree.wrapper;
 namespace SaxonCS_NUnit {
     public class TestXDocument {
 
-        private void CopyDomNodeToDestination(Processor proc, XDocument node, IDestination destination) {
+        private void CopyLinqNodeToDestination(Processor proc, XDocument node, IDestination destination) {
             XQueryEvaluator copy = proc.NewXQueryCompiler().Compile(".").Load();
             copy.ContextItem = proc.NewDocumentBuilder().Wrap(node);
             copy.Run(destination);
@@ -47,7 +47,7 @@ namespace SaxonCS_NUnit {
 
                 // Output a DOM to an XML file
                 StringWriter sw = new();
-                CopyDomNodeToDestination(proc, doc, proc.NewSerializer(sw));
+                CopyLinqNodeToDestination(proc, doc, proc.NewSerializer(sw));
                 //System.err.println(sw.ToString());
                 Assert.That(sw.ToString().Contains("http://lost.namespace.com/"), "Namespace is present in output");
                 Assert.That(sw.ToString().Contains("xmlns:xsi="), "Namespace is present in output");
@@ -227,7 +227,7 @@ namespace SaxonCS_NUnit {
                 string xml = "<?xml version='1.0'?> \n" +
                              "<XmlDocument> <e> <f/><f/> </e> </XmlDocument>";
 
-                // Read an XML file to a DOM
+                // Read an XML file to a Linq document
                 Processor proc = new();
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 XDocument doc = XDocument.Load(new StringReader(xml));
@@ -237,7 +237,7 @@ namespace SaxonCS_NUnit {
                 proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "showDomNodes"), showDomType, args => {
                     System.Collections.Generic.List<XdmAtomicValue> result = new();
                     foreach (XdmItem item in args[0]) {
-                        XElement domElement = (XElement) ((XdmNode) item).getUnderlyingNode();
+                        XElement domElement = (XElement) ((XdmNode) item).GetUnderlyingXNode();
                         result.Add(new XdmAtomicValue("[" + domElement.Name + "]"));
                     }
 
@@ -392,6 +392,8 @@ namespace SaxonCS_NUnit {
                 Processor proc = new();
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 XDocument doc = new();
+                XElement outer = new XElement("outer");
+                doc.Add(outer);
                 XdmNode wrappedDoc = builder.Wrap(doc);
                 XdmItemType makeElementListType =
                     proc.ParseItemType("function(xs:string, xs:string, xs:integer) as node()*");
@@ -400,8 +402,9 @@ namespace SaxonCS_NUnit {
                         long repeat = ((XdmAtomicValue) args[2]).AsLong();
                         XdmValue result = XdmEmptySequence.Instance;
                         for (int i = 0; i < repeat; i++) {
-                            // XElement e = new XElement(((XdmAtomicValue) args[0]).StringValue);
-                            // result = result.Append(builder.Wrap(wrappedDoc, e));
+                            XElement e = new XElement(((XdmAtomicValue) args[0]).StringValue);
+                            outer.Add(e);
+                            result = result.Append(builder.Wrap(wrappedDoc, e));
                         }
 
                         return result;
@@ -480,7 +483,7 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer transformer = templates.Load30();
                 StringReader source = new StringReader("<doc/>");
                 XDocument document = new();
-                //transformer.ApplyTemplates(source, new DomDestination(document));
+                transformer.ApplyTemplates(source, new LinqDestination(document));
                 Assert.AreEqual("a", document.Root.Name.LocalName, "result");
             }
             catch (TransformerException e) {
@@ -507,11 +510,11 @@ namespace SaxonCS_NUnit {
                 XsltExecutable templates = proc.NewXsltCompiler().Compile(new StringReader(stylesheet));
                 Xslt30Transformer transformer = templates.Load30();
                 XDocument document = new();
-                //transformer.ApplyTemplates(new StringReader("<doc/>"), new DomDestination(document));
+                transformer.ApplyTemplates(new StringReader("<doc/>"), new LinqDestination(document));
                 Assert.Fail("error not detected");
             }
             catch (SaxonApiException e) {
-                Assert.That(e.Message.Contains("the specified node is the wrong type"));
+                Assert.That(e.Message.Contains("Non-whitespace characters cannot be added to content"));
             }
             catch (Exception e) {
                 Console.Error.WriteLine(e.StackTrace);
@@ -731,25 +734,21 @@ namespace SaxonCS_NUnit {
 
 
                 // Process XML source
-                XmlDocument doc = new XmlDocument();
-                doc.Load(new StringReader(withPrefix ? prefixXml : noPrefixXml));
+                XDocument doc = XDocument.Load(new StringReader(withPrefix ? prefixXml : noPrefixXml));
 
-                XmlNode node = doc.DocumentElement.GetElementsByTagName("foo")[0];
-                if (namespaceAware) {
-                    Assert.AreEqual("http://foo", node.NamespaceURI);
-                }
-                else {
-                    Assert.Null(node.NamespaceURI);
-                }
+                XNamespace foo = XNamespace.Get("http://foo");
+                XElement node = doc.Descendants(foo+"foo").First();
+                Assert.AreEqual("http://foo", node.Name.Namespace.NamespaceName);
 
                 Xslt30Transformer t = IdentityTransformer(proc);
-                DomDestination result = new DomDestination();
+                LinqDestination result = new LinqDestination();
                 DocumentBuilder builder = proc.NewDocumentBuilder();
-                XdmNode source = builder.Wrap(builder.Wrap(doc), node);
+                XdmNode wrappedDoc = builder.Wrap(node.Document);
+                XdmNode source = builder.Wrap(wrappedDoc, node);
                 t.ApplyTemplates(source, result);
 
-                XdmNode wrappedResultDoc = builder.Wrap(result.XmlDocument);
-                XdmNode wrappedDocumentElement = builder.Wrap(wrappedResultDoc, result.XmlDocument.DocumentElement);
+                XdmNode wrappedResultDoc = builder.Wrap(result.XDocument);
+                XdmNode wrappedDocumentElement = wrappedResultDoc.Select(Steps.Child("*")).First();
 
                 XdmFunctionItem deepEqual = proc.GetSystemFunction(
                     new QName("http://www.w3.org/2005/xpath-functions", "deep-equal"), 2);
@@ -764,97 +763,7 @@ namespace SaxonCS_NUnit {
         }
 
 
-        // [Test]
-        // public void testTypedDom() {
-        //     try {
-        //         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        //         factory.setNamespaceAware(true);
-        //         DocumentBuilder domBuilder = factory.newDocumentBuilder();
-        //
-        //         // Process XML source that uses namespace prefixes
-        //         XmlDocument doc = domBuilder.parse(new InputSource(new FileInputStream(ConfigTest.DATA_DIR + "books.xml")));
-        //
-        //         SchemaFactory sf = null; //SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        //         sf = new SchemaFactoryImpl();
-        //         Schema s = sf.newSchema(new File(ConfigTest.DATA_DIR + "books.xsd"));
-        //         Validator v = s.newValidator();
-        //         DomDestination r = new DomDestination();
-        //         v.validate(proc.NewDocumentBuilder().Wrap(doc), r);
-        //         XmlDocument d2 = (XmlDocument) r.getNode();
-        //         XmlElement e = d2.DocumentElement;
-        //         TypeInfo ti = e.getSchemaTypeInfo();
-        //         Assert.Null(ti.getTypeName(), "TypeInfo null");
-        //         //Console.WriteLine(ti.getTypeName());
-        //         // This doesn't actually work. Saxon has no way of setting the type info in the dom, because there
-        //         // is no setTypeInfo() method.
-        //
-        //     } catch (ParserConfigurationException | IOException | SAXException e1) {
-        //         Assert.Faile1.getMessage());
-        //         e1.printStackTrace();
-        //     }
-        // }
-
-        // [Test]
-        // public void testTypedDom11() {
-        //     try {
-        //         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        //         factory.setNamespaceAware(true);
-        //         DocumentBuilder domBuilder = factory.newDocumentBuilder();
-        //
-        //         // Process XML source that uses namespace prefixes
-        //         XmlDocument doc = new XmlDocument();
-        //         doc.Load(new WebClient().OpenRead(new Uri(ConfigTest.DataDirUri, "books.xml")));
-        //         domBuilder.parse(new InputSource(new FileInputStream(ConfigTest.DATA_DIR + "books.xml")));
-        //
-        //         SchemaFactory sf = null; //SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        //         sf = new SchemaFactoryImpl();
-        //         sf.setProperty(FeatureKeys.XSD_VERSION, "1.1");
-        //         Schema s = sf.newSchema(new File(ConfigTest.DATA_DIR + "books11.xsd"));
-        //         Validator v = s.newValidator();
-        //         DomDestination r = new DomDestination();
-        //         v.validate(proc.NewDocumentBuilder().Wrap(doc), r);
-        //         XmlDocument d2 = (XmlDocument) r.getNode();
-        //         XmlElement e = d2.DocumentElement;
-        //         TypeInfo ti = e.getSchemaTypeInfo();
-        //         Assert.Null(ti.getTypeName(), "TypeInfo null");
-        //         // This doesn't actually work. Saxon has no way of setting the type info in the dom, because there
-        //         // is no setTypeInfo() method.
-        //
-        //     } catch (ParserConfigurationException | IOException | SAXException e1) {
-        //         Assert.Faile1.getMessage());
-        //         e1.printStackTrace();
-        //     }
-        // }
-
-        // [Test]
-        // public void testReusableValidator() {
-        //     try {
-        //         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        //         factory.setNamespaceAware(true);
-        //         DocumentBuilder domBuilder = factory.newDocumentBuilder();
-        //
-        //
-        //         XmlDocument doc = domBuilder.parse(new InputSource(new FileInputStream(ConfigTest.DATA_DIR + "books.xml")));
-        //
-        //         SchemaFactory sf = null; //SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        //         sf = new SchemaFactoryImpl();
-        //         Schema s = sf.newSchema(new File(ConfigTest.DATA_DIR + "books.xsd"));
-        //         Validator v = s.newValidator();
-        //         DomDestination r = new DomDestination();
-        //         v.validate(proc.NewDocumentBuilder().Wrap(doc), r);
-        //         XmlDocument d2 = (XmlDocument) r.getNode();
-        //         XmlElement e = d2.DocumentElement;
-        //
-        //         DomDestination r2 = new DomDestination();
-        //         v.validate(proc.NewDocumentBuilder().Wrap(e), r2);
-        //
-        //     } catch (ParserConfigurationException | IOException | SAXException e1) {
-        //         Assert.Faile1.getMessage());
-        //         e1.printStackTrace();
-        //     }
-        // }
-
-
+ 
         [Test]
         public void testNullNamespace() {
             try {
@@ -946,34 +855,13 @@ namespace SaxonCS_NUnit {
         }
 
 
-        // [Test]
-        // public void testBug1781() {
-        //     try {
-        //         Processor proc = new Processor(); 
-        //         DomDestination domWriter = new DomDestination();
-        //         domWriter.setPipelineConfiguration(proc.makePipelineConfiguration());
-        //         domWriter.open();
-        //         domWriter.startDocument(ReceiverOption.NONE);
-        //         AttributeMap atts = EmptyAttributeMap.getInstance();
-        //         atts = atts.put(new AttributeInfo(new NoNamespaceName("id"), BuiltInAtomicType.UNTYPED_ATOMIC, "iii", Loc.NONE, ReceiverOption.IS_ID));
-        //         domWriter.startElement(new NoNamespaceName("root"), Untyped.getInstance(),
-        //                                atts, NamespaceMap.emptyMap(),
-        //                                Loc.NONE, ReceiverOption.NONE);
-        //         domWriter.endElement();
-        //         domWriter.endDocument();
-        //         domWriter.close();
-        //         Assert.AreEqual("", domWriter.getCurrentRoot().getStringValue());
-        //     } catch (Exception err) {
-        //         err.printStackTrace();
-        //         Assert.Fail(();
-        //     }
-        // }
+
 
         [Test]
-        public void testEmptyDom() {
+        public void testEmptyDoc() {
             // Bug 2102
             try {
-                XmlDocument sourceDoc = new();
+                XDocument sourceDoc = new();
                 StringWriter sw = new StringWriter();
                 Processor proc = new();
                 string ss =
@@ -989,16 +877,16 @@ namespace SaxonCS_NUnit {
         }
 
         [Test]
-        public void testEmptyDomResult() {
+        public void testEmptyDocResult() {
             // Bug 2164
             try {
                 Processor proc = new();
                 string ss =
                     "<z xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xsl:version='2.0' count='{count(//*)}'/>";
                 Xslt30Transformer transformer = proc.NewXsltCompiler().Compile(new StringReader(ss)).Load30();
-                DomDestination result = new DomDestination();
+                LinqDestination result = new ();
                 transformer.ApplyTemplates(new StringReader(ss), result);
-                Assert.AreEqual("1", (result.XmlDocument).DocumentElement.GetAttribute("count"));
+                Assert.AreEqual("1", (result.XDocument).Root.Attribute("count").Value);
             }
             catch (TransformerException e1) {
                 Assert.Fail(e1.Message);
@@ -1007,7 +895,7 @@ namespace SaxonCS_NUnit {
         }
 
         [Test]
-        public void testSpaceStrippedDomWithExtensionFunction() {
+        public void testSpaceStrippedDocWithExtensionFunction() {
             // Bug 3142
             try {
                 string xml =
@@ -1035,9 +923,9 @@ namespace SaxonCS_NUnit {
                             + "<xsl:template match='/'><z count='{ext:count(//*)}' xmlns:ext='java:jaxptest.DOMTest'/></xsl:template>"
                             + "</xsl:transform>";
                 Xslt30Transformer transformer = proc.NewXsltCompiler().Compile(new StringReader(ss)).Load30();
-                DomDestination result = new DomDestination();
+                LinqDestination result = new LinqDestination();
                 transformer.ApplyTemplates(xdmNode, result);
-                Assert.AreEqual("4", result.XmlDocument.DocumentElement.GetAttribute("count"));
+                Assert.AreEqual("4", result.XDocument.Root.Attribute("count").Value);
             }
             catch (Exception e1) {
                 Assert.Fail(e1.Message);
@@ -1112,8 +1000,8 @@ namespace SaxonCS_NUnit {
 
                 string input = "<input/>";
                 DocumentBuilder builder = proc.NewDocumentBuilder();
-                XmlDocument document = new();
-                transformer.ApplyTemplates(new StringReader(input), new DomDestination(document));
+                XDocument document = new();
+                transformer.ApplyTemplates(new StringReader(input), new LinqDestination(document));
 
                 identityTransformer.ApplyTemplates(builder.Wrap(document), serializer);
                 string output = new UTF8Encoding().GetString(baos.GetBuffer(), 0, (int)baos.Length);
