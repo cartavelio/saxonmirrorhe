@@ -21,6 +21,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.Arrays;
 
@@ -28,6 +29,20 @@ import java.util.Arrays;
  * Abstract superclass (and factory class) for implementations of Function
  */
 public abstract class AbstractFunction implements FunctionItem {
+
+    private String uuid = null;
+
+    public synchronized String getUniqueIdentifier() {
+        if (uuid == null) {
+            uuid = randomUUID();
+        }
+        return uuid.toString();
+    }
+
+    @CSharpReplaceBody(code = "return System.Guid.NewGuid().ToString();")
+    private static String randomUUID() {
+        return java.util.UUID.randomUUID().toString();
+    }
 
     /**
      * Get the roles of the arguments, for the purposes of streaming

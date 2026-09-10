@@ -568,6 +568,11 @@ public class UserFunctionReference extends Expression
         public int hashCode() {
             return getTargetFunction().hashCode() ^ (getArity() << 13);
         }
+
+        @Override
+        public synchronized String getUniqueIdentifier() {
+            return function.getDescription();
+        }
     }
 
 }

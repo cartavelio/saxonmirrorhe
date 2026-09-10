@@ -619,6 +619,13 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
                 (details.properties & (BuiltInFunctionSet.FOCUS | BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)) == 0);
     }
 
-
+    @Override
+    public synchronized String getUniqueIdentifier() {
+        if ((details.properties & (BuiltInFunctionSet.FOCUS | BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)) == 0) {
+            return getDescription();
+        } else {
+            return super.getUniqueIdentifier();
+        }
+    }
 }
 
