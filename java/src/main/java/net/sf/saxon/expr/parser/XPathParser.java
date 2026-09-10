@@ -5961,7 +5961,7 @@ public class XPathParser {
     /**
      * If tracing, wrap an expression in a trace instruction
      *
-     * <p>NB, this no longer happens. Instead of creating trace expressions in the course of parsing and buildint
+     * <p>NB, this no longer happens. Instead of creating trace expressions in the course of parsing and building
      * the expression tree, trace code is now injected into the tree after the event, when parsing is complete.
      * See {@link ExpressionTool#injectCode(Expression, CodeInjector)}.</p>
      *
@@ -5975,12 +5975,11 @@ public class XPathParser {
 
     public Expression makeTracer(Expression exp,  /*@Nullable*/ StructuredQName qName) {
         exp.setRetainedStaticContextLocally(env.makeRetainedStaticContext());
+        CodeInjector injector = getCodeInjector();
+        if (injector != null) {
+            exp = injector.injectDuringParsing(exp);
+        }
         return exp;
-//        if (codeInjector != null) {
-//            return codeInjector.inject(exp);
-//        } else {
-//            return exp;
-//        }
     }
 
     /**

@@ -34,6 +34,22 @@ public interface CodeInjector {
     }
 
     /**
+     * Process an expression as soon as it has been parsed. Whereas the {@code #inject method is executed
+     * in a post-processing pass of the expression tree, this method is called immediately during
+     * parsing, and thus has a chance to change the expression before type-checking and optimization
+     * kick in. Used by the test driver to implement the -unfolded option.}
+     *
+     * @param exp the expression to be processed
+     * @return a new expression. Possibly the original expression unchanged; possibly a wrapper
+     * expression (such as a {@link TraceExpression}; possibly a replacement for the original expression.
+     * The default implementation returns the supplied expression unchanged.
+     */
+
+    default Expression injectDuringParsing(Expression exp) {
+        return exp;
+    }
+
+    /**
      * Process a component such as a function, template, or global variable. The default implementation
      * does nothing.
      * @param component the component to be processed
