@@ -183,6 +183,22 @@ public class SaxonCAPI {
       return a;
     }
 
+    interface AllocatorCCharFn extends CFunctionPointer {
+      @InvokeCFunctionPointer
+      CCharPointer call(long size);
+    }
+
+
+    static CCharPointer stringToNative(AllocatorCCharFn alloc, String string) {
+      byte[] b = string.getBytes(StandardCharsets.UTF_8);
+      CCharPointer a =  alloc.call(b.length + 1);
+      for (int i = 0; i < b.length; i++) {
+        a.write(i, b[i]);
+      }
+      a.write(b.length, (byte) 0);
+      return a;
+    }
+
     /**
      * static method to create String object 
      * @return
