@@ -69,7 +69,7 @@ public abstract class Sender {
             source = ((AugmentedSource) source).getContainedSource();
         }
         Configuration config = pipe.getConfiguration();
-        options.applyDefaults(config);
+        options = options.applyDefaults(config);
 
         receiver.setSystemId(systemId);
         Receiver next = receiver;

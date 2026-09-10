@@ -48,6 +48,8 @@ public class LicenseTests {
     private void requireProfessionalLicenseXslt(String xsl) {
         ProfessionalConfiguration config = new ProfessionalConfiguration();
         config.disableLicensing();
+
+        // First run directly
         Processor proc = new Processor(config);
         XsltCompiler compiler = proc.newXsltCompiler();
         try {
@@ -60,15 +62,17 @@ public class LicenseTests {
             System.err.println("LicenseException as expected: " + le.getMessage());
         }
 
+        // Now run with export and reload
         proc = new Processor(true);
         compiler = proc.newXsltCompiler();
+        compiler.setJustInTimeCompilation(false);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             XsltExecutable exec = compiler.compile(new StreamSource(new StringReader(xsl)));
             exec.export(baos);
         } catch (SaxonApiException err) {
-            fail();
             err.printStackTrace();
+            fail();
         }
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         config = new ProfessionalConfiguration();
@@ -113,14 +117,15 @@ public class LicenseTests {
             fail(e.getMessage());
         }
         compiler = proc.newXsltCompiler();
+        compiler.setJustInTimeCompilation(false);
         compiler.setSchemaAware(true);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             XsltExecutable exec = compiler.compile(new StreamSource(new StringReader(xsl)));
             exec.export(baos);
         } catch (SaxonApiException err) {
-            fail();
             err.printStackTrace();
+            fail();
         }
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         config = new EnterpriseConfiguration();

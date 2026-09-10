@@ -2171,6 +2171,7 @@ public class TestXslt30Transformer {
         try {
             Processor p = new Processor(true);
             XsltCompiler c = p.newXsltCompiler();
+            c.setJustInTimeCompilation(false);
             XsltExecutable exec = c.compile(new StreamSource(new StringReader(xsl)));
             if (export) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();

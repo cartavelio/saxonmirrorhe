@@ -4133,7 +4133,7 @@ public class Configuration implements SourceResolver, NotationSet {
                 options = options.merge(((AugmentedSource) source).getParseOptions());
             }
 
-            options.applyDefaults(this);
+            options = options.applyDefaults(this);
             finallyClose = options.isPleaseCloseAfterUse();
 
             // Create an appropriate Builder
@@ -4255,11 +4255,11 @@ public class Configuration implements SourceResolver, NotationSet {
                 } catch (UnsupportedEncodingException e) {
                     throw new IllegalArgumentException(e);
                 }
-                defaultParseOptions = defaultParseOptions.withAdditionalParserFeature(uri, requireBoolean(name, value));
+                defaultParseOptions = defaultParseOptions.withParserFeature(uri, requireBoolean(name, value));
             } else if (name.startsWith(FeatureKeys.XML_PARSER_PROPERTY)) {
                 String uri = name.substring(FeatureKeys.XML_PARSER_PROPERTY.length());
                 uri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
-                defaultParseOptions = defaultParseOptions.withAdditionalParserProperties(uri, value);
+                defaultParseOptions = defaultParseOptions.withParserProperty(uri, value);
 
             } else {
                 throw new IllegalArgumentException("Unrecognized configuration feature: " + name);

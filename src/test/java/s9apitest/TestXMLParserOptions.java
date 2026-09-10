@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * test The features and properties of a XML Parser in s9api
  */
 public class TestXMLParserOptions {
-    private ConfigTest configTest = new ConfigTest();
+    private final ConfigTest configTest = new ConfigTest();
     
     @Test
     public void testEnableOnExternalEntityExpansion() {
@@ -30,7 +30,7 @@ public class TestXMLParserOptions {
             Processor processor = new Processor(false);
             ParseOptions parserOptions = processor.getUnderlyingConfiguration().getParseOptions();
 
-            parserOptions = parserOptions.withAdditionalParserFeature("http://xml.org/sax/features/external-general-entities", true);
+            parserOptions = parserOptions.withParserFeature("http://xml.org/sax/features/external-general-entities", true);
             StringReader sr = new StringReader("<?xml version=\"1.0\" standalone=\"no\" ?>\n" +
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
@@ -70,7 +70,7 @@ public class TestXMLParserOptions {
         try {
             Processor processor = new Processor(false);
             ParseOptions parserOptions = processor.getUnderlyingConfiguration().getParseOptions()
-                    .withAdditionalParserFeature("http://xml.org/sax/features/external-general-entities", false);
+                    .withParserFeature("http://xml.org/sax/features/external-general-entities", false);
             StringReader sr = new StringReader("<?xml version=\"1.0\" standalone=\"no\" ?>\n" +
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
@@ -86,7 +86,7 @@ public class TestXMLParserOptions {
             XQueryEvaluator eval = c.compile("empty(/saxonica/*)").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(true, ((XdmAtomicValue) val).getBooleanValue());
+            assertTrue(((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
@@ -97,7 +97,7 @@ public class TestXMLParserOptions {
     public void testDisableOnExternalEntityExpansion2() {
         try {
             Processor processor = new Processor(false);
-            processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://xml.org/sax/features/external-general-entities", false);
+            processor.setConfigurationProperty(Feature.XML_PARSER_FEATURE.name + "http://xml.org/sax/features/external-general-entities", false);
             StringReader sr = new StringReader("<?xml version=\"1.0\" standalone=\"no\" ?>\n" +
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
@@ -112,7 +112,7 @@ public class TestXMLParserOptions {
             XQueryEvaluator eval = c.compile("empty(/saxonica/*)").load();
             eval.setContextItem(doc);
             XdmValue val = eval.evaluate();
-            assertEquals(true, ((XdmAtomicValue) val).getBooleanValue());
+            assertTrue(((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }

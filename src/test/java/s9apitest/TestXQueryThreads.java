@@ -1,6 +1,7 @@
 package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import net.sf.saxon.lib.StandardErrorReporter;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
@@ -37,6 +38,9 @@ public class TestXQueryThreads {
                     return new StreamSource(strawberryFieldsForever());
                 }
             });
+            StandardErrorReporter reporter = new StandardErrorReporter();
+            reporter.suppressWarning("SXQP0001");
+            xqueryEvaluator.setErrorReporter(reporter);
             XdmSequenceIterator<?> xdmSequenceIterator = xqueryEvaluator.iterator();
             xdmSequenceIterator.next();
 
