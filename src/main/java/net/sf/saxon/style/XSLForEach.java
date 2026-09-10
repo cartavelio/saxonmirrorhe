@@ -79,21 +79,23 @@ public class XSLForEach extends StyleElement {
     @Override
     public void prepareAttributes() {
 
-        String selectAtt = null;
-
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             String f = attName.getDisplayName();
             String value = att.getValue();
             if (f.equals("select")) {
-                selectAtt = value;
-                select = makeExpression(selectAtt, att);
+                select = makeExpression(value, att);
+            } else if (f.equals("array")) {
+                requireXslt40("array");
+                select = arrayToSequence(makeExpression(value, att));
+            } else if (f.equals("map")) {
+                requireXslt40("map");
+                select = mapToSequence(makeExpression(value, att));
             } else if (f.equals("separator")) {
                 requireSyntaxExtensions("separator");
                 separator = makeAttributeValueTemplate(value, att);
             } else if (attName.getLocalPart().equals("threads") && attName.hasURI(NamespaceConstant.SAXON)) {
-                String threadsAtt = Whitespace.trim(value);
-                threads = makeAttributeValueTemplate(threadsAtt, att);
+                threads = makeAttributeValueTemplate(Whitespace.trim(value), att);
                 if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
                     compileWarning("saxon:threads - no multithreading takes place when compiling with trace enabled",
                             SaxonErrorCode.SXWN9012);
@@ -108,8 +110,12 @@ public class XSLForEach extends StyleElement {
             }
         }
 
-        if (selectAtt == null) {
-            reportAbsence("select");
+        if (select == null) {
+            if (getEffectiveVersion() >= 40) {
+                compileError("One of the attributes select|array|map must be present");
+            } else {
+                reportAbsence("select");
+            }
             select = Literal.makeEmptySequence();
         }
 

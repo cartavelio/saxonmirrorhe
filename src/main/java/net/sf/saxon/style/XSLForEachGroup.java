@@ -80,7 +80,6 @@ public final class XSLForEachGroup extends StyleElement {
     @Override
     public void prepareAttributes() {
 
-        String selectAtt = null;
         String groupByAtt = null;
         String groupAdjacentAtt = null;
         String startingAtt = null;
@@ -94,8 +93,15 @@ public final class XSLForEachGroup extends StyleElement {
             String value = att.getValue();
             switch (f) {
                 case "select":
-                    selectAtt = value;
-                    select = makeExpression(selectAtt, att);
+                    select = makeExpression(value, att);
+                    break;
+                case "array":
+                    requireXslt40("array");
+                    select = arrayToSequence(makeExpression(value, att));
+                    break;
+                case "map":
+                    requireXslt40("map");
+                    select = mapToSequence(makeExpression(value, att));
                     break;
                 case "group-by":
                     groupByAtt = value;
@@ -132,9 +138,13 @@ public final class XSLForEachGroup extends StyleElement {
             }
         }
 
-        if (selectAtt == null) {
-            reportAbsence("select");
-            select = Literal.makeEmptySequence(); // for error recovery
+        if (select == null) {
+            select = Literal.makeEmptySequence();
+            if (getEffectiveVersion() >= 40) {
+                compileError("One of the attributes select|array|map must be present");
+            } else {
+                reportAbsence("select");
+            }
         }
 
         int c = (groupByAtt == null ? 0 : 1) +
