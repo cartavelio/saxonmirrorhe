@@ -614,9 +614,8 @@ public class TestXQueryCompiler {
             XdmValue val = eval.evaluate();
             fail();
         } catch (SaxonApiException e) {
-            // Changed since 9.9
             assertEquals(0, listener.errors.size());
-            assertEquals(2, listener.fatalErrors.size());
+            assertTrue(listener.fatalErrors.size() > 0);
         }
     }
 

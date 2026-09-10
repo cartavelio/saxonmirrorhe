@@ -14,7 +14,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.NumericComparer;
 import net.sf.saxon.functions.DeepEqual;
-import net.sf.saxon.om.Chain;
+import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Int64Value;
@@ -36,12 +36,15 @@ public class ChainTest {
             initial.add(new IntegerRange(1, 1, 20));
             initial.add(new IntegerRange(21, 1, 40));
             initial.add(new IntegerRange(41, 1, 60));
-            Chain chain = new Chain(initial);
+            ZenoSequence chain = ZenoSequence.join(initial);
             for (int i=61; i<=100; i++) {
                 chain.append(new Int64Value(i));
             }
             assertEquals(100, chain.getLength());
+            assertEquals(1, ((IntegerValue) chain.itemAt(0)).longValue());
             assertEquals(51, ((IntegerValue)chain.itemAt(50)).longValue());
+            assertEquals(82, ((IntegerValue) chain.itemAt(81)).longValue());
+            assertEquals(100, ((IntegerValue) chain.itemAt(99)).longValue());
         } catch (XPathException e) {
             fail();
         }
@@ -54,7 +57,7 @@ public class ChainTest {
             initial.add(new IntegerRange(1, 1, 20));
             initial.add(new IntegerRange(21, 1, 40));
             initial.add(new IntegerRange(41, 1, 60));
-            Chain chain = new Chain(initial);
+            ZenoSequence chain = ZenoSequence.join(initial);
             for (int i=61; i<=100; i++) {
                 chain.append(new Int64Value(i));
             }
@@ -75,17 +78,17 @@ public class ChainTest {
             initial.add(new IntegerRange(1, 1, 20));
             initial.add(new IntegerRange(21, 1, 40));
             initial.add(new IntegerRange(41, 1, 60));
-            Chain chain = new Chain(initial);
+            ZenoSequence chain = ZenoSequence.join(initial);
 
             List<GroundedValue> l2 = new ArrayList<>();
             for (int i=61; i<=100; i++) {
                 l2.add(new Int64Value(i));
             }
-            Chain chain2 = new Chain(l2);
+            ZenoSequence chain2 = ZenoSequence.join(l2);
             List<GroundedValue> l3 = new ArrayList<>();
             l3.add(chain);
             l3.add(chain2);
-            Chain chain3 = new Chain(l3);
+            ZenoSequence chain3 = ZenoSequence.join(l3);
             AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
@@ -103,17 +106,17 @@ public class ChainTest {
             initial.add(new IntegerRange(1, 1, 20));
             initial.add(new IntegerRange(21, 1, 40));
             initial.add(new IntegerRange(41, 1, 60));
-            Chain chain = new Chain(initial);
+            ZenoSequence chain = ZenoSequence.join(initial);
 
             List<GroundedValue> l2 = new ArrayList<>();
             for (int i=61; i<=100; i++) {
                 l2.add(new Int64Value(i));
             }
-            Chain chain2 = new Chain(l2);
+            ZenoSequence chain2 = ZenoSequence.join(l2);
             List<GroundedValue> l3 = new ArrayList<>();
             l3.add(chain);
             l3.add(chain2);
-            Chain chain3 = new Chain(l3);
+            ZenoSequence chain3 = ZenoSequence.join(l3);
 
             GroundedValue sub = chain3.subsequence(40, 20);
             AtomicComparer comparer = NumericComparer.getInstance();
