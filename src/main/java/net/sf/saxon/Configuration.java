@@ -552,8 +552,8 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public String getProductTitle() {
-        return "Saxon-" + getEditionCode() + " " + Version.getProductVersion() +
-                Version.platform.getPlatformSuffix() + " from Saxonica";
+        return "Saxon" + Version.platform.getPlatformSuffix() + "-" + getEditionCode() + " " +
+                Version.getProductVersion() + " from Saxonica";
     }
 
     /**

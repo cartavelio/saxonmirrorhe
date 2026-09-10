@@ -114,8 +114,10 @@ public class Query {
     void setPermittedOptions(CommandLineOptions options) {
         options.addRecognizedOption("backup", CommandLineOptions.TYPE_BOOLEAN,
                                     "Save updated documents before overwriting");
+        //#if CSHARP==false
         options.addRecognizedOption("catalog", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified catalog file to resolve URIs");
+        //#endif
         options.addRecognizedOption("config", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified configuration file");
         options.addRecognizedOption("cr", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,

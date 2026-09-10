@@ -72,7 +72,16 @@ namespace Saxon.Impl.Helpers {
         }
 
         public string getPlatformVersion() {
-            return ".NET " + Environment.Version + " on " + Environment.OSVersion;
+            string suffix = "";
+            if (OperatingSystem.IsWindows()) {
+                suffix = " on Windows " + Environment.OSVersion.Version;
+            } else if (OperatingSystem.IsMacOS()) {
+                suffix = " on MacOS";  // version info is not helpful
+            } else if (OperatingSystem.IsLinux()) {
+                suffix = " on Linux";
+            }
+
+            return ".NET " + Environment.Version + suffix;
         }
 
         public string getPlatformSuffix() {
