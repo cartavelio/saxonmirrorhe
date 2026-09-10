@@ -263,29 +263,21 @@ public class ParseOptions {
             result = result.withPleaseCloseAfterUse(true);
         }
 
-//        if (other.filters != null) {
-//            if (filters == null) {
-//                filters = new ArrayList<>();
-//            }
-//            filters.addAll(other.filters);
-//        }
-//        if (other.parserFeatures != null) {
-//            if (parserFeatures == null) {
-//                parserFeatures = new HashMap<>();
-//            }
-//            // Bug 5167
-//            for (Map.Entry<String, Boolean> feature : other.parserFeatures.entrySet()) {
-//                if (feature.getValue()) {
-//                    parserFeatures.put(feature.getKey(), true);
-//                }
-//            }
-//        }
-//        if (other.parserProperties != null) {
-//            if (parserProperties == null) {
-//                parserProperties = new HashMap<>();
-//            }
-//            parserProperties.putAll(other.parserProperties);
-//        }
+        if (other.getFilters() != null) {
+            for (FilterFactory ff : other.getFilters()) {
+                 result = result.withFilter(ff);
+            }
+        }
+        if (other.getParserFeatures() != null) {
+            for (Map.Entry<String, Boolean> entry : other.getParserFeatures().entrySet()) {
+                 result = result.withParserFeature(entry.getKey(), entry.getValue());
+            }
+        }
+        if (other.getParserProperties() != null) {
+            for (Map.Entry<String, Object> entry : other.getParserProperties().entrySet()) {
+                result = result.withParserProperty(entry.getKey(), entry.getValue());
+            }
+        }
 
         if (!other.isExpandAttributeDefaults()) {
             // expand defaults unless the other options says don't
@@ -357,13 +349,13 @@ public class ParseOptions {
      * applying any system-defined filters such as the whitespace stripper
      * and the schema validator.</p>
      * 
-     * <p>Example: {@code addFilter(receiver -> new MyFilter(receiver)}, where
+     * <p>Example: {@code withFilter(receiver -> new MyFilter(receiver)}, where
      * <code>MyFilter</code> extends {@link net.sf.saxon.event.ProxyReceiver}</p>
      *
      * @param filterFactory the filterFactory to be added
      */
 
-    public ParseOptions withAdditionalFilter(FilterFactory filterFactory) {
+    public ParseOptions withFilter(FilterFactory filterFactory) {
         List<FilterFactory> list = getFilters();
         if (list == null) {
             list = new ArrayList<>(2);

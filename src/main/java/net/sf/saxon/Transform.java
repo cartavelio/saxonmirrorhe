@@ -1413,7 +1413,7 @@ public class Transform {
                     }
                     StylesheetPackage top = pss.getTopLevelPackage();
                     if (top.isStripsTypeAnnotations()) {
-                        ParseOptions opt = ((AugmentedSource)source).getParseOptions().withAdditionalFilter(
+                        ParseOptions opt = ((AugmentedSource)source).getParseOptions().withFilter(
                                 receiver -> getConfiguration().getAnnotationStripper(receiver));
                         source = new AugmentedSource(source, opt);
                     }

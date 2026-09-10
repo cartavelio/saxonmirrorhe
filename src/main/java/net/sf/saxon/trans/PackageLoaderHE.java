@@ -175,7 +175,7 @@ public class PackageLoaderHE implements IPackageLoader {
         };
 
 
-        options = options.withAdditionalFilter(checksumFactory);
+        options = options.withFilter(checksumFactory);
 
         NodeInfo doc = config.buildDocumentTree(source, options).getRootNode();
 
