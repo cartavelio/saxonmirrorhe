@@ -82,7 +82,7 @@
       <reason>XQuery item types: forwards references not yet implemented</reason>
    </exception>
    
-   <exception test-set="prod-MapConstructor" test-case="MapConstructor-500
+   <!--<exception test-set="prod-MapConstructor" test-case="MapConstructor-500
                                                          MapConstructor-501
                                                          MapConstructor-502
                                                          MapConstructor-504" 
@@ -90,7 +90,7 @@
       <created by="Michael Kay" on="2026-04-07"/>
       <reason>PR2541 not yet implemented</reason>
    </exception>
-   
+   -->
 
  
    <exception test-set="misc-HtmlTestSuite" test-case="
@@ -111,13 +111,7 @@
  
    
    <exception test-set="app-spec-examples" 
-      test-case=" fo-test-fn-scan-left-001
-                  fo-test-fn-scan-left-002
-                  fo-test-fn-scan-left-003
-                  fo-test-fn-scan-left-004
-                  fo-test-fn-scan-right-001
-                  fo-test-fn-scan-right-002
-                  fo-test-fn-scan-right-003
+      test-case="
                   fo-test-fn-system-properties-001
                   fo-test-fn-system-properties-002
                   fo-test-fn-system-properties-003
@@ -143,22 +137,7 @@
       <reason>Test case incorrect: missing comma in expected result</reason>
    </exception>
    
-   <!--<exception test-set="app-spec-examples" 
-      test-case="
-      fo-test-fn-matching-segments-001
-      fo-test-fn-matching-segments-002
-      fo-test-fn-matching-segments-003
-      fo-test-fn-matching-segments-004
-      fo-test-fn-matching-segments-005
-      fo-test-fn-regex-001
-      fo-test-fn-regex-002
-      fo-test-fn-regex-003
-      fo-test-fn-regex-004
-      " 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2026-01-01"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
+
    
    <exception test-set="app-spec-examples" 
       test-case=" fo-test-fn-jvalue-003 " 
