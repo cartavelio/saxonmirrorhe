@@ -30,7 +30,6 @@ import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
 import org.xmlresolver.ResolverFeature;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -393,7 +392,9 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "traceListenerOutputFile", FeatureCode.TRACE_LISTENER_OUTPUT_FILE, "JN");
         applyProperty(props, "traceOptimizerDecisions", FeatureCode.TRACE_OPTIMIZER_DECISIONS, "JN");
         applyProperty(props, "treeModel", FeatureCode.TREE_MODEL_NAME, "JN");
+        // Two spellings accepted: see bug #6201. The correct one (according to the schema) is "unparsedTextURIResolver"
         applyProperty(props, "unparsedTextUriResolver", FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
+        applyProperty(props, "unparsedTextURIResolver", FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
         applyProperty(props, "uriResolver", FeatureCode.URI_RESOLVER_CLASS, "J");
         applyProperty(props, "usePiDisableOutputEscaping", FeatureCode.USE_PI_DISABLE_OUTPUT_ESCAPING, "JN");
         applyProperty(props, "useTypedValueCache", FeatureCode.USE_TYPED_VALUE_CACHE, "JN");
@@ -791,21 +792,19 @@ public class ConfigurationReader implements Receiver {
                     }
                     //#endif
                 } else if ("schemaDocument".equals(localName)) {
-                    throw new NotImplementedException();
-//                    try {
-//                        Source source = getInputSource(content);
-//                        targetConfig.addSchemaSource(source);
-//                    } catch (XPathException e) {
-//                        errors.add(new XmlProcessingException(e));
-//                    }
+                    try {
+                        Source source = getInputSource(content);
+                        targetConfig.addSchemaSource(source);
+                    } catch (XPathException e) {
+                        errors.add(new XmlProcessingException(e));
+                    }
                 } else if ("schemaComponentModel".equals(localName)) {
-                    throw new NotImplementedException();
-//                    try {
-//                        Source source = getInputSource(content);
-//                        targetConfig.importComponents(source);
-//                    } catch (XPathException e) {
-//                        errors.add(new XmlProcessingException(e));
-//                    }
+                    try {
+                        Source source = getInputSource(content);
+                        targetConfig.importComponents(source);
+                    } catch (XPathException e) {
+                        errors.add(new XmlProcessingException(e));
+                    }
                 } else if ("catalogFile".equals(localName)) {
                     URI baseURI = URI.create(systemId);
                     catalogFiles.add(baseURI.resolve(content).toString());
