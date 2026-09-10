@@ -346,7 +346,6 @@ public class TestValidatorOldApi {
             XdmNode doc = proc.newDocumentBuilder().build(new StreamSource(Testdata.file("dita/concept.xml")));
             XQueryCompiler c = proc.newXQueryCompiler();
             c.setSchemaAware(true);
-            c.useSchema(sm.getXsdSchema());
             XQueryEvaluator e = c.compile("validate{.}").load();
             e.setContextItem(doc);
             Serializer s = proc.newSerializer();
@@ -587,7 +586,6 @@ public class TestValidatorOldApi {
 
             XPathCompiler xp = proc.newXPathCompiler();
             xp.setSchemaAware(true);
-            xp.useSchema(sm.getXsdSchema());
             XdmAtomicValue result = (XdmAtomicValue) xp.evaluate("count(//comment())", destination.getXdmNode());
             assertEquals(1, result.getLongValue());
 
@@ -642,7 +640,6 @@ public class TestValidatorOldApi {
 
             XPathCompiler xp = proc.newXPathCompiler();
             xp.setSchemaAware(true);
-            xp.useSchema(sm.getXsdSchema());
             XdmAtomicValue result = (XdmAtomicValue) xp.evaluate("count(//comment())", destination.getXdmNode());
             assertEquals(1, result.getLongValue());
 
@@ -1186,8 +1183,6 @@ public class TestValidatorOldApi {
             WeakReference<TinyTree> tinyTree = new WeakReference<>(((TinyDocumentImpl) node.getUnderlyingNode()).getTree());
 
             final XPathCompiler compiler = processor.newXPathCompiler();
-            compiler.useSchema(processor.getSchemaManager().getXsdSchema());
-            //compiler.importSchemaNamespace("http://example.org");
             compiler.evaluate("namespace-uri-from-QName(//*/foo)", node);
             node = builder.build(new StreamSource(Testdata.file("leak/instance.xml")));
             System.gc();
@@ -1305,7 +1300,6 @@ public class TestValidatorOldApi {
 
             XsltCompiler xsltCompiler = proc.newXsltCompiler();
             xsltCompiler.setSchemaAware(true);
-            xsltCompiler.useSchema(sm.getXsdSchema());
             Xslt30Transformer exec = xsltCompiler.compile(new StreamSource(new StringReader(xsl))).load30();
 
             exec.setErrorListener(new ErrorListener() {
@@ -1342,42 +1336,6 @@ public class TestValidatorOldApi {
             fail(e.getMessage());
         }
     }
-
-    /**
-     * Test the effect of setting bytecode on or off
-     */
-
-    private void testByteCode(boolean byteCodeOn) {
-        try {
-            String sch1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
-                    "  <simpleType name='percentage'>" +
-                    "     <restriction base='decimal'>" +
-                    "        <minInclusive value='10'/>" +
-                    "        <maxInclusive value='20'/>" +
-                    "        <totalDigits value='5'/>" +
-                    "        <fractionDigits value='2'/>" +
-                    "     </restriction></simpleType>" +
-                    "</schema>";
-
-            Processor proc = new Processor(true);
-            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, byteCodeOn);
-            //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, byteCodeOn);
-            //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, configTest.getTempDir() + "Saxon-bytecode");
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new StringReader(sch1)));
-            XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setSchemaAware(true);
-            XQueryExecutable qry = comp.compile("import schema namespace s='http://myexample/family'; sum(for $i in 1 to 100000 return s:percentage($i div 100 mod 10 + 10))");
-            XdmItem result = qry.load().evaluateSingle();
-            assertEquals("1499500", result.getStringValue(), "result");
-            //System.err.println(result.getStringValue());
-        } catch (SaxonApiException sapie) {
-            System.err.println(sapie.getMessage());
-            fail();
-        }
-    }
-
 
 
     @Test
