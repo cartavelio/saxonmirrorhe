@@ -118,25 +118,6 @@ task buildCWrappers (
   dependsOn: ['buildTransform', 'buildQuery', 'buildValidate']){
 }
 
-task check_codesign_dylib(
-  description: "Check to see if we can and should sign the .dylib file"
-) {
-  def identities = new ByteArrayOutputStream();
-
-  if (systemOs.isMacOsX()) {
-    exec {
-      standardOutput = identities
-      commandLine "security", "find-identity", "-p", "codesigning", "-v"
-    }
-  }
-
-  doLast {
-    // 2RW84ZZ739 is the ID of the Saxonica Limited signing certificate
-    codesign_dylib = identities.toString("utf-8").contains('2RW84ZZ739')
-    //print("Code sign ${codesign_dylib ? 'enabled' : 'disabled'}")
-  }
-}
-
 ["he", "pe", "ee"].each { edition ->
   //def graalEdition = edition == "he" ? "ce" : "ee"
   def graalEdition = "ce"
@@ -189,11 +170,11 @@ task check_codesign_dylib(
   }
 
   task "${edition}c_graalImage"(
-    dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home", "check_codesign_dylib"],
+    dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home"],
     description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
   ) {
     inputs.file "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar"
-    outputs.file "${buildDir}/c/libsaxon-${edition}c-${saxonVersion}.o"
+    outputs.file "libsaxon-${edition}c-${saxonVersion}.o"
 
     doLast {
       def image = nativeImage(graalEdition)
@@ -212,22 +193,6 @@ task check_codesign_dylib(
           "--enable-url-protocols=https",
           "--enable-url-protocols=http",
           "--shared"
-      }
-    }
-
-    if (systemOs.isMacOsX()) {
-      doLast {
-        exec {
-          workingDir 'build/c'
-          if (codesign_dylib) {
-            commandLine 'codesign', '--force', '--options', 'runtime',
-              '--entitlements', '../../tools/saxon-cs/entitlements.plist',
-              '--deep', '--sign', 'Developer ID Application: Saxonica Limited',
-              '--timestamp', "libsaxon-${edition}c-${saxonVersion}.dylib"
-          } else {
-            commandLine 'echo', 'Code signing is not available'
-          }
-        }
       }
     }
   }
@@ -736,22 +701,6 @@ task all_saxonc_releases() {
         }
       }
     }
-
-
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/pypi/python_saxon"
-        into "${saxoncReleaseDir}/pypi/python_saxon"
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-                  .replace('@@edition@@', edition)
-                  .replace('@@EDITION@@', edition.toUpperCase())
-                  .replace('@@libpath@@', libpath)
-                  .replace('@@location@@', location)
-        }
-      }
-    }
-
     doLast {
       copy {
         from "${projectDir}/src/main/c/samples"
@@ -826,8 +775,6 @@ task all_saxonc_releases() {
         include "php8_XPathProcessor.cpp"
         include "php8_saxon.h"
         include "php8_XQueryProcessor.cpp"
-        include "CythonExceptionHandler.h"
-        include "CythonExceptionHandler.cpp"
         include "config.m4"
         include "config.w32"
         filter { line ->
@@ -943,7 +890,7 @@ task all_saxonc_releases() {
                        ? "${pypiDir}/libs/darwin"
                        : (systemOs.isLinux()
                           ? "${pypiDir}/libs/nix"
-                          : "${pypiDir}/libs/win"))
+                          : "libs/win"))
 
     doLast {
       if (SAXONC_HOME == null) {
@@ -971,10 +918,10 @@ task all_saxonc_releases() {
         into "${buildDir}/${edition}c_pypi/python_saxon"
         include "saxonc.pyx"
         include "saxoncClasses.pxd"
+        include "nodekind.py"
         include "readme.txt"
         filter { line ->
           line.replace('@@edition@@', edition)
-          line.replace('@@location@@', '../')
         }
       }
     }
@@ -1026,7 +973,6 @@ task all_saxonc_releases() {
         include "XPathProcessor.cpp"
         include "SchemaValidator.cpp"
         include "SaxonApiException.cpp"
-        include "CythonExceptionHandler.cpp"
         include "SaxonProcessor.h"
         include "SaxonCGlue.h"
         include "SaxonCProcessor.h"
@@ -1045,7 +991,6 @@ task all_saxonc_releases() {
         include "XPathProcessor.h"
         include "SchemaValidator.h"
         include "SaxonApiException.h"
-        include "CythonExceptionHandler.h"
         filter { line ->
           line.replaceAll('@@VERSION@@', saxonVersion)
             .replace('@@edition@@', edition)

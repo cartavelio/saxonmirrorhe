@@ -103,7 +103,6 @@ ext {
   csoptimize = findProperty("csOptimize") ?: "false"
   csplatform = null
   c_sendria = "sendriasmtp"
-  codesign_dylib = false
 }
 
 // Find dotnet
@@ -270,7 +269,7 @@ dependencies {
     [group: 'com.ibm.icu', name: 'icu4j', version: icu4jVersion ],
     [group: 'dom4j', name: 'dom4j', version: '1.6.1'],
     [group: 'jline', name: 'jline', version: jlineVersion ],
-    [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.2.15', ext: 'pom'],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.2.15'],
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.2.15'],
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.2.15']
   )
@@ -1554,17 +1553,13 @@ def pomXml(String release) {
       dependencyNode.appendNode('groupId', it.group)
       dependencyNode.appendNode('artifactId', it.name)
       dependencyNode.appendNode('version', it.version)
-      if (it.group == 'org.xmlresolver' && it.name == 'xmlresolver') {
-        // Special case the data classifier
+      // Special case the data classifier
+      if (it.group == "org.xmlresolver" && it.name == "xmlresolver") {
         dependencyNode = dependenciesNode.appendNode('dependency')
         dependencyNode.appendNode('groupId', it.group)
         dependencyNode.appendNode('artifactId', it.name)
         dependencyNode.appendNode('version', xmlresolverVersion)
         dependencyNode.appendNode('classifier', 'data')
-      } else if (it.group == 'org.apache.ws.commons.axiom' && it.name == 'axiom') {
-        // Special case the pom type for the axiom dependency (bug #5801)
-        dependencyNode.appendNode('type', 'pom')
-        dependencyNode.appendNode('optional', 'true')
       } else {
         dependencyNode.appendNode('optional', 'true')
       }
