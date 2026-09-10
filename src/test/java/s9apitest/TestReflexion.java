@@ -647,12 +647,14 @@ public class TestReflexion {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
+            comp.setJustInTimeCompilation(false);
             XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             exec.export(out);
 
             Processor proc2 = new Processor(true);
             XsltCompiler comp2 = proc2.newXsltCompiler();
+            comp2.setJustInTimeCompilation(false);
             XsltExecutable exec2 = comp2.compile(new StreamSource(new ByteArrayInputStream(out.toByteArray())));
             Xslt30Transformer trans = exec2.load30();
             StringWriter sw = new StringWriter();

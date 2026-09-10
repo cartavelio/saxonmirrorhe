@@ -1025,6 +1025,7 @@ public class TestXsltCompiler {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
             comp.setSchemaAware(true);
+            comp.setJustInTimeCompilation(false);
             String xsl1 = "<xsl:stylesheet exclude-result-prefixes=\"#all\" version=\"3.0\"\n"
                     + "  xmlns:test=\"http://www.example.com/test\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
                     + "  xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"

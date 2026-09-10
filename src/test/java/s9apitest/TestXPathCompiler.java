@@ -19,6 +19,7 @@ import net.sf.saxon.trace.Traceable;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
+import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -554,10 +555,11 @@ public class TestXPathCompiler {
                             "</xbrl>";
 
             InputSource is = new InputSource(new StringReader(xml));
-            SAXSource ss = new SAXSource(is);
-            ParseOptions options = new ParseOptions();
-            options.setExpandAttributeDefaults(true);
-            options.setSchemaValidationMode(Validation.STRICT);
+            Source ss = new SAXSource(is);
+            ParseOptions options = new ParseOptions()
+                    .withExpandAttributeDefaults(true)
+                    .withSchemaValidationMode(Validation.STRICT);
+            ss = new AugmentedSource(ss, options);
             NodeInfo doc = conf.buildDocumentTree(ss, options).getRootNode();
 
             xpathCompiler.setAllowUndeclaredVariables(true);

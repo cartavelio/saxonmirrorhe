@@ -56,10 +56,10 @@ public class ValidationTest {
             config.addSchemaSource(new StreamSource(new File(configTest.getDataDir() + "books.xsd")), listener);
             StringWriter sw = new StringWriter();
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw));
-            ParseOptions options = new ParseOptions();
-            options.setSchemaValidationMode(Validation.STRICT);
-            options.setValidationErrorLimit(1);
-            options.setErrorReporter(listener);
+            ParseOptions options = new ParseOptions()
+                    .withSchemaValidationMode(Validation.STRICT)
+                    .withValidationErrorLimit(1)
+                    .withErrorReporter(listener);
             Receiver val = config.getDocumentValidator(out, "", options, null);
             val.setPipelineConfiguration(out.getPipelineConfiguration());
             String badBooks = "<BOOKLIST><BOOKS/><CATEGORIES><CATEGORY/></CATEGORIES></BOOKLIST>";
@@ -87,9 +87,9 @@ public class ValidationTest {
             SerializationProperties props = new SerializationProperties();
             props.setProperty("omit-xml-declaration", "yes");
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw), props);
-            ParseOptions options = new ParseOptions();
-            options.setSchemaValidationMode(Validation.STRICT);
-            options.setErrorReporter(listener);
+            ParseOptions options = new ParseOptions()
+                    .withSchemaValidationMode(Validation.STRICT)
+                    .withErrorReporter(listener);
             Receiver val = config.getDocumentValidator(out, "", options, null);
             val.setPipelineConfiguration(out.getPipelineConfiguration());
             Sender.send(new StreamSource(new StringReader(badBooks)), val, null);
@@ -118,9 +118,9 @@ public class ValidationTest {
             Properties props = new Properties();
             props.setProperty("omit-xml-declaration", "yes");
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw), new SerializationProperties(props));
-            ParseOptions options = new ParseOptions();
-            options.setErrorReporter(listener);
-            options.setSchemaValidationMode(Validation.STRICT);
+            ParseOptions options = new ParseOptions()
+                    .withErrorReporter(listener)
+                    .withSchemaValidationMode(Validation.STRICT);
             Receiver val = config.getDocumentValidator(out, "", options, null);
             val.setPipelineConfiguration(out.getPipelineConfiguration());
             Sender.send(new StreamSource(new StringReader(badBooks)), val, null);
