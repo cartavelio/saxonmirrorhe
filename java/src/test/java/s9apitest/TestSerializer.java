@@ -8,7 +8,6 @@ import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
@@ -30,7 +29,6 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Path;
@@ -342,9 +340,9 @@ public class TestSerializer {
     @Test
     public void test3631() {
         try {
-            Path dir = Testdata.dir().resolve("nadolu3631/");
-            String sourceID = dir + "test.xml";
-            String xslID = dir + "main.xsl";
+            Path dir = Testdata.dir().resolve("nadolu3631");
+            String sourceID = dir + "/test.xml";
+            String xslID = dir + "/main.xsl";
 
             // Create a transform factory instance.
             TransformerFactoryImpl tfactory = new TransformerFactoryImpl();

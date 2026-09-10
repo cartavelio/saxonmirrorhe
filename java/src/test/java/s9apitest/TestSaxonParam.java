@@ -19,9 +19,9 @@ public class TestSaxonParam {
         try {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
-            SchemaManager manager = proc.getSchemaManager();
-            manager.load(new StreamSource(Testdata.file("schema-with-param.xsd")));
-            SchemaValidator val = manager.newSchemaValidator();
+            XsdCompiler manager = proc.newXsdCompiler();
+            XsdSchema schema = manager.compile(new StreamSource(Testdata.file("schema-with-param.xsd")));
+            SchemaValidator val = schema.newValidator();
             val.setParameter(new QName("baseLine"), new XdmAtomicValue("2012-12-12", ItemType.DATE));
             val.validate(new StreamSource(new StringReader("<date>2012-10-12</date>")));  //OK
             try {

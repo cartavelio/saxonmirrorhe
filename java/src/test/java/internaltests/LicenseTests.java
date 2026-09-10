@@ -2,27 +2,31 @@ package internaltests;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.LicenseException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
-import java.net.URI;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * A number of tests to ensure that certain constructs require a valid license,
@@ -110,15 +114,17 @@ public class LicenseTests {
         }
 
         proc = new Processor(true);
+        XsdSchema schema = null;
         try {
-            SchemaManager mgr = proc.getSchemaManager();
-            mgr.load(new StreamSource(new StringReader(xsd)));
+            XsdCompiler mgr = proc.newXsdCompiler();
+            schema = mgr.compile(new StreamSource(new StringReader(xsd)));
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
         compiler = proc.newXsltCompiler();
         compiler.setJustInTimeCompilation(false);
         compiler.setSchemaAware(true);
+        compiler.useSchema("", schema);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             XsltExecutable exec = compiler.compile(new StreamSource(new StringReader(xsl)));

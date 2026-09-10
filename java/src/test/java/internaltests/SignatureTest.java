@@ -98,16 +98,14 @@ public class SignatureTest {
                 //System.err.println("Processing " + prefix + ":" + localName);
                 BuiltInFunctionSet functionSet = null;
 
-                if (prefix.equals("fn")) {
-                    functionSet = XPath40FunctionSet.getInstance();
-                } else if (prefix.equals("math")) {
-                    functionSet = MathFunctionSet.getInstance(40);
-                } else if (prefix.equals("map")) {
-                    functionSet = MapFunctionSet.getInstance(40);
-                } else if (prefix.equals("array")) {
-                    functionSet = ArrayFunctionSet.getInstance(40);
-                } else {
-                    continue;
+                switch (prefix) {
+                    case "fn" -> functionSet = XPath40FunctionSet.getInstance();
+                    case "math" -> functionSet = MathFunctionSet.getInstance(40);
+                    case "map" -> functionSet = MapFunctionSet.getInstance(40);
+                    case "array" -> functionSet = ArrayFunctionSet.getInstance(40);
+                    default -> {
+                        continue;
+                    }
                 }
                 List<XdmNode> args = proto.select(Steps.child("arg")).asListOfNodes();
                 BuiltInFunctionSet.Entry entry = functionSet.getFunctionDetails(localName, args.size());
@@ -174,6 +172,7 @@ public class SignatureTest {
             env.setXPathLanguageLevel(40);
             env.declareNamespace("xs", NamespaceUri.SCHEMA);
             env.declareNamespace("fn", NamespaceUri.FN);
+            env.declareNamespace("output",  NamespaceUri.OUTPUT);
             XPathParser parser = new XPathParser(env);
             return parser.parseSequenceType(typeDesignation, env);
         } catch (XPathException e) {
