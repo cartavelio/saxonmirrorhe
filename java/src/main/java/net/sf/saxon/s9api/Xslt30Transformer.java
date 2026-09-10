@@ -14,6 +14,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.SequenceNormalizerWithSpaceSeparator;
 import net.sf.saxon.expr.Component;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.instruct.UserFunction;
@@ -27,6 +28,7 @@ import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.coercion.CoercionRules;
+import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.Source;
@@ -588,16 +590,26 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
     }
 
     private synchronized Component getFunctionComponent(QName function, XdmValue[] arguments) throws XPathException {
-        SymbolicName fName = new SymbolicName.F(function.getStructuredQName(), arguments.length);
-        PreparedStylesheet pss = (PreparedStylesheet) controller.getExecutable();
-        Component f = pss.getComponent(fName);
-        if (f == null) {
-            throw new XPathException("No public function with name " + function.getClarkName() +
-                                             " and arity " + arguments.length + " has been declared in the stylesheet", "XTDE0041");
-        } else if (f.getVisibility() != Visibility.FINAL && f.getVisibility() != Visibility.PUBLIC) {
-            throw new XPathException("Cannot invoke " + fName + " externally, because it is not public", "XTDE0041");
+        int arity = arguments.length;
+        while (true) {
+            SymbolicName fName = new SymbolicName.F(function.getStructuredQName(), arity);
+            PreparedStylesheet pss = (PreparedStylesheet) controller.getExecutable();
+            Component f = pss.getComponent(fName);
+            if (f != null) {
+                UserFunction fn = (UserFunction)f.getActor();
+                if (fn.getArity() < arity) {
+                    break;
+                }
+                if (f.getVisibility() != Visibility.FINAL && f.getVisibility() != Visibility.PUBLIC) {
+                    throw new XPathException("Cannot invoke " + fName + " externally, because it is not public", "XTDE0041");
+                }
+                return f;
+            }
+            arity += 1;
         }
-        return f;
+        throw new XPathException("No public function with name " + function.getClarkName() +
+                         " and arity " + arguments.length + " has been declared in the stylesheet", "XTDE0041");
+
     }
 
     private Sequence[] typeCheckFunctionArguments(UserFunction uf, XdmValue[] arguments) throws XPathException {
@@ -606,16 +618,21 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
         CoercionRules coercionRules = CoercionRules.forVersion(config, version);
         UserFunctionParameter[] params = uf.getParameterDefinitions();
         GroundedValue[] vr =
-                new GroundedValue[arguments.length];
-        for (int i = 0; i < arguments.length; i++) {
+                new GroundedValue[params.length];
+        for (int i = 0; i < params.length; i++) {
             net.sf.saxon.value.SequenceType type = params[i].getRequiredType();
-            vr[i] = arguments[i].getUnderlyingValue();
-            if (!type.matches(vr[i], config.getTypeHierarchy())) {
-                final int pos = i;
-                Supplier<RoleDiagnostic> role =
-                        () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, uf.getFunctionName().getDisplayName(), pos);
-                Sequence converted = coercionRules.coerce(vr[i], type, SequenceType.ANY_SEQUENCE, config, role, Loc.NONE);
-                vr[i] = converted.materialize();
+            if (i < arguments.length) {
+                vr[i] = arguments[i].getUnderlyingValue();
+                if (!type.matches(vr[i], config.getTypeHierarchy())) {
+                    final int pos = i;
+                    Supplier<RoleDiagnostic> role =
+                            () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, uf.getFunctionName().getDisplayName(), pos);
+                    Sequence converted = coercionRules.coerce(vr[i], type, SequenceType.ANY_SEQUENCE, config, role, Loc.NONE);
+                    vr[i] = converted.materialize();
+                }
+            } else {
+                XPathContext c2 = controller.newXPathContext();
+                vr[i] = SequenceExtent.from(params[i].getDefaultValueExpression().get().iterate(c2));
             }
         }
         return vr;
