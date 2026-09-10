@@ -709,4 +709,72 @@ public class TestPackage {
             fail("Unexpected exception attempting to use unavailable package");
         }
     }
+
+    @Test
+    public void testPackageRenaming() {
+        try {
+            File configFile = Testdata.file("packages/config-120.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            XsltCompiler compiler = processor.newXsltCompiler();
+            XsltExecutable top = compiler.compile(
+                    new StreamSource(Testdata.file("packages/pack-120-top.xsl")));
+            Xslt30Transformer trans = top.load30();
+            XdmNode result = (XdmNode) trans.callTemplate(null);
+            XPathCompiler xp = processor.newXPathCompiler();
+            String sum = xp.evaluateSingle("/out/add", result).getStringValue();
+            String difference = xp.evaluateSingle("/out/subtract", result).getStringValue();
+            String product = xp.evaluateSingle("/out/multiply", result).getStringValue();
+            assertEquals("12", sum);
+            assertEquals("8", difference);
+            assertEquals("20", product);
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testPackageExportWithParams() {
+        try {
+            File configFile = Testdata.file("packages/config-120.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            XsltCompiler compiler = processor.newXsltCompiler();
+            XsltExecutable top = compiler.compile(
+                    new StreamSource(Testdata.file("packages/pack-120-top.xsl")));
+            XsltPackage add = compiler.obtainPackage("http://package-add/", "1.0");
+            add.save(Testdata.file("sandpit/pack-120-add.sef.xml"));
+            XsltPackage subtract = compiler.obtainPackage("http://package-subtract/", "1.0");
+            subtract.save(Testdata.file("sandpit/pack-120-subtract.sef.xml"));
+            XsltPackage multiply = compiler.obtainPackage("http://package-multiply/", "1.0");
+            multiply.save(Testdata.file("sandpit/pack-120-multiply.sef.xml"));
+
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testPackageRenamingExported() {
+        // This uses the sef packages created by test testPackageExportWithParams
+        try {
+            File configFile = Testdata.file("packages/config-121.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            XsltCompiler compiler = processor.newXsltCompiler();
+            XsltExecutable top = compiler.compile(
+                    new StreamSource(Testdata.file("packages/pack-120-top.xsl")));
+            Xslt30Transformer trans = top.load30();
+            XdmNode result = (XdmNode) trans.callTemplate(null);
+            XPathCompiler xp = processor.newXPathCompiler();
+            String sum = xp.evaluateSingle("/out/add", result).getStringValue();
+            String difference = xp.evaluateSingle("/out/subtract", result).getStringValue();
+            String product = xp.evaluateSingle("/out/multiply", result).getStringValue();
+            assertEquals("12", sum);
+            assertEquals("8", difference);
+            assertEquals("20", product);
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 }

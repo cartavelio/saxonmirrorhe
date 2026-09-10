@@ -1,7 +1,7 @@
 <configuration edition="EE" xmlns="http://saxon.sf.net/ns/configuration"> 
     <xsltPackages>
-        <package name='http://package-add/' base="http://example.org/pack-120.xsl" version='1.0' exportLocation='pack-120-add.xsl'/>
-        <package name='http://package-subtract/' base="http://example.org/pack-120.xsl" version='1.0' exportLocation='pack-120-subtract.xsl'/>
-        <package name='http://package-multiply/' base="http://example.org/pack-120.xsl" version='1.0' exportLocation='pack-120-multiply.xsl'/>
+        <package name='http://package-add/' base="http://example.org/pack-120.xsl" version='1.0' exportLocation='../sandpit/pack-120-add.sef.xml'/>
+        <package name='http://package-subtract/' base="http://example.org/pack-120.xsl" version='1.0' exportLocation='../sandpit/pack-120-subtract.sef.xml'/>
+        <package name='http://package-multiply/' base="http://example.org/pack-120.xsl" version='1.0' exportLocation='../sandpit/pack-120-multiply.sef.xml'/>
     </xsltPackages>
 </configuration>
