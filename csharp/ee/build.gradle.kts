@@ -731,7 +731,7 @@ tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
 
 // ============================================================
 
-tasks.register<Exec>("eecsTest") {
+tasks.register<Exec>("ecsTest") {
   group = "Verification"
   description = "Run SaxonCS nUnit tests"
   dependsOn("dotnetBuild")

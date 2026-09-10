@@ -18,6 +18,8 @@ val saxonEecRelease by configurations.dependencyScope("saxonEecRelease")
 
 val saxonCsEeRelease by configurations.dependencyScope("saxonCsEeRelease")
 
+val saxonCsHeRelease by configurations.dependencyScope("saxonCsHeRelease")
+
 val currentBranch by configurations.consumable("currentBranch")
 
 dependencies {
@@ -30,6 +32,9 @@ dependencies {
 
   saxonCsEeRelease(project(mapOf("path" to ":csharp:ee",
                                  "configuration" to "releaseArtifacts")))
+
+  saxonCsHeRelease(project(mapOf("path" to ":csharp:he",
+    "configuration" to "releaseArtifacts")))
 
   saxonHecRelease(project(mapOf("path" to ":libsaxonc-core:he",
                                 "configuration" to "releaseArtifacts")))
@@ -51,6 +56,10 @@ val saxonEej = configurations.resolvable("saxonEej") {
 
 val saxonCsEe = configurations.resolvable("saxonCsEe") {
   extendsFrom(saxonCsEeRelease)
+}
+
+val saxonCsHe = configurations.resolvable("saxonCsHe") {
+  extendsFrom(saxonCsHeRelease)
 }
 
 val saxonHec = configurations.resolvable("saxonHec") {
@@ -137,6 +146,7 @@ val cpp = tasks.register<Copy>("cppReleases") {
 val csharp = tasks.register<Copy>("dotnetReleases") {
   into(layout.buildDirectory.dir("releases"))
   from(saxonCsEe)
+  from(saxonCsHe)
 }
 
 tasks.register("allReleases") {
