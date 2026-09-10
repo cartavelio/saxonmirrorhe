@@ -612,6 +612,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
     private Receiver getDestinationReceiver(Destination destination) throws SaxonApiException {
         Executable exec = expression.getExecutable();
         PipelineConfiguration pipe = expression.getConfiguration().makePipelineConfiguration();
+        pipe.setHostLanguage(HostLanguage.XQUERY, exec.getTopLevelPackage().getHostLanguageVersion());
         Receiver out = destination.getReceiver(pipe, exec.getPrimarySerializationProperties());
         if (Configuration.isAssertionsEnabled()) {
             return new RegularSequenceChecker(out, true);

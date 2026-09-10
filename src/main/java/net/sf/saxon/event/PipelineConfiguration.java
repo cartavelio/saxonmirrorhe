@@ -34,6 +34,7 @@ public class PipelineConfiguration {
     private Controller controller;
     private ParseOptions parseOptions;
     private HostLanguage hostLanguage = HostLanguage.UNKNOWN;
+    private int hostLanguageVersion = 31;
     private Map<String, Object> components;
     private XPathContext context;
     private java.util.function.Function<NodeInfo, Object> copyInformee;
@@ -250,6 +251,21 @@ public class PipelineConfiguration {
 
     public void setHostLanguage(HostLanguage language) {
         hostLanguage = language;
+    }
+
+    /**
+     * Set the host language and version in use
+     *
+     * @param language for example {@link HostLanguage#XSLT} or {@link HostLanguage#XQUERY}
+     */
+
+    public void setHostLanguage(HostLanguage language, int version) {
+        hostLanguage = language;
+        hostLanguageVersion = version;
+    }
+
+    public int getHostLanguageVersion() {
+        return hostLanguageVersion;
     }
 
     /**

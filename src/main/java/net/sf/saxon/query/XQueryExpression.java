@@ -463,7 +463,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         } else {
             SerializerFactory sf = context.getConfiguration().getSerializerFactory();
             PipelineConfiguration pipe = controller.makePipelineConfiguration();
-            pipe.setHostLanguage(HostLanguage.XQUERY);
+            pipe.setHostLanguage(HostLanguage.XQUERY, getPackageData().getHostLanguageVersion());
             out = sf.getReceiver(result, new SerializationProperties(actualProperties), pipe);
         }
 

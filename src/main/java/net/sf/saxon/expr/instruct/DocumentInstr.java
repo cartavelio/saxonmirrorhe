@@ -8,10 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.ComplexContentOutputter;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -156,9 +153,8 @@ public class DocumentInstr extends ParentNodeConstructor {
                         throw de;
                     }
                     if (validation == Validation.STRICT && component instanceof FixedElement) {
-                        int fingerprint = ((FixedElement) component).getFixedElementName().getFingerprint();
-                        Schema schema = env.getPackageData().getImportedSchema();
-                        SchemaDeclaration decl = schema.getElementDecl(fingerprint);
+                        SchemaDeclaration decl = env.getConfiguration().getElementDeclaration(
+                                ((FixedElement) component).getFixedElementName().getFingerprint());
                         if (decl != null) {
                             ((FixedElement) component).getContentExpression().
                                     checkPermittedContents(decl.getType(), true);
@@ -224,9 +220,8 @@ public class DocumentInstr extends ParentNodeConstructor {
     public Expression copy(RebindingMap rebindings) {
         DocumentInstr doc = new DocumentInstr(textOnly, constantText);
         ExpressionTool.copyLocationInfo(this, doc);
-        Schema schema = getSchema();
         doc.setContentExpression(getContentExpression().copy(rebindings));
-        doc.setValidationAction(schema, getValidationAction(), getSchemaType());
+        doc.setValidationAction(getValidationAction(), getSchemaType());
         return doc;
     }
 
@@ -368,6 +363,7 @@ public class DocumentInstr extends ParentNodeConstructor {
             } else {
                 PushEvaluator contentEval = expr.getContentExpression().makeElaborator().elaborateForPush();
                 HostLanguage hostLanguage = expr.getPackageData().getHostLanguage();
+                int hostLanguageVersion = expr.getPackageData().getHostLanguageVersion();
                 return context -> {
                     try {
                         Controller controller = context.getController();
@@ -386,7 +382,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                         builder.setBaseURI(staticBaseUri);
                         builder.setTiming(false);
 
-                        pipe.setHostLanguage(hostLanguage);
+                        pipe.setHostLanguage(hostLanguage, hostLanguageVersion);
                         builder.setPipelineConfiguration(pipe);
 
                         ComplexContentOutputter out =

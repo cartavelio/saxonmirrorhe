@@ -327,8 +327,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         if (fp != -1) {
                             Affinity e = th.relationship(in, NodeKindTest.ELEMENT);
                             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
-                                SchemaDeclaration elem = schema.getElementDecl(fp);
+                                SchemaDeclaration elem = config.getElementDeclaration(fp);
                                 if (elem != null) {
                                     try {
                                         return new ContentTypeTest(Type.ELEMENT, elem.getType(), config, false);
@@ -342,8 +341,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                             }
                             Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
                             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
-                                SchemaDeclaration attr = schema.getElementDecl(fp);
+                                SchemaDeclaration attr = config.getElementDeclaration(fp);
                                 if (attr != null) {
                                     try {
                                         return new ContentTypeTest(Type.ATTRIBUTE, attr.getType(), config, false);
@@ -543,6 +541,54 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         return new PathMap.PathMapNodeSet(pathMap.makeNewRoot(this));
     }
 
+    //        try {
+//            if (copyAccumulators) {
+//                // Try to create a virtual copy if we can. This is cheaper
+//                if (mustPush()) {
+//                    // This typically happens with the combination copy-accumulators=yes, validation=strict
+//                    // Test case accumulators-070
+//                    // We have to create a physical copy because of the validation requirement, but this makes
+//                    // it difficult to copy the accumulator values.
+//                    SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
+//                        if (item instanceof NodeInfo) {
+//                            TinyBuilder builder = new TinyBuilder(out.getPipelineConfiguration());
+//                            ComplexContentOutputter cco = new ComplexContentOutputter(builder);
+//                            cco.open();
+//                            copyOneNode(context, cco, (NodeInfo) item, CopyOptions.ALL_NAMESPACES);
+//                            cco.close();
+//                            TinyNodeImpl copy = (TinyNodeImpl) builder.getCurrentRoot();
+//                            copy.getTree().setCopiedFrom((NodeInfo) item);
+//                            out.append(copy);
+//                        } else {
+//                            out.append(item);
+//                        }
+//                    });
+//                } else {
+//                    // Use the iterate() method to create a virtual copy.
+//                    SequenceTool.supply(iterate(context), (ItemConsumer<? super Item>)out::append);
+//                }
+//            } else {
+//
+//                int copyOptions =
+//                        (validation == Validation.SKIP ? 0 : CopyOptions.TYPE_ANNOTATIONS)
+//                        | (copyNamespaces ? CopyOptions.ALL_NAMESPACES : 0)
+//                        | (copyForUpdate ? CopyOptions.FOR_UPDATE : 0);
+//
+//                SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
+//                    if (item instanceof NodeInfo) {
+//                        copyOneNode(context, out, (NodeInfo) item, copyOptions);
+//                    } else {
+//                        out.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
+//                    }
+//                });
+//
+//            }
+//        } catch (UncheckedXPathException e) {
+//            throw e.getXPathException();
+//        }
+//        return null;
+//    }
+
     private void copyOneNode(XPathContext context, Outputter out, NodeInfo item, int copyOptions) throws XPathException {
         Controller controller = context.getController();
         boolean copyBaseURI = out.getSystemId() == null;
@@ -554,7 +600,6 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     .withErrorCode("XQTY0030");
         }
         final Configuration config = controller.getConfiguration();
-        Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
         switch (kind) {
 
             case Type.ELEMENT: {
@@ -579,7 +624,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                                 throw new XPathException("Invalid QName in xsi:type attribute of element being validated: "
                                                                  + xsitype + ". " + e.getMessage(), "XTTE1510");
                             }
-                            type = schema.getSchemaType(typeName);
+                            type = config.getSchemaType(typeName);
                             if (type == null) {
                                 throw new XPathException("Unknown xsi:type in element being validated: " + xsitype, "XTTE1510");
                             }
@@ -590,7 +635,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                             .withTopLevelElement(NameOfNode.makeName(item).getStructuredQName())
                             .withErrorReporter(context.getErrorReporter());
                     config.prepareValidationReporting(context, options);
-                    Receiver validator = schema.getElementValidator(out, options, getLocation());
+                    Receiver validator = config.getElementValidator(out, options, getLocation());
                     eval = new ComplexContentOutputter(validator);
                 }
                 if (copyBaseURI) {
@@ -661,7 +706,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         .withTopLevelType(schemaType)
                         .withErrorReporter(context.getErrorReporter());
                 config.prepareValidationReporting(context, options);
-                Receiver val = schema.getDocumentValidator(out, item.getBaseURI(), options, getLocation());
+                Receiver val = config.getDocumentValidator(out, item.getBaseURI(), options, getLocation());
                 if (copyBaseURI) {
                     val.setSystemId(item.getBaseURI());
                 }
@@ -736,8 +781,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             throws XPathException {
         int opt = rejectDuplicates ? ReceiverOption.REJECT_DUPLICATES : ReceiverOption.NONE;
         UnicodeString value = source.getUnicodeStringValue();
-        Schema schema = instruction.getRetainedStaticContext().getPackageData().getImportedSchema();
-        SimpleType annotation = validateAttribute(schema, source, schemaType, validation, context);
+        SimpleType annotation = validateAttribute(source, schemaType, validation, context);
         try {
             output.attribute(NameOfNode.makeName(source), annotation, value.toString(), instruction.getLocation(), opt);
         } catch (XPathException e) {
@@ -762,7 +806,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
 
 
     public static SimpleType validateAttribute(
-            Schema schema, NodeInfo source, SimpleType schemaType, int validation, XPathContext context) throws XPathException {
+            NodeInfo source, SimpleType schemaType, int validation, XPathContext context) throws XPathException {
         UnicodeString value = source.getUnicodeStringValue();
         SimpleType annotation = BuiltInAtomicType.UNTYPED_ATOMIC;
         if (schemaType != null) {
@@ -783,7 +827,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             annotation = schemaType;
         } else if (validation == Validation.STRICT || validation == Validation.LAX) {
             try {
-                annotation = schema.validateAttribute(NameOfNode.makeName(source).getStructuredQName(), value, validation);
+                annotation = context.getConfiguration().validateAttribute(NameOfNode.makeName(source).getStructuredQName(), value, validation);
             } catch (ValidationException e) {
                 XPathException err = XPathException.makeXPathException(e);
                 err.setErrorCodeQName(e.getErrorCodeQName());
@@ -921,6 +965,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 };
             } else {
                 HostLanguage host = expr.getPackageData().getHostLanguage();
+                int hostLanguageVersion = expr.getPackageData().getHostLanguageVersion();
                 PushEvaluator push = elaborateForPush();
                 return context -> {
                     final Controller controller = context.getController();
@@ -931,7 +976,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     if (expr.copyForUpdate) {
                         out.setTreeModel(TreeModel.LINKED_TREE);
                     }
-                    pipe.setHostLanguage(host);
+                    pipe.setHostLanguage(host, hostLanguageVersion);
                     try {
                         TailCall tc = push.processLeavingTail(new ComplexContentOutputter(out), context);
                         Expression.dispatchTailCall(tc);

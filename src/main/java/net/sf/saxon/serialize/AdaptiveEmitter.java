@@ -45,10 +45,12 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
     private String itemSeparator = "\n";
     private boolean started = false;
     private boolean mustClose = true;
+    private int hostLanguageVersion = 31;
 
     public AdaptiveEmitter(PipelineConfiguration pipe, UnicodeWriter writer)  {
         super(pipe);
         this.writer = writer;
+        this.hostLanguageVersion = pipe.getHostLanguageVersion();
     }
 
     public void setOutputProperties(Properties props) {
@@ -295,7 +297,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
     }
 
     private void serializeMap(MapItem map) throws XPathException {
-        emit("map{");
+        emit(hostLanguageVersion >= 40 ? "{" : "map{");
         boolean first = true;
         for (KeyValuePair pair : map.keyValuePairs()) {
             if (first) {

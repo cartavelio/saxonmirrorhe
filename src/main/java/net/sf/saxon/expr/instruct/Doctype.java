@@ -122,7 +122,7 @@ public class Doctype extends Instruction {
 
                 PipelineConfiguration pipe = controller.makePipelineConfiguration();
                 pipe.setXPathContext(context);
-                pipe.setHostLanguage(expr.getPackageData().getHostLanguage());
+                pipe.setHostLanguage(expr.getPackageData().getHostLanguage(), expr.getPackageData().getHostLanguageVersion());
                 TinyBuilder builder = new TinyBuilder(pipe);
                 builder.setStatistics(pipe.getConfiguration().getTreeStatistics().RESULT_TREE_STATISTICS);
                 builder.open();
