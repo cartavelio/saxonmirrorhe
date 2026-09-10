@@ -9,11 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.NodeInfo;
@@ -70,33 +66,7 @@ public class Siblings_1 extends SystemFunction {
         return new LazySequence(parent.iterateAxis(AxisInfo.CHILD));
     }
 
-    @Override
-    public String getStreamerName() {
-        return "Root";
-    }
 
-    /**
-     * Make an elaborator for a system function call on this function
-     *
-     * @return a suitable elaborator; or null if no custom elaborator is available
-     */
-    @Override
-    public Elaborator getElaborator() {
-        return new RootFnElaborator();
-    }
 
-    public static class RootFnElaborator extends ItemElaborator {
-
-        public ItemEvaluator elaborateForItem() {
-            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            final ItemEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForItem();
-            return context -> {
-                NodeInfo focus = (NodeInfo)arg0Eval.eval(context);
-                return focus == null ? null : focus.getRoot();
-            };
-
-        }
-
-    }
 }
 
