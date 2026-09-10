@@ -924,8 +924,8 @@ public class Environment implements ResourceResolver {
                     environment.streamedSecondaryDocs.put(file.toURI().toString(), validation);
                     res.file = file;
                 }
-            } else /*if (select == null) */ {
-                Source ss;
+            } else {
+                Source ss = null;
                 File file = null;
                 FileInputStream fileInputStream = null;
                 StringReader stringReader = null;
@@ -968,7 +968,7 @@ public class Environment implements ResourceResolver {
                         driver.println("*** failed to find source document " + href);
                         continue;
                     }
-                } else {
+                } else if (!source.select("content").asListOfNodes().isEmpty()) {
                     // content is inline in the catalog
                     baseUri = res.uri;
                     if (res.uri == null) {
@@ -977,6 +977,9 @@ public class Environment implements ResourceResolver {
                     String content = xpc.evaluate("string(content)", source).toString();
                     stringReader = new StringReader(content);
                     ss = new StreamSource(stringReader, baseUri);
+                } else {
+                    // No href or content, construct an empty document
+                    ss = new StreamSource(new StringReader("<dummySource/>"));
                 }
 
                 if (selectedTreeModel.getName().equals("DOM") || selectedTreeModel.getName().equals("DOMINO")) {
@@ -1009,7 +1012,7 @@ public class Environment implements ResourceResolver {
                         res.doc = driver.makeDominoTree(doc, environment.processor.getUnderlyingConfiguration(), res.uri);
                     }
                     environment.sourceDocs.put(res.uri, res.doc);
-                } else {
+                } else { // Not DOM, typically create a TinyTree
                     try {
                         builder.setLineNumbering(true);
                         res.doc = builder.build(ss);
@@ -1026,6 +1029,11 @@ public class Environment implements ResourceResolver {
 
                 XdmItem selectedItem = res.doc;
 
+                if (select != null) {
+                    XPathSelector selector = environment.xpathCompiler.compile(select).load();
+                    selector.setContextItem(selectedItem);
+                    selectedItem = selector.evaluateSingle();
+                }
 
                 if (role != null) {
                     if (".".equals(role)) {
@@ -1039,25 +1047,22 @@ public class Environment implements ResourceResolver {
                         }
                     }
                 }
-            } //else {
-//                XPathSelector selector = environment.xpathCompiler.compile(select).load();
-//                XdmItem selectedItem = selector.evaluateSingle();
-//                if (role != null) {
-//                    if (".".equals(role)) {
-//                        environment.contextItem = selectedItem;
-//                    } else if (role.startsWith("$")) {
-//                        String varName = role.substring(1);
-//                        environment.params.put(new QName(varName), selectedItem);
-//                        environment.xpathCompiler.declareVariable(new QName(varName));
-//                        if (!isTrue("declared").test(source)) {
-//                            environment.paramDeclarations.append("declare variable $" + varName + " external; ");
-//                        }
-//                    }
-//                }
-//                selector.setContextItem(selectedItem);
-//
-//
-//            }
+
+
+                if (role != null) {
+                    if (".".equals(role)) {
+                        environment.contextItem = selectedItem;
+                    } else if (role.startsWith("$")) {
+                        String varName = role.substring(1);
+                        environment.params.put(new QName(varName), selectedItem);
+                        environment.xpathCompiler.declareVariable(new QName(varName));
+                        if (!isTrue("declared").test(source)) {
+                            environment.paramDeclarations.append("declare variable $" + varName + " external; ");
+                        }
+                    }
+                }
+            }
+
             String definesStylesheet = source.attribute("defines-stylesheet");
             if (definesStylesheet != null) {
                 definesStylesheet = definesStylesheet.trim();
