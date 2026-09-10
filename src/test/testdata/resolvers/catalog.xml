@@ -7,8 +7,8 @@
   <uri name="http://example.com/text"
        uri="catalog.xml"/>
 
-    <uri name="http://example.com/testfunc"
-         xmlns:rddl="http://www.rddl.org/"
-         rddl:purpose="https://www.iana.org/assignments/media-types/application/xquery"
-         uri="testfunc.xqy"/>
+  <uri name="http://example.com/testfunc"
+       xmlns:rddl="http://www.rddl.org/"
+       rddl:purpose="https://www.iana.org/assignments/media-types/application/xquery"
+       uri="testfunc.xqy"/>
 </catalog>
