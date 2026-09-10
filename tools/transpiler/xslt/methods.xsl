@@ -483,7 +483,7 @@
       <xsl:sequence select="f:applyFormat(., map{
          'create#1':                  'new System.Uri(%args%)',
          'getAuthority#0':            '%scope%.Authority',
-         'getFragment#0':             '%scope%.Fragment',
+         'getFragment#0':             'Saxon.Impl.Helpers.StringUtils.nullIfEmpty(%scope%.Fragment)',
          'getHost#0':                 '%scope%.Host',
          'getPath#0':                 '%scope%.LocalPath',
          'getPort#0':                 '%scope%.Port',
@@ -550,6 +550,10 @@
             <xsl:text>((int)</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier='values' and @RESOLVED_TYPE = 'net.sf.saxon.type.PrimitiveUType'">
+            <!-- TODO: avoid special-casing this! Needed for UType.decompose() method -->
+            <xsl:text>net.sf.saxon.type.PrimitiveUType.values()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier='values'">
             <xsl:text>System.Enum.GetValues(typeof({@RESOLVED_TYPE}))</xsl:text>

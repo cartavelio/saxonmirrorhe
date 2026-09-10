@@ -132,8 +132,23 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
         return SequenceTool.attributeMapFromList(list);
     }
 
+    /**
+     * Verify the consistency of the attribute map. This performs an implementation-defined
+     * set of checks that might include checking for duplicates, checking that names are
+     * well-formed, checking for inappropriate use of the xml and xmlns namespaces, and
+     * checking the constraint that attributes in a namespace have a prefix, and vice
+     * versa. The default implementation does nothing.
+     * @throws IllegalStateException if the attribute map is invalid.
+     */
     default void verify() {}
 
+    /**
+     * Apply a function to every attribute in an attribute map, returning a new
+     * attribute map
+     * @param mapper the mapping function to be applied to each attribute in the attribute map
+     * @return the attribute containing the attributes after the mapping function has been
+     * applied
+     */
     default AttributeMap apply(java.util.function.Function<AttributeInfo, AttributeInfo> mapper) {
         List<AttributeInfo> list = new ArrayList<>(size());
         for (AttributeInfo a : this) {

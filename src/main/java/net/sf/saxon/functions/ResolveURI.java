@@ -11,6 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
@@ -83,7 +84,7 @@ public class ResolveURI extends SystemFunction {
 
         URI relativeURI = null;
         try {
-            relativeURI = new URI(relative);
+            relativeURI = absoluteOrRelativeURI(relative);
         } catch (URISyntaxException e) {
             throw new XPathException("Relative URI " + Err.wrap(relative) + " is invalid: " + e.getMessage(),
                                      "FORG0002", context);
@@ -146,6 +147,11 @@ public class ResolveURI extends SystemFunction {
 
         return new AnyURIValue(result);
 
+    }
+
+    @CSharpReplaceBody(code="return new System.Uri(href, System.UriKind.RelativeOrAbsolute);")
+    public static URI absoluteOrRelativeURI(String href) throws URISyntaxException {
+        return new URI(href);
     }
 
     /**
@@ -273,7 +279,7 @@ public class ResolveURI extends SystemFunction {
                     }
                 }
                 try {
-                    new URI(relativeURI);   // for validation only
+                    absoluteOrRelativeURI(relativeURI);   // for validation only
                 } catch (URISyntaxException e) {
                     throw new URISyntaxException(base, "Invalid relative URI: " + e.getMessage());
                 }

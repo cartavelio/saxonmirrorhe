@@ -3648,7 +3648,7 @@ public class XPathParser {
         }
 
         Expression[] arguments = new Expression[args.size()];
-        args.toArray(arguments);
+        arguments = args.toArray(arguments);
 
         if (placeMarkers != null) {
             return parserExtension.makeCurriedFunction(this, offset, functionName, arguments, placeMarkers);

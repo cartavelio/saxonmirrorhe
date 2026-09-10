@@ -68,7 +68,7 @@
       <xsl:text>)</xsl:text>
    </xsl:template>
    
-   <!-- java.lang.BigDecimal -->
+   <!-- java.math.BigDecimal -->
    <xsl:template match="*[type/@RESOLVED_TYPE='java.math.BigDecimal']" priority="30">
       <xsl:variable name="argType" select="f:expressionType(arguments/argument[1])"/>
       <xsl:variable name="arity" select="count(arguments/argument)"/>
@@ -90,6 +90,13 @@
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>, 0)</xsl:text>
          </xsl:when>
+         <xsl:when test="$argType = 'java.math.BigInteger' and $arity=2">
+            <xsl:text>new Singulink.Numerics.BigDecimal(</xsl:text>
+            <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
+            <xsl:text>, -(</xsl:text>
+            <xsl:apply-templates select="arguments/argument[2]" mode="xml-to-cs"/>
+            <xsl:text>))</xsl:text>
+         </xsl:when>
          <xsl:otherwise>
             <xsl:next-match/>
          </xsl:otherwise>
@@ -110,6 +117,14 @@
    <!-- TopDownStackIterable. Not needed on .NET because stacks naturally iterate top-down -->
    <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.tree.jiter.TopDownStackIterable']" priority="30">
       <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+   </xsl:template>
+   
+   <!-- java.io.File -->
+   <xsl:template match="*[type/@RESOLVED_TYPE='java.io.FileInputStream']
+      [count(arguments/argument) eq 2]" priority="30">
+      <xsl:text>java.io.File.Resolve(</xsl:text>
+      <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+      <xsl:text>)</xsl:text>
    </xsl:template>
    
    <!-- new FileInputStream(java.io.File f) ==> System.IO.File.OpenRead(f.getPath()) -->

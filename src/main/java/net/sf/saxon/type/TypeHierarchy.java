@@ -342,13 +342,14 @@ public class TypeHierarchy {
             return SUBSUMES;
         }
         ItemTypePair pair = new ItemTypePair(t1, t2);
-        Affinity result = map.get(pair);
-        if (result == null) {
-            result = computeRelationship(t1, t2);
-            map.put(pair, result);
+        if (map.containsKey(pair)) {
+            return map.get(pair);
         }
-        return result;
+        Affinity affinity = computeRelationship(t1, t2);
+        map.put(pair, affinity);
+        return affinity;
     }
+
 
     /**
      * Replace an item type, where necessary, by one that can safely be stored in the cache

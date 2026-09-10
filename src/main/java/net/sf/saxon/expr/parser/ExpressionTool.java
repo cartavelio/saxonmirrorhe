@@ -1718,7 +1718,7 @@ public class ExpressionTool {
             if (base == null) {
                 base = getCurrentDirectory();
             }
-            if (base != null) {
+            if (base != null && !base.isEmpty()) {
                 expressionBaseURI = new URI(base);
             }
         } catch (URISyntaxException e) {

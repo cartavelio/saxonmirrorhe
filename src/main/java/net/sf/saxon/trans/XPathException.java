@@ -188,6 +188,21 @@ public class XPathException extends TransformerException {
         }
     }
 
+    //#if CSHARP==true
+    /**
+     * Get the error message. Adapted on C# to get the message from a
+     * contained exception
+     */
+
+    public String getMessage() {
+        if (getCause() == null) {
+            return super.getMessage();
+        } else {
+            return super.getMessage() + ": " + getCause().getMessage();
+        }
+    }
+    //#endif
+
     /**
      * Set dynamic context information in the exception object
      *
