@@ -14,6 +14,7 @@ import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.value.CalendarValue;
 import net.sf.saxon.value.DateTimeValue;
 
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -465,11 +466,11 @@ public class NamedTimeZone {
         return Optional.of(inDaylightTime(zone, date.secondsSinceEpoch().longValue()));
     }
 
-    @CSharpReplaceException(from="java.time.zone.ZoneRulesException", to="System.Exception")
+    @CSharpReplaceException(from="java.time.DateTimeException", to="System.Exception")
     private static ZoneId olsonZoneOrUtc(String olsonName) {
         try {
             return ZoneId.of(olsonName);
-        } catch (java.time.zone.ZoneRulesException e) {
+        } catch (DateTimeException e) {
             return ZoneId.of("UTC");
         }
     }
