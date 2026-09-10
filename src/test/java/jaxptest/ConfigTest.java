@@ -294,7 +294,7 @@ public class ConfigTest {
             fail("invalidity not detected");
         } catch (SaxonApiException err) {
             assertTrue(err.getMessage().contains("Invalid configuration property xsd/@occurrenceLimits"));
-            assertTrue(err.getMessage().contains("Property not available in Saxon-HE"));
+            assertTrue(err.getMessage().contains("Property occurrenceLimits not available in Saxon-HE"));
             System.err.println(err.getMessage());
             // failure expected;
         }
