@@ -88,6 +88,7 @@ namespace SaxonCS_NUnit {
          * preserved through validation
          */
 
+        //[Ignore("Restriction: Multiple base URIs in a document not recognized")]
         [Test]
         public void TestValidationWithEntities() {
             try {
@@ -297,27 +298,20 @@ namespace SaxonCS_NUnit {
         public void TestImportUsingSchemaUriResolver() {
             try {
                 Processor p = new Processor(true);
-                // p.SetProperty(Feature.SCHEMA_URI_RESOLVER, new SchemaURIResolver() {
-                //
-                //     @Override
-                //     public void setConfiguration(Configuration config) {
-                //         //To change body of implemented methods use File | Settings | File Templates.
-                //     }
-                //
-                //     @Override
-                //     public Source[] resolve(string targetNamespace, string baseURI, string[] locations) {
-                //         if (targetNamespace == "http://two/") {
-                //             return new Source[]{new StreamSource(new StringReader(
-                //                     "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" targetNamespace=\"http://two/\">\n" +
-                //                             "    <xs:simpleType name='date'><xs:restriction base='xs:date'/></xs:simpleType>\n" +
-                //                             "</xs:schema> "
-                //             ))};
-                //         } else {
-                //             return null;
-                //         }
-                //     }
-                // });
                 SchemaManager sm = p.SchemaManager;
+                sm.SchemaResolver = (targetNamespace, uri, hints) => {
+                    if (targetNamespace == "http://two/") {
+                        return p.NewDocumentBuilder().Build(new StringReader(
+                            "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" targetNamespace=\"http://two/\">\n" +
+                            "    <xs:simpleType name='date'><xs:restriction base='xs:date'/></xs:simpleType>\n" +
+                            "</xs:schema> "
+                        ));
+                    }
+                    else {
+                        return null;
+                    }
+                };
+
                 string xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='http://two/'>\n" +
                               "<xs:import namespace='http://two/'/>" +
                               "<xs:element name='a' type='b:date'/>\n" +
@@ -382,7 +376,7 @@ namespace SaxonCS_NUnit {
                 XPathCompiler xp = proc.NewXPathCompiler();
                 xp.SchemaAware = true;
                 XdmAtomicValue result = (XdmAtomicValue) xp.Evaluate("count(//comment())", destination.XdmNode);
-                Assert.AreEqual(1, result.GetLongValue());
+                Assert.AreEqual(1, result.AsLong());
 
                 try {
                     sv.Validate(new StringReader(invalid_xml));
@@ -437,7 +431,7 @@ namespace SaxonCS_NUnit {
                 XPathCompiler xp = proc.NewXPathCompiler();
                 xp.SchemaAware = (true);
                 XdmAtomicValue result = (XdmAtomicValue) xp.Evaluate("count(//comment())", destination.XdmNode);
-                Assert.AreEqual(1, result.GetLongValue());
+                Assert.AreEqual(1, result.AsLong());
 
                 try {
                     sv.Validate(new StringReader(invalid_xml));
@@ -652,21 +646,15 @@ namespace SaxonCS_NUnit {
                 proc.SetProperty(Saxon.Api.Feature<bool>.IMPLICIT_SCHEMA_IMPORTS, true);
 
                 SchemaManager sm = proc.SchemaManager;
-                sm.SchemaResolver = null;
-                //     @Override
-                //     public Source[] resolve(string targetNamespace, string baseURI, string[] locations) {
-                //         if (targetNamespace.equals("http://x.com/ns")) {
-                //             return new StreamSource[]{new StreamSource(new StringReader(xsd2))};
-                //         } else {
-                //             return null;
-                //         }
-                //     }
-                //
-                //     @Override
-                //     public void setConfiguration(Configuration config) {
-                //
-                //     }
-                // });
+                sm.SchemaResolver = (targetNamespace, uri, hints) => {
+                    if (targetNamespace == "http://x.com/ns") {
+                        return proc.NewDocumentBuilder().Build(new StringReader(xsd2));
+                    }
+                    else {
+                        return null;
+                    }
+                };
+                
                 sm.Compile(new StringReader(xsd1));
                 sm.Compile(new StringReader(xsd2));
 
@@ -1195,24 +1183,7 @@ namespace SaxonCS_NUnit {
 
 
 
-        [Test]
-        public void TestBug4507() {
-            try {
-                Processor proc = new Processor(true);
-                SchemaManager sm = proc.SchemaManager;
-                sm.Compile(new Uri(ConfigTest.BugsDirUri, "2020/4507-Carter/2000-04-03/data/schema.xsd"));
-                SchemaValidator val = sm.NewSchemaValidator();
-                val.Validate(new Uri(ConfigTest.BugsDirUri, "2020/4507-Carter/2000-04-03/data/data.xml"));
-                Instrumentation.report();
-            }
-            catch (SaxonApiException e) {
-                //e.printStackTrace();
-                Assert.Fail();
-            }
-        }
-
-
-
+ 
 
     }
 

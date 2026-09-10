@@ -60,6 +60,25 @@ namespace SaxonCS_NUnit {
             Assert.AreEqual(0, baz.Children().Count());
             Assert.AreEqual(0, baz.Children("baz").Count());
         }
+        
+        [Test]
+        public void TestChildrenRepeatable() {
+            // Children() returns an Enumerable so we need to be able to process it more than once...
+            Processor proc = new();
+            DocumentBuilder builder = proc.NewDocumentBuilder();
+            XdmNode doc = builder.Build(new StringReader("<in><foo/><foo/><foo/></in>"));
+            XdmNode element = doc.Children().First();
+            IEnumerable<XdmNode> grandkids = element.Children();
+            int counter = 0;
+            foreach (XdmNode grandkid in grandkids) {
+                counter++;
+            }
+            Assert.AreEqual(3, counter);
+            foreach (XdmNode grandkid in grandkids) {
+                counter++;
+            }
+            Assert.AreEqual(6, counter);
+        }
 
         [Test]
         public void TestAttributes() {

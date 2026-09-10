@@ -266,7 +266,7 @@ namespace SaxonCS_NUnit {
                 builder.BaseUri = new Uri("http://www.example.com");
                 s.ContextItem = (builder.Build(new StringReader(xml)));
                 XdmItem val = s.EvaluateSingle();
-                Assert.AreEqual("29", val.GetStringValue());
+                Assert.AreEqual("29", val.StringValue);
                 Assert.AreEqual("<age:ag xmlns:age=\"http://www.w3.org/2003/01/geo/wgs84_pos#\">29</age:ag>",
                     val.ToString());
             }
