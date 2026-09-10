@@ -7,8 +7,8 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
@@ -23,10 +23,12 @@ import net.sf.saxon.value.StringValue;
  */
 
 
-public abstract class UnparsedEntity extends SystemFunction implements Callable {
+public abstract class UnparsedEntity extends SystemFunction implements IContextAccessorFunction {
 
     public static int URI = 0;
     public static int PUBLIC_ID = 1;
+
+    private Item boundContextItem = null;
 
     public abstract int getOp();
 
@@ -45,7 +47,7 @@ public abstract class UnparsedEntity extends SystemFunction implements Callable 
         String arg0 = arguments[0].head().getStringValue();
         NodeInfo doc = null;
         if (getArity() == 1) {
-            Item it = context.getContextItem();
+            Item it = boundContextItem == null ? context.getContextItem() : boundContextItem;
             if (it instanceof NodeInfo) {
                 doc = ((NodeInfo)it).getRoot();
             }
@@ -71,6 +73,19 @@ public abstract class UnparsedEntity extends SystemFunction implements Callable 
             result = "";
         }
         return operation == URI ? new AnyURIValue(result) : new StringValue(result);
+    }
+
+    /**
+     * Bind context information to appear as part of the function's closure. If this method
+     * has been called, the supplied context will be used in preference to the
+     * context at the point where the function is actually called.
+     *
+     * @param context the context to which the function applies. Must not be null.
+     */
+    @Override
+    public FunctionItem bindContext(XPathContext context) throws XPathException {
+        boundContextItem = context.getContextItem();
+        return this;
     }
 
     public static class UnparsedEntityUri extends UnparsedEntity {
