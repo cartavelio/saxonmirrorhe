@@ -567,7 +567,10 @@ cdef class PySaxonProcessor:
         :param value_ptr:
         :return:
         """
-        cdef PyXdmNode node = PyXdmNode(self)
+        cdef PyXdmNode node = None
+        if value_ptr is NULL:
+            return None
+        node = PyXdmNode(self)
         node.derivednptr = node.derivedptr = node.thisvptr = value_ptr
         value_ptr.incrementRefCount()
 
@@ -580,7 +583,10 @@ cdef class PySaxonProcessor:
         :param value_ptr:
         :return:
         """
-        cdef PyXdmFunctionItem func = PyXdmFunctionItem(self)
+        cdef PyXdmFunctionItem func = None
+        if value_ptr is NULL:
+            return None
+        func = PyXdmFunctionItem(self)
         func.derivedfptr = func.derivedptr = func.thisvptr = value_ptr
         value_ptr.incrementRefCount()
 
@@ -593,7 +599,10 @@ cdef class PySaxonProcessor:
         :param value_ptr:
         :return:
         """
-        cdef PyXdmMap map = PyXdmMap(self)
+        cdef PyXdmMap map = None
+        if value_ptr is NULL:
+            return None
+        map = PyXdmMap(self)
         map.derivedmmptr = map.derivedfptr = map.derivedptr = map.thisvptr = value_ptr
         value_ptr.incrementRefCount()
 
@@ -606,7 +615,10 @@ cdef class PySaxonProcessor:
         :param value_ptr:
         :return:
         """
-        cdef PyXdmArray array = PyXdmArray(self)
+        cdef PyXdmArray array = None
+        if value_ptr is NULL:
+            return None
+        array = PyXdmArray(self)
         array.derivedaaptr = array.derivedfptr = array.derivedptr = array.thisvptr = value_ptr
 
         value_ptr.incrementRefCount()
@@ -620,7 +632,10 @@ cdef class PySaxonProcessor:
         :param value_ptr:
         :return:
         """
-        cdef PyXdmAtomicValue atomic_value = PyXdmAtomicValue(self)
+        cdef PyXdmAtomicValue atomic_value = None
+        if value_ptr is NULL:
+            return None
+        atomic_value = PyXdmAtomicValue(self)
         atomic_value.derivedaptr = atomic_value.derivedptr = atomic_value.thisvptr = value_ptr
         value_ptr.incrementRefCount()
 
