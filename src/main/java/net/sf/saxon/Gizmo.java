@@ -175,9 +175,6 @@ public class Gizmo {
     public Gizmo(String[] args) {
         initSubCommands();
         config = Configuration.newConfiguration();
-        // TODO: temporary
-        //config.setResourceResolver(request -> null);
-        // TODO: above is temporary
         boolean allow40 = config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY);
         if (allow40) {
             config.setConfigurationProperty(Feature.ALLOW_SYNTAX_EXTENSIONS, true);
