@@ -39,11 +39,10 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     private XdmDestination xdmDestination = null;
 
 
-    /*
-     *   Default constructor to create a Schema valditor based on the s9api. Assume license file is available.
+    /**
+     *   Default constructor to create a Schema validator based on the s9api. Assume license file is available.
      *   throw SaxonApiException if processor not licensed
      **/
-
     public SchemaValidatorForCpp() throws SaxonApiException {
         processor = new Processor(true);
         schemaManager = processor.getSchemaManager();
@@ -54,6 +53,13 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
         schemaManager = processor.getSchemaManager();
     }
 
+    /**
+     *  create SchemaValidatorForCpp with reference to object held in the Graalvm ObjectHandles pool.
+     *  This methods calls the constructor class
+     * @param thread - Graalvm runtime data structure for the thread
+     * @return  - long value to the created SchemaValidatorForCpp object in the ObjectHandles pool
+     * @throws SaxonApiException
+     */
     @CEntryPoint(name = "createSchemaValidator", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createSchemaValidator(IsolateThread thread) throws SaxonApiException {
         SchemaValidatorForCpp validatorForCpp = new SchemaValidatorForCpp();
@@ -68,11 +74,13 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
     }
 
-    /*
-     *   Default constructor to create a Schema valditor based on the s9api. Assume license file is available.
-     *   @param proc - Supplied processor. Assume that license feature is enabled
+    /**
+     *   Default constructor to create a Schema validator based on the s9api. Assume license file is available.
+     *   @param thread - Graalvm runtime data structure for the thread
+     *   @param procRef - Supplied reference to the processor object in the ObjectHandles pool. Assume that license feature is enabled
      *   throw SaxonApiException if processor not licensed
      **/
+
     @CEntryPoint(name = "createSchemaValidatorWithProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createSchemaValidatorWithProcessor(IsolateThread thread, ObjectHandle procRef) throws SaxonApiException {
         if (procRef == WordFactory.nullPointer()) {
@@ -103,7 +111,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     /**
      * Get the Schema manager
      *
-     * @return SchemaManager
+     * @return long value reference to the SchemaManager object
      */
     @CEntryPoint(name = "j_getSchemaManager")
     public static long j_getSchemaManager(IsolateThread thread, ObjectHandle processorRef) {
@@ -134,6 +142,13 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
        return xdmDestination.getXdmNode();
     }
 
+    /**
+     * get the validation report as a reference to the created XdmNode object
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param schemaValidatorForCpp - Reference to the SchemaValidatorForCpp object
+     * @return long value to the Validator report object
+     * @throws SaxonApiException
+     */
     @CEntryPoint(name = "j_getValidationReport", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_getValidationReport(IsolateThread thread, ObjectHandle schemaValidatorForCpp) throws SaxonApiException {
         SchemaValidatorForCpp schemaValidatorForCpp1 = SaxonCAPI.objectHandles.get(schemaValidatorForCpp);
@@ -149,11 +164,13 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     /**
      * Register the Schema by file name.
      *
-     * @param cwd    - Current Working directory
-     * @param xsd    - File name of the schema relative to the cwd
-     * @param params - parameters and property names given as an array of stings.
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param processorRef - processor reference
+     * @param ccwd    - Current Working directory
+     * @param cxsd    - File name of the schema relative to the cwd
+     * @param processorDataAccumulatorRef - parameters and property names given as reference to the ProcessorData object.
      *               We handle processor properties here
-     * @param values - the values of the parameters and properties. given as a array of Java objects
+     * @return long value: Success= 0, Failure = -1 and Exception thrown = -2
      */
     @CEntryPoint(name = "j_registerSchema", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long registerSchema(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
@@ -195,12 +212,12 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     /**
      * Register the Schema which is given as a string representation.
      *
-     * @param cwd      - Current Working directory
-     * @param xsd      - File name of the schema relative to the cwd
-     * @param systemId - The system ID of the document
-     * @param params   - parameters and property names given as an array of stings.
-     *                 We handle processor properties here
-     * @param values   - the values of the parameters and properties. given as a array of Java objects
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param processorRef - processor reference
+     * @param cxsd      - File name of the schema relative to the cwd
+     * @param csystemId - The system ID of the document
+     * @param processorDataAccumulatorRef - parameters and property names given as reference to the ProcessorData object.
+     * @return long value: Success= 0, Failure = -1 or Exception thrown = -2
      */
     @CEntryPoint(name = "j_registerSchemaString")
     public static long registerSchemaString(IsolateThread thread, ObjectHandle processorRef, CCharPointer cxsd, CCharPointer csystemId, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
@@ -246,9 +263,11 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     /**
      * Export a precompiled Schema Component Model containing all the components (except built-in components)
      * that have been loaded into this Processor.
-     *
-     * @param cwd        The current working directory
-     * @param outputfile The file name to which the SCM will be saved
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param processorRef - processor reference
+     * @param ccwd - The current working directory
+     * @param coutputfile The file name to which the SCM will be saved
+     * @return long value: Success= 0 or Exception thrown = -2
      * @throws SaxonApiException
      */
     @CEntryPoint(name = "j_exportSchema", exceptionHandler = SaxonCExceptionLongHandler.class)
@@ -303,11 +322,14 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     /**
      * Validate an instance document supplied as a Source object
      *
-     * @param cwd            - Current working directory
-     * @param sourceFilename - The name of the file to be validated
-     * @param outfilename    - The name of the file where output from the validator will be sent. Can be null.
-     * @param params         - Parameters and properties names required by the Validator. This could contain the source as a node , source as string or file name, validator options, etc
-     * @param values         -  The values for the parameters and properties required by the Validator
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param processorRef - processor reference
+     * @param ccwd            - Current working directory
+     * @param csourceFilename - The name of the file to be validated
+     * @param c_outfilename    - The name of the file where output from the validator will be sent. Can be null.
+     * @param processorDataRef - parameters and property names given as reference to the ProcessorData object.
+     *                                    Parameters and properties names required by the Validator. This could contain the source as a node , source as string or file name, validator options, etc
+     * @return long value: Success= 0 or Exception thrown = -2
      **/
     @CEntryPoint(name = "j_validate", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long validate(IsolateThread thread, ObjectHandle processorRef, ObjectHandle schemaValidatorForCppRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer c_outfilename, ObjectHandle processorDataRef) throws SaxonApiException {
@@ -379,11 +401,13 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     /**
      * Validate an instance document supplied as a Source object with the validated document returned to the calling program
      *
-     * @param cwd            - Current working directory
-     * @param sourceFilename - The name of the file to be validated
-     * @param params         - Parameters and properties names required by the Validator. This could contain the source as a node , source as string or file name, validator options, etc
-     * @param values         -  The values for the parameters and properties required by the Validator
-     * @return XdmNode
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param processorRef - processor reference
+     * @param ccwd            - Current working directory
+     * @param csourceFilename - The name of the file to be validated
+     * @param processorDataRef - parameters and property names given as reference to the ProcessorData object.
+     *                                    Parameters and properties names required by the Validator. This could contain the source as a node , source as string or file name, validator options, etc
+     * @return reference to the XdmNode object
      **/
     @CEntryPoint(name = "j_validateToNode", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long validateToNode(IsolateThread thread, ObjectHandle processorRef, ObjectHandle schemaValidatorForCppRef, CCharPointer ccwd, CCharPointer csourceFilename, ObjectHandle processorDataRef) throws SaxonApiException {
