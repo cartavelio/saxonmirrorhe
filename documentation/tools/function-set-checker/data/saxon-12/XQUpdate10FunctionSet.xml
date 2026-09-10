@@ -3,5 +3,5 @@
           pulled="2026-04-23T21:37:00+01:00"
           name="XQuery Update 1.0 Function Set"
           catalog="xpath">
-   <function prefix="fn" local-name="put" name="fn:put"/>
+   <function name="fn:put"/>
 </registry>

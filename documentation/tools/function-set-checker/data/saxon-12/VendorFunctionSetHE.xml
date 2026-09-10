@@ -3,31 +3,15 @@
           pulled="2026-04-23T21:37:00+01:00"
           name="HE Vendor Function Set"
           catalog="saxon">
-   <function prefix="saxon"
-             local-name="is-whole-number"
-             name="saxon:is-whole-number"/>
-   <function prefix="saxon"
-             local-name="dynamic-error-info"
-             name="saxon:dynamic-error-info"/>
-   <function prefix="saxon" local-name="apply" name="saxon:apply"/>
-   <function prefix="saxon" local-name="create-map" name="saxon:create-map"/>
-   <function prefix="saxon" local-name="doc" name="saxon:doc"/>
-   <function prefix="saxon"
-             local-name="has-local-namespaces"
-             name="saxon:has-local-namespaces"/>
-   <function prefix="saxon"
-             local-name="has-uniform-namespaces"
-             name="saxon:has-uniform-namespaces"/>
-   <function prefix="saxon"
-             local-name="map-untyped-contains"
-             name="saxon:map-untyped-contains"/>
-   <function prefix="saxon"
-             local-name="map-as-sequence-of-maps"
-             name="saxon:map-as-sequence-of-maps"/>
-   <function prefix="saxon"
-             local-name="yes-no-boolean"
-             name="saxon:yes-no-boolean"/>
-   <function prefix="saxon"
-             local-name="concatenate-sequences"
-             name="saxon:concatenate-sequences"/>
+   <function name="saxon:is-whole-number"/>
+   <function name="saxon:dynamic-error-info"/>
+   <function name="saxon:apply"/>
+   <function name="saxon:create-map"/>
+   <function name="saxon:doc"/>
+   <function name="saxon:has-local-namespaces"/>
+   <function name="saxon:has-uniform-namespaces"/>
+   <function name="saxon:map-untyped-contains"/>
+   <function name="saxon:map-as-sequence-of-maps"/>
+   <function name="saxon:yes-no-boolean"/>
+   <function name="saxon:concatenate-sequences"/>
 </registry>

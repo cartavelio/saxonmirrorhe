@@ -3,6 +3,6 @@
           pulled="2026-04-23T21:37:00+01:00"
           name="EXSLT Common Function Set"
           catalog="exslt">
-   <function prefix="exsl" local-name="node-set" name="exsl:node-set"/>
-   <function prefix="exsl" local-name="object-type" name="exsl:object-type"/>
+   <function name="exsl:node-set"/>
+   <function name="exsl:object-type"/>
 </registry>

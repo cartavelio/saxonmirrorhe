@@ -3,24 +3,22 @@
           pulled="2026-04-23T21:37:00+01:00"
           name="Map Function Set"
           catalog="xpath">
-   <function prefix="map" local-name="merge" name="map:merge"/>
-   <function prefix="map" local-name="put" name="map:put"/>
-   <function prefix="map" local-name="contains" name="map:contains"/>
-   <function prefix="map" local-name="remove" name="map:remove"/>
-   <function prefix="map" local-name="keys" name="map:keys"/>
-   <function prefix="map" local-name="size" name="map:size"/>
-   <function prefix="map" local-name="entry" name="map:entry"/>
-   <function prefix="map" local-name="find" name="map:find"/>
-   <function prefix="map" local-name="for-each" name="map:for-each"/>
-   <function prefix="map" local-name="get" name="map:get"/>
-   <function prefix="map" local-name="index" name="map:index"/>
-   <function prefix="map" local-name="build" name="map:build"/>
-   <function prefix="map" local-name="pair" name="map:pair"/>
-   <function prefix="map" local-name="pairs" name="map:pairs"/>
-   <function prefix="map" local-name="entries" name="map:entries"/>
-   <function prefix="map" local-name="of-pairs" name="map:of-pairs"/>
-   <function prefix="map"
-             local-name="untyped-contains"
-             name="map:untyped-contains"/>
-   <function prefix="map" local-name="filter" name="map:filter"/>
+   <function name="map:merge"/>
+   <function name="map:put"/>
+   <function name="map:contains"/>
+   <function name="map:remove"/>
+   <function name="map:keys"/>
+   <function name="map:size"/>
+   <function name="map:entry"/>
+   <function name="map:find"/>
+   <function name="map:for-each"/>
+   <function name="map:get"/>
+   <function name="map:index"/>
+   <function name="map:build"/>
+   <function name="map:pair"/>
+   <function name="map:pairs"/>
+   <function name="map:entries"/>
+   <function name="map:of-pairs"/>
+   <function name="map:untyped-contains"/>
+   <function name="map:filter"/>
 </registry>

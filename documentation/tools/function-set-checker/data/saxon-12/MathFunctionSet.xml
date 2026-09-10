@@ -3,18 +3,18 @@
           pulled="2026-04-23T21:37:00+01:00"
           name="Math Function Set"
           catalog="xpath">
-   <function prefix="math" local-name="pi" name="math:pi"/>
-   <function prefix="math" local-name="sin" name="math:sin"/>
-   <function prefix="math" local-name="cos" name="math:cos"/>
-   <function prefix="math" local-name="tan" name="math:tan"/>
-   <function prefix="math" local-name="asin" name="math:asin"/>
-   <function prefix="math" local-name="acos" name="math:acos"/>
-   <function prefix="math" local-name="atan" name="math:atan"/>
-   <function prefix="math" local-name="sqrt" name="math:sqrt"/>
-   <function prefix="math" local-name="log" name="math:log"/>
-   <function prefix="math" local-name="log10" name="math:log10"/>
-   <function prefix="math" local-name="exp" name="math:exp"/>
-   <function prefix="math" local-name="exp10" name="math:exp10"/>
-   <function prefix="math" local-name="pow" name="math:pow"/>
-   <function prefix="math" local-name="atan2" name="math:atan2"/>
+   <function name="math:pi"/>
+   <function name="math:sin"/>
+   <function name="math:cos"/>
+   <function name="math:tan"/>
+   <function name="math:asin"/>
+   <function name="math:acos"/>
+   <function name="math:atan"/>
+   <function name="math:sqrt"/>
+   <function name="math:log"/>
+   <function name="math:log10"/>
+   <function name="math:exp"/>
+   <function name="math:exp10"/>
+   <function name="math:pow"/>
+   <function name="math:atan2"/>
 </registry>

@@ -3,47 +3,23 @@
           pulled="2026-04-23T21:37:00+01:00"
           name="XSLT 3.0 Function Set"
           catalog="xslt">
-   <function prefix="fn"
-             local-name="accumulator-after"
-             name="fn:accumulator-after"/>
-   <function prefix="fn"
-             local-name="accumulator-before"
-             name="fn:accumulator-before"/>
-   <function prefix="fn"
-             local-name="available-system-properties"
-             name="fn:available-system-properties"/>
-   <function prefix="fn" local-name="current" name="fn:current"/>
-   <function prefix="fn" local-name="current-group" name="fn:current-group"/>
-   <function prefix="fn"
-             local-name="current-grouping-key"
-             name="fn:current-grouping-key"/>
-   <function prefix="fn"
-             local-name="current-merge-group"
-             name="fn:current-merge-group"/>
-   <function prefix="fn"
-             local-name="current-merge-key"
-             name="fn:current-merge-key"/>
-   <function prefix="fn"
-             local-name="current-output-uri"
-             name="fn:current-output-uri"/>
-   <function prefix="fn" local-name="document" name="fn:document"/>
-   <function prefix="fn"
-             local-name="element-available"
-             name="fn:element-available"/>
-   <function prefix="fn"
-             local-name="function-available"
-             name="fn:function-available"/>
-   <function prefix="fn" local-name="key" name="fn:key"/>
-   <function prefix="fn" local-name="regex-group" name="fn:regex-group"/>
-   <function prefix="fn"
-             local-name="stream-available"
-             name="fn:stream-available"/>
-   <function prefix="fn" local-name="system-property" name="fn:system-property"/>
-   <function prefix="fn" local-name="type-available" name="fn:type-available"/>
-   <function prefix="fn"
-             local-name="unparsed-entity-public-id"
-             name="fn:unparsed-entity-public-id"/>
-   <function prefix="fn"
-             local-name="unparsed-entity-uri"
-             name="fn:unparsed-entity-uri"/>
+   <function name="fn:accumulator-after"/>
+   <function name="fn:accumulator-before"/>
+   <function name="fn:available-system-properties"/>
+   <function name="fn:current"/>
+   <function name="fn:current-group"/>
+   <function name="fn:current-grouping-key"/>
+   <function name="fn:current-merge-group"/>
+   <function name="fn:current-merge-key"/>
+   <function name="fn:current-output-uri"/>
+   <function name="fn:document"/>
+   <function name="fn:element-available"/>
+   <function name="fn:function-available"/>
+   <function name="fn:key"/>
+   <function name="fn:regex-group"/>
+   <function name="fn:stream-available"/>
+   <function name="fn:system-property"/>
+   <function name="fn:type-available"/>
+   <function name="fn:unparsed-entity-public-id"/>
+   <function name="fn:unparsed-entity-uri"/>
 </registry>
