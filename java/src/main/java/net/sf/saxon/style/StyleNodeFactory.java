@@ -222,7 +222,6 @@ public class StyleNodeFactory implements NodeFactory {
                 validNames.add("doctype");
                 validNames.add("entity-ref");
                 validNames.add("import-query");
-                validNames.add("item-type");
                 validNames.add("while");
                 if (validNames.contains(elemName.getLocalPart())) {
                     String message = elemName.getDisplayName() + " is not recognized as a Saxon instruction";

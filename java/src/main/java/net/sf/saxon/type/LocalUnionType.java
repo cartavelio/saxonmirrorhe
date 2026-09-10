@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * A class that represents a union type declared locally, for example using
- * the (Saxon-extension) item-type syntax union(a,b,c), or internally in Java code.
+ * the XPath 4.0 choice item-type syntax (a|b|c), or internally in Java code.
  */
 
 public class LocalUnionType extends ChoiceItemType implements PlainType, UnionType {

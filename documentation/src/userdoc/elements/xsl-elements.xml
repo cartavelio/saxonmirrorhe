@@ -2468,8 +2468,7 @@
                 <p>The <code>xsl:item-type</code> declaration is available from Saxon 13 in XSLT
                     4.0; it is available in Saxon 11 and 12 provided that syntax
                     extensions are enabled. (It was also available in earlier releases under the
-                    synonym <a class="bodylink code" href="/extensions/instructions/item-type"
-                        >saxon:item-type</a>.)</p>
+                    synonym <code>saxon:item-type</code>.)</p>
                 <p>In the current implementation item type names must be unique within the
                     stylesheet; import precedences for multiple declarations are not implemented,
                     and item types are not visible in other stylesheet packages. The

@@ -496,8 +496,8 @@
             </li>
             <li>
                 <p><a class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a></p>
-                <p>Used to declare a name (or alias) for an item type; replaces the previously available <a class="bodylink code"
-                    href="/extensions/instructions/item-type">saxon:item-type</a>.</p>
+                <p>Used to declare a name (or alias) for an item type; replaces the previously available
+                    <code>saxon:item-type</code>.</p>
             </li>
             <li>
                 <p><code>xsl:match</code></p>

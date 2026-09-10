@@ -1012,6 +1012,9 @@ TODO: rethink redefines and override
             <code>xsl:array</code> has changed to drop the <code>composite</code> attribute, and add
             the <code>for-each</code> attribute.</p>
         
+        <p>The <code>saxon:item-type</code> instruction is dropped, superseded by <code>xsl:item-type</code>
+            from the XSLT 4.0 specification.</p>
+        
         <p>The <code>saxon:as</code> extension attribute is deprecated; the standard <code>as</code>
             attribute can now be used in its place.</p>
         

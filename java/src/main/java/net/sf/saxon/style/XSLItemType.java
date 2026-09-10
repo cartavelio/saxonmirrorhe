@@ -96,7 +96,7 @@ public class XSLItemType extends StyleElement {
         checkEmpty();
         checkTopLevel("XTSE0010", false);
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION,
-                                                "saxon:item-type",
+                                                "xsl:item-type",
                                                 getPackageData().getLocalLicenseId());
     }
 
