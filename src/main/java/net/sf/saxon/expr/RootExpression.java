@@ -120,6 +120,7 @@ public class RootExpression extends Expression {
 
     /**
      * Customize the error message on type checking
+     * @return a suitable error message
      */
 
     protected String noContextMessage() {
@@ -161,7 +162,6 @@ public class RootExpression extends Expression {
      * inference rules defined in the XSLT 3.0 specification.
      *
      * @return the static item type of the expression according to the XSLT 3.0 defined rules
-     * @param contextItemType
      */
     @Override
     public UType getStaticUType(UType contextItemType) {
@@ -197,6 +197,8 @@ public class RootExpression extends Expression {
      * @param context The evaluation context
      * @return the NodeInfo of the first selected element, or null if no element
      *         is selected
+     * @throws XPathException for dynamic errors (no context item, context item is not a node, context node
+     * not rooted at a document node)
      */
 
     /*@Nullable*/
@@ -232,7 +234,7 @@ public class RootExpression extends Expression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables that need to be re-bound
      */
 
     /*@NotNull*/
@@ -260,8 +262,6 @@ public class RootExpression extends Expression {
      * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
      * by an expression in a source tree.
      *
-     * @param pathMap        the PathMap to which the expression should be added
-     * @param pathMapNodeSet
      * @return the pathMapNode representing the focus established by this expression, in the case where this
      *         expression is the first operand of a path expression or filter expression
      */

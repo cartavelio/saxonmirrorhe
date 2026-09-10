@@ -170,9 +170,8 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     * @return
+     * Get the value of the item as a UnicodeString.
+     * @return the string value
      */
 
     @Override

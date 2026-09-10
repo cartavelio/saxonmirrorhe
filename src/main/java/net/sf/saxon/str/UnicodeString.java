@@ -192,6 +192,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
     /**
      * Get the code point at a given position in the string
      * @param index the given position (0-based)
+     * @return the code point at the given position
      * @throws IndexOutOfBoundsException if the index is out of range
      */
 
@@ -203,12 +204,27 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      *
      * @param start the start position (0-based): that is, the position of the first
      *              code point to be included
+     * @return the requested substring
      * @throws IndexOutOfBoundsException if the start position is out of range
      */
 
     public UnicodeString substring(long start) {
         return substring(start, length());
     }
+
+    /**
+     * Get a substring of this string, with a given start and end position
+     *
+     * @param start the start position (0-based): that is, the position of the first
+     *              code point to be included
+     * @param end   the end position (0-based): specifically, the position of the first
+     *              code point not to be included
+     * @return the requested substring
+     * @throws IndexOutOfBoundsException if the start/end positions are out of range (the conditions
+     *                                   are the same as for <code>String.substring()</code>)
+     */
+
+    public abstract UnicodeString substring(long start, long end);
 
     /**
      * Concatenate with another string, returning a new string
@@ -220,17 +236,6 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
         return ZenoString.of(this).concat(other);
     }
 
-    /**
-     * Get a substring of this string, with a given start and end position
-     * @param start the start position (0-based): that is, the position of the first
-     *              code point to be included
-     * @param end the end position (0-based): specifically, the position of the first
-     *            code point not to be included
-     * @throws IndexOutOfBoundsException if the start/end positions are out of range (the conditions
-     * are the same as for <code>String.substring()</code>)
-     */
-
-    public abstract UnicodeString substring(long start, long end);
 
     protected void checkSubstringBounds(long start, long end) {
         if (start < 0) {
@@ -246,7 +251,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
 
     /**
      * Diagnostic method: verify that all the characters in the string are valid XML codepoints
-     * @throw IllegalStateException if the contents are invalid
+     * @throws IllegalStateException if the contents are invalid
      */
     public void verifyCharacters() {
         IntIterator iter = codePoints();
@@ -285,7 +290,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
     }
 
     /**
-     * Compute a hashCode. All implementations of {@code UniString use compatible hash codes and the
+     * Compute a hashCode. All implementations of {@code UnicodeString} use compatible hash codes and the
      * hashing algorithm is therefore identical to that for {@code java.lang.String}. This means
      * that for strings containing Astral characters, the hash code needs to be computed by decomposing
      * an Astral character into a surrogate pair.

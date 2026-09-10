@@ -434,6 +434,7 @@ public class ZenoString extends UnicodeString {
      * This method is for diagnostics and unit testing only: it exposes
      * the lengths of the internal segments. This is an implementation detail
      * that is subject to change and does not affect the exposed functionality.
+     * @return the lengths of the segments
      */
 
     public List<Long> debugSegmentLengths() {

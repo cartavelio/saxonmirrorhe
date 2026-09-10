@@ -79,6 +79,7 @@ public class CharacterSetFactory {
      *
      * @param details the serialization properties
      * @return the constructed CharacterSet
+     * @throws XPathException if the encoding is not recognized
      */
 
     public CharacterSet getCharacterSet(Properties details)
@@ -95,6 +96,7 @@ public class CharacterSetFactory {
      * Make a CharacterSet appropriate to the encoding
      * @param encoding the required encoding
      * @return the constructed CharacterSet
+     * @throws XPathException if the encoding is not recognized
      */
 
     public CharacterSet getCharacterSet(String encoding)
@@ -142,6 +144,7 @@ public class CharacterSetFactory {
      * by the Java VM
      *
      * @param args command line arguments (none needed)
+     * @throws Exception if anything goes wrong
      */
 
     public static void main(String[] args) throws Exception {

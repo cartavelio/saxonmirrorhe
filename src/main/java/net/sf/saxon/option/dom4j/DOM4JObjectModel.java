@@ -172,7 +172,7 @@ public class DOM4JObjectModel extends TreeModel implements ExternalObjectModel {
      * Test whether this object model recognizes a particular kind of JAXP Result object,
      * and if it does, return a Receiver that builds an instance of this data model from
      * a sequence of events. If the Result is not recognised, return null.
-     * @return
+     * @return a Receiver that can be used to build a DOM4J Document
      */
 
     @Override

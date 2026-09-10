@@ -20,11 +20,11 @@ import java.util.List;
 /**
  * Class ListIterator, iterates over a sequence of items held in a Java List.
  *
- * @implNote There are three subclasses: {@code ListIterator}, which takes a general list of items,
+ * <p>Note: There are three subclasses: {@code ListIterator}, which takes a general list of items,
  * {@code NodeListIterator}, which takes a list of nodes, and {@code AtomicListIterator}, which takes
  * a list of atomic values. It might seem simpler to implement this entirely using generics, but that
  * design proves very difficult to translate to C#, where generics behave very differently. With this approach
- * the generics are confined to this abstract class.
+ * the generics are confined to this abstract class.</p>
  */
 
 public abstract class ListIterator implements SequenceIterator, LastPositionFinder, LookaheadIterator, GroundedIterator, ReversibleIterator {

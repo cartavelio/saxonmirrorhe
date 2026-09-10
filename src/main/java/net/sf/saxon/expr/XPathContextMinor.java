@@ -192,6 +192,7 @@ public class XPathContextMinor implements XPathContext {
      *
      * @param iter the current iterator. The context item, position, and size are determined by reference
      *             to the current iterator.
+     * @return the iterator
      */
 
     public FocusIterator trackFocusMultithreaded(SequenceIterator iter) {
@@ -233,7 +234,7 @@ public class XPathContextMinor implements XPathContext {
      * Get the context size (the position of the last item in the current node list)
      *
      * @return the context size
-     * @throws XPathException if the context position is undefined
+     * @throws UncheckedXPathException if the context position is undefined
      */
 
     @Override

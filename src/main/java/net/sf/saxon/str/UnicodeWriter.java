@@ -34,6 +34,7 @@ public interface UnicodeWriter {
      * output stream "as is", because many encodings have ASCII as a subset.)
      * @param content byte array holding ASCII characters only (the effect if
      *                the high-order bit is set is undefined)
+     * @throws IOException if processing fails for any reason
      */
 
     void writeAscii(byte[] content) throws IOException;

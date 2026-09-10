@@ -58,7 +58,7 @@ public class ContextItemExpression extends Expression {
      * Create a clone copy of this expression
      *
      * @return a copy of this expression
-     * @param rebindings
+     * @param rebindings     variables that must be re-bound
      */
 
     /*@NotNull*/

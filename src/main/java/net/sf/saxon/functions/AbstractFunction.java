@@ -76,7 +76,7 @@ public abstract class AbstractFunction implements Function {
      * Get the string value of the function
      *
      * @throws UnsupportedOperationException (the string value of a function is not defined)
-     * @return
+     * @return nothing; this method always throws an exception
      */
 
     @Override
@@ -122,7 +122,7 @@ public abstract class AbstractFunction implements Function {
      * Prepare an XPathContext object for evaluating the function
      *
      * @param callingContext the XPathContext of the function calling expression
-     * @param originator
+     * @param originator the originator of the new context
      * @return a suitable context for evaluating the function (which may or may
      * not be the same as the caller's context)
      */

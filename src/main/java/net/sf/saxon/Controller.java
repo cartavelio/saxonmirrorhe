@@ -1408,6 +1408,7 @@ public class Controller implements ContextOriginator {
      * <p>This method is intended for internal use.</p>
      *
      * @param context the dynamic context for evaluating the global variables
+     * @throws XPathException if pre-evaluation is attempted and fails with a dynamic error
      */
 
     public void preEvaluateGlobals(XPathContext context) throws XPathException {

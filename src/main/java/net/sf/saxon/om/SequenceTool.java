@@ -174,8 +174,8 @@ public class SequenceTool {
     /**
      * Ask whether the length of a sequence is exactly N
      *
-     * @implNote this is more efficient than counting the items and testing whether the result is
-     * N, because the sequence only needs to be read as far as the Nth item.
+     * <p>Note: this is more efficient than counting the items and testing whether the result is
+     * N, because the sequence only needs to be read as far as the Nth item.</p>
      *
      * @param iter   an iterator over the sequence in question (which is typically consumed)
      * @param length the supposed length

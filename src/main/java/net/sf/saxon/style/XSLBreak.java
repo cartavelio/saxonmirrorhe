@@ -58,7 +58,7 @@ public class XSLBreak extends XSLBreakOrContinue {
      * initialisation. The default implementation does nothing; it is normally overriden
      * in subclasses.
      *
-     * @param decl
+     * @param decl the component declaration - not used in this case
      */
 
     @Override

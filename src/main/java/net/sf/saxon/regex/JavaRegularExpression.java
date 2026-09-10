@@ -25,8 +25,8 @@ import java.util.regex.PatternSyntaxException;
  * An implementation of RegularExpression that calls the JDK regular expression library directly.
  * This can be invoked by appending ";j" to the flags attribute/argument.
  *
- * @implNote Note that in Saxon-CS, this class is emulated by code that invokes the .NET
- * regex engine, which has different rules. In this case the ";n" flag activates this option.
+ * <p>Note that in Saxon-CS, this class is emulated by code that invokes the .NET
+ * regex engine, which has different rules. In this case the ";n" flag activates this option.</p>
  */
 public class JavaRegularExpression implements RegularExpression {
 

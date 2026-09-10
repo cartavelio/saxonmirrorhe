@@ -61,8 +61,6 @@ public interface ItemType {
 
     /**
      * Test whether a given item conforms to this type
-     *
-     *
      * @param item    The item to be tested
      * @param th      The type hierarchy cache. Currently used only when matching function items.
      * @return true if the item is an instance of this type; false otherwise
@@ -157,6 +155,7 @@ public interface ItemType {
      * Get the full alpha code for this item type. As well as the basic alpha code, this contains
      * additional information, for example <code>element(EFG)</code> has a basic alpha code of
      * <code>NE</code>, but the full alpha code of <code>NE nQ{}EFG</code>.
+     * @return the alpha code for the type
      */
 
     default String getFullAlphaCode() {

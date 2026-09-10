@@ -93,9 +93,9 @@ public class XPathExpressionImpl implements XPathExpression {
     /**
      * JAXP 1.3 evaluate() method
      *
-     * @param node  The context node: generalized in Saxon to allow any XDM item to act as the context item.</p>
+     * @param node  The context node: generalized in Saxon to allow any XDM item to act as the context item.
      *              <p>The types of values accepted, and the conversions applied, are described in the Saxon
-     *              documentation.</p>
+     *              documentation.
      *              <p><b>Contrary to the interface specification, Saxon does not supply an empty
      *              document when the value is null. This is because XPath 2.0 allows the context
      *              item to be "absent" (null). So Saxon executes the XPath expression with the
@@ -107,6 +107,7 @@ public class XPathExpressionImpl implements XPathExpression {
      * @return the result of the evaluation, as a Java object of the appropriate type. Saxon interprets the
      *         rules as follows:
      *         <table>
+     *             <caption>Return value types</caption>
      *         <thead><tr><td>QName</td><td>Return Value</td></thead>
      *         <tbody>
      *         <tr><td valign="top">BOOLEAN</td>
@@ -249,7 +250,7 @@ public class XPathExpressionImpl implements XPathExpression {
     /**
      * Evaluate the expression to return a string value
      *
-     * @param node  The context node: generalized in Saxon to allow any XDM item to act as the context item.</p>
+     * @param node  The context node: generalized in Saxon to allow any XDM item to act as the context item.
      *              <p>The types of values accepted, and the conversions applied, are described in the Saxon
      *              documentation.</p>
      *              <p><b>Contrary to the interface specification, Saxon does not supply an empty

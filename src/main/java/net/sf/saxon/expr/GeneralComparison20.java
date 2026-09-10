@@ -34,7 +34,7 @@ public class GeneralComparison20 extends GeneralComparison {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings   variables that must be re-bound
      */
 
     /*@NotNull*/

@@ -152,6 +152,7 @@ public interface MutableNodeInfo extends NodeInfo {
      * prefix, the method throws an exception.
      *
      * @param prefix the namespace prefix.
+     * @param uri the corresponding namespace URI
      */
 
     default void addNamespace(String prefix, String uri) {

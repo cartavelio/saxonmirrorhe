@@ -43,6 +43,8 @@ public interface PendingUpdateList {
      * @param node       (the first argument of put())
      * @param uri        (the second argument of put())
      * @param originator the originating put() expression, for diagnostics
+     * @throws XPathException in the event of an error, for example two documents with
+     * the same URI
      */
 
     void addPutAction(NodeInfo node, String uri, Expression originator) throws XPathException;

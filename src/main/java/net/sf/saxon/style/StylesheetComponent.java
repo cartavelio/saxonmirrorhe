@@ -36,6 +36,7 @@ public interface StylesheetComponent {
      *
      * @param declaration the combination of the source XSLT element defining the component, and the
      * module in which it appears
+     * @throws XPathException if an error is found at this stage (which shouldn't really happen)
      */
 
     void optimize(ComponentDeclaration declaration) throws XPathException;

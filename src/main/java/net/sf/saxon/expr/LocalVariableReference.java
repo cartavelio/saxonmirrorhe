@@ -24,6 +24,7 @@ public class LocalVariableReference extends VariableReference {
 
     /**
      * Create a local variable reference. The binding and slot number will be supplied later
+     * @param name the name of the local variable
      */
 
     public LocalVariableReference(StructuredQName name) {

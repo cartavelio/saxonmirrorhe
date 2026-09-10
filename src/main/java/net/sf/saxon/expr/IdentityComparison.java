@@ -141,7 +141,7 @@ public final class IdentityComparison extends BinaryExpression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings  variables that must be re-bound
      */
 
     /*@NotNull*/
@@ -242,7 +242,6 @@ public final class IdentityComparison extends BinaryExpression {
      * inference rules defined in the XSLT 3.0 specification.
      *
      * @return the static item type of the expression according to the XSLT 3.0 defined rules
-     * @param contextItemType
      */
     @Override
     public UType getStaticUType(UType contextItemType) {

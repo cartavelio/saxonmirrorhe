@@ -14,7 +14,7 @@ import net.sf.saxon.value.AtomicValue;
  * that if two atomic values are equal under the XPath 'eq' operator, then their corresponding surrogates
  * are equal under the Java equals() comparison (and by implication, they have equal hash codes).
  * <p>Match keys representing atomic values
- * of an ordered type, however, must also implement Comparable<AtomicMatchKey, and their compareTo() method must
+ * of an ordered type, however, must also implement Comparable&lt;AtomicMatchKey&gt;, and their compareTo() method must
  * reflect the ordering semantics. In the case of strings this means the keys must reflect the
  * semantics of the relevant collation.</p>
  */

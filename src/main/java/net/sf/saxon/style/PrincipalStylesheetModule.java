@@ -111,6 +111,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * Create a PrincipalStylesheetModule
      *
      * @param sourceElement the xsl:package element at the root of the package manifest
+     * @throws XPathException if things go wrong
      */
 
     public PrincipalStylesheetModule(XSLPackage sourceElement) throws XPathException {
@@ -317,7 +318,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * It is done once per stylesheet, so the stylesheet can be reused for multiple source
      * documents. The method is called only on the XSLStylesheet element representing the
      * principal stylesheet module
-     *
+     * @param compilation the XSLT compilation in progress
      * @throws net.sf.saxon.trans.XPathException if errors are found in the stylesheet
      */
 
@@ -850,7 +851,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * Combine all like-named xsl:attribute-set declarations in this package into a single Component, whose body
      * is an AttributeSet object. The resulting attribute set Components are saved in the StylesheetPackage
      * object.
-     *
+     * @param compilation the XSLT compilation in progress
      * @throws XPathException if a failure occurs
      */
 
@@ -980,6 +981,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      *
      * @param template the template rule
      * @param mode     the mode
+     * @return true if all is well, false if the mode cannot be extended (in which case an error will
+     * have been reported)
      */
 
     public boolean checkAcceptableModeForPackage(XSLTemplate template, Mode mode) {
@@ -1523,6 +1526,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
     /**
      * Adjust visibility of components by applying xsl:expose rules
+     * @throws XPathException if this detects an error or inconsistency
      */
 
     public void adjustExposedVisibility() throws XPathException {

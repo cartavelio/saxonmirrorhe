@@ -128,7 +128,7 @@ public class NegateExpression extends UnaryExpression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings  variables that need to be re-bound
      */
 
     /*@NotNull*/

@@ -43,6 +43,7 @@ public class QueryReader {
      *                    responsibility.</p>
      * @param charChecker this checks XML characters against either the XML 1.0 or XML 1.1 rules
      * @return the text of the query
+     * @throws XPathException if the input cannot be read
      */
 
     public static String readSourceQuery(/*@NotNull*/ StreamSource ss, IntPredicateProxy charChecker) throws XPathException {
@@ -96,6 +97,7 @@ public class QueryReader {
      * @param encoding    the encoding, or null if the encoding is unknown
      * @param nameChecker the predicate to be used for checking characters
      * @return the content of the InputStream as a string
+     * @throws XPathException if the stream cannot be read, for example if there is a problem with the encoding
      */
 
     public static String readInputStream(InputStream is, String encoding, IntPredicateProxy nameChecker) throws XPathException {

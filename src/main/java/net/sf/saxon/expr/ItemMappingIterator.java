@@ -58,6 +58,10 @@ public class ItemMappingIterator
     /**
      * Factory method designed for use when the mapping function is a lambda expression
      * Example of usage: {@code ItemMappingIterator.map(base, item -> item.getParentNode())}
+     * @param base iterator over the base sequence
+     * @param mappingExpression function to be applied to items in the base sequence
+     * @return an iterator over the items determined by applying the mapping expression
+     * to every item in the base sequence (a flatMap operation).
      */
 
     public static ItemMappingIterator map(SequenceIterator base, ItemMapper.Lambda mappingExpression) {
@@ -67,6 +71,9 @@ public class ItemMappingIterator
     /**
      * Factory method designed for use when the mapping function is designed to filter the input nodes
      * Example of usage: {@code ItemMappingIterator.filter(base, item -> item.hasChildNodes())}
+     * @param base iterator over the base sequence
+     * @param filterExpression predicate to be applied to items in the base sequence
+     * @return an iterator over the items in the base sequence that satisfy the predicate
      */
 
     public static ItemMappingIterator filter(SequenceIterator base, ItemFilter.Lambda filterExpression) {

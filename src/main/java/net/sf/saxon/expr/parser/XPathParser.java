@@ -1937,6 +1937,8 @@ public class XPathParser {
     /**
      * Parse a union type (Saxon 9.8 extension).
      * Syntax: "union" "(" qname ("," qname)* ")"
+     * @return the item type
+     * @throws XPathException if a syntax error is found
      */
 
     public ItemType parseUnionType() throws XPathException {
@@ -1986,6 +1988,8 @@ public class XPathParser {
     /**
      * Parse an enum type (XPath 4.0 proposal).
      * Syntax: "enum" "(" StringLiteral ("," StringLiteral)* ")"
+     * @return the item type
+     * @throws XPathException if a syntax error is found
      */
 
     public EnumerationType parseEnumType() throws XPathException {
@@ -2472,8 +2476,9 @@ public class XPathParser {
 
     /**
      * Parse an XPath 3.1 arrow operator ("=&gt;")
-     *
+     * @param lhs the expression on the left of the arrow operator
      * @return the expression that results from the parsing
+     * @throws XPathException if the syntax is wrong
      */
 
     /*@NotNull*/
@@ -3434,6 +3439,7 @@ public class XPathParser {
 
     /**
      * Check that Saxon syntax extensions are permitted
+     * @param construct name of the construct, for use in error messages
      * @throws XPathException if Saxon syntax extensions have not been enabled
      */
 
@@ -3517,6 +3523,8 @@ public class XPathParser {
      * Parse a "square" array constructor
      * "[" (exprSingle ("," exprSingle)* )? "]"
      * Applies to XPath/XQuery 3.1 only
+     * @return the parsed expression
+     * @throws XPathException if the syntax is wrong
      */
     protected Expression parseArraySquareConstructor() throws XPathException {
         checkLanguageVersion31();
@@ -4101,8 +4109,8 @@ public class XPathParser {
      */
 
     /*@Nullable*/
-    public LocalBinding findOuterRangeVariable(XPathParser p, StructuredQName qName) {
-        return findOuterRangeVariable(qName, inlineFunctionStack, p.getStaticContext());
+    public LocalBinding findOuterRangeVariable(StructuredQName qName) {
+        return findOuterRangeVariable(qName, inlineFunctionStack, getStaticContext());
     }
 
 
@@ -4443,7 +4451,7 @@ public class XPathParser {
                 return b;
             }
         }
-        return findOuterRangeVariable(this, qName);
+        return findOuterRangeVariable(qName);
     }
 
     /**
@@ -4691,6 +4699,8 @@ public class XPathParser {
 
     /**
      * Make a location object corresponding to a specified offset in the query
+     * @param offset the offset (character position) in the query
+     * @return an object containing location information
      */
 
     public Location makeLocation(int offset) {
@@ -4813,7 +4823,7 @@ public class XPathParser {
      * of parsing will be an EmptySequence literal
      */
 
-    public boolean isAllowAbsentExpression(boolean allowEmpty) {
+    public boolean isAllowAbsentExpression() {
         return this.allowAbsentExpression;
     }
 

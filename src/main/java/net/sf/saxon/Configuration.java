@@ -1396,6 +1396,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param localName the local name of the function in the Saxon namespace
      * @param arity the function arity
      * @return the system function with this name and arity
+     * @throws XPathException if no suitable function is available
      */
 
     public SystemFunction bindSaxonExtensionFunction(String localName, int arity) throws XPathException {
@@ -3472,6 +3473,9 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /**
      * Check the streamability of a template rule
+     * @param template the xsl:template element in the stylesheet tree
+     * @param body of the compiled body of the template rule
+     * @throws XPathException if streamability problems are found
      */
 
     public void checkStrictStreamability(XSLTemplate template, Expression body) throws XPathException {
@@ -3630,6 +3634,10 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /**
      * Make an instruction to implement xsl:evaluate
+     * @param source the xsl:evaluate element in the raw stylesheet tree
+     * @param decl the corresponding component declaration
+     * @return the compiled instruction
+     * @throws XPathException if static errors are found
      */
 
     public Expression makeEvaluateInstruction(XSLEvaluate source, ComponentDeclaration decl) throws XPathException {

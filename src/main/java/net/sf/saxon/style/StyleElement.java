@@ -806,6 +806,7 @@ public abstract class StyleElement extends ElementImpl {
      *
      * @param name  the name of the attribute (used for diagnostics)
      * @param value the value of the attribute
+     * @return the value of the attribute as a boolean
      */
 
     public boolean processBooleanAttribute(String name, String value) {
@@ -1061,6 +1062,7 @@ public abstract class StyleElement extends ElementImpl {
      * Ask if an extension attribute is allowed; if no Professional Edition license is available,
      * issue a warning saying the attribute is ignored, and return false
      * @param attribute the name of the attribute
+     * @return true if the extension attribute is allowed, false if not
      */
 
     protected boolean isExtensionAttributeAllowed(String attribute)  {
@@ -2316,7 +2318,7 @@ public abstract class StyleElement extends ElementImpl {
      * Get the list of xsl:with-param elements for a calling element (apply-templates,
      * call-template, apply-imports, next-match). This method can be used to get either
      * the tunnel parameters, or the non-tunnel parameters.
-     *
+     * @param parent the compiled form of the parent instruction
      * @param compilation the compilation episode
      * @param decl        the containing stylesheet declaration
      * @param tunnel      true if the tunnel="yes" parameters are wanted, false to get
@@ -2448,7 +2450,8 @@ public abstract class StyleElement extends ElementImpl {
     /**
      * Report an error unless XSLT syntax extensions are allowed, for example xsl:when/@select.
      * Note, this is not affected by forwards-compatibility mode
-     * (because it's too error-prone to simply ignore the presence of these attributes).
+     * (because it's too error-prone to simply ignore the presence of these attributes)
+     * @param attributeName the name of the attribute being checked, for use in error messages.
      */
     protected void requireSyntaxExtensions(String attributeName) {
         if (!getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS)) {
@@ -2668,6 +2671,9 @@ public abstract class StyleElement extends ElementImpl {
 
     /**
      * Ask whether this particular element implicitly binds a given variable (used for xsl:accumulator-rule)
+     * @param name the name of the variable
+     * @return a {@code SourceBinding} object representing the binding of this variable if it
+     * exists; otherwise null;
      */
 
     protected SourceBinding hasImplicitBinding(StructuredQName name) {
@@ -2700,6 +2706,7 @@ public abstract class StyleElement extends ElementImpl {
      * Get an iterator over all the properties available. The values returned by the iterator
      * will be of type String, and each string can be supplied as input to the getProperty()
      * method to retrieve the value of the property.
+     * @return an iterator over the available property names
      */
 
     public Iterator<String> getProperties() {

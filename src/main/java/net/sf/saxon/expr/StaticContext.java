@@ -150,6 +150,7 @@ public interface StaticContext {
      * which matches both the namespace given in {@link #getDefaultElementNamespace()} and the null namespace,
      * or {@link UnprefixedElementMatchingPolicy#ANY_NAMESPACE}, which matches any namespace (that is, it
      * matches by local name only).
+     * @return the policy for matching unprefixed element names
      */
 
     default UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {

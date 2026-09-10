@@ -162,7 +162,7 @@ public class LookupAllExpression extends UnaryExpression {
      * and we assume that a sequence has length 5. The resulting estimates may be used, for
      * example, to reorder the predicates in a filter expression so cheaper predicates are
      * evaluated first.
-     * @return
+     * @return the cost estimate
      */
     @Override
     public double getCost() {

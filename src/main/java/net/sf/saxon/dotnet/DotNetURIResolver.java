@@ -134,7 +134,7 @@ public class DotNetURIResolver implements RelativeURIResolver, EntityResolver {
      * @param uri The absolute URI to be dereferenced
      * @return A Source object, or null if the href cannot be dereferenced,
      *         and the processor should try to resolve the URI itself.
-     * @throws javax.xml.transform.TransformerException
+     * @throws XPathException
      *          if an error occurs when trying to
      *          dereference the URI.
      */

@@ -354,32 +354,10 @@ public abstract class SystemFunction extends AbstractFunction {
 
     /**
      * Determine the item type of the value returned by the function
+     * @return the item type of the result
      */
     public ItemType getResultItemType() {
         return details.itemType;
-//        if (details == null) {
-//            // probably an unresolved function call
-//            return AnyItemType.getInstance();
-//        }
-//        ItemType type = details.itemType;
-//        if ((details.properties & StandardFunction.AS_ARG0) != 0) {
-//            if (getArity() > 0) {
-//                return getArg(0).getItemType();
-//            } else {
-//                return AnyItemType.getInstance();
-//                // if there is no first argument, an error will be reported
-//            }
-//        } else if ((details.properties & StandardFunction.AS_PRIM_ARG0) != 0) {
-//            if (getArity() > 0) {
-//                ItemType t0 = getArg(0).getItemType().getPrimitiveItemType();
-//                return UType.NUMERIC.subsumes(t0.getUType()) ? t0 : type;
-//            } else {
-//                return AnyItemType.getInstance();
-//                // if there is no first argument, an error will be reported
-//            }
-//        } else {
-//            return type;
-//        }
     }
 
     /**
@@ -503,7 +481,10 @@ public abstract class SystemFunction extends AbstractFunction {
     }
 
     /**
-     * Typecheck a call on this function
+     * Type-check a call on this function
+     * @param caller the function call expression calling this function
+     * @param contextInfo static context information relating to the call
+     * @return a type-checked replacement for the supplied function call
      */
 
     public Expression typeCheckCaller(FunctionCall caller, ExpressionVisitor visitor, ContextItemStaticInfo contextInfo)
@@ -530,7 +511,9 @@ public abstract class SystemFunction extends AbstractFunction {
 
     /**
      * Export any implicit arguments held in optimized form within the SystemFunction call
+     * @param call the system function call (on this function)
      * @param out the export destination
+     * @throws XPathException if a failure occurs (such as an I/O error)
      */
 
     public void exportAdditionalArguments(SystemFunctionCall call, ExpressionPresenter out) throws XPathException {
@@ -540,7 +523,7 @@ public abstract class SystemFunction extends AbstractFunction {
      * Import any attributes found in the export file, that is, any attributes output using
      * the exportAttributes method
      * @param attributes the attributes, as a properties object
-     * @throws XPathException
+     * @throws XPathException if errors are found in the SEF file
      */
 
     public void importAttributes(Properties attributes) throws XPathException {}
@@ -586,8 +569,12 @@ public abstract class SystemFunction extends AbstractFunction {
     }
 
     /**
-     * Helper method to get an argument value as a Unistring, in the case where an empty sequenec
+     * Helper method to get an argument value as a UnicodeString, in the case where an empty sequence
      * should be treated as a zero-length string
+     * @param supplied the actual argumetn values supplied
+     * @return zero-length string if the input was an empty sequence; otherwise the string value of the
+     * first item in the sequence
+     * @throws XPathException if the first item in the sequence has no string value (for example, a map)
      */
 
     protected UnicodeString getUniStringArg(Sequence supplied) throws XPathException {

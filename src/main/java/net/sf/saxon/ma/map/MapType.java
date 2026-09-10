@@ -147,10 +147,6 @@ public class MapType extends AnyFunctionType {
 
     /**
      * Test whether a given item conforms to this type
-     *
-     * @param item The item to be tested
-     * @param th
-     * @return true if the item is an instance of this type; false otherwise
      */
     @Override
     public boolean matches(Item item, TypeHierarchy th) {

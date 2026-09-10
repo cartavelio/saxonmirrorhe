@@ -143,6 +143,7 @@ public class OperandRole {
 
     /**
      * Set a constraint on the expression that can be associated with this operand type
+     * @param constraint the constraint that must be satisfied by the relevant expression
      */
 
     public void setConstraint(Predicate<Expression> constraint) {

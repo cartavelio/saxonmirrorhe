@@ -24,6 +24,7 @@ public abstract class XSLGeneralVariable extends StyleElement {
 
     /**
      * Get the source binding object that holds information about the declared variable.
+     * @return the binding object
      */
 
     public SourceBinding getSourceBinding() {
