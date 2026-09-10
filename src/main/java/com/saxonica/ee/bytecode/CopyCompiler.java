@@ -19,6 +19,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.type.*;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.commons.TableSwitchGenerator;
@@ -239,6 +240,8 @@ public class CopyCompiler extends ToPushCompiler {
             ga.invokeInstanceMethod(Configuration.class, "getDocumentValidator",
                                     Receiver.class, String.class, ParseOptions.class, Location.class);
             //-- receiver
+            ga.push("CCO A");
+            ga.invokeStaticMethod(Instrumentation.class, "count", String.class);
             ga.newInstance(ComplexContentOutputter.class);
             //-- receiver CCO
             ga.dupX1();
@@ -357,6 +360,8 @@ public class CopyCompiler extends ToPushCompiler {
             LabelInfo sameReceiver = methodInfo.newLabel("sameReceiver");
             ga.ifSameObject(sameReceiver);
             //-- (empty)
+            ga.push("CCO B");
+            ga.invokeStaticMethod(Instrumentation.class, "count", String.class);
             ga.newInstance(ComplexContentOutputter.class);
             ga.dup();
             ga.loadLocal(validatorVar);

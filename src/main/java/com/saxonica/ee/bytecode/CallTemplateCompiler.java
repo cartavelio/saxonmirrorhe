@@ -10,6 +10,8 @@ import net.sf.saxon.expr.instruct.*;
  */
 public class CallTemplateCompiler extends ToPushCompiler {
 
+
+
     @Override
     public void compileToPush(/*@NotNull*/ CompilerService compiler, Expression expression) throws CannotCompileException {
         CallTemplate call = (CallTemplate) expression;

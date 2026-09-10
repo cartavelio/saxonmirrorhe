@@ -749,7 +749,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             }
             try {
                 addSchemaSource(new StreamSource(in), makeErrorReporter());
-            } catch (SchemaException e) {
+                in.close();
+            } catch (SchemaException|IOException e) {
                 throw new IllegalStateException("Failed to load internal copy of xpath-functions.scm");
             }
         } else {

@@ -3,9 +3,11 @@ package com.saxonica.ee.bytecode.util;
 import com.saxonica.expr.JavaExtensionFunctionCall;
 import net.sf.saxon.expr.CardinalityChecker;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
@@ -225,6 +227,10 @@ public class Callback {
         } catch (IllegalArgumentException e) {
             throw new XPathException(e.getMessage(), errorCode);
         }
+    }
+
+    public static Sequence callSequenceEvaluator(SequenceEvaluator evaluator, XPathContext context) throws XPathException {
+        return evaluator.evaluate(context);
     }
 
 

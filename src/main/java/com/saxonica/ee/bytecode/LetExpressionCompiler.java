@@ -1,5 +1,6 @@
 package com.saxonica.ee.bytecode;
 
+import com.oracle.truffle.api.impl.asm.commons.GeneratorAdapter;
 import com.saxonica.ee.bytecode.util.*;
 import com.saxonica.ee.optim.SearchableValue;
 import com.saxonica.ee.stream.Posture;
@@ -15,7 +16,6 @@ import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
 
 /**
  * Generate bytecode for evaluation of an LetExpression
@@ -25,7 +25,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
     private SequenceEvaluator getEvaluator(LetExpression expr) {
         SequenceEvaluator eval = expr.getEvaluator();
         if (eval == null) {
-            return null; // Evaluator.EagerSequence.INSTANCE;
+            return expr.makeElaborator().eagerly();
         } else {
             return eval;
         }
@@ -39,7 +39,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
      * @param compiler   the compiler service
      * @param expression the expression to be compiled
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
-     * @return
+     * @return the class of item that will be on the stack after executing the generated code
      */
     @Override
     public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
@@ -166,17 +166,18 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
      *
      * @param compiler the compiler service
      * @param exp      the expression to be compiled
-     * @param evaluationMode the evaluation mode
+     * @param evaluator the evaluation mode
      * @param refCount the nominal count of references to this variable
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
      */
     public static void compileCommonExpr(CompilerService compiler,
-                                         Expression exp, SequenceEvaluator evaluationMode, int refCount) throws CannotCompileException {
+                                         Expression exp, SequenceEvaluator evaluator, int refCount) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitLineNumber(compiler, ga, exp);
-        int code = Evaluators.EVALUATE_VARIABLE;
-        switch (code) {  // evaluationMode.getCode()) {
+
+        int code = evaluator.getEvaluationMethodCode();
+        switch (code) {
 
             case Evaluators.EVALUATE_LITERAL:
                 //return ((Literal)exp).getValue();
@@ -198,7 +199,8 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
             case Evaluators.LAZY_TAIL_EXPRESSION:
                 TailExpression tail = (TailExpression) exp;
                 VariableReference vr = (VariableReference) tail.getBaseExpression();
-                compileCommonExpr(compiler, vr, null /*Evaluator.Variable.INSTANCE*/, refCount);
+                SequenceEvaluator vrEval = vr.getElaborator().lazily(true);
+                compileCommonExpr(compiler, vr, vrEval, refCount);
                 ga.dup();
                 int baseVar = methodInfo.allocateLocal(Sequence.class);
                 ga.storeLocal(baseVar);

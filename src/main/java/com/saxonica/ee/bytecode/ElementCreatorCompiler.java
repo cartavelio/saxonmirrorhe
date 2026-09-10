@@ -13,6 +13,7 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
@@ -80,6 +81,8 @@ public abstract class ElementCreatorCompiler extends ToPushCompiler {
                 LabelInfo sameReceiver = methodInfo.newLabel("sameReceiver");
                 //LabelInfo doneReceiver = methodInfo.newLabel("doneReceiver");
                 ga.ifSameObject(sameReceiver);
+                ga.push("CCO C");
+                ga.invokeStaticMethod(Instrumentation.class, "count", String.class);
                 ga.newInstance(ComplexContentOutputter.class);
                 ga.dup();
                 ga.loadLocal(validatorVar);
@@ -186,6 +189,8 @@ public abstract class ElementCreatorCompiler extends ToPushCompiler {
 
         ga.invokeInstanceMethod(Outputter.class, "usesTypeAnnotations");
         ga.ifFalse(noStripNeeded);
+        ga.push("CCO D");
+        ga.invokeStaticMethod(Instrumentation.class, "count", String.class);
         ga.newInstance(ComplexContentOutputter.class);
         ga.dup();
 
