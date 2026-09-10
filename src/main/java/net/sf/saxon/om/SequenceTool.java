@@ -243,7 +243,11 @@ public class SequenceTool {
         if (sequence instanceof Item && index == 0) {
             return (Item)sequence;
         }
-        return sequence.materialize().itemAt(index);
+        try {
+            return sequence.materialize().itemAt(index);
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
     }
 
     /**
