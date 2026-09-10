@@ -21,7 +21,7 @@ def test_saxon_edition_unlicensed():
     assert saxonproc.edition == 'HE'
 
 def test_icu_lib():
-    saxonproc = PySaxonProcessor(license=True)
+    saxonproc = saxoncee.PySaxonProcessor(license=True)
     print(saxonproc.version)
     xqc = saxonproc.new_xquery_processor()
     xqc.set_query_content("format-date(current-date(),'[FNn]','de',(),())")
