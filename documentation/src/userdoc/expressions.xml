@@ -2905,7 +2905,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<p>Many new functions are available, for details see the <a class="bodylink"
 			href="/functions">Functions library</a>.</p>
 		
-		<p>The XPath language specification now includes a section on <i>External Resources and
+		<!--<p>The XPath language specification now includes a section on <i>External Resources and
 			Security</i>, which introduces the following changes:</p>
 		<ul>
 			<li>
@@ -2932,7 +2932,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		</ul>
 		
 		<p>The <code>trusted</code> option is only partially implemented in Saxon 13: see the specifications
-		of individual functions for details.</p>
+		of individual functions for details.</p>-->
 	</section>
 
 </article>
