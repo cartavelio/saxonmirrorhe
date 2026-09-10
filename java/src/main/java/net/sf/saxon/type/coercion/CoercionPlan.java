@@ -5,6 +5,7 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.MappingIterator;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -58,6 +59,9 @@ public abstract class CoercionPlan {
         SequenceIterator uncheckedResult;
         if (singleton) {
             Item input = value.next();
+            if (input instanceof Parcel) {
+                return coerceSequence(((Parcel)input).getValue().iterate(), requiredType, request);
+            }
             uncheckedResult = coerceItem(input, requiredType.getPrimaryType(), request).iterate();
         } else {
             uncheckedResult = makeMappingIterator(value, requiredType.getPrimaryType(), request);

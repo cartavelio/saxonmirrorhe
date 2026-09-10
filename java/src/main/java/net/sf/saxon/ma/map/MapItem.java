@@ -98,6 +98,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      */
 
     public GroundedValue getWithPlan(AtomicValue key, Stack<LookupPlan> plans) {
+        // TODO: not currently used
         return get(key);
     }
 

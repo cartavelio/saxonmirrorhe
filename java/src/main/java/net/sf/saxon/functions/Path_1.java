@@ -302,9 +302,9 @@ public class Path_1 extends SystemFunction {
                 if (selector instanceof StringValue && NameChecker.isValidNCName(selectorStr.codePoints())) {
                     buffer = SLASH.concat(selectorStr).concat(buffer);
                 } else if (selector instanceof StringValue) {
-                    buffer = SLASH.concat(selectorStr).concat(new Twine8("get(\"")).concat(buffer).concat(new Twine8("\")"));
+                    buffer = SLASH.concat(new Twine8("get(\"")).concat(selectorStr).concat(new Twine8("\")").concat(buffer));
                 } else if (selector instanceof NumericValue) {
-                    buffer = SLASH.concat(selectorStr).concat(new Twine8("get(")).concat(buffer).concat(new UnicodeChar(')'));
+                    buffer = SLASH.concat(new Twine8("get(")).concat(selectorStr).concat(new UnicodeChar(')').concat(buffer));
                 } else if (selector instanceof QNameValue) {
                     buffer = SLASH.concat(StringView.of(((QNameValue) selector).getStructuredQName().getEQName()))
                                    .concat(buffer);

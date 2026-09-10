@@ -8,15 +8,22 @@
 package net.sf.saxon.ma.arrays;
 
 import com.saxonica.functions.qt4.Slice;
-import com.saxonica.functions.qt4.UnparcelFn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.Pingable;
-import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.DeepEqual;
+import net.sf.saxon.functions.Fold;
+import net.sf.saxon.functions.FoldingFunction;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.Shape;
+import net.sf.saxon.ma.map.ShapedMap;
 import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.Twine8;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
@@ -30,6 +37,8 @@ import net.sf.saxon.z.IntSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static net.sf.saxon.ma.map.RecordTest.VALUE_RECORD;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XPath 3.1
@@ -47,6 +56,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     public static ArrayFunctionSet getInstance(int version) {
         return version >= 40 ? instance40 : instance31;
     }
+
+    public final static UnicodeString valueRecordKey = new Twine8("value");
+    public final static Shape valueRecord = new Shape(valueRecordKey);
 
     private void init(int version) {
 
@@ -254,9 +266,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
             register("of-members", 1, e -> e.populate(ArrayOfMembers::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                    .arg(0, Parcel.TYPE, STAR, null));
+                    .arg(0, VALUE_RECORD, STAR, null));
 
-            register("members", 1, e -> e.populate(ArrayMembers::new, Parcel.TYPE, STAR, 0)
+            register("members", 1, e -> e.populate(ArrayMembers::new, VALUE_RECORD, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
             // TODO: drop this, renamed array:items
@@ -852,9 +864,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         }
 
         public static GroundedValue members(ArrayItem input) {
-            List<Parcel> parcels = new ArrayList<>(input.arrayLength());
+            List<MapItem> parcels = new ArrayList<>(input.arrayLength());
             for (GroundedValue member : input.members()) {
-                parcels.add(new Parcel(member));
+                parcels.add(new ShapedMap(valueRecord, member));
             }
             return SequenceExtent.makeSequenceExtent(parcels);
         }
@@ -897,8 +909,8 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             List<GroundedValue> members = new ArrayList<>(expectedSize());
             SequenceIterator parcels = arguments[0].iterate();
-            for (Item parcel; (parcel = parcels.next()) != null; ) {
-                members.add(UnparcelFn.unparcel(parcel, context));
+            for (MapItem parcel; (parcel = (MapItem)parcels.next()) != null; ) {
+                members.add(parcel.getU(valueRecordKey));
             }
             return makeArray(members);
         }
@@ -993,8 +1005,8 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
             List<GroundedValue> members = new ArrayList<>(slicedParcels.getLength());
             SequenceIterator iter = slicedParcels.iterate();
-            for (Item parcel; (parcel = iter.next()) != null; ) {
-                members.add(UnparcelFn.unparcel(parcel, context));
+            for (ShapedMap parcel; (parcel = (ShapedMap)iter.next()) != null; ) {
+                members.add(parcel.getU(valueRecordKey));
             }
             return new SimpleArrayItem(members);
         }
