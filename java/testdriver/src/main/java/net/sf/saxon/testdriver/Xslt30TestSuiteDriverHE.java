@@ -555,6 +555,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                     return;
                 }
             } else {
+                // TODO: compare the actual transformation results, not just success or failure
                 ExecutorService executor = Executors.newFixedThreadPool(threads);
                 boolean[] threadFailures = new boolean[threads];
                 XsltExecutable exec = sheet;
@@ -665,18 +666,13 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
      */
     private boolean executeStylesheet(XdmNode testCase, XPathCompiler xpath, Environment env, XdmNode testInput, TestOutcome outcome,
                                       InitialTransformDetails ini, XsltExecutable sheet, ErrorCollector collector) {
-        XdmItem contextItem = env.contextItem;
-        String testName = testCase.attribute("name");
-        String testSetName = testCase.getParent().attribute("name");
         boolean failure;
         try {
             if (useXslt30Transformer) {
-                failure = runWithXslt30Transformer(testCase, xpath, outcome, testName,
-                                                   testSetName, env, testInput, sheet, collector, ini);
+                failure = runWithXslt30Transformer(testCase, xpath, outcome, env, testInput, sheet, collector, ini);
             } else {
-                failure = runWithXsltTransformer(xpath, outcome, testName, testSetName, env, testInput,
-                                                 sheet, collector, contextItem, ini.initialMode, ini.initialModeName,
-                                                 ini.initialTemplateName, ini.baseOutputUri);
+                failure = runWithXsltTransformer(testCase, xpath, outcome, env, testInput,
+                                                 sheet, collector, ini);
             }
             if (failure) {
                 return true;
@@ -694,24 +690,25 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         // exists to be overridden
     }
 
-    private boolean runWithXsltTransformer(XPathCompiler xpath, final TestOutcome outcome, String testName,
-                                           String testSetName, Environment env, XdmNode testInput,
+    private boolean runWithXsltTransformer(XdmNode testCase, XPathCompiler xpath, final TestOutcome outcome,
+                                           Environment env, XdmNode testInput,
                                            XsltExecutable sheet, ErrorCollector collector,
-                                           XdmItem contextItem, XdmNode initialMode, QName initialModeName,
-                                           QName initialTemplateName, String baseOutputURI) {
+                                           InitialTransformDetails ini) {
+        String testName = testCase.attribute("name");
+        String testSetName = testCase.getParent().attribute("name");
         try {
             XsltTransformer transformer = sheet.load();
             transformer.setResourceResolver(env);
-            transformer.setBaseOutputURI(baseOutputURI);
+            transformer.setBaseOutputURI(ini.baseOutputUri);
             if (env.unparsedTextResolver != null) {
                 transformer.getUnderlyingController().setUnparsedTextURIResolver(env.unparsedTextResolver);
             }
-            if (initialTemplateName != null) {
-                transformer.setInitialTemplate(initialTemplateName);
+            if (ini.initialTemplateName != null) {
+                transformer.setInitialTemplate(ini.initialTemplateName);
             }
-            if (initialMode != null) {
+            if (ini.initialMode != null) {
                 try {
-                    transformer.setInitialMode(initialModeName);
+                    transformer.setInitialMode(ini.initialModeName);
                 } catch (IllegalArgumentException e) {
                     if (e.getCause() instanceof XPathException) {
                         collector.report(new XmlProcessingException((XPathException) e.getCause()));
@@ -734,8 +731,8 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 transformer.setParameter(new QName(name), value);
                 setGlobalParameter(new QName(name), value);
             });
-            if (contextItem != null) {
-                transformer.setInitialContextNode((XdmNode) contextItem);
+            if (ini.contextItem != null) {
+                transformer.setInitialContextNode((XdmNode) ini.contextItem);
             }
             if (env.streamedFile != null) {
                 transformer.setSource(new StreamSource(env.streamedFile));
@@ -840,9 +837,11 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
     }
 
     protected boolean runWithXslt30Transformer(XdmNode testCase, XPathCompiler xpath, final TestOutcome outcome,
-                                               String testName, String testSetName, Environment env,
+                                               Environment env,
                                                XdmNode testInput, XsltExecutable sheet, ErrorCollector collector,
                                                InitialTransformDetails ini) {
+        String testName = testCase.attribute("name");
+        String testSetName = testCase.getParent().attribute("name");
         try {
             boolean assertsSerial =
                 testCase.select(path(child("result"),
