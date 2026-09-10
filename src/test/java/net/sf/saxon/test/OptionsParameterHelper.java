@@ -37,7 +37,7 @@ public class OptionsParameterHelper {
      * @return the parsed options
      * @throws XPathException
      */
-    public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, Map<String, Sequence> options) throws XPathException {
+    public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, Map<String, GroundedValue> options) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
         return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt);
     }
@@ -62,7 +62,7 @@ public class OptionsParameterHelper {
      * @return the parsed options
      * @throws XPathException
      */
-    public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, Map<String, Sequence> options, XPathContext ctxt) throws XPathException {
+    public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, Map<String, GroundedValue> options, XPathContext ctxt) throws XPathException {
         return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt);
     }
 

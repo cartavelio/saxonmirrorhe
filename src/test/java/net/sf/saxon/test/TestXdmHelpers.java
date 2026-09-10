@@ -19,10 +19,10 @@ public class TestXdmHelpers {
      * @param options the map to convert
      * @return
      */
-    public static MapItem buildXdmMap(Map<String, Sequence> options) {
+    public static MapItem buildXdmMap(Map<String, GroundedValue> options) {
         DictionaryMap resultMap = new DictionaryMap();
         options.forEach((k, v) -> {
-            resultMap.initialPut(k, (GroundedValue) v);
+            resultMap.initialPut(k,v);
         });
         return resultMap;
     }
