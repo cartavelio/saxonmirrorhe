@@ -47,6 +47,7 @@ namespace Saxon.Impl.Helpers {
 
         public static Singulink.Numerics.BigDecimal Round(Singulink.Numerics.BigDecimal a, int scale,
             Round.RoundingRule roundingRule) {
+            #pragma warning disable 8524
             return roundingRule switch {
                 Hej.functions.Round.RoundingRule.FLOOR =>
                     BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.ToNegativeInfinity),
@@ -67,6 +68,7 @@ namespace Saxon.Impl.Helpers {
                 Hej.functions.Round.RoundingRule.HALF_TO_EVEN =>
                     BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.MidpointToEven)
             };
+            #pragma warning restore 8524
         }
 
         public static int IntValueExact(Singulink.Numerics.BigDecimal value) {
