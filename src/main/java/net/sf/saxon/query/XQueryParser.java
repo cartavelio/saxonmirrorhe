@@ -3216,22 +3216,43 @@ public class XQueryParser extends XPathParser {
     /**
      * Parse a Switch Expression.
      * This construct is XQuery-3.0-only.
-     * SwitchExpr ::= "switch" "(" Expr ")" SwitchCaseClause+ "default" "return" ExprSingle
+     * SwitchExpr ::= "switch" ("(" Expr ")")? SwitchCaseClause+ "default" "return" ExprSingle
      * SwitchCaseClause ::= ("case" ExprSingle)+ "return" ExprSingle
+     *
+     * <p>4.0 allows the parenthesized expression to be omitted, and also allows braces around
+     * the cases. This means there are three ways of recognizing the start of the expression:
+     * (a) "switch (", (b) "switch {" (c) "switch case"}</p>
      */
 
     /*@NotNull*/
     @Override
     protected Expression parseSwitchExpression() throws XPathException {
 
-        // On entry, the "(" has already been read
-        int offset = t.currentTokenStartOffset;
-        nextToken();
-        Expression operand = parseExpression();
-        expect(Token.RPAR);
-        nextToken();
-
+        Expression operand;
         boolean braced = false;
+        if (t.currentToken == Token.SWITCH) {
+            // On entry, the "(" has already been read
+            nextToken();
+            operand = parseExpression();
+            expect(Token.RPAR);
+            nextToken();
+        } else if (t.currentToken == Token.KEYWORD_CURLY) {
+            checkLanguageVersion40();
+            operand = Literal.makeLiteral(BooleanValue.TRUE);
+            braced = true;
+            nextToken();
+            if (isKeyword("case")) {
+                t.currentToken = Token.CASE;
+            }
+        } else if (t.currentToken == Token.SWITCH_CASE) {
+            checkLanguageVersion40();
+            operand = Literal.makeLiteral(BooleanValue.TRUE);
+            t.currentToken = Token.CASE;
+        } else {
+            throw new AssertionError();
+        }
+
+
         if (t.currentToken == Token.LCURLY) {
             checkLanguageVersion40();
             braced = true;
@@ -3561,6 +3582,9 @@ public class XQueryParser extends XPathParser {
 
                     case "namespace":
                         return parseNamespaceConstructor(offset);
+
+                    case "switch":
+                        return parseSwitchExpression();
 
                     default:
                         grumble("Unrecognized keyword '" + t.currentTokenValue + "' before {...} ");

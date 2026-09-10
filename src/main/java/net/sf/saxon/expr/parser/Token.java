@@ -306,9 +306,9 @@ public abstract class Token {
     public static final int MODIFY = 68;
 
     /**
-     * Node kind, e.g. "node()" or "comment()"
+     * `name(` for a reserved function name, e.g. "node(" or "comment(" or "function(" or "union("
      */
-    public static final int NODEKIND = 69;
+    public static final int KEYWORD_LBRA = 69;
     /**
      * "*:" token
      */
@@ -529,6 +529,7 @@ public abstract class Token {
      * Saxon extension: declare type
      */
     public static final int DECLARE_TYPE = 124;
+    public static final int SWITCH_CASE = 125;
     /**
      * semicolon separator
      */
@@ -741,7 +742,7 @@ public abstract class Token {
         tokens[NUMBER] = "<numeric-literal>";
         tokens[HEX_INTEGER] = "<hex-integer>";
         tokens[BINARY_INTEGER] = "<binary-integer>";
-        tokens[NODEKIND] = "<node-type>()";
+        tokens[KEYWORD_LBRA] = "<node-type>()";
         tokens[FOR] = "for";
         tokens[SUFFIX] = "<*:local-name>";
         tokens[QMARK] = "?";
@@ -812,6 +813,7 @@ public abstract class Token {
         mapDouble("rename nodes", RENAME_NODE);
         mapDouble("first into", FIRST_INTO);
         mapDouble("last into", LAST_INTO);
+        mapDouble("switch case", SWITCH_CASE);
     }
 
     private static void mapDouble(String doubleKeyword, int token) {

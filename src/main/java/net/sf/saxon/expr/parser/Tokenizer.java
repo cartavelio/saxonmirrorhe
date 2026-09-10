@@ -1229,13 +1229,13 @@ public final class Tokenizer {
                 return Token.IF;
             case "namespace-node":
             case "function":
-                return languageLevel == 20 ? Token.FUNCTION : Token.NODEKIND;
+                return languageLevel == 20 ? Token.FUNCTION : Token.KEYWORD_LBRA;
             case "fn":
-                return languageLevel >= 40 ? Token.NODEKIND : Token.FUNCTION;
+                return languageLevel >= 40 ? Token.KEYWORD_LBRA : Token.FUNCTION;
             case "array":
             case "map":
                  // first reserved in 3.1, unreserved again in 4.0
-                return languageLevel == 31 ? Token.NODEKIND : Token.FUNCTION;
+                return languageLevel == 31 ? Token.KEYWORD_LBRA : Token.FUNCTION;
             case "node":
             case "schema-attribute":
             case "schema-element":
@@ -1247,14 +1247,14 @@ public final class Tokenizer {
             case "item":
             case "text":
             case "attribute":
-                return Token.NODEKIND;
+                return Token.KEYWORD_LBRA;
             case "atomic":
             case "tuple": // Retained as synonym of "record" for the time being
             case "record":
             case "type":
             case "union":
             case "enum":
-                return allowSaxonExtensions ? Token.NODEKIND : Token.FUNCTION; // Saxon extension types
+                return allowSaxonExtensions ? Token.KEYWORD_LBRA : Token.FUNCTION; // Saxon extension types
             case "switch":
                 // Reserved in XPath 3.0, even though only used in XQuery
                 return languageLevel == 20 ? Token.FUNCTION : Token.SWITCH;
