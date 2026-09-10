@@ -246,7 +246,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
     @CEntryPoint(name = "j_evaluate", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long evaluate(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long evaluate(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {

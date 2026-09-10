@@ -25,10 +25,23 @@ public class ProcessorDataAccumulator {
         values = new ArrayList(cap);
     }
 
+    public ProcessorDataAccumulator(String [] props){
+        paramNames = new ArrayList<String>(Arrays.asList(props));
+    }
+
+    public ProcessorDataAccumulator(int cap, boolean propsOnly){
+
+        paramNames = new ArrayList<String>(cap);
+    }
+
 
     public ProcessorDataAccumulator(XdmValue[] ivalues){
         values =  new ArrayList<XdmValue>(Arrays.asList(ivalues));
 
+    }
+
+    public void addProperty(String name){
+         paramNames.add(name);
     }
 
     @CEntryPoint(name = "createProcessorDataWithArray")
@@ -91,6 +104,16 @@ public class ProcessorDataAccumulator {
         Object object = SaxonCAPI.objectHandles.get(objectRef);
 
         processorData.values.add(object);
+
+    }
+
+    @CEntryPoint(name = "j_getProcessorDataProperty", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    public static CCharPointer j_getProcessorDataProperty(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle processorDataRef, int index){
+
+        ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
+        String data = processorData.paramNames.get(index);
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, data);
+        return a;
 
     }
 

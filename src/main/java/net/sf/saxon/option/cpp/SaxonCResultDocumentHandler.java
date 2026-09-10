@@ -11,10 +11,14 @@ import net.sf.saxon.s9api.*;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.word.WordFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,12 +80,22 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
     }
 
 
-    public XdmValue[] getResultDocuments() {
-        if (rawResultsFlag) {
-            return getRawResults();
+    @CEntryPoint(name = "j_getResultDocuments", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
+    public static CLongPointer getResultDocuments(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle rdRef) {
+        SaxonCResultDocumentHandler rdHandler = SaxonCAPI.objectHandles.get(rdRef);
+        XdmValue[] results = null;
+        if (rdHandler.rawResultsFlag) {
+            results = rdHandler.getRawResults();
         } else {
-            return getXdmResultDocuments();
+            results = rdHandler.getXdmResultDocuments();
         }
+        int len = results.length;
+        long[] resultRefs = Arrays.stream(results).mapToLong(i -> {
+            ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
+            return objectHandle.rawValue();
+        }).toArray();
+        CLongPointer addr = SaxonCAPI.longArrayToNativeWithLength(alloc, resultRefs);
+        return addr;
     }
 
 
@@ -126,36 +140,32 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
         return resultsArr;
     }
 
-
-    public String[] getResultDocumentURIs() {
-        String[] resultDocUris = null;
+    @CEntryPoint(name = "j_getResultDocumentURIs", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    public static long getResultDocumentURIs(IsolateThread thread, ObjectHandle rdRef) {
+        SaxonCResultDocumentHandler rdHandler = SaxonCAPI.objectHandles.get(rdRef);
         Collection<? extends AbstractDestination> resultDocCollection;
-        if (rawResultsFlag) {
-            resultDocUris = new String[rawResults.size()];
-            resultDocCollection = rawResults.values();
+        if (rdHandler.rawResultsFlag) {
+            resultDocCollection = rdHandler.rawResults.values();
 
         } else {
-            resultDocUris = new String[results.size()];
-            resultDocCollection = results.values();
+            resultDocCollection = rdHandler.results.values();
 
         }
 
-        int i = 0;
-          if (resultDocCollection.size() == 0) {
-              if (SaxonCAPI.debug) {
-                  System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocumentURIs is empty");
-              }
-              return null;
-          }
-          for (AbstractDestination dest : resultDocCollection) {
-              resultDocUris[i] = dest.getDestinationBaseURI().toASCIIString();
+        if (resultDocCollection.size() == 0) {
+            if (SaxonCAPI.debug) {
+                System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocumentURIs is empty");
+            }
+            return SaxonCAPI.STATUS_FAIL;
+        }
+        ProcessorDataAccumulator processorData = new ProcessorDataAccumulator(resultDocCollection.size(), true);
+        for (AbstractDestination dest : resultDocCollection) {
+            processorData.addProperty(dest.getDestinationBaseURI().toASCIIString());
+        }
 
-              i++;
-          }
-
-          return resultDocUris;
+        ObjectHandle handle = SaxonCAPI.createHandle(processorData);
+        return handle.rawValue();
     }
-
 
 
     public XdmNode getResultDocument(String baseURI) throws SaxonApiException {
