@@ -112,7 +112,6 @@ public abstract class SearchableValue implements GroundedValue {
      * @param values                the set of values to be found
      * @param convertUntypedToOther true if untypedAtomic values are to be converted to the
      *                              type of the other operand
-     * @param firstOnly             true if only the first matching item is required
      * @param comparer              AtomicComparer used to compare values for equality (encapsulates a collation
      *                              if necessary)
      * @param context               the dynamic evaluation context @return an iterator over the items that match the specified values
@@ -122,7 +121,7 @@ public abstract class SearchableValue implements GroundedValue {
 
     public abstract SequenceIterator findItems(Expression use, SequenceIterator values,
                                                boolean convertUntypedToOther,
-                                               boolean firstOnly, AtomicComparer comparer, XPathContext context) throws XPathException;
+                                               AtomicComparer comparer, XPathContext context) throws XPathException;
 
     /**
      * Get a subsequence of the value

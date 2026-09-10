@@ -11,7 +11,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
-import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
@@ -36,8 +35,8 @@ class SmallSearchableValue extends SearchableValue {
 
     @Override
     public SequenceIterator findItems(Expression use, SequenceIterator values,
-                                               boolean convertUntypedToOther, boolean firstOnly,
-                                               AtomicComparer comparer, XPathContext context) throws XPathException {
+                                               boolean convertUntypedToOther,
+                                      AtomicComparer comparer, XPathContext context) throws XPathException {
         List<Item> selected = new ArrayList<>();
 
         XPathContext c2 = context.newContext();
@@ -63,16 +62,22 @@ class SmallSearchableValue extends SearchableValue {
             Item key;
             while ((key = keys.next()) != null) {
                 AtomicSequence atomized = key.atomize();
+                boolean matched = false;
                 for (AtomicValue sought : soughtValues) {
                     for (AtomicValue val : atomized) {
                         if (compare.compare(val, sought)) {
-                            if (firstOnly) {
-                                return SingletonIterator.makeIterator(value[i]);
-                            } else {
-                                selected.add(value[i]);
-                            }
+                            selected.add(value[i]);
+                            matched = true;
+                            break;
                         }
                     }
+                    if (matched) {
+                        break;
+                    }
+                }
+                if (matched) {
+                    keys.close();
+                    break;
                 }
             }
         }

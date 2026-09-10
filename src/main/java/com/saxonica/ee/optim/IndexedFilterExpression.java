@@ -476,7 +476,7 @@ public final class IndexedFilterExpression extends Expression {
                 AtomicComparer comparer = expr.comparer.provideContext(context);
                 SequenceIterator values = searchPullEvaluator.iterate(context);
                 return indexedValue.findItems(expr.getUseExpression(), values, expr.convertUntypedToOther,
-                                              false, comparer, context);
+                                              comparer, context);
 
             };
         }

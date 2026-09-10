@@ -40,7 +40,6 @@ public class IndexedValue extends SearchableValue {
      * @param values                the set of values to be found
      * @param convertUntypedToOther true if untypedAtomic values are to be converted to the
      *                              type of the other operand
-     * @param firstOnly             true if only the first matching item is required
      * @param comparer              AtomicComparer used to compare values for equality (encapsulates a collation
      *                              if necessary)
      * @param context               the dynamic evaluation context @return an iterator over the items that match the specified values
@@ -51,7 +50,7 @@ public class IndexedValue extends SearchableValue {
     @Override
     public SequenceIterator findItems(Expression use, SequenceIterator values,
                                                       boolean convertUntypedToOther,
-                                                      boolean firstOnly, AtomicComparer comparer, XPathContext context) throws XPathException {
+                                      AtomicComparer comparer, XPathContext context) throws XPathException {
         // first find the index for this expression if there is one
         MultiIndex index = null;
         synchronized(this) {
@@ -81,7 +80,7 @@ public class IndexedValue extends SearchableValue {
                 indexes.add(index);
             }
         }
-        return index.findItems(use, values, convertUntypedToOther, firstOnly, comparer.getCollator(), context);
+        return index.findItems(use, values, convertUntypedToOther, comparer.getCollator(), context);
     }
 
     /**

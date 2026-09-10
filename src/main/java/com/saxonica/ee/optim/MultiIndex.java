@@ -162,7 +162,6 @@ public class MultiIndex {
      * @param values                the set of values to be found
      * @param convertUntypedToOther true if untypedAtomic values are to be converted to the
      *                              type of the other operand
-     * @param firstOnly             true if only the first matching value is needed
      * @param collator              StringCollator used to compare values for equality (encapsulates a collation
      *                              if necessary)
      * @param context               the dynamic evaluation context
@@ -173,7 +172,7 @@ public class MultiIndex {
 
     /*@Nullable*/
     public SequenceIterator findItems(Expression use, SequenceIterator values,
-                                      boolean convertUntypedToOther, boolean firstOnly,
+                                      boolean convertUntypedToOther,
                                       StringCollator collator, XPathContext context) throws XPathException {
         //System.err.println("*** Using index");
 
@@ -261,19 +260,7 @@ public class MultiIndex {
                 while (ii.hasNext()) {
                     int type = ii.next();
                     final BuiltInAtomicType requiredType = (BuiltInAtomicType) BuiltInType.getSchemaType(type);
-                    AtomicValue conv;
-
-                    // convert the value being sought to this type
-                    ConversionResult result = Converter.convert(value, requiredType, rules);
-                    if (result instanceof ValidationFailure) {
-                        String msg = "Failure converting untypedAtomic value to " +
-                                requiredType.getDisplayName() +
-                                " during comparison operation. " +
-                                ((ValidationFailure) result).getMessage();
-                        throw new XPathException(msg, "FORG0001").withXPathContext(context);
-                    } else {
-                        conv = (AtomicValue) result;
-                    }
+                    AtomicValue conv = Converter.convert(value, requiredType, rules);
 
                     // look up the index to find the positions of items with this "use" value,
                     // and combine it with the result found for other values being sought at the same time
@@ -300,13 +287,6 @@ public class MultiIndex {
                         selectedItems = selectedItems.union(list);
                         //selectedItems = targetHandler.mergeNodeLists(selectedItems, list);
                     }
-                }
-            }
-            if (firstOnly && selectedItems != null && !selectedItems.isEmpty()) {
-                IntIterator it = selectedItems.iterator();
-                if (it.hasNext()) {
-                    // always true
-                    return singletonIterator(it.next());
                 }
             }
         }
