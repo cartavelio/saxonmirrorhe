@@ -2379,6 +2379,9 @@ public class PackageLoaderHE implements IPackageLoader {
                 if (sep != null) {
                     forEach.setSeparatorExpression(sep);
                 }
+                String flags = element.getAttributeValue("", "flags");
+                boolean containsTailCall = flags != null && flags.contains("t");
+                forEach.setContainsTailCall(containsTailCall);
                 return forEach;
             } else {
                 ForEach forEach = new ForEach(lhs, rhs, false, threads);

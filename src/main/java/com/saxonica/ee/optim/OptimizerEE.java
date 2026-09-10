@@ -1928,7 +1928,8 @@ public class OptimizerEE extends Optimizer {
 
     @Override
     public Expression generateMultithreadedInstruction(Expression instruction) {
-        if (instruction instanceof ForEach && config.getBooleanProperty(Feature.ALLOW_MULTITHREADING)) {
+        if (instruction instanceof ForEach && config.getBooleanProperty(Feature.ALLOW_MULTITHREADING)
+                && !((ForEach)instruction).isContainsTailCall()) {
             ForEach base = (ForEach) instruction;
             MultithreadedForEach result = new MultithreadedForEach(
                     base.getSelectExpression(), base.getActionExpression(), false, base.getNumberOfThreadsExpression());
