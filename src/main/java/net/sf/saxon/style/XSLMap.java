@@ -20,6 +20,7 @@ import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -78,9 +79,12 @@ public class XSLMap extends StyleElement {
             NodeName attName = att.getNodeName();
             String f = attName.getDisplayName();
             String value = att.getValue();
-            if (attName.getLocalPart().equals("on-duplicates")) {
+            if (f.equals("select")) {
+                requireXslt40Attribute("select");
+                select = makeExpression(value, att);
+            } else if (attName.getLocalPart().equals("on-duplicates")) {
                 if (attName.getNamespaceUri().isEmpty()) {
-                    if ( requireXslt40Attribute("on-duplicates")) {
+                    if (requireXslt40Attribute("on-duplicates")) {
                         onDuplicates = makeExpression(value, att);
                     }
                 } else if (attName.hasURI(NamespaceUri.SAXON)) {
@@ -98,8 +102,23 @@ public class XSLMap extends StyleElement {
     }
 
     @Override
+    public void validate(ComponentDeclaration decl) throws XPathException {
+        select = typeCheck("select", select);
+        if (select != null) {
+            for (NodeInfo kid : children()) {
+                if (!(kid instanceof XSLFallback)) {
+                    compileError("An xsl:map element with a select attribute must be empty", "XTSE3185");
+                    return;
+                }
+            }
+        }
+    }
+
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
-        select = compileSequenceConstructor(exec, decl, false);
+        if (select == null) {
+            select = compileSequenceConstructor(exec, decl, false);
+        }
         select = select.simplify();
         // Custom type-checking; the checking performed by map:merge() gives poor diagnostics
         TypeChecker tc = getConfiguration().getTypeChecker(false);
