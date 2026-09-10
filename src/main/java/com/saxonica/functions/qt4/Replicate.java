@@ -41,7 +41,7 @@ public class Replicate extends SystemFunction {
                 return baseValue;
             }
         } else {
-            return new LazySequence(new ForEachFn.RepeatingIterator(baseValue, count, context));
+            return new LazySequence(new ForEachFn.RepeatingIterator(baseValue, count));
         }
     }
 
