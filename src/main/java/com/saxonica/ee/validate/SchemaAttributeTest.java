@@ -210,7 +210,7 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
             return explanation;
         }
         NodeInfo node = (NodeInfo)item;
-        StructuredQName name = new StructuredQName("", node.getNamespaceUri(), node.getLocalPart());
+        StructuredQName name = node.getQName();
         if (!declaration.getComponentName().equals(name)) {
             return Optional.of("The supplied attribute has the wrong name");
         }

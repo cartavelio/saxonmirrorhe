@@ -745,13 +745,13 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, valuePredicate, ONE, null)
                 .arg(2, valueAction, ONE, null));
 
-        register("xdm-to-json", 1, e -> e.populate(XdmToJsonFn::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null));
+        register("elements-to-maps", 1, e -> e.populate(ElementsToMaps::new, MapType.ANY_MAP_TYPE, STAR, 0)
+                .arg(0, NodeKindTest.ELEMENT, STAR, null));
 
-        register("xdm-to-json", 2, e -> e.populate(XdmToJsonFn::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
+        register("elements-to-maps", 2, e -> e.populate(ElementsToMaps::new, MapType.ANY_MAP_TYPE, STAR, 0)
+                .arg(0, NodeKindTest.ELEMENT, STAR, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(XdmToJsonFn.OPTION_DETAILS));
+                .setOptionDetails(ElementsToMaps.OPTION_DETAILS));
 
         register("xml-to-json", 2, e -> e.populate(XMLToJsonFn::new, BuiltInAtomicType.STRING,
                                                    OPT, LATE)
