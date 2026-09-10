@@ -1,5 +1,7 @@
+using System;
 using System.Globalization;
 using System.Text;
+using System.Threading;
 using Saxon.Ejava.text;
 using Saxon.Ejava.util;
 using Saxon.Hej;
@@ -16,52 +18,34 @@ using StringBuilder = Saxon.Ejava.lang.StringBuilder;
 namespace Saxon.Impl.Helpers
 {
 
-    public class UcaCollatorUsingCSharp : SubstringMatcher
-    {
+    public class UcaCollatorUsingCSharp : SubstringMatcher {
         private string uri;
-
         private Properties properties;
-
         private Saxon.Hej.Configuration config;
+        private System.StringComparer stringComparer;
+        private bool ignoreCase = false;
+        private System.Globalization.CultureInfo cultureInfo = CultureInfo.InvariantCulture;
 
-        private System.StringComparer uca;
-
-        private int strength;
-
-        private static string[] keywords =
-        {
+        private readonly static string[] keywords = {
             "fallback", "lang", "version", "strength",
             "alternate", "backwards", "normalization", "maxVariable",
             "caseLevel", "caseFirst", "numeric", "reorder"
         };
 
-        private static System.Collections.Generic.HashSet<string> keys = new System.Collections.Generic.HashSet<string>(Arrays.asList(keywords));
+        private static System.Collections.Generic.HashSet<string> keys = new (Arrays.asList(keywords));
 
         public UcaCollatorUsingCSharp(string urim, Configuration config)
         {
-            this.uri = uri;
             this.config = config;
-            uca = System.StringComparer.CurrentCultureIgnoreCase; //new RuleBasedCollator();
+            stringComparer = System.StringComparer.CurrentCultureIgnoreCase; //new RuleBasedCollator();
             setProps(parseProps(urim));
-            strength = 0;
-        }
-
-        /**
-        * Set the strength of the collation (primary, secondary, tertiary, etc)
-        * @param newStrength the strength
-        */
-
-        public void setStrength(int newStrength)
-        {
-            strength = newStrength;
         }
 
         private void setProps(Properties props)
         {
             this.properties = props;
-            System.Globalization.CultureInfo loc = null;
             bool fallbackError = false;
-            CompareOptions options = CompareOptions.None;
+            CompareOptions compareOptions = CompareOptions.None;
             string fallback = props.getProperty("fallback");
             if (fallback != null)
             {
@@ -75,12 +59,12 @@ namespace Saxon.Impl.Helpers
                             error("fallback=no is not supported in Saxon-HE");
 #if EE
                     } else if (!ICULibrary.isICUCollatorAvailable()) {
-                        error("fallback=no is not available because ICU4J is not available");
+                        error("fallback=no is not available because ICU4N is not available");
 #endif
                         }
                         else
                         {
-                            error("fallback=no is not available with JDK-based collations");
+                            error("fallback=no is not available except when ICU4N is in use");
                         }
 
                         break;
@@ -91,44 +75,46 @@ namespace Saxon.Impl.Helpers
             }
 
             string lang = props.getProperty("lang");
-            if (lang != null && lang.Length != 0)
-            {
+            if (!string.IsNullOrEmpty(lang)) {
                 ValidationFailure vf = Saxon.Hej.type.StringConverter.StringToLanguage.INSTANCE.validate(Saxon.Hej.str.StringView.tidy(lang));
-                if (vf != null)
-                {
+                if (vf != null) {
                     error("lang", "a valid language code");
                 }
 
                 string language, country = "", variant = "";
                 string[] parts = lang.Split("-");
                 language = parts[0];
-                if (parts.Length > 1)
-                {
+                if (parts.Length > 1) {
                     country = parts[1];
                 }
 
-                if (parts.Length > 2)
-                {
+                if (parts.Length > 2) {
                     variant = parts[2];
                 }
 
                 //TODO Locale loc = new Locale(language, country, variant);
-                loc = makeLocale(language, country, variant);
+                this.cultureInfo = makeLocale(language, country, variant);
 
                 //TODO create RuleBaseCollator uca = (RuleBasedCollator) Collator.getInstance(loc);
             }
 
             string strengthAtt = props.getProperty("strength");
-            if (strengthAtt != null && options == CompareOptions.None)
+            if (strengthAtt != null && compareOptions == CompareOptions.None)
             {
-                options = strengthAtt switch
-                {
+                compareOptions = strengthAtt switch {
                     "primary" => System.Globalization.CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace |
                                  CompareOptions.IgnoreWidth,
                     "secondary" => CompareOptions.IgnoreCase | CompareOptions.IgnoreWidth,
                     "tertiary" => CompareOptions.IgnoreWidth,
                     "identical" => 0,
                     _ => throw new XPathException("strength must be primary, secondary, tertiary, or identical")
+                };
+                this.ignoreCase = strengthAtt switch {
+                    "primary" => true,
+                    "secondary" => true,
+                    "tertiary" => false,
+                    "identical" => false,
+                    _ => false
                 };
             }
 
@@ -139,7 +125,7 @@ namespace Saxon.Impl.Helpers
             {
                 if (ignore == "yes")
                 {
-                    options |= CompareOptions.IgnoreCase;
+                    compareOptions |= CompareOptions.IgnoreCase;
                 }
                 else if (ignore == "no")
                 {
@@ -156,7 +142,7 @@ namespace Saxon.Impl.Helpers
             {
                 if (ignore == "yes")
                 {
-                    options |= CompareOptions.IgnoreNonSpace;
+                    compareOptions |= CompareOptions.IgnoreNonSpace;
                 }
                 else if (ignore == "no")
                 {
@@ -173,7 +159,7 @@ namespace Saxon.Impl.Helpers
             {
                 if (ignore == "yes")
                 {
-                    options |= CompareOptions.IgnoreSymbols;
+                    compareOptions |= CompareOptions.IgnoreSymbols;
                 }
                 else if (ignore == "no")
                 {
@@ -190,7 +176,7 @@ namespace Saxon.Impl.Helpers
             {
                 if (ignore == "yes")
                 {
-                    options |= CompareOptions.IgnoreWidth;
+                    compareOptions |= CompareOptions.IgnoreWidth;
                 }
                 else if (ignore == "no")
                 {
@@ -202,14 +188,7 @@ namespace Saxon.Impl.Helpers
                 }
             }
 
-            if (loc != null)
-            {
-                uca = System.StringComparer.Create(loc, options);
-            }
-            else
-            {
-                uca = System.StringComparer.Create(CultureInfo.CurrentCulture, options);
-            }
+            stringComparer = System.StringComparer.Create(cultureInfo, compareOptions);
 
             string normalization = props.getProperty("normalization");
             if (normalization != null)
@@ -225,56 +204,38 @@ namespace Saxon.Impl.Helpers
             }
         }
 
-        private static System.Globalization.CultureInfo makeLocale(string language, string country, string variant)
-        {
-            return makeCSharpLocale(language, country, variant);
-        }
-
-        private static System.Globalization.CultureInfo makeCSharpLocale(string language, string country,
-            string variant)
-        {
-            StringBuilder sb = new StringBuilder(language);
-            if (((country != null) && !(country.Length == 0)))
-            {
+        private static System.Globalization.CultureInfo makeLocale(string language, string country, string variant) {
+            StringBuilder sb = new (language);
+            if (!string.IsNullOrEmpty(country)) {
                 sb.append("-").append(country);
             }
-
-            if (((variant != null) && !(variant.Length == 0)))
-            {
+            if (!string.IsNullOrEmpty(variant)) {
                 sb.append("-").append(variant);
             }
-
             return new System.Globalization.CultureInfo(sb.ToString());
         }
 
 
-        private Properties parseProps(string uri)
-        {
+        private Properties parseProps(string uri) {
             System.Uri uuri;
-            try
-            {
+            try {
                 uuri = new System.Uri(uri, System.UriKind.RelativeOrAbsolute);
             }
-            catch (System.UriFormatException err)
-            {
+            catch (System.UriFormatException err) {
                 throw new XPathException(err);
             }
 
             System.Collections.Generic.List<string> unknownKeys = new System.Collections.Generic.List<string>();
-            Properties props = new Properties();
+            Properties props = new ();
             string query = AnyURIValue.decode(uuri.Query);
-            if (((query != null) && !(query.Length == 0)))
-            {
-                if (query.StartsWith("?"))
-                {
+            if (!string.IsNullOrEmpty(query)) {
+                if (query.StartsWith("?")) {
                     query = query.Substring(1);
                 }
 
-                foreach (string s in System.Text.RegularExpressions.Regex.Split(query, ";"))
-                {
+                foreach (string s in System.Text.RegularExpressions.Regex.Split(query, ";")) {
                     string[] tokens = System.Text.RegularExpressions.Regex.Split(s, "=");
-                    if (!(keys.Contains(tokens[0])))
-                    {
+                    if (!(keys.Contains(tokens[0]))) {
                         unknownKeys.Add(tokens[0]);
                     }
 
@@ -284,12 +245,11 @@ namespace Saxon.Impl.Helpers
             }
 
             string fallback = props.getProperty("fallback");
-            if ((((fallback != null) && fallback.Equals("no")) && !(unknownKeys.Count == 0)))
+            if ((((fallback != null) && fallback.Equals("no")) && unknownKeys.Count != 0))
             {
                 StringBuilder message =
                     new StringBuilder(((unknownKeys.Count > 1) ? "unknown parameters:" : "unknown parameter:"));
-                foreach (string u in unknownKeys)
-                {
+                foreach (string u in unknownKeys) {
                     message.append(u).append(" ");
                 }
 
@@ -299,150 +259,104 @@ namespace Saxon.Impl.Helpers
             return props;
         }
 
-        public Properties getProperties()
-        {
+        public Properties getProperties() {
             return properties;
         }
 
-        public string getCollationURI()
-        {
+        public string getCollationURI() {
             return uri;
         }
 
-        private abstract class Strength
-        {
-
-            abstract public int compare(int ce1, int ce2);
-
-
+        public int compareStrings(UnicodeString s1, UnicodeString s2) {
+            return stringComparer.Compare(s1.ToString(), s2.ToString());
         }
 
 
-        private class Primary : Strength
-        {
-            public override int compare(int ce1, int ce2)
-            {
-                return ce1.CompareTo(ce2);
-            }
+        public bool comparesEqual(UnicodeString s1, UnicodeString s2) {
+            return stringComparer.Compare(s1.ToString(), s2.ToString()) == 0;
         }
 
-        private class Secondary : Strength
-        {
-            public override int compare(int ce1, int ce2)
-            {
-                int c1 = ce1.CompareTo(ce2);
-                if (c1 == 0)
-                {
-                    return
-                        0; //Integer.compare(CollationElementIterator.secondaryOrder(ce1), CollationElementIterator.secondaryOrder(ce2));
-                }
-                else
-                {
-                    return c1;
-                }
-            }
-
-        }
-
-        private class Tertiary : Strength
-        {
-            public override int compare(int ce1, int ce2)
-            {
-                throw new System.NotImplementedException();
-            }
-
-
-        }
-
-        private class Identical : Strength
-        {
-            public override int compare(int ce1, int ce2)
-            {
-                throw new System.NotImplementedException();
-            }
-
-        }
-
-        public int compareStrings(UnicodeString s1, UnicodeString s2)
-        {
-            return uca.Compare(s1.ToString(), s2.ToString());
-        }
-
-
-        public bool comparesEqual(UnicodeString s1, UnicodeString s2)
-        {
-            return uca.Compare(s1.ToString(), s2.ToString()) == 0;
-        }
-
-        public bool isEqualToEmpty(UnicodeString s1)
-        {
+        public bool isEqualToEmpty(UnicodeString s1) {
             return s1.isEmpty();
         }
 
-        public AtomicMatchKey getCollationKey(UnicodeString s)
-        {
-            CollationKey ck = new CollationKeyUsingCSharp(s.ToString());
-            return new CollationMatchKey(ck);
+        public AtomicMatchKey getCollationKey(UnicodeString s) {
+            byte[] key = cultureInfo.CompareInfo.GetSortKey(s.ToString(), 
+                ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None).KeyData;
+            return new Base64BinaryValue(key);
         }
 
-        private void error(string message)
-        {
+        private void error(string message) {
             throw new XPathException("Error in UCA Collation URI " + uri + ": " + message, "FOCH0002");
         }
 
-        private void error(string field, string allowed)
-        {
+        private void error(string field, string allowed) {
             error("value of " + field + " must be " + allowed);
         }
 
-        private void error(string field, string allowed, string requested)
-        {
+        private void error(string field, string allowed, string requested) {
             error("value of " + field + " must be " + allowed + ", requested was:" + requested);
         }
 
-        public bool contains(UnicodeString s1, UnicodeString s2)
-        {
-            return s1.ToString().Contains(s2.ToString());
+        public bool contains(UnicodeString s1, UnicodeString s2) {
+            CultureInfo saved = Thread.CurrentThread.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = cultureInfo;
+            bool result = s1.ToString().Contains(
+                s2.ToString(), 
+                this.ignoreCase ?  StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture);
+            Thread.CurrentThread.CurrentCulture = saved;
+            return result;
         }
 
-        public bool startsWith(UnicodeString s1, UnicodeString s2)
-        {
-            return s1.ToString().StartsWith(s2.ToString());
+        public bool startsWith(UnicodeString s1, UnicodeString s2) {
+            CultureInfo saved = Thread.CurrentThread.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = cultureInfo;
+            bool result = s1.ToString().StartsWith(
+                s2.ToString(), 
+                this.ignoreCase ?  StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture);
+            Thread.CurrentThread.CurrentCulture = saved;
+            return result;
         }
 
-        public bool endsWith(UnicodeString s1, UnicodeString s2)
-        {
-            return s1.ToString().EndsWith(s2.ToString());
+        public bool endsWith(UnicodeString s1, UnicodeString s2) {
+            CultureInfo saved = Thread.CurrentThread.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = cultureInfo;
+            bool result = s1.ToString().EndsWith(
+                s2.ToString(), 
+                this.ignoreCase ?  StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture);
+            Thread.CurrentThread.CurrentCulture = saved;
+            return result;
         }
 
-        public UnicodeString substringBefore(UnicodeString s1, UnicodeString s2)
-        {
+        public UnicodeString substringBefore(UnicodeString s1, UnicodeString s2) {
             string g1 = s1.ToString();
             string g2 = s2.ToString();
-            int bb = g1.IndexOf(g2);
-            if (bb > 0)
-            {
+            int bb = IndexOf(g1, g2);
+            if (bb >= 0) {
                 return s1.substring(0, bb);
-            }
-            else
-            {
-                return EmptyUnicodeString.getInstance();
-            }
+            } 
+            return EmptyUnicodeString.getInstance();
         }
 
-        public UnicodeString substringAfter(UnicodeString s1, UnicodeString s2)
-        {
+        public UnicodeString substringAfter(UnicodeString s1, UnicodeString s2) {
             string g1 = s1.ToString();
             string g2 = s2.ToString();
-            int bb = g1.IndexOf(g2);
-            if (bb > 0)
-            {
-                return s1.substring(bb);
-            }
-            else
-            {
-                return EmptyUnicodeString.getInstance();
-            }
+            int bb = IndexOf(g1, g2);
+            if (bb >= 0) {
+                return s1.substring(bb + g2.Length);
+            } 
+            return EmptyUnicodeString.getInstance();
+        }
+
+
+        private int IndexOf(string s1, string s2) {
+            CultureInfo saved = Thread.CurrentThread.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = cultureInfo;
+            int result = s1.ToString().IndexOf(
+                s2.ToString(), 
+                this.ignoreCase ?  StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture);
+            Thread.CurrentThread.CurrentCulture = saved;
+            return result;
         }
     }
 }
