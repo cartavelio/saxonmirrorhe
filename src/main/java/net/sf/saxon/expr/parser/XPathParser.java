@@ -2604,6 +2604,10 @@ public class XPathParser {
             case Token.STRING_CONSTRUCTOR_INITIAL:
                 return parseStringConstructor();
 
+            case Token.BACKTICK:
+                checkLanguageVersion40();
+                return parseStringTemplate();
+
             case Token.NUMBER:
                 return parseNumericLiteral(true);
 
@@ -2815,6 +2819,79 @@ public class XPathParser {
     protected Expression parseStringConstructor() throws XPathException {
         grumble("String constructor expressions are allowed only in XQuery");
         return null;
+    }
+
+    public Expression parseStringTemplate() throws XPathException {
+        int offset = t.inputOffset;
+        // we're reading raw characters
+        //t.nextChar(); // lose this one, it's the initial backtick
+        List<Expression> components = new ArrayList<>();
+        StringBuilder currentPart = new StringBuilder();
+        boolean finished = false;
+        do {
+            char c = t.nextChar();
+            switch (c) {
+                case (char) 0:
+                    grumble("Unclosed string template");
+                    return null;
+                case '`':
+                    c = t.nextChar();
+                    if (c == '`') {
+                        currentPart.append('`');
+                    } else {
+                        Expression fixed = new StringLiteral(currentPart.toString());
+                        components.add(fixed);
+                        finished = true;
+                        t.unreadChar();
+                        t.lookAhead();
+                        nextToken();
+                    }
+                    break;
+                case '{':
+                    c = t.nextChar();
+                    if (c == '{') {
+                        currentPart.append('{');
+                    } else {
+                        Expression fixed = new StringLiteral(currentPart.toString());
+                        components.add(fixed);
+                        currentPart.setLength(0);
+                        t.unreadChar();
+                        t.setState(Tokenizer.DEFAULT_STATE);
+                        t.lookAhead();
+                        nextToken();
+                        if (t.currentToken == Token.RCURLY) {
+                            //components.add(Literal.makeEmptySequence());
+                        } else {
+                            Expression exp = parseExpression();
+                            RetainedStaticContext rsc = new RetainedStaticContext(env);
+                            Expression fn = SystemFunction.makeCall("string-join", rsc, exp, new StringLiteral(StringValue.SINGLE_SPACE));
+                            ExpressionTool.copyLocationInfo(exp, fn);
+                            components.add(fn);
+                            expect(Token.RCURLY);
+                        }
+                    }
+                    break;
+                case '}':
+                    c = t.nextChar();
+                    if (c == '}') {
+                        currentPart.append('}');
+                    } else {
+                        grumble("Closing brace ('}') in string template must be doubled");
+                    }
+                    break;
+                default:
+                    currentPart.append(c);
+                    break;
+            }
+        } while (!finished);
+
+        RetainedStaticContext rsc = new RetainedStaticContext(env);
+        Block block = new Block(components.toArray(new Expression[]{}));
+        setLocation(block);
+        Expression fn = SystemFunction.makeCall("string-join", rsc, block, new StringLiteral(StringValue.EMPTY_STRING));
+        ExpressionTool.copyLocationInfo(block, fn);
+        components.add(fn);
+        return fn;
     }
 
     /*@NotNull*/

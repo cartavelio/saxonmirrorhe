@@ -256,7 +256,7 @@ public final class Tokenizer {
                 break;
         }
 
-        if (currentToken == Token.TAG || currentToken == Token.RCURLY) {
+        if (currentToken == Token.TAG || currentToken == Token.RCURLY || currentToken == Token.BACKTICK) {
 
             // No lookahead after encountering "<" at the start of an XML-like tag.
             // After an RCURLY, the parser must do an explicit lookahead() to continue
@@ -879,9 +879,12 @@ public final class Tokenizer {
                     nextToken = Token.STRING_LITERAL;
                     return;
                 case '`':
-                    if (isXQuery && inputOffset < inputLength - 1
+                    if (inputOffset < inputLength - 1
                             && input.charAt(inputOffset) == '`'
                             && input.charAt(inputOffset + 1) == '[') {
+                        if (!isXQuery) {
+                            throw new XPathException("String constructors (starting '``[') are allowed only in XQuery, not XPath");
+                        }
                         inputOffset += 2;
                         int j = inputOffset;
                         int newlines = 0;
@@ -910,7 +913,8 @@ public final class Tokenizer {
                             j++;
                         }
                     } else {
-                        throw new XPathException("Invalid character '`' (backtick) in expression");
+                        nextToken = Token.BACKTICK;
+                        return;
                     }
                 case '\n':
                     incrementLineNumber();
@@ -1230,9 +1234,13 @@ public final class Tokenizer {
 
     /**
      * Step back one character. If this steps back to a previous line, adjust the line number.
+     * If we have already read off the end of the input, do nothing.
      */
 
     public void unreadChar() {
+        if (inputOffset >= inputLength) {
+            return;
+        }
         if (input.charAt(--inputOffset) == '\n') {
             nextLineNumber--;
             lineNumber--;
