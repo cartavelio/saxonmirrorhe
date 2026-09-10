@@ -32,9 +32,9 @@ high-performance features exclusive to the EE version, such as advanced
 optimization, schema-awareness, streaming, and multi-threading. 
 Some platform-specific features such as bytecode generation are excluded.
 
-License files are compatible between SaxonCS and SaxonJ.
+License files are compatible between SaxonCS, SaxonJ, and SaxonC.
 
-Stylesheet export files (SEF files) are compatible between SaxonCS, SaxonC, and SaxonJ.
+Stylesheet export files (SEF files) are compatible between SaxonCS, SaxonJ, and SaxonC.
 
 SaxonCS can also generate SEF files for SaxonJS.
 
@@ -91,7 +91,7 @@ and JSON, or do custom conversions from one to the other.
 ## What's new in this version?
 
 There's a comprehensive list of changes in the 
-[documentation](https://www.saxonica.com/documentation12/).
+[documentation](https://www.saxonica.com/documentation13/).
 
 For a record of bugs fixed in each maintenance release, please consult the
 [issues list](https://saxonica.plan.io/projects/saxon/issues) — you can filter
@@ -100,7 +100,7 @@ to report any problems you find.
 
 ## Where do I find documentation?
 
-It's all [online](https://www.saxonica.com/documentation12/). 
+It's all [online](https://www.saxonica.com/documentation13/). 
 
 (Delivered, in case you're interested, by SaxonJS running in your browser.)
 
