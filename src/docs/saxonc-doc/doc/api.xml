@@ -468,7 +468,7 @@
                   <span class="signature">setConfigurationProperty(string $name, string
                      $value)</span>
                   <div class="fcomment">Set a configuration property specific to the processor in
-                     use. Properties specified here are common across all the processors. See <a
+                     use. Properties specified here are common across all the processors. See <a target="_blank"
                         href="http://www.saxonica.com/documentation12/index.html#!configuration/config-features"
                         >Configuration features</a> for more details.</div>
                </td>

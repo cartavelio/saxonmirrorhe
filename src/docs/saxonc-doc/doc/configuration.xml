@@ -7,7 +7,7 @@
       behaves. In the SaxonC API in C/C++, PHP and Python, these may either be set at a global level on the
       <code>SaxonProcessor</code>, or on the specific XSLT, XQuery, XPath and Schema processors.</p>
    
-   <p>For a complete list of the available Saxon configuration features see the <a
+   <p>For a complete list of the available Saxon configuration features see the <a target="_blank"
       href="http://www.saxonica.com/documentation12/index.html#!configuration/config-features"
       >Configuration features</a> section in the main Saxon documentation.</p>
    
@@ -97,7 +97,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
       <h3 class="codeTitle">setProperty(string $name, string $propValue)</h3>
 
       <p>The properties available are a subset of those specified for running XSLT from the command
-         line (see the <a
+         line (see the <a target="_blank"
             href="http://www.saxonica.com/documentation12/index.html#!using-xsl/commandline">Using XSLT from
             the command line</a> section in the main Saxon documentation for more information).</p>
 
@@ -268,7 +268,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
       <h3 class="codeTitle">setProperty(string $name, string $propValue)</h3>
       
       <p>The properties available are a subset of those specified for running XQuery from the command
-         line (see the <a
+         line (see the <a target="_blank"
             href="http://www.saxonica.com/documentation12/index.html#!using-xquery/commandline">Using XQuery
             from the command line</a> section in the main Saxon documentation for more information).</p>
 
