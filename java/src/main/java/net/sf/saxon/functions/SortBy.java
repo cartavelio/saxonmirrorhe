@@ -30,7 +30,6 @@ import net.sf.saxon.value.StringValue;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.sf.saxon.functions.Sort_1.doSort;
 
 /**
  * This class implements the function fn:sort-by, which is a proposed function in XPath 4.0
@@ -69,11 +68,11 @@ public class SortBy extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
 
-    GroundedValue details = arguments[1].materialize();
+        GroundedValue details = arguments[1].materialize();
         if (details.getLength() == 0) {
-            ArrayList<Sort_1.ItemToBeSorted> inputList = Sort_1.getItemsToBeSorted(arguments[0]);
+            ArrayList<Sort_1.ItemToBeSorted> inputList0 = Sort_1.getItemsToBeSorted(arguments[0]);
             StringCollator collation = context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName());
-            return doSort(inputList, collation, context);
+            return Sort_1.doSort(inputList0, collation, context);
         }
 
         List<Callable> sortKeys = new ArrayList<>();

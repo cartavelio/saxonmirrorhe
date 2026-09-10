@@ -11,10 +11,7 @@ import com.saxonica.functions.qt4.Slice;
 import com.saxonica.functions.qt4.UnparcelFn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.Pingable;
-import net.sf.saxon.functions.DeepEqual;
-import net.sf.saxon.functions.Fold;
-import net.sf.saxon.functions.FoldingFunction;
-import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.map.SingleEntryMap;
@@ -244,6 +241,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(1, BuiltInAtomicType.INTEGER, OPT, null)
                     .arg(2, BuiltInAtomicType.INTEGER, OPT, null)
                     .arg(3, BuiltInAtomicType.INTEGER, OPT, null));
+
+            register("sort-by", 1, 2, e -> e.populate(ArraySortBy::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR, null)
+                    .arg(1, ArraySortBy.sortKeyRecord, STAR, null));
 
             register("split", 1, 1, e -> e.populate(ArraySplit::new, ArrayItemType.ANY_ARRAY_TYPE, STAR, 0)
                              .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));

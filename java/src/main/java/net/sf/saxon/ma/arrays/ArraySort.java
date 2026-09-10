@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
 
-    private static class MemberToBeSorted{
+    public static class MemberToBeSorted{
         public GroundedValue value;
         public GroundedValue sortKey;
         int originalPosition;
@@ -55,7 +55,7 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
             }
         }
         FunctionItem key = null;
-        if (arguments.length == 3){
+        if (arguments.length == 3) {
             key = (FunctionItem) arguments[2].head();
         }
         for (GroundedValue seq: array.members()){
