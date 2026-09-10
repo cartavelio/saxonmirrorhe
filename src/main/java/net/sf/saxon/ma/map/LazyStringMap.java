@@ -13,7 +13,6 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.MappedAtomicIterator;
-import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -357,17 +356,6 @@ public class LazyStringMap extends StringMapItem implements Iterable<KeyValuePai
     @Override
     public MapItem removeU(UnicodeString key) {
         return remove(new StringValue(key));
-    }
-
-    /**
-     * Get the lowest common item type of the keys in the map
-     *
-     * @return the most specific type to which all the keys belong. If the map is
-     * empty, return {@link UType#VOID}
-     */
-    @Override
-    public UType getKeyUType() {
-        return UType.STRING;
     }
 
     /**

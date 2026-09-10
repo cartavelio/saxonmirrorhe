@@ -234,15 +234,6 @@ public abstract class MapItem implements FunctionItem {
     }
 
     /**
-     * Get the lowest common item type of the keys in the map
-     *
-     * @return the most specific type to which all the keys belong. If the map is
-     *         empty, return UType.VOID
-     */
-
-    abstract public UType getKeyUType();
-
-    /**
      * Provide a short string showing the contents of the item, suitable
      * for use in error messages
      *

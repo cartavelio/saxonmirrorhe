@@ -15,7 +15,6 @@ import net.sf.saxon.tree.iter.SingleAtomicIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.PlainType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -164,17 +163,6 @@ public class SingleEntryMap extends MapItem {
         return new MapType(key.getItemType(), SequenceType.makeSequenceType(
                 SequenceTool.getItemType(value, th),
                 SequenceTool.getCardinality(value)));
-    }
-
-    /**
-     * Get the lowest common item type of the keys in the map
-     *
-     * @return the most specific type to which all the keys belong. If the map is
-     * empty, return UType.VOID
-     */
-    @Override
-    public UType getKeyUType() {
-        return key.getUType();
     }
 
     /**

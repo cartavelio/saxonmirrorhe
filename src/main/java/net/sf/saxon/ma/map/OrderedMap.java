@@ -5,7 +5,6 @@ import io.vavr.control.Option;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
-import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -162,11 +161,6 @@ public class OrderedMap extends MapItem {
     @Override
     public MapItem remove(AtomicValue key) {
         return new OrderedMap(baseMap.remove(key.asMapKey()));
-    }
-
-    @Override
-    public UType getKeyUType() {
-        return null;
     }
 
 }

@@ -167,17 +167,6 @@ public abstract class MapTypeMaintainer extends MapItem {
         }
     }
 
-    /**
-     * Get the lowest common item type of the keys in the map
-     *
-     * @return the most specific type to which all the keys belong. If the map is
-     * empty, return UType.VOID (the type with no instances)
-     */
-    @Override
-    public UType getKeyUType() {
-        return keyUType;
-    }
-
     protected void copyTypeInfoFrom(MapTypeMaintainer that) {
         valueCardinality = that.valueCardinality;
         keyUType = that.keyUType;

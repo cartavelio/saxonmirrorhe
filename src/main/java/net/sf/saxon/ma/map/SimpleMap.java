@@ -2,7 +2,6 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.HashMap;
@@ -29,11 +28,11 @@ import java.util.Map;
  */
 public class SimpleMap extends MapItem {
 
-    private static class SingleUseMapBuilder implements MapBuilder {
+    private static class SimpleMapBuilder implements MapBuilder {
 
         private final Map<AtomicMatchKey, KeyValuePair> baseMap = new HashMap<>();
 
-        public SingleUseMapBuilder() {}
+        public SimpleMapBuilder() {}
 
         @Override
         public void put(AtomicValue key, GroundedValue value) {
@@ -54,7 +53,7 @@ public class SimpleMap extends MapItem {
      * @return a class for building simple maps
      */
     public static MapBuilder getBuilder() {
-        return new SingleUseMapBuilder();
+        return new SimpleMapBuilder();
     }
 
     /**
@@ -116,9 +115,5 @@ public class SimpleMap extends MapItem {
         }
     }
 
-    @Override
-    public UType getKeyUType() {
-        return null;  // TODO
-    }
 }
 

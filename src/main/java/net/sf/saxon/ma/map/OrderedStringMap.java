@@ -56,11 +56,6 @@ public class OrderedStringMap extends StringMapItem {
 
 
     @Override
-    public UType getKeyUType() {
-        return UType.STRING;
-    }
-
-    @Override
     public GroundedValue getU(UnicodeString key) {
         return baseMap.get(key).orNull();
     }

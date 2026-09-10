@@ -231,17 +231,6 @@ public class DictionaryMap extends StringMapItem {
         }
     }
 
-    /**
-     * Get the lowest common item type of the keys in the map
-     *
-     * @return the most specific type to which all the keys belong. If the map is
-     * empty, return {@link UType#VOID}
-     */
-    @Override
-    public UType getKeyUType() {
-        return map.isEmpty() ? UType.VOID : UType.STRING;
-    }
-
     protected static class KeyIteratorImpl implements AtomicIterator {
         Iterator<String> keyIter;
 

@@ -130,17 +130,6 @@ public class RangeKey extends MapItem {
     }
 
     /**
-     * Get the lowest common item type of the keys in the map
-     *
-     * @return the most specific type to which all the keys belong. If the map is
-     *         empty, return ErrorType.getInstance() (the type with no instances)
-     */
-    @Override
-    public UType getKeyUType() {
-        return UType.STRING;
-    }
-
-    /**
      * Create a new map containing the existing entries in the map plus an additional entry,
      * without modifying the original. If there is already an entry with the specified key,
      * this entry is replaced by the new entry.
