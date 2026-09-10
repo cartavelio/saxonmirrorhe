@@ -36,9 +36,7 @@ import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * A regular expression compiler.  This class compiles a pattern string into a
@@ -109,6 +107,7 @@ public class RECompiler {
     boolean isXSD11 = false;
     IntHashSet captures = new IntHashSet();
     boolean hasBackReferences = false;
+    Map<UnicodeString, Integer> namedCapturingGroups = new HashMap<>();
 
     REFlags reFlags;
 
@@ -290,6 +289,17 @@ public class RECompiler {
     }
 
     /**
+     * Test whether a character is an ASCII letter
+     *
+     * @param ch the character to be matched
+     * @return true if the character is an ASCII letter (a-z, A-Z)
+     */
+
+    private static boolean isAsciiLetter(int ch) {
+        return ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z';
+    }
+
+    /**
      * Match an escape sequence.  Handles quoted chars and octal escapes as well
      * as normal escape characters.  Always advances the input stream by the
      * right amount. This code "understands" the subtle difference between an
@@ -445,6 +455,24 @@ public class RECompiler {
                     syntaxError("Unknown character category: " + block);
                 }
                 break;
+
+            case 'k':
+                if (inSquareBrackets) {
+                    syntaxError("Backreference not allowed within character class");
+                } else if (isXPath40 && thereFollows('<')) {
+                    hasBackReferences = true;
+                    UnicodeString groupName = readGroupName(idx+1);
+                    if (namedCapturingGroups.containsKey(groupName)) {
+                        idx += groupName.length32() + 2;
+                        return new BackReference(namedCapturingGroups.get(groupName));
+                    } else {
+                        syntaxError("Unknown group name in backreference: " + groupName);
+                    }
+                } else if (isXPath40) {
+                    syntaxError("Named backreference requires XPath 4.0");
+                } else {
+                    syntaxError("Expected '<' after \\k");
+                }
 
             case '0':
                 syntaxError("Octal escapes not allowed");
@@ -1205,73 +1233,83 @@ public class RECompiler {
      */
     private Operation parseExpr(int[] compilerFlags) throws RESyntaxException {
         // Create open paren node unless we were called from the top level (which has no parens)
-        int paren = -1;
+        boolean parenthesized = false;
         int group = 0;
         List<Operation> branches = new ArrayList<>();
         int closeParens = capturingOpenParenCount;
         boolean capturing = true;
+        boolean lookahead = false;
         boolean lookbehind = false;
-        int marker = 0;
+        boolean positive = true;
+        //int marker = 0;
+        UnicodeString groupName = null;
         if ((compilerFlags[0] & NODE_TOPLEVEL) == 0 && pattern.codePointAt(idx) == '(') {
-            // if its a cluster ( rather than a proper subexpression ie with backrefs )
-            if (idx + 2 < len && pattern.codePointAt(idx + 1) == '?') {
-                marker = pattern.codePointAt(idx + 2);
-                if (marker == ':') {
+            parenthesized = true;
+            int first = idx + 1 < len ? pattern.codePointAt(idx + 1) : -1;
+            int second = idx + 2 < len ? pattern.codePointAt(idx + 2) : -1;
+            int third = idx + 3 < len ? pattern.codePointAt(idx + 3) : -1;
+            if (first == '?') {
+                capturing = false;
+                if (second == ':') {
                     if (!isXPath30) {
                         syntaxError("Non-capturing groups allowed only in XPath3.0");
                     }
-                } else if (marker == '=' || marker == '!') {
+                    idx += 3;
+                } else if (second == '=' || second == '!') {
                     if (!isXPath40) {
                         syntaxError("Lookahead assertions allowed only in XPath4.0");
                     }
+                    lookahead = true;
+                    positive = second == '=';
+                    idx += 3;
                     lookaheadDepth++;
-                } else if (marker == '<') {
+                } else if (second == '<' && (third == '=' || third == '!')) {
                     if (!isXPath40) {
                         syntaxError("Lookbehind assertions allowed only in XPath4.0");
                     }
+                    positive = third == '=';
+                    idx += 4;
                     lookbehind = true;
-                    if (idx + 3 < len) {
-                        marker = pattern.codePointAt(idx + 3);
-                        if (!(marker == '=' || marker == '!')) {
-                            syntaxError("Expected '=' or '!' after '(?<'");
-                        }
-                        idx++;
-                    } else {
-                        syntaxError("Expected '=' or '!' after '(?<'");
+                } else if (second == '<') {
+                    if (!isXPath40) {
+                        syntaxError("Named capture groups allowed only in XPath4.0");
                     }
+                    groupName = readGroupName(idx+3);
+                    group = capturingOpenParenCount++;
+                    Integer prev = namedCapturingGroups.put(groupName, group);
+                    if (prev != null) {
+                        syntaxError("Capture group name " + prev + " is a duplicate");
+                    }
+                    capturing = true;
+                    idx += 4 + groupName.length32();
+
                 } else {
                     syntaxError("Invalid character after '(?'");
                 }
-                paren = 2;
-                idx += 3;
-                capturing = false;
-            } else if (idx + 2 < len && pattern.codePointAt(idx + 1) == '*') {
+            } else if (first == '*') {
                 capturing = false;
                 if (thereFollows("(*positive_lookahead:")) {
                     idx += "(*positive_lookahead:".length();
-                    paren = 2;
-                    marker = '=';
+                    positive = true;
+                    lookahead = true;
                     lookaheadDepth++;
                 } else if (thereFollows("(*negative_lookahead:")) {
                     idx += "(*negative_lookahead:".length();
-                    paren = 2;
-                    marker = '!';
+                    positive = false;
+                    lookahead = true;
                     lookaheadDepth++;
                 } else if (thereFollows("(*positive_lookbehind:")) {
                     idx += "(*positive_lookbehind:".length();
-                    paren = 2;
-                    marker = '=';
+                    positive = true;
                     lookbehind = true;
                 } else if (thereFollows("(*negative_lookbehind:")) {
                     idx += "(*negative_lookbehind:".length();
-                    paren = 2;
-                    marker = '!';
+                    positive = false;
                     lookbehind = true;
                 } else {
                     syntaxError("Unexpected characters after '(*'");
                 }
             } else {
-                paren = 1;
                 idx++;
                 group = capturingOpenParenCount++;
             }
@@ -1295,7 +1333,7 @@ public class RECompiler {
         }
 
         // Create an ending node (either a close paren or an OP_END)
-        if (paren > 0) {
+        if (parenthesized) {
             if (idx < len && pattern.codePointAt(idx) == ')') {
                 idx++;
             } else {
@@ -1304,20 +1342,49 @@ public class RECompiler {
             if (capturing) {
                 op = new OpCapture(op, group, lookaheadDepth > 0);
                 captures.add(closeParens);
-            } else if (marker == '=' || marker == '!') {
-                if (lookbehind) {
-                    op = new OpLookbehind(op, marker=='=');
-                } else {
-                    op = new OpLookahead(op, marker == '=');
-                    lookaheadDepth--;
-                }
+            } else if (lookbehind) {
+                op = new OpLookbehind(op, positive);
+            } else if (lookahead) {
+                op = new OpLookahead(op, positive);
+                lookaheadDepth--;
             }
         } else {
             op = makeSequence(op, new OpEndProgram());
         }
 
-        // Return the node list
         return op;
+    }
+
+    /**
+     * Read a group name enclosed in angle brackets
+     * @param idx the position within the regex of the first character of the group
+     *            name
+     * @return the group name
+     * @throws RESyntaxException if the group name is invalid or if no terminating
+     * right angle bracket is found
+     */
+
+    private UnicodeString readGroupName(int idx) throws RESyntaxException {
+        TwineBuilder builder = TwineBuilder.make(16);
+        int ch = pattern.codePointAt(idx++);
+        if (!isAsciiLetter(ch)) {
+            syntaxError("First character of group name must be an ASCII letter");
+        }
+        builder.append(ch);
+        while (idx < len) {
+            ch = pattern.codePointAt(idx++);
+            if (ch == '>') {
+                return builder.toUnicodeString();
+                //namedCapturingGroups.put(groupName, capturingOpenParenCount++);
+                //break;
+            } else if (isAsciiLetter(ch) || isAsciiDigit(ch)) {
+                builder.append(ch);
+            } else {
+                syntaxError("Invalid character in captured group name " + ch);
+            }
+        }
+        syntaxError("Missing '>' after captured group name " + builder);
+        return EmptyUnicodeString.getInstance(); // to keep the compiler happy
     }
 
     private static Operation makeSequence(Operation o1, Operation o2) {

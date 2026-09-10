@@ -573,22 +573,6 @@ public final class Tokenizer {
                     }
                     nextToken = Token.LT;
                     return;
-//                case FULL_WIDTH_LT:
-//                    if (languageLevel < 40) {
-//                        throw new XPathException("Operator character FULL_WIDTH_LESS_THAN (xFF1C) requires XPath 4.0 to be enabled");
-//                    }
-//                    if (isFollowedBy('=')) {
-//                        inputOffset++;
-//                        nextToken = Token.LE;
-//                        return;
-//                    }
-//                    if (inputOffset < inputLength && input.charAt(inputOffset) == FULL_WIDTH_LT) {
-//                        inputOffset++;
-//                        nextToken = Token.PRECEDES;
-//                        return;
-//                    }
-//                    nextToken = Token.LT;
-//                    return;
                 case '|':
                     if (isFollowedBy('|')) {
                         inputOffset++;
@@ -598,17 +582,6 @@ public final class Tokenizer {
                     nextToken = Token.VBAR;
                     return;
                 case '#':
-//                    if (inputOffset < inputLength
-//                            && languageLevel >= 40
-//                            && NameChecker.isNCNameStartChar(input.charAt(inputOffset))) {
-//                        nextToken = Token.HASH_BEFORE_NAME;
-//                        // indicates that the "#" is the start of a QName literal. We only
-//                        // return this if the "#" is followed by a name start character, but
-//                        // we leave the parser to read the immediately-following EQName as
-//                        // if it were a separate token.
-//                    } else {
-//                        nextToken = Token.HASH;
-//                    }
                     nextToken = Token.HASH;
                     return;
                 case '.':
@@ -1263,7 +1236,7 @@ public final class Tokenizer {
         return (int) (getLineAndColumn(offset) & 0x7fffffff);
     }
 
-    private static ARegularExpression piRegex = ARegularExpression.compile("\\i\\c*(\\s+.*)?", "");
+    private static ARegularExpression piRegex = ARegularExpression.compile("\\i\\c*(?:\\s+.*)?", "");
     public boolean readDirectPIConstructor() {
         int end = input.indexOf("?>", inputOffset);
         if (end < 0) {
