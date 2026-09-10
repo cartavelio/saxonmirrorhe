@@ -78,7 +78,7 @@ public abstract class Subsumption {
             if (t1 == BuiltInAtomicType.STRING) {
                 return SUBSUMES;
             } else {
-                return computeRelationship(BuiltInAtomicType.STRING, t2);
+                return computeRelationship(t1, BuiltInAtomicType.STRING);
             }
         }
 
