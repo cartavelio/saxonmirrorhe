@@ -89,8 +89,28 @@ SAXONC_EXPORT void initSaxonc(sxnc_environment **environi, sxnc_processor **proc
 SAXONC_EXPORT void freeSaxonc(sxnc_environment **environi, sxnc_processor **proc,
                 sxnc_parameter **param, sxnc_property **prop);
 
+/**
+ * Set a configuration property specific to the processor in use.
+ *
+ * @param environi - GraalVM environment
+ * @param proc - Pointer to the Saxon Processor which is represented as the
+ * struct sxnc_processor
+ * @param name - the name of the property
+ * @param value - the value for the property
+ */
+
 SAXONC_EXPORT void setConfigurationProperty(sxnc_environment *environi, sxnc_processor *proc,
                                             char *name, char *value);
+
+/**
+ * Set a catalog file to be used in Saxon.
+ *
+ * @param environi - GraalVM environment
+ * @param proc - Pointer to the Saxon Processor which is represented as the
+ * struct sxnc_processor
+ * @param cwd - Current working directory
+ * @param catalogFileName - file name to the catalog
+ */
 
 SAXONC_EXPORT void setCatalog(sxnc_environment *environi, sxnc_processor *proc,
                                             char *cwd, char *catalogFileName);
