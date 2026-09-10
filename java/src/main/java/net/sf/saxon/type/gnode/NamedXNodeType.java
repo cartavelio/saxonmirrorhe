@@ -156,14 +156,6 @@ public class NamedXNodeType extends XNodeType {
     }
 
 
-//    @Override
-//    public int getFingerprint() {
-//        if (nameTest instanceof SpecificQNameTest) {
-//            return ((SpecificQNameTest) nameTest).getFingerprint();
-//        }
-//        return -1;
-//    }
-
     /**
      * The test is nillable if a question mark was specified as the occurrence indicator
      *
@@ -209,35 +201,11 @@ public class NamedXNodeType extends XNodeType {
         }
     }
 
-//    /**
-//     * Test whether this node test is satisfied by a given node. This method is only
-//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-//     * node tests where the node kind is known to be an attribute.
-//     *
-//     * @param nodeKind   The kind of node to be matched
-//     * @param name       identifies the expanded name of the node to be matched.
-//     *                   The value should be null for a node with no name.
-//     * @param annotation The actual content type of the node
-//     */
-//    @Override
-//    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-//        return kind == nodeKind
-//                && nameTest.matches(name.getStructuredQName())
-//                && matchesAnnotation(annotation);
-//    }
-
-
-
 
 
     private boolean matchesAnnotation(SchemaType annotation) {
         if (annotation == null) {
-            return false;
+            return true;
         }
         if (schemaType == AnyType.getInstance()) {
             return true;
