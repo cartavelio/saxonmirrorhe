@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="xsd.xsl" type="text/xsl"?>
+<!--* Substitute this schema document for ACSJournal-namespace.xsd,
+    * in order to use substitution groups to extend MathML.
+    *-->
+<!--* Changes:
+    * Add xmlns:m and xmlns:xlink namespace declarations 
+    * Add xsl:import for MathML namespaces
+    * Add substitutionGroup="m:mspace" to ACS element declarations
+    * Add types to serve as bridges to m:mspace
+    *-->
+<xsd:schema xmlns:ACS="http://namespace.acs.org/2008/acs"
+            xmlns:mtl="http://www.mulberrytech.com/taglib"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:m="http://www.w3.org/1998/Math/MathML"            
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            targetNamespace="http://namespace.acs.org/2008/acs">
+   <xsd:annotation>
+      <xsd:documentation>
+         <div xmlns="http://www.w3.org/1999/xhtml" class="bodytext">
+            <h1>MODULE: ACS_XSD_schema_document</h1>
+            <h2>VERSION:  0.1</h2>
+            <h2>DATE:  Wed_May_11_21:58:33_EDT_2022</h2>
+            <dl>
+               <dt>SYSTEM</dt>
+               <dd>
+                  <p>ACS_DTD_in_XSD</p>
+               </dd>
+               <dt>PURPOSE</dt>
+               <dd>
+                  <p>Declare_elements_in_ACS_namespace</p>
+               </dd>
+               <dt>CREATED FOR</dt>
+               <dd>
+                  <p>American_Chemical_Society</p>
+                  <p>Original Creation Date December_2013</p>
+               </dd>
+               <dt>CREATED BY</dt>
+               <dd>Mulberry Technologies, Inc.                       
+             <br/>17 West Jefferson Street, #207                    
+             <br/>Rockville, MD 20850 (301-315-9631)                
+             <br/>http://www.mulberrytech.com                       
+             <br/>(B._T._Usdin_and_C._M._Sperberg-McQueen)</dd>
+            </dl>
+         </div>
+      </xsd:documentation>
+   </xsd:annotation>
+
+   <xsd:import namespace="http://www.w3.org/1998/Math/MathML"/>
+   <xsd:import namespace="http://www.w3.org/1999/xlink"/>
+
+
+   <xsd:annotation>
+      <xsd:documentation>
+         <div xmlns="http://www.w3.org/1999/xhtml" class="bodytext">
+	   <p>First, we declare the ACS extension elements.
+	   We use named types, not inline types, so as to
+	   keep all the type-related machinery separate from
+	   the element declarations.</p>
+	   <p>Each element goes into the substitution group
+	   of element <code>m:space</code> in the MathML namespace.
+	   That means they can appear wherever <code>m:space</code>
+	   is mentioned in a content model.</p>
+         </div>
+      </xsd:documentation>
+   </xsd:annotation>
+ 
+   <xsd:element name="marker" 
+		type="ACS:marker.type" 
+		substitutionGroup="m:mspace"/>
+   
+   <xsd:element name="tie-bar-end" 
+		type="ACS:tie-bar-end.type" 
+		substitutionGroup="m:mspace"/>
+   
+   <xsd:element name="tie-bar-start" 
+		type="ACS:tie-bar-start.type" 
+		substitutionGroup="m:mspace"/>
+
+      <xsd:annotation>
+         <xsd:documentation>
+         <div xmlns="http://www.w3.org/1999/xhtml" class="bodytext">
+	   <p>Next, we declare the three types.  In order to make
+	   the elements with these types substitutable for 
+	   <code>m:space</code>, the types must be derived from
+	   <code>m:space.type</code> (as the name suggests, this is
+	   the type of element <code>m:space</code>) by a series
+	   of extension or restriction steps.  We'll do this
+	   in several steps, building a bridge from 
+	   <code>m:space.type</code> to the types needed for
+	   the ACS extension elements.</p>
+	 </div>
+      </xsd:documentation>
+     </xsd:annotation>
+
+   <xsd:complexType name="bridge-with-id">
+     <xsd:annotation>
+       <xsd:documentation>
+	 <div xmlns="http://www.w3.org/1999/xhtml" class="bodytext">	 
+	   <p>First step: a bridge type which retains the ID
+	   attribute from <code>m:space</code>, and deletes
+	   all the other attributes.</p>
+	   <p>This type has no content, and just the one attribute ID.</p>
+         </div>
+       </xsd:documentation>
+     </xsd:annotation>
+     <xsd:complexContent>
+       <xsd:restriction base="m:mspace.type">
+         <xsd:attribute name="width" use="prohibited"/>
+         <xsd:attribute name="height" use="prohibited"/>
+         <xsd:attribute name="depth" use="prohibited"/>
+         <xsd:attribute name="linebreak" use="prohibited"/>
+         <xsd:attribute name="class" use="prohibited"/>
+         <xsd:attribute name="style" use="prohibited"/>
+         <xsd:attribute name="xref" use="prohibited"/>
+         <xsd:attribute ref="xlink:href" use="prohibited"/>
+       </xsd:restriction>
+     </xsd:complexContent>
+   </xsd:complexType>
+  
+  <xsd:complexType name="bridge-no-id">
+     <xsd:annotation>
+       <xsd:documentation>
+	 <div xmlns="http://www.w3.org/1999/xhtml" class="bodytext">	 
+	   <p>Next step: a bridge type which drops the ID
+	   attribute from <code>m:space</code>, too.</p>
+	   <p>This type has no content and no attributes; it's
+	   pretty much a blank slate.</p>
+            </div>
+         </xsd:documentation>
+      </xsd:annotation>
+     <xsd:complexContent>
+       <xsd:restriction base="ACS:bridge-with-id">
+         <xsd:attribute name="id" use="prohibited"/>
+       </xsd:restriction>
+     </xsd:complexContent>
+   </xsd:complexType>
+  
+  <xsd:complexType name="bridge-required-id">
+     <xsd:annotation>
+       <xsd:documentation>
+	 <div xmlns="http://www.w3.org/1999/xhtml" class="bodytext">	 
+	   <p>Next step: a bridge type which <em>requires</em> the ID
+	   attribute.  This is a restriction of type
+	   <code>ACS:bridge-with-id</code>.  It's not particularly
+	   useful in itself but it forms the basis for
+	   <code>ACS:tie-bar-start.type</code>.</p>
+         </div>
+       </xsd:documentation>
+     </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:restriction base="ACS:bridge-with-id">
+        <xsd:attribute name="id" type="xsd:ID" use="required"/>
+      </xsd:restriction>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="marker.type">
+     <xsd:annotation>
+       <xsd:documentation>
+	 <div xmlns="http://www.w3.org/1999/xhtml" class="bodytext">	 
+	   <p>This type (<code>ACS:marker.type</code> inherits an
+	   optional ID attribute from <code>m:space.type</code>
+	   (through <code>ACS:bridge-with-id</code>), and adds
+	   two further attributes.</p>
+         </div>
+       </xsd:documentation>
+     </xsd:annotation>
+    <xsd:complexContent mixed="true">
+      <xsd:extension base="ACS:bridge-with-id">        
+         <xsd:attribute name="marker-type" use="required" type="xsd:NMTOKEN"/>
+         <xsd:attribute name="rid" use="optional" type="xsd:IDREFS"/>
+      </xsd:extension>
+    </xsd:complexContent>
+      </xsd:complexType>
+  
+  <xsd:complexType name="tie-bar-end.type">
+      <xsd:annotation>
+       <xsd:documentation>
+	 <div xmlns="http://www.w3.org/1999/xhtml" class="bodytext">	 
+	   <p>This type (<code>ACS:tie-bar-end.type</code> carries
+	   only an <code>rid</code> attribute.</p>
+	   <p>It has no particular similarity to <code>m:space.type</code>,
+	   and we wouldn't derive it from that type except that we
+	   must, in order to be in the substitution group of element
+	   <code>m:space</code>.</p>
+         </div>
+       </xsd:documentation>
+      </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="ACS:bridge-no-id">
+         <xsd:attribute name="rid" use="required" type="xsd:IDREF"/>
+      </xsd:extension>
+    </xsd:complexContent>
+      </xsd:complexType>
+  
+  <xsd:complexType name="tie-bar-start.type">
+      <xsd:annotation>
+       <xsd:documentation>
+	 <div xmlns="http://www.w3.org/1999/xhtml" class="bodytext">	 
+	   <p>This type (<code>ACS:tie-bar-start.type</code> inherits
+	   the required ID attribute from <code>ACS:bridge-required-id</code>
+	   and adds a <code>position</code> attribute.</p>
+         </div>
+       </xsd:documentation>
+      </xsd:annotation>
+    <xsd:complexContent mixed="true">
+      <xsd:extension base="ACS:bridge-required-id">
+         <xsd:attribute name="position" use="required">
+                     <xsd:simpleType>
+                        <xsd:annotation>
+                  <xsd:documentation/>
+               </xsd:annotation>
+                        <xsd:restriction base="xsd:NMTOKEN">
+                           <xsd:enumeration value="above"/>
+                           <xsd:enumeration value="below"/>
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:attribute>
+      </xsd:extension>
+    </xsd:complexContent>
+      </xsd:complexType>
+</xsd:schema>
+
