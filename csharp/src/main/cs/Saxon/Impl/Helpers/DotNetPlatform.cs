@@ -282,9 +282,10 @@ namespace Saxon.Impl.Helpers {
                     settings.ValidationType = ValidationType.DTD;
                 }
 
-                if (!options.isTrusted()) {
-                    settings.XmlResolver = System.Xml.XmlResolver.ThrowingResolver;
-                }
+                // Commented out because "trusted" option is not fully implemented
+                // if (!options.isTrusted()) {
+                //     settings.XmlResolver = System.Xml.XmlResolver.ThrowingResolver;
+                // }
             
                 // if (source.getSystemId() != null) {
                 //     settings.XmlResolver =
