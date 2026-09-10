@@ -620,6 +620,29 @@ public class ExpressionTool {
     }
 
     /**
+     * Get the axis followed by this expression, if there is one. For an axis expression or a filtered
+     * axis expression this returns the axis. For a union/intersect/except expression it returns the
+     * common axis if they all use the same axis. Where no axis can be discerned, return -1
+     * @return the axis followed by this expression if applicable (as an {@link AxisInfo} constant)
+     * or -1 otherwise.
+     */
+
+    public static int getAxisNavigation(Expression exp) {
+        Expression unfiltered = unfilteredExpression(exp, true);
+        if (unfiltered instanceof AxisExpression) {
+            return ((AxisExpression)unfiltered).getAxis();
+        }
+        if (unfiltered instanceof VennExpression) {
+            int v1 = getAxisNavigation(((VennExpression) unfiltered).getLhsExpression());
+            int v2 = getAxisNavigation(((VennExpression) unfiltered).getRhsExpression());
+            if (v1 == v2) {
+                return v1;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Return true if two objects are equal or if both are null
      *
      * @param x the first object
@@ -1487,6 +1510,8 @@ public class ExpressionTool {
     public static Expression unfilteredExpression(Expression exp, boolean allowPositional) {
         if (exp instanceof FilterExpression && (allowPositional || !((FilterExpression) exp).isFilterIsPositional())) {
             return unfilteredExpression(((FilterExpression) exp).getSelectExpression(), allowPositional);
+        } else if (exp instanceof TailExpression && allowPositional) {
+            return unfilteredExpression(((UnaryExpression)exp).getBaseExpression(), allowPositional);
         } else if (exp instanceof SingleItemFilter && allowPositional) {
             return unfilteredExpression(((SingleItemFilter) exp).getBaseExpression(), allowPositional);
         } else {

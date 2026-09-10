@@ -58,6 +58,10 @@ public class PatternMaker {
             return getAxisForPathStep(((FilterExpression) step).getSelectExpression());
         } else if (step instanceof FirstItemExpression) {
             return getAxisForPathStep(((FirstItemExpression) step).getBaseExpression());
+        } else if (step instanceof LastItemExpression) {
+            return getAxisForPathStep(((LastItemExpression) step).getBaseExpression());
+        } else if (step instanceof TailExpression) {
+            return getAxisForPathStep(((TailExpression) step).getBaseExpression());
         } else if (step instanceof SubscriptExpression) {
             return getAxisForPathStep(((SubscriptExpression) step).getBaseExpression());
         } else if (step instanceof SlashExpression) {

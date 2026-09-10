@@ -20,7 +20,11 @@ import java.util.Set;
 
 /**
  * Abstract pattern formed as the union, intersection, or difference of two other patterns;
- * concrete subclasses are used for the different operators
+ * concrete subclasses are used for the different operators.
+ *
+ * Bug #5368 concludes that we can't simply treat "A except B" as meaning that a node must
+ * match pattern A and not match pattern B; similarly for the intersect operator. There
+ * are however special cases where we can do so, for example "@* except @code".
  */
 
 public abstract class VennPattern extends Pattern {

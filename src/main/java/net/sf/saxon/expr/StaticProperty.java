@@ -17,8 +17,6 @@ import net.sf.saxon.value.Cardinality;
 
 public abstract class StaticProperty {
 
-    // TODO: use an EnumSet
-
     /**
      * Bit setting: Expression depends on current() item
      */
@@ -26,7 +24,9 @@ public abstract class StaticProperty {
     public static final int DEPENDS_ON_CURRENT_ITEM = 1;
 
     /**
-     * Bit setting: Expression depends on context item
+     * Bit setting: Expression depends on context item. This setting is NOT used
+     * where the expression depends only on the context document: that is
+     * indicated by {@link #DEPENDS_ON_CONTEXT_DOCUMENT}.
      */
 
     public static final int DEPENDS_ON_CONTEXT_ITEM = 1 << 1;
