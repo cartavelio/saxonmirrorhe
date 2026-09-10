@@ -1869,6 +1869,9 @@ public class XQueryParser extends XPathParser {
                     if (!allowXPath40Syntax) {
                         grumble("Default values for function parameters require XQuery 4.0 to be enabled");
                     }
+                    if (func.isVariadic()) {
+                        grumble("Default values are not allowed for the parameters of a variadic function", "XQST0150");
+                    }
                     foundDefault = true;
                     nextToken();
                     Expression defaultValue = parseStandaloneExpr();
