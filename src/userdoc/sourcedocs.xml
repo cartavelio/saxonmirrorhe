@@ -147,7 +147,9 @@
     
     <p>URIs for result documents produced using the <code>xsl:result-document</code> instruction
     are handled using a <code>ResultDocumentHandler</code> registered with the <code>XsltTransformer</code>
-    or <code>Xslt30Transformer</code>.</p>
+      or <code>Xslt30Transformer</code>. For more information on how this works in both the Java s9api API and
+      the Saxon.Api interface on .NET, see <a class="bodylink"
+        href="/using-xsl/stylesheet-output/secondary-output">Secondary output</a>.</p>
   </section>
     
     <section id="xml-catalogs" title="Using XML catalogs">
