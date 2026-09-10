@@ -1325,7 +1325,7 @@ public class XdmUtils {
      * @return  int value representing the XdmValue subclass
      */
     @CEntryPoint(name = "j_getXdmObjectType", exceptionHandler = SaxonCExceptionIntHandler.class)
-    public  static int getXdmObjectType(IsolateThread thread, ObjectHandle valueRef){
+        public  static int getXdmObjectType(IsolateThread thread, ObjectHandle valueRef){
         Object value = SaxonCAPI.objectHandles.get(valueRef);
         if(SaxonCAPI.debug){
             System.err.println("call j_getXdmObjectType="+value.getClass().getName() + value.getClass());
