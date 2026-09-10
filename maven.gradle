@@ -27,7 +27,7 @@ task mavenEe() {
   ) {
     archiveBaseName = "Saxon-${RELEASE}"
     archiveVersion = saxonVersion
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     destinationDirectory = project.file("${buildDir}/maven")
     from "${buildDir}/${release}_javadoc"
     doLast {
@@ -67,7 +67,7 @@ task mavenEe() {
     type: Jar,
     dependsOn: ["${release}j_preprocess", "eej_preprocess", "compile_function_library"]) {
     archiveBaseName = "Saxon-${RELEASE}"
-    classifier = 'sources'
+    archiveClassifier = 'sources'
     archiveVersion = saxonVersion
     destinationDirectory = project.file("${buildDir}/maven")
     from ("${buildDir}/src/${release}j") {
@@ -88,7 +88,7 @@ task mavenEe() {
       dependsOn: ["${release}jCompile"]
     ) {
       archiveBaseName = "Saxon-${RELEASE}"
-      classifier = 'sql'
+      archiveClassifier = 'sql'
       archiveVersion = saxonVersion
       destinationDirectory = project.file("${buildDir}/maven")
       from ("${buildDir}/classes/${release}j") {
@@ -115,7 +115,7 @@ task mavenEe() {
       type: Jar, dependsOn: ["${release}jCompile"]
     ) {
       archiveBaseName = "Saxon-${RELEASE}"
-      classifier = 'sql-sources'
+      archiveClassifier = 'sql-sources'
       archiveVersion = saxonVersion
       destinationDirectory = project.file("${buildDir}/maven")
       from ("${projectDir}/src/main/java") {
@@ -134,7 +134,7 @@ task mavenEe() {
     dependsOn: ["${release}jCompile", "${release}j_compileTestDrivers"]
   ) {
     archiveBaseName = "Saxon-${RELEASE}"
-    classifier = 'test'
+    archiveClassifier = 'test'
     archiveVersion = saxonVersion
     destinationDirectory = project.file("${buildDir}/maven")
     from ("${buildDir}/testdriver_classes/${release}j")
@@ -158,7 +158,7 @@ task mavenEe() {
     type: Jar, dependsOn: ["${release}j_copyTestDrivers"]
   ) {
     archiveBaseName = "Saxon-${RELEASE}"
-    classifier = 'test-sources'
+    archiveClassifier = 'test-sources'
     archiveVersion = saxonVersion
     destinationDirectory = project.file("${buildDir}/maven")
     from ("${buildDir}/src/testdrivers/${release}j")
@@ -171,7 +171,7 @@ task mavenEe() {
 
 task mavenHeXqjJar(type: Jar, dependsOn: ["eejCompile"]) {
   archiveBaseName = "Saxon-HE"
-  classifier = 'xqj'
+  archiveClassifier = 'xqj'
   archiveVersion = saxonVersion
   destinationDirectory = project.file("${buildDir}/maven")
   from ("${buildDir}/classes/eej") {
@@ -195,7 +195,7 @@ mavenHeXqjJar.finalizedBy(testMavenHeXqjJar)
 
 task mavenHeXqjSourcesJar(type: Jar, dependsOn: ["eejCompile"]) {
   archiveBaseName = "Saxon-HE"
-  classifier = 'xqj-sources'
+  archiveClassifier = 'xqj-sources'
   archiveVersion = saxonVersion
   destinationDirectory = project.file("${buildDir}/maven")
   from ("${projectDir}/src/main/java") {

@@ -11,5 +11,7 @@ plugins {
 
 apply plugin: 'java'
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+compileJava {
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+}

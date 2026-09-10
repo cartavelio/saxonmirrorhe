@@ -31,8 +31,10 @@ import com.nwalsh.gradle.docker.DockerContainer
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+compileJava {
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+}
 
 project.extensions.create("testSuite", SaxonTestSuite, project)
 
