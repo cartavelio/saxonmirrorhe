@@ -4,6 +4,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.test.TestXdmHelpers;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.test.xdmfixtures.SequenceBuilder;
 import net.sf.saxon.trans.XPathException;
@@ -162,8 +163,8 @@ class CsvXdmGeneratorTest {
 
             actual = subject().fromRowSequence(input);
 
-            assertThat(getFirstRow(actual).get(string("fields")), deepEquals(simpleValueSequence("a", "b", "c")));
-            assertThat(getRow(actual, 2).get(string("fields")), deepEquals(simpleValueSequence("1", "2", "3")));
+            assertThat(getFirstRow(actual).get(string("fields")), deepEquals(TestXdmHelpers.simpleValueSequence("a", "b", "c")));
+            assertThat(getRow(actual, 2).get(string("fields")), deepEquals(TestXdmHelpers.simpleValueSequence("1", "2", "3")));
         }
 
         @Test
@@ -173,8 +174,8 @@ class CsvXdmGeneratorTest {
 
             actual = subject().fromRowSequence(input);
 
-            assertThat(getFirstRow(actual).get(string("fields")), deepEquals(simpleValueSequence("b", "c", "a")));
-            assertThat(getRow(actual, 2).get(string("fields")), deepEquals(simpleValueSequence("2", "3", "1")));
+            assertThat(getFirstRow(actual).get(string("fields")), deepEquals(TestXdmHelpers.simpleValueSequence("b", "c", "a")));
+            assertThat(getRow(actual, 2).get(string("fields")), deepEquals(TestXdmHelpers.simpleValueSequence("2", "3", "1")));
         }
 
         @Test
@@ -228,7 +229,7 @@ class CsvXdmGeneratorTest {
             @Test
             @DisplayName("the number of columns can be truncated")
             void truncation() throws XPathException {
-                options.put("number-of-columns", integerValue(3));
+                options.put("number-of-columns", TestXdmHelpers.integerValue(3));
 
                 actual = subject().fromRowSequence(input);
 
@@ -241,7 +242,7 @@ class CsvXdmGeneratorTest {
             @Test
             @DisplayName("the number of columns can be padded")
             void padding() throws XPathException {
-                options.put("number-of-columns", integerValue(7));
+                options.put("number-of-columns", TestXdmHelpers.integerValue(7));
 
                 actual = subject().fromRowSequence(input);
 
@@ -253,7 +254,7 @@ class CsvXdmGeneratorTest {
             @Test
             @DisplayName("some rows can be padded while other rows are truncated")
             void padAndTruncate() throws XPathException {
-                options.put("number-of-columns", integerValue(5));
+                options.put("number-of-columns", TestXdmHelpers.integerValue(5));
 
                 actual = subject().fromRowSequence(input);
 
@@ -265,7 +266,7 @@ class CsvXdmGeneratorTest {
             @Test
             @DisplayName("setting the number of columns affects the extraction of column-names")
             void columnsNamesAlsoTruncated() throws XPathException {
-                options.put("number-of-columns", integerValue(4));
+                options.put("number-of-columns", TestXdmHelpers.integerValue(4));
                 options.put("column-names", BooleanValue.TRUE);
 
                 expectedColumns = FixtureBuilder.map(cols -> {
@@ -289,7 +290,7 @@ class CsvXdmGeneratorTest {
             @Test
             @DisplayName("setting the number of columns does not affect an explicit column-names map")
             void explicitColumnNamesUnaffected() throws XPathException {
-                options.put("number-of-columns", integerValue(4));
+                options.put("number-of-columns", TestXdmHelpers.integerValue(4));
                 options.put("column-names", FixtureBuilder.map(names -> {
                     names.put("C1", 1).put("C2", 2)
                             .put("C3", 3).put("C4", 4)
