@@ -3055,6 +3055,8 @@
             <p>In an environment where the schema is trusted, accessing external documents within
                 an assertion can be useful for example to perform code lookup; it can also be used
                 to trigger validation of secondary documents referenced from a primary document.</p>
+            <p>As well as assertions, the option also affects other XPath expressions used in XSD 1.1,
+            for example conditional type assignment expressions.</p>
             <p>This option is introduced in Saxon 13.1. Earlier versions restricted use of some
             functions (such as <code>doc()</code>) while allowing others (such as <code>unparsed-text()</code>).</p>
         </desc>
