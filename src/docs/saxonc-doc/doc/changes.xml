@@ -147,6 +147,8 @@
             <li>PHP API: added the methods <code>XdmNode.getAttributeNodes()</code> and
                <code>XdmNode.getChildren()</code> which respectively return the attribute nodes, and
                child nodes, of the current node, as a PHP array of <code>XdmNode</code> objects.</li>
+            <li>We have thoroughly reviewed how we handle paths passed in by the user so that they are now getting properly resolved with the 'current working directory'.
+               (see bug issue <a href="https://saxonica.plan.io/issues/6273">#6273</a>)</li>
          </ul>
       </category>
       
