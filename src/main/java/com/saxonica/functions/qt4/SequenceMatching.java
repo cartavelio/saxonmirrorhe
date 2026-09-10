@@ -2,6 +2,7 @@ package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.TailIterator;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
@@ -12,8 +13,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 
 /**
- * This class supports the two extension functions starts-with-sequence,
- * ends-with-sequence, contains-sequence
+ * This class supports the three QT4 functions starts-with-subsequence,
+ * ends-with-subsequence, contains-subsequence
  */
 
 public abstract class SequenceMatching extends SystemFunction {
@@ -52,7 +53,7 @@ public abstract class SequenceMatching extends SystemFunction {
                     return BooleanValue.FALSE;
                 }
                 Sequence result = comparator.call(context, new Sequence[]{it0, it1});
-                if (!((BooleanValue) result.head()).getBooleanValue()) {
+                if (!ExpressionTool.effectiveBooleanValue(result.iterate())) {
                     return BooleanValue.FALSE;
                 }
             }

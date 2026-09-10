@@ -63,7 +63,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         SpecificFunctionType compareFnType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
-                SequenceType.SINGLE_BOOLEAN);
+                SequenceType.ANY_SEQUENCE);
 
         SpecificFunctionType ft = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
@@ -249,7 +249,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("filter", 2, e -> e.populate(FilterFn::new, AnyItemType.getInstance(),
                                               STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
-                .arg(1, predicate2, ONE, null));
+                .arg(1, predicate2ebv, ONE, null));
 
         register("foot", 1, e -> e.populate(FootFn::new, AnyItemType.getInstance(), OPT, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
@@ -276,7 +276,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("index-where", 2, e -> e.populate(IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate2, ONE, null));
+                .arg(1, predicate2ebv, ONE, null));
 
         register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, STAR, null));
