@@ -11,6 +11,7 @@ import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.NumericType;
 import net.sf.saxon.type.Type;
@@ -412,7 +413,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
-        register("replace", 4, e -> e.populate(Replace::new, BuiltInAtomicType.STRING, ONE, 0)
+        register("replace", 4, e -> e.populate(CSharp.staticRef(Replace::make20), BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null)
