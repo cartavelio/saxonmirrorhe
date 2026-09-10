@@ -191,12 +191,23 @@ public class SaxonCAPI {
 
     public static synchronized void applyToConfiguration(Processor processor, String[] names, String[] values) throws SaxonApiException {
 
-
+        if (debug) {
+            System.err.println("New processor created, Processor: " + System.identityHashCode(processor));
+        }
         Configuration config = processor.getUnderlyingConfiguration();
         for (int i = 0; i < names.length; i++) {
             String name = names[i];
             String value = values[i];
-
+            if(debug) {
+                System.err.println("SaxonC DEBUG - applyConfiguration, name=" + name);
+                System.err.println("SaxonC DEBUG - applyConfiguration, value=" + value);
+            }
+            if(value == null || name == null) {
+                if(debug) {
+                    System.err.println("SaxonC DEBUG - applyConfiguration value or name is null");
+                }
+                continue;
+            }
             if (name.equals("l")) {
                 if (value != null) {
                     processor.setConfigurationProperty(Feature.LINE_NUMBERING,
@@ -243,13 +254,11 @@ public class SaxonCAPI {
                 processor.setConfigurationProperty(Feature.XML_VERSION, value);
 
             } else if (name.equals("xi")) {
-
                 processor.setConfigurationProperty(Feature.XINCLUDE, "on".equals(value));
 
             } else if (name.equals("xsiloc")) {
                 processor.setConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION, "on".equals(value));
-            } else if (name.startsWith("http://saxon.sf.net/feature/") && value != null) {
-
+            } else if (name.startsWith("http://saxon.sf.net/feature/")) {
                 try {
                     processor.setConfigurationProperty(name, value);
                 } catch (IllegalArgumentException err) {
