@@ -115,7 +115,7 @@ public final class AttributeGroupReference extends SchemaStructure
      *          declaration cannot be resolved
      */
     
-    protected AttributeWildcard getAttributeWildcard(SchemaCompiler compiler, Stack<AttributeGroupDecl> stack) {
+    AttributeWildcard getAttributeWildcard(SchemaCompiler compiler, Stack<AttributeGroupDecl> stack) {
         //tryToResolve(compiler);
         if (target == null) {
             throw new MissingComponentExceptionImpl(this);

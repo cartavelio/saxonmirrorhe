@@ -248,7 +248,7 @@ public final class AttributeGroupDecl extends SchemaStructure
         return getAttributeWildcard(compiler, new Stack<>());
     }
 
-    protected AttributeWildcard getAttributeWildcard(/*@Nullable*/ SchemaCompiler compiler, Stack<AttributeGroupDecl> stack) {
+    AttributeWildcard getAttributeWildcard(/*@Nullable*/ SchemaCompiler compiler, Stack<AttributeGroupDecl> stack) {
         AttributeWildcard awc = getLocalAttributeWildcard();
         Wildcard wat = awc == null ? null : awc.getWildcard();
         if (stack.contains(this)) {

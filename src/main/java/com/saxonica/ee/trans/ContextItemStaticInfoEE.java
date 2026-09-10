@@ -7,6 +7,7 @@ import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.AttributeSet;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.functions.AccumulatorFn;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
@@ -128,9 +129,11 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
      * Default information when nothing else is known
      */
 
+    @CSharpModifiers(code={"public", "static", "readonly", "new"})
     public final static ContextItemStaticInfoEE DEFAULT =
             new ContextItemStaticInfoEE(AnyItemType.getInstance(), true, Posture.STRIDING);
 
+    @CSharpModifiers(code = {"public", "static", "readonly", "new"})
     public final static ContextItemStaticInfoEE ABSENT =
             new ContextItemStaticInfoEE(ErrorType.getInstance(), true, Posture.STRIDING);
 

@@ -25,7 +25,7 @@ import java.util.Objects;
 public class FleetingElementNode extends FleetingParentNode {
 
     private NamespaceMap inScopeNamespaces;
-    private AttributeMap attributes;
+    private AttributeMap attributeMap;
 
     public FleetingElementNode(NodeName name, SchemaType type) {
         setNodeKind(Type.ELEMENT);
@@ -63,7 +63,7 @@ public class FleetingElementNode extends FleetingParentNode {
      */
 
     public void setAttributes(AttributeMap attributes) {
-        this.attributes = attributes;
+        this.attributeMap = attributes;
     }
 
     /**
@@ -109,14 +109,14 @@ public class FleetingElementNode extends FleetingParentNode {
     public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
-                if (attributes.size() == 0) {
+                if (attributeMap.size() == 0) {
                     return EmptyIterator.ofNodes();
                 } else if (nodeTest instanceof NameTest) {
-                    AttributeInfo att = attributes.getByFingerprint(
+                    AttributeInfo att = attributeMap.getByFingerprint(
                             ((NameTest)nodeTest).getFingerprint(), getConfiguration().getNamePool());
                     return att==null ? EmptyIterator.ofNodes() : SingleNodeIterator.makeIterator(makeAttributeNode(att));
                 } else {
-                    final AttributeIterator base = new AttributeIterator(this, attributes);
+                    final AttributeIterator base = new AttributeIterator(this, attributeMap);
                     return new Navigator.AxisFilter(base, nodeTest);
                 }
 
@@ -153,7 +153,7 @@ public class FleetingElementNode extends FleetingParentNode {
      */
 
     public AttributeMap getAttributes() {
-        return attributes;
+        return attributeMap;
     }
 
     /**
@@ -182,7 +182,7 @@ public class FleetingElementNode extends FleetingParentNode {
      */
     @Override
     public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
-        return attributes.getValue(uri, local);
+        return attributeMap.getValue(uri, local);
     }
 
     /**
@@ -191,7 +191,7 @@ public class FleetingElementNode extends FleetingParentNode {
 
     public int getAttributeIndex(String uri, String local) {
         int i=0;
-        for (AttributeInfo att : attributes) {
+        for (AttributeInfo att : attributeMap) {
             final NodeName nn = att.getNodeName();
             if (nn.hasURI(uri) && nn.getLocalPart().equals(local)) {
                 return i;
@@ -206,7 +206,7 @@ public class FleetingElementNode extends FleetingParentNode {
         if (one.equals(two)) {
             return 0;
         } else {
-            for (AttributeInfo att : attributes) {
+            for (AttributeInfo att : attributeMap) {
                 final NodeName nn = att.getNodeName();
                 if (nn.equals(one)) {
                     return -1;

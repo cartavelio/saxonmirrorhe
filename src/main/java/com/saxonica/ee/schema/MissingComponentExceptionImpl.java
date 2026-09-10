@@ -1,5 +1,6 @@
 package com.saxonica.ee.schema;
 
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.MissingComponentException;
 
 /**
@@ -26,6 +27,7 @@ public class MissingComponentExceptionImpl extends MissingComponentException {
     }
 
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public String getMessage() {
         try {
             String space = SymbolSpace.getSymbolSpaceName(reference.getSymbolSpace());
