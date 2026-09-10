@@ -72,6 +72,8 @@ def process_catalog(catalogi):
               if node is not None:
                 att_name = node.get_attribute_value("name")
                 att_file = node.get_attribute_value("file")
+                if run_test is not None and att_name != run_test:
+                    continue
                 process_test_set(cat_builder, driver_proc, path + att_file)
               else:
                 print("Node for test-set is None")
@@ -140,8 +142,6 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
 
         else:
             print("Cannot find test " + test_set_file)
-
-
 
 ''', catalog_xpath_proci'''
 
@@ -327,13 +327,14 @@ def create_local_environments(test_set_node: PyXdmNode, xpath_proc: PyXPathProce
 def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
     global environments
-
     xpath_proc.set_context(xdm_item=test_case_node)
     test_name  = xpath_proc.evaluate_single("@name")
     dependencies = xpath_proc.evaluate_single("//dependencies")
     env_node = xpath_proc.evaluate_single("environment")
+    test_input_node = xpath_proc.evaluate_single("test")
     spec_att = 'XSLT10+'
     if dependencies is not None:
+        print("environment found !!!!")
         xpath_proc.set_context(xdm_item=dependencies)
         spec_att = xpath_proc.evaluate_single("spec/@value")
         if(spec_att is not None):
@@ -344,23 +345,30 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     if env_node is not None:
         print(env_node)
         env_ref = env_node.get_node_value().get_attribute_value("ref")
-        '''environment = None
+        environment = None
+        env_node_i = env_node.get_node_value()
         if env_ref is None:
-            environment = process_environment(xpath_proc, env_node.get_node_value(), "spec", globalEnvironment, localEnvironment['default'])
+            environment = process_environment(xpath_proc, env_node_i, "spec", globalEnvironment, localEnvironment['default'])
         else:
             print('env_Ref = ' + env_ref)
-            environment = environments[env_ref]'''
+            environment = environments[env_ref]
+        print("environment found !!!!")
+        print(environment.source_docs)
+        print("checkpoint xx1")
+    xpath_proc.set_context(xdm_item=test_case_node)
+    print(test_case_node)
 
-    test_input = xpath_proc.evaluate_single("test")
+    print("checkpoint xx2")
+    print(test_input_node)
+    xpath_proc.set_context(xdm_item=test_input_node)
 
     stylesheet = xpath_proc.evaluate_single("stylesheet[not(@role = 'secondary')]")
+    print("checkpoint xx3")
 
     if stylesheet is not None:
         print('stylesheet found XXX')
         print(str(stylesheet))
-
-
-
+    print("checkpoint xx4")
 
     return "Not run"
 
@@ -375,12 +383,12 @@ def main(argv):
     print("W3 XSLT 3.0 Test Suite")
     print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
 
-    dir = None
+    diri = None
 
 
-    if len(sys.argv) > 0:
-        dir = str(sys.argv[1])
-        print("Test suite directory = " + dir)
+    if len(sys.argv) > 1:
+        diri = str(sys.argv[1])
+        print("Test suite directory = " + diri)
 
         argvv = argv[1:]
 
@@ -399,11 +407,11 @@ def main(argv):
             elif opt in ("-s", "--testset"):
                 run_test = arg
 
-            print('Input file is ', run_test)
+            print('Test set= ', run_test)
 
 
     '''dir = os.getcwd()'''
-    path = dir + "/xslt30-test/"
+    path = diri + "/xslt30-test/"
     catalog = path + "catalog.xml"
 
 
