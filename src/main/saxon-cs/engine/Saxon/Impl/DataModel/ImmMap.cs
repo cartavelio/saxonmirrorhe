@@ -119,17 +119,6 @@ namespace Saxon.Impl.DataModel {
             return imap.IsEmpty;
         }
 
-        
-        /**
-         * Get the lowest common item type of the keys in the map
-         *
-         * @return the most specific type to which all the keys belong. If the map is
-         *         empty, return UType.VOID (the type with no instances)
-         */
-        public override UType getKeyUType() {
-            return null;
-        }
-
         /**
          * Create a new map containing the existing entries in the map plus an additional entry,
          * without modifying the original. If there is already an entry with the specified key,

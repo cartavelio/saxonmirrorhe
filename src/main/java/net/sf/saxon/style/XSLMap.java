@@ -9,6 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.SequenceInstr;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
@@ -68,7 +69,7 @@ public class XSLMap extends StyleElement {
                 if (requireXslt40Attribute("select")) {
                     select = makeExpression(value, att);
                 }
-            } else if (f.equals("duplicates") || f.equals("on-duplicates")) { // TODO: drop old name
+            } else if (f.equals("duplicates") /*|| f.equals("on-duplicates")*/) { // TODO: drop old name
                 if (requireXslt40Attribute("duplicates")) {
                     onDuplicates = makeExpression(value, att);
                 }
@@ -110,8 +111,7 @@ public class XSLMap extends StyleElement {
 
         if (onDuplicates != null) {
             optionsExp = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(
-                    Literal.makeLiteral(new QNameValue("", NamespaceUri.SAXON, "on-duplicates")),
-                    onDuplicates);
+                    new StringLiteral("duplicates"), onDuplicates);
         } else {
             MapBuilder options = SimpleMap.getBuilder();
             options.put(StringValue.bmp("duplicates"), StringValue.bmp("reject"));
@@ -120,7 +120,7 @@ public class XSLMap extends StyleElement {
             optionsExp = Literal.makeLiteral(options.getCompletedMap(), select);
         }
 
-        Expression exp = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
+        Expression exp = MapFunctionSet.getInstance(40).makeFunction("merge", 2)
                 .makeFunctionCall(select, optionsExp);
         if (getConfiguration().getBooleanProperty(Feature.STRICT_STREAMABILITY)) {
             exp = new SequenceInstr(exp);

@@ -7,11 +7,11 @@
 
 package net.sf.saxon.lib;
 
-import io.vavr.Tuple2;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.expr.accum.Accumulator;
+import net.sf.saxon.ma.map.Vavr;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
@@ -184,7 +184,7 @@ public class ParseOptions {
      * @return the value of the property (null if it has not been set)
      */
     private Object getProperty(Key key) {
-        return properties.get(key).orNull();
+        return Vavr.get(properties, key);
     }
 
     /**
@@ -193,7 +193,7 @@ public class ParseOptions {
      * @return true if the property has a value
      */
     private boolean hasProperty(Key key) {
-        return !properties.get(key).isEmpty();
+        return !properties.containsKey(key);
     }
 
     /**
@@ -204,7 +204,7 @@ public class ParseOptions {
      * @return the value of the property, or its default
      */
     private int getIntegerProperty(Key key, int defaultValue) {
-        Object value = properties.get(key).orNull();
+        Object value = getProperty(key);
         if (value == null) {
             return defaultValue;
         } else {
@@ -222,7 +222,7 @@ public class ParseOptions {
      */
 
     private boolean getBooleanProperty(Key key, boolean defaultValue) {
-        Object value = properties.get(key).orNull();
+        Object value = getProperty(key);
         if (value == null) {
             return defaultValue;
         } else {
@@ -1248,12 +1248,12 @@ public class ParseOptions {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (Tuple2<Key, Object> entry : properties) {
-            sb.append(entry._1);
+        Vavr.forEach(properties, (key, value) -> {
+            sb.append(key);
             sb.append('=');
-            sb.append(entry._2);
+            sb.append(value);
             sb.append(' ');
-        }
+        });
         return sb.toString();
     }
 }

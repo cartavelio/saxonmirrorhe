@@ -13,7 +13,7 @@ namespace Saxon.Impl.DataModel {
     /// <summary>
     /// This class implements an ordered XDM map. Unfortunately .NET lacks an immutable
     /// ordered map implementation, so we improvise using an ImmutableDictionary for the
-    /// lookup, combined with an ImmutableList of KeyValuePairs for the ordering.
+    /// lookup, with next/prior pointers added to each entry.
     /// </summary>
     public class ImmOrderedMap : ImmMap {
         

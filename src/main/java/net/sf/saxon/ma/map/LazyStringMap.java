@@ -11,6 +11,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.Instrumentation;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.MappedAtomicIterator;
 import net.sf.saxon.value.AtomicValue;
@@ -365,12 +366,16 @@ public class LazyStringMap extends StringMapItem implements Iterable<KeyValuePai
     private MapItem toGeneralMap() {
         //System.err.println("Dictionary rewrite!!!!");
         Instrumentation.count("Map rewrite");
-        io.vavr.collection.LinkedHashMap<UnicodeString, GroundedValue> baseMap =
-                io.vavr.collection.LinkedHashMap.empty();
+        io.vavr.collection.LinkedHashMap<UnicodeString, GroundedValue> baseMap = emptyBaseMap();
         for (int i = 0; i < keyList.size(); i++) {
             baseMap = baseMap.put(keyList.get(i), valueList.get(i));
         }
         return new OrderedStringMap(baseMap);
+    }
+
+    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.str.UnicodeString,Saxon.Hej.om.GroundedValue>.Empty;")
+    private static io.vavr.collection.LinkedHashMap<UnicodeString, GroundedValue> emptyBaseMap() {
+        return io.vavr.collection.LinkedHashMap.empty();
     }
 }
 

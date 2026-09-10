@@ -4,9 +4,9 @@ import io.vavr.collection.LinkedHashMap;
 import io.vavr.control.Option;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
 
 /**
  * An XDM Map implementation using arbitrary atomic keys, that maintains map entries
@@ -19,7 +19,7 @@ public class OrderedMap extends MapItem {
         private LinkedHashMap<AtomicMatchKey, KeyValuePair> map;
 
         public OrderedMapBuilder() {
-            map = LinkedHashMap.empty();
+            map = emptyMap();
         }
 
         /**
@@ -30,34 +30,7 @@ public class OrderedMap extends MapItem {
          */
         @Override
         public void put(AtomicValue key, GroundedValue value) {
-//            if (counter++ % 1000 == 0) {
-//                System.err.println("Put " + counter + " at size " + map.size());
-//            }
             map = map.put(key.asMapKey(), new KeyValuePair(key, value));
-        }
-        private static int counter = 0;
-
-        /**
-         * During initial construction of the map, add a key-value pair where the key is a string
-         *
-         * @param key   the key
-         * @param value the corresponding value
-         */
-
-        public void put(String key, GroundedValue value) {
-            put(new StringValue(key), value);
-        }
-
-        /**
-         * Get a value from the map under construction
-         */
-
-        public GroundedValue get(AtomicValue key) {
-            Option<KeyValuePair> optionalKVP = map.get(key.asMapKey());
-            if (optionalKVP.isEmpty()) {
-                return null;
-            }
-            return optionalKVP.get().value;
         }
 
         /**
@@ -95,12 +68,16 @@ public class OrderedMap extends MapItem {
         return m2;
     }
 
+    @CSharpReplaceBody(code = "return System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.expr.sort.AtomicMatchKey,Saxon.Hej.ma.map.KeyValuePair>.Empty;")
+    private static LinkedHashMap<AtomicMatchKey, KeyValuePair> emptyMap() {
+        return LinkedHashMap.empty();
+    }
+
 
     private final LinkedHashMap<AtomicMatchKey, KeyValuePair> baseMap;
 
     public OrderedMap() {
-        baseMap = LinkedHashMap.empty();
-
+        baseMap = emptyMap();
     }
 
     private OrderedMap(LinkedHashMap<AtomicMatchKey, KeyValuePair> baseMap) {
@@ -114,6 +91,7 @@ public class OrderedMap extends MapItem {
      * @return the value associated with the given key, or null if the key is not present in the map.
      */
     @Override
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.MapUtils.Get(baseMap, key.asMapKey()).value;")
     public GroundedValue get(AtomicValue key) {
         Option<KeyValuePair> optionalKVP = baseMap.get(key.asMapKey());
         if (optionalKVP.isEmpty()) {
@@ -134,7 +112,7 @@ public class OrderedMap extends MapItem {
 
     @Override
     public Iterable<net.sf.saxon.ma.map.KeyValuePair> keyValuePairs() {
-        return new IterableUsingIteratorSupplier<>(baseMap::valuesIterator);
+        return new IterableUsingIteratorSupplier<>(() -> Vavr.valuesIterator(baseMap));
     }
 
     /**

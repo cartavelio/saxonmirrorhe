@@ -56,7 +56,7 @@ namespace Saxon.Api {
             MapItem jMap = (MapItem) this.value;
             AtomicValue jKey = (AtomicValue) key.value;
             GroundedValue jValue = value.value;
-            return (XdmMap)Wrap(jMap.addEntry(jKey, jValue));
+            return (XdmMap)Wrap(jMap.put(jKey, jValue));
         }
 
 

@@ -241,6 +241,18 @@ namespace Saxon.Impl.Helpers {
                 //Console.Error.WriteLine("Hashcode for " + key + " = " + h);
                 return h;
             }
+            
+            /**
+             * Returns a 64-bit hash code value for the object.
+             */
+            public long longHashCode() {
+                byte[] data = key.KeyData;
+                long h = 0x7d6a8521_59a0133c;
+                for (int i = 0; i < data.Length; i++) {
+                    h ^= data[i] << (i & 31);
+                }
+                return h;
+            }
 
             /**
              * Indicates whether some other SortKeyWrapper is "equal to" this one (that is, it represents

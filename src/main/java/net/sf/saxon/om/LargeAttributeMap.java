@@ -8,6 +8,9 @@
 package net.sf.saxon.om;
 
 
+import net.sf.saxon.ma.map.Vavr;
+import net.sf.saxon.transpile.CSharpReplaceBody;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,16 +28,21 @@ public class LargeAttributeMap implements AttributeMap {
 
 
     public LargeAttributeMap(List<AttributeInfo> atts) {
-        io.vavr.collection.LinkedHashMap<NodeName, AttributeInfo> map =
-                io.vavr.collection.LinkedHashMap.empty();
+        io.vavr.collection.LinkedHashMap<NodeName, AttributeInfo> map = emptyMap();
         for (AttributeInfo att : atts) {
-            if (map.get(att.getNodeName()).orNull() != null) {
+            if (map.containsKey(att.getNodeName())) {
                 throw new IllegalArgumentException("Attribute map contains duplicates");
             }
             map = map.put(att.getNodeName(), att);
         }
         this.attributes = map;
     }
+
+    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.om.NodeName,Saxon.Hej.om.AttributeInfo>.Empty;")
+    private static io.vavr.collection.LinkedHashMap<NodeName, AttributeInfo> emptyMap() {
+        return io.vavr.collection.LinkedHashMap.empty();
+    }
+
 
     private LargeAttributeMap(io.vavr.collection.LinkedHashMap<NodeName, AttributeInfo> attributes) {
         this.attributes = attributes;
@@ -53,7 +61,7 @@ public class LargeAttributeMap implements AttributeMap {
 
     @Override
     public AttributeInfo get(NodeName name) {
-        return attributes.get(name).orNull();
+        return Vavr.get(attributes, name);
     }
 
     @Override
@@ -76,16 +84,16 @@ public class LargeAttributeMap implements AttributeMap {
     @Override
     public AttributeMap remove(NodeName name) {
         // Not actually used (or tested)
-        if (attributes.get(name) == null) {
-            return this;
-        } else {
+        if (attributes.containsKey(name)) {
             return new LargeAttributeMap(attributes.remove(name));
+        } else {
+            return this;
         }
     }
 
     @Override
     public Iterator<AttributeInfo> iterator() {
-        return attributes.valuesIterator();
+        return Vavr.valuesIterator(attributes);
     }
 
     @Override

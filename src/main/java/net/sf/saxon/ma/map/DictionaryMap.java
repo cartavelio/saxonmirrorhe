@@ -9,12 +9,16 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Type;
+import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -33,7 +37,7 @@ import java.util.Map;
 
 public class DictionaryMap extends StringMapItem {
 
-    protected final Map<String, GroundedValue> map;
+    protected final Map<UnicodeString, GroundedValue> map;
 
     /**
      * Create an empty dictionary.
@@ -58,7 +62,7 @@ public class DictionaryMap extends StringMapItem {
      *
      * @param underlyingMap the initial contents of the dictionary
      */
-    public DictionaryMap(Map<String, GroundedValue> underlyingMap) {
+    public DictionaryMap(Map<UnicodeString, GroundedValue> underlyingMap) {
         map = underlyingMap;
     }
 
@@ -68,7 +72,7 @@ public class DictionaryMap extends StringMapItem {
      * @return true if the key is present
      */
     public boolean contains(String key) {
-        return map.containsKey(key);
+        return map.containsKey(StringView.of(key));
     }
 
     /**
@@ -78,7 +82,7 @@ public class DictionaryMap extends StringMapItem {
      * @return true if the key is present
      */
     public boolean containsU(UnicodeString key) {
-        return map.containsKey(key.toString());
+        return map.containsKey(key);
     }
 
     /**
@@ -90,7 +94,7 @@ public class DictionaryMap extends StringMapItem {
     @Override
     public GroundedValue get(AtomicValue key) {
         if (key instanceof StringValue) {
-            return map.get(key.getStringValue());
+            return map.get(key.getUnicodeStringValue());
         } else {
             return null;
         }
@@ -102,7 +106,7 @@ public class DictionaryMap extends StringMapItem {
      * @return the relevant entry if present, or null if absent.
      */
     public GroundedValue get(String key) {
-        return map.get(key);
+        return map.get(StringView.of(key));
     }
 
     /**
@@ -113,7 +117,7 @@ public class DictionaryMap extends StringMapItem {
      */
     @Override
     public GroundedValue getU(UnicodeString key) {
-        return map.get(key.toString());
+        return map.get(key);
     }
 
     /**
@@ -156,7 +160,7 @@ public class DictionaryMap extends StringMapItem {
             + "                () => Saxon.Impl.Helpers.MapUtils.convertStringKeyValuePairs(map));")
     public Iterable<KeyValuePair> keyValuePairs() {
         return new IterableUsingIteratorSupplier<>(() -> {
-            Iterator<Map.Entry<String, GroundedValue>> entries = map.entrySet().iterator();
+            Iterator<Map.Entry<UnicodeString, GroundedValue>> entries = map.entrySet().iterator();
 
             return new net.sf.saxon.tree.jiter.MappingJavaIterator<>(
                     entries,
@@ -213,7 +217,7 @@ public class DictionaryMap extends StringMapItem {
         ItemType valueType = null;
         int valueCard = 0;
         // we need to test the entries individually
-        for (Map.Entry<String, GroundedValue> entry : map.entrySet()) {
+        for (Map.Entry<UnicodeString, GroundedValue> entry : map.entrySet()) {
             GroundedValue val = entry.getValue();
             if (valueType == null) {
                 valueType = SequenceTool.getItemType(val, th);
@@ -232,9 +236,9 @@ public class DictionaryMap extends StringMapItem {
     }
 
     protected static class KeyIteratorImpl implements AtomicIterator {
-        Iterator<String> keyIter;
+        Iterator<UnicodeString> keyIter;
 
-        public KeyIteratorImpl(Map<String, GroundedValue> hashMap) {
+        public KeyIteratorImpl(Map<UnicodeString, GroundedValue> hashMap) {
             this.keyIter = hashMap.keySet().iterator();
         }
 

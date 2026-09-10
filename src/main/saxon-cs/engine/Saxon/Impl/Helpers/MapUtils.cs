@@ -1,3 +1,4 @@
+using Saxon.Hej.str;
 using SysCollGen = System.Collections.Generic;
 using Saxon.Hej.value;
 
@@ -71,8 +72,8 @@ namespace Saxon.Impl.Helpers {
         /// </remarks>
 
         public static SysCollGen.IEnumerator<Saxon.Hej.ma.map.KeyValuePair> convertStringKeyValuePairs(
-                SysCollGen.IDictionary<string, Saxon.Hej.om.GroundedValue> map) {
-            foreach (SysCollGen.KeyValuePair<string, Saxon.Hej.om.GroundedValue> kvp in map) {
+                SysCollGen.IDictionary<UnicodeString, Saxon.Hej.om.GroundedValue> map) {
+            foreach (SysCollGen.KeyValuePair<UnicodeString, Saxon.Hej.om.GroundedValue> kvp in map) {
                 yield return new Saxon.Hej.ma.map.KeyValuePair(new StringValue(kvp.Key), kvp.Value);
             }
         }

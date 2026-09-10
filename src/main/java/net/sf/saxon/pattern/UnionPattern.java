@@ -39,7 +39,7 @@ public class UnionPattern extends VennPattern {
         // In 4.0 it is the max of the component priorities
         boolean is40 = p1.getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
         if (is40) {
-            setPriority(Double.max(p1.getDefaultPriority(), p2.getDefaultPriority()));
+            setPriority(Math.max(p1.getDefaultPriority(), p2.getDefaultPriority()));
         } else {
             setPriority(Double.NaN);
         }

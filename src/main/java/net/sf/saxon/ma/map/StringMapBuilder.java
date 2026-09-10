@@ -123,8 +123,7 @@ public class StringMapBuilder {
         if (possibleDuplicates) {
             // If there are possible duplicates, then we build the map now, with a more thorough
             // check for duplicates as we build it.
-
-            StringMapItem map = new OrderedStringMap();
+            StringMapItem map = ordered ? new OrderedStringMap() : new DictionaryMap();
             Iterator<GroundedValue> valueIter = values.iterator();
             for (UnicodeString key : keys) {
                 GroundedValue value;
@@ -135,7 +134,7 @@ public class StringMapBuilder {
                 }
                 GroundedValue existing = map.getU(key);
                 if (existing == null) {
-                    map = (OrderedStringMap)map.putU(key, value);
+                    map = (StringMapItem)map.putU(key, value);
                 } else if (combiner == null) {
                     throw new XPathException("Duplicate key " + Err.wrap(key) + " in map");
                 } else {

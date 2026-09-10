@@ -68,45 +68,46 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             field("value", SequenceType.ANY_SEQUENCE, false));
 
     public static OnDuplicatesAction getDuplicatesCombiner (
-            MapItem options, String defaultAction) throws XPathException {
-        StringValue duplicatesOption = (StringValue)options.get(new StringValue("duplicates"));
-        FunctionItem combineOption = (FunctionItem)options.get(new StringValue("combine"));
-        if (combineOption != null) {
-            if (duplicatesOption != null) {
-                throw new XPathException("The duplicates and combine options are mutually exclusive", "FORG0013");
-            }
-            return (x, y, cxt) -> {
-                try {
-                    return combineOption.call(cxt, new Sequence[]{x, y}).materialize();
-                } catch (XPathException e) {
-                    throw new UncheckedXPathException(e);
-                }
-            };
-        }
-        String action;
+            MapItem options, String defaultAction, String duplicatesErrorCode) throws XPathException {
+        GroundedValue duplicatesOption = options.get(new StringValue("duplicates"));
         if (duplicatesOption == null) {
-            action = defaultAction;
+            duplicatesOption = new StringValue(defaultAction);
         } else {
-            action = duplicatesOption.getStringValue();
+            duplicatesOption = duplicatesOption.head();
+            if (duplicatesOption == null) {
+                duplicatesOption = new StringValue(defaultAction);
+            }
         }
+        if (duplicatesOption instanceof StringValue) {
+            String action = duplicatesOption.getStringValue();
+            switch (action) {
+                case "use-first":
+                case "use-any":
+                case "unspecified": // used in XSLT 3.0
+                    return (x, y, cxt) -> x;
+                case "use-last":
+                    return (x, y, cxt) -> y;
+                case "combine":
+                    return (x, y, cxt) -> x.concatenate(y);
+                case "reject":
+                    return (x, y, cxt) -> {
+                        throw new UncheckedXPathException("Duplicate key in map", duplicatesErrorCode);
+                    };
+                default:
+                    throw new AssertionError();
 
-        switch (action) {
-            case "use-first":
-            case "use-any":
-            case "unspecified": // used in XSLT 3.0
-                return (x, y, cxt) -> x;
-            case "use-last":
-                return (x, y, cxt) -> y;
-            case "combine":
-                return (x, y, cxt) -> x.concatenate(y);
-            case "reject":
-                return (x, y, cxt) -> {
-                    throw new UncheckedXPathException("Duplicate key in map", "FOJS0003");
-                };
-            default:
-                throw new AssertionError();
-
+            }
         }
+        FunctionItem combineOption = (FunctionItem)duplicatesOption;
+        return (x, y, cxt) -> {
+            try {
+                return combineOption.call(cxt, new Sequence[]{x, y}).materialize();
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
+            }
+        };
+
+        
 
     }
 
@@ -121,22 +122,20 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 SequenceType.ANY_SEQUENCE
         );
 
-        SequenceType oneOnDuplicatesFunction = SequenceType.one(ON_DUPLICATES_CALLBACK_TYPE);
+        EnumerationUnionType duplicatesKeywords =
+                EnumerationUnionType.of("reject", "use-first", "use-last", "use-any", "combine", "unspecified");
+        // duplicates=unspecified is retained because that's what the XSLT 3.0 Rec incorrectly uses
 
+        SequenceType duplicatesOptionType = SequenceType.one(
+                ChoiceItemType.of(ON_DUPLICATES_CALLBACK_TYPE, duplicatesKeywords));
 
 
 
         OptionsParameter mergeOptionDetails = new OptionsParameter(version);
-        mergeOptionDetails.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringValue.bmp("use-first"));
+        mergeOptionDetails.addAllowedOption("duplicates", duplicatesOptionType, StringValue.bmp("use-first"));
         // duplicates=unspecified is retained because that's what the XSLT 3.0 Rec incorrectly uses
-        mergeOptionDetails.setAllowedValues("duplicates", "FOJS0005", "use-first", "use-last", "combine", "reject", "unspecified", "use-any", "use-callback");
-        // retain-order is dropped from the spec but retained here pro tem
         mergeOptionDetails.addAllowedOption("retain-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         mergeOptionDetails.addAllowedOption(MapMerge.errorCodeKey, SequenceType.SINGLE_STRING, StringValue.bmp("FOJS0003"));
-        mergeOptionDetails.addAllowedOption(MapMerge.keyTypeKey, SequenceType.SINGLE_STRING, StringValue.bmp("anyAtomicType"));
-        mergeOptionDetails.addAllowedOption(MapMerge.finalKey, SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        mergeOptionDetails.addAllowedOption(MapMerge.onDuplicatesKey, oneOnDuplicatesFunction, null);
-        mergeOptionDetails.addAllowedOption("combine", oneOnDuplicatesFunction, null);
 
 
         register("merge", 2, e -> e.populate( MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
@@ -620,7 +619,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
     /**
      * Implementation of the proposed XPath 4.0 function
-     * map:build($sequence, $key, $value, $combined) as xs:anyAtomicType) =&gt; map(*)
+     * map:build($sequence, $key, $value, $options) =&gt; map(*)
      */
     public static class MapBuild extends SystemFunction {
 
@@ -658,7 +657,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             } else {
                 options = EmptyMap.getInstance();
             }
-            OnDuplicatesAction action = getDuplicatesCombiner(options, "combine");
+            OnDuplicatesAction action = getDuplicatesCombiner(options, "combine", "FOJS0003");
             mapBuilder.setDuplicatesAction(action);
             
             SequenceIterator iter = arguments[0].iterate();
@@ -720,58 +719,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapMerge extends SystemFunction {
 
-        public final static String finalKey = "Q{" + NamespaceConstant.SAXON + "}final";
-        public final static String keyTypeKey ="Q{"+NamespaceConstant.SAXON +"}key-type";
-        public final static String onDuplicatesKey = "Q{" + NamespaceConstant.SAXON + "}on-duplicates";
+        //public final static String finalKey = "Q{" + NamespaceConstant.SAXON + "}final";
+        //public final static String keyTypeKey ="Q{"+NamespaceConstant.SAXON +"}key-type";
         public final static String errorCodeKey = "Q{" + NamespaceConstant.SAXON + "}duplicates-error-code";
 
-        private String duplicates = "use-first";
-        private boolean retainOrder = false;
-        private String duplicatesErrorCode = "FOJS0003";
-        private FunctionItem onDuplicates = null;
-        private boolean allStringKeys = false;
-        private boolean treatAsFinal = false;
+        private final String duplicates = "use-first";
+        private final String duplicatesErrorCode = "FOJS0003";
 
-        /**
-         * Allow the function to create an optimized call based on the values of the actual arguments
-         *
-         * @param visitor     the expression visitor
-         * @param contextInfo information about the context item
-         * @param arguments   the supplied arguments to the function call. Note: modifying the contents
-         *                    of this array should not be attempted, it is likely to have no effect.
-         * @return either a function call on this function, or an expression that delivers
-         * the same result, or null indicating that no optimization has taken place
-         * @throws XPathException if an error is detected
-         */
-//        @Override
-//        public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments) throws XPathException {
-//            if (arguments.length == 2 && arguments[1] instanceof Literal) {
-//                MapItem options = (MapItem) ((Literal)arguments[1]).getGroundedValue().head();
-//                if (options != null) {
-//                    Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(
-//                            options, visitor.getStaticContext().makeEarlyEvaluationContext());
-//                    String duplicates = ((StringValue) values.get("duplicates")).getStringValue();
-//                    boolean retainOrder = ((BooleanValue)values.get("retain-order")).getBooleanValue();
-//                    String duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
-//                    FunctionItem onDuplicates = (FunctionItem) values.get("combine");
-//                    if (onDuplicates != null) {
-//                        duplicates = "use-callback";
-//                    }
-//
-//                    boolean isFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
-//                    String keyType = ((StringValue) values.get(keyTypeKey)).getStringValue();
-//                    MapMerge mm2 = (MapMerge) instance31.makeFunction("merge", 1);
-//                    mm2.duplicates = duplicates;
-//                    mm2.retainOrder = retainOrder;
-//                    mm2.duplicatesErrorCode = duplicatesErrorCode;
-//                    mm2.onDuplicates = onDuplicates;
-//                    mm2.allStringKeys = keyType.equals("string");
-//                    mm2.treatAsFinal = isFinal;
-//                    return mm2.makeFunctionCall(arguments[0]);
-//                }
-//            }
-//            return super.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
-//        }
 
         /**
          * Get the return type, given knowledge of the actual arguments
@@ -816,92 +770,23 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             try {
-                String duplicates = this.duplicates;
-                boolean retainOrder = this.retainOrder;
                 String duplicatesErrorCode = this.duplicatesErrorCode;
-                boolean allStringKeys = this.allStringKeys;
-                boolean treatAsFinal = this.treatAsFinal;
                 MapFunctionSet.OnDuplicatesAction action = null;
                 if (arguments.length > 1) {
                     MapItem options = (MapItem) arguments[1].head();
                     if (options != null && !options.isEmpty()) {
                         Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(options, context);
-                        duplicates = ((StringValue) values.get("duplicates")).getStringValue();
-                        retainOrder = ((BooleanValue)values.get("retain-order")).getBooleanValue();
                         duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
-                        treatAsFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
-                        allStringKeys = "string".equals(((StringValue) values.get(keyTypeKey)).getStringValue());
-                        onDuplicates = (FunctionItem) values.get("combine");
-                        if (onDuplicates != null) {
-                            duplicates = "use-callback";
-                        }
-                        action = getDuplicatesCombiner(options, "use-first");
+                        action = getDuplicatesCombiner(options, "use-first", duplicatesErrorCode);
                     }
                 }
                 if (action == null) {
-                    action = getDuplicatesCombiner(EmptyMap.getInstance(), "use-first");
+                    action = getDuplicatesCombiner(EmptyMap.getInstance(), "use-first", "FOJS0003");
                 }
 
+                SequenceIterator iter = arguments[0].iterate();
+                return mergeMaps(iter, context, action);
 
-
-//                if (treatAsFinal && allStringKeys) {
-//                    // Optimize for a map with string-valued keys that's unlikely to be modified
-//                    SequenceIterator iter = arguments[0].iterate();
-//                    StringMapBuilder mapBuilder = new StringMapBuilder();
-//                    MapItem next;
-//                    switch (duplicates) {
-//                        // Code is structured (a) to avoid testing "duplicates" within the loop unnecessarily,
-//                        // and (b) to avoid the "get" operation to look for duplicates when it's not needed.
-//                        case "unspecified":
-//                        case "use-any":
-//                        case "use-last":
-//                            while ((next = (MapItem) iter.next()) != null) {
-//                                for (KeyValuePair pair : next.keyValuePairs()) {
-//                                    if (!(pair.key instanceof StringValue)) {
-//                                        throw new XPathException("The keys in this map must all be strings (found " + pair.key.getItemType() + ")");
-//                                    }
-//                                    mapBuilder.put(pair.key.getUnicodeStringValue(), pair.value);
-//                                }
-//                            }
-//                            return mapBuilder.getCompletedMap();
-//                        default:
-//                            while ((next = (MapItem) iter.next()) != null) {
-//                                for (KeyValuePair pair : next.keyValuePairs()) {
-//                                    if (!(pair.key instanceof StringValue)) {
-//                                        throw new XPathException("The keys in this map must all be strings (found " + pair.key.getItemType() + ")");
-//                                    }
-//                                    Sequence existing = mapBuilder.get(pair.key.getStringValue());
-//                                    if (existing != null) {
-//                                        switch (duplicates) {
-//                                            case "use-first":
-//                                                // no action
-//                                                break;
-//                                            case "combine":
-//                                                InsertBefore.InsertIterator combinedIter =
-//                                                        new InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
-//                                                GroundedValue combinedValue = SequenceTool.toGroundedValue(combinedIter);
-//                                                mapBuilder.put(pair.key.getStringValue(), combinedValue);
-//                                                break;
-//                                            case "use-callback":
-//                                                Sequence[] args = new Sequence[]{existing, pair.value};
-//                                                Sequence combined = onDuplicates.call(context, args);
-//                                                mapBuilder.put(pair.key.getStringValue(), combined.materialize());
-//                                                break;
-//                                            default:
-//                                                throw new XPathException("Duplicate key in constructed map: " +
-//                                                                                 Err.wrap(pair.key.getStringValue()), duplicatesErrorCode);
-//                                        }
-//                                    } else {
-//                                        mapBuilder.put(pair.key.getStringValue(), pair.value);
-//                                    }
-//                                }
-//                            }
-//                            return mapBuilder.getCompletedMap();
-//                    }
-//                } else {
-                    SequenceIterator iter = arguments[0].iterate();
-                    return mergeMaps(iter, context, duplicates, retainOrder, duplicatesErrorCode, action);
-//                }
             } catch (UncheckedXPathException e) {
                 throw e.getXPathException();
             }
@@ -910,17 +795,15 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
         /**
          * Merge a sequence of maps into a single map
-         * @param iter iterator over the input maps
-         * @param context The XPath dynamic context
-         * @param duplicates action to be taken when duplicate keys are encountered
-         * @param duplicatesErrorCode if duplicates are not allowed, the error code to be used
+         *
+         * @param iter         iterator over the input maps
+         * @param context      The XPath dynamic context
          * @param onDuplicates callback to be used when duplicates = "use-callback"
          * @return the merged map
          * @throws XPathException if any error occurs, including detection of disallowed duplicates
          */
         public static MapItem mergeMaps(SequenceIterator iter, XPathContext context,
-                                        String duplicates, boolean retainOrder, String duplicatesErrorCode,
-                                        MapFunctionSet.OnDuplicatesAction onDuplicates)
+                                        OnDuplicatesAction onDuplicates)
                 throws XPathException {
             //MapBuilder mapBuilder = context.getConfiguration().makeMapBuilder(retainOrder, false);
             GeneralMapBuilder builder = new GeneralMapBuilder();
@@ -934,22 +817,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             return builder.getCompletedMap(context);
         }
 
-        private static String invertDuplicates(String duplicates) {
-            switch (duplicates) {
-                case "use-first":
-                case "unspecified":
-                case "use-any":
-                    return "use-last";
-                case "use-last":
-                    return "use-first";
-                case "combine":
-                    return "combine-reverse";
-                case "combine-reverse":
-                    return "combine";
-                default:
-                    return duplicates;
-            }
-        }
 
         @Override
         public String getStreamerName() {
@@ -989,7 +856,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     getDetails().optionDetails.processSuppliedOptions(options, context);
                 }
             }
-            OnDuplicatesAction action = getDuplicatesCombiner(options, "combine");
+            OnDuplicatesAction action = getDuplicatesCombiner(options, "combine", "FOJS0003");
             builder.setDuplicatesAction(action);
 
             SequenceIterator iter = arguments[0].iterate();

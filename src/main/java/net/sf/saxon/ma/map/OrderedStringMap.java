@@ -3,7 +3,8 @@ package net.sf.saxon.ma.map;
 import io.vavr.Tuple2;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.tree.jiter.MappingJavaIterator;
+import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
@@ -20,11 +21,16 @@ public class OrderedStringMap extends StringMapItem {
     final io.vavr.collection.LinkedHashMap<UnicodeString, GroundedValue> baseMap;
 
     public OrderedStringMap() {
-        baseMap = io.vavr.collection.LinkedHashMap.empty();
+        baseMap = emptyMap();
     }
 
     public OrderedStringMap(io.vavr.collection.LinkedHashMap<UnicodeString, GroundedValue> baseMap) {
         this.baseMap = baseMap;
+    }
+
+    @CSharpReplaceBody(code = "return System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.str.UnicodeString,Saxon.Hej.om.GroundedValue>.Empty;")
+    private static io.vavr.collection.LinkedHashMap<UnicodeString, GroundedValue> emptyMap() {
+        return io.vavr.collection.LinkedHashMap.empty();
     }
 
     @Override
@@ -42,20 +48,20 @@ public class OrderedStringMap extends StringMapItem {
     }
 
     @Override
+    @CSharpReplaceBody(code="return new Saxon.Hej.tree.jiter.IterableUsingIteratorSupplier<Saxon.Hej.ma.map.KeyValuePair>(\n"
+            + "                () => Saxon.Impl.Helpers.MapUtils.convertStringKeyValuePairs(baseMap));")
     public Iterable<KeyValuePair> keyValuePairs() {
-        return new Iterable<KeyValuePair>() {
-            @Override
-            public Iterator<KeyValuePair> iterator() {
-                Iterator<Tuple2<UnicodeString, GroundedValue>> baseIter = baseMap.iterator();
-                return new MappingJavaIterator<>(baseIter,
-                                                 t2 -> new KeyValuePair(
-                                                         new StringValue(t2._1()), t2._2()));
-            }
-        };
+        return new IterableUsingIteratorSupplier<>(() -> {
+            Iterator<Tuple2<UnicodeString, GroundedValue>> entries = baseMap.iterator();
+            return new net.sf.saxon.tree.jiter.MappingJavaIterator<>(
+                    entries,
+                    e -> new KeyValuePair(new StringValue(e._1), e._2));
+        });
     }
 
 
     @Override
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.MapUtils.Get(baseMap, key);")
     public GroundedValue getU(UnicodeString key) {
         return baseMap.get(key).orNull();
     }

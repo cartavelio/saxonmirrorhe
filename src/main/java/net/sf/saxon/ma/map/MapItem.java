@@ -200,8 +200,8 @@ public abstract class MapItem implements FunctionItem {
         int maxCardinality = 0;
         for (KeyValuePair pair : keyValuePairs()) {
             commonKeyType = combinedItemType(th, commonKeyType, pair.key.getItemType());
-            maxCardinality = Integer.max(maxCardinality, pair.value.getLength());
-            minCardinality = Integer.min(minCardinality, pair.value.getLength());
+            maxCardinality = Math.max(maxCardinality, pair.value.getLength());
+            minCardinality = Math.min(minCardinality, pair.value.getLength());
             for (Item item : pair.value.asIterable()) {
                 commonValueType = combinedItemType(th,commonValueType, Type.getItemType(item,th));
             }

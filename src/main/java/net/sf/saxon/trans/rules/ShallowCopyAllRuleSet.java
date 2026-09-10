@@ -145,7 +145,7 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
                 pipe.setXPathContext(context);
 
                 MapItem mergedMap = MapFunctionSet.MapMerge.mergeMaps(
-                        collector.iterate(), context, "use-last", false, null, null);
+                        collector.iterate(), context, null);
                 out.append(mergedMap, locationId, 0);
             }
 
