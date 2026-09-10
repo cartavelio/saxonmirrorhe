@@ -63,7 +63,7 @@ public abstract class ArrayIterator implements SequenceIterator, FocusIterator,
 
     @Override
     public int position() {
-        return index - start + 1;
+        return index - start;
     }
 
     @Override
@@ -169,7 +169,7 @@ public abstract class ArrayIterator implements SequenceIterator, FocusIterator,
 
         @Override
         public Item current() {
-            return index > 0 && index <= end ? items[index - 1] : null;
+            return index > start && index <= end ? items[index - 1] : null;
         }
 
         @Override

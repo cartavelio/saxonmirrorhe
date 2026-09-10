@@ -23,7 +23,7 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
     private final Item item;
-    boolean gone = false;
+    private int position = -1;
 
     /**
      * Protected constructor: external classes should use the factory method
@@ -71,28 +71,23 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
 
     @Override
     public boolean hasNext() {
-        return !gone;
+        return position < 0;
     }
 
     /*@Nullable*/
     @Override
     public Item next() {
-        if (gone) {
-            return null;
-        } else {
-            gone = true;
-            return item;
-        }
+        return ++position == 0 ? item : null;
     }
 
     @Override
     public Item current() {
-        return gone ? item : null;
+        return position == 0 ? item : null;
     }
 
     @Override
     public int position() {
-        return gone ? 0 : 1;
+        return position + 1;
     }
 
     @Override
@@ -145,11 +140,7 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
 
     @Override
     public GroundedValue getResidue() {
-        if (gone) {
-            return EmptySequence.getInstance();
-        } else {
-            return item;
-        }
+        return position < 0 ? item : EmptySequence.getInstance();
     }
 
 }
