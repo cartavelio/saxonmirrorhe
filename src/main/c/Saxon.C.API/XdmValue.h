@@ -112,6 +112,7 @@ public:
   /**
    *
    * @return XdmItem or nullptr if sequence is empty
+   * Pointer to XdmItem objects have to be deleted in the calling program.
    */
   virtual XdmItem *getHead();
 
@@ -179,7 +180,15 @@ public:
    */
   virtual XDM_TYPE getType();
 
+  /**
+    * Internal method used to reset associated reference counts on xdmItems that have been relinquished
+    */
   void resetRelinquishedItems();
+
+  /**
+    * Internal method used to increment the ref count for an relinquished item only once
+    */
+  void incrementRefCountForRelinquishedValue(int i);
 
 protected:
   //! initialize this XdmValue with default values

@@ -588,6 +588,10 @@ cdef extern from "@@location@@Saxon.C.API/XdmValue.h":
 
         void decrementRefCount()
 
+        void resetRelinquishedItems()
+
+        void incrementRefCountForRelinquishedValue(int i)
+
         int getRefCount()
 
         int getType()

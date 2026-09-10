@@ -1669,13 +1669,13 @@ PHP_METHOD(XdmValue, getHead) {
       (xdmValue_object *)((char *)oobj - XtOffsetOf(xdmValue_object, std));
   xdmValue = obj->xdmValue;
   if (xdmValue != nullptr) {
+    xdmValue->incrementRefCountForRelinquishedValue(0); // incremented as the item is still apart of the XdmValue
     XdmItem *item = xdmValue->getHead();
     if (item != nullptr) {
       if (object_init_ex(return_value, xdmItem_ce) != SUCCESS) {
         RETURN_NULL();
       } else {
         item->incrementRefCount();
-        item->incrementRefCount(); // incremented as the item is still apart of the XdmValue
         zend_object *oobj = Z_OBJ_P(return_value);
         xdmItem_object *vobj =
             (xdmItem_object *)((char *)oobj - XtOffsetOf(xdmItem_object, std));
@@ -1704,6 +1704,7 @@ PHP_METHOD(XdmValue, itemAt) {
       (xdmValue_object *)((char *)oobj - XtOffsetOf(xdmValue_object, std));
   xdmValue = obj->xdmValue;
   if (xdmValue != nullptr) {
+    xdmValue->incrementRefCountForRelinquishedValue((unsigned int)index); // incremented as the item is still apart of the XdmValue
     XdmItem *item = xdmValue->itemAt((unsigned int)index);
 
     if (item != nullptr) {
@@ -1713,7 +1714,6 @@ PHP_METHOD(XdmValue, itemAt) {
         return;
       } else {
         item->incrementRefCount();
-        item->incrementRefCount(); // incremented as the item is still apart of the XdmValue
         zend_object *oobj = Z_OBJ_P(return_value);
         xdmItem_object *vobj =
             (xdmItem_object *)((char *)oobj - XtOffsetOf(xdmItem_object, std));

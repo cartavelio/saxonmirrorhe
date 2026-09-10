@@ -119,13 +119,18 @@ void XdmValue::resetRelinquishedItems(){
       if (relinquished_values[i] == (char)1 && values[i] != nullptr) {
         values[i]->decrementRefCount();
         if(values[i]->getRefCount() < 1) {
-           relinquished_values[i] == (char)0;
+           relinquished_values[i] = (char)0;  //reset
         }
       }
     }
 }
 
 XdmValue::~XdmValue() {
+
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "~XdmValue destructor called:" << refCount
+              << " ob ref=" << (this)  << std::endl;
+  }
 
   if (xdmSize > 0 && values != nullptr) {
 
@@ -229,6 +234,18 @@ void XdmValue::incrementRefCount() {
   }
 }
 
+void XdmValue::incrementRefCountForRelinquishedValue(int i){
+  if (xdmSize > 0 && relinquished_values[i] == (char)0){
+    values[i]->incrementRefCount();
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "refCount-inc-relinquished-xdmVal=" << refCount << " ob ref=" << (this)
+                << std::endl;
+    }
+
+  }
+
+}
+
 void XdmValue::decrementRefCount() {
   if (refCount > 0)
     refCount--;
@@ -241,6 +258,7 @@ void XdmValue::decrementRefCount() {
 XdmItem *XdmValue::getHead() {
   if (xdmSize > 0) {
     relinquished_values[0] = (char)1;
+    //TODO handle the case where values[0] is null because we have called getHead() before
     return values[0];
   } else {
     return nullptr;
@@ -274,7 +292,7 @@ int64_t XdmValue::getUnderlyingValue() {
 }
 
 void XdmValue::releaseXdmValue() {
-  for (size_t i = 0; i < xdmSize; i++) {
+  for (int i = 0; i < xdmSize; i++) {
     if (values[i] != nullptr) {
       delete values[i];
     }

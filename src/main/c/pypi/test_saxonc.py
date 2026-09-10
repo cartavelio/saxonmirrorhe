@@ -1549,6 +1549,25 @@ def testMapAsQueryParameter():
         assert result is not None
         assert result.head.integer_value == 3
 
+def testGetHead(saxonproc, data_dir):
+    xml = """\
+    <out>
+        <person att1='value1' att2='value2'>text1</person>
+        <salary>3000 €</salary>
+        <person>text2</person>
+        <person>text3</person>
+    </out>
+    """
+    query_proc = saxonproc.new_xquery_processor()
+    query_proc.set_cwd(os.getcwd()+'/')
+    node = saxonproc.parse_xml(xml_text=xml, encoding="UTF-8")
+    result = query_proc.run_query_to_value(input_xdm_item=node, query_text="/out/salary/text() = '3000 €'", encoding="UTF-8")
+    result.head
+    assert result.head is not None
+    assert result.head.get_atomic_value() is not None
+    assert result.head.get_atomic_value().boolean_value
+    print(result)
+
 
 def testMapAsQueryResult():
     with PySaxonProcessor(license=False) as proc:

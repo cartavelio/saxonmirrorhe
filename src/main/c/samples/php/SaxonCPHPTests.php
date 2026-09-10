@@ -73,11 +73,51 @@ name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri(
         $item = $value->getHead();
         $this->assertStringContainsString("code", $item->getStringValue());
     }
+
+    public function testParsingXMLError(): void
+    {
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testParsingXMLError");
+        }
+        $transformer = self::$saxonProc->newXslt30Processor();
+        // Load the source document
+        try {
+            $input = self::$saxonProc->parseXmlFromFile("../../data/error.xml");
+            $this->assertTrue(True);
+        } catch (Exception $e) {
+            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->assertTrue(True);
+        }
+
+    }
+
+    public function testParsingXMLFromStringError(): void
+    {
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testParsingXMLError");
+        }
+        $transformer = self::$saxonProc->newXslt30Processor();
+        // Load the source document
+        try {
+            $input = self::$saxonProc->parseXmlFromString("<out>");
+            $this->assertTrue(True);
+        } catch (Exception $e) {
+            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->assertTrue(True);
+        }
+
+    }
+
     public function testEmbeddedStylesheet(): void
     {
         $transformer = self::$saxonProc->newXslt30Processor();
         // Load the source document
-        $input = self::$saxonProc->parseXmlFromFile("../data/books.xml");
+        try {
+            $input = self::$saxonProc->parseXmlFromFile("../data/books.xml");
+        } catch (Exception $e) {
+            echo 'Caught exception: ',  $e->getMessage(), "\n";
+            $this->assertTrue(False);
+        }
         //Console.WriteLine("=============== source document ===============");
         //Console.WriteLine(input.OuterXml);
         //Console.WriteLine("=========== end of source document ============");
@@ -94,7 +134,7 @@ name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri(
         $href = $hrefval->getAtomicValue()->getStringValue();
         $this->assertNotEquals($href, "");
         // The stylesheet is embedded in the source document and identified by a URI of the form "#id"
-        $executable = $transformer->compileFromFile("../styles/".$href);
+        $executable = $transformer->compileFromFile("../data/".$href);
         $this->assertInstanceOf(Saxon\XdmNode::class, $input);
         // Run it
         $node = $executable->transformToValue($input);
@@ -114,8 +154,8 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
         echo $executable->getErrorMessage();
 
         $this->assertNotNull($result);
-        if ($result->getHead() != NULL) {
-            $this->assertStringContainsString("[]", $result->getHead()->getStringValue());
+        if ($result->getHead() != NULL) {   //$result->getHead(): XdmItem (ref++), result:XdmValue (ref++)   refCount = 2, ref--, refCount = 1
+            $this->assertStringContainsString("[]", $result->getHead()->getStringValue());   //refCount=2
         }
         $result2 = $executable->callTemplateReturningString("main");
         echo $executable->getErrorMessage();

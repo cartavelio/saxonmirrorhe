@@ -4249,11 +4249,12 @@ cdef class PyXdmValue:
 
      def __dealloc__(self):
         if type(self) is PyXdmValue and self.thisvptr != NULL:
+            self.thisvptr.decrementRefCount()
             if self.thisvptr.getRefCount() < 1:
+                self.thisvptr.resetRelinquishedItems();
                 del self.thisvptr
                 self.thisvptr = NULL
-            else:
-                self.thisvptr.decrementRefCount()
+
 
      def add_xdm_item(self, PyXdmItem value):
         """
@@ -4275,12 +4276,12 @@ cdef class PyXdmValue:
         """
 
         cdef saxoncClasses.XdmItem * xdmItem = NULL
+        self.thisvptr.incrementRefCountForRelinquishedValue(0)
         xdmItem = self.thisvptr.getHead()
 
         if xdmItem is NULL:
             return None
 
-        cdef PyXdmItem val = PyXdmItem()
         cdef type_ = xdmItem.getType()
         if type_== XdmType.XDM_ATOMIC_VALUE:
             aval = PyXdmAtomicValue()
@@ -4331,6 +4332,7 @@ cdef class PyXdmValue:
         cdef PyXdmItem ival = None
         cdef type_ = None
         cdef saxoncClasses.XdmItem * xdmItem = NULL
+        self.thisvptr.incrementRefCountForRelinquishedValue(index)
         xdmItem = self.thisvptr.itemAt(index)
         if xdmItem == NULL:
             return None
@@ -4462,11 +4464,11 @@ cdef class PyXdmItem(PyXdmValue):
 
      def __dealloc__(self):
         if type(self) is PyXdmItem and self.derivedptr != NULL:
+            self.derivedptr.decrementRefCount()
             if self.derivedptr.getRefCount() < 1:
                 del self.derivedptr
                 self.derivedptr = self.thisvptr = NULL
-            else:
-                self.derivedptr.decrementRefCount()
+
 
         '''if type(self) is PyXdmItem:
             del self.derivedptr'''
@@ -4658,11 +4660,11 @@ cdef class PyXdmNode(PyXdmItem):
 
      def __dealloc__(self):
         if type(self) is PyXdmNode and self.derivednptr != NULL:
-                 if self.derivednptr.getRefCount() < 1:
-                     del self.derivednptr
-                     self.derivednptr = self.derivedptr = self.thisvptr = NULL
-                 else:
-                     self.derivednptr.decrementRefCount()
+            self.derivednptr.decrementRefCount()
+            if self.derivednptr.getRefCount() < 1:
+                del self.derivednptr
+                self.derivednptr = self.derivedptr = self.thisvptr = NULL
+
 
      @property
      def head(self):
@@ -5015,10 +5017,10 @@ cdef class PyXdmAtomicValue(PyXdmItem):
             self.derivedaptr = self.derivedptr = self.thisvptr = new saxoncClasses.XdmAtomicValue()
      def __dealloc__(self):
         if type(self) is PyXdmAtomicValue and self.derivedaptr != NULL:
+            self.derivedaptr.decrementRefCount()
             if self.derivedaptr.getRefCount() < 1:
                 del self.derivedaptr
-            else:
-                self.derivedaptr.decrementRefCount()
+
 
 
      @property
@@ -5155,10 +5157,10 @@ cdef class PyXdmFunctionItem(PyXdmItem):
             self.derivedfptr = self.derivedptr = self.thisvptr = new saxoncClasses.XdmFunctionItem()
      def __dealloc__(self):
         if type(self) is PyXdmFunctionItem and self.derivedfptr != NULL:
+            self.derivedfptr.decrementRefCount()
             if self.derivedfptr.getRefCount() < 1:
                 del self.derivedfptr
-            else:
-                self.derivedfptr.decrementRefCount()
+
 
 
      @property
@@ -5329,11 +5331,11 @@ cdef class PyXdmMap(PyXdmFunctionItem):
             self.derivedmmptr = self.derivedfptr = self.derivedptr = self.thisvptr = new saxoncClasses.XdmMap()
      def __dealloc__(self):
         if type(self) is PyXdmMap and self.derivedfptr != NULL:
+            self.derivedfptr.decrementRefCount()
             if self.derivedfptr.getRefCount() < 1:
                 del self.derivedfptr
                 self.derivedmmptr = self.derivedfptr = self.derivedptr = self.thisvptr = NULL
-            else:
-                self.derivedfptr.decrementRefCount()
+
 
 
 
@@ -5640,10 +5642,9 @@ cdef class PyXdmArray(PyXdmFunctionItem):
             self.derivedaaptr = self.derivedfptr = self.derivedptr = self.thisvptr = new saxoncClasses.XdmArray()
      def __dealloc__(self):
         if type(self) is PyXdmArray and self.derivedaaptr != NULL:
+            self.derivedaaptr.decrementRefCount()
             if self.derivedaaptr.getRefCount() < 1:
                 del self.derivedaaptr
-            else:
-                self.derivedaaptr.decrementRefCount()
 
 
 
