@@ -383,6 +383,9 @@ public abstract class AbstractStaticContext implements StaticContext {
      */
 
     public void setXPathLanguageLevel(int level) {
+        if (level == 40) {
+            config.checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, "XPath 4.0", -1);
+        }
         xpathLanguageLevel = level;
         if (packageData.getHostLanguageVersion() != level) {
             packageData.setHostLanguage(packageData.getHostLanguage(), level);

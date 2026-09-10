@@ -172,7 +172,6 @@ public class StaticQueryContext {
         requiredContextItemType = c.requiredContextItemType;
         preserveSpace = c.preserveSpace;
         defaultEmptyLeast = c.defaultEmptyLeast;
-        moduleURIResolver = c.moduleURIResolver;
         errorReporter = c.errorReporter;
         codeInjector = c.codeInjector;
         updating = c.updating;
@@ -328,6 +327,7 @@ public class StaticQueryContext {
         if (version==10 || version==30 || version==31) {
             languageVersion = 31;
         } else if (version == 40) {
+            config.checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, "XQuery 4.0", -1);
             languageVersion = 40;
         } else {
             throw new IllegalArgumentException("languageVersion = " + version);
