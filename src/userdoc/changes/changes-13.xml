@@ -246,6 +246,10 @@
         to allow JSON null to be represented by something other than an empty sequence, for example
             <code>map{'null':[]}</code> maps null to an empty array while <code>map{'null':[]}</code>.</p>
         
+        <p>The function <code>fn:load-xquery-module</code> accepts a new option <code>content</code>
+        whose value is the text of the module to be loaded, as a string. This works whether or not
+        4.0 is enabled.</p>
+        
         <p>The rules for the <code>number-parser</code> callback in <code>fn:parse-json</code> and 
             <code>fn:json-doc</code> have been changed to reflect changes in the specification.</p>
         

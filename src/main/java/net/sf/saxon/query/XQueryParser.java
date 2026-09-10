@@ -1673,7 +1673,7 @@ public class XQueryParser extends XPathParser {
 
         if (t.currentToken == Token.COLON_EQUALS) {
             nextToken();
-            Expression exp = parseExprSingle();
+            Expression exp = parseStandaloneExpr();
             exp = makeTracer(exp, varQName);
             if (allowXPath40Syntax && requiredType != SequenceType.ANY_SEQUENCE) {
                 TypeChecker checker = env.getConfiguration().getTypeChecker(false);
@@ -1696,7 +1696,7 @@ public class XQueryParser extends XPathParser {
                 nextToken();
                 if (t.currentToken == Token.COLON_EQUALS) {
                     nextToken();
-                    Expression exp = parseExprSingle();
+                    Expression exp = parseStandaloneExpr();
                     exp = makeTracer(exp, varQName);
                     if (allowXPath40Syntax && requiredType != SequenceType.ANY_SEQUENCE) {
                         TypeChecker checker = env.getConfiguration().getTypeChecker(false);
@@ -1766,7 +1766,7 @@ public class XQueryParser extends XPathParser {
                 grumble("The context item must not be initialized in a library module", "XQST0113");
             }
             nextToken();
-            Expression exp = parseExprSingle();
+            Expression exp = parseStandaloneExpr();
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "context item declaration", 0);
@@ -1786,7 +1786,7 @@ public class XQueryParser extends XPathParser {
                     grumble("The context item must not be initialized in a library module", "XQST0113");
                 }
                 nextToken();
-                Expression exp = parseExprSingle();
+                Expression exp = parseStandaloneExpr();
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "context item declaration", 0);
                 exp = CardinalityChecker.makeCardinalityChecker(exp, StaticProperty.EXACTLY_ONE, role);
@@ -1910,7 +1910,7 @@ public class XQueryParser extends XPathParser {
                     }
                     foundDefault = true;
                     nextToken();
-                    Expression defaultValue = parseExprSingle();
+                    Expression defaultValue = parseStandaloneExpr();
 //                    if (!(defaultValue instanceof Literal || defaultValue instanceof ContextItemExpression)) {
 //                        grumble("The default value for a function parameter must be either a constant, or '.' (temporary Saxon restriction)");
 //                    }
@@ -2272,6 +2272,7 @@ public class XQueryParser extends XPathParser {
         int returnOffset = t.currentTokenStartOffset;
         readKeyword("return");
         Expression returnExpression = parseExprSingle();
+        setLocation(returnExpression, returnOffset);
         returnExpression = makeTracer(returnExpression, null);
 
         // undeclare all the range variables
@@ -2546,7 +2547,7 @@ public class XQueryParser extends XPathParser {
             LocalVariableBinding v = new LocalVariableBinding(varQName, type);
 
             readToken(Token.COLON_EQUALS);
-            clause.initSequence(flwor, parseExprSingle());
+            clause.initSequence(flwor, parseStandaloneExpr());
             clause.setRangeVariable(v);
             declareRangeVariable(v);
         } while (t.currentToken == Token.COMMA);
@@ -2624,7 +2625,7 @@ public class XQueryParser extends XPathParser {
                 nextToken();
 
                 LocalVariableBinding v = new LocalVariableBinding(varQName, type);
-                Expression value = parseExprSingle();
+                Expression value = parseStandaloneExpr();
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.MISC, "grouping key", 0);
                 Expression atomizedValue = Atomizer.makeAtomizer(value, role);

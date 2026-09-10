@@ -762,7 +762,7 @@ public class XPathParser {
     /*@NotNull*/
     public Expression parseExpression() throws XPathException {
         int offset = t.currentTokenStartOffset;
-        Expression exp = parseExprSingle();
+        Expression exp = parseStandaloneExpr();
         ArrayList<Expression> list = null;
         while (t.currentToken == Token.COMMA) {
             // An expression containing a comma often contains many, so we accumulate all the
@@ -772,7 +772,7 @@ public class XPathParser {
                 list.add(exp);
             }
             nextToken();
-            Expression next = parseExprSingle();
+            Expression next = parseStandaloneExpr();
             setLocation(next);
             list.add(next);
         }
@@ -781,6 +781,14 @@ public class XPathParser {
             setLocation(exp, offset);
         }
         return exp;
+    }
+
+    public Expression parseStandaloneExpr() throws XPathException {
+        if (t.currentToken == Token.LCURLY) {
+            return parseMapExpression();
+        } else {
+            return parseExprSingle();
+        }
     }
 
     /**
@@ -1581,7 +1589,7 @@ public class XPathParser {
 
             // process the  ":=" clause
             readToken(Token.COLON_EQUALS);
-            Expression collection = parseExprSingle();
+            Expression collection = parseStandaloneExpr();
             firstClause.setSequence(collection);
             declareRangeVariable(lastClause);
             if (previous == null) {
@@ -1721,8 +1729,8 @@ public class XPathParser {
             nextToken();
             if (tryKeyword("if")) {
                 expect(Token.LPAREN);
-                condition = parseExpression();
                 nextToken();
+                condition = parseExpression();
                 readToken(Token.RPAREN);
                 readToken(Token.LCURLY);
                 thenExp = parseExpression();
@@ -3138,17 +3146,12 @@ public class XPathParser {
             return ae2;
 
         } else if (token == Token.LCURLY) {
-            checkLanguageVersion40("a map constructor without the `map` keyword");
-            try {
-                return parseMapExpression();
-            } catch (XPathException e) {
-                if (e.getMessage().startsWith("Expression starting with '{'")) {
-                    throw e;
-                } else{
-                    grumble("Expression starting with '{' is not a valid map constructor: " + e.getMessage());
-                    return null;
-                }
+            if (isAllowXPath40Syntax()) {
+                grumble("A map constructor following " + previousToken + " needs to use the `map` keyword (or parentheses)");
+            } else {
+                grumble("Unexpected `{` after " + previousToken);
             }
+            return null;
 
         } else if (token == Token.PERCENT) {
             AnnotationList annotations = parseAnnotationsList();
@@ -3192,54 +3195,6 @@ public class XPathParser {
         }
 
 
-
-
-
-
-
-
-//            case Token.AXIS:
-//                int axis;
-//                try {
-//                    axis = AxisInfo.getAxisNumber(t.currentTokenValue);
-//                } catch (XPathException err) {
-//                    grumble(err.getMessage());
-//                    axis = AxisInfo.CHILD; // error recovery
-//                }
-//                testPermittedAxis(axis, "XPST0003");
-//                short principalNodeType = AxisInfo.principalNodeType[axis];
-//                nextToken();
-//                Token tok3 = t.currentToken;
-//                switch (tok3) {
-//
-//                    case Token.NAME:
-//                    case Token.PREFIX:
-//                    case Token.SUFFIX:
-//                    case Token.STAR:
-//                    case Token.LPAREN:
-//                        Expression ax = new AxisExpression(axis, parseNodeTest(principalNodeType));
-//                        setLocation(ax);
-//                        return ax;
-//
-//                    default:
-//                        grumble("Unexpected token " + currentTokenDisplay() + " after axis name");
-//                        break;
-//                }
-//                break;
-
-
-
-//            case Token.START_TAG:
-//                Expression constructor = getPendingDirectElementConstructor();
-//                Objects.requireNonNull(constructor);
-//                nextToken();
-//                return constructor;
-
-//            default:
-//                grumble("Unexpected token " + currentTokenDisplay() + " at start of expression");
-//                break;
-//        }
-//        return new ErrorExpression();
     }
 
     /**
@@ -4070,7 +4025,7 @@ public class XPathParser {
                     grumble("The ':=' notation is no longer accepted in map expressions: use ':' instead");
                 }
                 readToken(Token.COLON);
-                Expression value = parseExprSingle();
+                Expression value = parseStandaloneExpr();
                 Expression entry;
                 if (key instanceof Literal && ((Literal)key).getGroundedValue() instanceof AtomicValue
                         && value instanceof Literal) {
@@ -4132,7 +4087,7 @@ public class XPathParser {
             return arrayBlock;
         }
         while (true) {
-            Expression member = parseExprSingle();
+            Expression member = parseStandaloneExpr();
             members.add(member);
             if (t.currentToken == Token.COMMA) {
                 nextToken();
@@ -4228,7 +4183,7 @@ public class XPathParser {
                         placeMarkerArgs.add(paramName);
                         arg = Literal.makeEmptySequence(); // a convenient fiction
                     } else {
-                        arg = parseExprSingle();
+                        arg = parseStandaloneExpr();
                     }
                     if (keywordArgs == null) {
                         keywordArgs = new HashMap<>();
@@ -4250,7 +4205,7 @@ public class XPathParser {
                         placeMarkerArgs.add(position);
                         arg = Literal.makeEmptySequence(); // a convenient fiction
                     } else {
-                        arg = parseExprSingle();
+                        arg = parseStandaloneExpr();
                     }
                     args.add(arg);
                 }
@@ -4577,7 +4532,7 @@ public class XPathParser {
 
     /*@Nullable*/
     public Expression parseFunctionArgument() throws XPathException {
-        return parseExprSingle();
+        return parseStandaloneExpr();
     }
 
     /**
