@@ -5,7 +5,7 @@
 
    <p>There are many parameters and options that can be set to control the way in which Saxon
       behaves. For a comprehensive guide to the Saxon configuration features see the <a
-         href="http://www.saxonica.com/documentation11/index.html#!configuration/config-features"
+         href="http://www.saxonica.com/documentation12/index.html#!configuration/config-features"
          target="_blank">Saxon 12 documentation</a>.</p>
 
    <aside>Note that a small number of the features are not available with SaxonC. Please see the <a
@@ -91,7 +91,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
 
       <p>The properties available are a subset of those specified for running XSLT from the command
          line (see the <a target="_blank"
-            href="http://www.saxonica.com/documentation11/index.html#!using-xsl/commandline">Saxon 11
+            href="http://www.saxonica.com/documentation12/index.html#!using-xsl/commandline">Saxon 12
             documentation</a> for more information).</p>
 
       <table>
@@ -259,8 +259,8 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
 
       <p>The properties available are a subset of those specified for running XQuery from the
          command line (see the <a target="_blank"
-            href="http://www.saxonica.com/documentation11/index.html#!using-xquery/commandline">Saxon
-            11 documentation</a> for more information).</p>
+            href="http://www.saxonica.com/documentation12/index.html#!using-xquery/commandline">Saxon
+            12 documentation</a> for more information).</p>
 
       <table>
          <thead>
@@ -523,8 +523,8 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
             <td>
                <p>Sets the value of a Saxon extension parameter defined in the schema (see <a
                      target="_blank"
-                     href="http://www.saxonica.com/documentation11/index.html#!schema-processing/parameterizing-schemas"
-                     >Parameterizing schemas</a> in the Saxon 11 documentation for more
+                     href="http://www.saxonica.com/documentation12/index.html#!schema-processing/parameterizing-schemas"
+                     >Parameterizing schemas</a> in the Saxon 12 documentation for more
                   information).</p>
             </td>
          </tr>
@@ -534,8 +534,8 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
 
       <p>The properties available are a subset of those specified for running schema validation from
          the command line (see the <a target="_blank"
-            href="http://www.saxonica.com/documentation11/index.html#!schema-processing/commandline"
-            >Saxon 11 documentation</a> for more information).</p>
+            href="http://www.saxonica.com/documentation12/index.html#!schema-processing/commandline"
+            >Saxon 12 documentation</a> for more information).</p>
 
       <table>
          <thead>
