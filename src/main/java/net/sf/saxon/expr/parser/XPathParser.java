@@ -1473,6 +1473,10 @@ public class XPathParser {
         expect(Token.RPAR);
         nextToken();
         int thenoffset = t.currentTokenStartOffset;
+        if (t.currentToken == Token.LCURLY) {
+            checkLanguageVersion40();
+            return parseBracedActions(condition);
+        }
         expect(Token.THEN);
         nextToken();
         Expression thenExp = makeTracer(parseExprSingle(), null);
@@ -1485,6 +1489,50 @@ public class XPathParser {
         Expression ifExp = Choose.makeConditional(condition, thenExp, elseExp);
         setLocation(ifExp, ifoffset);
         return makeTracer(ifExp, null);
+    }
+
+    private Expression parseBracedActions(Expression condition) throws XPathException {
+        List<Expression> conditions = new ArrayList<>();
+        List<Expression> actions = new ArrayList<>();
+        conditions.add(condition);
+        nextToken();
+        Expression thenExp = parseExpression();
+        actions.add(thenExp);
+        expect(Token.RCURLY);
+        t.lookAhead();
+        nextToken();
+        while (t.currentToken == Token.ELSE) {
+            nextToken();
+            if (t.currentToken == Token.IF) {
+//                nextToken();
+//                expect(Token.LPAR);
+                nextToken();
+                condition = parseExpression();
+                expect(Token.RPAR);
+                nextToken();
+                expect(Token.LCURLY);
+                nextToken();
+                thenExp = parseExpression();
+                expect(Token.RCURLY);
+                t.lookAhead();
+                nextToken();
+                conditions.add(condition);
+                actions.add(thenExp);
+            } else {
+                expect(Token.LCURLY);
+                nextToken();
+                Expression elseExp = parseExpression();
+                expect(Token.RCURLY);
+                t.lookAhead();
+                nextToken();
+                conditions.add(Literal.makeLiteral(BooleanValue.TRUE));
+                actions.add(elseExp);
+                break;
+            }
+        }
+        Choose result = new Choose(conditions.toArray(new Expression[]{}), actions.toArray(new Expression[]{}));
+        setLocation(result);
+        return result;
     }
 
     /**
