@@ -9,10 +9,14 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.ReportingSingletonIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 
 /**
@@ -43,11 +47,18 @@ public class SingletonClosure extends Closure implements Sequence {
      * @throws XPathException if an error occurs saving the dynamic context
      */
 
-    public SingletonClosure(/*@NotNull*/ Expression exp, /*@NotNull*/ XPathContext context) throws XPathException {
-        expression = exp;
+    public SingletonClosure(Expression exp, PullEvaluator inputEvaluator, XPathContext context) throws XPathException {
+        setInputEvaluator(inputEvaluator);
         savedXPathContext = context.newContext();
         saveContext(exp, context);
-        //System.err.println("Creating SingletonClosure");
+        Instrumentation.count("SingletonClosure.new()");
+    }
+
+    public SingletonClosure(Expression exp, XPathContext context) throws XPathException {
+        setInputEvaluator(exp.makeElaborator().elaborateForPull());
+        savedXPathContext = context.newContext();
+        saveContext(exp, context);
+        Instrumentation.count("SingletonClosure.new()");
     }
 
     /**
@@ -58,7 +69,14 @@ public class SingletonClosure extends Closure implements Sequence {
     @Override
     public SequenceIterator iterate() {
         try {
-            return SingletonIterator.makeIterator(asItem());
+            Item item = asItem();
+            if (item == null) {
+                return EmptyIterator.getInstance();
+            } else if (learningEvaluator != null) {
+                return new ReportingSingletonIterator(item, learningEvaluator, serialNumber);
+            } else {
+                return new SingletonIterator(item);
+            }
         } catch (XPathException e) {
             throw new UncheckedXPathException(e);
         }
@@ -91,9 +109,14 @@ public class SingletonClosure extends Closure implements Sequence {
     /*@Nullable*/
     public Item asItem() throws XPathException {
         if (!built) {
-            value = expression.evaluateItem(savedXPathContext);
+            value = inputEvaluator.iterate(savedXPathContext).next();
             built = true;
             savedXPathContext = null;   // release variables saved in the context to the garbage collector
+            if (learningEvaluator != null) {
+                learningEvaluator.reportCompletion(serialNumber);
+                Instrumentation.count("SingletonClosure.reportCompletion()");
+                learningEvaluator = null;
+            }
         }
         return value;
     }

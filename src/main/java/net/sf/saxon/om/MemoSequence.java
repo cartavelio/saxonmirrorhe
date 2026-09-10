@@ -8,6 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.expr.LastPositionFinder;
+import net.sf.saxon.expr.elab.LearningEvaluator;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
@@ -16,7 +17,6 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.MemoClosure;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.Arrays;
@@ -35,7 +35,8 @@ public class MemoSequence implements Sequence {
     private Item[] reservoir = null;
     private int used;
 
-    private MemoClosure.MemoClosureStatisticsConsumer callingExpression;
+    private LearningEvaluator learningEvaluator;
+    private int serialNumber;
 
     @CSharpSimpleEnum
     private enum State {
@@ -59,8 +60,9 @@ public class MemoSequence implements Sequence {
     }
 
 
-    public void setCallingExpression(MemoClosure.MemoClosureStatisticsConsumer caller) {
-        this.callingExpression = caller;
+    public void setLearningEvaluator(LearningEvaluator caller, int serialNumber) {
+        this.learningEvaluator = caller;
+        this.serialNumber = serialNumber;
     }
 
 
@@ -243,7 +245,7 @@ public class MemoSequence implements Sequence {
                         container.state = State.ALL_READ;
                         container.condense();
                         position = -2;
-                        reportCompletion(true);
+                        reportCompletion();
                         return null;
                     }
                     position = container.used;
@@ -370,18 +372,19 @@ public class MemoSequence implements Sequence {
          */
         @Override
         public void close() {
-            reportCompletion(container.state == State.ALL_READ);
+            if (container.state == State.ALL_READ) {
+                reportCompletion();
+            }
         }
 
-        private void reportCompletion(boolean allRead) {
+        private void reportCompletion() {
             // When we've finished with the iterator, provide feedback to the binding instruction
             // as to whether all the data was read, or whether there was an early exit. This can
-            // be used to switch the evaluation strategy from lazy evaluation to eager evaluation
-            if (container.callingExpression != null) {
-                MemoClosure.MemoClosureStatistics stats = new MemoClosure.MemoClosureStatistics();
-                stats.allRead = allRead;
-                stats.size = container.used;
-                container.callingExpression.accept(stats);
+            // be used to switch the evaluation strategy from lazy evaluation to eager evaluation.
+            // In fact we only notify when the iterator is read to completion, otherwise we
+            // would get multiple notifications for constructs like `if (!empty(x)) then x`.
+            if (container.learningEvaluator != null) {
+                container.learningEvaluator.reportCompletion(container.serialNumber);
             }
         }
 

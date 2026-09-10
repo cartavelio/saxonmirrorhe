@@ -289,16 +289,15 @@ public class DynamicFunctionCall extends Expression {
             DynamicFunctionCall expr = (DynamicFunctionCall)getExpression();
             SequenceEvaluator[] argEvaluators = new SequenceEvaluator[expr.getArity()];
             for (int i=0; i<argEvaluators.length; i++) {
-                argEvaluators[i] = expr.suppliedArguments.getOperand(i)
-                        .getChildExpression().makeElaborator().lazily(true);
+                Expression arg = expr.suppliedArguments.getOperand(i).getChildExpression();
+                argEvaluators[i] = new LearningEvaluator(arg, arg.makeElaborator().lazily(true));
             }
-            ItemEvaluator functionEvaluator = expr.targetFunction.getChildExpression().makeElaborator().elaborateForItem();
+            Expression body = expr.targetFunction.getChildExpression();
+            ItemEvaluator functionEvaluator = body.makeElaborator().elaborateForItem();
             return context -> {
                 Function fn = (Function)functionEvaluator.eval(context);
                 TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
                 FunctionItemType fit = fn.getFunctionItemType();
-
-
                 if (fn.getArity() != argEvaluators.length) {
                     String errorCode = "XPTY0004";
                     XPathException err = new XPathException(
@@ -318,12 +317,14 @@ public class DynamicFunctionCall extends Expression {
                 } else {
                     for (int i = 0; i < argEvaluators.length; i++) {
                         SequenceType expected = fit.getArgumentTypes()[i];
-                        Supplier<RoleDiagnostic> role;
-                        role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, fn.getDescription(), 0);
                         Sequence actual = argEvaluators[i].evaluate(context);
-                        Sequence converted = th.applyFunctionConversionRules(
-                                actual, expected, role, Loc.NONE);
-                        argValues[i] = converted;
+                        if (!expected.equals(SequenceType.ANY_SEQUENCE)) {
+                            Supplier<RoleDiagnostic> role;
+                            role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, fn.getDescription(), 0);
+                            actual = th.applyFunctionConversionRules(
+                                    actual, expected, role, Loc.NONE);
+                        }
+                        argValues[i] = actual;
                     }
                 }
 

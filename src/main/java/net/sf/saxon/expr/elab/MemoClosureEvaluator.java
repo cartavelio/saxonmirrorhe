@@ -6,15 +6,20 @@ import net.sf.saxon.expr.parser.Evaluators;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.MemoClosure;
+import net.sf.saxon.value.SingletonClosure;
 
 public class MemoClosureEvaluator implements SequenceEvaluator {
 
     final Expression input;
+    final PullEvaluator inputEvaluator;
+    final boolean singleton;
 
-    public MemoClosureEvaluator(Expression input) {
-        // TODO: supply a PullEvaluator to the MemoClosure, not the original expression
+    public MemoClosureEvaluator(Expression input, PullEvaluator inputEvaluator) {
         this.input = input;
+        this.inputEvaluator = inputEvaluator;
+        this.singleton = !Cardinality.allowsMany(input.getCardinality());
     }
 
     /**
@@ -27,7 +32,9 @@ public class MemoClosureEvaluator implements SequenceEvaluator {
     @Override
     public Sequence evaluate(XPathContext context) throws XPathException {
         try {
-            return new MemoClosure(input, context);
+            return singleton
+                    ? new SingletonClosure(input, inputEvaluator, context)
+                    : new MemoClosure(input, inputEvaluator, context);
         } catch (UncheckedXPathException e) {
             throw e.getXPathException();
         }

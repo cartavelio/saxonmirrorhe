@@ -311,6 +311,25 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     }
 
     /**
+     * Ask whether the expression supports lazy evaluation.
+     * @return false either if the expression cannot be evaluated lazily
+     * because it has dependencies that cannot be saved in the context, or
+     * because lazy evaluation is pointless (for example, for literals
+     * and variable references).
+     */
+
+    public boolean supportsLazyEvaluation() {
+        return (getDependencies() &
+                     (StaticProperty.DEPENDS_ON_POSITION |
+                              StaticProperty.DEPENDS_ON_LAST |
+                              StaticProperty.DEPENDS_ON_CURRENT_ITEM |
+                              StaticProperty.DEPENDS_ON_CURRENT_GROUP |
+                              StaticProperty.DEPENDS_ON_REGEX_GROUP)) == 0;
+            // we can't save these values in a closure, so we evaluate
+            // the expression eagerly
+    }
+
+    /**
      * Get the innermost scoping expression of this expression, for expressions that directly
      * depend on something in the dynamic context. For example, in the case of a local variable
      * reference this is the expression that causes the relevant variable to be bound; for a

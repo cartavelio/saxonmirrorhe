@@ -655,7 +655,10 @@ public final class LocalParam extends Instruction implements LocalBinding {
                 PullEvaluator pullEval = expr.getSelectExpression().makeElaborator().elaborateForPull();
                 selectEvaluator = new IndexedVariableEvaluator(pullEval);
             } else {
-                selectEvaluator = expr.getSelectExpression().makeElaborator().lazily(true);
+                Expression select = expr.getSelectExpression();
+                selectEvaluator = new LearningEvaluator(
+                        select, select.makeElaborator().lazily(true));
+                //selectEvaluator = select.makeElaborator().lazily(true);
             }
             SequenceEvaluator conversionEval = (expr.getConversion() == null) ? null :
                     expr.getConversion().makeElaborator().eagerly();

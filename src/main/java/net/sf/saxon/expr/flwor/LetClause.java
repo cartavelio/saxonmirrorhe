@@ -9,13 +9,13 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.LearningEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.MemoClosure;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -25,16 +25,11 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.LET;
 /**
  * A "let" clause in a FLWOR expression
  */
-public class LetClause extends Clause implements MemoClosure.MemoClosureStatisticsConsumer {
+public class LetClause extends Clause {
 
     private LocalVariableBinding rangeVariable;
     private Operand sequenceOp;
     private SequenceEvaluator variableEvaluator;
-
-
-    private int completed = 0;
-    private int abandoned = 0;
-    private boolean switchedToEagerEvaluation = false;
 
     @Override
     public ClauseName getClauseKey() {
@@ -43,27 +38,12 @@ public class LetClause extends Clause implements MemoClosure.MemoClosureStatisti
 
     public SequenceEvaluator getEvaluator() {
         if (variableEvaluator == null) {
-            variableEvaluator = getSequence().makeElaborator().lazily(true);
+            variableEvaluator = new LearningEvaluator(
+                    getSequence(), getSequence().makeElaborator().lazily(true));
         }
         return variableEvaluator;
     }
 
-
-    public void accept(MemoClosure.MemoClosureStatistics statistics) {
-        // Note, does thread-unsafe updates to the statistics
-        if (!switchedToEagerEvaluation) {
-            if (statistics.allRead) {
-                completed++;
-            } else {
-                abandoned++;
-            }
-            if (completed > 10 && abandoned == 0) {
-                //System.err.println("LetClause set to eager");
-                variableEvaluator = getSequence().makeElaborator().eagerly();
-                switchedToEagerEvaluation = true;
-            }
-        }
-    }
 
     @Override
     public LetClause copy(FLWORExpression flwor, RebindingMap rebindings) {
@@ -101,9 +81,6 @@ public class LetClause extends Clause implements MemoClosure.MemoClosureStatisti
             getEvaluator();
         }
         Sequence val = variableEvaluator.evaluate(context);
-        if (val instanceof MemoClosure) {
-            ((MemoClosure)val).setBindingExpression(this);
-        }
         context.setLocalVariable(getRangeVariable().getLocalSlotNumber(), val);
     }
 

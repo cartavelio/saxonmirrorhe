@@ -8,8 +8,11 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.LearningEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -32,42 +35,41 @@ import net.sf.saxon.tree.iter.ManualIterator;
  * of these context variables.</p>
  */
 
-public class Closure implements Sequence, ContextOriginator {
-
-    protected Expression expression;
-    /*@Nullable*/ protected XPathContextMajor savedXPathContext;
+public abstract class Closure implements Sequence, ContextOriginator {
+    
+    protected PullEvaluator inputEvaluator;
+    protected XPathContextMajor savedXPathContext;
     protected int depth = 0;
+    protected LearningEvaluator learningEvaluator;
+    protected int serialNumber;
 
     // The base iterator is used to copy items on demand from the underlying value
     // to the reservoir. It only ever has one instance (for each Closure) and each
     // item is read only once.
 
     protected SequenceIterator inputIterator;
-
-    /**
-     * Constructor should not be called directly, instances should be made using the make() method.
-     */
+    
     public Closure() {
     }
 
-    /**
-     * Construct a Closure by supplying the expression and the set of context variables.
-     *
-     * @param expression the expression to be lazily evaluated
-     * @param context    the dynamic context of the expression including for example the variables
-     *                   on which it depends
-     * @param ref        the number of references to the value being lazily evaluated; this affects
-     *                   the kind of Closure that is created
-     * @return the Closure, a virtual value that can later be materialized when its content is required
-     * @throws net.sf.saxon.trans.XPathException
-     *          if a dynamic error occurs
-     */
-
-    /*@NotNull*/
-    public static Sequence make(
-            Expression expression, XPathContext context, int ref) throws XPathException {
-        return context.getConfiguration().makeClosure(expression, ref, context);
-    }
+//    /**
+//     * Construct a Closure by supplying the expression and the set of context variables.
+//     *
+//     * @param expression the expression to be lazily evaluated
+//     * @param context    the dynamic context of the expression including for example the variables
+//     *                   on which it depends
+//     * @param ref        the number of references to the value being lazily evaluated; this affects
+//     *                   the kind of Closure that is created
+//     * @return the Closure, a virtual value that can later be materialized when its content is required
+//     * @throws net.sf.saxon.trans.XPathException
+//     *          if a dynamic error occurs
+//     */
+//
+//    /*@NotNull*/
+//    public static Sequence make(
+//            Expression expression, XPathContext context, int ref) throws XPathException {
+//        return context.getConfiguration().makeClosure(expression, ref, context);
+//    }
 
     public void saveContext(/*@NotNull*/ Expression expression, /*@NotNull*/ XPathContext context) throws XPathException {
         // Make a copy of all local variables. If the value of any local variable is a closure
@@ -76,7 +78,7 @@ public class Closure implements Sequence, ContextOriginator {
 
         // We only copy the local variables if the expression has dependencies on local variables.
         // What's more, we only copy those variables that the expression actually depends on.
-
+        Instrumentation.count("Closure.saveContext()");
         if ((expression.getDependencies() & StaticProperty.DEPENDS_ON_LOCAL_VARIABLES) != 0) {
             StackFrame localStackFrame = context.getStackFrame();
             Sequence[] local = localStackFrame.getStackFrameValues();
@@ -114,6 +116,13 @@ public class Closure implements Sequence, ContextOriginator {
 
     }
 
+
+    public void setLearningEvaluator(LearningEvaluator learningEvaluator, int serialNumber) {
+        this.learningEvaluator = learningEvaluator;
+        this.serialNumber = serialNumber;
+    }
+
+
     /**
      * Get the first item in the sequence.
      *
@@ -132,17 +141,14 @@ public class Closure implements Sequence, ContextOriginator {
         }
     }
 
-    public Expression getExpression() {
-        return expression;
-    }
 
     /*@Nullable*/
     public XPathContextMajor getSavedXPathContext() {
         return savedXPathContext;
     }
 
-    public void setExpression(Expression expression) {
-        this.expression = expression;
+    public void setInputEvaluator(PullEvaluator inputEvaluator) {
+        this.inputEvaluator = inputEvaluator;
     }
 
     public void setSavedXPathContext(XPathContextMajor savedXPathContext) {
@@ -155,27 +161,28 @@ public class Closure implements Sequence, ContextOriginator {
 
     /*@NotNull*/
     @Override
-    public SequenceIterator iterate() {
-
-        if (inputIterator == null) {
-            try {
-                inputIterator = expression.iterate(savedXPathContext);
-                return inputIterator;
-            } catch (XPathException e) {
-                throw new UncheckedXPathException(e);
-            }
-        } else {
-            // In an ideal world this shouldn't happen: if the value is needed more than once, we should
-            // have chosen a MemoClosure.
-
-            // Changed Feb 2015 to throw an exception. Processing the expression more than once is not only
-            // inefficient, it is wrong in the case where node-identity affects the outcome. See for example
-            // test case fn-fold-left-018
-
-            //return inputIterator.getAnother();
-            throw new IllegalStateException("A Closure can only be read once");
-        }
-    }
+    public abstract SequenceIterator iterate();
+//    {
+//
+//        if (inputIterator == null) {
+//            try {
+//                inputIterator = inputEvaluator.iterate(savedXPathContext);
+//                return inputIterator;
+//            } catch (XPathException e) {
+//                throw new UncheckedXPathException(e);
+//            }
+//        } else {
+//            // In an ideal world this shouldn't happen: if the value is needed more than once, we should
+//            // have chosen a MemoClosure.
+//
+//            // Changed Feb 2015 to throw an exception. Processing the expression more than once is not only
+//            // inefficient, it is wrong in the case where node-identity affects the outcome. See for example
+//            // test case fn-fold-left-018
+//
+//            //return inputIterator.getAnother();
+//            throw new IllegalStateException("A Closure can only be read once");
+//        }
+//    }
 
     /**
      * Reduce a value to its simplest form. If the value is a closure or some other form of deferred value

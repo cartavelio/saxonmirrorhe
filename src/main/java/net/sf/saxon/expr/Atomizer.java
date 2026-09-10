@@ -34,6 +34,7 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 
@@ -571,6 +572,7 @@ public final class Atomizer extends UnaryExpression {
                 return EmptyIterator.getInstance();
             } else if (count == 1) {
                 Item first = base.next();
+                Objects.requireNonNull(first);
                 return first.atomize().iterate();
             }
         } else if (base instanceof AtomizedValueIterator) {

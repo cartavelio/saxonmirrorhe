@@ -171,8 +171,7 @@ public class ApplyFn extends SystemFunction  {
 
         if (function.isSequenceVariadic()) {
             List<Item> members = new ArrayList<>();
-            ArrayItem suppliedArgs = (ArrayItem) arguments[1].head();
-            for (GroundedValue mem : suppliedArgs.members()) {
+            for (GroundedValue mem : args.members()) {
                 for (Item it : mem.asIterable()) {
                     members.add(it);
                 }

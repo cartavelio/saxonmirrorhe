@@ -264,12 +264,12 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 // current-merge-group(), etc, then in general we can't save the values in a Closure
                 // so we need to evaluate the argument eagerly. (Tests position-0103, merge-096).
                 argumentEvaluators[i] = arg.makeElaborator().eagerly();
-            } else if (!Cardinality.allowsMany(arg.getCardinality()) && arg.getCost() < 20) {
-                // the argument is cheap to evaluate and doesn't use much memory...
-                argumentEvaluators[i] = arg.makeElaborator().eagerly();
-            } else if (arg.getCardinality() == StaticProperty.ALLOWS_ZERO_OR_ONE) {
-                ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
-                argumentEvaluators[i] = new OptionalItemEvaluator(argEval);
+//            } else if (!Cardinality.allowsMany(arg.getCardinality()) && arg.getCost() < 20) {
+//                // the argument is cheap to evaluate and doesn't use much memory...
+//                argumentEvaluators[i] = arg.makeElaborator().eagerly();
+//            } else if (arg.getCardinality() == StaticProperty.ALLOWS_ZERO_OR_ONE) {
+//                ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
+//                argumentEvaluators[i] = new OptionalItemEvaluator(argEval);
             } else if (arg instanceof Block && ((Block) arg).isCandidateForSharedAppend()) {
                 // If the expression is a Block, that is, it is appending a value to a sequence,
                 // then we have the opportunity to use a shared list underpinning the old value and
@@ -280,7 +280,8 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 // appending to the sequence.
                 argumentEvaluators[i] = new SharedAppendEvaluator((Block) arg);
             } else {
-                argumentEvaluators[i] = arg.makeElaborator().lazily(true);
+                argumentEvaluators[i] = new LearningEvaluator(
+                        arg, arg.makeElaborator().lazily(true));
             }
             i++;
         }

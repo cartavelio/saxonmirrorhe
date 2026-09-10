@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.LearningEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Sequence;
@@ -215,7 +216,9 @@ public class WithParam  {
 
 
     private void makeEvaluator() {
-        evaluator = selectOp.getChildExpression().makeElaborator().lazily(true);
+        Expression select = selectOp.getChildExpression();
+        evaluator = new LearningEvaluator(
+                select, select.makeElaborator().lazily(true));
     }
 
 
@@ -234,7 +237,6 @@ public class WithParam  {
         WithParam[] result = new WithParam[params.length];
         for (int i = 0; i < params.length; i++) {
             result[i] = new WithParam();
-            //result[i].parameterId = params[i].parameterId;
             result[i].slotNumber = params[i].slotNumber;
             result[i].typeChecked = params[i].typeChecked;
             result[i].selectOp = new Operand(parent, params[i].selectOp.getChildExpression().copy(rebindings), OperandRole.NAVIGATE);

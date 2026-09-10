@@ -17,21 +17,18 @@ public class FallbackElaborator extends Elaborator {
         
     }
 
-    public FallbackElaborator(Expression expr) {
-        super();
-        setExpression(expr);
-    }
 
     @Override
     public SequenceEvaluator eagerly() {
         return new EagerPullEvaluator(elaborateForPull());
     }
 
+
     @Override
     public SequenceEvaluator lazily(boolean repeatable) {
         Expression expr = getExpression();
         if (repeatable) {
-            return new MemoClosureEvaluator(expr);
+            return new MemoClosureEvaluator(expr, elaborateForPull());
         } else {
             return new LazyPullEvaluator(elaborateForPull());
         }
