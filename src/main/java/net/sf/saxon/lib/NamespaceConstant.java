@@ -7,6 +7,8 @@
 
 package net.sf.saxon.lib;
 
+import net.sf.saxon.value.Whitespace;
+
 /**
  * This class is not instantiated, it exists to hold a set of constants representing known
  * namespaces. For each of these, there is a constant for the namespace URI and for many of
@@ -448,6 +450,8 @@ public class NamespaceConstant {
     }
 
     private static boolean isSimilar(String s1, String s2) {
+        s1 = Whitespace.removeAllWhitespace(s1);
+        s2 = Whitespace.removeAllWhitespace(s2);
         if (s1.equalsIgnoreCase(s2)) {
             return true;
         } else if (s1.startsWith(s2) && s1.length() - s2.length() < 3) {
