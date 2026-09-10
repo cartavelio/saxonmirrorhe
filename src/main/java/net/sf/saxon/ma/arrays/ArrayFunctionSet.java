@@ -54,6 +54,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null));
 
+        //#if EE==true || PE==true
         register("build", 1, e -> e.populate(ArrayBuild::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | NAV, null));
 
@@ -64,6 +65,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         register("build", 2, e -> e.populate(ArrayBuild::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | NAV, null)
                 .arg(1, buildFunctionType, ONE | INS, null));
+        //#endif
 
         ItemType filterFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
@@ -708,7 +710,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the proposed XP40 function array:of(parcel*) =&gt; array
+     * Implementation of the proposed XP40 function array:build()
      */
     public static class ArrayBuild extends ArrayGeneratingFunction {
 
