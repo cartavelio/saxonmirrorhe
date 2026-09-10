@@ -139,8 +139,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("column-number", 1, e -> e.populate( ColumnNumber::new, BuiltInAtomicType.INTEGER, OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY));
 
-        register("compile-query", 1, e -> e.populate( CompileQuery::new, JavaExternalObjectType.of(XQueryExpression.class), ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("compile-query", 1, e -> e.populate( CompileQuery::new, JavaExternalObjectType.of(XQueryExpression.class), OPT, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
         register("compile-stylesheet", 1, e -> e.populate( CompileStylesheet::new, JavaExternalObjectType.of(PreparedStylesheet.class), ONE, 0)
                 .arg(0, NodeKindTest.DOCUMENT, ONE, null));
@@ -574,6 +574,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             NodeInfo node = (NodeInfo) arguments[0].head();
+            if (node == null) {
+                return EmptySequence.getInstance();
+            }
             return Int64Value.makeIntegerValue(node.getColumnNumber());
         }
     }
