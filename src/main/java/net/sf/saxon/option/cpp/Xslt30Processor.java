@@ -832,8 +832,12 @@ public class Xslt30Processor extends SaxonCAPI {
         Processor processor = executable.getProcessor();
 
         applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
-
-        XdmValue result = null;// TODO transformer.callFunction(qname, getArguments(arguments));
+        Object[] arguments = null;
+        if(argumentsRef != WordFactory.nullPointer()) {
+            ProcessorDataAccumulator argumentsAccumulator = objectHandles.get(argumentsRef);
+            arguments = argumentsAccumulator.getValues();
+        }
+        XdmValue result =  transformer.callFunction(qname, getArguments(arguments));
         ObjectHandle handle = objectHandles.create(result);
         return handle.rawValue();
     }

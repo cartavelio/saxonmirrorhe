@@ -34,14 +34,14 @@ public:
     /**
      * Create an empty XdmItem
      */
-     XdmItem();
+    XdmItem();
 
     //! XdmItem constructor created as a wrapper around an existing Saxon Java object
     /**
      * XdmItem constructor created from a JNI Java object. This is for internal use only
      * @param obj - The internal Java object for the XdmItem is wrapped here in the C++ XdmItem class
      */
-     explicit XdmItem(int64_t);
+    explicit XdmItem(int64_t);
 
 
     //! Copy constructor.
@@ -108,7 +108,7 @@ public:
      * Get Java XdmValue object.
      * @return jobject - The Java object of the XdmValue in its JNI representation
      */
-     virtual  int64_t getUnderlyingValue();
+    virtual  int64_t getUnderlyingValue();
 
 
 
@@ -124,44 +124,44 @@ public:
      * @return the result of converting the item to a string.
      * @deprecated the SaxonProcessor argument. It has been removed from release version 1.2.1
      */
-     virtual const char * getStringValue();
+    virtual const char * getStringValue();
 
-     const char * toString();
+    const char * toString();
 
-     /**
-     * Get the first item in the sequence
-     * @return XdmItem or nullptr if sequence is empty
-     */
-	virtual XdmItem * getHead();
+    /**
+    * Get the first item in the sequence
+    * @return XdmItem or nullptr if sequence is empty
+    */
+    virtual XdmItem * getHead();
 
-  /**
-     * Get the n'th item in the value, counting from zero.
-     *
-     * @param n the item that is required, counting the first item in the sequence as item zero
-     * @return the n'th item in the sequence making up the value, counting from zero
-     * return nullptr  if n is less than zero or greater than or equal to the number
-     *                                    of items in the value
-     * return nullptr if the value is lazily evaluated and the delayed
-     *                                    evaluation fails with a dynamic error.
-     */
-	XdmItem * itemAt(int n);
+    /**
+       * Get the n'th item in the value, counting from zero.
+       *
+       * @param n the item that is required, counting the first item in the sequence as item zero
+       * @return the n'th item in the sequence making up the value, counting from zero
+       * return nullptr  if n is less than zero or greater than or equal to the number
+       *                                    of items in the value
+       * return nullptr if the value is lazily evaluated and the delayed
+       *                                    evaluation fails with a dynamic error.
+       */
+    XdmItem * itemAt(int n);
 
     /**
      * Get the number of items in the sequence
      * @return the number of items in the value. For an item (including a map or array) this is always 1 (one).
      */
-      int size();
+    int size();
 
 
 
-	/**
-	* Get the type of the object
-	*/
-	virtual XDM_TYPE getType();
+    /**
+    * Get the type of the object
+    */
+    virtual XDM_TYPE getType();
 
- protected:  
-	int64_t value; /*!< The Java XdmItem reference in Graalvm  */
-	std::string stringValue;  /*!< Cached. String representation of the XdmValue, if available */
+protected:
+    int64_t value; /*!< The Java XdmItem reference in Graalvm  */
+    char * stringValue;  /*!< Cached. String representation of the XdmValue, if available */
 };
 
 

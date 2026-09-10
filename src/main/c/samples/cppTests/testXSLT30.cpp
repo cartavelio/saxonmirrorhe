@@ -1005,7 +1005,6 @@ void exampleSimple3aError(SaxonProcessor *saxonProc, Xslt30Processor *proc, sRes
         return;
     }
 
-    cout << "Error: executable is not nullptr'" << endl;
     sresult->failure++;
     sresult->failureList.push_back("exampleSimple3aError");
     delete executable;
@@ -1611,6 +1610,7 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *
         if(svalue != nullptr) {
             cout << "testResolveUri = " << svalue << endl;
             delete svalue;
+            svalue = nullptr;
             sresult->success++;
 
         }

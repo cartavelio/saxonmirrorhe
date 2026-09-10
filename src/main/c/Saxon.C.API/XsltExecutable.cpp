@@ -694,10 +694,8 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
     }
 
     int64_t  result = j_callFunctionReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName, (void *)argumentValuesRef,  (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-
-    if (result > -1) {
+    if (result > 0) {
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
-
         XdmValue * value = new XdmValue();
         XdmItem * xdmItem = nullptr;
 
@@ -727,7 +725,8 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
             value->addXdmItem(xdmItem);
             return value;
         }
-        value = new XdmValue(result, false);
+        xdmItem = new XdmItem(result);
+        value->addXdmItem(xdmItem);
         return value;
     }else if(result== -2){
 
@@ -830,8 +829,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
     }
 
     int64_t result = j_callTemplateReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)templateName, (void *)processorDataRef);
-
-    if (result > -1) {
+    if (result > 0) {
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,(void *)result);
 
         XdmValue * value = new XdmValue();
@@ -863,9 +861,10 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
             value->addXdmItem(xdmItem);
             return value;
         }
-        value = new XdmValue(result, false);
+        xdmItem = new XdmItem(result);
+        value->addXdmItem(xdmItem);
         return value;
-    }else {
+    }else if(result == -2) {
 
         //createException();
 
@@ -909,7 +908,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
     }
     char * cstylesheet = nullptr;
     int64_t result = j_transformToValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)-1, (void *)executableRef, (char *)sourcefile, cstylesheet,  (void *)processorDataRef);
-    if (result > -1) {
+    if (result > 0) {
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,(void *)result);
 
         XdmValue * value = new XdmValue();
@@ -941,9 +940,10 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
             value->addXdmItem(xdmItem);
             return value;
         }
-        value = new XdmValue(result, false);
+        xdmItem = new XdmItem(result);
+        value->addXdmItem(xdmItem);
         return value;
-    }else {
+    }else if(result == -2){
 
         //createException();
 

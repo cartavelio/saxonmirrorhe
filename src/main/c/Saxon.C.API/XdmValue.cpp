@@ -233,9 +233,12 @@ void XdmValue::releaseXdmValue() {
 }
 
 XdmItem * XdmValue::itemAt(int n) {
+    std::cerr<<"itemat cp0"<<std::endl;
 	if (n >= 0 && (unsigned int)n < values.size()) {
+        std::cerr<<"itemat cp1"<<std::endl;
 		return values[n];
 	}
+    std::cerr<<"itemat cp2"<<std::endl;
 	return nullptr;
 }
 
