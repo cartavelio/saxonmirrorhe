@@ -2,7 +2,8 @@ package com.saxonica.functions.extfn;
 
 import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.TreeReceiver;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.SequenceNormalizerWithSpaceSeparator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.functions.SystemFunction;
@@ -100,7 +101,8 @@ public class TransformFn extends SystemFunction {
             }
             transformer.setApplyFunctionConversionRulesToExternalVariables(true);
             transformer.initializeController(params);
-            transformer.applyTemplates(source, new TreeReceiver(builder));
+            Receiver out = new SequenceNormalizerWithSpaceSeparator(builder);
+            transformer.applyTemplates(source, out);
             NodeInfo result = builder.getCurrentRoot();
             if (result == null) {
                 return EmptySequence.getInstance();
