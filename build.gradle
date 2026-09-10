@@ -1723,6 +1723,19 @@ task sqlServerStart() {
     }
   }
 
+  doFirst {
+    try {
+      exec {
+        commandLine DockerContainer.docker(), "volume", "create", "${sqlServer}-data"
+      }
+    } catch (Exception e) {
+      dockerOk = false
+      println("***************************************************************")
+      println("Failed to create sqldata volume; saxon:sql tests will fail.")
+      println("***************************************************************")
+    }
+  }
+
   doLast {
     if (dockerOk) {
       if (!DockerContainer.running(c_sqlserver)) {
