@@ -380,6 +380,7 @@ task hecs_generateCSharp(
   }
 }
 
+
 /*
 // This is the start of building the csproj and sln files automatically but
 // I've decided it's not the best use of my time today.
@@ -413,7 +414,7 @@ task hecs_project_files (
 ) {
   from "src/main/saxon-cs/csproj"
   into "${buildDir}/cs/he"
-  include "*.csproj"
+  include "engine_he.csproj"
   filter { line ->
     line.replaceAll("@@optimize@@", csoptimize)
     .replaceAll("@@csrid@@", csrid)
@@ -428,6 +429,7 @@ task hecs_dll(
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
   outputs.dir "${buildDir}/cs/csout"
 
+
   doLast {
     if (dotnetex == null) {
       throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
@@ -435,7 +437,7 @@ task hecs_dll(
 
     exec {
         workingDir = "${buildDir}/cs/he"
-        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj', '/p:DefineConstants="EE"'
+        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine_he.csproj'
     }
   }
 }
@@ -578,7 +580,7 @@ task dotnetRelease_he(
       from "${projectDir}/src/main/saxon-cs/csproj"
       into "${buildDir}/cs/he"
       rename { String filename ->
-        filename.replace("engine", "SaxonCS")
+        filename.replace("engine_he", "SaxonCS")
       }
       filter { line ->
         line.replaceAll("@@optimize@@", csoptimize)
@@ -655,7 +657,7 @@ task copyNuGetPackage_he(
     }
   }
 }
-dotnetRelease_he.finalizedBy copyNuGetPackage
+dotnetRelease_he.finalizedBy copyNuGetPackage_he
 
 task he_pushNuGetPackage(
   dependsOn: ["dotnetRelease_he", "copyNuGetPackage_he"],

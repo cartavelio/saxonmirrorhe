@@ -720,7 +720,7 @@ task "hej_preprocess"(
       args "/c",
         "/i:${buildDir}/filtered/hej", "/o:${buildDir}/src/hej",
         "/p:EE=false", "/p:PE=false",
-        "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
+        "/p:OPT=false", "/p:STREAM=false", "/p:SCHEMA=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
   doLast {
@@ -805,7 +805,7 @@ task "pej_preprocess"(
       args "/c",
         "/i:${buildDir}/filtered/pej", "/o:${buildDir}/src/pej",
         "/p:EE=false", "/p:PE=true",
-        "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
+        "/p:OPT=false", "/p:SAXONC=false",  "/p:STREAM=false", "/p:SCHEMA=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
   doLast {

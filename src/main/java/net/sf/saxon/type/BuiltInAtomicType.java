@@ -1489,7 +1489,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         return null;
     }
 
-    //#ifdefined SCHEMA
+    //#if SCHEMA==true
     @Override
     public FunctionItem getComponentAsFunction() {
         return UserSimpleType.getComponentAsFunction(this);

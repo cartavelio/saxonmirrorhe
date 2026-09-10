@@ -258,7 +258,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
         }
     }
 
-    //#ifdefined STREAM
+    //#if STREAM==true
     @Override
     public boolean isMotionless() {
         ContextItemStaticInfoEE cio = (ContextItemStaticInfoEE)getConfiguration().makeContextItemStaticInfo(getItemType(), false);

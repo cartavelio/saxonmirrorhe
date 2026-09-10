@@ -455,7 +455,7 @@ public class Optimizer {
     }
 
 
-//#ifdefined STREAM
+//#if STREAM==true
 
     /**
      * In streaming mode, optimizer a ForExpression for streaming

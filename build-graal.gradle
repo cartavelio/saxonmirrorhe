@@ -219,7 +219,7 @@ task hec_graal_preprocess(
   args "/c",
     "/i:${buildDir}/filtered/hec", "/o:${buildDir}/preprocess/hec",
     "/p:EE=false", "/p:PE=false", "/p:CSHARP=false",
-    "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false"
+    "/p:SAXONC=true",  "/p:STREAM=false", "/p:SCHEMA=false", "/p:BYTECODE=false", "/p:OPT=false"
 }
 
 task pec_graal_preprocess(
@@ -234,7 +234,7 @@ task pec_graal_preprocess(
   args "/c",
     "/i:${buildDir}/filtered/pec", "/o:${buildDir}/preprocess/pec",
     "/p:EE=false", "/p:PE=true", "/p:CSHARP=false",
-    "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false",
+    "/p:SAXONC=true",  "/p:STREAM=false", "/p:SCHEMA=false", "/p:BYTECODE=false", "/p:OPT=false",
     "/p:HOF=true"
   doFirst {
     mkdir "${buildDir}/preprocess/pec"

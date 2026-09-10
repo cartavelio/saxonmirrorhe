@@ -1,5 +1,7 @@
 using System;
+#if EE
 using Saxon.Eej.expr.sort;
+#endif
 using Saxon.Hej;
 using Saxon.Hej.lib;
 
@@ -16,7 +18,11 @@ namespace Saxon.Impl.Overrides {
         }
 
         public static StringCollator makeICUCollator(string uri, Configuration config) {
-            return new UcaCollatorUsingIcu(uri);
+#if EE                
+                return new UcaCollatorUsingIcu(uri);
+#else
+            throw new NotSupportedException("Not supported in HE");
+#endif            
         }
 
         public static String getLanguageTag(Saxon.Ejava.util.Locale locale) {

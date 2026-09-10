@@ -341,7 +341,11 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws IllegalAccessException if the class is not accessible
      */
 
-    @CSharpReplaceBody(code="return new Saxon.Eej.config.EnterpriseConfiguration();")
+    @CSharpReplaceBody(code="#if EE\n" +
+            "            return new Saxon.Eej.config.EnterpriseConfiguration();\n" +
+            "#else \n" +
+            "           return new Saxon.Hej.Configuration();\n" +
+            "#endif")
     public static Configuration instantiateConfiguration(String className, ClassLoader classLoader) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         Class theClass;
         ClassLoader loader = classLoader;
@@ -492,7 +496,11 @@ public class Configuration implements SourceResolver, NotationSet {
      * @since 9.2 (renamed from makeSchemaAwareConfiguration)
      */
 
-    @CSharpReplaceBody(code = "return new Saxon.Eej.config.EnterpriseConfiguration();")
+    @CSharpReplaceBody(code="#if EE\n" +
+            "            return new Saxon.Eej.config.EnterpriseConfiguration();\n" +
+            "#else \n" +
+            "           return new Saxon.Hej.Configuration();\n" +
+            "#endif")
     public static Configuration makeLicensedConfiguration(ClassLoader classLoader, /*@Nullable*/ String className)
             throws RuntimeException {
         if (className == null) {

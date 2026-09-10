@@ -556,11 +556,11 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * @param expression the expression that delivers the content
      * @param kind       the node kind whose content is being delivered: {@link Type#ELEMENT},
      *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
-     * @param schema
-     * @throws net.sf.saxon.trans.XPathException if the expression will never deliver a value of the correct type
+     * @throws net.sf.saxon.trans.XPathException
+     *          if the expression will never deliver a value of the correct type
      */
     @Override
-    public void analyzeContentExpression(Expression expression, int kind, Schema schema) throws XPathException {
+    public void analyzeContentExpression(Expression expression, int kind) throws XPathException {
         BuiltInAtomicType.analyzeContentExpression(this, expression, kind);
     }
 
@@ -694,7 +694,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      */
     @Override
     public void checkTypeDerivationIsOK(SchemaType base, int block) throws SchemaException {
-        //#ifdefined  SCHEMA
+        //#if SCHEMA==true
         String s = UserSimpleType.isTypeDerivationOK(this, base, block);
         if (s != null) {
             throw new SchemaException(s);
@@ -702,7 +702,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
         //#endif
     }
 
-    //#ifdefined SCHEMA
+    //#if SCHEMA==true
     /**
      * Get the schema component in the form of a function item. This allows schema information
      * to be made visible to XSLT or XQuery code. The function makes available the contents of the

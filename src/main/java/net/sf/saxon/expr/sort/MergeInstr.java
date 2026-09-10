@@ -182,7 +182,7 @@ public class MergeInstr extends Instruction {
         }
 
         public void prepareForStreaming() throws XPathException {
-            //#ifdefined STREAM
+            //#if STREAM==true
             if (streamable) {
                 MergeInstrAdjunct.checkStreamability(this, instruction.getConfiguration());
             }
@@ -583,7 +583,7 @@ public class MergeInstr extends Instruction {
             SequenceIterator anchorsIter;
 
             if (ms.streamable && ms.getForEachSource() != null) {
-//#ifdefined STREAM
+//#if STREAM==true
                 List<ContextMappingIterator> msIters =
                         MergeInstrAdjunct.makeSourceIterators(ms, getPackageData(), context);
                 for (ContextMappingIterator iter : msIters) {

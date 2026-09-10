@@ -334,7 +334,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
 
 
     private void checkInitialStreamability(Expression init) {
-        //#ifdefined STREAM
+        //#if STREAM==true
         if (accumulator.isDeclaredStreamable()) {
             // Check streamability constraints
             PostureAndSweep ps = Streamability.getStreamability(init, ContextItemStaticInfoEE.DEFAULT, null);
@@ -346,7 +346,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
     }
 
     private void checkRuleStreamability(XSLAccumulatorRule rule, Pattern pattern, Expression newValueExp) {
-        //#ifdefined STREAM
+        //#if STREAM==true
         if (accumulator.isDeclaredStreamable()) {
             // Check streamability constraints
             if (!pattern.isMotionless()) {

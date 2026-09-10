@@ -529,7 +529,7 @@ public abstract class Pattern extends PseudoExpression {
         return toString();
     }
 
-//    //#ifdefined STREAM
+//    //#if STREAM==true
 //
 //    @Override
 //    public PostureAndSweep getStreamability(ContextItemStaticInfo contextInfo, List<String> reasons) {

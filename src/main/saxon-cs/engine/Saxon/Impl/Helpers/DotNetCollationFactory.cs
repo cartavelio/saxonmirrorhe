@@ -1,6 +1,8 @@
 using System;
 using System.Globalization;
+#if EE 
 using Saxon.Eej.expr.sort;
+#endif
 using Saxon.Ejava.util;
 using Saxon.Hej;
 using Saxon.Hej.expr.sort;
@@ -25,7 +27,11 @@ namespace Saxon.Impl.Helpers {
         public static StringCollator makeCollation(Configuration config, string uri, Properties props) {
 
             if (uri.StartsWith("http://www.w3.org/2013/collation/UCA")) {
+#if EE                
                 return new UcaCollatorUsingIcu(uri);
+#else
+                throw new NotSupportedException("Not supported in HE");
+#endif
             }
 
             StringCollator stringCollator = null;
