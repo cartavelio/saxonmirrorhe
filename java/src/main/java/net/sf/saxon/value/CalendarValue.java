@@ -415,5 +415,57 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
             return asAtomic().hashCode();
         }
     }
+
+    /**
+     * Checks whether a time value is valid per the rules for time specified
+     * in XPath and XQuery Functions 4.0.
+     *
+     * @param iHours - number of hours
+     * @param iMinutes - number of minutes
+     * @param iSeconds - number of seconds
+     * @param iNanoseconds - number of nanoseconds, if second is fractional
+     * @return true if the time abides by the rules, otherwise throw an XPathException.
+     */
+    public static boolean isValidTime(int iHours, int iMinutes, int iSeconds, int iNanoseconds) throws XPathException {
+
+      // The hour must be positive
+        if (iHours < 0) {
+            throw new XPathException("The hour must be between 0 and 23 (inclusive).", "FODT0006");
+        }
+
+        // XSD 1.0 stated that "24" was an invalid hour
+        // but XSD 1.1 equates "24" to "00", so
+        // the hour must be less than 25
+        if (iHours >= 25) {
+            throw new XPathException("The hour must be less than 25.", "FODT0006");
+        }
+
+       // The minutes must be positive
+        if (iMinutes < 0) {
+            throw new XPathException("The minute must be between 0 and 59 (inclusive).", "FODT0006");
+        }
+
+        // The minutes must be less than 60
+        if (iMinutes > 59) {
+            throw new XPathException("The minute must be less than 60.", "FODT0006");
+        }
+
+        // The seconds must be positive
+        if (iSeconds < 0) {
+            throw new XPathException("The second must be between 0 and 59 (inclusive).", "FODT0006");
+        }
+
+        // The seconds must be less than 60
+        if (iSeconds > 59) {
+            throw new XPathException("The second must be less than 60.", "FODT0006");
+        }
+
+        // If hour is 24, minutes and seconds may only be 0
+        if (iHours == 24 && (iMinutes > 0 || iSeconds > 0 || iNanoseconds > 0)) {
+            throw new XPathException("The time may not be greater than '24:00:00'.");
+        }
+
+        return true;
+    }
 }
 
