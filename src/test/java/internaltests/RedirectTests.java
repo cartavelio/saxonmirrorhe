@@ -2,35 +2,37 @@ package internaltests;
 
 // Tests for various functions following http 301/302 redirects.
 
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.QName;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.Serializer;
-import net.sf.saxon.s9api.XdmAtomicValue;
-import net.sf.saxon.s9api.XsltTransformer;
+import jaxptest.ConfigTest;
+import net.sf.saxon.junit.TestHttpServer;
+import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RedirectTests {
-    private static final String httpBase = "https://dev.saxonica.com/tests/redirect/";
+    private final Path testDataDirPath = Paths.get(new ConfigTest().getDataDir()).resolve("redirectTests");
+    private TestHttpServer testHttp = new TestHttpServer(testDataDirPath);
 
     @Test
     public void testXslImport() {
         try {
             Processor processor = new Processor(false);
+            testHttp.route(http -> {
+                http.redirect.get("/stylesheet.xsl", "/redirected.xsl");
+                http.get("/redirected.xsl", testHttp.file("redirected.xsl"));
+            });
 
             String xsl = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
                     "                xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
                     "                exclude-result-prefixes=\"xs\"\n" +
                     "                version=\"3.0\">\n" +
-                    "<xsl:import href=\"" + httpBase + "stylesheet.xsl\"/>\n" +
+                    "<xsl:import href=\"" + testHttp.url("/stylesheet.xsl") + "\"/>\n" +
                     "<xsl:output method=\"text\" encoding=\"utf-8\"/>\n" +
                     "<xsl:template name=\"xsl:initial-template\">\n" +
                     "  <xsl:call-template name=\"imported\"/>\n" +
@@ -53,6 +55,8 @@ public class RedirectTests {
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());
+        } finally {
+            testHttp.stop();
         }
     }
 
@@ -60,6 +64,11 @@ public class RedirectTests {
     public void testXPathDoc() {
         try {
             Processor processor = new Processor(false);
+            testHttp.route(http -> {
+                http.redirect.get("/step1.html", "/step2.html");
+                http.redirect.get("/step2.html", "/step3.html");
+                http.get("/step3.html", testHttp.file("step3.html"));
+            });
 
             String xsl = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
                     "                xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -68,7 +77,7 @@ public class RedirectTests {
                     "                version=\"3.0\">\n" +
                     "<xsl:output method=\"text\" encoding=\"utf-8\"/>\n" +
                     "<xsl:template name=\"xsl:initial-template\">\n" +
-                    "  <xsl:sequence select=\"doc('" + httpBase+ "step1.html')//h:h1/text()\"/>\n" +
+                    "  <xsl:sequence select=\"doc('" + testHttp.url("/step1.html") + "')//h:h1/text()\"/>\n" +
                     "</xsl:template>\n" +
                     "</xsl:stylesheet>\n";
 
@@ -88,6 +97,8 @@ public class RedirectTests {
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());
+        } finally {
+            testHttp.stop();
         }
     }
 
@@ -95,6 +106,10 @@ public class RedirectTests {
     public void testLoop() {
         try {
             Processor processor = new Processor(false);
+            testHttp.route(http -> {
+                http.redirect.get("/infiniteloop.html", "/seeloopinfinite.html");
+                http.redirect.get("/seeloopinfinite.html", "/infiniteloop.html");
+            });
 
             String xsl = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
                     "                xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -103,7 +118,7 @@ public class RedirectTests {
                     "                version=\"3.0\">\n" +
                     "<xsl:output method=\"text\" encoding=\"utf-8\"/>\n" +
                     "<xsl:template name=\"xsl:initial-template\">\n" +
-                    "  <xsl:sequence select=\"doc('" + httpBase+ "infiniteloop.html')//h:h1/text()\"/>\n" +
+                    "  <xsl:sequence select=\"doc('" + testHttp.url("/infiniteloop.html") + "')//h:h1/text()\"/>\n" +
                     "</xsl:template>\n" +
                     "</xsl:stylesheet>\n";
 
@@ -124,6 +139,8 @@ public class RedirectTests {
             // in the exception from the *production* version of the XPathException class. Alas.
             // So we let this pass with any exception.
             assertTrue(true);
+        } finally {
+            testHttp.stop();
         }
     }
 

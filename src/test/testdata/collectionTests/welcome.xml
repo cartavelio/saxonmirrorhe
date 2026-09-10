@@ -1,0 +1,134 @@
+<?xml-stylesheet href="../make-menu.xsl" type="text/xsl"?>
+<html>
+    <head>
+        <this-is section="welcome" page="welcome" subpage=""></this-is>
+        <title>Saxonica: Welcome</title>
+        <meta name="title" content="Saxonica: Welcome" />
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <meta name="coverage" content="Worldwide" />
+        <meta name="copyright" content="Copyright Saxonica Ltd" />
+        <meta name="robots" content="index, follow" />
+    </head>
+    <body class="main">
+        <div id="section">
+            <p style="font-size: 16pt">Developers of the Saxon processor for XSLT, XQuery, and XML
+                Schema, including the only XSLT 3.0 conformant toolset. </p>
+            <p style="font-size: 16pt"> Saxonica was founded by Dr Michael Kay in 2004. We now have
+                more than 500 clients world-wide. </p>
+            <!--<img id="mid" src="../img/drawing-of-transform-dl-clean.jpg" width="580" height="167" />-->
+            <table class="buttons border" id="one-button">
+                <tr class="buttons border">
+                    <td>
+                        <a class="bodylink" href="../download/download.xml">
+                            <div class="MainPageButton red">TRY SAXON FOR 30 DAYS</div>
+                        </a>
+                    </td>
+                    <td>Get an evaluation license for Saxon.</td>
+                </tr>
+            </table>
+            <table class="buttons">
+                <tr class="buttons">
+                    <td>
+                        <a class="bodylink" href="../download/download_page.xml">
+                            <div class="MainPageButton brown">DOWNLOAD</div>
+                        </a>
+                    </td>
+                    <td>
+                        <a class="bodylink" href="../products/products.xml">
+                            <div class="MainPageButton grey">PRODUCTS</div>
+                        </a>
+                    </td>
+                    <td>
+                        <a class="bodylink" href="http://www.saxonica.com/shop/index.html">
+                            <div class="MainPageButton green">PURCHASE</div>
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Download Saxon (for license holders).</td>
+                    <td>Find out more about our range of software products.</td>
+                    <td>Purchase Saxon licenses from our online store.</td>
+                </tr>
+            </table>
+        </div>
+        <!--<div id="aside">
+            <h2>Upcoming events</h2>
+            <table class="news-table">
+                <tr>
+                    <td><a class="block-link" target="_blank" href="http://www.balisage.net/"
+                                    ><p><b>13 August 2015</b><br />John Lumley will present a paper
+                                on the semi-automatic conversion of certain XSLT 3.0 features to
+                                XSLT 2.0 at <b class="highlight">Balisage 2015</b>, Washington
+                                DC.</p></a></td>
+                </tr>
+            </table>
+        </div>-->
+        <div id="aside">
+            <h2>Recent news</h2>
+            <table class="news-table">
+                <tr>
+                    <td><a class="block-link" target="_blank"
+                            href="http://www.balisage.net/Proceedings/vol15/html/Lumley01/BalisageVol15-Lumley01.html"
+                                    ><p><b>13 August 2015</b><br />John Lumley presented a paper on
+                                the semi-automatic conversion of certain XSLT 3.0 features to XSLT
+                                2.0 at Balisage 2015, Washington
+                            DC.</p></a></td>
+                </tr>
+                <tr>
+                    <td><a class="block-link" href="../download/download_page.xml"><p><b>5 August
+                                    2015</b><br />
+                                <b class="highlight">Saxon 9.6.0.7</b> maintenance release for Java
+                                and .NET.</p></a></td>
+                </tr>
+                <tr>
+                    <td><a class="block-link" target="_blank"
+                            href="http://www.saxonica.com/papers/xmllondon-2015jl.pdf">
+                            <p><b>6 June 2015</b><br /> John Lumley presented a paper on
+                                    <i>Improving Pattern Matching Performance in XSLT</i> at XML
+                                London 2015.</p></a></td>
+                </tr>
+
+
+                <tr>
+                    <td><a class="block-link" href="../download/download_page.xml"><p><b>15 April
+                                    2015</b><br />
+                                <b class="highlight">Saxon 9.5.1.10</b> maintenance release for Java
+                                and .NET.</p></a></td>
+                </tr>
+                <tr>
+                    <td><a class="block-link" target="_blank"
+                            href="http://www.saxonica.com/papers/xmlprague-2015mhk.pdf">
+                            <p><b>14 February 2015</b><br /> Michael Kay presented a paper on
+                                    <i>Parallel Processing in the Saxon XSLT Processor</i> at XML
+                                Prague 2015.</p></a></td>
+                </tr>
+                <tr>
+                    <td><a class="block-link" href="../products/latest.xml"><p><b>2 October 2014</b><br />
+                                <b class="highlight">Saxon 9.6</b> for Java is released, the first
+                                major release in over a year.</p></a></td>
+                </tr>
+                <!--<tr>
+                    <td><a class="block-link" target="_blank"
+                            href="http://balisage.net/Proceedings/vol13/html/Lumley01/BalisageVol13-Lumley01.html"
+                                    ><p><b>05 Aug 2014</b><br /> John Lumley presented a paper on
+                                    <i>Analysing XSLT Streamability</i> at Balisage
+                        2014.</p></a></td>
+                </tr>-->
+                <tr>
+                    <td><a class="block-link" href="../saxon-c/index.xml"><p><b>28 June 2014</b><br />
+                                <b class="highlight">Saxon/C 0.3.1</b> beta release for C/C++/PHP
+                                platforms.</p></a></td>
+                </tr>
+                <!--<tr>
+                    <td><a target="_blank" class="block-link"
+                            href="http://www.saxonica.com/papers/xmllondon-2014mhk.pdf"><p><b>07
+                                    June 2014</b><br /> Michael Kay and Debbie Lockett presented a
+                                paper on <i>Benchmarking XSLT Performance</i> at XML London
+                                2014.</p></a></td>
+                </tr>-->
+            </table>
+        </div>
+    </body>
+</html>
