@@ -95,6 +95,12 @@ public class ResourceRequest {
     public boolean streamable;
 
     /**
+     * If the encoding is specified out of band, it can be provided here. Requesting an encoding
+     * doesn't gaurantee that it'll be used. For example, HTTP headers might override it.
+     */
+    public String requestedEncoding;
+
+    /**
      * Make a copy of a resource request (so that it can be modified without changing the original)
      * @return a copy of the request
      */
@@ -110,6 +116,7 @@ public class ResourceRequest {
         rr.nature = nature;
         rr.entityName = entityName;
         rr.streamable = streamable;
+        rr.requestedEncoding = requestedEncoding;
         return rr;
     }
 
