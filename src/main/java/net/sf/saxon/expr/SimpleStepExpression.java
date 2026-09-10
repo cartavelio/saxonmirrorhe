@@ -38,6 +38,10 @@ public final class SimpleStepExpression extends SlashExpression {
         }
     }
 
+    public AxisExpression getAxisExpression() {
+        return (AxisExpression)getStep();
+    }
+
     private static final OperandRole STEP_ROLE = new OperandRole(OperandRole.USES_NEW_FOCUS | OperandRole.HIGHER_ORDER, OperandUsage.TRANSMISSION, SequenceType.ANY_SEQUENCE);
 
     @Override

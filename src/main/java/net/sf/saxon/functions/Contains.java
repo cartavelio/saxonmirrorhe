@@ -46,9 +46,9 @@ public class Contains extends CollatingFunctionFixed {
                 @Override
                 @CSharpModifiers(code = {"public", "override"})
                 public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
-                    UnicodeString s0 = getArg(0).evaluateAsString(context).tidy();
-                    UnicodeString s1 = getArg(1).evaluateAsString(context).tidy();
-                    return s0.indexOf(s1, 0) >= 0;
+                    String s0 = getArg(0).evaluateAsString(context).toString();
+                    String s1 = getArg(1).evaluateAsString(context).toString();
+                    return s0.contains(s1);
                 }
 
                 @Override

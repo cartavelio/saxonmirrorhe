@@ -106,9 +106,9 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                 argumentEvaluators[i] = Evaluator.Literal.INSTANCE;
             } else if (arg instanceof VariableReference) {
                 argumentEvaluators[i] = Evaluator.Variable.INSTANCE;
-            } else if (cardinality == StaticProperty.EXACTLY_ONE) {
+            } else if (cardinality == StaticProperty.EXACTLY_ONE || arg.getCardinality() == StaticProperty.EXACTLY_ONE) {
                 argumentEvaluators[i] = Evaluator.SingleItem.INSTANCE;
-            } else if (cardinality == StaticProperty.ALLOWS_ZERO_OR_ONE) {
+            } else if (cardinality == StaticProperty.ALLOWS_ZERO_OR_ONE || arg.getCardinality() == StaticProperty.ALLOWS_ZERO_OR_ONE) {
                 argumentEvaluators[i] = Evaluator.OptionalItem.INSTANCE;
             } else {
                 argumentEvaluators[i] = Evaluator.LazySequence.INSTANCE;
