@@ -27,7 +27,7 @@
   <Project>
     <PropertyGroup>
       <LangVersion>9.0</LangVersion>
-      <TargetFramework>net6.0</TargetFramework>
+      <TargetFramework>net8.0</TargetFramework>
       <Nullable>disable</Nullable>
       <OutputType>Exe</OutputType>
       <NoWarn>2200;0414;0168;0169;0649;1591</NoWarn>
@@ -57,7 +57,7 @@
 
     <ItemGroup>
       <Reference Include="Saxon">
-        <HintPath>..\SaxonCS\bin\Release\net6.0\{$csrid}\SaxonCS.dll</HintPath>
+        <HintPath>..\SaxonCS\bin\Release\net8.0\{$csrid}\SaxonCS.dll</HintPath>
       </Reference>
     </ItemGroup>
 
@@ -68,25 +68,23 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="AngleSharp" Version="0.17.1" />
-      <PackageReference Include="ICU4N" Version="60.1.0-alpha.402" />
-      <!-- Is this implied by ICU4N? I'm getting duplicate package reference errors for it
-      <PackageReference Include="ICU4N.Resources" Version="60.1.0-alpha.402" />
-      -->
-      <PackageReference Include="NSec.Cryptography" Version="22.4.0" />
-      <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
-      <PackageReference Include="Singulink.Numerics.BigDecimal" Version="2.0.2" />
-      <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.1.0" />
-      <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
-      <PackageReference Include="StringComparer" Version="1.0.1"/>
-      <PackageReference Include="System.IO.Hashing" Version="8.0.0" />
+      <PackageReference Include="AngleSharp" Version="1.2.0" />
+      <PackageReference Include="ICU4N" Version="60.1.0-alpha.436" />
+      <PackageReference Include="ICU4N.Resources" Version="60.1.0-alpha.436" />
+      <PackageReference Include="NSec.Cryptography" Version="24.4.0" />
+      <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.0" />
+      <PackageReference Include="Singulink.Numerics.BigDecimal" Version="3.3.3" />
+      <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.3.0" />
+      <PackageReference Include="System.Collections.Immutable" Version="9.0.4" />
+      <!--<PackageReference Include="StringComparer" Version="1.0.1"/>-->
+      <PackageReference Include="System.IO.Hashing" Version="9.0.4" />
       <PackageReference Include="System.Net.Http" Version="4.3.4" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="8.0.0" />
-      <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
-      <PackageReference Include="XmlResolver" Version="6.0.2" />
-      <PackageReference Include="XmlResolverData" Version="6.0.2" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="9.0.4" />
+      <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.4" />
+      <PackageReference Include="XmlResolver" Version="2.1.1" />
+      <PackageReference Include="XmlResolverData" Version="1.2.4" />
     </ItemGroup>
   </Project>
 </xsl:template>

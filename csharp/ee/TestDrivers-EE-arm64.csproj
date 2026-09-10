@@ -3,11 +3,10 @@
   <Import Project="build\arm64\TestDrivers\core.csproj"/>
    <ItemGroup>
       <Compile Include="..\src\test\testrunner\**"/>
-      <Compile Remove="**\.DS_Store"/>
    </ItemGroup>
   <ItemGroup>
     <Reference Include="SaxonCS">
-      <HintPath>bin/Debug/net6.0/osx-arm64/SaxonCS.dll</HintPath>
+      <HintPath>bin/Debug/net8.0/osx-arm64/SaxonCS.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

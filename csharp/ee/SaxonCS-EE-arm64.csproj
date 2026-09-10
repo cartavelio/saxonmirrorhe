@@ -8,7 +8,7 @@
   <ItemGroup>
     <Compile Include="build\generated\**"/>
     <Compile Include="..\src\main\cs\**"/>
-    <Compile Include="..\keys\build\cs\**"/>
-    <Compile Remove="**\.DS_Store"/>
+    <Compile Include="..\..\featurekeys\build\cs\**"/>
+    <Compile Remove="..\**\.DS_Store"/>
   </ItemGroup>
 </Project>
