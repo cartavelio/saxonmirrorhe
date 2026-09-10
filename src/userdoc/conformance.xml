@@ -1437,7 +1437,7 @@
                <i>The default boundary-space policy (see 4.3 Boundary-space Declaration).</i>
             </p>
             <p>
-               ► Boundary space is significant.
+               ► The default is strip, in accordance with Appendix C.1 of the XQuery specification.
             </p>
          </li>
          <li>
