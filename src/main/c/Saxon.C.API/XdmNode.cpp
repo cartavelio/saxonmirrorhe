@@ -342,8 +342,6 @@ XdmNode *XdmNode::getChild(int i, bool cached) {
         return nullptr;
     }
 
-        std::cout<<" i = "<<i<<" childRef = "<<((int)childRef)<<std::endl;
-
     child = new XdmNode(this, childRef, UNKNOWN);
 
     return child;

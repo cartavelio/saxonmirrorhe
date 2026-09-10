@@ -720,6 +720,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_getChildNode, 0, 0, 1)
 ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_getChildren, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_getParent, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
