@@ -11,7 +11,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="systemId">Optional; may be used to represent the destination of any
         /// report produced.</param>
-        void StartReporting(string systemId);
+		/**public**/ void StartReporting(string systemId);
 
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace Saxon.Api {
         /// against a schema.
         /// </summary>
         /// <param name="i">Details of the validation error.</param>
-        void ReportInvalidity (ValidationFailure i);
+		/**public**/ void ReportInvalidity (ValidationFailure i);
 		
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Saxon.Api {
         /// In the case of the <c>InvalidityReportGenerator</c>, this returns the XML document
         /// containing the validation report. This will be the value returned as the value of
         /// the variable <c>$err:value</c> during try/catch processing.</returns>
-        XdmValue EndReporting(); 
+		/**public**/ XdmValue EndReporting(); 
 
     }
 }
