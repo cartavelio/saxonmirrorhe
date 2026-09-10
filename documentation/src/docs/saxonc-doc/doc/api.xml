@@ -960,6 +960,16 @@
                      and is used to resolve any relative URIs appearing within XSLT.</div>
                </td>
             </tr>
+            
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getcwd()</span>
+                  <div class="fcomment">Get the current working directory set on this processor.</div>
+               </td>
+            </tr>
 
 
             <tr>
@@ -1030,6 +1040,16 @@
                   <span class="signature">setJustInTimeCompilation(bool $value)</span>
                   <div class="fcomment">Say whether just-in-time compilation of template rules
                      should be used.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <code>bool</code>
+               </td>
+               <td>
+                  <span class="signature">getJustInTimeCompilation()</span>
+                  <div class="fcomment">Get the status of the just-in-time compilation flag.</div>
                </td>
             </tr>
 
@@ -1394,6 +1414,15 @@
                   <span class="signature">setcwd(string $cwd)</span>
                   <div class="fcomment">Set the current working directory used to resolve file names
                      against.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getcwd()</span>
+                  <div class="fcomment">Get the current working directory set on this processor.</div>
                </td>
             </tr>
             <tr>
@@ -1809,6 +1838,25 @@
                   <code>void</code>
                </td>
                <td>
+                  <span class="signature">setcwd(string $cwd)</span>
+                  <div class="fcomment">Set the current working directory used to resolve file names
+                     against.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getcwd()</span>
+                  <div class="fcomment">Get the current working directory set on this processor.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
                   <span class="signature">declareNamespace(string $prefix, string $namespace)</span>
                   <div class="fcomment">Declare a namespace binding as part of the static context
                      for XPath expressions compiled using this XQuery processor.</div>
@@ -1969,6 +2017,25 @@
                         class="bodylink code" href="../saxon_c_php_xdmitem">XdmItem</a>.
                      Returns null if the expression returns an empty sequence. If the expression
                      returns a sequence of more than one item, any items after the first are ignored.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setcwd(string $cwd)</span>
+                  <div class="fcomment">Set the current working directory used to resolve file names
+                     against.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getcwd()</span>
+                  <div class="fcomment">Get the current working directory set on this processor.</div>
                </td>
             </tr>
             <tr>
@@ -2196,6 +2263,16 @@
             </tr>
             <tr>
                <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getOutputFile()</span>
+                  <div class="fcomment">Get the file name to which a validated document will be saved if
+                     validation is successful.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
                   <code>void</code>
                </td>
                <td>
@@ -2304,6 +2381,25 @@
                      property on the SchemaValidator: e.g. <code>validator.setProperty('report-node',
                         'true')</code>. Returns the report as an <a class="bodylink code"
                         href="../saxon_c_php_xdmnode">XdmNode</a>.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setcwd(string $cwd)</span>
+                  <div class="fcomment">Set the current working directory used to resolve file names
+                     against.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getcwd()</span>
+                  <div class="fcomment">Get the current working directory set on this processor.</div>
                </td>
             </tr>
             <tr>
@@ -2676,6 +2772,15 @@
                   <code>boolean</code>
                </td>
                <td>
+                  <span class="signature">isAtomic()</span>
+                  <div class="fcomment">Determine whether or not the item is an atomic value.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>boolean</code>
+               </td>
+               <td>
                   <span class="signature">isNode()</span>
                   <div class="fcomment">Determine whether or not the item is a node.</div>
                </td>
@@ -2685,8 +2790,29 @@
                   <code>boolean</code>
                </td>
                <td>
-                  <span class="signature">isAtomic()</span>
-                  <div class="fcomment">Determine whether or not the item is an atomic value.</div>
+                  <span class="signature">isFunction()</span>
+                  <div class="fcomment">Determine whether the item is an XDM function or some other
+                     type of item.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>boolean</code>
+               </td>
+               <td>
+                  <span class="signature">isMap()</span>
+                  <div class="fcomment">Determine whether the item is an XDM map or some other
+                     type of item.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>boolean</code>
+               </td>
+               <td>
+                  <span class="signature">isArray()</span>
+                  <div class="fcomment">Determine whether the item is an XDM array or some other
+                     type of item.</div>
                </td>
             </tr>
             <tr>
@@ -2709,6 +2835,39 @@
                   <span class="signature">getNodeValue()</span>
                   <div class="fcomment">If the item is a node, then this <a class="bodylink code"
                         href="../saxon_c_php_xdmnode">XdmNode</a> is returned; otherwise returns
+                     null.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmfunctionitem">Saxon\XdmFunctionItem</a>
+               </td>
+               <td>
+                  <span class="signature">getFunctionItem()</span>
+                  <div class="fcomment">If the item is an XDM function, then this <a class="bodylink code"
+                     href="../saxon_c_php_xdmfunctionitem">XdmFunctionItem</a> is returned; otherwise returns
+                     null.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmmap">Saxon\XdmMap</a>
+               </td>
+               <td>
+                  <span class="signature">getMap()</span>
+                  <div class="fcomment">If the item is an XDM map, then this <a class="bodylink code"
+                     href="../saxon_c_php_xdmmap">XdmMap</a> is returned; otherwise returns
+                     null.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmarray">Saxon\XdmArray</a>
+               </td>
+               <td>
+                  <span class="signature">getArray()</span>
+                  <div class="fcomment">If the item is an XDM array, then this <a class="bodylink code"
+                     href="../saxon_c_php_xdmarray">XdmArray</a> is returned; otherwise returns
                      null.</div>
                </td>
             </tr>
