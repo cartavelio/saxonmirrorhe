@@ -128,7 +128,7 @@ public class XSLMode extends StyleElement {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String nameAtt = null;
         String visibilityAtt = null;
