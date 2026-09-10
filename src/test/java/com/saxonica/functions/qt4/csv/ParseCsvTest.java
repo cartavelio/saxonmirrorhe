@@ -22,7 +22,7 @@ import static com.saxonica.test.matchers.MatchesCsvRecord.matchesCsvRecord;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
 import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
 
-class CsvToXdmTest {
+class ParseCsvTest {
     MapItem options = MapBuilder.empty();
     Configuration configuration = new Configuration();
 
@@ -30,7 +30,7 @@ class CsvToXdmTest {
     public MapItem expectedColumns;
 
     public SystemFunction subject() throws XPathException {
-        return XPath40FunctionSet.getInstance().makeFunction("csv-to-xdm", 2);
+        return XPath40FunctionSet.getInstance().makeFunction("parse-csv", 2);
     }
 
     public XPathContext ctxt() {

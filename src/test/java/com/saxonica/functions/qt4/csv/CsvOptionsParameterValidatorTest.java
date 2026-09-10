@@ -1,33 +1,32 @@
 package com.saxonica.functions.qt4.csv;
 
+import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.test.OptionsParameterHelper;
 import net.sf.saxon.test.xdmfixtures.DslLambda;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.test.xdmfixtures.MapBuilder;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import static net.sf.saxon.test.TestXdmHelpers.stringValue;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
 import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
 
 class CsvOptionsParameterValidatorTest {
     Map<String, GroundedValue> options;
 
-    public Map<String, GroundedValue> makeOptions(DslLambda<MapBuilder> optionsBuilder) {
+    public Map<String, GroundedValue> makeOptions(OptionsParameter optionsParameter, DslLambda<MapBuilder> optionsBuilder) throws XPathException {
         MapItem options = FixtureBuilder.map(optionsBuilder);
-        Map<String, GroundedValue> result = new HashMap<>();
-        options.keyValuePairs().forEach(kvPair -> {
-            result.put(((StringValue) kvPair.key).getStringValue(), kvPair.value);
-        });
-        return result;
+        return OptionsParameterHelper.parsedOptionParameters(optionsParameter, options);
     }
+
+    final OptionsParameter defaultOpts = CsvFunction.extendedOptions();
 
     @Nested
     class OptionTypePreconditions {
@@ -35,8 +34,8 @@ class CsvOptionsParameterValidatorTest {
         class PositiveIntegers {
             @Test
             @DisplayName("column-names maps cannot use zero as a value")
-            void columnNamesMapsZeroErrors() {
-                options = makeOptions(opts -> {
+            void columnNamesMapsZeroErrors() throws XPathException {
+                options = makeOptions(defaultOpts, opts -> {
                     opts.put("column-names", FixtureBuilder.map(map -> {
                         map.put("First", 0);
                     }));
@@ -47,8 +46,8 @@ class CsvOptionsParameterValidatorTest {
 
             @Test
             @DisplayName("column-names maps cannot use negative integers as a value")
-            void columnNamesMapsNegativeErrors() {
-                options = makeOptions(opts -> {
+            void columnNamesMapsNegativeErrors() throws XPathException {
+                options = makeOptions(defaultOpts, opts -> {
                     opts.put("column-names", FixtureBuilder.map(map -> {
                         map.put("First", -1);
                     }));
@@ -59,8 +58,8 @@ class CsvOptionsParameterValidatorTest {
 
             @Test
             @DisplayName("number-of-columns cannot be set to zero")
-            void numberOfColumnsZeroErrors()  {
-                options = makeOptions(opts -> {
+            void numberOfColumnsZeroErrors() throws XPathException {
+                options = makeOptions(defaultOpts, opts -> {
                     opts.put("number-of-columns", 0);
                 });
 
@@ -69,8 +68,8 @@ class CsvOptionsParameterValidatorTest {
 
             @Test
             @DisplayName("number-of-columns cannot be set to a negative integer")
-            void negativeNumberOfColumnsErrors()  {
-                options = makeOptions(opts -> {
+            void negativeNumberOfColumnsErrors() throws XPathException {
+                options = makeOptions(defaultOpts, opts -> {
                     opts.put("number-of-columns", -1);
                 });
 
@@ -79,8 +78,8 @@ class CsvOptionsParameterValidatorTest {
 
             @Test
             @DisplayName("filter-columns cannot contain zero")
-            void filterColumnsZero()  {
-                options = makeOptions(opts -> {
+            void filterColumnsZero() throws XPathException {
+                options = makeOptions(defaultOpts, opts -> {
                     opts.put("filter-columns", 0);
                 });
 
@@ -89,8 +88,8 @@ class CsvOptionsParameterValidatorTest {
 
             @Test
             @DisplayName("filter-columns cannot contain a negative integer")
-            void filterColumnsNegative()  {
-                options = makeOptions(opts -> {
+            void filterColumnsNegative() throws XPathException {
+                options = makeOptions(defaultOpts, opts -> {
                     opts.put("filter-columns", -1);
                 });
 
