@@ -96,7 +96,7 @@ XdmItem::~XdmItem() {
   /*else {
        decrementRefCount();
    }*/
-  if (stringValue != nullptr) {
+  /*if (stringValue != nullptr) {
     delete[] stringValue;
     stringValue = nullptr;
   }
@@ -104,7 +104,7 @@ XdmItem::~XdmItem() {
   if (itemToString != nullptr) {
     delete[] itemToString;
     itemToString = nullptr;
-  }
+  } */
 }
 
 void XdmItem::incrementRefCount() {

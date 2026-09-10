@@ -293,6 +293,8 @@ void testTransformToString2b(SaxonProcessor *processor, Xslt30Processor *trans,
   try {
     result = trans->transformFileToString("cat-error.xml", "test-error.xsl");
 
+    delete result;
+
   } catch (SaxonApiException &e) {
     const char *emessage = e.getMessage();
     const char *code = e.getErrorCode();
@@ -307,9 +309,6 @@ void testTransformToString2b(SaxonProcessor *processor, Xslt30Processor *trans,
     return;
   }
 
-  if (result != nullptr) {
-    delete result;
-  }
   sresult->failure++;
   sresult->failureList.push_back("testTransformToString2b");
   cerr << "testTransformToString2b NULL found" << endl;
@@ -1047,7 +1046,7 @@ void exampleTransformToFile(SaxonProcessor *sproc, Xslt30Processor *proc,
     sresult->failure++;
     sresult->failureList.push_back("exampleTransformToFile");
   }
-
+  delete xmlfile;
   delete executable;
 }
 
@@ -1066,7 +1065,7 @@ void exampleTransformToString(SaxonProcessor *sproc, Xslt30Processor *proc,
     if (emessage != nullptr) {
       cerr << "exampleTransformToFile error: " << emessage << endl;
     }
-
+    delete emessage;
     return;
   }
 
@@ -1110,8 +1109,10 @@ void exampleTransformToString(SaxonProcessor *sproc, Xslt30Processor *proc,
     executable->setSaveXslMessage(true);
     result = executable->transformToString();
     XdmValue *messages = executable->getXslMessages();
-    cerr << "xsl:messages = " << messages->toString();
+    const char * xslMessagesStr  = messages->toString();
+    cerr << "xsl:messages = " << xslMessagesStr <<std::endl;;
     delete messages;
+    delete xslMessagesStr;
   } catch (SaxonApiException &e) {
     cerr << "exampleTransformToString: exception thrown" << endl;
     cout << e.what() << endl;
@@ -1140,6 +1141,7 @@ void exampleTransformToString(SaxonProcessor *sproc, Xslt30Processor *proc,
     }
   }
   delete result;
+  delete xmlfile;
   delete executable;
 }
 
@@ -1165,9 +1167,11 @@ void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc,
   try {
     executable = proc->compileFromFile("php/xsl/foo.xsl");
   } catch (SaxonApiException &e) {
-    cout << "Error message=" << e.getMessage() << endl;
+    const char * message = e.getMessage();
+    cout << "Error message=" << message << endl;
     sresult->failure++;
     sresult->failureList.push_back("exampleSimple3");
+    delete message;
     return;
   }
 
@@ -1197,6 +1201,7 @@ void exampleSimple3aError(SaxonProcessor *saxonProc, Xslt30Processor *proc,
     if (message != nullptr) {
       cout << "Exception success = " << message << endl;
     }
+    //delete message;
     sresult->success++;
     return;
   }
@@ -1216,7 +1221,7 @@ void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc,
     executable = proc->compileFromFile("php/xsl/foo.xsl");
     executable->setInitialMatchSelectionAsFile("php/xml/foo.xml");
   } catch (SaxonApiException &e) {
-    cout << "Expected failure of test exampleSimple3aError:" << endl;
+    cout << "Expected failure of test exampleParam:" << endl;
     const char *message = e.getMessage();
 
     if (message != nullptr) {
@@ -1781,11 +1786,13 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
   executable->setInitialTemplateParameters(parameterValues, false);
   executable->setInitialMatchSelection(node);
   XdmValue *result = executable->applyTemplatesReturningValue();
-  char * resultStr = result->getHead()->getStringValue();
   if (result != nullptr) {
+    XdmItem * itemResult = result->getHead();
+    const char * resultStr = itemResult->getStringValue();
     sresult->success++;
     cout << "Result=" << resultStr << endl;
     delete result;
+    delete itemResult;
     delete resultStr;
   } else {
     sresult->failure++;
@@ -1822,6 +1829,13 @@ void testResultDocumentAsMap(SaxonProcessor *proc, Xslt30Processor *trans,
 
     if (mmap.size() == 2) {
       sresult->success++;
+      map<string,  XdmValue *>::iterator it;
+
+      for (it = mmap.begin(); it != mmap.end(); it++){
+            delete it->second;
+      }
+      mmap.clear();
+
     } else {
       sresult->failure++;
       sresult->failureList.push_back("testResultDocumentAsMap");
@@ -2475,6 +2489,9 @@ void testCatalog(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
     } else {
       sresult->failure++;
       sresult->failureList.push_back("testCatalog-1");
+      if (trans == nullptr) {
+        return tanrs;
+      }
       return;
     }
 
@@ -2621,6 +2638,49 @@ void testAssociatedError(SaxonProcessor *proc, Xslt30Processor *trans,
     sresult->success++;
   }
 }
+
+void testUTF8StringTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
+                         sResultCount *sresult) {
+
+  const char *source =
+      "<?xml version='1.0' encoding='UTF8'?>  <xsl:stylesheet "
+      "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  "
+      "xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0'>  "
+      "<xsl:template match='*'>     <xsl:sequence select='&apos;تيست&apos;'/>  </xsl:template>  </xsl:stylesheet>";
+  cout << endl << "Test:testUTF8StringTemplate" << endl;
+  XsltExecutable *executable = trans->compileFromString(source);
+  if (executable == nullptr) {
+    if (trans->exceptionOccurred()) {
+      cout << "Error: " << trans->getErrorMessage() << endl;
+    }
+    return;
+  }
+  const char* _in = "<?xml version='1.0' encoding='UTF8'?><e>تيست</e>";
+  XdmNode *node = proc->parseXmlFromString(_in);
+  executable->setResultAsRawValue(false);
+  std::map<std::string, XdmValue *> parameterValues;
+
+  executable->setInitialTemplateParameters(parameterValues, false);
+  executable->setInitialMatchSelection(node);
+  XdmValue *result = executable->applyTemplatesReturningValue();
+  if (result != nullptr) {
+    sresult->success++;
+    cout << "Input=" << _in;
+    XdmItem * head = result->getHead();
+    const char * headStr = head->getStringValue();
+    cout << "Result=" << headStr << endl << node->toString() << endl;
+    delete result;
+    delete headStr;
+    delete head;
+  } else {
+    sresult->failure++;
+    sresult->failureList.push_back("testUTF8StringTemplate");
+  }
+  delete executable;
+  delete node;
+  parameterValues.clear();
+}
+
 
 static int NUM_THREADS = 10;
 
@@ -2795,7 +2855,14 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
-  testPackageExport(processor, trans, sresult);
+       testUTF8StringTemplate(processor, trans, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+ testPackageExport(processor, trans, sresult);
 
   cout << endl
        << "============================================================="

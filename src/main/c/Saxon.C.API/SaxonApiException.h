@@ -32,7 +32,8 @@ public:
    * A constructor. Create a SaxonApiException
    * @param message - The detail message string of this throwable.
    */
-  SaxonApiException(const char *message);
+  SaxonApiException(const char * err);
+
 
   /**
    * A Copy constructor. Create a SaxonApiException
@@ -57,8 +58,8 @@ public:
    * @param linenumber - The line number in the stylesheet related to cause of
    * the exception
    */
-  SaxonApiException(const char *message, const char *errorCode,
-                    const char *systemId, int linenumber);
+  SaxonApiException(const char * message, const char * errorCode,
+                    const char * systemId, int linenumber);
 
   /**
    * A destructor.
@@ -108,10 +109,12 @@ public:
 private:
   bool cppException;
   bool isStaticError;
-  char *message;
+  std::string message;
+  std::string s_message;
+  std::string ec_message;
   int lineNumber;
-  char *errorCode;
-  char *systemId;
+  std::string errorCode;
+  std::string systemId;
 };
 
 #endif /* SAXON_API_EXCEPTION_H */

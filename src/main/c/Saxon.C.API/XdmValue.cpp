@@ -115,12 +115,9 @@ XdmValue::XdmValue(int64_t val, bool arr) {
 XdmValue::~XdmValue() {
 
   if (xdmSize > 0 && values != nullptr) {
-    if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr<<"~XdmValue XdmSize = "<<xdmSize<<std::endl;
-    std::cerr<<"~XdmValue values_cap = "<<values_cap<<std::endl;
-    }
+
     for (int i = 0; i < xdmSize; i++) {
-      if (relinquished_values[i] == 0 && values[i] != nullptr && values[i]->getRefCount() < 1) {
+      if (relinquished_values[i] == (char)0 && values[i] != nullptr && values[i]->getRefCount() < 1) {
         delete values[i];
         values[i] = nullptr;
       }
@@ -140,10 +137,10 @@ XdmValue::~XdmValue() {
 
   xdmSize = 0;
 
-  if (toStringValue != nullptr) {
+  /*if (toStringValue != nullptr) {
     delete[] toStringValue;
     toStringValue = nullptr;
-  }
+  }   */
 }
 
 void XdmValue::addXdmItem(XdmItem *val) {
@@ -160,16 +157,21 @@ void XdmValue::addXdmItem(XdmItem *val) {
     if(xdmSize == values_cap) {
         //resizing values pointer array
         XdmItem ** newValues = new XdmItem*[values_cap*2];
+        char * new_relinquish_val  = new char[values_cap*2];
+        memset(new_relinquish_val, 0, sizeof(*new_relinquish_val) * values_cap*2);
         for(int i= 0; i< values_cap; i++) {
             newValues[i] = values[i];
+            new_relinquish_val[i] = relinquished_values[i];
         }
-        delete values;
+        delete [] values;
+        delete [] relinquished_values;
         values = newValues;
+        relinquished_values = new_relinquish_val;
         values_cap *=2;
     }
     values[xdmSize] = val;
     //values.push_back(val);
-    val->incrementRefCount();
+    //val->incrementRefCount();
     xdmSize++;
     if (jValues >= 0) {
       jValues = -1;

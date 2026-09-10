@@ -62,12 +62,12 @@ XdmNode::~XdmNode() {
     localName = nullptr;
   }
 
-  if (nodeToString != nullptr) {
+  /* if (nodeToString != nullptr) {
     delete[] nodeToString;
     nodeToString = nullptr;
   }
 
-  /* if (children != nullptr) {
+  if (children != nullptr) {
 
        for (int p = 0; p < childCount; ++p) {
            delete children[p];
@@ -84,6 +84,7 @@ XdmNode::~XdmNode() {
    }     */
 
   //}
+
 }
 
 const char *XdmNode::getLocalName() {

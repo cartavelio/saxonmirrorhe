@@ -122,7 +122,6 @@ void SaxonProcessor::exceptionClear() {
     SaxonProcessor(false);
 }*/
 
-void SaxonProcessor::createException(const char *message) {}
 
 SaxonApiException *SaxonProcessor::checkForExceptionCPP(
     /*JNIEnv *env, jclass callingClass, jobject callingObject*/) {
