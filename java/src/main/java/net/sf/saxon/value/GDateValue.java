@@ -354,6 +354,28 @@ public abstract class GDateValue extends CalendarValue {
         }
     }
 
+
+    protected static void setLexicalValue(MutableGDateValue m, int year, int month, int day, int timezoneInMinutes, boolean allowYearZero) {
+        GDateValue.setLexicalValue(m, year, month, day, allowYearZero);
+        m.tzMinutes = timezoneInMinutes;
+    }
+
+    protected static void setLexicalValue(MutableGDateValue m, int year, int month, int day, boolean allowYearZero) {
+        GYearValue.setLexicalValue(m, year, allowYearZero);
+        if (m.error != null) {
+            return;
+        }
+        GMonthDayValue.setLexicalValue(m, month, day);
+        if (m.error != null) {
+            return;
+        }
+
+        if (month == 2 && day > 28 && !(GDateValue.isLeapYear(year))) {
+            m.error = badDateComponent("There are only 28 days in February " + year + ", as it is not a leap year.", day, "FODT0006");
+        }
+    }
+
+
     private static ValidationFailure badDate(String msg, UnicodeString value) {
         ValidationFailure err = new ValidationFailure(
                 "Invalid date " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
@@ -364,6 +386,13 @@ public abstract class GDateValue extends CalendarValue {
     private static ValidationFailure badDate(String msg, UnicodeString value, String errorCode) {
         ValidationFailure err = new ValidationFailure(
                 "Invalid date " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
+        err.setErrorCode(errorCode);
+        return err;
+    }
+
+    protected static ValidationFailure badDateComponent(String msg, int value, String errorCode) {
+        ValidationFailure err = new ValidationFailure(
+                "Invalid date component: " + Err.wrap(String.valueOf(value), Err.VALUE) + " (" + msg + ")");
         err.setErrorCode(errorCode);
         return err;
     }

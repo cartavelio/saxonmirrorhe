@@ -55,6 +55,29 @@ public class GYearMonthValue extends GDateValue {
         return new GYearMonthValue(g);
     }
 
+    public static ConversionResult makeGYearMonthValue(int year, int month, int timezoneInMinutes, ConversionRules rules) {
+        MutableGDateValue g = new MutableGDateValue();
+        g.typeLabel = BuiltInAtomicType.G_YEAR_MONTH;
+        GYearMonthValue.setLexicalValue(g, year, month, timezoneInMinutes, rules.isAllowYearZero());
+        if (g.error != null) {
+            return g.error;
+        }
+        return new GYearMonthValue(g);
+    }
+
+    protected static void setLexicalValue(MutableGDateValue m, int year, int month, boolean allowYearZero) {
+        GYearValue.setLexicalValue(m, year, allowYearZero);
+        if (m.error != null) {
+            return;
+        }
+        GMonthValue.setLexicalValue(m, month);
+    }
+
+    protected static void setLexicalValue(MutableGDateValue m, int year, int month, int timezoneInMinutes, boolean allowYearZero) {
+        GYearMonthValue.setLexicalValue(m, year, month, allowYearZero);
+        m.tzMinutes = timezoneInMinutes;
+    }
+
     public GYearMonthValue(int year, byte month, int tz, boolean xsd10) {
         this(new MutableGDateValue(year, month, 1, xsd10, tz, BuiltInAtomicType.G_YEAR_MONTH));
     }

@@ -10,12 +10,14 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 
 import java.math.BigDecimal;
@@ -93,6 +95,14 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
 
     public TimeValue makeTimeValue(byte hour, byte minute, byte second, int nanosecond, int tz) {
         return new TimeValue(hour, minute, second, nanosecond, tz, BuiltInAtomicType.TIME);
+    }
+
+    private TimeValue(DateTimeValue.MutableDateTimeValue m) {
+        super(m.typeLabel, m.tzMinutes);
+        this.hour = m.hour;
+        this.minute = m.minute;
+        this.second = m.second;
+        this.nanosecond = m.nanosecond;
     }
 
     //#if CSHARP==false
@@ -290,11 +300,95 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         return new TimeValue(hour, minute, second, nanosecond, tz, BuiltInAtomicType.TIME);
     }
 
+    /**
+     * Creates an instance of TimeValue.  Includes validation
+     * checks.  If a validation error is detected, an instance of
+     * ValidationFailure will be returned instead.
+     *
+     * @param hour - hour number within an arbitrary day
+     * @param minute - minute within the hour specified
+     * @param second - second within the minute specified
+     * @param nanosecond - nanosecond within the second specified
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     * @return - an instance of TimeValue
+     */
+    public static ConversionResult makeTimeValue(int hour, int minute, int second, int nanosecond, int timezoneInMinutes, ConversionRules rules) {
+        DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
+        g.typeLabel = BuiltInAtomicType.TIME;
+        if (timezoneInMinutes == CalendarValue.NO_TIMEZONE) {
+            TimeValue.setLexicalValue(g, hour, minute, second, nanosecond);
+        } else {
+            TimeValue.setLexicalValue(g, hour, minute, second, nanosecond, timezoneInMinutes);
+        }
+        if (g.error != null) {
+            return g.error;
+        }
+        return new TimeValue(g);
+    }
+
+    public static ConversionResult makeTimeValue(int hour, int minute, int second, int nanosecond, ConversionRules rules) {
+        return TimeValue.makeTimeValue(hour, minute, second, nanosecond, CalendarValue.NO_TIMEZONE, rules);
+    }
+
+    /**
+     * Checks whether a gDay value in an arbitrary month and year
+     * is valid per the rules specified in XPath and XQuery Functions
+     * and Operators 4.0.
+     * If the input values are valid, they will be assigned to their
+     * corresponding attributes in the input instance of MutableGDateValue.
+     * If an error is found, the details will be assigned to the
+     * error attribute of the input instance of MutableGDateValue.
+     *
+     * @param hour - hour number within an arbitrary day
+     * @param minute - minute within the hour specified
+     * @param second - second within the minute specified
+     * @param nanosecond - nanosecond within the second specified
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     * @return the input instance of MutableTimeValue, with the attributes set to their corresponding input values
+     */
+    protected static void setLexicalValue(DateTimeValue.MutableDateTimeValue m, int hour, int minute, int second, int nanosecond, int timezoneInMinutes) {
+        TimeValue.setLexicalValue(m, hour, minute, second, nanosecond);
+        m.tzMinutes = timezoneInMinutes;
+    }
+
+    protected static void setLexicalValue(DateTimeValue.MutableDateTimeValue m, int hour, int minute, int second, int nanosecond) {
+        // XSD 1.0 stated that "24" was an invalid hour
+        // but XSD 1.1 equates "24" to "00",
+        // so the hour must be less than 25
+        if (hour < 0 || hour > 24) {
+            m.error = badTimeComponent("Hour must be between 0 and 24 (inclusive).", hour, "FODT0006");
+            return;
+        }
+        m.hour = (byte) hour;
+        if (minute < 0 || minute > 59) {
+            m.error = badTimeComponent("Minute must be between 0 and 59 (inclusive).", minute, "FODT0006");
+            return;
+        }
+        m.minute = (byte) minute;
+        if (second < 0 || second > 59) {
+            m.error = badTimeComponent("Second must be between 0 and 59 (inclusive).", second, "FODT0006");
+            return;
+        }
+        m.second = (byte) second;
+        if (nanosecond < 0 || nanosecond > 999999999) {
+            m.error = badTimeComponent("Nanosecond must be between 0 and 999999999 (inclusive).", nanosecond, "FODT0006");
+            return;
+        }
+        m.nanosecond = nanosecond;
+    }
+
     /*@NotNull*/
     private static ValidationFailure badTime(String msg, UnicodeString value) {
         ValidationFailure err = new ValidationFailure(
                 "Invalid time " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
         err.setErrorCode("FORG0001");
+        return err;
+    }
+
+    protected static ValidationFailure badTimeComponent(String msg, int value, String errorCode) {
+        ValidationFailure err = new ValidationFailure(
+                "Invalid time component: " + Err.wrap(String.valueOf(value), Err.VALUE) + " (" + msg + ")");
+        err.setErrorCode(errorCode);
         return err;
     }
 
@@ -687,6 +781,28 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         return super.subtract(other, context);
     }
 
+    /**
+     * Split a decimal second value into its component parts.
+     *
+     * @param second
+     * @return the whole number; and the fractional value in nanoseconds
+     */
+    public static int[] splitSecond(DecimalValue second) {
+        BigDecimal dSecond = (BigDecimal) second.getDecimalValue();
+        return new int[]{dSecond.intValue(), nanosecondFromSecond(dSecond)};
+    }
+
+    /**
+     * Extract the fractional second (to the right of the decimal point)
+     * from a decimal second value and return its value in nanoseconds.
+     *
+     * @param second - a decimal number
+     * @return the fractional value of a second, in nanoseconds
+     */
+    public static int nanosecondFromSecond(BigDecimal second) {
+        BigDecimal fractionalSecond = second.remainder(BigDecimal.ONE);
+        return (fractionalSecond.multiply(BigDecimal.valueOf(1_000_000_000))).intValue();
+    }
 
 }
 

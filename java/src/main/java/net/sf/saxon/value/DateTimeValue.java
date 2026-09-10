@@ -22,10 +22,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.AtomicMetadata;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ConversionResult;
-import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.type.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -91,6 +88,18 @@ public final class DateTimeValue extends CalendarValue
         this.hasNoYearZero = hasNoYearZero;
     }
 
+    private DateTimeValue(DateTimeValue.MutableDateTimeValue m) {
+        super(m.typeLabel, m.tzMinutes);
+        this.year = m.year;
+        this.month = m.month;
+        this.day = m.day;
+        this.hour = m.hour;
+        this.minute = m.minute;
+        this.second = m.second;
+        this.nanosecond = m.nanosecond;
+        this.hasNoYearZero = m.hasNoYearZero;
+    }
+
     @CSharpModifiers(code={"private"})
     protected static class MutableDateTimeValue {
         public int year;       // the year as written, +1 for BC years
@@ -103,6 +112,7 @@ public final class DateTimeValue extends CalendarValue
         public boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
         public int tzMinutes = NO_TIMEZONE;
         public AtomicMetadata typeLabel = BuiltInAtomicType.DATE_TIME;
+        public ValidationFailure error = null;
     }
 
     private MutableDateTimeValue makeMutableCopy() {
@@ -652,6 +662,79 @@ public final class DateTimeValue extends CalendarValue
 
         dt.typeLabel = BuiltInAtomicType.DATE_TIME;
         return fromMutableCopy(dt);
+    }
+
+    /**
+     * Creates an instance of DateTimeValue.  Includes validation
+     * checks.  If a validation error is detected, an instance of
+     * ValidationFailure will be returned instead.
+     *
+     * @param month - number of a month within an arbitrary year
+     * @param day - number of a day within the specified month
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     * @param rules - configuration rules relevant to converting between datatypes
+     * @return - an instance of DateTimeValue
+     */
+    public static ConversionResult makeDateTimeValue(int year, int month, int day, int hour, int minute, int second, int nanosecond, int timezoneInMinutes, ConversionRules rules) {
+        DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
+
+        DateTimeValue.setLexicalValue(g, year, month, day, hour, minute, second, nanosecond, timezoneInMinutes, rules);
+        if (g.error != null) {
+            return g.error;
+        }
+        return new DateTimeValue(g);
+    }
+
+    public static ConversionResult makeDateTimeValue(int year, int month, int day, int hour, int minute, int second, int nanosecond, ConversionRules rules) {
+        return DateTimeValue.makeDateTimeValue(year, month, day, hour, minute, second, nanosecond, CalendarValue.NO_TIMEZONE, rules);
+    }
+
+    /**
+     * Checks whether the component parts of a DateTime value are valid per
+     * the rules specified in XPath and XQuery Functions and Operators 4.0.
+     * If the input values are valid, they will be assigned to their
+     * corresponding attributes in the input instance of MutableDateTimeValue.
+     * If an error is found, the details will be assigned to the
+     * error attribute of the input instance of MutableDateTimeValue.
+     *
+     * @param month - number of a month within an arbitrary year
+     * @param day - number of a day within the specified month
+     * @return the input instance of MutableGDateValue, updated with the values supplied
+     */
+    protected static void setLexicalValue(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, int hour, int minute, int second, int nanosecond, int timezoneInMinutes, ConversionRules rules) {
+
+        // Process the date portion of the DateTime
+        ConversionResult dateConversionResult = DateValue.makeDateValue(year, month, day, timezoneInMinutes, rules);
+        if (dateConversionResult instanceof ValidationFailure) {
+            m.error = (ValidationFailure) dateConversionResult;
+            return;
+        }
+        DateValue dateValue = (DateValue) dateConversionResult;
+        m.year = dateValue.year;
+        m.month = dateValue.month;
+        m.day = dateValue.day;
+        m.hasNoYearZero = dateValue.hasNoYearZero;
+        m.tzMinutes = dateValue.getTimezoneInMinutes();
+
+        // Process the time portion of the DateTime
+        TimeValue.setLexicalValue(m, hour, minute, second, nanosecond);
+        if (m.error != null) {
+            return;
+        }
+
+        // If hour is 24, set the date to the following day and the hour to 0
+        if (m.hour == 24) {
+            DateValue tomorrow = DateValue.tomorrow(m.year, m.month, m.day); // Includes a check that new date is valid
+            m.hour = (byte) 0;
+            m.year = tomorrow.getYear();
+            m.month = tomorrow.getMonth();
+            m.day = tomorrow.getDay();
+        }
+
+        m.tzMinutes = timezoneInMinutes;
+
+        // TODO: If all seven fields are populated, change the datatype to datetimestamp?
+        // m.typeLabel = BuiltInAtomicType.DATE_TIME_STAMP;
     }
 
     /**

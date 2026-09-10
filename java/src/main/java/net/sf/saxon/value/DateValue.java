@@ -193,6 +193,24 @@ public class DateValue extends GDateValue implements XPathComparable {
         return new DateValue(g);
     }
 
+    public static ConversionResult makeDateValue(int year, int month, int day, int timezoneInMinutes, ConversionRules rules) {
+        GDateValue.MutableGDateValue g = new GDateValue.MutableGDateValue();
+        g.typeLabel = BuiltInAtomicType.DATE;
+        if (timezoneInMinutes == CalendarValue.NO_TIMEZONE) {
+            setLexicalValue(g, year, month, day, rules.isAllowYearZero());
+        } else {
+            setLexicalValue(g, year, month, day, timezoneInMinutes, rules.isAllowYearZero());
+        }
+        if (g.error != null) {
+            return g.error;
+        }
+        return new DateValue(g);
+    }
+
+    public static ConversionResult makeDateValue(int year, int month, int day, ConversionRules rules) {
+        return DateValue.makeDateValue(year, month, day, CalendarValue.NO_TIMEZONE, rules);
+    }
+
     /**
      * Determine the primitive type of the value. This delivers the same answer as
      * getItemType().getPrimitiveItemType(). The primitive types are

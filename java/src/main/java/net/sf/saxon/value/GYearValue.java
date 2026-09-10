@@ -51,6 +51,37 @@ public class GYearValue extends GDateValue {
         return new GYearValue(g);
     }
 
+    public static ConversionResult makeGYearValue(int year, int timezoneInMinutes, ConversionRules rules) {
+        MutableGDateValue g = new MutableGDateValue();
+        g.typeLabel = BuiltInAtomicType.G_YEAR;
+        setLexicalValue(g, year, timezoneInMinutes, rules.isAllowYearZero());
+        if (g.error != null) {
+            return g.error;
+        }
+        return new GYearValue(g);
+    }
+
+
+    protected static void setLexicalValue(GDateValue.MutableGDateValue m, int year, int timezoneInMinutes, boolean allowYearZero) {
+        GYearValue.setLexicalValue(m, year, allowYearZero);
+        m.tzMinutes = timezoneInMinutes;
+    }
+
+    protected static void setLexicalValue(GDateValue.MutableGDateValue m, int year, boolean allowYearZero) {
+        m.hasNoYearZero = !allowYearZero;
+
+        // "0000" is an illegal year value per XSD 1.0 (https://www.w3.org/TR/xmlschema-2/#truncatedformats)
+        // but legal per XSD 1.1.
+        if (year == 0 && !allowYearZero ) {
+            m.error = badDateComponent("Year zero is not allowed", year, "FODT0006");
+            return;
+        }
+
+        // Internally, dates are stored per XSD 1.1 and adjusted to match XSD 1.0 on request.
+        m.year = year;
+    }
+
+
     public GYearValue(int year, int tz, boolean xsd10) {
         this(new MutableGDateValue(year, 1, 1, xsd10,tz, BuiltInAtomicType.G_YEAR));
     }

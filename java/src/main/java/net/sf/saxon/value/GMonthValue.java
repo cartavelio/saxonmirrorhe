@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -54,6 +55,29 @@ public class GMonthValue extends GDateValue {
             return g.error;
         }
         return new GMonthValue(g);
+    }
+
+    public static ConversionResult makeGMonthValue(int month, int timezoneInMinutes, ConversionRules rules) {
+        MutableGDateValue g = new MutableGDateValue();
+        g.typeLabel = BuiltInAtomicType.G_MONTH;
+        GMonthValue.setLexicalValue(g, month, timezoneInMinutes);
+        if (g.error != null) {
+            return g.error;
+        }
+        return new GMonthValue(g);
+    }
+
+    protected static void setLexicalValue(MutableGDateValue m, int month, int timezoneInMinutes) {
+        GMonthValue.setLexicalValue(m, month);
+        m.tzMinutes = timezoneInMinutes;
+    }
+
+    protected static void setLexicalValue(MutableGDateValue m, int month) {
+        if (month < 1 || month > 12) {
+            m.error = badDateComponent("Month must be between 1 and 12 (inclusive)", month, "FODT0006");
+            return;
+        }
+        m.month = (byte) month;
     }
 
     public GMonthValue(byte month, int tz) {

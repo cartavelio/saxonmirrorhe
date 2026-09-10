@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -53,6 +54,53 @@ public class GDayValue extends GDateValue {
         }
         return new GDayValue(g);
     }
+
+    /**
+     * Creates an instance of GDayValue.  Includes validation
+     * checks.  If a validation error is detected, an instance of
+     * ValidationFailure will be returned instead.
+     *
+     * @param day - number of a day within an arbitrary month
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     * @param rules - configuration rules relevant to converting between datatypes
+     * @return - an instance of GDayValue
+     */
+    public static ConversionResult makeGDayValue(int day, int timezoneInMinutes, ConversionRules rules) {
+        MutableGDateValue g = new MutableGDateValue();
+        g.typeLabel = BuiltInAtomicType.G_DAY;
+        GDayValue.setLexicalValue(g, day, timezoneInMinutes);
+        if (g.error != null) {
+            return g.error;
+        }
+        return new GDayValue(g);
+    }
+
+    /**
+     * Checks whether a gDay value in an arbitrary month and year
+     * is valid per the rules specified in XPath and XQuery Functions
+     * and Operators 4.0.
+     * If the input values are valid, they will be assigned to their
+     * corresponding attributes in the input instance of MutableGDateValue.
+     * If an error is found, the details will be assigned to the
+     * error attribute of the input instance of MutableGDateValue.
+     *
+     * @param day - number of a day within an arbitrary month
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     * @return the input instance of MutableDGateValue, with the day attribute set to the input day number
+     */
+    protected static void setLexicalValue(MutableGDateValue m, int day, int timezoneInMinutes) {
+        GDayValue.setLexicalValue(m, day);
+        m.tzMinutes = timezoneInMinutes;
+    }
+
+    protected static void setLexicalValue(MutableGDateValue m, int day) {
+        if (day < 1 || day > 31) {
+            m.error = badDateComponent("Day must be between 1 and 31 (inclusive).", day, "FODT0006");
+            return;
+        }
+        m.day = (byte) day;
+    }
+
 
     public GDayValue(byte day, int tz) {
         this(day, tz, BuiltInAtomicType.G_DAY);
