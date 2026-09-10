@@ -563,6 +563,7 @@ class TestSuite {
 
       def testargs = [options["dotnet"],
                       "${project.buildDir}/testdrivers/bin/Release/net5.0/TestDrivers.dll",
+                      directory,
                       "-o:${options['reportDirectory']}",
                       "-lang:${options['language']}",
                       '-debug',
