@@ -943,6 +943,7 @@ namespace TestDriver {
                                         break;
                                     case "dom":
                                         XmlDocument dom = new();
+                                        dom.PreserveWhitespace = true;
                                         dom.Load(ss);
                                         doc = builder.Wrap(dom);
                                         break;
