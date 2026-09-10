@@ -883,7 +883,7 @@
     <alt-description JS="HE">
       <p>Ability to use a DOM (Document Object Model) for the input and output of transformations.</p>
     </alt-description>
-    <details link="sourcedocs/thirdparty" name="Object models"/>
+    <details link="sourcedocs/tree-models/thirdparty" name="Object models"/>
     <details JSlink="xdm/nodes" JSname="Nodes"/>
     <products>
       <product J="HE" CS="HE" JS="HE"/>
@@ -895,7 +895,7 @@
     <description>
       <p>Indexing of a supplied DOM tree to provide fast navigation (the Domino Model).</p>
     </description>
-    <details link="sourcedocs/domino" name="Domino tree model"/>
+    <details link="sourcedocs/tree-models/domino" name="Domino tree model"/>
     <products>
       <product J="EEV"/>
     </products>
@@ -908,7 +908,7 @@
         and queries. Note that the code for these interfaces is open source and can be compiled to
         work with Saxon-HE, but it does not come packaged with the Saxon-HE download.</p>
     </description>
-    <details link="sourcedocs/thirdparty" name="Object models"/>
+    <details link="sourcedocs/tree-models/thirdparty" name="Object models"/>
     <products>
       <product level="Open" J="HE">
         <description><p>Although the code for these interfaces does not come packaged with the Saxon-HE download,
