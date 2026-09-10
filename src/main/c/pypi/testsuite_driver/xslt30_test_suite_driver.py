@@ -14,7 +14,9 @@ start_memory = process.memory_info().rss
 
 path = None
 catalog = None
-saxon_version = ""
+saxon_version = "12.3"
+
+assert_set = set()
 
 alwaysOn = {"feature/serialization", "feature/namespace_axis", "feature/dtd", "feature/built_in_derived_types"
 , "feature/higher_order_functions", "feature/remote_http", "feature/fn-transform-XSLT"
@@ -56,7 +58,7 @@ debug = False
 
 run_test = None
 '''"streamable"'''
-run_test_case_name = None
+run_test_case_name = 'current-output-uri-004'
 '''result-document-0206'''
 run_assertion = None
 '''serialization-matches'''
@@ -69,6 +71,7 @@ def process_catalog(path: str, catalogi):
     att_file = None
     global cat_builder
     global test_report
+    global saxon_version
     cat_builder = driver_proc.new_document_builder()
     xpc = driver_proc.new_xpath_processor()
     '''xpc.set_lanaguage("3.1")'''
@@ -168,7 +171,7 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
                         if test_case.is_node:
                             test_casei = test_case.get_node_value()
                             test_case_name = test_casei.get_attribute_value("name")
-                            if (run_test_case_name is None or test_case_name is run_test_case_name) and test_set_name not in exceptionList:
+                            if (run_test_case_name is None or test_case_name == run_test_case_name) and test_set_name not in exceptionList:
                                 print("-s:" + test_set_name + " -t:" + test_case_name)
                                 run_test_case(test_case, xpathProcForEnv)
                         else:
@@ -188,6 +191,7 @@ def ensure_dependency_satisfied(dependency: PyXdmNode, env: Environment):
     global alwaysOn
     ''' TODO the local_name property will be used in SaxonC 12.3 release '''
     typei = dependency.name.split("}")[1]
+
     value = dependency.get_attribute_value("value")
     if value is None:
         value = "*"
@@ -225,6 +229,9 @@ def ensure_dependency_satisfied(dependency: PyXdmNode, env: Environment):
         else:
             '''Check this path'''
             return False
+    elif typei == "year_component_values":
+        return not inverse
+
 
 
     return True
@@ -427,27 +434,23 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
     xpath_proc.set_context(xdm_item=test_case_node)
     test_name = test_case_node.get_attribute_value("name")
-    dependencies = xpath_proc.evaluate_single("//dependencies/*")
+    dependencies = xpath_proc.evaluate("dependencies/*")
     env_node = xpath_proc.evaluate_single("environment")
     test_input_node = xpath_proc.evaluate_single("test")
     spec_att = 'XSLT10+'
     if dependencies is not None:
         '''print("environment found !!!!")'''
 
-        if dependencies is not None:
-            print(dependencies)
-            for i in range(dependencies.size):
-                dep = dependencies.item_at(i).get_node_value()
 
-                if not ensure_dependency_satisfied(dep, localEnvironments['default']):
-                    not_run += 1
-                    test_report.write_test_case_element(test_name, "n/a", None)
-                    return
+        for i in range(dependencies.size):
+            dep = dependencies.item_at(i).get_node_value()
+            print(dep)
+            if not ensure_dependency_satisfied(dep, localEnvironments['default']):
+                not_run += 1
+                test_report.write_test_case_element(test_name, "n/a", None)
+                return
 
-        xpath_proc.set_context(xdm_item=dependencies)
-        spec_att = xpath_proc.evaluate_single("spec/@value")
-        if(spec_att is not None):
-            '''print("spec value = " + spec_att.string_value)'''
+
 
         ''' get environment for this testcase'''
 
@@ -481,11 +484,36 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         print(process.memory_info().rss)
     '''print(test_input_node)'''
     xpath_proc.set_context(xdm_item=test_input_node)
-
+    '''Get config for XSLT Processor'''
     stylesheet = xpath_proc.evaluate_single("stylesheet[not(@role = 'secondary')]")
+    initial_mode = xpath_proc.evaluate_single("initial-mode")
+    initial_template = xpath_proc.evaluate_single("initial-template")
+    initial_function = xpath_proc.evaluate_single("initial-function")
     if os.getenv("SAXONC_DEBUG_FLAG") is not None:
         print(test_case_node.base_uri)
-        print(test_case_node)
+    print(test_case_node)
+    if initial_function is not None:
+        print(initial_function)
+        exit()
+    initial_match_selection = None
+    initial_mode_name = None
+    if initial_mode is not None:
+        initial_mode_name = initial_mode.get_node_value().get_attribute_value("name")
+        select = initial_mode.get_node_value().get_attribute_value("select")
+        if select is not None:
+            print(select)
+            environment.xpath_proc.clear_properties()
+            environment.xpath_proc.set_cwd(initial_mode.get_node_value().base_uri)
+            try:
+                initial_match_selection = environment.xpath_proc.evaluate(select)
+            except PySaxonApiError as ex:
+                errorResult = ex
+
+                '''TODO this is not currently working  - try set base-uri on XPathProcessor'''
+                test_report.write_test_case_element(str(test_name), "fail", str(ex))
+                failures += 1
+                return
+
 
     if stylesheet is not None:
         file_name = stylesheet.get_node_value().get_attribute_value("file")
@@ -501,8 +529,12 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
             if environment.context_item is not None:
                 '''print(environment.context_item)'''
                 sheet.set_global_context_item(xdm_item=environment.context_item)
-
-            result = sheet.apply_templates_returning_value(xdm_value=environment.context_item)
+            if initial_mode_name is not None:
+                sheet.set_initial_mode(initial_mode_name)
+            if initial_template is not None:
+                result = sheet.call_template_returning_value(initial_template.get_node_value().get_attribute_value("name"))
+            else:
+                result = sheet.apply_templates_returning_value(xdm_value=environment.context_item)
             '''print('Result = ' + str(result))'''
 
 
@@ -523,10 +555,10 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         assert_xpc.declare_namespace("file", "http://expath.org/ns/file")
         assert_xpc.declare_namespace("bin", "http://expath.org/ns/binary")
         assert_xpc.declare_variable("result")
-
+        global assert_set
         '''TODO add method  - assert_xpc.set_base_uri(assertion.getBaseURI())'''
         if result is not None:
-            success = outcome.test_assertion(assertion, result, assert_xpc, xpath_proc)
+            success = outcome.test_assertion(assertion, result, None, environment.proc, assert_xpc, xpath_proc, assert_set)
             if success:
                 test_report.write_test_case_element(str(test_name), "pass", None)
                 successes += 1
@@ -535,12 +567,15 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
                 failures += 1
             return
         elif errorResult is not None:
-            success = outcome.test_assertion_error(assertion, errorResult, assert_xpc, xpath_proc)
+            success = outcome.test_assertion(assertion, None, errorResult, environment.proc, assert_xpc, xpath_proc, assert_set)
             if success:
                 test_report.write_test_case_element(str(test_name), "pass", None)
                 successes += 1
+            elif assertion.get_attribute_value("code") is not None:
+                test_report.write_test_case_element(str(test_name), "fail", "Wrong error code: " + str(errorResult))
+                failures += 1
             else:
-                test_report.write_test_case_element(str(test_name), "fail", None)
+                test_report.write_test_case_element(str(test_name), "fail", str(errorResult))
                 failures += 1
 
             return
