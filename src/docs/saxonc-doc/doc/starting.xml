@@ -360,9 +360,9 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <p>The PHP extension is in the form of a C/C++ PHP7 extension to
       SaxonC created using the Zend module API. (To use the extension
-      with PHP5, see the note below.)</p>
+      with PHP5, see the "Building with PHP5" note below.)</p>
 
-      <p>To install, open a shell window and navigate to the <kbd>Saxon.C.API</kbd>
+      <p>To install, open a shell window and navigate to the <code>Saxon.C.API</code>
       directory inside the location where you unpacked the zip file. Run
       these commands:</p>
 
@@ -416,7 +416,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       </ul>
 
       <div id="php5" class="note">
-        <h4>Building with PHP5</h4>
+        <h3>Building with PHP5</h3>
         <p>The SaxonC PHP extension is built for PHP7. To instead
         build with PHP5, first replace the <code>config.m4</code> file
         in the <code>Saxon-C-API/</code> directory with the one held
