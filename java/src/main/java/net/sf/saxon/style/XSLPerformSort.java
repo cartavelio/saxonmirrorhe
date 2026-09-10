@@ -109,7 +109,7 @@ public class XSLPerformSort extends StyleElement {
                 body = Literal.makeEmptySequence();
             }
             try {
-                return new SortExpression(body.simplify(), sortKeys);
+                return new SortExpression(body.simplify(getStaticContext()), sortKeys);
             } catch (XPathException e) {
                 compileError(e);
                 return null;

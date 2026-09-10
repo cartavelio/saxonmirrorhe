@@ -1144,7 +1144,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
                 }
                 if (paramPos < positionalArgs) {
                     throw new XPathException("Parameter " + key + " of function " + fd.getFunctionName() +
-                                                     " is supplied both by position and by keyword", "XPST0141");
+                                                     " is supplied both by position and by keyword", "XPST0017");
                 }
                 Expression supplied = arguments[argPos];
                 expandedArgs[paramPos] = supplied;

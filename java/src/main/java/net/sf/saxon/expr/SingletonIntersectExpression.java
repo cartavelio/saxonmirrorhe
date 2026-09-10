@@ -43,7 +43,7 @@ public class SingletonIntersectExpression extends VennExpression {
      *
      */
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         return this;
     }
 

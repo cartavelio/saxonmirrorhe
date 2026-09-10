@@ -105,7 +105,7 @@ public class XSLMapEntry extends StyleElement {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (select == null) {
             select = compileSequenceConstructor(exec, decl, false);
-            select = select.simplify();
+            select = select.simplify(getStaticContext());
         }
         Expression exp = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, select);
         if (getConfiguration().getBooleanProperty(Feature.STRICT_STREAMABILITY)) {

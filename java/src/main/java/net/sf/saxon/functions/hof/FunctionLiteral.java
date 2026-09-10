@@ -9,6 +9,7 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.*;
@@ -58,7 +59,7 @@ public class FunctionLiteral extends Literal {
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         if (getGroundedValue() instanceof AbstractFunction fn) {
             fn.simplify();
         }

@@ -641,8 +641,7 @@ public class Gizmo {
         buffer.replace(0, 5, "");
         XQueryExpression replacement = getQuery(buffer);
         for (NodeInfo item : nodes) {
-            if (item instanceof MutableNodeInfo) {
-                MutableNodeInfo target = (MutableNodeInfo) item;
+            if (item instanceof MutableNodeInfo target) {
                 GroundedValue newValue = SequenceTool.toGroundedValue(evaluateQuery(replacement, item));
                 if (newValue instanceof AtomicValue) {
                     Orphan orphan = new Orphan(config);
@@ -661,18 +660,17 @@ public class Gizmo {
                         List<NodeInfo> newChildren = new ArrayList<>();
                         for (Item it : newValue.asIterable()) {
                             if (it instanceof NodeInfo) {
-                                switch (((NodeInfo)it).getNodeKind()) {
-                                    case Type.ATTRIBUTE:
-                                        throw new XPathException("Cannot replace non-attribute with attribute");
-                                    case Type.NAMESPACE:
-                                        throw new XPathException("Cannot replace non-namespace node with namespace node");
-                                    case Type.DOCUMENT:
-                                        for (NodeInfo kid : ((NodeInfo)it).children()) {
+                                switch (((NodeInfo) it).getNodeKind()) {
+                                    case Type.ATTRIBUTE ->
+                                            throw new XPathException("Cannot replace non-attribute with attribute");
+                                    case Type.NAMESPACE ->
+                                            throw new XPathException("Cannot replace non-namespace node with namespace node");
+                                    case Type.DOCUMENT -> {
+                                        for (NodeInfo kid : ((NodeInfo) it).children()) {
                                             newChildren.add(kid);
                                         }
-                                        break;
-                                    default:
-                                        newChildren.add((NodeInfo) it);
+                                    }
+                                    default -> newChildren.add((NodeInfo) it);
                                 }
                             } else if (it instanceof AtomicValue) {
                                 Orphan orphan = new Orphan(config);
@@ -690,9 +688,8 @@ public class Gizmo {
                         ((MutableNodeInfo) target.getParent()).removeAttribute(target);
                         if (newValue.getLength() > 0) {
                             if (newValue.getLength() == 1 &&
-                                    newValue.itemAt(0) instanceof NodeInfo &&
+                                    newValue.itemAt(0) instanceof NodeInfo att &&
                                     ((NodeInfo) newValue.itemAt(0)).getNodeKind() == Type.ATTRIBUTE) {
-                                NodeInfo att = ((NodeInfo) newValue.itemAt(0));
                                 ((MutableNodeInfo) target.getParent()).addAttribute(
                                         NameOfNode.makeName(att), (SimpleType) att.getSchemaType(), att.getStringValue(), 0, true);
                             } else {
@@ -728,8 +725,7 @@ public class Gizmo {
         buffer.replace(0, "with".length(), "");
         XQueryExpression newContent = getQuery(buffer);
         for (NodeInfo item : nodes) {
-            if (item instanceof MutableNodeInfo) {
-                MutableNodeInfo target = (MutableNodeInfo) item;
+            if (item instanceof MutableNodeInfo target) {
                 GroundedValue newValue = SequenceTool.toGroundedValue(evaluateQuery(newContent, item));
                 if (newValue instanceof AtomicValue && where.equals("content")) {
                     target.replaceStringValue(((AtomicValue) newValue).getUnicodeStringValue());
@@ -739,19 +735,14 @@ public class Gizmo {
                     for (Item it : newValue.asIterable()) {
                         if (it instanceof NodeInfo) {
                             switch (((NodeInfo) it).getNodeKind()) {
-                                case Type.ATTRIBUTE:
-                                    replacementAtts.add((NodeInfo) it);
-                                    break;
-                                case Type.NAMESPACE:
-                                    throw new XPathException("Cannot replace namespace nodes");
-                                case Type.DOCUMENT:
+                                case Type.ATTRIBUTE -> replacementAtts.add((NodeInfo) it);
+                                case Type.NAMESPACE -> throw new XPathException("Cannot replace namespace nodes");
+                                case Type.DOCUMENT -> {
                                     for (NodeInfo kid : ((NodeInfo) it).children()) {
                                         replacement.add(kid);
                                     }
-                                    break;
-                                default:
-                                    replacement.add((NodeInfo) it);
-
+                                }
+                                default -> replacement.add((NodeInfo) it);
                             }
                         } else if (it instanceof AtomicValue) {
                             Orphan orphan = new Orphan(config);
@@ -767,21 +758,11 @@ public class Gizmo {
                         // Bug 6489 - copy the replacement elements
                         NodeInfo[] childArray = copyNodes(config, replacement);
                         switch (where) {
-                            case "content":
-                                target.replace(childArray, true);
-                                break;
-                            case "precede":
-                                target.insertSiblings(childArray, true, true);
-                                break;
-                            case "follow":
-                                target.insertSiblings(childArray, false, true);
-                                break;
-                            case "prefix":
-                                target.insertChildren(childArray, true, true);
-                                break;
-                            case "suffix":
-                            default:
-                                target.insertChildren(childArray, false, true);
+                            case "content" -> target.replace(childArray, true);
+                            case "precede" -> target.insertSiblings(childArray, true, true);
+                            case "follow" -> target.insertSiblings(childArray, false, true);
+                            case "prefix" -> target.insertChildren(childArray, true, true);
+                            default /* , "suffix" */ -> target.insertChildren(childArray, false, true);
                         }
 
                     }

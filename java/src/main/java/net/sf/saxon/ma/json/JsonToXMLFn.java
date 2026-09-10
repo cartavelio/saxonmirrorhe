@@ -61,7 +61,6 @@ public class JsonToXMLFn extends SystemFunction {
     public static StringValue decodeBinary(XPathContext context, byte[] binaryValue)
             throws XPathException, IOException {
         InputStream inputStream = new ByteArrayInputStream(binaryValue);
-        // TODO: make CsvParser.parse() accept binary input? Where does the encoding come from?
 
         String encoding = EncodingDetector.inferStreamEncoding(inputStream, "UTF-8", null);
 
@@ -86,15 +85,6 @@ public class JsonToXMLFn extends SystemFunction {
         Item arg0 = arguments[0].head();
         if (arg0 == null) {
             return EmptySequence.INSTANCE;
-        }
-
-        // Following needed for parse-json but not for json-to-xml, see PR 2205
-        if (arg0 instanceof BinaryValue) {
-            try {
-                arg0 = decodeBinary(context, ((BinaryValue) arg0).getBinaryValue());
-            } catch (IOException e) {
-                throw new XPathException("Failed to decode binary JSON input", "FOUT1200");
-            }
         }
 
         UnicodeString input = arg0.getUnicodeStringValue();

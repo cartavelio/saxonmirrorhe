@@ -53,6 +53,7 @@ public class QueryModule implements StaticContext {
     private String baseURI;
     private NamespaceUri moduleNamespace; // null only if moduleIsMainModule is false
     private HashMap<String, NamespaceUri> explicitPrologNamespaces;
+    private NamespaceMap fixedModuleNamespaces;
     private IndexedStack<NamespaceBinding> activeNamespaces;  // The namespace bindings declared in element constructors
     private HashMap<StructuredQName, GlobalVariable> variables;
     // global variables declared in this module
@@ -92,7 +93,7 @@ public class QueryModule implements StaticContext {
     private int languageLevel;
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
-    private Set<QueryModule> importedModules = new HashSet<>();
+    private final Set<QueryModule> importedModules = new HashSet<>();
 
     /**
      * Create a QueryModule for a main module, copying the data that has been set up in a
@@ -249,7 +250,7 @@ public class QueryModule implements StaticContext {
         module.setBaseURI(baseURI);
         module.setExecutable(executable);
         module.setModuleNamespace(namespaceURI);
-
+        module.setXPathVersion(importer.getXPathVersion()); // by default, overridden by explicit version declaration
         executable.addQueryLibraryModule(module);
         XQueryParser qp = (XQueryParser) config.newExpressionParser(
                 "XQ", importer.isUpdating(), module);
@@ -305,8 +306,8 @@ public class QueryModule implements StaticContext {
         functionLibraryList.addFunctionLibrary(config.getIntegratedFunctionLibrary());
         config.addExtensionBinders(functionLibraryList);
 
-        unboundFunctionLibraryNr = functionLibraryList.addFunctionLibrary(
-                new UnboundFunctionLibrary());
+//        unboundFunctionLibraryNr = functionLibraryList.addFunctionLibrary(
+//                new UnboundFunctionLibrary());
     }
 
     public BuiltInFunctionSet getBuiltInFunctionSet() {
@@ -1037,7 +1038,6 @@ public class QueryModule implements StaticContext {
      */
 
     public void declareFunction(/*@NotNull*/ XQueryFunction function) throws XPathException {
-        Configuration config = getConfiguration();
         if (function.getMinimumArity() <= 1 && function.getNumberOfParameters() >= 1) {
             Schema schema = getPackageData().getImportedSchema("");
             StructuredQName name = function.getFunctionName();
@@ -1077,8 +1077,8 @@ public class QueryModule implements StaticContext {
      */
 
     public void bindUnboundFunctionCalls() throws XPathException {
-        UnboundFunctionLibrary lib = (UnboundFunctionLibrary) functionLibraryList.get(unboundFunctionLibraryNr);
-        lib.bindUnboundFunctionReferences(functionLibraryList, getConfiguration());
+//        UnboundFunctionLibrary lib = (UnboundFunctionLibrary) functionLibraryList.get(unboundFunctionLibraryNr);
+//        lib.bindUnboundFunctionReferences(functionLibraryList, getConfiguration());
     }
 
     /**

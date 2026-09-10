@@ -229,9 +229,9 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
-        WithParam.simplify(actualParams);
-        WithParam.simplify(tunnelParams);
+    public Expression simplify(StaticContext env) throws XPathException {
+        WithParam.simplify(actualParams, env);
+        WithParam.simplify(tunnelParams, env);
         return this;
     }
 

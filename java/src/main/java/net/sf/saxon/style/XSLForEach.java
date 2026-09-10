@@ -141,7 +141,7 @@ public class XSLForEach extends StyleElement {
             return Literal.makeEmptySequence();
         }
         try {
-            ForEach result = new ForEach(sortedSequence, block.simplify(), containsTailCall, threads);
+            ForEach result = new ForEach(sortedSequence, block.simplify(getStaticContext()), containsTailCall, threads);
             result.setInstruction(true);
             result.setLocation(allocateLocation());
             if (separator != null) {

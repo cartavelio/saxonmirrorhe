@@ -126,9 +126,9 @@ public final class AncestorQualifiedPattern extends Pattern {
      */
 
     @Override
-    public Pattern simplify() throws XPathException {
-        upperPattern = upperPattern.simplify();
-        basePattern = basePattern.simplify();
+    public Pattern simplify(StaticContext env) throws XPathException {
+        upperPattern = upperPattern.simplify(env);
+        basePattern = basePattern.simplify(env);
         return this;
     }
 

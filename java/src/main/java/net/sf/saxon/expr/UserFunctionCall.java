@@ -17,7 +17,6 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
-import net.sf.saxon.query.UnboundFunctionLibrary;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpUsing;
@@ -45,7 +44,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     private StructuredQName name;
     private boolean beingInlined = false;
     private SequenceEvaluator[] argumentEvaluators = null;
-    private UnboundFunctionLibrary.UnboundFunctionCallDetails unboundCallDetails;
 
 
 
@@ -69,14 +67,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     }
 
     /**
-     * Create an unbound function call (typically, a forwards reference in XQuery)
-     */
-
-    public UserFunctionCall(UnboundFunctionLibrary.UnboundFunctionCallDetails details) {
-        this.unboundCallDetails = details;
-    }
-
-    /**
      * Copy details from another user function call
      */
 
@@ -88,7 +78,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         name = ufc2.name;
         beingInlined = false;
         argumentEvaluators = ufc2.argumentEvaluators;
-        unboundCallDetails = null;
     }
 
 
@@ -172,10 +161,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         } else {
             return null;
         }
-    }
-
-    public UnboundFunctionLibrary.UnboundFunctionCallDetails getUnboundCallDetails() {
-        return unboundCallDetails;
     }
 
     /**
@@ -579,11 +564,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     public Sequence[] evaluateArguments(XPathContext c, boolean streamed) throws XPathException {
         int numArgs = getArity();
         Sequence[] actualArgs = SequenceTool.makeSequenceArray(numArgs);
-        synchronized(this) {
-            if (argumentEvaluators == null) {
-                allocateArgumentEvaluators();
-            }
-        }
         for (int i = 0; i < numArgs; i++) {
             SequenceEvaluator eval = argumentEvaluators[i];
             if (eval == null || (eval instanceof StreamingArgumentEvaluator && !streamed)) {
@@ -657,7 +637,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
 
         public PullEvaluator elaborateForPull() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-
+            expr.allocateArgumentEvaluators();
             if (expr.bindingSlot >= 0) {
                 return context -> {
                     TailCallLoop.TailCallComponent info = new TailCallLoop.TailCallComponent();
@@ -709,6 +689,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         @Override
         public PullEvaluator elaborateForPull() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
+            expr.allocateArgumentEvaluators();
             if (expr.bindingSlot >= 0) {
                 // XSLT packages in general need dynamic binding
                 return context -> {
@@ -749,7 +730,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         @Override
         public ItemEvaluator elaborateForItem() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-
+            expr.allocateArgumentEvaluators();
             if (expr.bindingSlot >= 0) {
                 // XSLT packages in general need dynamic binding
                 return context -> {
@@ -791,6 +772,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         public PushEvaluator elaborateForPush() {
 
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
+            expr.allocateArgumentEvaluators();
             if (expr.isTailCall()) {
                 throw new AssertionError("Not using tail call path");
             }

@@ -83,7 +83,7 @@ public abstract class AttributeValueTemplate {
                 parser.setAllowAbsentExpression(true);
                 exp = parser.parse(avt, nextSingleLeftBrace + 1, Tokenizer.CLOSING_CURLY, env);
                 exp.setRetainedStaticContext(env.makeRetainedStaticContext());
-                exp = exp.simplify();
+                exp = exp.simplify(env);
                 last = parser.getTokenizer().inputOffset + 1;
 
                 if (last > avt.length()) {
@@ -100,7 +100,7 @@ public abstract class AttributeValueTemplate {
                 } else {
                     components.add(XSLLeafNodeConstructor.makeSimpleContentConstructor(
                             exp,
-                            new StringLiteral(StringValue.SINGLE_SPACE), env).simplify());
+                            new StringLiteral(StringValue.SINGLE_SPACE), env).simplify(env));
                 }
 
             }
@@ -117,7 +117,7 @@ public abstract class AttributeValueTemplate {
         // is it a single component?
 
         else if (components.size() == 1) {
-            result = components.get(0).simplify();
+            result = components.get(0).simplify(env);
         }
 
         // otherwise, return an expression that concatenates the components
@@ -126,7 +126,7 @@ public abstract class AttributeValueTemplate {
             Expression[] args = new Expression[components.size()];
             args = components.toArray(args);
             Expression fn = SystemFunction.makeCall("concat", new RetainedStaticContext(env), args);
-            result = fn.simplify();
+            result = fn.simplify(env);
         }
 
         result.setLocation(env.getContainingLocation());

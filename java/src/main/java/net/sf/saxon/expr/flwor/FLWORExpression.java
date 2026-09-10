@@ -138,13 +138,13 @@ public class FLWORExpression extends Expression {
      */
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         OperandProcessor simplifier =
-                op -> op.setChildExpression(op.getChildExpression().simplify());
+                op -> op.setChildExpression(op.getChildExpression().simplify(env));
         for (Clause c : clauses) {
             c.processOperands(simplifier);
         }
-        returnClauseOp.setChildExpression(getReturnClause().simplify());
+        returnClauseOp.setChildExpression(getReturnClause().simplify(env));
         return this;
     }
 

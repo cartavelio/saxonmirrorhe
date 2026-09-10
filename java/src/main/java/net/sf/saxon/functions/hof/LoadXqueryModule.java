@@ -128,6 +128,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         Configuration config = context.getConfiguration();
         StaticQueryContext staticQueryContext = config.newStaticQueryContext();
+        staticQueryContext.setLanguageVersion(qv);
         staticQueryContext.preLoadSchema(getRetainedStaticContext().getImportedSchema());
 
         String content = null;

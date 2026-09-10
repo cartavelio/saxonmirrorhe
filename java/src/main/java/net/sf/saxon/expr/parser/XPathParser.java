@@ -42,6 +42,7 @@ import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTestStar;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.query.AnnotationList;
+import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.s9api.Location;
@@ -91,10 +92,7 @@ public class XPathParser {
 
     protected IntPredicateProxy charChecker;
 
-    protected boolean allowXPath30Syntax = false;
     protected boolean allowXPath30XSLTExtensions = false;
-    protected boolean allowXPath31Syntax = false;
-    protected boolean allowXPath40Syntax = false;
     protected boolean allowSaxonExtensions = false;
 
     protected boolean scanOnly = false;
@@ -119,7 +117,7 @@ public class XPathParser {
 
     protected ParsedLanguage language = ParsedLanguage.XPATH; // know which language we are parsing, for diagnostics
 
-    protected int languageVersion = 20;
+    protected int languageVersion = 20; // XPath language level. Note XQuery 1.0 == XPath 2.0.
     protected int catchDepth = 0;
 
 
@@ -165,7 +163,7 @@ public class XPathParser {
 
 
     public boolean isAllowXPath40Syntax() {
-        return allowXPath40Syntax;
+        return languageVersion >= 40;
     }
 
     /**
@@ -505,9 +503,6 @@ public class XPathParser {
         }
         this.language = language;
         this.languageVersion = version;
-        this.allowXPath30Syntax = languageVersion >= 30;
-        this.allowXPath31Syntax = languageVersion >= 31;
-        this.allowXPath40Syntax = languageVersion >= 40;
 
     }
 
@@ -535,7 +530,7 @@ public class XPathParser {
      */
 
     public boolean isAllowXPath31Syntax() {
-        return allowXPath31Syntax;
+        return languageVersion >= 31;
     }
 
     /**
@@ -607,15 +602,14 @@ public class XPathParser {
         if (exp == null) {
 
             qNameParser = new QNameParser(env.getNamespaceResolver())
-                .withAcceptEQName(allowXPath30Syntax, languageVersion)
+                .withAcceptEQName(languageVersion >= 30, languageVersion)
                 .withErrorOnBadSyntax(language == ParsedLanguage.XSLT_PATTERN ? "XTSE0340" : "XPST0003")
                 .withErrorOnUnresolvedPrefix("XPST0081");
 
             charChecker = env.getConfiguration().getValidCharacterChecker();
             t = new Tokenizer();
-            t.languageLevel = env.getXPathVersion();
+            t.languageLevel = languageVersion = env.getXPathVersion();
             t.setFinishCondition(finished);
-            allowXPath40Syntax =
                     t.allowSaxonExtensions =
                             env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel == 40;
             offset = t.currentTokenStartOffset;
@@ -696,8 +690,7 @@ public class XPathParser {
         language = ParsedLanguage.SEQUENCE_TYPE;
         t = new Tokenizer();
         t.languageLevel = languageVersion;
-        allowXPath40Syntax =
-                t.allowSaxonExtensions =
+        t.allowSaxonExtensions =
                         env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel == 40;
         try {
             t.tokenize(input, 0, -1);
@@ -759,7 +752,6 @@ public class XPathParser {
         t = new Tokenizer();
         t.languageLevel = languageVersion = 40;
         allowSaxonExtensions = t.allowSaxonExtensions = true;
-        allowXPath30Syntax = allowXPath31Syntax = allowXPath40Syntax = true;
         try {
             t.tokenize(input, 0, -1);
         } catch (XPathException err) {
@@ -788,7 +780,7 @@ public class XPathParser {
     /*@NotNull*/
     public Expression parseExpression() throws XPathException {
         int offset = t.currentTokenStartOffset;
-        if (allowXPath40Syntax) {
+        if (languageVersion >= 40) {
             Set<String> prefixes = new HashSet<>();
             if (tryKeywordPair("declare", "default")) {
                  readKeyword("element");
@@ -965,7 +957,7 @@ public class XPathParser {
                     nextToken();
                     boolean leftParenFollows = t.peekAhead() == Token.LPAREN;
                     CastingTarget at;
-                    if (allowXPath40Syntax &&
+                    if (languageVersion >= 40 &&
                             (t.currentToken == Token.LPAREN || (leftParenFollows && t.currentToken instanceof Token.NameToken))) {
                         ItemType type = parseItemType();
                         if (type instanceof CastingTarget) {
@@ -1065,7 +1057,7 @@ public class XPathParser {
 
     private OperatorSymbol getCurrentOperatorSymbol() throws XPathException {
         OperatorSymbol op = t.currentToken.getOperatorSymbol();
-        if (!allowXPath40Syntax && t.currentToken instanceof Token.NameToken) {
+        if (languageVersion < 40 && t.currentToken instanceof Token.NameToken) {
             String tok = ((Token.NameToken) t.currentToken).getValue();
             if (tok.equals("precedes") || tok.equals("follows") || tok.equals("is-not")) {
                 grumble("Operator '" + t.currentToken.toString() + "' requires 4.0 to be enabled");
@@ -1176,7 +1168,7 @@ public class XPathParser {
             case TO:
                 return new RangeExpression(lhs, rhs);
             case CONCAT: {
-                if (!allowXPath30Syntax) {
+                if (languageVersion < 30) {
                     grumble("Concatenation operator ('||') requires XPath 3.0 to be enabled");
                 }
                 RetainedStaticContext rsc = new RetainedStaticContext(env);
@@ -1277,7 +1269,7 @@ public class XPathParser {
                 default:
                     throw new IllegalArgumentException();
             }
-        } else if (allowXPath30Syntax) {
+        } else if (languageVersion >= 30) {
             switch (operator) {
                 case CASTABLE_AS:
                     if (type instanceof UnionType) {
@@ -1423,7 +1415,7 @@ public class XPathParser {
      */
 
     protected Expression parseFLWORExpression() throws XPathException {
-        if (isKeyword("let") && !allowXPath30Syntax) {
+        if (isKeyword("let") && languageVersion < 30) {
             grumble("'let' is not permitted in XPath 2.0");
         }
         if (isKeyword("let")) {
@@ -1446,7 +1438,7 @@ public class XPathParser {
         } else if (isKeyword(second, "value")) {
             iterand = ForQualifier.FOR_VALUE;
         }
-        if (iterand != ForQualifier.FOR_ITEM && !allowXPath40Syntax) {
+        if (iterand != ForQualifier.FOR_ITEM && languageVersion < 40) {
             grumble("'for member/key/value' requires XPath 4.0 to be enabled");
         }
 
@@ -1458,7 +1450,7 @@ public class XPathParser {
         if (continuation) {
             // we are currently positioned on a "," within a multi-variable for expression
             nextToken();
-            if (allowXPath40Syntax) {
+            if (languageVersion >= 40) {
                 if (tryKeyword("member")) {
                     iterand = ForQualifier.FOR_MEMBER;
                 } else if (tryKeyword("key")) {
@@ -1487,7 +1479,7 @@ public class XPathParser {
         result.setVariableQName(varQName);
         String positionVar = null;
 
-        if (allowXPath40Syntax) {
+        if (languageVersion >= 40) {
             requiredType = readOptionalAsClause(requiredType);
         }
 
@@ -1503,7 +1495,7 @@ public class XPathParser {
         }
 
         LocalVariableBinding positionBinding = null;
-        if (allowXPath40Syntax && isKeyword("at")) {
+        if (languageVersion >= 40 && isKeyword("at")) {
             nextToken();
             StructuredQName positionVarQName = readVariableName();
             if (positionVarQName.equals(varQName) || positionVarQName.equals(varQName2)) {
@@ -1606,9 +1598,9 @@ public class XPathParser {
             action = parseExprSingle();
         } else if (t.currentToken == Token.COMMA) {
             action = parseForExpression(true);
-        } else if (allowXPath40Syntax && isKeyword("for")) {
+        } else if (languageVersion >= 40 && isKeyword("for")) {
             action = parseForExpression(false);
-        } else if (allowXPath40Syntax && isKeyword("let")) {
+        } else if (languageVersion >= 40 && isKeyword("let")) {
             action = parseLetExpression();
         } else {
             grumble("In 'for' expression, expected ',', 'for', 'let', or 'return', but found " + t.currentToken);
@@ -1661,16 +1653,16 @@ public class XPathParser {
             List<StructuredQName> componentNames = new ArrayList<>(2);
             List<SequenceType> componentTypes = new ArrayList<>(2);
             String destructure = null;
-            if (allowXPath40Syntax && t.currentToken == Token.LPAREN) {
+            if (languageVersion >= 40 && t.currentToken == Token.LPAREN) {
                 var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "seq" + offset);
                 gatherComponents(componentNames, componentTypes, SequenceType.ANY_SEQUENCE, Token.RPAREN);
                 destructure = "seq";
-            } else if (allowXPath40Syntax && t.currentToken == Token.LSQB) {
+            } else if (languageVersion >= 40 && t.currentToken == Token.LSQB) {
                 var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "arr" + offset);
                 requiredType = ArrayItemType.SINGLE_ARRAY;
                 gatherComponents(componentNames, componentTypes, SequenceType.ANY_SEQUENCE, Token.RSQB);
                 destructure = "arr";
-            } else if (allowXPath40Syntax && t.currentToken == Token.LCURLY) {
+            } else if (languageVersion >= 40 && t.currentToken == Token.LCURLY) {
                 var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "map" + offset);
                 requiredType = SequenceType.SINGLE_MAP;
                 gatherComponents(componentNames, componentTypes, SequenceType.ANY_SEQUENCE, Token.RCURLY);
@@ -1679,7 +1671,7 @@ public class XPathParser {
                 String name = readName();
                 var = makeStructuredQName(name, NamespaceUri.NULL);
             }
-            if (allowXPath40Syntax) {
+            if (languageVersion >= 40) {
                 requiredType = readOptionalAsClause(SequenceType.ANY_SEQUENCE);
             }
 
@@ -1764,10 +1756,10 @@ public class XPathParser {
                         throw new IllegalStateException();
                 }
             }
-        } while (t.currentToken == Token.COMMA || (allowXPath40Syntax && isKeyword("let")));
+        } while (t.currentToken == Token.COMMA || (languageVersion >= 40 && isKeyword("let")));
 
         // process the "return" expression (called the "action") - or in 4.0 a FOR expression
-        if (!(allowXPath40Syntax && isKeyword("for"))) {
+        if (!(languageVersion >= 40 && isKeyword("for"))) {
             readKeyword("return");
         }
         previous.setAction(parseExprSingle());
@@ -1808,7 +1800,7 @@ public class XPathParser {
             setLocation(v, offset);
 
 
-            if (isKeyword("as") && (language == ParsedLanguage.XQUERY || allowXPath40Syntax)) {
+            if (isKeyword("as") && (language == ParsedLanguage.XQUERY || languageVersion >= 40)) {
                 // We use this path for quantified expressions in XQuery and XPath 4.0, which permit an "as" clause
                 nextToken();
                 SequenceType type = parseSequenceType();
@@ -1947,7 +1939,7 @@ public class XPathParser {
                 grumble("The type " + qname + " is not atomic", "XPST0051");
                 assert false;
             }
-        } else if (uri.equals(NamespaceUri.FN) && allowXPath40Syntax) {
+        } else if (uri.equals(NamespaceUri.FN) && languageVersion >= 40) {
             ItemType recordType = config.getBuiltInRecordType(local);
             if (recordType == null) {
                 grumble("Unknown built-in record type fn:" + local, "XPST0051");
@@ -1972,7 +1964,7 @@ public class XPathParser {
         } else if (uri.equals(NamespaceUri.DOT_NET_TYPE)) {
             return Version.platform.getExternalObjectType(config, uri, local);
         } else {
-            if (allowXPath40Syntax) {
+            if (languageVersion >= 40) {
                 ItemType it = env.resolveTypeAlias(sq);
                 if (it != null) {
                     return it;
@@ -1983,7 +1975,7 @@ public class XPathParser {
                 grumble("Unknown simple type " + qname, "XPST0051");
             } else if (st.isAtomicType()) {
                 return (AtomicType) st;
-            } else if (st instanceof ItemType && ((ItemType) st).isPlainType() && allowXPath30Syntax) {
+            } else if (st instanceof ItemType && ((ItemType) st).isPlainType() && languageVersion >= 30) {
                 return (ItemType) st;
             } else if (st.isComplexType()) {
                 grumble("Type (" + qname + ") is a complex type", "XPST0051");
@@ -1991,7 +1983,7 @@ public class XPathParser {
             } else if (((SimpleType) st).isListType()) {
                 grumble("Type (" + qname + ") is a list type", "XPST0051");
                 return BuiltInAtomicType.ANY_ATOMIC;
-            } else if (allowXPath30Syntax) {
+            } else if (languageVersion >= 30) {
                 grumble("Type (" + qname + ") is a union type that cannot be used as an item type", "XPST0051");
                 return BuiltInAtomicType.ANY_ATOMIC;
             } else {
@@ -2055,7 +2047,7 @@ public class XPathParser {
         if (builtInNamespace) {
             SimpleType target = Type.getBuiltInSimpleType(uri, local);
             if (target == null) {
-                grumble("Unknown simple type " + qname, allowXPath30Syntax ? "XQST0052" : "XPST0051");
+                grumble("Unknown simple type " + qname, languageVersion >= 30 ? "XQST0052" : "XPST0051");
             } else if (!(target instanceof CastingTarget)) {
                 grumble("Unsuitable type for cast: " + target.getDescription(), "XPST0080");
             }
@@ -2072,14 +2064,14 @@ public class XPathParser {
 
             SchemaType st = env.getImportedSchema().getSchemaType(new StructuredQName("", uri, local));
             if (st == null) {
-                if (allowXPath30Syntax) {
+                if (languageVersion >= 30) {
                     grumble("Unknown simple type " + qname, "XQST0052");
                 } else {
                     grumble("Unknown simple type " + qname, "XPST0051");
                 }
                 return BuiltInAtomicType.ANY_ATOMIC;
             }
-            if (allowXPath30Syntax) {
+            if (languageVersion >= 30) {
                 // XPath 3.0
                 return (CastingTarget) st;
 
@@ -2479,7 +2471,7 @@ public class XPathParser {
         } else {
             Set<StructuredQName> paramNames = null;
             while (t.currentToken != Token.RPAREN) {
-                if (t.currentToken == Token.DOLLAR && allowXPath40Syntax) {
+                if (t.currentToken == Token.DOLLAR && languageVersion >= 40) {
                     // Optional parameter names are allowed (and ignored) in 4.0
                     StructuredQName varName = parseEQName();
                     if (paramNames == null) {
@@ -2592,13 +2584,13 @@ public class XPathParser {
 
     /*@NotNull*/
     private ItemType parseParenthesizedItemType() throws XPathException {
-        if (!allowXPath30Syntax) {
+        if (languageVersion < 30) {
             grumble("Parenthesized item types require 3.0 to be enabled");
         }
         nextToken();
         List<ItemType> alternatives = new ArrayList<>();
         alternatives.add(parseItemType());
-        while (allowXPath40Syntax && t.currentToken == Token.VBAR) {
+        while (languageVersion >= 40 && t.currentToken == Token.VBAR) {
             nextToken();
             alternatives.add(parseItemType());
         }
@@ -2758,7 +2750,7 @@ public class XPathParser {
         int offset = t.currentTokenStartOffset;
         Expression exp = parsePathExpression();
         while (t.currentToken == Token.BANG) {
-            if (!allowXPath30Syntax) {
+            if (languageVersion < 30) {
                 grumble("XPath '!' operator requires XPath 3.0 to be enabled");
             }
             nextToken();
@@ -2833,7 +2825,7 @@ public class XPathParser {
                 exp = ExpressionTool.makePathExpression(exp, step);
                 exp = new HomogeneityChecker(exp);
             } else /*if (op == Token.BANG)*/ {
-                if (!allowXPath30Syntax) {
+                if (languageVersion < 30) {
                     grumble("XPath '!' operator requires XPath 3.0 to be enabled");
                 }
                 exp = new ForEach(exp, next);
@@ -3000,7 +2992,7 @@ public class XPathParser {
             Expression var = parseParenthesizedExpression();
             expect(Token.LPAREN);
             return parseDynamicFunctionCall(var, lhs);
-        } else if (allowXPath40Syntax) {
+        } else if (languageVersion >= 40) {
             // At this point, the things that are allowed in a DynamicFunctionCall, but not in
             // a RestrictedDynamicCall or FunctionCall, are: Literal, ContextValueRef,
             // OrderedExpr, UnorderedExpr, NodeConstructor, StringTemplate, StringConstructor,
@@ -3101,7 +3093,7 @@ public class XPathParser {
                 String name = t.currentName();
                 switch (name) {
                     case "namespace-node":
-                        if (!allowXPath30Syntax) {
+                        if (languageVersion < 30) {
                             return parseFunctionCall(name, null);
                         };
                         testPermittedAxis(AxisInfo.NAMESPACE, "XQST0134");
@@ -3128,7 +3120,7 @@ public class XPathParser {
                         return ae;
                     }
                     case "jnode": {
-                        if (!allowXPath40Syntax) {
+                        if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
                         JNodeType jType;
@@ -3145,7 +3137,7 @@ public class XPathParser {
                         return ae;
                     }
                     case "gnode": {
-                        if (!allowXPath40Syntax) {
+                        if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
                         nextToken();
@@ -3166,7 +3158,7 @@ public class XPathParser {
                         return ae;
                     }
                     case "get": {
-                        if (!allowXPath40Syntax) {
+                        if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
                         nextToken();
@@ -3178,7 +3170,7 @@ public class XPathParser {
                         return getExpr;
                     }
                     case "type": {
-                        if (!allowXPath40Syntax) {
+                        if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
                         nextToken();
@@ -3192,7 +3184,7 @@ public class XPathParser {
                         return typeExpr;
                     }
                     case "record": {
-                        if (!allowXPath40Syntax) {
+                        if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
                         ItemType type = parseRecordTest(this);
@@ -3207,7 +3199,7 @@ public class XPathParser {
                     case "map":
                     case "enum":
                     case "item": {
-                        if (!allowXPath40Syntax) {
+                        if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
                         ItemType type = parseItemType();
@@ -3402,7 +3394,7 @@ public class XPathParser {
             return ae2;
 
         } else if (token == Token.LCURLY) {
-            if (isAllowXPath40Syntax()) {
+            if (languageVersion >= 40) {
                 return parseMapConstructor();
             } else {
                 grumble("Unexpected `{` after " + previousToken);
@@ -3422,7 +3414,7 @@ public class XPathParser {
                 return parseInlineFunction(annotations);
             }
 
-        } else if (token == Token.HASH && isAllowXPath40Syntax()) {
+        } else if (token == Token.HASH && languageVersion >= 40) {
             StructuredQName qn = parseEQName();
             return Literal.makeLiteral(new QNameValue(qn, BuiltInAtomicType.QNAME));
 
@@ -3497,7 +3489,7 @@ public class XPathParser {
         if (axis == AxisInfo.PRECEDING_OR_ANCESTOR) {
             grumble("The preceding-or-ancestor axis is for internal use only", errorCode);
         }
-        if (!allowXPath40Syntax && (
+        if (languageVersion < 40 && (
                 axis == AxisInfo.PRECEDING_SIBLING_OR_SELF ||
                 axis == AxisInfo.FOLLOWING_SIBLING_OR_SELF ||
                 axis == AxisInfo.FOLLOWING_OR_SELF ||
@@ -3811,14 +3803,14 @@ public class XPathParser {
                 SequenceType requiredType = parseSequenceType();
                 expect(Token.RPAREN);
                 nextToken();
-                result = parserExtension.lookupStar(lhs, requiredType, allowXPath40Syntax);
+                result = parserExtension.lookupStar(lhs, requiredType, languageVersion >= 40);
             } else {
                 result = env.getConfiguration().makeLookupExpression(
-                        lhs, new StringLiteral(name), allowXPath40Syntax);
+                        lhs, new StringLiteral(name), languageVersion >= 40);
             }
         } else if (token instanceof Token.NumericLiteral) {
             NumericValue number = ((Token.NumericLiteral)token).getValue();
-            if (!allowXPath40Syntax) {
+            if (languageVersion < 40) {
                 if (!(number instanceof IntegerValue)) {
                     grumble("Number following '?' must be an integer");
                 }
@@ -3837,14 +3829,14 @@ public class XPathParser {
 
         } else if (token == Token.STAR) {
             nextToken();
-            result = parserExtension.lookupStar(lhs, SequenceType.ANY_SEQUENCE, allowXPath40Syntax);
+            result = parserExtension.lookupStar(lhs, SequenceType.ANY_SEQUENCE, languageVersion >= 40);
         } else if (token == Token.LPAREN) {
             result = makeLookupExpression(env.getConfiguration(), lhs, parseParenthesizedExpression());
         } else if (token instanceof Token.StringLiteral) {
             checkLanguageVersion40("a string literal after `?`");
             String key = ((Token.StringLiteral)token).getValue();
             result = env.getConfiguration().makeLookupExpression(
-                    lhs, new StringLiteral(key), allowXPath40Syntax);
+                    lhs, new StringLiteral(key), languageVersion >= 40);
             nextToken();
         } else if (token == Token.DOLLAR) {
             checkLanguageVersion40("a variable reference directly after `?`");
@@ -3868,7 +3860,7 @@ public class XPathParser {
 
 
     protected Expression makeLookupExpression(Configuration config, Expression lhs, Expression rhs) throws XPathException {
-        return config.makeLookupExpression(lhs, rhs, allowXPath40Syntax);
+        return config.makeLookupExpression(lhs, rhs, languageVersion >= 40);
     }
 
 
@@ -3973,7 +3965,7 @@ public class XPathParser {
                     XNodeType inner = (XNodeType)parseKindTest();
                     readToken(Token.RPAREN);
                     return new DocumentNodeType(inner);
-                } else if (allowXPath40Syntax) {
+                } else if (languageVersion >= 40) {
                     QNameTest qNameTest = parseNameTestUnion(Type.ELEMENT);
                     readToken(Token.RPAREN);
                     return new DocumentNodeType(
@@ -4060,7 +4052,7 @@ public class XPathParser {
                 }
                 QNameTest qNameTest2 = parseNameTestUnion(nodeKind);
 
-                if (!allowXPath40Syntax) {
+                if (languageVersion < 40) {
                     if (qNameTest2 instanceof NamespaceQNameTest || qNameTest2 instanceof LocalQNameTest) {
                         grumble("Wildcard syntax in item types requires 4.0 to be enabled");
                     } else if (qNameTest2 instanceof UnionQNameTest) {
@@ -4261,7 +4253,7 @@ public class XPathParser {
      */
 
     protected boolean isNamespaceTestAllowed() {
-        return allowXPath30Syntax;
+        return languageVersion >= 30;
     }
 
     /**
@@ -4271,7 +4263,7 @@ public class XPathParser {
      */
 
     protected void checkLanguageVersion30() throws XPathException {
-        if (!allowXPath30Syntax) {
+        if (languageVersion < 30) {
             grumble("To use XPath 3.0 syntax, you must configure the XPath parser to handle it");
         }
     }
@@ -4283,7 +4275,7 @@ public class XPathParser {
      */
 
     protected void checkLanguageVersion31() throws XPathException {
-        if (!allowXPath31Syntax) {
+        if (languageVersion < 31) {
             grumble("The XPath parser is not configured to allow use of XPath 3.1 syntax");
         }
     }
@@ -4296,14 +4288,14 @@ public class XPathParser {
 
     protected void checkLanguageVersion40() throws XPathException {
         String lang = getLanguage();
-        if (!allowXPath40Syntax) {
+        if (languageVersion < 40) {
             grumble("The parser is not configured to allow use of " + lang + " 4.0 syntax");
         }
     }
 
     protected void checkLanguageVersion40(String feature) throws XPathException {
         String lang = getLanguage();
-        if (!allowXPath40Syntax) {
+        if (languageVersion < 40) {
             grumble("The parser is not configured to allow use of " + lang + " 4.0 syntax, which is needed when using " + feature);
         }
     }
@@ -4316,7 +4308,7 @@ public class XPathParser {
      */
 
     protected void checkMapExtensions() throws XPathException {
-        if (!(allowXPath31Syntax || allowXPath30XSLTExtensions)) {
+        if (!(languageVersion >= 31 || allowXPath30XSLTExtensions)) {
             grumble("The XPath parser is not configured to allow use of the map syntax from XSLT 3.0 or XPath 3.1");
         }
     }
@@ -4328,7 +4320,7 @@ public class XPathParser {
      */
 
     public void checkSyntaxExtensions(String construct) throws XPathException {
-        if (!allowXPath40Syntax) {
+        if (languageVersion < 40) {
             grumble("Saxon XPath syntax extensions have not been enabled: " + construct + " is not allowed");
         }
     }
@@ -4587,16 +4579,10 @@ public class XPathParser {
             args.add(prefixArgument);
             position++;
         }
-
-//        StructuredQName noNamespaceFunctionName = null;
-//        if (allowXPath40Syntax && NameChecker.isValidNCName(fname)) {
-//            noNamespaceFunctionName = new StructuredQName("", NamespaceUri.NULL, fname);
-//        }
-        StructuredQName functionName = resolveFunctionName(fname);
-        if (env.getConfiguration().isDisabledFunction(functionName)) {
-            grumble("Function " + functionName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017", offset);
-        }
-
+        
+        StructuredQName nominalName = scanOnly
+                ? NamespaceUri.SAXON.qName("dummy")
+                : qNameParser.parse(fname,NamespaceUri.NULL);
         // placeMarkerArgs holds details of the arguments that were set to "?", indicating
         // a partially applied function. The list is in the order that the placeMarkers appear,
         // and each Object in the list is either the 0-based position of the placeMarker if given
@@ -4671,15 +4657,26 @@ public class XPathParser {
         Expression[] arguments = new Expression[args.size()];
         arguments = args.toArray(arguments);
 
-        if (placeMarkerArgs != null) {
-            return makeCurriedFunction(this, offset, functionName, arguments, placeMarkerArgs);
-        }
-
         Expression fcall = null;
+        if (env instanceof QueryModule) {
+            fcall = new DraftFunctionCall(fname,
+                                          env,
+                                          arguments,
+                                          placeMarkerArgs,
+                                          keywordArgs);
+        } else {
+            StructuredQName functionName = resolveFunctionName(fname);
+            if (env.getConfiguration().isDisabledFunction(functionName)) {
+                grumble("Function " + functionName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017", offset);
+            }
 
-        SymbolicName.F sn;
+            if (placeMarkerArgs != null) {
+                return makeCurriedFunction(this, offset, functionName, arguments, placeMarkerArgs);
+            }
 
-        //if (fcall == null) {
+            SymbolicName.F sn;
+
+
             sn = new SymbolicName.F(functionName, args.size());
             List<String> reasons = new ArrayList<>();
             try {
@@ -4688,24 +4685,10 @@ public class XPathParser {
                 reasons.add(e.getMessage());
             }
 
-//            // Temporarily, look for a no-namespace function only if there is no matching function in the default function namespace
-//
-//            if (fcall == null) {
-//                if (noNamespaceFunctionName != null) {
-//                    // In 4.0, try first for a no-namespace function
-//                    sn = new SymbolicName.F(noNamespaceFunctionName, args.size());
-//                    List<String> reasons0 = new ArrayList<>();
-//                    try {
-//                        fcall = env.getFunctionLibrary().bind(sn, arguments, keywordArgs, env, reasons0);
-//                    } catch (UncheckedXPathException e) {
-//                        // Try again with the default function namespace
-//                    }
-//                }
-//            }
-
             if (fcall == null) {
                 return reportMissingFunction(offset, functionName, arguments, reasons);
             }
+        }
         //}
         //  A QName or NOTATION constructor function must be given the namespace context now
 //        if (fcall instanceof CastExpression &&
@@ -4741,7 +4724,7 @@ public class XPathParser {
         setLocation(fcall, offset);
         for (Expression argument : arguments) {
             if (fcall != argument && argument.getParentExpression() == null
-                    && !functionName.hasURI(NamespaceUri.GLOBAL_JS)) {
+                    && !nominalName.hasURI(NamespaceUri.GLOBAL_JS)) {
                 // avoid doing this when the function has already been optimized away, e.g. unordered()
                 // Also avoid doing this when a js: function is parsed into an ixsl:call()
                 // TODO move the adoptChildExpression into individual function libraries
@@ -4749,12 +4732,12 @@ public class XPathParser {
             }
         }
 
-        return makeTracer(fcall, functionName);
+        return makeTracer(fcall, nominalName);
 
     }
 
     protected boolean isAllowArgumentKeywords() {
-        return allowXPath40Syntax;
+        return languageVersion >= 40;
     }
 
     protected void checkAllowedFunctionArgument(Expression arg) throws XPathException {}
@@ -5065,6 +5048,12 @@ public class XPathParser {
         }
         int arity = (int) number.longValue();
         nextToken();
+
+        if (env instanceof QueryModule) {
+            // In XQuery, defer binding till the end, to cope with forwards references
+            return new DraftFunctionReference(fname,env.getNamespaceResolver(), env.getDefaultFunctionNamespace(), arity);
+        }
+
         StructuredQName functionName = null;
 
         try {
@@ -5092,23 +5081,6 @@ public class XPathParser {
             }
 
             if (foundFunction instanceof IContextAccessorFunction) {
-                // This indicates that the function being referenced is dependent on the
-                // dynamic context, and cannot be invoked directly until it is bound to
-                // the dynamic context by calling the method {@link IContextAccessorFunction#bindContext}.
-                // This cannot be done until run-time. In the meantime we return an expression whose
-                // effect, when evaluated, is to make the call on {@code bindContext} and return
-                // the bound function item.
-//                IContextAccessorFunction unboundFunction = (IContextAccessorFunction)foundFunction;
-//                CallableDelegate callable = new CallableDelegate(
-//                        (context, args) -> unboundFunction.bindContext(context));
-//                callable.setDescription(foundFunction.getDescription());
-//                CallableFunction binder = new CallableFunction(
-//                        0, callable, new SpecificFunctionType(new SequenceType[]{}, SequenceType.SINGLE_FUNCTION));
-//                DynamicFunctionCall dfc = new DynamicFunctionCall(
-//                        new FunctionLiteral(binder), Collections.emptyList());
-//                setLocation(dfc, offset);
-//                return dfc;
-
                 // For a context-dependent function, return a call on function-lookup(), which saves the context
                 SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
                 lookup.setRetainedStaticContext(env.makeRetainedStaticContext());
@@ -5128,7 +5100,7 @@ public class XPathParser {
 
     }
 
-    private static Expression makeNamedFunctionReference(StructuredQName functionName, FunctionItem fcf) {
+    public static Expression makeNamedFunctionReference(StructuredQName functionName, FunctionItem fcf) {
         if (fcf instanceof UserFunction && !functionName.hasURI(NamespaceUri.XSLT)) {
             // This case is treated specially because a UserFunctionReference in XSLT can be redirected
             // at link time to an overriding function. However, this doesn't apply to xsl:original
@@ -5236,7 +5208,7 @@ public class XPathParser {
 
         readToken(Token.LCURLY);
         Expression body;
-        if (t.currentToken == Token.RCURLY && isAllowXPath31Syntax()) {
+        if (t.currentToken == Token.RCURLY && languageVersion >= 31) {
             nextToken();
             body = Literal.makeEmptySequence();
         } else {

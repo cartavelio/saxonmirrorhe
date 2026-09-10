@@ -9,6 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -95,9 +96,9 @@ public abstract class ApplyNextMatchingTemplate extends Instruction implements I
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
-        WithParam.simplify(getActualParams());
-        WithParam.simplify(getTunnelParams());
+    public Expression simplify(StaticContext env) throws XPathException {
+        WithParam.simplify(getActualParams(), env);
+        WithParam.simplify(getTunnelParams(), env);
         return this;
     }
 

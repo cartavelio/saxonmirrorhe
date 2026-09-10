@@ -12,10 +12,7 @@ import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Operand;
-import net.sf.saxon.expr.StringLiteral;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.ComplexNodePushElaborator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PushEvaluator;
@@ -101,9 +98,9 @@ public class FixedElement extends ElementCreator {
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         preservingTypes |= !getPackageData().isSchemaAware();
-        return super.simplify();
+        return super.simplify(env);
     }
 
     /**

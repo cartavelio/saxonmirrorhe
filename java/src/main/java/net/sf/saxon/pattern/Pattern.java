@@ -62,7 +62,7 @@ public abstract class Pattern extends PseudoExpression {
         Pattern pat = parser.parsePattern(pattern, env);
         pat.setRetainedStaticContext(env.makeRetainedStaticContext());
         // System.err.println("Simplified [" + pattern + "] to " + pat.getClass() + " default prio = " + pat.getDefaultPriority());
-        pat = pat.simplify();
+        pat = pat.simplify(env);
         return pat;
     }
 
@@ -190,7 +190,7 @@ public abstract class Pattern extends PseudoExpression {
      */
 
     @Override
-    public Pattern simplify() throws XPathException {
+    public Pattern simplify(StaticContext env) throws XPathException {
         return this;
     }
 

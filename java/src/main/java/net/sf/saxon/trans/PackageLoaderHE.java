@@ -1971,7 +1971,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 inst.setInheritanceFlags(flags);
             }
             inst.setContentExpression(content);
-            return inst.simplify();
+            return inst.simplify(loader.makeStaticContext(element));
         });
         
         eMap.put("conditionalSort", (loader, element) -> {
@@ -3034,7 +3034,6 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression select = loader.getExpressionWithRole(element, "select");
             if (select != null) {
                 param.setSelectExpression(select);
-                param.computeEvaluationMode();
             }
             Expression convert = loader.getExpressionWithRole(element, "conversion");
             if (convert != null) {

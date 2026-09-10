@@ -159,7 +159,7 @@ public abstract class CastingExpression extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         if (targetType instanceof BuiltInAtomicType) {
             String s = XPathParser.whyDisallowedType(getPackageData(), (BuiltInAtomicType)targetType);
             if (s != null) {
@@ -170,7 +170,7 @@ public abstract class CastingExpression extends UnaryExpression {
                 throw err;
             }
         }
-        setBaseExpression(getBaseExpression().simplify());
+        setBaseExpression(getBaseExpression().simplify(env));
         return this;
     }
 

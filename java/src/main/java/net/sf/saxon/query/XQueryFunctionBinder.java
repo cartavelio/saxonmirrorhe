@@ -7,11 +7,8 @@
 
 package net.sf.saxon.query;
 
-import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.om.StructuredQName;
-
-import java.util.List;
 
 /**
  * XQueryFunctionBinder is an extension of the FunctionLibrary interface used for function libraries
@@ -32,14 +29,5 @@ public interface XQueryFunctionBinder extends FunctionLibrary {
     /*@Nullable*/
     XQueryFunction getDeclaration(StructuredQName functionName, int staticArgs);
 
-    /**
-     * Bind a function call using this XQuery function library, in the situation where
-     * it was not possible to bind it earlier, typically because it was encountered as a forwards
-     * reference.
-     * @param call The unbound function call, which will include a non-null <code>UnboundFunctionCallDetails</code>
-     * @param reasons a list which can be populated with messages indicating why binding failed
-     * @return true if the function call is now bound; false if it remains unbound.
-     */
-    boolean bindUnboundFunctionCall(UserFunctionCall call, List<String> reasons);
 
 }

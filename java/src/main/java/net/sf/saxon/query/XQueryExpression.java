@@ -91,12 +91,17 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             ExpressionVisitor visitor = ExpressionVisitor.make(mainModule);
             Optimizer optimizer = visitor.obtainOptimizer();
             visitor.setOptimizeForStreaming(streaming);
-            exp = exp.simplify();
+            Expression e2 = exp.simplify(mainModule);
+            if (e2 != exp) {
+                ExpressionTool.copyLocationInfo(exp, e2);
+                e2.setParentExpression(null);
+                exp = e2;
+            }
             exp.checkForUpdatingSubexpressions();
             GlobalContextRequirement contextReq = exec.getGlobalContextRequirement();
             SequenceType req = contextReq == null ? SequenceType.SINGLE_ITEM : contextReq.getRequiredSequenceType();
             ContextItemStaticInfo cit = config.makeContextItemStaticInfo(req, Optionality.OPTIONAL);
-            Expression e2 = exp.typeCheck(visitor, cit);
+            e2 = exp.typeCheck(visitor, cit);
             if (e2 != exp) {
                 e2.setRetainedStaticContext(exp.getRetainedStaticContext());
                 e2.setParentExpression(null);
@@ -124,13 +129,17 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             throw err;
         }
         ExpressionTool.allocateSlots(exp, 0, stackFrameMap);
-        ExpressionTool.computeEvaluationModesForUserFunctionCalls(exp);
         for (GlobalVariable var : getPackageData().getGlobalVariableList()) {
             Expression top = var.getBody();
             if (top != null) {
-                ExpressionTool.computeEvaluationModesForUserFunctionCalls(top);
+                Expression e2 = top.simplify(mainModule);
+                if (top != e2) {
+                    var.setBody(e2);
+                    ExpressionTool.copyLocationInfo(top, e2);
+                }
             }
         }
+        mainModule.getGlobalFunctionLibrary().fixupGlobalFunctions(mainModule);
 
         expression = exp;
         executable.setConfiguration(config);

@@ -375,9 +375,12 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         return true;
     }
 
+
     /**
-     * Simplify an expression. This performs any static optimization (by rewriting the expression
+     * Simplify an expression. This performs basic context-free optimization (by rewriting the expression
      * as a different expression). The default implementation simplifies its operands.
+     * <p>In 13.x, the simplify() phase also resolves names that might be forwards references,
+     * notably references to functions.</p>
      * @return the simplified expression (or the original if unchanged, or if modified in-situ)
      * @throws net.sf.saxon.trans.XPathException
      *          if an error is discovered during expression
@@ -385,8 +388,8 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     /*@NotNull*/
-    public Expression simplify() throws XPathException {
-        simplifyChildren();
+    public Expression simplify(StaticContext env) throws XPathException {
+        simplifyChildren(env);
         return this;
     }
 
@@ -399,12 +402,12 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     /*@NotNull*/
-    protected final void simplifyChildren() throws XPathException {
+    protected final void simplifyChildren(StaticContext env) throws XPathException {
         for (Operand o : operands()) {
             if (o != null) {
                 Expression e = o.getChildExpression();
                 if (e != null) {
-                    Expression f = e.simplify();
+                    Expression f = e.simplify(env);
                     o.setChildExpression(f);
                 }
             }
@@ -995,16 +998,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     public String toString() {
         // fallback implementation
         StringBuilder buff = new StringBuilder(64);
-        String className = getClass().getName();
-        while (true) {
-            int dot = className.indexOf('.');
-            if (dot >= 0) {
-                className = className.substring(dot + 1);
-            } else {
-                break;
-            }
-        }
-        buff.append(className);
+        buff.append(getExpressionName());
         boolean first = true;
         for (Operand o : operands()) {
             buff.append(first ? "(" : ", ");
@@ -1016,6 +1010,8 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         }
         return buff.toString();
     }
+
+
 
     /**
      * Produce a short string identifying the expression for use in error messages
@@ -1322,7 +1318,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
             sub.checkForUpdatingSubexpressions();
             if (sub.isUpdatingExpression()) {
                 throw new XPathException(
-                        "Updating expression appears in a context where it is not permitted", "XUST0001")
+                        "Updating expression {" + sub.toShortString() + "} appears in a context where it is not permitted", "XUST0001")
                         .withLocation(sub.getLocation());
             }
         }

@@ -205,13 +205,13 @@ public class XSLAnalyzeString extends StyleElement {
                 nonMatchingBlock = nonMatching.compileSequenceConstructor(exec, decl, false);
             }
         }
-
+        ExpressionContext env = getStaticContext();
         try {
             return new AnalyzeString(select,
                                      regex,
                                      flags,
-                                     matchingBlock == null ? null : matchingBlock.simplify(),
-                                     nonMatchingBlock == null ? null : nonMatchingBlock.simplify(),
+                                     matchingBlock == null ? null : matchingBlock.simplify(env),
+                                     nonMatchingBlock == null ? null : nonMatchingBlock.simplify(env),
                                      pattern)
                     .withLocation(saveLocation());
         } catch (XPathException e) {

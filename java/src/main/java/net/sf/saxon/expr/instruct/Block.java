@@ -553,12 +553,12 @@ public class Block extends Instruction {
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         boolean allAtomic = true;
         boolean nested = false;
 
         for (int c = 0; c < size(); c++) {
-            setChild(c, child(c).simplify());
+            setChild(c, child(c).simplify(env));
             if (!Literal.isAtomic(child(c))) {
                 allAtomic = false;
             }
@@ -586,7 +586,7 @@ public class Block extends Instruction {
             }
             Block newBlock = new Block(children);
             ExpressionTool.copyLocationInfo(this, newBlock);
-            return newBlock.simplify();
+            return newBlock.simplify(env);
         } else if (allAtomic) {
             AtomicValue[] values = new AtomicValue[size()];
             for (int c = 0; c < size(); c++) {

@@ -759,7 +759,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     private Expression refineTemplateBody(Expression body, ContextItemStaticInfo cisi) {
         Expression old = body;
         try {
-            body = body.simplify();
+            body = body.simplify(getStaticContext());
         } catch (XPathException e) {
             if (e.isReportableStatically()) {
                 compileError(e);

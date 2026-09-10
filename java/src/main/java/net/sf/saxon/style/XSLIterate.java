@@ -144,7 +144,7 @@ public class XSLIterate extends StyleElement {
             return Literal.makeEmptySequence();
         }
         try {
-            action = action.simplify();
+            action = action.simplify(getStaticContext());
             return new IterateInstr(select, paramBlock, action, finallyExp)
                     .withLocation(saveLocation());
         } catch (XPathException err) {

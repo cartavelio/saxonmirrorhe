@@ -125,7 +125,7 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
                     Component target = psm.getComponent(fc.getSymbolicName());
                     UserFunction fn1 = (UserFunction) target.getActor();
                     if (fn1 != null) {
-                        fc.allocateArgumentEvaluators();
+                        //fc.allocateArgumentEvaluators(); Now done at elaboration time
                         fc.setStaticType(fn1.getResultType());
                     } else {
                         XPathException err = new XPathException("There is no available function named " + fc.getDisplayName() +

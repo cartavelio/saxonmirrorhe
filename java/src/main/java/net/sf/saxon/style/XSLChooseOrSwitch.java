@@ -123,7 +123,7 @@ public abstract class XSLChooseOrSwitch extends StyleElement {
                     b.setRetainedStaticContext(makeRetainedStaticContext());
                 }
                 try {
-                    b = b.simplify();
+                    b = b.simplify(getStaticContext());
                     actions[w] = b;
                 } catch (XPathException e) {
                     compileError(e);

@@ -127,8 +127,8 @@ public class PatternThatSetsCurrent extends Pattern {
      *
      */
     @Override
-    public Pattern simplify() throws XPathException {
-        wrappedPattern = wrappedPattern.simplify();
+    public Pattern simplify(StaticContext env) throws XPathException {
+        wrappedPattern = wrappedPattern.simplify(env);
         return this;
     }
 

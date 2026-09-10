@@ -9,7 +9,6 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
-import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.FunctionItem;
@@ -161,30 +160,6 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
             }
         }
         return null;
-    }
-
-    /**
-     * Bind a function call using this function library, in the situation where
-     * it was not possible to bind it earlier, typically because it was encountered as a forwards
-     * reference.
-     *
-     * @param call     The unbound function call, which will include a non-null <code>UnboundFunctionCallDetails</code>
-     * @param reasons a list which can be populated with messages indicating why binding failed
-     * @return true if the function call is now bound; false if it remains unbound.
-     */
-
-
-    @Override
-    public boolean bindUnboundFunctionCall(UserFunctionCall call, List<String> reasons) {
-        for (FunctionLibrary lib : libraryList) {
-            if (lib instanceof XQueryFunctionBinder) {
-                boolean found = ((XQueryFunctionBinder) lib).bindUnboundFunctionCall(call, reasons);
-                if (found) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**

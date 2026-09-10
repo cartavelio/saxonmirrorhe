@@ -73,9 +73,9 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         try {
-            setBaseExpression(getBaseExpression().simplify());
+            setBaseExpression(getBaseExpression().simplify(env));
             if (getBaseExpression() instanceof Literal) {
                 GroundedValue val =
                         SequenceTool.toGroundedValue(iterate(new EarlyEvaluationContext(getConfiguration())));

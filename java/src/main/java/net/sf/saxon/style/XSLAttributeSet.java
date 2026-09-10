@@ -325,7 +325,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
         while ((node = (XSLAttribute) iter.next()) != null) {
             Expression inst = node.compile(compilation, decl);
             inst.setRetainedStaticContext(makeRetainedStaticContext());
-            inst = inst.simplify();
+            inst = inst.simplify(getStaticContext());
             setInstructionLocation(this, inst);
             containedInstructions.add(inst);
         }

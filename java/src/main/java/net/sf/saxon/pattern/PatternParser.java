@@ -42,7 +42,6 @@ public class PatternParser extends XPathParser {
     /**
      * Parse a string representing an XSLT pattern
      *
-     *
      * @param pattern the pattern expressed as a String
      * @param env     the static context for the pattern
      * @return a Pattern object representing the result of parsing
@@ -65,7 +64,7 @@ public class PatternParser extends XPathParser {
             int start = t.currentTokenStartOffset;
             trimmed = trimmed.substring(start);
         }
-        allowXPath40Syntax = env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || env.getXPathVersion() == 40;
+
         if (isSelectionPattern(trimmed)) {
             Expression e = parse(pattern, 0, Tokenizer.END_OF_INPUT, env);
             if (e instanceof Pattern) {
@@ -131,9 +130,8 @@ public class PatternParser extends XPathParser {
             language = ParsedLanguage.XSLT_PATTERN;
             t = new Tokenizer();
             t.languageLevel = env.getXPathVersion();
-            allowXPath40Syntax =
-                    t.allowSaxonExtensions =
-                            env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel == 40;
+            t.allowSaxonExtensions =
+                            env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel >= 40;
             try {
                 t.tokenize(pattern, 0, -1);
             } catch (XPathException err) {
@@ -164,9 +162,9 @@ public class PatternParser extends XPathParser {
                     AnyXNodeType.getInstance(), Optionality.OPTIONAL);
             Pattern pat;
             try {
-                pat = PatternMaker.fromExpression(exp.simplify().typeCheck(visitor, cit), env.getConfiguration(), true);
+                pat = PatternMaker.fromExpression(exp.simplify(env).typeCheck(visitor, cit), env.getConfiguration(), true);
             } catch (XPathException e) {
-                pat = PatternMaker.fromExpression(exp.simplify(), env.getConfiguration(), true);
+                pat = PatternMaker.fromExpression(exp.simplify(env), env.getConfiguration(), true);
             }
 
             pat.setOriginalText(pattern);
@@ -179,7 +177,7 @@ public class PatternParser extends XPathParser {
             }
 
             if (exp instanceof FilterExpression && ((FilterExpression)exp).getBase() instanceof ContextItemExpression) {
-                if (allowXPath40Syntax && (pattern.startsWith("record") || pattern.startsWith("map") || pattern.startsWith("array") || pattern.startsWith("union"))) {
+                if (languageVersion >= 40 && (pattern.startsWith("record") || pattern.startsWith("map") || pattern.startsWith("array") || pattern.startsWith("union"))) {
                     // no action, this is OK
                 } else {
                     grumble("A predicatePattern can appear only at the outermost level (parentheses not allowed)");
@@ -243,7 +241,7 @@ public class PatternParser extends XPathParser {
         Tokenizer t = getTokenizer();
         if (inPredicate > 0) {
             return super.parseExpression();
-        } else if (allowXPath40Syntax && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
+        } else if (languageVersion >= 40 && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
                 (isKeyword("record")  || isKeyword("type") || isKeyword("map") || isKeyword("array"))) {
             ItemType type = parseItemType();
             Expression expr = new ItemTypePattern(type);
@@ -253,7 +251,7 @@ public class PatternParser extends XPathParser {
                 expr = parsePredicate(expr).toPattern(env.getConfiguration(), false);
             }
             return expr;
-        } else if (allowXPath40Syntax && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
+        } else if (languageVersion >= 40 && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
                 isKeyword("atomic")) {
             nextToken();
 

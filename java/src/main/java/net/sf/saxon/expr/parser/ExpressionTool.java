@@ -81,7 +81,7 @@ public class ExpressionTool {
         Expression exp = parser.parse(expression, start, finished, env);
         // TODO: parser.parse() already sets the retained static context
         setDeepRetainedStaticContext(exp, env.makeRetainedStaticContext());
-        exp = exp.simplify();
+        exp = exp.simplify(env);
         return exp;
     }
 
@@ -1005,12 +1005,13 @@ public class ExpressionTool {
 
     public static void computeEvaluationModesForUserFunctionCalls(Expression exp) throws XPathException {
         ExpressionTool.processExpressionTree(exp, null, (expression, result) -> {
-            if (expression instanceof UserFunctionCall) {
-                ((UserFunctionCall) expression).allocateArgumentEvaluators();
-            }
-            if (expression instanceof LocalParam) {
-                ((LocalParam) expression).computeEvaluationMode();
-            }
+            // Now done at elaboration time
+//            if (expression instanceof UserFunctionCall) {
+//                ((UserFunctionCall) expression).allocateArgumentEvaluators();
+//            }
+//            if (expression instanceof LocalParam) {
+//                ((LocalParam) expression).computeEvaluationMode();
+//            }
             return false;
         });
     }

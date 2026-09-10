@@ -293,11 +293,11 @@ public class Choose extends Instruction implements ConditionalInstruction {
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         for (int i = 0; i < size(); i++) {
-            setCondition(i, getCondition(i).simplify());
+            setCondition(i, getCondition(i).simplify(env));
             try {
-                setAction(i, getAction(i).simplify());
+                setAction(i, getAction(i).simplify(env));
             } catch (XPathException err) {
                 // mustn't throw the error unless the branch is actually selected, unless its a type error
                 if (err.isTypeError()) {

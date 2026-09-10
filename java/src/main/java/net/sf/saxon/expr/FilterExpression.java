@@ -219,10 +219,10 @@ public final class FilterExpression extends BinaryExpression implements ContextS
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
 
-        setBase(getBase().simplify());
-        setFilter(getFilter().simplify());
+        setBase(getBase().simplify(env));
+        setFilter(getFilter().simplify(env));
 
         // ignore the filter if the base expression is an empty sequence
         if (Literal.isEmptySequence(getBase())) {
@@ -499,7 +499,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 opt.trace("Rewrote Filter Expression as:", subsequence);
             }
             ExpressionTool.copyLocationInfo(this, subsequence);
-            return subsequence.simplify()
+            return subsequence.simplify(visitor.getStaticContext())
                     .typeCheck(visitor, contextItemType)
                     .optimize(visitor, contextItemType);
         }

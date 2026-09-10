@@ -539,7 +539,7 @@ public class SourceBinding {
                 try {
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, name.getDisplayName(), 0, "XTTE0570");
-                    select = select.simplify();
+                    select = select.simplify(sourceElement.getStaticContext());
                     select = sourceElement.getConfiguration().getTypeChecker(false).staticTypeCheck(
                             select, declaredType, role, sourceElement.makeExpressionVisitor());
                 } catch (XPathException err) {

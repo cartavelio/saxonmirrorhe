@@ -241,7 +241,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
             }
             try {
                 Expression atomizedSortKey = Atomizer.makeAtomizer(b, null);
-                atomizedSortKey = atomizedSortKey.simplify();
+                atomizedSortKey = atomizedSortKey.simplify(getStaticContext());
                 ExpressionTool.copyLocationInfo(b, atomizedSortKey);
                 sortKeyDefinition.setSortKey(atomizedSortKey, true);
                 select = atomizedSortKey;
@@ -251,7 +251,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
         }
         // Simplify the sort key definition - this is especially important in the case where
         // all aspects of the sort key are known statically.
-        sortKeyDefinition = (SortKeyDefinition)sortKeyDefinition.simplify();
+        sortKeyDefinition = (SortKeyDefinition)sortKeyDefinition.simplify(getStaticContext());
         // not an executable instruction
         return null;
     }

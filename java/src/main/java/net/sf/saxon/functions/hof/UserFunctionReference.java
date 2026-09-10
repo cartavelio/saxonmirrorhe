@@ -81,12 +81,12 @@ public class UserFunctionReference extends Expression
     }
 
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         // if this is an inline function, simplify the body of that function now
         if (nominalTarget.getFunctionName().hasURI(NamespaceUri.ANONYMOUS) && typeCheckCounter == 0) {
             // Prevent recursive simplification
             typeCheckCounter++;
-            nominalTarget.setBody(nominalTarget.getBody().simplify());
+            nominalTarget.setBody(nominalTarget.getBody().simplify(env));
             typeCheckCounter--;
         }
         return this;

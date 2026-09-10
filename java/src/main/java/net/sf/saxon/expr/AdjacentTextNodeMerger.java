@@ -63,12 +63,12 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
     }
 
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         Expression operand = getBaseExpression();
         if (operand instanceof Literal && ((Literal) operand).getGroundedValue() instanceof AtomicValue) {
             return operand;
         } else {
-            return super.simplify();
+            return super.simplify(env);
         }
     }
 

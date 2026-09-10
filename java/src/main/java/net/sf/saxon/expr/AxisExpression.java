@@ -114,8 +114,8 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
-        Expression e2 = super.simplify();
+    public Expression simplify(StaticContext env) throws XPathException {
+        Expression e2 = super.simplify(env);
         if (e2 != this) {
             return e2;
         }

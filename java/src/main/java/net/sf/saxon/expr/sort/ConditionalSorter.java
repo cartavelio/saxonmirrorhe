@@ -99,8 +99,8 @@ public class ConditionalSorter extends Expression {
     }
 
     @Override
-    public Expression simplify() throws XPathException {
-        return rewrite(Expression::simplify);
+    public Expression simplify(StaticContext env) throws XPathException {
+        return rewrite(expression -> expression.simplify(env));
     }
 
     /**

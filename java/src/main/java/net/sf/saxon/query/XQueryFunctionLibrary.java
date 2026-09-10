@@ -10,8 +10,8 @@ package net.sf.saxon.query;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
@@ -390,79 +390,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         }
         return null;
     }
-
-    /**
-     * Bind a function call using this XQuery function library, in the situation where
-     * it was not possible to bind it earlier, typically because it was encountered as a forwards
-     * reference.
-     *
-     * @param ufc    The unbound function call, which will include a non-null <code>UnboundFunctionCallDetails</code>
-     * @param reasons a list which can be populated with messages indicating why binding failed
-     * @return true if the function call is now bound; false if it remains unbound.
-     */
-
-    public boolean bindUnboundFunctionCall(UserFunctionCall ufc, List<String> reasons) {
-        UnboundFunctionLibrary.UnboundFunctionCallDetails details = ufc.getUnboundCallDetails();
-        assert details != null;
-        StructuredQName functionName = details.functionName.getComponentName();
-        Expression[] arguments = details.arguments;
-        Map<StructuredQName, Integer> keywords = details.keywords;
-        XQueryFunction fd = getDeclaration(functionName, arguments.length);
-        if (fd != null) {
-            if (fd.isPrivate() && fd.getStaticContext() != details.env) {
-                reasons.add("Cannot call the private XQuery function " +
-                                    functionName.getDisplayName() + " from outside its module");
-                return false;
-            }
-            ufc.setFunctionName(fd.getFunctionName());
-            int maxArity = fd.getNumberOfParameters();
-            if (arguments.length == maxArity && (details.keywords == null || details.keywords.isEmpty())) {
-                ufc.setArguments(arguments);
-            } else {
-                // 4.0: handle keyword arguments and default arguments
-                Expression[] expandedArgs = Arrays.copyOf(arguments, maxArity);
-                // If there are keyword arguments, reposition them to the correct position in the argument sequence
-                if (keywords != null) {
-                    int positionalArgs = arguments.length - keywords.size();
-                    for (Map.Entry<StructuredQName, Integer> entry : keywords.entrySet()) {
-                        StructuredQName key = entry.getKey();
-                        int argPos = entry.getValue();
-                        int paramPos = fd.getPositionOfParameter(key);
-                        if (paramPos < 0) {
-                            throw new UncheckedXPathException("Keyword " + key + " does not match the name of any declared parameter", "XPST0142");
-                        }
-                        if (paramPos < positionalArgs) {
-                            throw new UncheckedXPathException("Parameter " + key + " is supplied both by position and by keyword", "XPST0141");
-                        }
-                        Expression supplied = arguments[paramPos];
-                        expandedArgs[argPos] = null;
-                        expandedArgs[paramPos] = supplied;
-                    }
-                }
-                for (int a = 0; a < maxArity; a++) {
-                    if (expandedArgs[a] == null) {
-                        Supplier<Expression> defaultExp = fd.getParameterDefinitions()[a].getDefaultValueExpression();
-                        if (defaultExp != null) {
-                            expandedArgs[a] = defaultExp.get().copy(new RebindingMap());
-                        }
-                    }
-                }
-                ufc.setArguments(expandedArgs);
-            }
-            ufc.setStaticType(fd.getResultType());
-            UserFunction fn = fd.getUserFunction();
-            if (fn == null) {
-                // not yet compiled
-                fd.registerReference(ufc);
-            } else {
-                ufc.setFunction(fn);
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
+    
     /**
      * Get the function declaration corresponding to a given function name and arity, supplied
      * in the form "{uri}local/arity"
@@ -514,6 +442,22 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         processAllFunctions(fn -> {
             try {
                 fn.compile();
+                Expression body = fn.getBody();
+                Expression e2 = body.simplify(env);
+                if (e2 != body) {
+                    ExpressionTool.copyLocationInfo(body, e2);
+                    fn.setBody(e2);
+                }
+                for (int i=0; i<fn.getNumberOfParameters(); i++) {
+                    Supplier<Expression> init = fn.getDefaultValueExpression(i);
+                    if (init != null) {
+                        Expression initExp = init.get();
+                        e2 = initExp.simplify(env);
+                        if (e2 != initExp) {
+                            fn.setDefaultValueExpression(i, e2);
+                        }
+                    }
+                }
             } catch (XPathException err) {
                 throw new UncheckedXPathException(err);
             }

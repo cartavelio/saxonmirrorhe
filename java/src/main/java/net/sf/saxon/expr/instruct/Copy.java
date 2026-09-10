@@ -102,9 +102,9 @@ public class Copy extends ElementCreator {
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         preservingTypes |= !getPackageData().isSchemaAware();
-        return super.simplify();
+        return super.simplify(env);
     }
 
 

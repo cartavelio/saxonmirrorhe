@@ -132,10 +132,10 @@ public class ComputedElement extends ElementCreator {
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
-        setNameExp(getNameExp().simplify());
+    public Expression simplify(StaticContext env) throws XPathException {
+        setNameExp(getNameExp().simplify(env));
         if (getNamespaceExp() != null) {
-            setNamespaceExp(getNamespaceExp().simplify());
+            setNamespaceExp(getNamespaceExp().simplify(env));
         }
         Configuration config = getConfiguration();
         boolean schemaAware = getPackageData().isSchemaAware();
@@ -152,7 +152,7 @@ public class ComputedElement extends ElementCreator {
             // We know that it won't be untyped, but we have no way of representing that.
             itemType = NodeKindType.ELEMENT;
         }
-        return super.simplify();
+        return super.simplify(env);
     }
 
     /*@NotNull*/

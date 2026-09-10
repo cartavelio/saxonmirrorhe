@@ -9,18 +9,25 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.FunctionLibrary;
+import net.sf.saxon.functions.IContextAccessorFunction;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpUsing;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.QNameValue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static net.sf.saxon.expr.parser.XPathParser.makeNamedFunctionReference;
 
 
 /**
@@ -31,32 +38,34 @@ import java.util.Map;
 public class DraftFunctionCall extends DraftExpression {
 
     private final String lexicalName;
-    private final NamespaceResolver resolver;
-    private final NamespaceUri defaultFunctionNamespace;
+    private final StaticContext staticContext;
     private final Operand[] operanda;
-    private Map<StructuredQName, Integer> keywordArgs;
+    private final List<Object> placeMarkerArgs;
+    private final Map<StructuredQName, Integer> keywordArgs;
 
     /**
      * Create a function call to a user-written function in a query or stylesheet
      */
 
     public DraftFunctionCall(String lexicalName,
-                                  NamespaceResolver resolver,
-                                  NamespaceUri defaultFunctionNamespace,
-                                  List<Expression> arguments) {
+                             StaticContext staticContext,
+                             Expression[] arguments,
+                             List<Object> placeMarkerArgs,
+                             Map<StructuredQName, Integer> keywordArgs) {
         this.lexicalName = lexicalName;
-        this.resolver = resolver;
-        this.defaultFunctionNamespace = defaultFunctionNamespace;
-        this.operanda = new Operand[arguments.size()];
+        this.staticContext = staticContext;
+        this.operanda = new Operand[arguments.length];
         int i=0;
         for (Expression arg : arguments) {
             operanda[i++] = new Operand(this, arg, OperandRole.NAVIGATE);
         }
+        this.placeMarkerArgs = placeMarkerArgs;
+        this.keywordArgs = keywordArgs;
     }
 
     @Override
     public Iterable<Operand> operands() {
-        return new Arrays.asList(operanda);
+        return Arrays.asList(operanda);
     }
 
     @Override
@@ -72,7 +81,7 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     public boolean isUpdatingExpression() {
-        return true; // we don't actually know yet
+        return false; // we don't actually know yet
     }
 
     /**
@@ -85,11 +94,21 @@ public class DraftFunctionCall extends DraftExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        List<Expression> a2 = new ArrayList<>(operanda.length);
+        Expression[] a2 = new Expression[operanda.length];
+        int i=0;
         for (Operand operand : operanda) {
-            a2.add(operand.getChildExpression().copy(rebindings));
+            a2[i++] = operand.getChildExpression().copy(rebindings);
         }
-        return new DraftFunctionCall(lexicalName, resolver, defaultFunctionNamespace, a2);
+        return new DraftFunctionCall(lexicalName, staticContext, a2, placeMarkerArgs, keywordArgs);
+    }
+
+    private Expression[] getArguments() {
+        Expression[] a2 = new Expression[operanda.length];
+        int i = 0;
+        for (Operand operand : operanda) {
+            a2[i++] = operand.getChildExpression();
+        }
+        return a2;
     }
 
     /**
@@ -109,7 +128,7 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     public Item evaluateItem(XPathContext c) throws XPathException {
-        throw new UnsupportedOperationException();
+        throw cannotExecute();
     }
 
     /**
@@ -120,7 +139,7 @@ public class DraftFunctionCall extends DraftExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext c) throws XPathException {
-        throw new UnsupportedOperationException();
+        throw cannotExecute();
     }
 
     /**
@@ -132,7 +151,7 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        throw new UnsupportedOperationException();
+        throw cannotExecute();
     }
 
 
@@ -143,7 +162,7 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        throw new UnsupportedOperationException();
+        throw cannotExecute();
     }
 
     /**
@@ -155,7 +174,7 @@ public class DraftFunctionCall extends DraftExpression {
      */
     @Override
     public String getExpressionName() {
-        return "userFunctionCall";
+        return lexicalName;
     }
 
     @Override
@@ -166,7 +185,11 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     public Elaborator getElaborator() {
-        throw new UnsupportedOperationException();
+        throw cannotExecute();
+    }
+
+    private UnsupportedOperationException cannotExecute() {
+        return new UnsupportedOperationException("Internal error. Function call " + toShortString() + " has not been resolved.");
     }
 
     @Override
@@ -174,7 +197,8 @@ public class DraftFunctionCall extends DraftExpression {
         simplifyChildren(env);
         StructuredQName qName;
         int arity = operanda.length;
-        FunctionLibrary lib = env.getFunctionLibrary();
+        FunctionLibrary lib = staticContext.getFunctionLibrary();
+        NamespaceUri defaultFunctionNamespace = staticContext.getDefaultFunctionNamespace();
         if (NameChecker.isValidNCName(lexicalName)) {
             if (env.getXPathVersion() >= 40) {
                 // For an unprefixed function name in 4.0, we look first for a no-namespace name,
@@ -183,16 +207,70 @@ public class DraftFunctionCall extends DraftExpression {
                 if (lib.getFunctionItem(sn, env) != null) {
                     qName = sn.getComponentName();
                 } else {
-                    qName = new StructuredQName("", env.getDefaultFunctionNamespace(), lexicalName);
+                    qName = new StructuredQName("", defaultFunctionNamespace, lexicalName);
                 }
             } else {
-                qName = new StructuredQName("", env.getDefaultFunctionNamespace(), lexicalName);
+                qName = new StructuredQName("", defaultFunctionNamespace, lexicalName);
             }
         } else {
-            QNameParser qp = new QNameParser(resolver);
+            NamespaceResolver resolver = staticContext.getNamespaceResolver();
+            QNameParser qp = new QNameParser(resolver)
+                    .withAcceptEQName(true, env.getXPathVersion());
             qName = qp.parse(lexicalName, NamespaceUri.NULL);
         }
+
+        if (env.getConfiguration().isDisabledFunction(qName)) {
+            throw new XPathException("Function " + qName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017")
+                    .withLocation(getLocation());
+        }
+
+        if (placeMarkerArgs != null && !placeMarkerArgs.isEmpty()) {
+            return makeCurriedFunction(qName, getArguments(), placeMarkerArgs);
+        }
+
         SymbolicName.F functionName = new SymbolicName.F(qName, arity);
-        Expression exp = lib.bind(functionName, staticArgs, keywordArgs, env, reasons);
+        List<String> reasons = new ArrayList<>();
+        Expression[] args = getArguments();
+        Expression exp = lib.bind(functionName, args, keywordArgs, staticContext, reasons);
+        if (exp == null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Cannot find a ").append(args.length).append(
+                    "-argument function named ").append(functionName.getComponentName().getEQName()).append("()");
+            for (String reason : reasons) {
+                sb.append(". ").append(reason);
+            }
+            throw new XPathException(sb.toString(), "XPST0017").asStaticError();
+        }
+        ExpressionTool.copyLocationInfo(this,exp);
+        return exp;
     }
+
+    private Expression makeCurriedFunction(
+            StructuredQName name,
+            Expression[] args,
+            List<Object> placeMarkerArgs) throws XPathException {
+
+        FunctionLibrary lib = staticContext.getFunctionLibrary();
+        SymbolicName.F sn = new SymbolicName.F(name, args.length);
+        FunctionItem target = lib.getFunctionItem(sn, staticContext);
+        if (target == null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Cannot find a ").append(args.length).append(
+                    "-argument function named ").append(name.getEQName()).append("()");
+            throw new XPathException(sb.toString(), "XPST0017").asStaticError();
+        }
+        if (target instanceof IContextAccessorFunction) {
+            // For a context-dependent function, return a call on function-lookup(), which saves the context
+            SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
+            lookup.setRetainedStaticContext(staticContext.makeRetainedStaticContext());
+            return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(name, BuiltInAtomicType.QNAME)),
+                                           Literal.makeLiteral(Int64Value.makeIntegerValue(args.length)));
+
+        }
+        Expression targetExp = makeNamedFunctionReference(name, target);
+        ExpressionTool.copyLocationInfo(this, targetExp);
+        return XPathParser.curryFunction(targetExp, args, placeMarkerArgs);
+    }
+
+
 }

@@ -470,7 +470,7 @@ public class GlobalVariable extends Actor
             ContextItemStaticInfo cit = getConfiguration().makeContextItemStaticInfo(
                     AnyItemType.INSTANCE, Optionality.OPTIONAL);
             Expression value2 = TypeChecker.strictTypeCheck(
-                    value.simplify().typeCheck(visitor, cit),
+                    value.simplify(visitor.getStaticContext()).typeCheck(visitor, cit),
                     getRequiredType(), role, visitor.getStaticContext());
             value2 = value2.optimize(visitor, cit);
             setBody(value2);

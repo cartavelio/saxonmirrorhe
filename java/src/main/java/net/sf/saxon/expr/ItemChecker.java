@@ -88,8 +88,8 @@ public final class ItemChecker extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    public Expression simplify() throws XPathException {
-        Expression operand = getBaseExpression().simplify();
+    public Expression simplify(StaticContext env) throws XPathException {
+        Expression operand = getBaseExpression().simplify(env);
         if (requiredItemType instanceof AnyItemType) {
             return operand;
         }

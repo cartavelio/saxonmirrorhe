@@ -122,12 +122,12 @@ public class NumberSequenceFormatter extends Expression {
      *                                           rewriting
      */
     @Override
-    public Expression simplify() throws XPathException {
+    public Expression simplify(StaticContext env) throws XPathException {
         if (valueOp != null && !valueOp.getChildExpression().getItemType().isPlainType()) {
             valueOp.setChildExpression(Atomizer.makeAtomizer(valueOp.getChildExpression(), null));
         }
         preallocateNumberer(getConfiguration());
-        return super.simplify();
+        return super.simplify(env);
     }
 
     public void preallocateNumberer(Configuration config) throws XPathException {

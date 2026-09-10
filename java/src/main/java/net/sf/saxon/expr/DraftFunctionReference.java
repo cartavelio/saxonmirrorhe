@@ -9,18 +9,21 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.FunctionLibrary;
+import net.sf.saxon.functions.IContextAccessorFunction;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpUsing;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.QNameValue;
 
 
 /**
@@ -28,37 +31,27 @@ import java.util.Map;
  * actual function.
  */
 @CSharpUsing(code="Saxon.Hej.trans")
-public class DraftFunctionCall extends DraftExpression {
+public class DraftFunctionReference extends DraftExpression {
 
     private final String lexicalName;
     private final NamespaceResolver resolver;
     private final NamespaceUri defaultFunctionNamespace;
-    private final Operand[] operanda;
-    private Map<StructuredQName, Integer> keywordArgs;
+    private final int arity;
 
     /**
      * Create a function call to a user-written function in a query or stylesheet
      */
 
-    public DraftFunctionCall(String lexicalName,
-                             NamespaceResolver resolver,
-                             NamespaceUri defaultFunctionNamespace,
-                             Expression[] arguments) {
+    public DraftFunctionReference(String lexicalName,
+                                  NamespaceResolver resolver,
+                                  NamespaceUri defaultFunctionNamespace,
+                                  int arity) {
         this.lexicalName = lexicalName;
         this.resolver = resolver;
         this.defaultFunctionNamespace = defaultFunctionNamespace;
-        this.operanda = new Operand[arguments.length];
-        int i=0;
-        for (Expression arg : arguments) {
-            operanda[i++] = new Operand(this, arg, OperandRole.NAVIGATE);
-        }
-        this.keywordArgs = null; // TODO: implement this
+        this.arity = arity;
     }
 
-    @Override
-    public Iterable<Operand> operands() {
-        return Arrays.asList(operanda);
-    }
 
     @Override
     public int getIntrinsicDependencies() {
@@ -73,7 +66,7 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     public boolean isUpdatingExpression() {
-        return false; // we don't actually know yet
+        return false;
     }
 
     /**
@@ -86,12 +79,7 @@ public class DraftFunctionCall extends DraftExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Expression[] a2 = new Expression[operanda.length];
-        int i=0;
-        for (Operand operand : operanda) {
-            a2[i++] = operand.getChildExpression().copy(rebindings);
-        }
-        return new DraftFunctionCall(lexicalName, resolver, defaultFunctionNamespace, a2);
+        return new DraftFunctionReference(lexicalName, resolver, defaultFunctionNamespace, arity);
     }
 
     /**
@@ -100,7 +88,7 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     protected int computeCardinality() {
-        return StaticProperty.ALLOWS_ZERO_OR_MORE;
+        return StaticProperty.EXACTLY_ONE;
     }
 
     /**
@@ -111,7 +99,7 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     public Item evaluateItem(XPathContext c) throws XPathException {
-        throw new UnsupportedOperationException();
+        throw cannotExecute();
     }
 
     /**
@@ -122,7 +110,7 @@ public class DraftFunctionCall extends DraftExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext c) throws XPathException {
-        throw new UnsupportedOperationException();
+        throw cannotExecute();
     }
 
     /**
@@ -134,7 +122,7 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        throw new UnsupportedOperationException();
+        throw cannotExecute();
     }
 
 
@@ -145,7 +133,7 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        throw new UnsupportedOperationException();
+        throw cannotExecute();
     }
 
     /**
@@ -157,7 +145,17 @@ public class DraftFunctionCall extends DraftExpression {
      */
     @Override
     public String getExpressionName() {
-        return lexicalName;
+        return "NamedFunctionRef";
+    }
+
+    @Override
+    public String toString() {
+        return lexicalName + "#" + arity;
+    }
+
+    @Override
+    public String toShortString() {
+        return toString();
     }
 
     @Override
@@ -168,14 +166,16 @@ public class DraftFunctionCall extends DraftExpression {
 
     @Override
     public Elaborator getElaborator() {
-        throw new UnsupportedOperationException();
+        throw cannotExecute();
+    }
+
+    private UnsupportedOperationException cannotExecute() {
+        return new UnsupportedOperationException("Internal error. Function reference " + toShortString() + " has not been resolved.");
     }
 
     @Override
     public Expression simplify(StaticContext env) throws XPathException {
-        simplifyChildren(env);
         StructuredQName qName;
-        int arity = operanda.length;
         FunctionLibrary lib = env.getFunctionLibrary();
         if (NameChecker.isValidNCName(lexicalName)) {
             if (env.getXPathVersion() >= 40) {
@@ -191,7 +191,8 @@ public class DraftFunctionCall extends DraftExpression {
                 qName = new StructuredQName("", env.getDefaultFunctionNamespace(), lexicalName);
             }
         } else {
-            QNameParser qp = new QNameParser(resolver);
+            QNameParser qp = new QNameParser(resolver)
+                    .withAcceptEQName(true, env.getXPathVersion());
             qName = qp.parse(lexicalName, NamespaceUri.NULL);
         }
 
@@ -200,23 +201,27 @@ public class DraftFunctionCall extends DraftExpression {
                     .withLocation(getLocation());
         }
 
-        SymbolicName.F functionName = new SymbolicName.F(qName, arity);
-        List<String> reasons = new ArrayList<>();
-        Expression[] args = new Expression[operanda.length];
-        for (int i=0; i<args.length; i++) {
-            args[i] = operanda[i].getChildExpression();
+        SymbolicName.F symName = new SymbolicName.F(qName, arity);
+
+        FunctionItem foundFunction = lib.getFunctionItem(symName, env);
+        if (foundFunction == null) {
+            throw new XPathException("Function " + qName.getEQName()
+                                             + "#" + arity + " not found", "XPST0017")
+                    .asStaticError()
+                    .withLocation(getLocation());
         }
-        Expression exp = lib.bind(functionName, args, keywordArgs, env, reasons);
-        if (exp == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Cannot find a ").append(args.length).append(
-                    "-argument function named ").append(functionName.getComponentName().getEQName()).append("()");
-            for (String reason : reasons) {
-                sb.append(". ").append(reason);
-            }
-            throw new XPathException(sb.toString(), "XPST0017").asStaticError();
+
+        if (foundFunction instanceof IContextAccessorFunction) {
+            // For a context-dependent function, return a call on function-lookup(), which saves the context
+            SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
+            lookup.setRetainedStaticContext(env.makeRetainedStaticContext());
+            return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(qName, BuiltInAtomicType.QNAME)),
+                                           Literal.makeLiteral(Int64Value.makeIntegerValue(arity)));
         }
-        return exp;
+
+        Expression ref = XPathParser.makeNamedFunctionReference(qName, foundFunction);
+        ExpressionTool.copyLocationInfo(this, ref);
+        return ref;
     }
 
 }

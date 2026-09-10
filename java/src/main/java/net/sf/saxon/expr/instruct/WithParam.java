@@ -7,13 +7,12 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Operand;
-import net.sf.saxon.expr.OperandRole;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.LearningEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
@@ -156,10 +155,10 @@ public class WithParam  {
      * @throws XPathException if a static error is found
      */
 
-    public static void simplify(WithParam[] params) throws XPathException {
+    public static void simplify(WithParam[] params, StaticContext env) throws XPathException {
         if (params != null) {
             for (WithParam param : params) {
-                param.selectOp.setChildExpression(param.selectOp.getChildExpression().simplify());
+                param.selectOp.setChildExpression(param.selectOp.getChildExpression().simplify(env));
             }
         }
     }

@@ -161,7 +161,7 @@ public abstract class FunctionCall extends Expression {
 
     protected final Expression simplifyArguments(StaticContext env) throws XPathException {
         for (int i = 0; i < getArguments().length; i++) {
-            Expression exp = getArg(i).simplify();
+            Expression exp = getArg(i).simplify(env);
             if (exp != getArg(i)) {
                 adoptChildExpression(exp);
                 setArg(i, exp);
@@ -257,7 +257,7 @@ public abstract class FunctionCall extends Expression {
                             throw new XPathException("No value supplied for " + RoleDiagnostic.ordinal(i + 1) +
                                                              " parameter of function " +
                                                              (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
-                                                     "XPST0141");
+                                                     "XPST0017");
                         }
                         if (arg instanceof DefaultedArgumentExpression.DefaultCollationArgument) {
                             arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
@@ -283,7 +283,7 @@ public abstract class FunctionCall extends Expression {
                             throw new XPathException("No value supplied for " + RoleDiagnostic.ordinal(i + 1) +
                                                              " parameter of function " +
                                                              (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
-                                                     "XPST0141");
+                                                     "XPST0017");
                         }
 
                         arg = new Literal(EmptySequence.INSTANCE);
