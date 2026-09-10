@@ -67,8 +67,8 @@ public class SaxonCAPI {
     public static String RESOURCES_DIR = null;
 
 
-    public static ObjectHandles objectHandles = ObjectHandles.create();
-    public static Map<Long , String> objectHandlesPool = new HashMap<>(); //for debugging
+    public static final ObjectHandles objectHandles = ObjectHandles.create();
+    public static final Map<Long , String> objectHandlesPool = new HashMap<>(); //for debugging
 
     public static int objHandlesCreated = 0;
 

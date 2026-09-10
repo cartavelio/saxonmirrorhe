@@ -1129,15 +1129,17 @@ const char *XsltExecutable::transformFileToString(const char *source) {
       (void *)nullptr, (void *)executableRef, (char *)source, cstylesheet,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
-  if (result == nullptr) {
-    exceptionFound = true;
-    throw SaxonApiException();
-  }
+
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
+  if (result == nullptr) {
+    exceptionFound = true;
+    throw SaxonApiException();
+  }
+
   return result;
 }
 
