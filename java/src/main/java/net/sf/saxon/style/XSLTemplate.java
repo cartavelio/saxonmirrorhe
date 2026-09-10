@@ -60,12 +60,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     private SequenceType requiredType = SequenceType.ANY_SEQUENCE;
     private boolean declaresRequiredType = false;
     private Visibility visibility = Visibility.PRIVATE;
-    private ItemType requiredContextItemType;
-
-    {
-        requiredContextItemType = AnyItemType.getInstance();
-    }
-
+    private ItemType requiredContextItemType = AnyItemType.getInstance();
     private Optionality contextItemOptionality = Optionality.OPTIONAL;
     //private boolean absentFocus = false;
     private boolean jitCompilationDone = false;

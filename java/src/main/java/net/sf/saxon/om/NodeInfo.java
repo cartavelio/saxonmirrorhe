@@ -464,7 +464,7 @@ public interface NodeInfo extends GNode, Location
      */
 
     default Iterable<? extends NodeInfo> children() {
-        return new IterableSequenceIterator<>(iterateChildAxis(null));
+        return new IterableSequenceIterator<NodeInfo>(iterateChildAxis(null));
     }
 
     default Iterable<? extends NodeInfo> children(NodePredicate filter) {

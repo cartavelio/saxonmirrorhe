@@ -44,6 +44,9 @@ public enum EmptyIterator implements SequenceIterator,
     }
 
     @Override
+    public void close() {}
+
+    @Override
     public boolean supportsGetLength() {
         return true;
     }
@@ -67,7 +70,7 @@ public enum EmptyIterator implements SequenceIterator,
      */
     /*@NotNull*/
     @Override
-    public EmptyIterator getReverseIterator() {
+    public SequenceIterator getReverseIterator() {
         return this;
     }
 
@@ -110,6 +113,8 @@ public enum EmptyIterator implements SequenceIterator,
     public boolean isActuallyGrounded() {
         return true;
     }
+
+
 
  
 }

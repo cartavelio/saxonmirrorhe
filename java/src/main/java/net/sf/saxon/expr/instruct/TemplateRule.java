@@ -56,12 +56,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     protected Pattern matchPattern;
     private SequenceType requiredType;
     private boolean declaredStreamable;
-    private ItemType requiredContextItemType;
-
-    {
-        requiredContextItemType = AnyItemType.getInstance();
-    }
-
+    private ItemType requiredContextItemType = AnyItemType.getInstance();
     private boolean absentFocus;
     private SlotManager stackFrameMap;
     private PackageData packageData;

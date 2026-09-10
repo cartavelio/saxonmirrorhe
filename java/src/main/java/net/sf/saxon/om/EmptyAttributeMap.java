@@ -7,6 +7,7 @@
 
 package net.sf.saxon.om;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -17,12 +18,6 @@ import java.util.Iterator;
 public enum EmptyAttributeMap implements AttributeMap {
 
     INSTANCE;
-
-    /**
-     * Return the number of attributes in the map.
-     *
-     * @return The number of attributes in the map.
-     */
 
     @Override
     public int size() {
@@ -45,6 +40,16 @@ public enum EmptyAttributeMap implements AttributeMap {
     }
 
     @Override
+    public String getValue(NamespaceUri uri, String local) {
+        return null;
+    }
+
+    @Override
+    public String getValue(String local) {
+        return null;
+    }
+
+    @Override
     public AttributeMap put(AttributeInfo att) {
         return SingletonAttributeMap.of(att);
     }
@@ -53,6 +58,9 @@ public enum EmptyAttributeMap implements AttributeMap {
     public AttributeMap remove(NodeName name) {
         return this;
     }
+
+    @Override
+    public void verify() {}
 
     @Override
     public Iterator<AttributeInfo> iterator() {
@@ -65,8 +73,15 @@ public enum EmptyAttributeMap implements AttributeMap {
     }
 
     @Override
+    public ArrayList<AttributeInfo> asList() {
+        return new ArrayList<>(0);
+    }
+
+    @Override
     public AttributeInfo itemAt(int index) {
         throw new IndexOutOfBoundsException();
     }
+
+
 }
 

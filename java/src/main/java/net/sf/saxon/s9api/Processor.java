@@ -390,14 +390,9 @@ public class Processor implements Configuration.ApiProvider {
 
     public void setXmlVersion(/*@NotNull*/ String version) {
         switch (version) {
-            case "1.0":
-                config.setXMLVersion(Configuration.XML10);
-                break;
-            case "1.1":
-                config.setXMLVersion(Configuration.XML11);
-                break;
-            default:
-                throw new IllegalArgumentException("XmlVersion");
+            case "1.0" -> config.setXMLVersion(Configuration.XML10);
+            case "1.1" -> config.setXMLVersion(Configuration.XML11);
+            default -> throw new IllegalArgumentException("XmlVersion");
         }
     }
 

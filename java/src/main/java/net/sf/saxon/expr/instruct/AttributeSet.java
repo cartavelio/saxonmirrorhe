@@ -115,7 +115,7 @@ public class AttributeSet extends Actor {
             throw new XPathException("Attribute set " + getObjectName().getEQName() + " invokes itself recursively", "XTDE0640");
         }
         stack.push(this);
-        Expression.dispatchTailCall(bodyEvaluator.processLeavingTail(output, context));
+        Expression.dispatchTailCall(pushEvaluator.processLeavingTail(output, context));
         stack.pop();
         if (stack.isEmpty()) {
             ((XsltController)context.getController()).releaseAttributeSetEvaluationStack();

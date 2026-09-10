@@ -30,11 +30,6 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
     private SequenceType _zeroOrOne;
     private SequenceType _zeroOrMore;
 
-    private AnyItemType() {
-    }
-
-
-
     /**
      * Factory method to get the singleton instance
      * @return the singleton instance
@@ -88,6 +83,16 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
         return "";
     }
 
+    @Override
+    public String getFullAlphaCode() {
+        return "";
+    }
+
+    @Override
+    public String toExportString() {
+        return toString();
+    }
+
     /**
      * Determine whether this item type is atomic (that is, whether it can ONLY match
      * atomic values)
@@ -102,9 +107,6 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
 
     /**
      * Test whether a given item conforms to this type
-     *
-     *
-     *
      * @param item    The item to be tested
      * @param th  The type hierarchy cache
      * @return true if the item is an instance of this type; false otherwise
@@ -136,7 +138,7 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
 
     /*@NotNull*/
     @Override
-    public AtomicType getAtomizedItemType() {
+    public PlainType getAtomizedItemType() {
         return BuiltInAtomicType.ANY_ATOMIC;
     }
 
@@ -158,7 +160,12 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
         return -2;
     }
 
-    /*@NotNull*/
+    @Override
+    public double getNormalizedDefaultPriority() {
+        return 0;
+    }
+    
+    @Override
     public String toString() {
         return "item()";
     }
@@ -238,6 +245,8 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         return Optional.empty();
     }
+
+
 
 }
 

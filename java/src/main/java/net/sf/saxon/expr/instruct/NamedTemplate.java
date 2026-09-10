@@ -48,12 +48,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
 
     private StructuredQName templateName;
     private SequenceType requiredType;
-    private ItemType requiredContextItemType;
-
-    {
-        requiredContextItemType = AnyItemType.getInstance();
-    }
-
+    private ItemType requiredContextItemType = AnyItemType.getInstance();
     private Optionality contextItemOptionality = Optionality.OPTIONAL;
 //    private boolean mayOmitContextItem = true;
 //    private boolean absentFocus = false;
@@ -238,7 +233,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
             }
         }
         makeBodyEvaluator();
-        return bodyEvaluator.processLeavingTail(output, context);
+        return pushEvaluator.processLeavingTail(output, context);
     }
 
 

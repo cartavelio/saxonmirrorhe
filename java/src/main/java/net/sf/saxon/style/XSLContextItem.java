@@ -25,12 +25,7 @@ import net.sf.saxon.value.Whitespace;
 
 public class XSLContextItem extends StyleElement {
 
-    private ItemType requiredType;
-
-    {
-        requiredType = AnyItemType.getInstance();
-    }
-
+    private ItemType requiredType = AnyItemType.getInstance();
     private Optionality optionality = Optionality.OPTIONAL;
 
 
@@ -45,15 +40,9 @@ public class XSLContextItem extends StyleElement {
                 String f = attName.getDisplayName();
                 String value = att.getValue();
             switch (f) {
-                case "as":
-                    asAtt = Whitespace.trim(value);
-                    break;
-                case "use":
-                    useAtt = Whitespace.trim(value);
-                    break;
-                default:
-                    checkUnknownAttribute(attName);
-                    break;
+                case "as" -> asAtt = Whitespace.trim(value);
+                case "use" -> useAtt = Whitespace.trim(value);
+                default -> checkUnknownAttribute(attName);
             }
         }
         if (asAtt != null) {

@@ -15,6 +15,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodePredicateLambda;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
@@ -279,7 +280,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
             }
         }
         if (predicate == NodeKindType.ATTRIBUTE) {
-            predicate = node -> true;
+            predicate = NodePredicateLambda.of(node -> true);
         }
         return new AttributeIterator(tree, nodeNr, predicate);
     }

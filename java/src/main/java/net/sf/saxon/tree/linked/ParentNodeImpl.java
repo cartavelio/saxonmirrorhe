@@ -33,7 +33,6 @@ import net.sf.saxon.type.gnode.AnyGNodeType;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.function.Supplier;
 
 /**
  * ParentNodeImpl is an implementation of a non-leaf node (specifically, an Element node
@@ -182,13 +181,19 @@ public abstract class ParentNodeImpl extends NodeImpl {
         } else if (filter == null || filter == AnyGNodeType.getInstance()) {
             return children();
         } else if (_children instanceof NodeImpl child) {
-            return filter.test(child) ? Collections.singleton(child) : Collections.emptyList();
+            // written for transpiler
+            if (filter.test(child)) {
+                return Collections.singleton(child);
+            } else {
+                return Collections.emptyList();
+            }
         } else {
             NodeImpl[] nodeArray = (NodeImpl[]) _children;
-            Iterator<NodeImpl> iter = Arrays.asList(nodeArray).listIterator();
-            Supplier<Iterator<NodeImpl>> supplier =
-                () -> new MappingJavaIterator<>(iter, n -> filter.test(n) ? n : null);
-            return new IterableUsingIteratorSupplier<>(supplier);
+            Iterable<NodeImpl> nodeList = Arrays.asList(nodeArray);
+            return new IterableUsingIteratorSupplier<NodeImpl>(() -> {
+                Iterator<NodeImpl> nodeIter = nodeList.iterator();
+                return new MappingJavaIterator<NodeImpl, NodeImpl>(nodeIter, n -> filter.test(n) ? n : null);
+            });
         }
     }
 

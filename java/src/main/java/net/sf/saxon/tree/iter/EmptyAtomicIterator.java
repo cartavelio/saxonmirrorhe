@@ -10,6 +10,8 @@ package net.sf.saxon.tree.iter;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.transpile.CSharpReplaceMethod;
 import net.sf.saxon.value.AtomicValue;
 
 /**
@@ -30,6 +32,7 @@ public enum EmptyAtomicIterator implements AtomicIterator,
      * @return the next item. For the EmptyIterator this is always null.
      */
     @Override
+    @CSharpReplaceMethod(code="public Saxon.Hej.om.Item next() { return null; }")
     public AtomicValue next() {
         return null;
     }
@@ -58,7 +61,7 @@ public enum EmptyAtomicIterator implements AtomicIterator,
      */
     /*@NotNull*/
     @Override
-    public EmptyAtomicIterator getReverseIterator() {
+    public SequenceIterator getReverseIterator() {
         return this;
     }
 
@@ -101,6 +104,12 @@ public enum EmptyAtomicIterator implements AtomicIterator,
     public boolean isActuallyGrounded() {
         return true;
     }
+
+    @Override
+    public void close() {
+    }
+
+
 
  
 }

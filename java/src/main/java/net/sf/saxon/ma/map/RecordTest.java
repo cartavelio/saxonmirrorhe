@@ -14,7 +14,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionPlan;
@@ -27,8 +26,6 @@ import net.sf.saxon.value.StringValue;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static net.sf.saxon.type.AnyFunctionType.INSTANCE;
 
 /**
  * An instance of this class represents a specific record item type, for example
@@ -190,7 +187,6 @@ public class RecordTest implements RecordType {
      * @return the Genre to which this type belongs, specifically {@link Genre#MAP}
      */
     @Override
-    @CSharpModifiers(code = {"public", "override"})
     public Genre getGenre() {
         return Genre.MAP;
     }
@@ -395,7 +391,6 @@ public class RecordTest implements RecordType {
      * @return the string representation as an instance of the XPath ItemType construct
      */
     @Override
-    @CSharpModifiers(code={"public", "override"})
     public String toExportString() {
         return makeString(SequenceType::toExportString);
     }
@@ -620,7 +615,6 @@ public class RecordTest implements RecordType {
      * @param th the type hierarchy cache
      */
     @Override
-    @CSharpModifiers(code = {"public", "override"})
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item instanceof MapItem) {
             for (Map.Entry<String, SequenceType> entry : fieldTypes.entrySet()) {

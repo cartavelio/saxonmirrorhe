@@ -49,7 +49,7 @@ public abstract class Actor implements ExpressionOwner, Location {
     private Component declaringComponent;
     private Visibility declaredVisibility = Visibility.UNDEFINED;
     private RetainedStaticContext retainedStaticContext;
-    protected PushEvaluator bodyEvaluator;
+    protected PushEvaluator pushEvaluator;
 
     public Actor() {
     }
@@ -320,7 +320,7 @@ public abstract class Actor implements ExpressionOwner, Location {
             + "            return bodyEvaluator(@out, context);")
     protected TailCall process(Outputter out, XPathContext context) throws XPathException {
         makeBodyEvaluator();
-        return bodyEvaluator.processLeavingTail(out, context);
+        return pushEvaluator.processLeavingTail(out, context);
     }
 
     @CSharpReplaceBody(code = "if (System.Threading.Volatile.Read(ref bodyEvaluator) == null) {\n"
@@ -330,8 +330,8 @@ public abstract class Actor implements ExpressionOwner, Location {
             + "            }\n")
     protected void makeBodyEvaluator() {
         synchronized(this) {
-            if (bodyEvaluator == null) {
-                bodyEvaluator = body.makeElaborator().elaborateForPush();
+            if (pushEvaluator == null) {
+                pushEvaluator = body.makeElaborator().elaborateForPush();
             }
         }
     }

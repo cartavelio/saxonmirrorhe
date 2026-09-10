@@ -10,7 +10,6 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -66,7 +65,6 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     private SequenceType resultType;
     private SequenceType declaredResultType;
     protected volatile SequenceEvaluator bodyEvaluator = null;
-    protected PushEvaluator pushEvaluator = null;
     private boolean updating = false;
     private boolean ixslUpdating = false;
     private int inlineable = -1; // 0:no 1:yes -1:don't know

@@ -46,12 +46,7 @@ import java.util.Iterator;
 public class Copy extends ElementCreator {
 
     private boolean copyNamespaces;
-    private ItemType selectItemType;
-
-    {
-        selectItemType = AnyItemType.getInstance();
-    }
-
+    private ItemType selectItemType = AnyItemType.getInstance();
     private ItemType resultItemType;
 
     /**
