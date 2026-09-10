@@ -283,6 +283,7 @@ public class DocumentBuilder {
      * @deprecated since 13.0 - document projection is no longer supported
      */
 
+    @Deprecated(since="13.0", forRemoval=true)
     public void setDocumentProjectionQuery(XQueryExecutable query) {
         throw new UnsupportedOperationException("Document projection was dropped in Saxon 13");
     }
@@ -296,6 +297,7 @@ public class DocumentBuilder {
      * @deprecated since 13.0 - document projection is no longer supported
      */
 
+    @Deprecated(since = "13.0", forRemoval = true)
     public XQueryExecutable getDocumentProjectionQuery() {
         return null;
     }
