@@ -537,8 +537,8 @@
             </td>
             <td>
                <p>This is equivalent to setting
-                  <code>-T:net.sf.saxon.trace.TimedTraceListener</code> and
-                  <code>-traceout:filename</code>; that is, it causes trace profile information
+                  <code>-T:net.sf.saxon.trace.TimingTraceListener</code> and
+                  <code>-Tout:filename</code>; that is, it causes trace profile information
                   to be set to the specified file. This output file can subsequently be analyzed to
                   give an execution time profile for the query. See <a class="bodylink"
                      href="../performanceanalysis">Performance analysis</a>.</p>
