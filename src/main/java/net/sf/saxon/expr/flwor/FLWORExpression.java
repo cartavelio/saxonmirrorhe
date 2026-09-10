@@ -383,6 +383,8 @@ public class FLWORExpression extends Expression {
                 expandedList.add(extra);
             }
             clauses = expandedList;
+            returnClauseOp.setChildExpression(ExpressionTool.injectCode(returnClauseOp.getChildExpression(), injector));
+
         }
     }
     /**

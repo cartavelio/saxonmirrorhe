@@ -4769,6 +4769,13 @@ public class XPathParser {
     /**
      * If tracing, wrap an expression in a trace instruction
      *
+     * <p>NB, this no longer happens. Instead of creating trace expressions in the course of parsing and buildint
+     * the expression tree, trace code is now injected into the tree after the event, when parsing is complete.
+     * See {@link ExpressionTool#injectCode(Expression, CodeInjector)}.</p>
+     *
+     * <p>However, the method has another effect, which is to set the retainedStaticContext in the node in the
+     * expression tree.</p>
+     *
      * @param exp         the expression to be wrapped
      * @param qName       the name of the construct (if applicable)
      * @return the expression that does the tracing
@@ -4776,11 +4783,12 @@ public class XPathParser {
 
     public Expression makeTracer(Expression exp,  /*@Nullable*/ StructuredQName qName) {
         exp.setRetainedStaticContextLocally(env.makeRetainedStaticContext());
-        if (codeInjector != null) {
-            return codeInjector.inject(exp);
-        } else {
-            return exp;
-        }
+        return exp;
+//        if (codeInjector != null) {
+//            return codeInjector.inject(exp);
+//        } else {
+//            return exp;
+//        }
     }
 
     /**
