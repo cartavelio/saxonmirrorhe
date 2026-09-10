@@ -309,12 +309,24 @@ val sourceFilesForRelease = tasks.register<Sync>("source_files_for_release") {
         filter<ReplaceTokens>("tokens" to mapOf("edition" to extension.edition.get(), "VERSION" to saxonBuild.version.get()))
     }
 }
-
 val venvTask = venv
-val sphinxDocTask = tasks.register<SphinxDoc>("sphinxdoc") {
+
+val sphinxDocSources = tasks.register<Sync>("sphinx-doc-sources") {
+    val autostarRegex = Regex("""^\.\.\s+(?<directive>auto[^:]+)::\s+saxonche\.""")
+    into(layout.buildDirectory.dir("doc/source"))
+    from(layout.projectDirectory.dir("../saxonc/doc")) {
+        filter { line ->
+            if (line == ".. automodule:: saxonche") ".. automodule:: saxonc${extension.edition.get()}"
+            else if (autostarRegex.containsMatchIn(line)) autostarRegex.replace(line, ".. \${directive}:: saxonc${extension.edition.get()}.")
+            else line
+        }
+    }
+}
+
+val sphinxDocTask = tasks.register<SphinxDoc>("sphinx-doc") {
     venv = venvTask
-    docSrcDir = layout.projectDirectory.dir("../saxonc/doc")
-    docBuildDir = layout.buildDirectory.dir("doc")
+    docSrcDir = sphinxDocSources.map { it.destinationDir }
+    docBuildDir = layout.buildDirectory.dir("doc/build")
     wheelInstaller(installDevWheel)
 }
 
