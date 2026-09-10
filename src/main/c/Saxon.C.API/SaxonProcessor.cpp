@@ -268,6 +268,7 @@ void SaxonProcessor::initialize(bool l) {
 }
 
 void SaxonProcessor::setExtensionLibrary(const char * libraryName){
+  std::cerr << "C++ setExtensionLibrary called" << std::endl;
     j_setLibrary(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwd.c_str(), (char *)libraryName);
 }
 

@@ -112,6 +112,9 @@ public class SaxonCAPI {
 
     @CEntryPoint(name = "j_setLibrary", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long setLibrary(IsolateThread thread, ObjectHandle procRef, CCharPointer ccwd, CCharPointer libNameRef) throws SaxonApiException {
+        if(SaxonCAPI.debug) {
+            System.err.println("Java DEBUG en entered setLibrary!!");
+        }
 //#if EE==true || PE==true
         if (procRef == WordFactory.nullPointer() || libNameRef == WordFactory.nullPointer()) {
             return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
@@ -139,8 +142,9 @@ public class SaxonCAPI {
             System.err.println("Java DEBUG setLibrary cwdURI= "+ cwd  + " libName= " + libName + "libURI = " + libURI.getPath());
         }
         NativeCall.loadLibrary(libURI.getPath());
-        return  SaxonCAPI.STATUS_OK;
+
 //#endif
+        return  SaxonCAPI.STATUS_OK;
     }
 
     /**
