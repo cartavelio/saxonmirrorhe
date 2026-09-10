@@ -464,7 +464,7 @@ public final class ValueOf extends SimpleNodeConstructor {
                         int actualOptions = options;
                         boolean useCdata = MessageInstr.evaluateBooleanAVT(context,finalCdataEval, "cdata", "xsl:text|xsl:value-of");
                         if (useCdata) {
-                            actualOptions |= ReceiverOption.USE_CDATA;
+                            actualOptions |= ReceiverOption.USE_CDATA | ReceiverOption.DISABLE_CHARACTER_MAPS;
                         }
                         UnicodeString value = contentEval.eval(context);
                         output.characters(value, loc, actualOptions);
