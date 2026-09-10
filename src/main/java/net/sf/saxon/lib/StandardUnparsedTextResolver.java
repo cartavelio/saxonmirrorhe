@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URL;
 
 /**
  * Default implementation of the UnparsedTextURIResolver, used if no other implementation
@@ -81,7 +80,7 @@ public class StandardUnparsedTextResolver
 
         ResourceRequest rr = new ResourceRequest();
         rr.uri = absoluteURI.toString();
-        rr.nature = ResourceRequest.TEXT_NATURE;
+        rr.nature = encoding == null ? ResourceRequest.BINARY_NATURE : ResourceRequest.TEXT_NATURE;
         rr.purpose = ResourceRequest.ANY_PURPOSE;
         rr.requestedEncoding = encoding;
         Source resolved = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));

@@ -10,20 +10,16 @@ package net.sf.saxon.lib;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.event.IDFilter;
-import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * A <code>DirectResourceResolver</code> is a {@link ResourceResolver} that resolves requests
@@ -83,17 +79,34 @@ public class DirectResourceResolver implements ResourceResolver {
             // System.err.println("StandardURIResolver, href=" + href + ", id=" + id);
         }
 
-        Source ss = null;
+        InputStream stream;
+        if (request.nature == ResourceRequest.BINARY_NATURE) {
+            try {
+                return ResourceLoader.typedStreamSource(config, request.uri);
+//                AugmentedSource as = AugmentedSource.makeAugmentedSource(ss);
+//                as.setPleaseCloseAfterUse(true);
+//                return as;
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
+        }
+
+        Source ss;
+
+
         try {
-            Reader reader = ResourceLoader.urlReader(config, request.uri, request.requestedEncoding);
-            ss = new StreamSource(reader);
+            stream = ResourceLoader.urlStream(config, request.uri);
+        } catch (IOException e) {
+            stream = null; // Carry on, the XML parser might know what to do with it.
+        }
+
+        InputSource is = new InputSource(request.uri);
+        is.setByteStream(stream);
+        ss = new SAXSource(config.getStyleParser(), is);
+        if (stream != null) {
             // We created the stream, so we must close it after use
             ss = AugmentedSource.makeAugmentedSource(ss);
             ((AugmentedSource) ss).setPleaseCloseAfterUse(true);
-        } catch (IOException e) {
-            // Carry on, the XML parser might know what to do with it.
-            InputSource is = new InputSource(request.uri);
-            ss = new SAXSource(config.getStyleParser(), is);
         }
 
         if (id != null) {
@@ -104,6 +117,9 @@ public class DirectResourceResolver implements ResourceResolver {
         }
 
         return ss;
+
     }
+
+
 }
 
