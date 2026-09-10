@@ -36,5 +36,12 @@
     <PackageReference Include="Singulink.Numerics.BigDecimal" Version="2.0.2" />
     <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.1.0" />
     <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+    <PackageReference Include="NSec.Cryptography" Version="22.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="6.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+    <PackageReference Include="XmlResolver" Version="2.1.0" />
+    <PackageReference Include="XmlResolverData" Version="1.2.3" />
   </ItemGroup>
 </Project>
