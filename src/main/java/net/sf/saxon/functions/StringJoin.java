@@ -112,7 +112,8 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
     public Fold getFold(XPathContext context, Sequence... additionalArguments) throws XPathException {
         UnicodeString separator = EmptyUnicodeString.getInstance();
         if (additionalArguments.length > 0) {
-            separator = ((GroundedValue) additionalArguments[0].head()).getUnicodeStringValue();
+            Item sep = additionalArguments[0].head();
+            separator = sep == null ? EmptyUnicodeString.getInstance() : sep.getUnicodeStringValue();
         }
         return new StringJoinFold(separator, returnEmptyIfEmpty);
     }
