@@ -19,9 +19,9 @@ public class Parcel extends SingleEntryMap {
         return result;
     }
 
-    private static final StringValue parcelKey = new StringValue(new Twine8("parcel"));
+    public static final StringValue parcelKey = new StringValue(new Twine8("value"));
     public static RecordTest TYPE = new RecordTest(
-            singletonList("parcel"),
+            singletonList("value"),
             singletonList(SequenceType.ANY_SEQUENCE),
             Collections.emptyList(),
             false);

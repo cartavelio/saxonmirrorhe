@@ -123,6 +123,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, actionType, ONE | INS, null);
 
+        register("entries", 1, MapEntries.class, MapType.ANY_MAP_TYPE, STAR, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
+
         register("untyped-contains", 2, MapUntypedContains.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
@@ -360,7 +363,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the extension function map:for-each(Map, Function) =&gt; item()*
+     * Implementation of the function map:for-each(Map, Function) =&gt; item()*
      */
     public static class MapForEach extends SystemFunction {
 
@@ -379,6 +382,26 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             return results;
         }
     }
+
+    /**
+     * Implementation of the proposed 4.0 function map:entries(Map) =&gt; record(key, value*
+     */
+    public static class MapEntries extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            MapItem map = (MapItem) arguments[0].head();
+            ZenoSequence results = new ZenoSequence();
+            for (KeyValuePair pair : map.keyValuePairs()) {
+                DictionaryMap kvp = new DictionaryMap(2);
+                kvp.initialPut("key", pair.key);
+                kvp.initialPut("value", pair.value);
+                results.appendSequence(kvp);
+            }
+            return results;
+        }
+    }
+
 
     /**
      * Implementation of the proposed XPath 4.0 function
@@ -416,7 +439,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the extension function map:merge() =&gt; Map
+     * Implementation of the function map:merge() =&gt; Map
      * From 9.8, map:merge is also used to implement map constructors in XPath and the xsl:map
      * instruction in XSLT. For this purpose it accepts an additional option to define the error
      * code to be used to signal duplicates.
