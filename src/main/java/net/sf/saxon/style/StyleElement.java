@@ -1917,6 +1917,22 @@ public abstract class StyleElement extends ElementImpl {
     }
 
     /**
+     * Check that if the element has a select attribute, the content is empty (except perhaps for xsl:fallback)
+     * @param allowFallback true if xsl:fallback children are allowed
+     */
+
+    public void checkSelectXorContent(boolean allowFallback) {
+        if (getAttributeValue("select") != null) {
+            for (NodeInfo child : children()) {
+                if (!(child instanceof XSLFallback) || !allowFallback) {
+                    compileError("An " + getDisplayName() + " element with a select attribute must be empty", "XTSE3185");
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
      * Convenience method to report the absence of a mandatory attribute
      *
      * @param attribute the name of the attribute whose absence is to be reported

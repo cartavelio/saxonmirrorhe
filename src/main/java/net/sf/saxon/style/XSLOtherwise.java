@@ -43,7 +43,7 @@ public class XSLOtherwise extends StyleElement {
             compileError("xsl:otherwise must be immediately within xsl:choose or xsl:switch", "XTSE0010");
         }
         if (select != null && hasChildNodes()) {
-            compileError("xsl:otherwise element must be empty if @select is present", "XTSE0010");
+            compileError("xsl:otherwise element must be empty if @select is present", "XTSE3185");
         }
     }
 

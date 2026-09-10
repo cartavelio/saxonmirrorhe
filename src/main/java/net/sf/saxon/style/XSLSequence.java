@@ -12,7 +12,6 @@ import net.sf.saxon.expr.instruct.SequenceInstr;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
@@ -95,14 +94,7 @@ public class XSLSequence extends StyleElement {
 
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
-        for (NodeInfo child : children()) {
-            if (!(child instanceof XSLFallback)) {
-                if (select != null) {
-                    compileError("An " + getDisplayName() + " element with a select attribute must be empty", "XTSE3185");
-                }
-                break;
-            }
-        }
+        checkSelectXorContent(true);
         select = typeCheck("select", select);
     }
 

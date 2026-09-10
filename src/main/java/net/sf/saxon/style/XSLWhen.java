@@ -57,7 +57,7 @@ public class XSLWhen extends StyleElement {
         }
         test = typeCheck("test", test);
         if (select != null && hasChildNodes()) {
-            compileError("xsl:when element must be empty if @select is present", "XTSE0010");
+            compileError("xsl:when element must be empty if @select is present", "XTSE3185");
         }
     }
 
