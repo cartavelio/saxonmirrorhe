@@ -12,17 +12,19 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringItem;
-import net.sf.saxon.str.UnicodeBuilder;
 
 import java.util.Arrays;
 
@@ -61,7 +63,7 @@ public class Concat extends SystemFunction implements PushableFunction {
     @Override
     public FunctionItemType getFunctionItemType() {
         SequenceType[] argTypes = new SequenceType[getArity()];
-        Arrays.fill(argTypes, SequenceType.OPTIONAL_ATOMIC);
+        Arrays.fill(argTypes, (getDetails().properties & BuiltInFunctionSet.SEQV) == 0 ? SequenceType.OPTIONAL_ATOMIC : SequenceType.ATOMIC_SEQUENCE);
         return new SpecificFunctionType(argTypes, SequenceType.SINGLE_STRING);
     }
 
@@ -91,9 +93,10 @@ public class Concat extends SystemFunction implements PushableFunction {
             public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
                 UnicodeBuilder buffer = new UnicodeBuilder();
                 for (Operand o: operands()) {
-                    Item it = o.getChildExpression().evaluateItem(context);
-                    if (it != null) {
-                        buffer.append(it.getStringValue());
+                    SequenceIterator iter = o.getChildExpression().iterate(context);
+                    Item item;
+                    while ((item = iter.next()) != null) {
+                        buffer.append(item.getUnicodeStringValue());
                     }
                 }
                 return buffer.toUnicodeString();
@@ -109,26 +112,15 @@ public class Concat extends SystemFunction implements PushableFunction {
 
     @Override
     public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-        if (arguments.length == 2) {
-            Item s0 = arguments[0].head();
-            if (s0 == null) {
-                s0 = StringItem.EMPTY_STRING;
+        UnicodeBuilder builder = new UnicodeBuilder();
+        for (Sequence arg : arguments) {
+            SequenceIterator iter = arg.iterate();
+            Item item;
+            while ((item = iter.next()) != null) {
+                builder.append(item.getUnicodeStringValue());
             }
-            Item s1 = arguments[1].head();
-            if (s1 == null) {
-                s1 = StringItem.EMPTY_STRING;
-            }
-            return new StringItem((s0.getUnicodeStringValue()).concat(s1.getUnicodeStringValue()));
-        } else {
-            UnicodeBuilder builder = new UnicodeBuilder();
-            for (Sequence arg : arguments) {
-                Item item = arg.head();
-                if (item != null) {
-                    builder.append(item.getUnicodeStringValue());
-                }
-            }
-            return new StringItem(builder.toUnicodeString());
         }
+        return new StringItem(builder.toUnicodeString());
     }
 
     @Override

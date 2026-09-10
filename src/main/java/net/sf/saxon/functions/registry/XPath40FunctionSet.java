@@ -8,6 +8,8 @@
 package net.sf.saxon.functions.registry;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.CodepointsToString;
+import net.sf.saxon.functions.Concat;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapType;
@@ -58,6 +60,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("all", 2, SefFunction.class, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, null);
+
+        // codepoints-to-string becomes variadic in 4.0:
+        register("codepoints-to-string", 1, CodepointsToString.class, BuiltInAtomicType.STRING, ONE, SEQV)
+                .arg(0, BuiltInAtomicType.INTEGER, STAR, null);
+
+        // Concat changes in 4.0:
+        register("concat", 1, Concat.class, BuiltInAtomicType.STRING, ONE, SEQV)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null);
 
         register("highest", 1, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null);

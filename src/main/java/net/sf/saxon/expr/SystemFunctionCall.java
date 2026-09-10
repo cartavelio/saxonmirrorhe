@@ -98,11 +98,10 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
     }
 
     private void allocateArgumentEvaluators(Expression[] arguments) {
+        int lastExplicitArg = Math.min(arguments.length, getTargetFunction().getDetails().argumentTypes.length)-1;
         for (int i = 0; i < arguments.length; i++) {
             Expression arg = arguments[i];
-            int cardinality = isCallOn(Concat.class) ?
-                    StaticProperty.ALLOWS_ZERO_OR_ONE :
-                    getTargetFunction().getDetails().argumentTypes[i].getCardinality();
+            int cardinality = getTargetFunction().getDetails().argumentTypes[Math.min(i, lastExplicitArg)].getCardinality();
             if (arg instanceof Literal) {
                 argumentEvaluators[i] = Evaluator.LITERAL;
             } else if (arg instanceof VariableReference) {

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.sxpath;
 
+import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.SlotManager;
@@ -64,6 +65,16 @@ public class XPathDynamicContext {
         }
         ManualIterator iter = new ManualIterator(item);
         contextObject.setCurrentIterator(iter);
+        if (item instanceof NodeInfo && ((NodeInfo)item).getSystemId() != null) {
+            Controller controller = contextObject.getController();
+            if (controller != null) {
+                DocumentPool pool = controller.getDocumentPool();
+                DocumentKey key = new DocumentKey(((NodeInfo) item).getSystemId());
+                if (pool.find(key) == null) {
+                    pool.add(((NodeInfo) item).getTreeInfo(), key);
+                }
+            }
+        }
     }
 
     /**

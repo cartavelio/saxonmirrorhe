@@ -379,7 +379,7 @@ public class QT3TestDriverHE extends TestDriver {
                     return;
                 }
             }
-            if (langVersion.equals("3.0") || langVersion.equals("3.1")) {
+            if (langVersion.equals("3.0") || langVersion.equals("3.1") || langVersion.equals("4.0")) {
                 EnvironmentVariableResolver resolver = new EnvironmentVariableResolver() {
                     @Override
                     public Set<String> getAvailableEnvironmentVariables() {
