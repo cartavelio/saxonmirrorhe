@@ -144,26 +144,17 @@ public class Err {
         if (item == null) {
             return "(*null*)";
         }
-        if (item instanceof NodeInfo) {
-            NodeInfo node = (NodeInfo)item;
-            switch (node.getNodeKind()) {
-                case Type.DOCUMENT:
-                    return "doc(" + abbreviateURI(node.getSystemId()) + ')';
-                case Type.ELEMENT:
-                    return '<' + node.getDisplayName() + '>';
-                case Type.ATTRIBUTE:
-                    return '@' + node.getDisplayName() + "=\"" + node.getUnicodeStringValue() + '"';
-                case Type.TEXT:
-                    return "text{" + truncate30(node.getUnicodeStringValue()) + "}";
-                case Type.COMMENT:
-                    return "<!--...-->";
-                case Type.PROCESSING_INSTRUCTION:
-                    return "<?" + node.getLocalPart() + "...?>";
-                case Type.NAMESPACE:
-                    return "xmlns:" + node.getLocalPart() + "=" + abbreviateURI(node.getStringValue());
-                default:
-                    return "";
-            }
+        if (item instanceof NodeInfo node) {
+            return switch (node.getNodeKind()) {
+                case Type.DOCUMENT -> "doc(" + abbreviateURI(node.getSystemId()) + ')';
+                case Type.ELEMENT -> '<' + node.getDisplayName() + '>';
+                case Type.ATTRIBUTE -> '@' + node.getDisplayName() + "=\"" + node.getUnicodeStringValue() + '"';
+                case Type.TEXT -> "text{" + truncate30(node.getUnicodeStringValue()) + "}";
+                case Type.COMMENT -> "<!--...-->";
+                case Type.PROCESSING_INSTRUCTION -> "<?" + node.getLocalPart() + "...?>";
+                case Type.NAMESPACE -> "xmlns:" + node.getLocalPart() + "=" + abbreviateURI(node.getStringValue());
+                default -> "";
+            };
         } else {
             return item.toShortString();
         }
@@ -183,8 +174,7 @@ public class Err {
             return "(*null*)";
         }
         try {
-            if (seq instanceof GroundedValue) {
-                GroundedValue val = (GroundedValue) seq;
+            if (seq instanceof GroundedValue val) {
                 if (val.getLength() == 0) {
                     return "()";
                 } else if (val.getLength() == 1) {
@@ -192,15 +182,13 @@ public class Err {
                 } else {
                     return depictSequenceStart(val.iterate(), 3, val.getLength());
                 }
-            } else if (seq instanceof SingletonClosure) {
-                SingletonClosure sc = (SingletonClosure) seq;
+            } else if (seq instanceof SingletonClosure sc) {
                 if (sc.isBuilt()) {
                     return sc.asItem() == null ? "()" : depict(sc.asItem());
                 } else {
                     return "(*not-yet-evaluated singleton*)";
                 }
-            } else if (seq instanceof net.sf.saxon.value.MemoClosure) {
-                net.sf.saxon.value.MemoClosure mc = (net.sf.saxon.value.MemoClosure)seq;
+            } else if (seq instanceof net.sf.saxon.value.MemoClosure mc) {
                 seq = mc.getSequenceAsIs();
                 if (seq == null) {
                     return "(*not-yet-evaluated sequence*)";
@@ -293,25 +281,16 @@ public class Err {
 
 
     public static String describeGenre(Genre genre) {
-        switch (genre) {
-            case ANY:
-                return "any item";
-            case ATOMIC:
-                return "an atomic value";
-            case XNODE:
-                return "a node";
-            case JNODE:
-                return "a JNode";
-            case FUNCTION:
-                return "a function";
-            case MAP:
-                return "a map";
-            case ARRAY:
-                return "an array";
-            case EXTERNAL:
-            default:
-                return "an external object";
-        }
+        return switch (genre) {
+            case ANY -> "any item";
+            case ATOMIC -> "an atomic value";
+            case XNODE -> "a node";
+            case JNODE -> "a JNode";
+            case FUNCTION -> "a function";
+            case MAP -> "a map";
+            case ARRAY -> "an array";
+            default -> "an external object";
+        };
     }
 
     public static String describeVisibility(Visibility vis) {

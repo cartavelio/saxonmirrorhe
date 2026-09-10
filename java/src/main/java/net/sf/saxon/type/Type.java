@@ -152,8 +152,7 @@ public abstract class Type {
         item = unlabelItem(item);
         if (item instanceof AtomicValue) {
             return ((AtomicValue) item).getItemType();
-        } else if (item instanceof NodeInfo) {
-            NodeInfo node = (NodeInfo) item;
+        } else if (item instanceof NodeInfo node) {
             if (th == null) {
                 th = node.getConfiguration().getTypeHierarchy();
             }
@@ -236,27 +235,26 @@ public abstract class Type {
      */
 
     public static String displayTypeName(/*@NotNull*/ Item item) {
-        if (item instanceof NodeInfo) {
-            NodeInfo node = (NodeInfo) item;
+        if (item instanceof NodeInfo node) {
             switch (node.getNodeKind()) {
                 case DOCUMENT:
                     return "document-node()";
                 case ELEMENT:
                     SchemaType annotation = node.getSchemaType();
                     if (annotation.isAnonymousType()) {
-                        return "element(" + ((NodeInfo) item).getDisplayName() + ')';
+                        return "element(" + node.getDisplayName() + ')';
                     } else {
                         return "element(" +
-                                ((NodeInfo) item).getDisplayName() + ", " +
+                                node.getDisplayName() + ", " +
                                 annotation.getDisplayName() + ')';
                     }
                 case ATTRIBUTE:
                     SchemaType annotation2 = node.getSchemaType();
                     if (annotation2.isAnonymousType()) {
-                        return "attribute(" + ((NodeInfo) item).getDisplayName() + ')';
+                        return "attribute(" + node.getDisplayName() + ')';
                     } else {
                         return "attribute(" +
-                                ((NodeInfo) item).getDisplayName() + ", " +
+                                node.getDisplayName() + ", " +
                                 annotation2.getDisplayName() + ')';
                     }
                 case TEXT:
