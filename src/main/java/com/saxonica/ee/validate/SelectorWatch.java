@@ -4,18 +4,23 @@ import com.saxonica.ee.schema.*;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.PatternWatch;
 import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.event.PathMaintainer;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.lib.InvalidityHandler;
 import net.sf.saxon.lib.InvalidityHandlerWrappingErrorReporter;
+import net.sf.saxon.om.AbsolutePath;
 import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.FingerprintedQName;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.StringValue;
@@ -148,6 +153,7 @@ public abstract class SelectorWatch extends PatternWatch {
                                                                  " selects more than one node");
             ve.setErrorCode(constraintChecker.getValidationContext().getErrorCode());
             ve.setConstraintReference(1, "cvc-identity-constraint", "3");
+            setPathIfAvailable(ve, locationId);
             reportValidationError(ve, locationId);
         }
         if (nillableElement && identityConstraint instanceof Key) {
@@ -157,10 +163,24 @@ public abstract class SelectorWatch extends PatternWatch {
                     "The element declaration of a field in an xs:key constraint must not be nillable");
             ve.setErrorCode(constraintChecker.getValidationContext().getErrorCode());
             ve.setConstraintReference(1, "cvc-identity-constraint", "4.2.3");
+            setPathIfAvailable(ve, locationId);
             reportValidationError(ve, locationId);
             //throw ve;
         }
         currentRow[column] = value;
+    }
+
+    private void setPathIfAvailable(ValidationFailure ve, Location locationId) {
+        PathMaintainer pm = (PathMaintainer) getPipelineConfiguration().getComponent("net.sf.saxon.event.PathMaintainer");
+        if (pm != null) {
+            AbsolutePath path = pm.getAbsolutePath();
+            if (locationId instanceof AttributeLocation) {
+                NodeName attName = new FingerprintedQName(((AttributeLocation) locationId).getAttributeName(),
+                                                          getPipelineConfiguration().getConfiguration().getNamePool());
+                path.appendAttributeName(attName);
+            }
+            ve.setPath(path);
+        }
     }
 
     /**
@@ -216,6 +236,7 @@ public abstract class SelectorWatch extends PatternWatch {
                                     " has no value");
                     ve.setErrorCode(constraintChecker.getValidationContext().getErrorCode());
                     ve.setConstraintReference(1, "cvc-identity-constraint", "4.2.1");
+                    setPathIfAvailable(ve, locationId);
                     reportValidationError(ve, locationId);
                     //throw ve;
                 } else {
@@ -239,6 +260,7 @@ public abstract class SelectorWatch extends PatternWatch {
                                     "\n    " + entry);
                     ve.setErrorCode(constraintChecker.getValidationContext().getErrorCode());
                     ve.setConstraintReference(1, "cvc-identity-constraint", "3");
+                    setPathIfAvailable(ve, locationId);
                     reportValidationError(ve, locationId);
                 }
                 table.put(entry, flags);
@@ -254,6 +276,7 @@ public abstract class SelectorWatch extends PatternWatch {
                                     "\n    " + entry);
                     ve.setErrorCode(constraintChecker.getValidationContext().getErrorCode());
                     ve.setConstraintReference(1, "cvc-identity-constraint", "3");
+                    setPathIfAvailable(ve, locationId);
                     reportValidationError(ve, locationId);
                 }
                 table.put(entry, flags);
@@ -266,6 +289,7 @@ public abstract class SelectorWatch extends PatternWatch {
                 ve.setErrorCode(err);
                 ve.setConstraintReference(1, "cvc-identity-constraint",
                                           identityConstraint instanceof Unique ? "4.1" : "4.2.2");
+                setPathIfAvailable(ve, locationId);
                 reportValidationError(ve, locationId);
             }
         } else if (identityConstraint.isOrdered()) {
@@ -290,6 +314,7 @@ public abstract class SelectorWatch extends PatternWatch {
                                     ": " + entry);
                     ve.setErrorCode(SaxonErrorCode.SXOR0001);
                     ve.setConstraintReference(1, "saxon-identity-constraint", "0");
+                    setPathIfAvailable(ve, locationId);
                     reportValidationError(ve, locationId);
                 }
             }

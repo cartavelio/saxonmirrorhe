@@ -165,7 +165,7 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
             Element error = report.element("error")
                     .attribute("line", ifPositive(failure.getLineNumber()))
                     .attribute("column", ifPositive(failure.getColumnNumber()))
-                    .attribute("path", failure.getPath().toString())
+                    .attribute("path", failure.getPath() == null ? null : failure.getPath().toString())
                     .attribute("system-id",
                                failure.getSystemId() != null && !failure.getSystemId().equals(systemId) ? failure.getSystemId() : null)
                     .attribute("xsd-part", ifPositive(failure.getSchemaPart()))
