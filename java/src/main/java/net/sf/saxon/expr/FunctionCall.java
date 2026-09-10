@@ -226,13 +226,15 @@ public abstract class FunctionCall extends Expression {
             fd = ((SystemFunction) target).getDetails();
         }
         if (target.isSequenceVariadic()) {
+            // Now applies to fn:concat only, with different rules for 3.1 and 4.0
+            int version = visitor.getStaticContext().getXPathVersion();
             String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
             for (int a=0; a<getArity(); a++) {
                 final int finalA = a;
                 Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, finalA);
                 setArg(a, tc.staticTypeCheck(
                         getArg(a),
-                        SequenceType.zeroOrMore(argTypes[0].getPrimaryType()),
+                        version >= 40 ? SequenceType.zeroOrMore(argTypes[0].getPrimaryType()) : argTypes[0],
                         role, visitor));
             }
         } else {
