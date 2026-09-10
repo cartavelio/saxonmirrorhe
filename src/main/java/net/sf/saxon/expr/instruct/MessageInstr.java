@@ -250,8 +250,8 @@ public class MessageInstr extends Instruction {
                 int kind = ((NodeInfo) item).getNodeKind();
                 if (kind == Type.ATTRIBUTE || kind == Type.NAMESPACE) {
                     characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
+                    return;
                 }
-                return;
             } else if (item instanceof FunctionItem && !((FunctionItem) item).isArray()) {
                 String representation = ((FunctionItem) item).isMap() ? Err.depict(item) : "Function " + Err.depict(item);
                 characters(StringView.of(representation), locationId, ReceiverOption.NONE);
