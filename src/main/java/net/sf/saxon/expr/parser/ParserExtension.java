@@ -169,16 +169,5 @@ public class ParserExtension {
         return null;
     }
 
-    /**
-     * Parse a for-member expression (Saxon extension):
-     * for member $x in expr return expr
-     *
-     * @param p the XPath parser
-     * @return the resulting subexpression
-     * @throws XPathException if any error is encountered
-     */
 
-    protected Expression parseForMemberExpression(XPathParser p) throws XPathException {
-        return null;
-    }
 }

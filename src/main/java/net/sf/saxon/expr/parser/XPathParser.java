@@ -1361,34 +1361,53 @@ public class XPathParser {
             String var = t.currentTokenValue;
 
             // declare the range variable
-            Assignation v;
+            Assignation firstClause;
+            Assignation lastClause;
+            boolean forMember = false;
             if (operator == Token.FOR) {
-                v = new ForExpression();
-                v.setRequiredType(SequenceType.SINGLE_ITEM);
+                firstClause = lastClause = new ForExpression();
+                firstClause.setRequiredType(SequenceType.SINGLE_ITEM);
             } else if (operator == Token.FOR_MEMBER) {
-                v = new ForMemberExpression();
-                v.setRequiredType(SequenceType.ANY_SEQUENCE);
+                // "for member $m in $array" compiles to "for $temp in array:members($array) let $m := $temp?value"
+                firstClause = new ForExpression();
+                firstClause.setRequiredType(SequenceType.SINGLE_ITEM);
+                firstClause.setVariableQName(
+                        new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "fm" + firstClause.hashCode()));
+                declareRangeVariable(firstClause);
+                lastClause = new LetExpression();
+                lastClause.setRequiredType(SequenceType.ANY_SEQUENCE);
+                LocalVariableReference tempRef = new LocalVariableReference(firstClause);
+                LookupExpression lookup = new LookupExpression(tempRef, new StringLiteral("value"));
+                lastClause.setSequence(lookup);
+                firstClause.setAction(lastClause);
+                forMember = true;
+                clauses++;
             } else /*if (operator == Token.LET)*/ {
-                v = new LetExpression();
-                v.setRequiredType(SequenceType.ANY_SEQUENCE);
+                firstClause = lastClause = new LetExpression();
+                firstClause.setRequiredType(SequenceType.ANY_SEQUENCE);
             }
 
             clauses++;
-            setLocation(v, offset);
-            v.setVariableQName(makeStructuredQName(var, NamespaceUri.NULL));
+            setLocation(firstClause, offset);
+            setLocation(lastClause, offset);
+            lastClause.setVariableQName(makeStructuredQName(var, NamespaceUri.NULL));
             nextToken();
 
             // process the "in" or ":=" clause
             expect(operator == Token.LET ? Token.ASSIGN : Token.IN);
             nextToken();
-            v.setSequence(parseExprSingle());
-            declareRangeVariable(v);
-            if (previous == null) {
-                first = v;
-            } else {
-                previous.setAction(v);
+            Expression collection = parseExprSingle();
+            if (forMember) {
+                collection = ArrayFunctionSet.getInstance(40).makeFunction("members", 1).makeFunctionCall(collection);
             }
-            previous = v;
+            firstClause.setSequence(collection);
+            declareRangeVariable(lastClause);
+            if (previous == null) {
+                first = firstClause;
+            } else {
+                previous.setAction(firstClause);
+            }
+            previous = lastClause;
         } while (t.currentToken == Token.COMMA || (allowXPath40Syntax && t.currentToken == operator));
 
         // process the "return" expression (called the "action")

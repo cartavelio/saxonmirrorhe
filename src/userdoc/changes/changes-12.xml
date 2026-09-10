@@ -480,6 +480,9 @@
         <code>for $i in 1 to 10 for $j in 1 to 10 return $i * $j</code>, or <code>let $i := 10 let $j := 20 return $i + $j</code>.
         This syntax was already valid in XQuery.</p>
         
+        <p>The implementation of "for member" expressions has changed in 12.3: as a result of this, any
+        SEF files using the construct will need to be recompiled.</p>
+        
         
         <h2>XQuery 4.0 extensions</h2>
         
