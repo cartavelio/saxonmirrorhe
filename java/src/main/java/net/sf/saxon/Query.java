@@ -699,16 +699,15 @@ public class Query {
         if (value != null) {
             XQueryCoverageCodeInjector injector = new XQueryCoverageCodeInjector();
             CoverageTraceListener listener = new CoverageTraceListener(injector.histograms);
-            processor.setConfigurationProperty(Feature.TRACE_LISTENER, listener);
-            processor.setConfigurationProperty(Feature.LINE_NUMBERING, true);
+            config.setTraceListener(listener);
             config.setLineNumbering(true);
-            config.getDefaultStaticQueryContext().setCodeInjector(injector);
             if (!value.isEmpty()) {
+                config.setTraceListenerOutputFile(value);
                 try {
                     listener.setOutputDestination(
                             StandardLogger.makeLogger(new File(value)));
                 } catch (FileNotFoundException e) {
-                    throw new SaxonApiException(e);
+                    badUsage("Cannot write to " + value);
                 }
             }
         }
