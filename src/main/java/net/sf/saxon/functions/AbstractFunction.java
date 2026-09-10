@@ -159,6 +159,12 @@ public abstract class AbstractFunction implements Function {
     public boolean isTrustedResultType() {
         return false;
     }
+
+    @Override
+    public String toShortString() {
+        // Need to disambiguate multiple inheritance candidates here
+        return getDescription();
+    }
 }
 
 
