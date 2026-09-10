@@ -165,9 +165,9 @@ provide any other feedback.</p>
       </li>
       <li>
         <p><b>Add the core SaxonC library location to the PATH environment variable</b></p>
-        <p>The core SaxonC library is located under the <code>libs/windows</code> directory, named
+        <p>The core SaxonC library is located under the <code>libs/win</code> directory, named
           <code>libsaxon-[EDITION]c-[VERSION].dll</code>.</p>
-        <p>The <code>libs/windows</code> path must be added to the environment variable <code>PATH</code>.</p>
+        <p>The <code>libs/win</code> path must be added to the environment variable <code>PATH</code>.</p>
       </li>
       <li>
         <p><b>Set the SAXONC_HOME environment variable</b></p>
@@ -286,8 +286,9 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <p>SaxonC can be run from the command line in a similar way to its Java counterpart. See the
             <code>Transform.c</code> and <code>Query.c</code> files (and <code>Validate.c</code> for
-         SaxonC-EE) in the <code>command</code> directory. The <code>build.sh</code> script can be
-         executed to build the command line programs.</p>
+        SaxonC-EE) in the <code>command</code> directory. To build the command line programs, execute the
+        <code>build-saxonc-commands.sh</code> script for Linux and MacOS, or the
+        <code>build-saxonc-commands.bat</code> script for Windows.</p>
 
       <p>To run SaxonC from the command line, the commands look like the following:</p>
 
