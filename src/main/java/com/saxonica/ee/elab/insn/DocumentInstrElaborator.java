@@ -1,0 +1,59 @@
+package com.saxonica.ee.elab.gen;
+
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.eval.PushEvaluator;
+import net.sf.saxon.Controller;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.SequenceCollector;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.NoDynamicContextException;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+public abstract class ComplexNodePushElaborator extends Elaborator {
+
+    @Override
+    public PullEvaluator getPullEvaluator() {
+        PushEvaluator pushEval = getPushEvaluator();
+        return context -> {
+            Controller controller = context.getController();
+            if (controller == null) {
+                throw new NoDynamicContextException("No controller available");
+            }
+            SequenceCollector seq = controller.allocateSequenceOutputter(1);
+            pushEval.process(new ComplexContentOutputter(seq), context);
+            seq.close();
+            SequenceIterator result = seq.iterate();
+            seq.reset();
+            return result;
+        };
+    }
+
+    @Override
+    public ItemEvaluator getItemEvaluator() {
+        PushEvaluator pushEval = getPushEvaluator();
+        return context -> {
+            Controller controller = context.getController();
+            if (controller == null) {
+                throw new NoDynamicContextException("No controller available");
+            }
+            SequenceCollector seq = controller.allocateSequenceOutputter(1);
+            pushEval.process(new ComplexContentOutputter(seq), context);
+            seq.close();
+            Item result = seq.getFirstItem();
+            seq.reset();
+            return result;
+        };
+    }
+
+    @Override
+    public PushEvaluator getPushEvaluator() {
+        // Must be implemented in a subclass
+        throw new NotImplementedException();
+    }
+
+
+
+}
+
