@@ -633,7 +633,7 @@ public class QT3TestDriverHE extends TestDriver {
                         }
                         case "XQ": {
                             XQueryCompiler testXqc = env.xqueryCompiler;
-                            testXqc.setLanguageVersion(langVersion);
+                            //testXqc.setLanguageVersion(langVersion);
                             testXqc.declareNamespace("fn", NamespaceConstant.FN);
                             testXqc.declareNamespace("xs", NamespaceConstant.SCHEMA);
                             //testXqc.declareNamespace("math", NamespaceConstant.MATH);
@@ -807,10 +807,6 @@ public class QT3TestDriverHE extends TestDriver {
                 outcome.setPrincipalResult(previousResult);
             }
 
-            for (Environment.ResetAction action : env.resetActions) {
-                action.reset(env);
-            }
-            env.resetActions.clear();
             XdmNode assertion;
             if (alternativeResult != null) {
                 assertion = (XdmNode) xpc.evaluateSingle("*[1]", alternativeResult);
@@ -899,6 +895,10 @@ public class QT3TestDriverHE extends TestDriver {
                     }
                 }
             }
+            for (Environment.ResetAction action : env.resetActions) {
+                action.reset(env);
+            }
+            env.resetActions.clear();
         }
     }
 
