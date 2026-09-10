@@ -5174,13 +5174,12 @@ cdef class PyXdmFunctionItem(PyXdmItem):
     def string_value(self):
         """
         string_value(self)
-        Property to get the string value of the PyXdmFunctionItem
-        Returns:
-            str: String value of the function item
+        Property to get the string value of the PyXdmFunctionItem. This will always raise an Exception,
+        as function items have no representation as a string value (FOTY0014).
+        Raises:
+            PySaxonApiError: function items have no representation as a string value
         """
-        cdef const char * c_string = self.derivedfptr.getStringValue()
-        py_string_i = make_py_str(c_string)
-        return py_string_i
+        raise PySaxonApiError("FOTY0014: The string value of a function is not defined")
 
     @staticmethod
     def get_system_function(PySaxonProcessor proc, str name, arity, encoding=None):

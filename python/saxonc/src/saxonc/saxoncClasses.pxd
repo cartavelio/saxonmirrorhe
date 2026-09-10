@@ -646,8 +646,9 @@ cdef extern from "saxonc/XdmValue.h":
 cdef extern from "saxonc/XdmItem.h":
     cdef cppclass XdmItem(XdmValue):
         XdmItem() except +handle_saxonc_api_exceptions
-        const char * getStringValue()
+        const char * getStringValue() except +handle_saxonc_api_exceptions
         bool isAtomic()
+
 
         bool isFunction()
 
