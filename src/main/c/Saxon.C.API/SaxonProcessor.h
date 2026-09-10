@@ -637,15 +637,15 @@ public:
   void clearConfigurationProperties();
 
  /**
-  * Flag to determine if this configuration is licensed.
-  * @return True if this configuration is licensed, false otherwise
+  * Test whether a license key has been found and accepted.
+  * @return True if this processor is licensed, false otherwise
   */
  bool isLicensed();
 
  /**
- * Get the short name of the Saxon product edition.
- * For example "EE". This represents the kind of configuration
- * that has been created, rather than the software that has been installed; for example it is possible to
+ * Get the short name of the licensed Saxon product edition, for example "EE". This represents the kind of
+ * configuration that has been created, rather than the software that has been installed; which depends on
+ * the license key supplied, as well as the software edition installed. For example it is possible to
  * instantiate an "HE" configuration even when using the "PE" or "EE" software.
  * @return The Saxon edition code: "EE", "PE", or "HE". Memory deallocation is handled internally.
  */

@@ -203,10 +203,13 @@
          <p>From SaxonC 12.6:</p>
 
          <ul>
-            <li>The <code>getSaxonEdition()</code> method on the <code>SaxonProcessor</code> class has
-               been added in the C++, Python and PHP APIs to give the shortened name of the Saxon product edition.</li>
-            <li>The <code>isLicensed()</code> method on the <code>SaxonProcessor</code> class has
-               been added to the C++, Python and PHP APIs to determine if this configuration is licensed.</li>
+            <li>The <code>isLicensed()</code> and <code>getSaxonEdition()</code> methods have been
+               added to <code>SaxonProcessor</code>, to make it easier to tell if a Saxon license
+               key has been found and accepted. The <code>getSaxonEdition()</code> method returns
+               the short name of the Saxon product edition licensed, for example "EE". This
+               represents the kind of configuration that has been created, rather than the software
+               that has been installed; which depends on the license key supplied, as well as the
+               software edition installed.</li>
             <li>The <code>equals()</code> method has been added to <code>XdmNode</code> to test for
                node identity. The same node may be represented by different <code>XdmNode</code>
                instances at different times, or even at the same time. The <code>equals()</code>

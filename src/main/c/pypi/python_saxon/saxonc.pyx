@@ -363,9 +363,9 @@ cdef class PySaxonProcessor:
     def is_licensed(self):
         """
         is_licensed(self)
-        Flag to determine if this configuration is licensed.
+        Property to check whether a license key has been found and accepted.
         Returns:
-            bool: True if the SaxonC Processor is licensed
+            bool: True if the SaxonC Processor is licensed, or False otherwise
         """
         return self.thisptr.isLicensed()
 
@@ -373,9 +373,11 @@ cdef class PySaxonProcessor:
     def edition(self):
         """
         edition(self)
-        Property to get the short name of the Saxon product edition.
+        Property to get the short name of the licensed Saxon product edition. This represents the kind of
+        configuration that has been created, rather than the software that has been installed; which depends on
+        the license key supplied, as well as the software edition installed.
         Returns:
-            bool: the Saxon edition code: "EE", "PE", or "HE".
+            str: the Saxon edition code: "EE", "PE", or "HE".
         """
         cdef const char* c_string = self.thisptr.getSaxonEdition()
         py_string_i = make_py_str(c_string)
@@ -450,7 +452,7 @@ cdef class PySaxonProcessor:
                 are accepted.
             encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
-            str: the URI inb clark notation
+            str: the URI in clark notation
         """
         cdef char * c_str_
         if encoding is None:
