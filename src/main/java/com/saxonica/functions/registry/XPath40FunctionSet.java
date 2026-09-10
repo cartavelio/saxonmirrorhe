@@ -432,9 +432,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(JsonToXMLFn.makeOptionsParameter(40)));
 
-        register("node-kind", 1, e -> e.populate(NodeKind_1::new, BuiltInAtomicType.STRING, OPT, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, EMPTY));
-
         register("label", 1, e -> e.populate(LabelFn::new, MapType.getInstance(), ONE, 0)
                 .arg(0, AnyItemType.getInstance(), ONE, null));
 
@@ -469,6 +466,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                                                            BuiltInAtomicType.INTEGER, OPT, CARD0)
                 .arg(0, chronoType, OPT, EMPTY));
 
+        register("node-kind", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
+
+        register("node-kind", 1, e -> e.populate(NodeKind_1::new, BuiltInAtomicType.STRING, OPT, 0)
+                .arg(0, Type.NODE_TYPE, OPT | INS, EMPTY));
+        
         register("normalize-unicode", 2, e -> e.populate(NormalizeUnicode::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
