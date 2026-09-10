@@ -17,7 +17,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 public class SubstringBeforeCompiler extends ToStringCompiler {
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty)
+    public void compileToUnicodeString(CompilerService compiler, Expression expression, OnEmpty onEmpty)
             throws CannotCompileException {
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
         final SubstringBefore fn = (SubstringBefore) fnc.getTargetFunction();
@@ -32,51 +32,32 @@ public class SubstringBeforeCompiler extends ToStringCompiler {
 
         if (stringCollator instanceof CodepointCollator) {
 
-            compiler.compileToPrimitive(fnc.getArg(0), requiredClass, onEmpty);
+            compiler.compileToPrimitive(fnc.getArg(0), UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
             ga.dup();
             // assert stack arg0 arg0
-            compiler.compileToPrimitive(fnc.getArg(1), requiredClass, onEmpty);
+            compiler.compileToPrimitive(fnc.getArg(1), UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
             // assert stack arg0 arg0 arg1
-            if (requiredClass == String.class) {
-                ga.invokeInstanceMethod(String.class, "indexOf", String.class);
-                // assert stack arg0 start(int)
-                ga.dup();
-                ga.ifZCmp(GeneratorAdapter.GT, found.label());
-                // assert stack arg0 start(int)
-                ga.pop();
-                ga.pop();
-                ga.push("");
-                ga.goTo(substringReturn);
 
-                methodInfo.placeLabel(found);
-                // assert stack arg0 start
-                ga.push(0);
-                ga.swap();
-                // assert stack arg0 0 start
-                ga.invokeInstanceMethod(requiredClass, "substring", Integer.TYPE, Integer.TYPE);
-                // assert stack substring (as string)
-            } else {
-                ga.push(0L);
-                ga.invokeInstanceMethod(UnicodeString.class, "indexOf", UnicodeString.class, Long.TYPE);
-                // assert stack arg0 start(long)
+            ga.push(0L);
+            ga.invokeInstanceMethod(UnicodeString.class, "indexOf", UnicodeString.class, Long.TYPE);
+            // assert stack arg0 start(long)
 
-                ga.cast(Type.LONG_TYPE, Type.INT_TYPE);
-                // assert stack arg0 start(int)
-                ga.dup();
-                // assert stack arg0 start(int) start(int)
-                ga.ifZCmp(GeneratorAdapter.GT, found.label());
-                // assert stack arg0 start(int)
-                ga.pop();
-                ga.pop();
-                ga.invokeStaticMethod(EmptyUnicodeString.class, "getInstance");
-                ga.goTo(substringReturn);
+            ga.cast(Type.LONG_TYPE, Type.INT_TYPE);
+            // assert stack arg0 start(int)
+            ga.dup();
+            // assert stack arg0 start(int) start(int)
+            ga.ifZCmp(GeneratorAdapter.GT, found.label());
+            // assert stack arg0 start(int)
+            ga.pop();
+            ga.pop();
+            ga.invokeStaticMethod(EmptyUnicodeString.class, "getInstance");
+            ga.goTo(substringReturn);
 
-                methodInfo.placeLabel(found);
-                // assert stack arg0 start(int)
-                ga.cast(Type.INT_TYPE, Type.LONG_TYPE);
-                ga.invokeInstanceMethod(UnicodeString.class, "prefix", Long.TYPE);
-                // assert stack substring (as UnicodeString)
-            }
+            methodInfo.placeLabel(found);
+            // assert stack arg0 start(int)
+            ga.cast(Type.INT_TYPE, Type.LONG_TYPE);
+            ga.invokeInstanceMethod(UnicodeString.class, "prefix", Long.TYPE);
+            // assert stack substring (as UnicodeString)
 
         } else {
 
@@ -88,9 +69,6 @@ public class SubstringBeforeCompiler extends ToStringCompiler {
 
             ga.invokeInstanceMethod(SubstringMatcher.class, "substringBefore", UnicodeString.class, UnicodeString.class);
 
-            if (requiredClass == String.class) {
-                ga.invokeInstanceMethod(UnicodeString.class, "toString");
-            }
         }
 
         methodInfo.placeLabel(substringReturn);

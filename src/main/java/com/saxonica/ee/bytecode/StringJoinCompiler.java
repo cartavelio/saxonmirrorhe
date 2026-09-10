@@ -14,6 +14,7 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.value.StringValue;
 import org.objectweb.asm.Type;
 
 public class StringJoinCompiler extends ToStringCompiler {
@@ -40,7 +41,11 @@ public class StringJoinCompiler extends ToStringCompiler {
 
         ga.loadLocal(arrVar);
         ga.push(1);
-        compiler.compileToItem(fnc.getArg(1));
+        if (fnc.getArity() > 1) {
+            compiler.compileToItem(fnc.getArg(1));
+        } else {
+            allocateStatic(compiler, StringValue.EMPTY_STRING);
+        }
         ga.arrayStore(Type.getType(Sequence.class));
 
         allocateStatic(compiler, fnc.getTargetFunction());

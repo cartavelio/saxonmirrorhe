@@ -2,10 +2,9 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.LocalVariableReference;
-import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -22,11 +21,19 @@ public class ConcatCompiler extends ToStringCompiler {
     @Override
     public void compileToUnicodeString(CompilerService compiler, Expression expression, OnEmpty onEmpty)
             throws CannotCompileException {
+        // In Saxon 11, the arguments to concat() are reduced to a single argument, which is a Block
         Configuration config = compiler.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
         SystemFunctionCall fnc = (SystemFunctionCall)expression;
+        Operand[] operanda;
+        if (((SystemFunctionCall) expression).getArg(0) instanceof Block) {
+            operanda = ((Block) ((SystemFunctionCall) expression).getArg(0)).getOperanda();
+        } else {
+            operanda = fnc.getOperanda().copy();
+        }
+        //Block block = (Block) ((SystemFunctionCall) expression).getArg(0);
         //Expression[] arguments = ((Concat) expression).getArguments();
-        int numArgs = fnc.getArity();
+        int numArgs = operanda.length;
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "Concat-item");
@@ -36,17 +43,21 @@ public class ConcatCompiler extends ToStringCompiler {
         ga.push(64);
         ga.invokeConstructor(UnicodeBuilder.class, Integer.TYPE);
         for (int i = 0; i < numArgs; i++) {
-            if (th.isSubType(fnc.getArg(i).getItemType(), BuiltInAtomicType.STRING) &&
-                    fnc.getArg(i).getCardinality() == StaticProperty.EXACTLY_ONE) {
+            Expression arg = operanda[i].getChildExpression();
+            if (th.isSubType(arg.getItemType(), BuiltInAtomicType.STRING) &&
+                    arg.getCardinality() == StaticProperty.EXACTLY_ONE) {
                 // this path is particularly useful for literal arguments
-                compiler.compileToPrimitive(fnc.getArg(i), UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
+                compiler.compileToPrimitive(arg, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
                 ga.invokeInstanceMethod(UnicodeBuilder.class, "append", UnicodeString.class);
+            } else if (Cardinality.allowsMany(arg.getCardinality())) {
+                compiler.compileToIterator(arg);
+                ga.invokeInstanceMethod(UnicodeBuilder.class, "appendAll", SequenceIterator.class);
             } else {
-                compiler.compileToItem(fnc.getArg(i));
+                compiler.compileToItem(arg);
                 ga.checkClass(AtomicValue.class);
                 ga.storeLocal(valVar);
                 LabelInfo nullLab = null;
-                if (Cardinality.allowsZero(fnc.getArg(i).getCardinality()) || fnc.getArg(i) instanceof LocalVariableReference) {
+                if (Cardinality.allowsZero(arg.getCardinality()) || arg instanceof LocalVariableReference) {
                     nullLab = methodInfo.newLabel("notNullCc" + i);
                     ga.loadLocal(valVar);
                     ga.ifNull(nullLab.label());

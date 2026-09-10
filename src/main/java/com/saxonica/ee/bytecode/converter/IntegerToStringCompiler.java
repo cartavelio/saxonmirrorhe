@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
@@ -59,6 +60,9 @@ public class IntegerToStringCompiler extends ConverterCompiler {
         if (compiler.isInRangeForLong(base)) {
             compiler.compileToPrimitive(base, Long.TYPE, onEmpty);
             ga.invokeStaticMethod(Long.class, "toString", Long.TYPE);
+            if (requiredClass == UnicodeString.class) {
+                ga.invokeStaticMethod(BMPString.class, "of", String.class);
+            }
         } else {
             compiler.compileToItem(base);
             if (allowsEmpty) {

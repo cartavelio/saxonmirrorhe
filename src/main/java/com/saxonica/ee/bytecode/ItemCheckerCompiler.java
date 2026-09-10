@@ -144,15 +144,8 @@ public class ItemCheckerCompiler extends ToIteratorCompiler {
             ga.instanceOf(Type.getType(NodeInfo.class));
         } else if (requiredType.equals(BuiltInAtomicType.ANY_ATOMIC)) {
             ga.instanceOf(Type.getType(AtomicValue.class));
-//        } else if (requiredType.equals(BuiltInAtomicType.STRING)) {
-//            errorLab = methodInfo.newLabel("errorLab");
-//            ga.dup();
-//            ga.instanceOf(Type.getType(StringValue.class));
-//            ga.swap();
-//            ga.invokeInstanceMethod(AtomicValue.class, "isUntypedAtomic");
-//            ga.not();
-//            ga.ifICmp(Generator.EQ, ok.label());
-//            ga.goTo(errorLab);
+        } else if (requiredType.equals(BuiltInAtomicType.STRING)) {
+            ga.instanceOf(Type.getType(StringValue.class));
         } else if (requiredType.equals(NumericType.getInstance())) {
             ga.instanceOf(Type.getType(NumericValue.class));
         } else if (requiredType.equals(BuiltInAtomicType.DOUBLE)) {

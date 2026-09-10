@@ -44,9 +44,17 @@ public class CopyCompiler extends ToPushCompiler {
         final Copy copyInstr = (Copy) expression;
 
         ItemType resultItemType = copyInstr.getItemType();
-        
+
+        LabelInfo contextItemNotNull = mi.newLabel("contextItemNotNull");
         compiler.generateGetContext();
         ga.invokeInstanceMethod(XPathContext.class, "getContextItem");
+        
+        ga.dup();
+        ga.ifNonNull(contextItemNotNull.label());
+        compiler.generateDynamicError("Context item for xsl:copy is null",
+                                      "XTTE0945", expression.getLocation(), true);
+        ga.pop();
+        mi.placeLabel(contextItemNotNull);
 
         final int selectedItemVar = mi.allocateLocal(Item.class);
         ga.storeLocal(selectedItemVar);
