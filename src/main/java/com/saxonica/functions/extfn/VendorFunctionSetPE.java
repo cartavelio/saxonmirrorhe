@@ -710,7 +710,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 dt = dt.adjustTimezone(context.getImplicitTimezone());
             }
 
-            Optional<Boolean> b = NamedTimeZone.inSummerTime(dt, arguments[0].head().getStringValue());
+            Optional<Boolean> b = NamedTimeZone.inSummerTime(dt, arguments[1].head().getStringValue());
             if (b.isPresent()) {
                 return BooleanValue.get(b.get());
             } else {

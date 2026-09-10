@@ -4,6 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.om.*;
+import net.sf.saxon.resource.BinaryResource;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -11,9 +12,6 @@ import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntIterator;
 
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -238,61 +236,6 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
         return PREFIX;
     }
 
-    @CSharpReplaceBody(code = "return System.Text.Encoding.GetEncoding(encoding).GetBytes(s);")
-    public static byte[] encode(String s, String encoding) throws XPathException {
-        CharsetEncoder encoder;
-        try {
-            encoder = Charset.forName(encoding).newEncoder();
-        } catch (Exception e) {
-            throw new XPathException("Unsupported encoding " + encoding, ERROR_CONVERSION);
-        }
-        encoder.onMalformedInput(CodingErrorAction.REPORT);
-
-        CharBuffer in = CharBuffer.wrap(s);
-        ByteBuffer out = null;
-        try {
-            out = encoder.encode(in);
-        } catch (MalformedInputException e) {
-            error("Malformed input in encoding:" + e, ERROR_CONVERSION);
-        } catch (UnmappableCharacterException e) {
-            error("Unmappable input in encoding:" + e, ERROR_CONVERSION);
-        } catch (CharacterCodingException e) {
-            error("Character code problem in encoding:" + e, ERROR_CONVERSION);
-        }
-        byte[] data = new byte[out.limit()];
-        System.arraycopy(out.array(), 0, data, 0, out.limit());
-        return data;
-    }
-
-    public static String decode(byte[] value, String encoding) throws XPathException {
-        return decode(value, 0, value.length, encoding);
-    }
-
-    @CSharpReplaceBody(code = "return new String(System.Text.Encoding.GetEncoding(encoding).GetChars(value, offset, len));")
-    public static String decode(byte[] value, int offset, int len, String encoding) throws XPathException {
-        CharsetDecoder decoder;
-        try {
-            decoder = Charset.forName(encoding).newDecoder();
-        } catch (Exception e) {
-            throw new XPathException("Unsupported encoding " + encoding, ERROR_CONVERSION);
-        }
-        decoder.onMalformedInput(CodingErrorAction.REPORT);
-        ByteBuffer in = ByteBuffer.wrap(value, offset, len);
-        char[] outChars = new char[len];
-        CharBuffer out = CharBuffer.wrap(outChars);
-        CoderResult res = decoder.decode(in, out, true);
-        if (res.isError()) {
-            if (res.isMalformed())
-                error("Malformed input in decoding", ERROR_CONVERSION);
-            if (res.isUnmappable())
-                error("Unmappable input in decoding", ERROR_CONVERSION);
-            error("Other error in decoding", ERROR_CONVERSION);
-        }
-        char[] resChars = new char[out.position()];
-        System.arraycopy(outChars, 0, resChars, 0, out.position());
-        return new String(resChars);
-    }
-
 
     public static class BinaryAnd extends SystemFunction {
         @Override
@@ -357,8 +300,13 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
 //            if (len == 0) {
 //                return StringValue.EMPTY_STRING;
 //            }
-            String result = decode(value.getBinaryValue(), offset, len, encoding);
-            return new StringValue(result);
+            try {
+                String result = BinaryResource.decode(value.getBinaryValue(), offset, len, encoding);
+                return new StringValue(result);
+            } catch (XPathException e) {
+                e.setErrorCodeQName(new StructuredQName("bin", ERROR_NAMESPACE, EXPathBinaryFunctionSet.ERROR_CONVERSION));
+                throw e;
+            }
         }
 
 
@@ -379,7 +327,12 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 encoding = arguments[1].head().getStringValue();
             }
             //checkEncoding(encoding);
-            byte[] data = encode(s, encoding);
+            byte[] data = new byte[0];
+            try {
+                data = BinaryResource.encode(s, encoding);
+            } catch (XPathException e) {
+                e.setErrorCodeQName(new StructuredQName("bin", ERROR_NAMESPACE, EXPathBinaryFunctionSet.ERROR_CONVERSION));
+            }
             return one(data);
         }
 
@@ -427,11 +380,25 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                     bytes[i++] = (byte) v;
                 } else {
                     error("Integer outside octet range in binary constructor:" + v,
-                          ERROR_OCTET_RANGE);
+                                         ERROR_OCTET_RANGE);
                 }
             }
             return one(bytes);
         }
+    }
+
+    /**
+     * Throw an error
+     *
+     * @param message the error message
+     * @param code    the error code to be used
+     * @throws XPathException always
+     */
+
+    public static void error(String message, String code) throws XPathException {
+        XPathException e = new XPathException(message);
+        e.setErrorCodeQName(new StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, code));
+        throw e;
     }
 
     public static class BinaryHex extends SystemFunction {
@@ -615,7 +582,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 return null;
             } else if (oct < 0 || 255 < oct) {
                 error("Integer outside octet range in padding:" + oct,
-                      ERROR_OCTET_RANGE);
+                                     ERROR_OCTET_RANGE);
                 return null;
             } else if (size == 0) {
                 return value;
@@ -881,21 +848,6 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
 
 
     /**
-     * Throw an error
-     *
-     * @param message the error message
-     * @param code    the error code to be used
-     * @throws XPathException always
-     */
-
-    private static void error(String message, String code)
-            throws XPathException {
-        XPathException e = new XPathException(message);
-        e.setErrorCodeQName(new StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, code));
-        throw e;
-    }
-
-    /**
      * Generate an xs:base64Binary result
      *
      * @param result - byte sequence
@@ -909,7 +861,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                                    int length) throws XPathException {
         if (offset < 0) {
             error("Attempting to retrieve data before the start of a binary data type",
-                    ERROR_INDEX_BEFORE_START);
+                                 ERROR_INDEX_BEFORE_START);
         }
         int len = value.getLengthInOctets();
         if (length < 0) {
@@ -930,7 +882,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                                             int length) throws XPathException {
         if (offset < 0) {
             error("Attempting to retrieve data before the start of a binary data type",
-                    ERROR_INDEX_BEFORE_START);
+                                 ERROR_INDEX_BEFORE_START);
         }
         int len = value.getLengthInOctets();
         if (length < 0) {
@@ -957,7 +909,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                                         Base64BinaryValue value2) throws XPathException {
         if (value1.getLengthInOctets() != value2.getLengthInOctets()) {
             error("The arguments to a bitwise operation are differing lengths",
-                    ERROR_DIFFERENT_LENGTH_ARGUMENTS);
+                                 ERROR_DIFFERENT_LENGTH_ARGUMENTS);
         }
     }
 
@@ -1063,7 +1015,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
         if (!se.equals("UTF-8") && !se.equals("UTF-16")
                 && !se.equals("US-ASCII") && !se.equals("ASCII") && !se.equals("ISO-8859-1")) {
             error("Unsupported encoding in binary encode/decode:" + encoding,
-                    ERROR_UNKNOWN_ENCODING);
+                                 ERROR_UNKNOWN_ENCODING);
         }
     }
 
