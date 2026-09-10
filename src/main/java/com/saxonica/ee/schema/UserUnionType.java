@@ -126,6 +126,10 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
         return memberTypeReferences;
     }
 
+    public Iterable<? extends ItemType> getAlternatives() {
+        return getPlainMemberTypes();
+    }
+
     /**
      * Ask whether this Simple Type is an atomic type
      *
