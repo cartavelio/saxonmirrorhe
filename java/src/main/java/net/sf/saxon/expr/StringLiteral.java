@@ -40,7 +40,7 @@ public class StringLiteral extends Literal {
             return in;
         }
         UnicodeString twine = TwineBuilder.make(in.length32()).append(us).toUnicodeString();
-        return new StringValue(twine);
+        return new StringValue(twine, in.getItemType());
     }
 
     /**
