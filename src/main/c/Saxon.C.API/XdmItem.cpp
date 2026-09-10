@@ -104,11 +104,6 @@ XdmItem::~XdmItem() {
               << " ob ref=" << (this) << " value =" << ((long)value)
               << std::endl;
   }
-  if (value != SXN_UNSET) {
-        if (getenv("SAXONC_DEBUG_FLAG")) {
-          std::cerr << "XdmItem j_handles_destroy	" << std::endl;
-        }
-
 #endif
   if (value > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)value);
@@ -129,9 +124,11 @@ void XdmItem::incrementRefCount() {
 
 
 void XdmItem::resetValue(int64_t newValue) {
+#ifdef DEBUG
 	if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr << "XdmItem resetItem called ref="<<((long)value) << std::endl;
     }
+#endif
   value = newValue;
 }
 
