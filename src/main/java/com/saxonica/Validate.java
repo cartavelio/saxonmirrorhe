@@ -89,9 +89,9 @@ public class Validate {
         //#if CSHARP==false
         options.addRecognizedOption("ext", CommandLineOptions.TYPE_BOOLEAN,
                 "Allow calls to Java extension functions");
-        options.addRecognizedOption("init", CommandLineOptions.TYPE_CLASSNAME,
-                "User-supplied net.sf.saxon.lib.Initializer class to initialize the Saxon Configuration");
         //#endif
+        options.addRecognizedOption("init", CommandLineOptions.TYPE_CLASSNAME,
+                "User-supplied code to initialize the Saxon configuration");
         options.addRecognizedOption("limits", CommandLineOptions.TYPE_INTEGER_PAIR,
                 "Limits for correct processing of minOccurs and maxOccurs");
         options.addRecognizedOption("opt", CommandLineOptions.TYPE_INTEGER | CommandLineOptions.VALUE_REQUIRED,
