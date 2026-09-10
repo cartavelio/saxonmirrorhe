@@ -248,16 +248,8 @@ public class Doc extends SystemFunction implements Callable {
                                                    "' but external entity expansion is disallowed", "FODC0006"));
             });
             //#endif
+            parseOptions = parseOptions.withTrusted(false);
         }
-
-//        val = checkedOptions.get("entity-expansion-limit").head();
-//        if (val != null) {
-//            try {
-//                parser.setProperty("http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", Integer.parseInt(val.getStringValue()));
-//            } catch (SAXException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
 
         val = checkedOptions.get("use-xsi-schema-location");
         if (val != null) {
