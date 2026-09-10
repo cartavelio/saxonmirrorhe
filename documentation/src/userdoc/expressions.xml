@@ -24,7 +24,7 @@
 
 	<p>The node-sets of XPath 1.0 are replaced in XPath 2.0 by sequences of nodes. Path expressions will return node sequences whose nodes are in document order with no duplicates, but other kinds of expression may return sequences of nodes in any order, with duplicates permitted.</p>
 
-	<section id="types" title="Types" class="qt4">
+	<section id="types" title="Types">
 		<h1>Types</h1>
 		<?source https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-types ?>
 
@@ -235,7 +235,7 @@
 					<td class="notes"><p>See also <code>xs:numeric</code></p></td>
 				</tr>
 				<tr>
-					<td class="name"><p><code>function()</code></p></td>
+					<td class="name"><p class="qt4"><code>function()</code></p></td>
 					<td class="description"><p>A function.</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>item()</code></p></td>
@@ -243,7 +243,7 @@
 					<td class="comparison-family"><p>Function</p></td>
 					<td class="notes">
 						<?source https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items ?>
-						<p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items">XDM 4.0</a> introduces the concept of function identity, an abstract property that can be used to test whether two variables refer to the same function or to different functions. This has an impact on <code>fn:deep-equal</code> and also when establishing whether the arguments and results of a function are <i>the same</i> when deciding whether the function is deterministic.</p>
+						<p class="qt4"><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items">XDM 4.0</a> introduces the concept of function identity, an abstract property that can be used to test whether two variables refer to the same function or to different functions. This has an impact on <code>fn:deep-equal</code> and also when establishing whether the arguments and results of a function are <i>the same</i> when deciding whether the function is deterministic.</p>
 					</td>
 				</tr>
 				<tr>
@@ -292,13 +292,13 @@
 					<td class="notes"><p>Also a member of the date/time types.</p></td>
 				</tr>
 				<tr>
-					<td class="name"><p><code>gnode()</code></p></td>
+					<td class="name"><p class="qt4"><code>gnode()</code></p></td>
 					<td class="description"><p>A generic node</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>item()</code></p></td>
 					<td class="sub-types"><p><code>node()</code>, <code>jnode()</code></p></td>
 					<td class="comparison-family"> </td>
-					<td class="notes"><p>Since 4.0.</p></td>
+					<td class="notes"><p class="qt4">Introduced in XDM 4.0.</p></td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:hexBinary</code></p></td>
@@ -337,13 +337,13 @@
 					<td class="notes"><p>See also <code>xs:numeric</code></p></td>
 				</tr>
 				<tr>
-					<td class="name"><p><code>jnode()</code></p></td>
+					<td class="name"><p class="qt4"><code>jnode()</code></p></td>
 					<td class="description"><p>A JSON node</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>gnode()</code></p></td>
 					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>JNode</p></td>
-					<td class="notes"><p>Since 4.0.</p></td>
+					<td class="notes"><p class="qt4">Introduced in XDM 4.0.</p></td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:long</code></p></td>
@@ -392,12 +392,12 @@
 				</tr>
 				<tr>
 					<td class="name"><p><code>node()</code></p></td>
-					<td class="description"><p>An XML node</p></td>
+					<td class="description"><p class="qt4">An XML node</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>gnode()</code></p></td>
 					<td class="sub-types"><p><code>document-node()</code>, <code>element()</code>, <code>attribute()</code>, <code>text()</code>, <code>comment()</code>, <code>processing-instruction()</code>, <code>namespace-node()</code></p></td>
 					<td class="comparison-family"> </td>
-					<td class="notes"><p>While the concept of a node existed before 4.0, the term <b>XNode</b> was introduced in 4.0 to differentiate between XML nodes and JSON nodes (see <code>jnode()</code>).</p></td>
+					<td class="notes"><p class="qt4">While the concept of a node existed before 4.0, the term <b>XNode</b> was introduced in 4.0 to differentiate between XML nodes and JSON nodes (see <code>jnode()</code>).</p></td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:nonNegativeInteger</code></p></td>
@@ -537,21 +537,23 @@
 			</tbody>
 		</table>
 
-		<p>XQuery and XPath Data Model 4.0 introduces new types in the Item category:</p>
-		<ul>
-			<li><p>Generic node (gnode())</p> - <i/>represents a node in a tree, regardless of whether it's a JSON tree or an XML tree.</li>
-			<li><p>JSON node (jnode())</p> - <i>represents a node in a JSON tree, as opposed to an XML tree</i></li>
-		</ul>
-		<p>To complement the above changes, from 4.0 onwards, a node in an XML tree is known as an XNode (node()) but remains otherwise unchanged.</p>
-
-		<p>New types were also added to the Schema category in 4.0 but these are more easily considered methods for constraining how other types are used:</p>
-		<ul>
-			<li><p><a class="bodylink" href="/expressions/types/choice-types">Choice item types</a></p></li>
-			<li><p><a class="bodylink" href="/expressions/types/choice-types">Record types</a></p></li>
-			<li><p><a class="bodylink" href="/expressions/types/choice-types">Enumeration types</a></p></li>
-		</ul>
-
-		<p>Since 4.0, atomic items that belong to the same comparison family are mutually comparable.</p>
+		<div class="qt4">
+			<p>XQuery and XPath Data Model 4.0 introduces new types in the Item category:</p>
+			<ul>
+				<li><p>Generic node (gnode())</p> - <i/>represents a node in a tree, regardless of whether it's a JSON tree or an XML tree.</li>
+				<li><p>JSON node (jnode())</p> - <i>represents a node in a JSON tree, as opposed to an XML tree</i></li>
+			</ul>
+			<p>To complement the above changes, from 4.0 onwards, a node in an XML tree is known as an XNode (node()) but remains otherwise unchanged.</p>
+	
+			<p>New types were also added to the Schema category in 4.0 but these are more easily considered methods for constraining how other types are used:</p>
+			<ul>
+				<li><p><a class="bodylink" href="/expressions/types/choice-types">Choice item types</a></p></li>
+				<li><p><a class="bodylink" href="/expressions/types/choice-types">Record types</a></p></li>
+				<li><p><a class="bodylink" href="/expressions/types/choice-types">Enumeration types</a></p></li>
+			</ul>
+	
+			<p>Since 4.0, atomic items that belong to the same comparison family are mutually comparable.</p>
+		</div>
 
 		<p>For more detailed information about types, see:</p>
 		<ul>
@@ -574,7 +576,7 @@
 
 			<p>Maps, like sequences, are immutable. When you add an entry to a map, you get a new map; the original is unchanged. Saxon provides an efficient implementation of maps that achieves this without copying the whole map every time an entry is added.</p>
 
-			<p>Since XDM 4.0, all the entries in map are ordered (see <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#map-ordering">Ordering of Maps</a>). Prior to that, order was not preserved.</p>
+			<p class="qt4">Since XDM 4.0, all the entries in map are ordered (see <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#map-ordering">Ordering of Maps</a>). Prior to that, order was not preserved.</p>
 
 			<p>Also like sequences, maps do not have an intrinsic type of their own, but rather have a type that can be inferred from what they contain. A map conforms to the type <code>map(K, V)</code> if all the keys are of type <code>K</code> and all the values are of type <code>V</code>. For example if the keys are all strings, and the values are all <code>employee</code> elements, then the map conforms to the type <code>map(xs:string, element(employee))</code>.</p>
 
@@ -970,7 +972,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<?source https://www.w3.org/TR/xpath-30/#id-literals?>
 		<p><strong>String literals</strong> are written as <code>"London"</code> or <code>'Paris'</code>. In each case you can use the opposite kind of quotation mark within the string: <code>'He said "Boo"'</code>, or <code>"That's rubbish"</code>. In a stylesheet XPath expressions always appear within XML attributes, so it is usual to use one kind of delimiter for the attribute and the other kind for the literal. Anything else can be written using XML character entities. String delimiters can be doubled within the string to represent the delimiter itself: for example <code>&lt;xsl:value-of select='"He said, ""Go!"""'/&gt;</code></p>
 		<p><strong>Numeric literals</strong> follow the Java rules for decimal literals: for example, <code>12</code> or <code>3.05</code>; a negative number can be written as (say) <code>-93.7</code>, though technically the minus sign is not part of the literal. (Also, note that you may need a space before the minus sign to avoid it being treated as a hyphen within a preceding name). The numeric literal is taken as a double precision floating point number if it uses scientific notation (e.g. <code>1.0e7</code>), as fixed point decimal if it includes a full stop, or as an integer otherwise. Decimal values (and integers) in Saxon have unlimited precision and range (they use the Java classes <code>BigInteger</code> and <code>BigDecimal</code> internally). Note that a value such as <code>3.5</code> was handled as a double-precision floating point number in XPath 1.0, but as a decimal number in XPath 2.0: this may affect the precision of arithmetic results.</p>
-		<p>Since XPath 4.0, numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary (<code>0b101010</code>), and underscores can be used as separators (<code>1_000_000</code>).</p>
+		<p class="qt4">Since XPath 4.0, numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary (<code>0b101010</code>), and underscores can be used as separators (<code>1_000_000</code>).</p>
 		<p>There are no boolean constants as such: instead use the function calls <a class="bodylink code" href="/functions/fn/true">true()</a> and <a class="bodylink code" href="/functions/fn/false">false()</a>.</p>
 		<p>Constants of other data types can be written using constructors, which look like function calls but generally take a string literal as their argument. For example, <code>xs:float("10.7")</code> produces a single-precision floating point number. Saxon implements constructors for all of the built-in data types defined in XML Schema Part 2.</p>
 		<p>An example for <strong>date</strong> and <strong>dateTime</strong> values: you can write constants for these data types as <code>xs:date("2002-04-30")</code> or <code>xs:dateTime("1966-07-31T15:00:00Z")</code>.</p>
@@ -1242,7 +1244,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			<p>The expression <code>E1 or E2</code> returns true if the <i>effective boolean values</i> of either or both of <code>E1</code> and <code>E2</code> are true.</p>
 			<p>The specification allows the operands to be evaluated in either order, but Saxon will normally evaluate them left-to-right, which means if you write something like <code>$a instance of xs:integer and $x = (1 to $a)</code>, then you won't get an error if <code>$a</code> is not an integer. But the specification doesn't guarantee this.</p>
 			
-			<section id="short-circuit" title="Short-circuit boolean operators">
+			<section id="short-circuit" title="Short-circuit boolean operators" class="qt4">
 				<h1>Short-circuit boolean operators</h1>
 				
 				<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled.</aside>
@@ -1282,7 +1284,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			<p>The expression <code>E1 except E2</code> selects all nodes that are in <code>E1</code> unless they are also in <code>E2</code>. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>@* except @note</code> returns all attributes except the <code>note</code> attribute.</p>
 			<p>The expression <code>E1 intersect E2</code> selects all nodes that are in both <code>E1</code> and <code>E2</code>. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>preceding::fig intersect ancestor::chapter//fig</code> returns all preceding <code>fig</code> elements within the current chapter.</p>
 		</section>
-		<section id="otherwise" title="Otherwise operator">
+		<section id="otherwise" title="Otherwise operator" class="qt4">
 			<h1>Otherwise operator</h1>
 			
 			
@@ -1295,7 +1297,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			<p>The precedence of the operator as implemented in Saxon 13 matches the current XPath 4.0 draft specification (September 2024), which has changed since Saxon 12. The precedence is greater than comparison operators such as <code>=</code>, but less than arithmetic operators such as <code>+</code>. So <code>$a = $b + $c otherwise $d</code> means <code>$a = (($b + $c) otherwise $d)</code>. Use parentheses to make your intended meaning clear and to avoid any compatibility problems.</p>		
 			
 		</section>	
-		<section id="lookup-generalization" title="Lookup expressions">
+		<section id="lookup-generalization" title="Lookup expressions" class="qt4">
 			<h1>Lookup expressions: removal of restrictions</h1>
 			
 			<p>From XPath 4.0 onwards, the lookup operator "?" (in both its unary and binary forms) can now be followed by:</p>
@@ -1307,7 +1309,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			
 			<p>The effect is the same as if the string literal or variable were written in parentheses.</p>
 		</section>
-		<section id="non-ascii-operators" title="Non-ASCII operator symbols">
+		<section id="non-ascii-operators" title="Non-ASCII operator symbols" class="qt4">
 			<h1>Non-ASCII operator symbols</h1>
 			<p>Since XPath 4.0, the non-ASCII characters <code>×</code> (xD7) and <code>÷</code> (xF7) can be used in place of <code>*</code> and <code>div</code> to represent the multiplication and division operators.</p>
 			<p>The <code>＜</code> and <code>＞</code> characters (xFF1C and xFF1E) can be used in place of <code>&lt;</code> and <code>&gt;</code> to represent the less-than and greater-than operators; these characters can also be used in place of <code>&lt;</code> and <code>&gt;</code> in the compound tokens <code>&lt;=</code>, <code>>=</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>=&gt;</code>, <code>-&gt;</code>, and <code>=!&gt;</code>.</p>
@@ -1339,8 +1341,6 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<p>The expression <code>E cast as T</code> converts the value of expression <code>E</code> to type <code>T</code>. Whether <code>T</code> is a built-in type or a user-defined type, the effect is exactly the same as using the constructor function <code>T (E)</code>.</p>
 		<p>The expression <code>E treat as T</code> is designed for environments that perform static type checking. Saxon doesn't do static type checking, so this expression has very little use, except to document an assertion that the expression <code>E</code> is of a particular type. A run-time failure will be reported if the value of <code>E</code> is not of type <code>T</code>; no attempt is made to convert the value to this type.</p>
 	</section>
-
-
 	<section id="arithmetic" title="Arithmetic expressions">
 		<h1>Arithmetic expressions</h1>
 		<h2 class="subtitle">Unary plus and minus</h2>
@@ -1382,12 +1382,14 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<p>XPath 2.0 introduced a conditional expression of the form <code>if ( E1 ) then E2 else E3</code>. For example, <code>if (@discount) then @discount else 0</code> returns the value of the <code>discount</code> attribute if it is present, or zero otherwise.</p>
 		<p>It's also worth noting the coding pattern <code>(@price, 5)[1]</code> which returns the value of <code>@price</code> if it exists, or 5 otherwise.</p>
 		
-		<h2 id="braced-conditionals" title="Braced Conditionals">Braced Conditionals</h2>
+		<div class="qt4">
+			<h2 id="braced-conditionals" title="Braced Conditionals" class="subtitle">Braced Conditionals</h2>
+				
+			<p>XPath 4.0 introduces an alternate syntax for conditionals, known as a <i>BracedAction</i>.  For example, <code>if (<i>condition</i>) then <i>thenExpr</i> else <i>elseExpr</i></code> may now be written as <code>if <i>condition</i> "{" <i>thenExpr</i> "}" ("else" "{" <i>elseExpr</i> "}")?</code>. The semantics are identical, but the <code>else</code> part is optional, and defaults to an empty sequence.</p>
 			
-		<p>XPath 4.0 introduces an alternate syntax for conditionals, known as a <i>BracedAction</i>.  For example, <code>if (<i>condition</i>) then <i>thenExpr</i> else <i>elseExpr</i></code> may now be written as <code>if <i>condition</i> "{" <i>thenExpr</i> "}" ("else" "{" <i>elseExpr</i> "}")?</code>. The semantics are identical, but the <code>else</code> part is optional, and defaults to an empty sequence.</p>
+			<p>For example, in XQuery, <code>if ($break) {&lt;br/&gt;}</code> outputs a <code>br</code> element if <code>$break</code> is true, and does nothing if it is false.</p>
+		</div>
 		
-		<p>For example, in XQuery, <code>if ($break) {&lt;br/&gt;}</code> outputs a <code>br</code> element if <code>$break</code> is true, and does nothing if it is false.</p>
-			
 	</section>
 	<section id="quantified" title="Quantified expressions">
 		<h1>Quantified expressions</h1>
@@ -1398,7 +1400,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<h1>For expressions</h1>
 		<p>The expression <code>for $x in E1 return E2</code> returns the sequence that results from evaluating <code>E2</code> once for every item in the sequence <code>E1</code>. Note that <code>E2</code> must use the range variable <code>$x</code> to refer to the item being tested; it does not become the context item. For example, <code>sum(for $v in order-item return $v/price * $v/quantity)</code> returns the total value of (price times quantity) for all the selected <code>order-item</code> elements.</p>
 		
-		<section id="for-member-expression" title="For-member expressions">
+		<section id="for-member-expression" title="For-member expressions" class="qt4">
 			<h1>For-member expressions</h1>
 			
 			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
@@ -1449,12 +1451,14 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 			
 			<p>XPath 3.0 allows <code>let</code> expressions, previously available only in XQuery. For example the expression <code>let $x := . return //a[@status=$x]</code> binds the variable <code>$x</code> to the context item, and then evaluates the expression <code>//a[@status=$x]</code> which makes use of this variable.</p>
 			
-			<p>XPath 4.0 allows multiple <code>let</code> clauses, or multiple <code>for</code> clauses (but not a mixture) in an expression. For example:</p>
-			<ul>
-				<li><code>let $i := 2 let $j := 3 return $i + $j</code></li>
-				<li><code>for $i in 1 to 10 for $j in 1 to 3 return $i * $j</code></li>
-			</ul>
-			<p>This feature is implemented from Saxon 12.3.</p>
+			<div class="qt4">
+				<p>XPath 4.0 allows multiple <code>let</code> clauses, or multiple <code>for</code> clauses (but not a mixture) in an expression. For example:</p>
+				<ul>
+					<li><code>let $i := 2 let $j := 3 return $i + $j</code></li>
+					<li><code>for $i in 1 to 10 for $j in 1 to 3 return $i * $j</code></li>
+				</ul>
+				<p>This feature is implemented from Saxon 12.3.</p>
+			</div>
 		</section>
 		
 	</section>
@@ -1502,14 +1506,16 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 		</ol>
 		<p>A number of new functions are available, including <code>random-number-generator()</code>, <code>sort()</code>, <code>parse-ietf-date()</code>, and functions to read and write data in JSON format. For details see the <a class="bodylink" href="/functions">Functions library</a>.</p>
 	</section>
-	<section id="new-in-xpath40" title="New features in XPath 4.0">
+	<section id="new-in-xpath40" title="New features in XPath 4.0" class="qt4">
 		<h1>New features in XPath 4.0</h1>
 		
-		<p>For full details of the changes in XPath 4.0, see the W3C specifications:</p>
-		<ul>
-			<li><p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html">XQuery and XPath Data Model 4.0</a></p></li>
-			<li><p><a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html">XML Path Language (XPath) 4.0</a></p></li>
-		</ul>
+		<aside>
+			<p>For full details of the changes in XPath 4.0, see the W3C specifications:</p>
+			<ul>
+				<li><p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html">XQuery and XPath Data Model 4.0</a></p></li>
+				<li><p><a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html">XML Path Language (XPath) 4.0</a></p></li>
+			</ul>
+		</aside>
 		
 		<ul>
 			<li><p>The previously optional Static Typing Feature has been dropped completely (see XPath 3.1 for a <a href="https://www.w3.org/TR/2017/REC-xpath-31-20170321/#dt-xpath-static-typing-feature">description of the feature</a> prior to 4.0).</p></li>
@@ -1530,9 +1536,9 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 					<li><p>Generic nodes (GNode)</p></li>
 					<li><p>JSON nodes (JNode)</p></li>
 					<li><p>A new name for XML nodes: XNode</p></li>
-					<li><p><a class="bodylink" href="/expressions/type-system/choice-types">Choice item types</a></p></li>
+					<li><p><a class="bodylink" href="/expressions/types/choice-types">Choice item types</a></p></li>
 					<li>
-						<p><a class="bodylink" href="/expressions/type-system/record-types">Record types</a>, including 5 built-in named record types:</p>
+						<p><a class="bodylink" href="/expressions/types/record-types">Record types</a>, including 5 built-in named record types:</p>
 						<ul>
 							<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#load-xquery-module-record"><code>fn:load-xquery-module-record</code></a> - <i>holds the result of <code>fn:load-xquery-module</code></i></li>
 							<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#parsed-csv-structure-record"><code>fn:parsed-csv-structure-record</code></a> - <i>holds the result of <code>fn:parse-csv</code></i></li>
@@ -1541,8 +1547,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 							<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#uri-structure-record"><code>fn:uri-structure-record</code></a> - <i>represents the components of a URI</i></li>
 						</ul>
 					</li>
-					<li><p><a class="bodylink" href="/expressions/type-system/enum-types">Enum types</a></p></li>
-					<li><p><a class="bodylink" href="/expressions/type-system/kindtests">KindTests and NodeTests</a></p></li>
+					<li><p><a class="bodylink" href="/expressions/types/enum-types">Enum types</a></p></li>
+					<li><p><a class="bodylink" href="/expressions/types/kindtests">KindTests and NodeTests</a></p></li>
 					<li><p><a class="bodylink" href="/expressions/types/named-item-types">Named item types</a></p></li>
 				</ul>
 			</li>
