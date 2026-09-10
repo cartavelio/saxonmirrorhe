@@ -86,8 +86,9 @@ dependencies {
         project(path = javaEditionProject(edition), configuration = "implementationDependencies")
     })
 
-    compileOnly("org.graalvm.sdk:graal-sdk:${findProperty("graalSdkVersion")}")
-    compileOnly("org.graalvm.nativeimage:svm:${findProperty("graalSvmVersion")}")
+    compileOnly("org.graalvm.sdk:graal-sdk:${project.findProperty("graalSdkVersion")}")
+    compileOnly("org.graalvm.nativeimage:svm:${project.findProperty("graalSvmVersion")}")
+    compileOnly("xerces:xercesImpl:${project.findProperty("xercesVersion")}")
     compileOnly("com.ibm.icu:icu4j:${project.findProperty("icu4jVersion")}")
     compileOnly("org.nineml:coffeefilter:${project.findProperty("ninemlVersion")}")
 }
@@ -152,7 +153,7 @@ val bundleDependencies = tasks.register<UnjarBundleDependencies>("bundleJarDepen
     outputDir = project.layout.buildDirectory.dir("unjar")
 
     bundle {
-        jar(project.layout.projectDirectory.file("../lib/xercesImpl.jar")) {
+        jar("xercesImpl-${project.findProperty("xercesVersion")}.jar") {
             include("**/*.class")
             include("**/*.properties")
             exclude("org.w3c.dom.html.HTMLDOMImplementation.class")
