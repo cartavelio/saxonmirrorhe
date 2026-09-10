@@ -1449,7 +1449,7 @@ cdef class PyXsltExecutable:
      def set_initial_match_selection(self, **kwds):
         """
         set_initial_match_selection(self, **kwds)
-        The initial filename to which templates are to be applied (equivalent to the select attribute of
+        The initial value to which templates are to be applied (equivalent to the select attribute of
         xsl:apply-templates).
         Args:
             **kwds: Possible keyword arguments: must be one of the following (file_name|xdm_value)
