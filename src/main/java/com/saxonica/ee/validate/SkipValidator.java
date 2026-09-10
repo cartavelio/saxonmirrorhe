@@ -21,17 +21,16 @@ import net.sf.saxon.type.*;
 public class SkipValidator extends ContentValidator {
 
     private boolean stripIdProperty = false;        // indicates whether the is-id and is-idref properties should be stripped
-    private TypeHierarchy typeHierarchy;
 
     public SkipValidator(Receiver next) {
         super(next);
+        setPipelineConfiguration(next.getPipelineConfiguration()); // see bug #5153
     }
 
     @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         super.setPipelineConfiguration(pipe);
         stripIdProperty = pipe.getHostLanguage() == HostLanguage.XQUERY;
-        typeHierarchy = pipe.getConfiguration().getTypeHierarchy();
     }
 
     /**
