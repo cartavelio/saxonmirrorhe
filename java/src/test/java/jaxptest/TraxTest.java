@@ -7,6 +7,7 @@ import net.sf.saxon.dom.NodeOverNodeInfo;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.jaxp.TransformerImpl;
 import net.sf.saxon.junit.Testdata;
+import net.sf.saxon.junit.TestdataDir;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.om.NodeInfo;
@@ -46,17 +47,18 @@ import static org.junit.jupiter.api.Assertions.fail;
  * originally created by Scott Boag, but much evolved since.
  */
 public class TraxTest {
-    private final String foo_xml = Testdata.pathString("trax/xml/foo.xml");
-    private final String foo_xsl = Testdata.pathString("trax/xsl/foo.xsl");
-    private final String baz_xml = Testdata.pathString("trax/xml/baz.xml");
-    private final String baz_xsl = Testdata.pathString("trax/xsl/baz.xsl");
-    private final String foo2_xsl = Testdata.pathString("trax/xsl/foo2.xsl");
-    private final String foo3_xsl = Testdata.pathString("trax/xsl/foo3.xsl");
-    private final String text_xsl = Testdata.pathString("trax/xsl/text.xsl");
-    private final String cities_xml = Testdata.pathString("trax/xml/cities.xml");
-    private final String embedded_xml = Testdata.pathString("trax/xml/embedded.xml");
-    private final String multidoc_xsl = Testdata.pathString("trax/xsl/multidoc.xsl");
-    private final String identity_xsl = Testdata.pathString("trax/xsl/identity.xsl");
+    private final TestdataDir traxDir = Testdata.testDir("trax");
+    private final String foo_xml = traxDir.pathString("xml/foo.xml");
+    private final String foo_xsl = traxDir.pathString("xsl/foo.xsl");
+    private final String baz_xml = traxDir.pathString("xml/baz.xml");
+    private final String baz_xsl = traxDir.pathString("xsl/baz.xsl");
+    private final String foo2_xsl = traxDir.pathString("xsl/foo2.xsl");
+    private final String foo3_xsl = traxDir.pathString("xsl/foo3.xsl");
+    private final String text_xsl = traxDir.pathString("xsl/text.xsl");
+    private final String cities_xml = traxDir.pathString("xml/cities.xml");
+    private final String embedded_xml = traxDir.pathString("xml/embedded.xml");
+    private final String multidoc_xsl = traxDir.pathString("xsl/multidoc.xsl");
+    private final String identity_xsl = traxDir.pathString("xsl/identity.xsl");
 
 
     private static TransformerFactory makeFactory() {

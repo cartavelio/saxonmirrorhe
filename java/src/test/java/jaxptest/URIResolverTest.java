@@ -3,6 +3,7 @@ package jaxptest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
 import net.sf.saxon.junit.Testdata;
+import net.sf.saxon.junit.TestdataDir;
 import net.sf.saxon.lib.EmptySource;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardURIResolver;
@@ -43,10 +44,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  * originally created by Scott Boag, but much evolved since.
  */
 public class URIResolverTest {
-    private final Path d = Testdata.path("trax");
+    private final TestdataDir d = Testdata.testDir("trax");
 
-    private final File foo_xml = d.resolve("xml/foo.xml").toFile();
-    private final File foo_xsl = d.resolve("xsl/foo.xsl").toFile();
+    private final File foo_xml = d.file("xml/foo.xml");
+    private final File foo_xsl = d.file("xsl/foo.xsl");
 
     @Test
     public void testGetURIResolver() {
@@ -310,9 +311,9 @@ public class URIResolverTest {
                 SAXBuilder builder = new SAXBuilder();
                 File file;
                 if (href.endsWith("inc1/inc1.xsl")) {
-                    file = Testdata.file("/trax/xsl/inc1/inc1.xsl");
+                    file = Testdata.file("trax/xsl/inc1/inc1.xsl");
                 } else if (href.endsWith("inc2/inc2.xsl")) {
-                    file = Testdata.file("/trax/xsl/inc1/inc2/inc2.xsl");
+                    file = Testdata.file("trax/xsl/inc1/inc2/inc2.xsl");
                 } else {
                     throw new XPathException("Unknown file " + href);
                 }

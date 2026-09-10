@@ -161,7 +161,7 @@ public class ResolverConfigurationTest {
             Processor processor = new Processor(false);
             processor.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "https,http");
             XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
-            xqueryCompiler.setBaseURI(Testdata.dir().toFile().toURI());
+            xqueryCompiler.setBaseURI(Testdata.baseURI());
             XQueryEvaluator xqueryEvaluator = xqueryCompiler.compile(query).load();
             xqueryEvaluator.run(processor.newSerializer(System.out));
             System.err.println("Third run wrongly successful");

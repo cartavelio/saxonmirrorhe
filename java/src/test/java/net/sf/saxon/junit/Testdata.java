@@ -58,6 +58,9 @@ public class Testdata {
         return testdata().pathString(filePath);
     }
 
+    public static TestdataDir testDir(String dirPath) {
+        return new TestdataDir(path(dirPath));
+    }
 
     public static TestdataDir bugs() {
         if (bugsDir == null) {
