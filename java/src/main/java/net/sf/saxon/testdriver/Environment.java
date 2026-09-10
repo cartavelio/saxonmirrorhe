@@ -1047,20 +1047,6 @@ public class Environment implements ResourceResolver {
                         }
                     }
                 }
-
-
-                if (role != null) {
-                    if (".".equals(role)) {
-                        environment.contextItem = selectedItem;
-                    } else if (role.startsWith("$")) {
-                        String varName = role.substring(1);
-                        environment.params.put(new QName(varName), selectedItem);
-                        environment.xpathCompiler.declareVariable(new QName(varName));
-                        if (!isTrue("declared").test(source)) {
-                            environment.paramDeclarations.append("declare variable $" + varName + " external; ");
-                        }
-                    }
-                }
             }
 
             String definesStylesheet = source.attribute("defines-stylesheet");
