@@ -303,3 +303,7 @@ td{
     padding-right:15px;
 }
 
+sup{
+   vertical-align: super;
+   font-size: smaller;
+}
