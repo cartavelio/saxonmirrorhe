@@ -9,6 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 
@@ -19,14 +20,28 @@ import net.sf.saxon.trans.XPathException;
 
 public class XSLMatchingSubstring extends StyleElement {
 
+    private Expression select = null;
 
     @Override
     protected void prepareAttributes() {
+
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
+            String value = att.getValue();
             String f = attName.getDisplayName();
-            checkUnknownAttribute(attName);
+            if (f.equals("select")) {
+                if (requireXslt40Attribute("select")) {
+                    select = makeExpression(value, att);
+                }
+            } else {
+                checkUnknownAttribute(attName);
+            }
         }
+
+    }
+
+    public Expression getSelectExpression() {
+        return select;
     }
 
     /**
@@ -44,6 +59,17 @@ public class XSLMatchingSubstring extends StyleElement {
     public void validate(ComponentDeclaration decl) throws XPathException {
         if (!(getParent() instanceof XSLAnalyzeString)) {
             compileError(getDisplayName() + " must be immediately within xsl:analyze-string", "XTSE0010");
+        }
+        if (select != null) {
+            for (NodeInfo child : children()) {
+                if (!(child instanceof XSLFallback)) {
+                    if (select != null) {
+                        compileError("An " + getDisplayName() + " element with a select attribute must be empty", "XTSE3185");
+                    }
+                    break;
+                }
+            }
+            select = typeCheck("select", select);
         }
     }
 
