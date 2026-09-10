@@ -1389,7 +1389,7 @@ task javaArchiveHE(
   description: "Archive the HE sources"
 ) {
   archiveFileName = "saxon${saxonVersion.replace('.', '-')}source.zip"
-  from ("${buildDir}/preprocess/hej") {
+  from ("${buildDir}/src/hej") {
     include "net/**/*.java"
   }
   from ("${buildDir}/n/csharp") {
@@ -1411,26 +1411,27 @@ task javaArchiveEE(
 
 // ============================================================
 // The following tasks exist to build jar files that will be
-// published on Maven. The archiveBaseName "MavenHE" distinguishes
-// them from jar files built by other targets. The Maven publish
-// step will make sure they have the correct names on Maven.
+// published on Maven. They're saved in build/maven so that
+// they're distinct from the other jar files
 
 task mavenHeJavadocJar(
   type: Jar,
   dependsOn: ["he_javadoc"]
 ) {
-  archiveBaseName = "MavenHE"
+  archiveBaseName = "Saxon-HE"
   archiveVersion = saxonVersion
   classifier = 'javadoc'
+  destinationDirectory = project.file("${buildDir}/maven")
   from "${buildDir}/he_javadoc"
   doLast {
-    signJar("${buildDir}/libs/MavenHE-${saxonVersion}-javadoc.jar")
+    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-javadoc.jar")
   }
 }
 
 task mavenHeSaxonJar(type: Jar, dependsOn: [hejJar, "compile_function_library"]) {
-  archiveBaseName = "MavenHE"
+  archiveBaseName = "Saxon-HE"
   archiveVersion = saxonVersion
+  destinationDirectory = project.file("${buildDir}/maven")
   manifest {
     attributes "Project-Name": "Saxon-HE"
     attributes "Main-Class": "net.sf.saxon.Transform"
@@ -1446,41 +1447,58 @@ task mavenHeSaxonJar(type: Jar, dependsOn: [hejJar, "compile_function_library"])
     include "net/sf/saxon/data/**"
   }
   doLast {
-    signJar("${buildDir}/libs/MavenHE-${saxonVersion}.jar")
+    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}.jar")
   }
 }
 
 task mavenHeSourceJar(type: Jar,
                       dependsOn: ["hej_preprocess", "eej_preprocess", "compile_function_library"]) {
-  archiveBaseName = "MavenHE"
+  archiveBaseName = "Saxon-HE"
   classifier = 'sources'
   archiveVersion = saxonVersion
-  from ("${buildDir}/preprocess/hej") {
+  destinationDirectory = project.file("${buildDir}/maven")
+  from ("${buildDir}/src/hej") {
     include "net/**/*.java"
-  }
-  from ("${buildDir}/preprocess/eej") {
-    include "com/saxonica/xqj/**/*.java"
-    include "javax/**/*.java"
   }
   from ("${buildDir}/resources/main") {
     include "net/sf/saxon/data/**"
   }
   doLast {
-    signJar("${buildDir}/libs/MavenHE-${saxonVersion}-sources.jar")
+    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-sources.jar")
   }
 }
 
 task mavenHeXqjJar(type: Jar, dependsOn: ["eejCompile"]) {
-  archiveBaseName = "MavenHE"
+  archiveBaseName = "Saxon-HE"
   classifier = 'xqj'
   archiveVersion = saxonVersion
+  destinationDirectory = project.file("${buildDir}/maven")
   from ("${buildDir}/classes/eej") {
     include "com/saxonica/xqj/**/*.class"
     include "javax/xml/xquery/**/*.class"
   }
   doLast {
-    signJar("${buildDir}/libs/MavenHE-${saxonVersion}-xqj.jar")
+    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-xqj.jar")
   }
+}
+
+task mavenHeXqjSourcesJar(type: Jar, dependsOn: ["eejCompile"]) {
+  archiveBaseName = "Saxon-HE"
+  classifier = 'xqj-sources'
+  archiveVersion = saxonVersion
+  destinationDirectory = project.file("${buildDir}/maven")
+  from ("${projectDir}/src/main/java") {
+    include "javax/xml/xquery/**/*.java"
+  }
+  doLast {
+    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-xqj-sources.jar")
+  }
+}
+
+task mavenHe(dependsOn: ['mavenHeJavadocJar', 'mavenHeSaxonJar',
+                         'mavenHeSourceJar', 'mavenHeXqjJar',
+                         'mavenHeXqjSourcesJar']) {
+  // Just a container to hang dependencies on
 }
 
 signing {
@@ -1576,6 +1594,7 @@ publishing {
       artifact mavenHeJavadocJar
       artifact mavenHeSourceJar
       artifact mavenHeXqjJar
+      artifact mavenHeXqjSourcesJar
     }
   }
 
