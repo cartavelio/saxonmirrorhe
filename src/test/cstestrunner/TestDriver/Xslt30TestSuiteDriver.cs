@@ -42,7 +42,7 @@ namespace TestDriver {
         public static void MainXSLT(string[] args) {
             if (args.Length == 0 || args[0].Equals("-?")) {
                 System.Console.WriteLine("testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
-                                         " [-t:testNamePattern] [-bytecode:on|off|debug] [-tree] [-lang] [-save][-export][-strict]");
+                                         " [-t:testNamePattern] [-tree] [-lang] [-save][-export][-strict]");
             }
 
             System.Console.WriteLine("Testing Saxon " + (new Processor()).ProductVersion);
