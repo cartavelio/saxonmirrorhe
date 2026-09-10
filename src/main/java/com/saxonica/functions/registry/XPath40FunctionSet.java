@@ -5,6 +5,7 @@ import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.FilterFn;
 import net.sf.saxon.functions.hof.ForEachFn;
+import net.sf.saxon.functions.hof.ForEachPairFn;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
@@ -43,10 +44,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
-        SpecificFunctionType predicate = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM},
-                SequenceType.SINGLE_BOOLEAN);
-
         SpecificFunctionType predicate2 = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
                 SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
@@ -66,6 +63,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         SpecificFunctionType replaceAction = new SpecificFunctionType(
                 new SequenceType[]{BuiltInAtomicType.UNTYPED_ATOMIC.one(), BuiltInAtomicType.UNTYPED_ATOMIC.zeroOrMore()},
                 SequenceType.OPTIONAL_ITEM);
+
+        SpecificFunctionType forEachPairArg = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE); //.withAcceptReducedArity();
 
         register("all-equal", 1, e -> e.populate(AllEqual::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
@@ -187,6 +188,13 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                                                 STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, forEachArg, ONE, null));
+
+        register("for-each-pair", 3, e -> e.populate(ForEachPairFn::new, AnyItemType.getInstance(),
+                                                     STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+                .arg(1, AnyItemType.getInstance(), STAR, EMPTY)
+                .arg(2, forEachPairArg, ONE, null));
+
 
         register("filter", 2, e -> e.populate(FilterFn::new, AnyItemType.getInstance(),
                                               STAR, AS_ARG0 | LATE)

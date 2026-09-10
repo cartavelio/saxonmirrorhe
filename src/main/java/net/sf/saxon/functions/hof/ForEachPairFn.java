@@ -16,6 +16,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.ObjectValue;
 
 /**
@@ -51,10 +52,10 @@ public class ForEachPairFn extends SystemFunction {
                                           SequenceIterator seq0,
                                           SequenceIterator seq1,
                                           final XPathContext context) {
-        PairedSequenceIterator pairs = new PairedSequenceIterator(seq0, seq1);
-        return MappingIterator.map(pairs, item -> {
-            Sequence[] pair = ((ObjectValue<Sequence[]>) item).getObject();
-            return dynamicCall(function, context, pair).iterate();
+        PairedSequenceIterator triples = new PairedSequenceIterator(seq0, seq1);
+        return MappingIterator.map(triples, item -> {
+            Sequence[] triple = ((ObjectValue<Sequence[]>) item).getObject();
+            return dynamicCall(function, context, triple).iterate();
         });
     }
 
@@ -67,7 +68,8 @@ public class ForEachPairFn extends SystemFunction {
 
         private final SequenceIterator seq0;
         private final SequenceIterator seq1;
-        private final Sequence[] args = new Sequence[2];
+        private final Sequence[] args = new Sequence[3];
+        int position = 0;
 
         public PairedSequenceIterator(SequenceIterator seq0,
                                       SequenceIterator seq1) {
@@ -89,6 +91,7 @@ public class ForEachPairFn extends SystemFunction {
             }
             args[0] = i0;
             args[1] = i1;
+            args[2] = new Int64Value(++position);
             return new ObjectValue<>(args);
         }
 
