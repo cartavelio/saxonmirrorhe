@@ -294,6 +294,8 @@ TODO: rethink redefines and override
         <p>The function <code>fn:round</code> acquires a third argument that can be used to control
         the rounding mode.</p>
         
+        <p>The functions <code>fn:message</code> and <code>fn:trace#1</code> are implemented.</p>
+        
         <p>The functions <code>map:values</code> and <code>array:values</code> are implemented.</p>
         
         <p>The functions <code>map:empty</code> and <code>map:keys-where</code> are implemented.</p>
