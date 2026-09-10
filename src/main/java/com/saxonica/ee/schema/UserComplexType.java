@@ -2044,7 +2044,7 @@ public class UserComplexType extends UserDefinedType
             }
             for (UserComplexType ext : getExtensionTypes()) {
                 // No need to consider further extensions, as iterateExtensionTypes() returns the transitive set
-                SchemaType st = ext.getElementParticleType(elementName, null, false);
+                SchemaType st = ext.getElementParticleType(elementName, schema, false);
                 if (st != null) {
                     if (child == null) {
                         child = st;

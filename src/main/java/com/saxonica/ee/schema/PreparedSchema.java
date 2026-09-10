@@ -122,7 +122,7 @@ public class PreparedSchema implements Schema, NotationSet {
      * A table of substitution group members for each element, indexed by fingerprint
      */
 
-    private IntHashMap<Set<ElementDecl>> substitutionGroupsByFingerprint = new IntHashMap<>();
+    private final IdentityHashMap<ElementDecl, Set<ElementDecl>> substitutionGroups = new IdentityHashMap<>();
 
     /**
      * Index of identity constraints (indexed by their name)
@@ -697,7 +697,7 @@ public class PreparedSchema implements Schema, NotationSet {
      */
 
     public synchronized Set<ElementDecl> getSubstitutionGroupMembers(ElementDecl owner) {
-        Set<ElementDecl> members = substitutionGroupsByFingerprint.get(owner.getFingerprint());
+        Set<ElementDecl> members = substitutionGroups.get(owner);
         if (members == null) {
             return new HashSet<>();
         }
@@ -705,16 +705,16 @@ public class PreparedSchema implements Schema, NotationSet {
     }
 
     public synchronized void addSubstitutionGroupMember(ElementDecl owner, ElementDecl member) {
-        Set<ElementDecl> members = substitutionGroupsByFingerprint.get(owner.getFingerprint());
+        Set<ElementDecl> members = substitutionGroups.get(owner);
         if (members == null) {
             members =  new HashSet<>();
-            substitutionGroupsByFingerprint.put(owner.getFingerprint(), members);
+            substitutionGroups.put(owner, members);
         }
         members.add(member);
     }
 
     public synchronized void setSubstitutionGroupMembers(ElementDecl owner, Set<ElementDecl> members) {
-        substitutionGroupsByFingerprint.put(owner.getFingerprint(), members);
+        substitutionGroups.put(owner, members);
     }
 
     /**
@@ -830,6 +830,10 @@ public class PreparedSchema implements Schema, NotationSet {
         return targetNamespaces.keySet();
     }
 
+    public boolean includesTargetNamespace(NamespaceUri target) {
+        return targetNamespaces.containsKey(target);
+    }
+
     public Map<NamespaceUri, List<String>> getTargetNamespaceMap() {
         return targetNamespaces;
     }
@@ -930,7 +934,7 @@ public class PreparedSchema implements Schema, NotationSet {
 
     private void copyWithoutChecking(PreparedSchema destination) {
 
-        destination.addTargetNamespaces(targetNamespaces);
+        destination.addTargetNamespaces(getTargetNamespaceMap());
 
         for (StructuredQName fp : typesByName.keySet()) {
             // We do it this way to allow for redefinition: the same type may have two different fingerprints
@@ -1688,6 +1692,7 @@ public class PreparedSchema implements Schema, NotationSet {
         vc.setController(pipe.getController());
         vc.setValidationParams(options.getValidationParams());
         vc.setInitiatingLocation(location);
+        vc.setSchema(this);
         allocateInvalidityHandler(options, vc);
 
         // Checker for uniqueness constraints added in Saxon 9.3: see bug 4353

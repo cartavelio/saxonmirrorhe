@@ -761,6 +761,10 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     public Schema getSchemaForBuiltInNamespace(NamespaceUri namespace) {
+        PreparedSchema ps = getCachedSchema(namespace);
+        if (ps != null) {
+            return ps;
+        }
         SchemaCompiler compiler = new SchemaCompiler(this);
         return compiler.getSchemaForBuiltInNamespace(namespace);
     }

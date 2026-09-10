@@ -310,6 +310,7 @@ public abstract class ContentValidator extends ValidatingFilter {
                     return null;
                 }
                 val = new LaxValidator(nextReceiver);
+                val.setValidationContext(validationContext);
                 val.setUnderlyingReceiver(nextReceiver);
             }
         } else if (decl.isAbstract()) {

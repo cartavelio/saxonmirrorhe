@@ -3,6 +3,11 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.om.NamespaceUri;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * A schema (collection of schema components) that has an identifiable target namespace: typically
  * the set of components derived from a single import or include. It is not actually necessary that
@@ -42,6 +47,13 @@ public class SingleNamespaceSchema extends PreparedSchema {
     /*@NotNull*/
     public NamespaceUri getTargetNamespace() {
         return targetNamespace;
+    }
+
+    @Override
+    public Map<NamespaceUri, List<String>> getTargetNamespaceMap() {
+        HashMap<NamespaceUri, List<String>> map = new HashMap<>();
+        map.put(getTargetNamespace(), new ArrayList<>()); // TODO - add the location
+        return map;
     }
 }
 
