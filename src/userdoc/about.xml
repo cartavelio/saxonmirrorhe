@@ -1495,12 +1495,6 @@
                class="bodylink">talk at xquery.com</a>. However, it has become largely dormant, and
             <a href="http://stackoverflow.com/">StackOverflow</a> is probably a better bet.</p>
 
-         
-
-         <p>If you have questions specific to Saxon you can usually get an answer by raising them on
-            the Saxon help mailing list at <a href="https://lists.sourceforge.net/lists/listinfo/saxon-help"
-               class="bodylink">http://lists.sourceforge.net/lists/listinfo/saxon-help</a>. You will
-            need to register.</p>
 
          <p>The preferred place for Saxon-specific questions and bug reports is the bug database and
             forum on the Saxonica community site at <a class="bodylink"
@@ -1508,6 +1502,10 @@
             search for details of known bugs. Saxonica monitors these forums and tries to manage
             issues through to closure (though without any contractual commitment or
             guarantees). </p>
+         
+         <p>The Saxon help mailing list at SourceForge closed in February 2022. The archives of the
+            list are available at <a class="bodylink"
+               href="https://saxon.markmail.org">saxon.markmail.org</a>.</p>
          
          <p>Unless otherwise stated, any code snippets that are published on a public forum in the course 
             of a request for technical support are considered to be implicitly licensed for use in Saxonica's 
@@ -1517,11 +1515,9 @@
 
 
          <aside>Please do not use the bug tracker or forums on SourceForge. The information on these
-            is out of date and we no longer monitor them. Only the Saxon help <a
-               href="https://lists.sourceforge.net/lists/listinfo/saxon-help" class="bodylink">mailing list</a> on
-            SourceForge is active.
-            Instead use the bug tracker and forums on the <a class="bodylink"
-               href="http://saxonica.plan.io/">Saxonica community site</a> as referenced above.</aside>
+            is out of date and we no longer monitor them. Instead use the bug tracker and forums on
+            the <a class="bodylink" href="http://saxonica.plan.io/">Saxonica community site</a> as
+            referenced above.</aside>
 
 
       </section>
