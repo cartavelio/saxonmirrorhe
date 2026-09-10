@@ -38,5 +38,7 @@ class PyTestReport:
 
         tree = ET.ElementTree(self.result_root)
         ET.indent(tree, space=" ", level=0)
-        tree.write(cwd + '../results/saxon/results_saxonc_XSLT3.0_12.2.xml')
+        if not cwd.endswith('/'):
+            cwd = cwd + '/'
+        tree.write(cwd + 'results/saxon/results_saxonc_XSLT3.0_12.2.xml')
 

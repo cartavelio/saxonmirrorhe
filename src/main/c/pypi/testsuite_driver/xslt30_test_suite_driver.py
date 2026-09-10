@@ -79,6 +79,7 @@ def process_catalog(path: str, catalogi):
     global cat_builder
     global test_report
     global saxon_version
+    global results_path
     cat_builder = driver_proc.new_document_builder()
     xpc = driver_proc.new_xpath_processor()
     '''xpc.set_lanaguage("3.1")'''
@@ -115,7 +116,9 @@ def process_catalog(path: str, catalogi):
             print("Result: " + str(successes) + " successes, " + str(failures) + " failures, " +
                   str(wrong_error_results) + " incorrect ErrorCode, " + str(not_run) + " not run")
             '''write resultpostamble'''
-            test_report.write_result_file_postamble(driver_proc, path)
+            if results_path is None:
+                results_path = path
+            test_report.write_result_file_postamble(driver_proc, results_path)
         else:
             print('Failed to open ' + catalogi)
 
@@ -727,24 +730,23 @@ def main(argv):
         argvv = argv[1:]
 
         try:
-            opts, args = getopt.getopt(argvv, "ht:s:")
+            opts, args = getopt.getopt(argvv, "ht:s:o:", ["testpattern", "testset", "resultdir"])
         except getopt.GetoptError:
-            print('xslt30_test_suite_driver.py -t <testpattern> -s <testset -o <resultdir>')
+            print('xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
             sys.exit(2)
 
         for opt, arg in opts:
             if opt == '-h':
-                print('xslt30_test_suite_driver.py -t <testpattern -s <testset -o <resultdir>')
+                print('HELP: xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
                 sys.exit()
             elif opt in ("-t", "--testpattern"):
                 run_test_case_name = arg
             elif opt in ("-s", "--testset"):
                 run_test = arg
+                print('Test set= ', run_test)
 
             elif opt in ("-o", "--resultdir"):
                 results_path = arg
-
-            print('Test set= ', run_test)
 
     '''dir = os.getcwd()'''
     path = diri + "/xslt30-test/"
