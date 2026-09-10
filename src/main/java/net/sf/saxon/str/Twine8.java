@@ -67,8 +67,14 @@ public class Twine8 extends UnicodeString {
      *
      * @param str the value, all characters in range must be <= 255
      */
+    
     public Twine8(String str) {
-        bytes = str.getBytes(StandardCharsets.ISO_8859_1);
+        bytes = fromString(str);
+    }
+
+    @CSharpReplaceBody(code="return System.Text.Encoding.Latin1.GetBytes(str);")
+    private static byte[] fromString(String str) {
+        return str.getBytes(StandardCharsets.ISO_8859_1);
     }
 
     /**
