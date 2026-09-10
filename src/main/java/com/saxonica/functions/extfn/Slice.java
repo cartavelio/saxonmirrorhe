@@ -23,8 +23,8 @@ public class Slice extends SystemFunction {
      * Evaluate the expression
      *
      * @param context   the dynamic evaluation context
-     * @param arguments the values of the arguments, supplied as SequenceIterators
-     * @return the result of the evaluation, in the form of a SequenceIterator
+     * @param arguments the values of the arguments
+     * @return the result of the evaluation
      * @throws XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
