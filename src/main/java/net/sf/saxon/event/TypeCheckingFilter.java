@@ -7,18 +7,12 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.CombinedNodeTest;
-import net.sf.saxon.pattern.ContentTypeTest;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceMethod;
@@ -39,12 +33,13 @@ import java.util.function.Supplier;
 
 public class TypeCheckingFilter extends ProxyOutputter {
 
-    private ItemType itemType;
+    private ItemType requiredType;
     private int cardinality;
     private RoleDiagnostic roleDiagnostic;
     private Location locator;
     private int count = 0;
     private int level = 0;
+    private boolean allowAnyElement = false;
     private final HashSet<Long> checkedElements = new HashSet<>(10);
     // used to avoid repeated checking when a template creates large numbers of elements of the same type
     // The key is a (namecode, typecode) pair, packed into a single long
@@ -53,13 +48,16 @@ public class TypeCheckingFilter extends ProxyOutputter {
     public TypeCheckingFilter(Outputter next) {
         super(next);
         typeHierarchy = getConfiguration().getTypeHierarchy();
+
     }
 
     public void setRequiredType(ItemType type, int cardinality, RoleDiagnostic roleDiagnostic, Location locator) {
-        itemType = type;
+        requiredType = type;
         this.cardinality = cardinality;
         this.roleDiagnostic = roleDiagnostic;
         this.locator = locator;
+        Affinity aff = typeHierarchy.relationship(requiredType, NodeKindTest.ELEMENT);
+        allowAnyElement = aff == Affinity.SAME_TYPE || aff == Affinity.SUBSUMES;
     }
 
     /**
@@ -71,7 +69,10 @@ public class TypeCheckingFilter extends ProxyOutputter {
             if (++count == 2) {
                 checkAllowsMany(Loc.NONE);
             }
-            checkItemType(NodeKindTest.NAMESPACE, Loc.NONE);
+            Orphan ns = new Orphan(getConfiguration());
+            ns.setNodeKind(Type.NAMESPACE);
+            ns.setNodeName(new NoNamespaceName(prefix));
+            checkItem(ns, Loc.NONE);
         }
         getNextOutputter().namespace(prefix, namespaceUri, properties);
     }
@@ -85,11 +86,11 @@ public class TypeCheckingFilter extends ProxyOutputter {
             if (++count == 2) {
                 checkAllowsMany(location);
             }
-            ItemType type = new CombinedNodeTest(
-                    new NameTest(Type.ATTRIBUTE, attName, getConfiguration().getNamePool()),
-                    OperatorSymbol.INTERSECT,
-                    new ContentTypeTest(Type.ATTRIBUTE, typeCode, getConfiguration(), false));
-            checkItemType(type, nodeSupplier(Type.ATTRIBUTE, attName, typeCode, StringView.tidy(value)), location);
+            Orphan att = new Orphan(getConfiguration());
+            att.setNodeKind(Type.ATTRIBUTE);
+            att.setNodeName(attName);
+            att.setTypeAnnotation(typeCode);
+            checkItem(att, location);
         }
         getNextOutputter().attribute(attName, typeCode, value, location, properties);
     }
@@ -104,7 +105,9 @@ public class TypeCheckingFilter extends ProxyOutputter {
             if (++count == 2) {
                 checkAllowsMany(locationId);
             }
-            checkItemType(NodeKindTest.TEXT, nodeSupplier(Type.TEXT, null, null, chars.tidy()), locationId);
+            Orphan txt = new Orphan(getConfiguration());
+            txt.setNodeKind(Type.TEXT);
+            checkItem(txt, locationId);
         }
         getNextOutputter().characters(chars, locationId, properties);
     }
@@ -119,7 +122,9 @@ public class TypeCheckingFilter extends ProxyOutputter {
             if (++count == 2) {
                 checkAllowsMany(locationId);
             }
-            checkItemType(NodeKindTest.COMMENT, nodeSupplier(Type.COMMENT, null, null, chars.tidy()), locationId);
+            Orphan comment = new Orphan(getConfiguration());
+            comment.setNodeKind(Type.COMMENT);
+            checkItem(comment, locationId);
         }
         getNextOutputter().comment(chars, locationId, properties);
     }
@@ -134,8 +139,10 @@ public class TypeCheckingFilter extends ProxyOutputter {
             if (++count == 2) {
                 checkAllowsMany(locationId);
             }
-            checkItemType(NodeKindTest.PROCESSING_INSTRUCTION,
-                          nodeSupplier(Type.PROCESSING_INSTRUCTION, new NoNamespaceName(target), null, data.tidy()), locationId);
+            Orphan pi = new Orphan(getConfiguration());
+            pi.setNodeKind(Type.PROCESSING_INSTRUCTION);
+            pi.setNodeName(new NoNamespaceName(target));
+            checkItem(pi, locationId);
         }
         getNextOutputter().processingInstruction(target, data, locationId, properties);
     }
@@ -188,29 +195,16 @@ public class TypeCheckingFilter extends ProxyOutputter {
     }
 
     private void checkElementStart(NodeName elemName, SchemaType elemType, Location location) throws XPathException {
-        Configuration config = getConfiguration();
-        NamePool namePool = config.getNamePool();
         if (level == 0) {
-            if (++count == 1) {
-                // don't bother with any caching on the first item, it will often be the only one
-                ItemType type = new CombinedNodeTest(
-                        new NameTest(Type.ELEMENT, elemName, namePool),
-                        OperatorSymbol.INTERSECT,
-                        new ContentTypeTest(Type.ELEMENT, elemType, config, false));
-                checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUnicodeString.getInstance()), location);
-            } else {
-                if (count == 2) {
-                    checkAllowsMany(location);
-                }
-                long key = (long) elemName.obtainFingerprint(namePool) << 32 | (long) elemType.getFingerprint();
-                if (!checkedElements.contains(key)) {
-                    ItemType type = new CombinedNodeTest(
-                            new NameTest(Type.ELEMENT, elemName, namePool),
-                            OperatorSymbol.INTERSECT,
-                            new ContentTypeTest(Type.ELEMENT, elemType, config, false));
-                    checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUnicodeString.getInstance()), location);
-                    checkedElements.add(key);
-                }
+            if (++count == 2) {
+                checkAllowsMany(location);
+            }
+            if (!allowAnyElement) {
+                Orphan node = new Orphan(getConfiguration());
+                node.setNodeKind(Type.ELEMENT);
+                node.setNodeName(elemName);
+                node.setTypeAnnotation(elemType);
+                checkItem(node, location);
             }
         }
         level++;
@@ -321,19 +315,19 @@ public class TypeCheckingFilter extends ProxyOutputter {
             + "        }"
             + "    }")
     private void checkItemType(ItemType type, Supplier<? extends Item> itemSupplier, Location locationId) throws XPathException {
-        if (!typeHierarchy.isSubType(type, itemType)) {
+        if (!typeHierarchy.isSubType(type, requiredType)) {
             throwTypeError(type, itemSupplier.get(), locationId);
         }
     }
 
     private void checkItemType(ItemType type, Location locationId) throws XPathException {
-        if (!typeHierarchy.isSubType(type, itemType)) {
+        if (!typeHierarchy.isSubType(type, requiredType)) {
             throwTypeError(type, null, locationId);
         }
     }
 
     private void checkItem(Item item, Location locationId) throws XPathException {
-        if (!itemType.matches(item, typeHierarchy)) {
+        if (!requiredType.matches(item, typeHierarchy)) {
             throwTypeError(null, item, locationId);
         }
     }
@@ -342,9 +336,9 @@ public class TypeCheckingFilter extends ProxyOutputter {
     private void throwTypeError(ItemType suppliedType, Item item, Location locationId) throws XPathException {
         String message;
         if (item == null) {
-            message = roleDiagnostic.composeErrorMessage(itemType, suppliedType);
+            message = roleDiagnostic.composeErrorMessage(requiredType, suppliedType);
         } else {
-            message = roleDiagnostic.composeErrorMessage(itemType, item, typeHierarchy);
+            message = roleDiagnostic.composeErrorMessage(requiredType, item, typeHierarchy);
         }
         String errorCode = roleDiagnostic.getErrorCode();
         throw new XPathException(message, errorCode)
