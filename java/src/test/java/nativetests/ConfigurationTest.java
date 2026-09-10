@@ -70,7 +70,7 @@ public class ConfigurationTest {
     public void testDisableFunctionXPath() {
 
         Processor proc = new Processor();
-        proc.getUnderlyingConfiguration().disableFunction(new StructuredQName("fn", NamespaceUri.FN, "contains"));
+        proc.getUnderlyingConfiguration().disableFunction(NamespaceUri.FN.qName("contains"));
         XPathCompiler compiler = proc.newXPathCompiler();
         try {
             compiler.compile("contains('banana', 'anan')");
