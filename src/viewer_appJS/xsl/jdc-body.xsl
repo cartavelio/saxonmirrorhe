@@ -224,6 +224,13 @@
                         </xsl:for-each>
                     </xsl:if>
                     
+                    <xsl:for-each select="comment/example">
+                        <p class="methodLabel">Example:</p>
+                        <samp>
+                            <xsl:apply-templates select="code/text()" mode="jdc"/>
+                        </samp>
+                    </xsl:for-each>
+                    
                     <xsl:for-each select="comment/attribute[@name='@since']">
                         <p class="methodLabel">Since:</p>
                         <div class="params">

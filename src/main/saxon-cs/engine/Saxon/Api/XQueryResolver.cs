@@ -22,14 +22,15 @@ namespace Saxon.Api {
     /// as if no <c>XQueryResolver</c> had been supplied.
     /// </returns>
     /// <example>
-    /// <c>xqueryCompiler.XQueryResolver = (moduleUri, baseUri, locations) => {
+    /// <code>
+	/// xqueryCompiler.XQueryResolver = (moduleUri, baseUri, locations) => {
     ///     if (moduleUri == "test.xq") {
     ///         const string q = "module namespace t='test.xq'; declare variable $t:x := 'x';";
     ///         return new [] {new XQueryModuleSource() {Content = q}};
     ///     }
     ///     return null;
     /// };
-    /// </c>
+    /// </code>
     /// </example>
     /// 
     public delegate XQueryModuleSource[] XQueryResolver(string moduleUri, Uri baseUri, Uri[] locationHints);
