@@ -115,8 +115,9 @@ public class ResourceRequest {
                 try {
                     s = resolver.resolve(this);
                 } catch (XPathException e) {
-                    if (e.getCause() instanceof IllegalArgumentException) {
-                        IllegalArgumentException iae = (IllegalArgumentException)e.getCause();
+                    Throwable cause = e.getCause();
+                    if (cause instanceof IllegalArgumentException) {
+                        IllegalArgumentException iae = (IllegalArgumentException)cause;
                         if (iae.getCause() instanceof URISyntaxException) {
                             throw new XPathException("Invalid URI " + uri, iae.getCause());
                         }

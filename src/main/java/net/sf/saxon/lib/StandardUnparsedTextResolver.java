@@ -79,6 +79,9 @@ public class StandardUnparsedTextResolver
         rr.nature = ResourceRequest.TEXT_NATURE;
         rr.purpose = "fn:unparsed-text";
         Source resolved = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+        if (resolved == null) {
+            throw new XPathException("unparsed-text(): failed to resolve URI " + absoluteURI);
+        }
         if (resolved instanceof StreamSource) {
             InputStream inputStream = ((StreamSource) resolved).getInputStream();
 
@@ -90,12 +93,13 @@ public class StandardUnparsedTextResolver
                     if (systemId != null) {
                         try {
                             if (systemId.startsWith("classpath:")) {
-                                inputStream = getClass().getClassLoader().getResourceAsStream(systemId.substring(10));
+                                inputStream = openClasspathResource(systemId);
                             } else {
                                 URL url = new URL(systemId);
                                 inputStream = url.openStream();
                             }
                         } catch (IOException e) {
+                            throw new XPathException("unparsed-text(): cannot retrieve " + systemId, e);
                         }
                     } else {
                         throw new XPathException("unparsed-text(): resolver returned empty StreamSource");
@@ -162,27 +166,28 @@ public class StandardUnparsedTextResolver
                     }
                     encoding = charset.trim();
                 }
-
-
-                try {
-                    if (encoding == null || isXmlMediaType) {
-                        encoding = EncodingDetector.inferStreamEncoding(inputStream, debug ? err : null);
-                        if (debug) {
-                            err.info("unparsed-text(): inferred encoding = " + encoding);
-                        }
-                    }
-                } catch (IOException e) {
-                    encoding = "UTF-8";
-                }
-                return makeStreamReader(inputStream, encoding);
-
-            } else {
-                throw new XPathException("Resolver for unparsed-text() returned non-StreamSource");
             }
+            
+            try {
+                if (encoding == null || isXmlMediaType) {
+                    encoding = EncodingDetector.inferStreamEncoding(inputStream, debug ? err : null);
+                    if (debug) {
+                        err.info("unparsed-text(): inferred encoding = " + encoding);
+                    }
+                }
+            } catch (IOException e) {
+                encoding = "UTF-8";
+            }
+            return makeStreamReader(inputStream, encoding);
 
-
+        } else {
+            throw new XPathException("Resolver for unparsed-text() returned non-StreamSource");
         }
-        return null;
+    }
+
+    @CSharpReplaceBody(code="throw new Saxon.Hej.trans.XPathException(\"classpath: URI scheme is not supported on .NET\");")
+    private InputStream openClasspathResource(String systemId) throws XPathException {
+        return getClass().getClassLoader().getResourceAsStream(systemId.substring(10));
     }
 
 

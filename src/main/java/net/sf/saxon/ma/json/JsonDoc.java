@@ -66,6 +66,9 @@ public class JsonDoc extends SystemFunction  {
             err.maybeSetErrorCode("FOUT1170");
             throw err;
         }
+        if (reader == null) {
+            throw new XPathException("Unable to resolve json-doc() URI " + absoluteURI, "FOUT1170");
+        }
         UnicodeString content;
         try {
             content = UnparsedTextFunction.readFile(checker, reader);
