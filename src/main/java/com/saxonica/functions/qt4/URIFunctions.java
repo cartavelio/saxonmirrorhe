@@ -110,14 +110,14 @@ abstract public class URIFunctions extends SystemFunction {
             if (options.get(PATH_SEPARATOR) != null) {
                 String str = options.get(PATH_SEPARATOR).getStringValue();
                 if (str.length() != 1) {
-                    throw new IllegalArgumentException("Path separator must be a single character");
+                    throw new XPathException("The path separator must be a single character", "FOXX0000");
                 }
                 pathSeparator = str.charAt(0);
             }
             if (options.get(QUERY_SEPARATOR) != null) {
                 String str = options.get(QUERY_SEPARATOR).getStringValue();
                 if (str.length() != 1) {
-                    throw new IllegalArgumentException("Path separator must be a single character");
+                    throw new XPathException("The query separator must be a single character", "FOXX0000");
                 }
                 querySeparator = str.charAt(0);
             }
