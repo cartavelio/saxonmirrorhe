@@ -306,6 +306,38 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
         return context.getErrorListener();
     }
     //#endif
+
+    /**
+     * Supply a callback which will be notified of all dynamic errors and warnings
+     * encountered during this query evaluation.
+     * <p>Calling this method overwrites the effect of any previous call on {@link #setErrorListener(ErrorListener)}
+     * or {@code setErrorList}.</p>
+     * <p>If no error reporter is supplied by the caller, error information will be written to the standard error stream.</p>
+     *
+     * @param reporter a callback function which will be notified of all Static errors and warnings
+     *                 encountered during a compilation episode.
+     * @since 11.2
+     */
+
+    public void setErrorReporter(ErrorReporter reporter) {
+        context.setErrorReporter(reporter);
+    }
+
+    /**
+     * Get the recipient of error information previously registered using {@link #setErrorReporter(ErrorReporter)}.
+     *
+     * @return the recipient previously registered explicitly using {@link #setErrorReporter(ErrorReporter)},
+     * or implicitly using {@link #setErrorListener(ErrorListener)}.
+     * If no error reporter has been registered, the result may be null, or may return
+     * a system supplied error reporter.
+     * @since 11.2
+     */
+
+    public ErrorReporter getErrorReporter() {
+        return context.getErrorReporter();
+    }
+
+
     /**
      * Set a TraceListener which will receive messages relating to the evaluation of all expressions.
      * This option has no effect unless the query was compiled to enable tracing.

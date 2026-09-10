@@ -6,9 +6,16 @@ import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.io.StringReader;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
@@ -65,6 +72,63 @@ public class TestQueryToTransform {
         qe.run();
 
         assertEquals("<a>1234</a>", resultTree.getXdmNode().toString().trim());
+    }
+
+    @Test
+    public void testFnTransformStaticErrorReporter() {
+        List<XmlProcessingError> staticErrors = new ArrayList<>();
+        List<XmlProcessingError> dynamicErrors = new ArrayList<>();
+        try {
+            Processor proc = new Processor(true);
+
+
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.setErrorReporter(staticErrors::add);
+            comp.setBaseURI(new URI("file:///c:/aplEjXML/"));
+            String qry_base = "transform(map{'stylesheet-text':'<a/>'})";
+
+            XQueryExecutable exp = comp.compile(qry_base);
+            XQueryEvaluator qe = exp.load();
+            qe.setErrorReporter(dynamicErrors::add);
+            qe.run(new NullDestination());
+            fail("Unexpected success");
+        } catch (URISyntaxException e) {
+            fail(e);
+        } catch (SaxonApiException e) {
+            // error expected;
+            assertTrue(staticErrors.isEmpty());
+            assertFalse(dynamicErrors.isEmpty());
+        }
+    }
+
+    @Test
+    public void testFnTransformDynamicErrorReporter() {
+        List<XmlProcessingError> staticErrors = new ArrayList<>();
+        List<XmlProcessingError> dynamicErrors = new ArrayList<>();
+        try {
+            Processor proc = new Processor(true);
+            XdmNode source = proc.newDocumentBuilder().build(new StreamSource(new StringReader("<a/>")));
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.setErrorReporter(staticErrors::add);
+            comp.setBaseURI(new URI("file:///c:/aplEjXML/"));
+            String qry_base = "transform(map{'stylesheet-text':"
+                    + "'<a xsl:version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" z=\"{year-from-date(current-date()) div 0}\"/>'"
+                    + ", 'source-node':.})";
+
+            XQueryExecutable exp = comp.compile(qry_base);
+            XQueryEvaluator qe = exp.load();
+            qe.setContextItem(source);
+            qe.setErrorReporter(dynamicErrors::add);
+            qe.run(new NullDestination());
+            fail("Unexpected success");
+        } catch (URISyntaxException e) {
+            fail(e);
+        } catch (SaxonApiException e) {
+            // error expected;
+            assertTrue(staticErrors.isEmpty());
+            assertFalse(dynamicErrors.isEmpty());
+            assertTrue(dynamicErrors.get(0).getMessage().contains("division by zero"));
+        }
     }
 }
 
