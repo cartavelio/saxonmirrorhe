@@ -45,7 +45,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor *proc, std::string curr) {
 
   if (r.status != SAXON_OK) {
     j_handles_destroy(thread, (void *)procRef);
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
 
   if (!(proc->cwd.empty()) && curr.empty()) {
@@ -53,6 +53,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor *proc, std::string curr) {
   } else if (!curr.empty()) {
     cwdXT = curr;
   }
+  schemaRef = SXN_UNSET;
 }
 
 Xslt30Processor::~Xslt30Processor() {
@@ -73,6 +74,10 @@ Xslt30Processor::~Xslt30Processor() {
     j_handles_destroy(thread,
                       (void *)procRef);
     procRef = SXN_UNSET;
+  }
+  if (schemaRef != SXN_UNSET) {
+    j_handles_destroy(thread,(void *)schemaRef);
+    schemaRef = SXN_UNSET;
   }
 }
 
@@ -233,15 +238,68 @@ SaxonProcessor *Xslt30Processor::getSaxonProcessor() {
   return processor;
 }
 
-void Xslt30Processor::createException(const char *message) {}
+
+void Xslt30Processor::useSchema(XsdSchema * schema, const char * role) {
+  if (schema != nullptr) {
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    schemaRef = j_copy_handles(thread, (void *)schema->getUnderlyingSchema());
+    setSchemaAware(true);
+    if (role != nullptr) {
+      setProperty("-schema-role:", role);
+    }
+  }
+
+}
+
+
+void Xslt30Processor::setSchemaAware(bool schemaAware) {
+  std::map<std::string, std::string>::iterator it;
+  it = properties.find("sa:");
+  if (it != properties.end()) {
+    parameters.erase("sa:");
+  }
+  if (schemaAware) {
+    setProperty("sa:", "true");
+  } else {
+    setProperty("sa:", "false");
+  }
+}
+
+bool Xslt30Processor::isSchemaAware() {
+  std::map<std::string, std::string>::iterator it;
+  it = properties.find("sa:");
+  if (it != properties.end()) {
+    std::string valuei = it->second;
+    if (valuei == "true" || valuei == "on") {
+      return true;
+    }
+  }
+  return false;
+}
 
 void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode *node,
                                                 const char *filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
+  int addition = 0;
+  if (schemaRef > SXN_UNSET) {
+    addition += 1;
+  }
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
-  long status = j_compileFromXdmNodeAndSave(thread, (void *)cppXT,
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+
+  if (schemaRef > SXN_UNSET) {
+
+    std::string packageOptionStr = "-use-schema:";
+    addProcessorDataPair(thread, (void *)processorDataRef,
+        (char *)packageOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
+  }
+
+  j_compileFromXdmNodeAndSave(thread, (void *)cppXT,
       (void *)node->getUnderlyingValue(), (char *)cwdXT.c_str(),
       (char *)filename,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
@@ -252,7 +310,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode *node,
     processorDataRef = SXN_UNSET;
   }
   if (r.status != SAXON_OK) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
 }
 
@@ -264,9 +322,25 @@ void Xslt30Processor::compileFromStringAndSave(const char *stylesheetStr,
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
+  int addition = 0;
+  if (schemaRef > SXN_UNSET) {
+    addition += 1;
+  }
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
-  long status = j_compileFromStringAndSave(thread, (void *)cppXT, (char *)cwdXT.c_str(),
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+
+  if (schemaRef > SXN_UNSET) {
+
+    std::string packageOptionStr = "-use-schema:";
+    addProcessorDataPair(thread, (void *)processorDataRef,
+        (char *)packageOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
+  }
+
+  j_compileFromStringAndSave(thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)stylesheetStr, (char *)filename,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef), &r);
@@ -276,7 +350,7 @@ void Xslt30Processor::compileFromStringAndSave(const char *stylesheetStr,
     processorDataRef = SXN_UNSET;
   }
   if (r.status != SAXON_OK) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
 }
 
@@ -295,7 +369,7 @@ void Xslt30Processor::importPackage(const char *packageFile) {
 
   addProcessorProperty(thread,(void *)importPackageValue, (char *)packageFile, &r);
   if (r.status != SAXON_OK) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
 }
 
@@ -309,9 +383,26 @@ void Xslt30Processor::compileFromFileAndSave(const char *xslFilename,
   }
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+
+  int addition = 0;
+  if (schemaRef > SXN_UNSET) {
+    addition += 1;
+  }
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
-  long status = j_compileFromFileAndSave(thread, (void *)cppXT, (char *)cwdXT.c_str(),
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+
+  if (schemaRef > SXN_UNSET) {
+
+    std::string packageOptionStr = "-use-schema:";
+    addProcessorDataPair(thread, (void *)processorDataRef,
+        (char *)packageOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
+  }
+
+  j_compileFromFileAndSave(thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)xslFilename, (char *)filename,
       (processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef), &r);
@@ -321,7 +412,7 @@ void Xslt30Processor::compileFromFileAndSave(const char *xslFilename,
     processorDataRef = SXN_UNSET;
   }
   if (r.status != SAXON_OK) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
 }
 
@@ -337,6 +428,9 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
   if (importPackageValue != SXN_UNSET) {
     addition += 1;
   }
+  if (schemaRef > SXN_UNSET) {
+    addition += 1;
+  }
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
@@ -348,9 +442,21 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
     addProcessorDataPair(thread, (void *)processorDataRef,
         (char *)packageOptionStr.c_str(), (void *)importPackageValue, &r);
     if (r.status != SAXON_OK) {
-      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+      throw SaxonApiException(r);
     }
   }
+
+  if (schemaRef > SXN_UNSET) {
+
+    std::string packageOptionStr = "-use-schema:";
+    addProcessorDataPair(thread, (void *)processorDataRef,
+        (char *)packageOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
+  }
+
   int64_t objRef = j_compileFromString(thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)stylesheetStr, (int)jitCompilation,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
@@ -361,10 +467,10 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
     processorDataRef = SXN_UNSET;
   }
   if (r.status != SAXON_OK) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
   XsltExecutable *executable =
-      new XsltExecutable(procRef, objRef, cwdXT, "");
+      new XsltExecutable(procRef, objRef, cwdXT);
 
   return executable;
 }
@@ -379,6 +485,9 @@ XsltExecutable *Xslt30Processor::compileFromXdmNode(XdmNode *node) {
   if (importPackageValue > SXN_UNSET) {
     addition += 1;
   }
+  if (schemaRef > SXN_UNSET) {
+    addition += 1;
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, addition);
@@ -391,7 +500,18 @@ XsltExecutable *Xslt30Processor::compileFromXdmNode(XdmNode *node) {
   }
 
   if (r.status != SAXON_OK) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
+  }
+
+  if (schemaRef > SXN_UNSET) {
+
+    std::string packageOptionStr = "-use-schema:";
+    addProcessorDataPair(thread, (void *)processorDataRef,
+        (char *)packageOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
   }
 
   int64_t objRef = j_compileFromXdmNode(thread, (void *)cppXT, (char *)cwdXT.c_str(),
@@ -405,10 +525,10 @@ XsltExecutable *Xslt30Processor::compileFromXdmNode(XdmNode *node) {
   }
   if (r.status != SAXON_OK) {
     //This should be a static error
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
   XsltExecutable *executable =
-      new XsltExecutable(procRef, objRef, cwdXT, "");
+      new XsltExecutable(procRef, objRef, cwdXT);
 
   return executable;
 }
@@ -424,6 +544,9 @@ XsltExecutable *Xslt30Processor::compileFromAssociatedFile(const char *source) {
   if (importPackageValue > SXN_UNSET) {
     addition += 1;
   }
+  if (schemaRef > SXN_UNSET) {
+    addition += 1;
+  }
 
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, addition);
@@ -435,7 +558,18 @@ XsltExecutable *Xslt30Processor::compileFromAssociatedFile(const char *source) {
         (char *)packageOptionStr.c_str(), (void *)importPackageValue, &r);
 
     if (r.status != SAXON_OK) {
-      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+      throw SaxonApiException(r);
+    }
+  }
+
+  if (schemaRef > SXN_UNSET) {
+
+    std::string packageOptionStr = "-use-schema:";
+    addProcessorDataPair(thread, (void *)processorDataRef,
+        (char *)packageOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
     }
   }
 
@@ -451,10 +585,10 @@ XsltExecutable *Xslt30Processor::compileFromAssociatedFile(const char *source) {
 
   if (r.status != SAXON_OK) {
     //Static error will be thrown
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
   XsltExecutable *executable =
-      new XsltExecutable(procRef, objRef, cwdXT, "");
+      new XsltExecutable(procRef, objRef, cwdXT);
   return executable;
 }
 
@@ -469,6 +603,9 @@ XsltExecutable *Xslt30Processor::compileFromFile(const char *stylesheet) {
   if (importPackageValue > SXN_UNSET) {
     addition += 1;
   }
+  if (schemaRef > SXN_UNSET) {
+    addition += 1;
+  }
 
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, addition);
@@ -480,7 +617,18 @@ XsltExecutable *Xslt30Processor::compileFromFile(const char *stylesheet) {
         (char *)packageOptionStr.c_str(), (void *)importPackageValue, &r);
 
     if (r.status != SAXON_OK) {
-      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+      throw SaxonApiException(r);
+    }
+  }
+
+  if (schemaRef > SXN_UNSET) {
+
+    std::string packageOptionStr = "-use-schema:";
+    addProcessorDataPair(thread, (void *)processorDataRef,
+        (char *)packageOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
     }
   }
 
@@ -495,10 +643,10 @@ XsltExecutable *Xslt30Processor::compileFromFile(const char *stylesheet) {
   }
 
   if (r.status != SAXON_OK) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
   XsltExecutable *executable =
-      new XsltExecutable(procRef, objRef, cwdXT, "");
+      new XsltExecutable(procRef, objRef, cwdXT);
 
   return executable;
 }

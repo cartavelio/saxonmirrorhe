@@ -12,6 +12,7 @@
 
 #include "saxonc_export.h"
 #include "saxonc/SaxonProcessor.h"
+#include "saxonc/XsdSchema.h"
 #include <string>
 
 class SaxonProcessor;
@@ -161,6 +162,37 @@ public:
    * non-updating query.
    */
   void setUpdating(bool updating);
+
+
+    /**
+     * Set the XsdSchema to be used with this XQueryProcessor.
+     *
+     * This automatically marks the XPath expression as schema-aware.
+     * The method should only be called once; supplying a schema cancels the effect
+     * of any previous call. The method must be called before the XPath expression is compiled.
+     * @param schema the schema to be imported
+     * @since 13.0
+     */
+
+    void useSchema(XsdSchema * schema);
+
+    /**
+    * Say that the query must be compiled to be schema-aware, even if it contains no
+     * import schema declarations. Normally a query is treated as schema-aware
+     * only if it contains one or more import schema declarations. If it is not schema-aware,
+     * then all input documents must be untyped (or xs:anyType), and
+     * validation of temporary nodes is disallowed
+     * (though validation of the final result tree is permitted). Setting the argument to true
+     * means that schema-aware code will be compiled regardless.
+     *
+     * @param schemaAware true if expressions are to be schema-aware, false otherwise
+     * @throws SaxonApiException if schema-awareness is requested when this is
+     * not a licensed Saxon-EE configuration.
+     * @since 13.
+     */
+    void setSchemaAware(bool schemaAware);
+
+    bool isSchemaAware();
 
   /**
    * Execute a query, and save the result to file.
@@ -318,6 +350,7 @@ private:
   std::string cwdXQ; /*!< Current working directory */
   int64_t procRef;
   int64_t cppXQ;
+  int64_t schemaRef;
   std::map<std::string, XdmValue *>
       parameters; /*!< Map of parameters used for the query as (string, value)
                      pairs */

@@ -71,6 +71,8 @@ SaxonApiException::SaxonApiException(const char *m, const char *ec,
     errorCode = "";
   }
 
+ ec_message = errorCode + " " + message;
+
   if (sysId != nullptr) {
     systemId = std::string(sysId);
   } else {
@@ -126,7 +128,7 @@ const char *SaxonApiException::getMessage() {
 }
 
 const char *SaxonApiException::getMessageWithErrorCode() {
-    return getMessage();
+    return ec_message.c_str();
 }
 
 int SaxonApiException::staticErrorCount() {

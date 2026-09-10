@@ -19,7 +19,7 @@
 #endif
 
 XsltExecutable::XsltExecutable(int64_t procRefi, int64_t exRef,
-                               std::string curr, std::string resources) {
+                               std::string curr) {
 
 #ifdef DEBUG
 
@@ -32,7 +32,6 @@ XsltExecutable::XsltExecutable(int64_t procRefi, int64_t exRef,
   executableRef = exRef;
   procRef = j_copy_handles(thread, (void *)procRefi);
   cwdXE = curr;
-  resources_dir = resources;
   selectionStringFlag = false;
 }
 
@@ -41,7 +40,6 @@ XsltExecutable::~XsltExecutable() {
 
   clearProperties();
   clearParameters();
-  resources_dir.clear();
 
   if (saxonMessageListenerRef != SXN_UNSET) {
     j_handles_destroy(thread,
@@ -80,7 +78,6 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
 
   procRef = j_copy_handles(thread, (void *)other.procRef);
   cwdXE = other.cwdXE;
-  resources_dir = other.resources_dir;
   selectionRef = other.selectionRef;
   rawResultsFlag = other.rawResultsFlag;
   saxonMessageListenerRef = SXN_UNSET;
@@ -419,9 +416,15 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
+  if (saxonMessageListenerRef != SXN_UNSET) {
+    additions++;
+  }
+  if (saxonResultDocRef != SXN_UNSET) {
+    additions++;
+  }
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   /*if(saxonMessageListenerRef != SXN_UNSET ) {
       additions++;
@@ -470,13 +473,16 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 
 const char *XsltExecutable::applyTemplatesReturningString() {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);//get_or_attach_thread(SaxonProcessor::sxn_environ);
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
 
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-  std::cerr << "C++: applyTemplateReturningString called "<< std::endl;
-}
+  if (saxonMessageListenerRef != SXN_UNSET) {
+    additions++;
+  }
+  if (saxonResultDocRef != SXN_UNSET) {
+    additions++;
+  }
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -521,16 +527,16 @@ const char *XsltExecutable::applyTemplatesReturningString() {
 
 XdmValue *XsltExecutable::applyTemplatesReturningValue() {
   
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
 
-  /*if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageListenerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef != SXN_UNSET) {
       additions++;
-  }*/
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -587,15 +593,15 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
                                                const char *outfile) {
 
   
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
-  /*if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageListenerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
       additions++;
-  }*/
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
@@ -659,9 +665,17 @@ const char *XsltExecutable::callFunctionReturningString(
     const char *functionName, XdmValue **arguments, int argument_length) {
 
   
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
+
+  if (saxonMessageListenerRef != SXN_UNSET) {
+    additions++;
+  }
+
+  if (saxonResultDocRef != SXN_UNSET) {
+    additions++;
+  }
 
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
@@ -728,16 +742,16 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
                                                      int argument_length) {
 
   
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
 
-  /*if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageListenerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
       additions++;
-  }*/
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
@@ -763,7 +777,7 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
                          (void *)saxonResultDocRef, &r);
 
     if (r.status != SAXON_OK) {
-      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+      throw SaxonApiException(r);
     }
   }
 
@@ -796,7 +810,7 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
   }
 
   if (r.status != SAXON_OK) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
 
   return nullptr;
@@ -804,9 +818,6 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
 
 void XsltExecutable::callTemplateReturningFile(const char *templateName,
                                                const char *outfile) {
-
-  
-  setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
 
@@ -862,10 +873,15 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
 const char *
 XsltExecutable::callTemplateReturningString(const char *templateName) {
   
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
-
+  if (saxonMessageListenerRef != SXN_UNSET) {
+    additions++;
+  }
+  if (saxonResultDocRef != SXN_UNSET) {
+    additions++;
+  }
 
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   std::string optionStr;
@@ -905,16 +921,16 @@ XsltExecutable::callTemplateReturningString(const char *templateName) {
 
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
   
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
 
-  /*if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageListenerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
       additions++;
-  }*/
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -967,16 +983,16 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
 
 
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
 
-  /*if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageListenerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
       additions++;
-  }*/
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -1037,16 +1053,16 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
 void XsltExecutable::transformFileToFile(const char *source,
                                          const char *outputfile) {
 
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
 
-  /*if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageListenerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
       additions++;
-  }*/
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -1180,16 +1196,16 @@ void XsltExecutable::clearXslMessages() {
 
 const char *XsltExecutable::transformFileToString(const char *source) {
 
-  setProperty("resources", resources_dir.c_str());
+  
 
   int additions = 0;
 
-  /*if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageListenerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
       additions++;
-  }*/
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -1241,7 +1257,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
     processorDataRef = SXN_UNSET;
   }
   if (r.status != SAXON_OK) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
 
   return result;

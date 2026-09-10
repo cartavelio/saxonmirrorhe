@@ -556,11 +556,11 @@ private:
 
   /**
    * Constructor with the SaxonProcessor supplied.
-   * @param proc - pointer to the SaxonProcessor object
+   * @param procRef - pointer to the SaxonProcessor object
+   * @param exObject - pointer to the created XsltExecutable object
    * @param cwd - the current working directory
    */
-  XsltExecutable(int64_t procRef, int64_t exObject, std::string cwd,
-                 std::string resources);
+  XsltExecutable(int64_t procRef, int64_t exObject, std::string cwd);
 
   /**
    * XsltExecutable copy constructor.
@@ -580,7 +580,6 @@ private:
                                 retrieved as a string file value instead of
                                 XdmValue */
   std::string cwdXE;         /*!< Current working directory */
-  std::string resources_dir; /*!< Saxon resources directory */
   bool jitCompilation, rawResultsFlag;
   std::map<std::string, XdmValue *>
       parameters; /*!< Map of parameters used for the transformation as (string,

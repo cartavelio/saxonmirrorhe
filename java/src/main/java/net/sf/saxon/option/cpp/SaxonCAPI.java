@@ -2028,8 +2028,12 @@ public class SaxonCAPI {
             Source source = resolveFileToSource(proci, cwd, filename, ResourceRequest.XML_NATURE);
             if (validatorRef != WordFactory.nullPointer()) {
                 SchemaValidator validator = objectHandles.get(validatorRef);
-
+                if (SaxonCAPI.debug) {
+                    System.err.println("DEBUG Validator object set on the builder (from: " + validatorRef.rawValue() + ") = " + filename);
+                }
                 builder.setSchemaValidator(validator);
+            } else  if (SaxonCAPI.debug) {
+                System.err.println("DEBUG No validator found");
             }
             XdmNode node = builder.build(source);
 

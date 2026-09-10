@@ -12,7 +12,8 @@
 
 #include "saxonc_export.h"
 #include "saxonc/SaxonProcessor.h"
-//#include "XdmValue.h"
+#include "saxonc/XsdSchema.h"
+
 #include <string>
 
 class SaxonProcessor;
@@ -21,6 +22,7 @@ class XsltExecutable;
 class XdmValue;
 class XdmItem;
 class XdmNode;
+class XsdSchema;
 
 /** An <code>Xslt30Processor</code> represents a factory to compile, load and
  * execute stylesheets. It is possible to cache the context and the stylesheet
@@ -78,6 +80,42 @@ public:
   * @return Current working directory
   */
  const char * getcwd();
+
+
+    /**
+     * Set the XsdSchema to be used with this Xslt30Processor.
+     *
+     * Set the XsdSchema to be used with this Xslt30Processor for a schema-aware
+     * transformation (requires SaxonC-EE). Equivalent to useSchema("", schema)
+     * @param schema the schema to be imported
+    * @param role the schema role. Set this to "" (an empty string) or to null for the default
+     *               (unnamed) schema role. If a role name is specified then the supplied schema
+     *               is ignored unless the stylesheet actually contains an <code>xsl:import-schema</code>
+     *               declaration for this schema role.
+     * @since 13.0
+     */
+
+    void useSchema(XsdSchema * schema, const char * role = "");
+
+    /**
+    * Say that the stylesheet must be compiled to be schema-aware, even if it contains no
+     * xsl:import-schema declarations. By default a stylesheet is treated as schema-aware
+     * only if it contains one or more xsl:import-schema declarations. If it is not schema-aware,
+     * then all input documents must be untyped, and validation of temporary trees is disallowed
+     * (though validation of the final result tree is permitted). Setting the argument to true
+     * means that schema-aware code will be compiled regardless.
+     *
+     * <p>Setting the value to true has no effect (it is not an error) if the configuration does
+     * not support schema processing. (Schema processing requires a Saxon-EE license.)</p>
+     *
+     * @param schemaAware true if expressions are to be schema-aware, false otherwise
+     * @throws SaxonApiException if schema-awareness is requested when this is
+     * not a licensed Saxon-EE configuration.
+     * @since 13.
+     */
+    void setSchemaAware(bool schemaAware);
+
+    bool isSchemaAware();
 
   /**
    * Set the base output URI.
@@ -363,7 +401,6 @@ public:
   XsltExecutable *compileFromXdmNode(XdmNode *node);
 
 private:
-  void createException(const char *message = nullptr);
 
   /**
    * Set a configuration property specific to the XSLT processor in use.
@@ -390,7 +427,7 @@ private:
   //SaxonProcessor *proc; /*!< Pointer to the SaxonProcessor object which created this Xslt30Processor */
 
   int64_t cppXT, procRef;
-  int64_t importPackageValue;
+  int64_t importPackageValue, schemaRef;
   std::string cwdXT;   /*!< Current working directory */
   bool jitCompilation; /*!< Just-in-time compilation flag*/
   std::map<std::string, XdmValue *>

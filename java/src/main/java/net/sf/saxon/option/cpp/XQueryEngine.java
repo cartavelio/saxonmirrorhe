@@ -191,31 +191,50 @@ public class XQueryEngine extends SaxonCAPI {
             URI baseURI = PathHelper.pathToURI(processor.getUnderlyingConfiguration(), cwd);
             compiler.setBaseURI(baseURI);
         }
+
+        if (!optionsMap.isEmpty()) {
+            if (optionsMap.containsKey("updating")) {
+                if (optionsMap.get("updating").equals("on")) {
+                    compiler.setUpdatingEnabled(true);
+                } else {
+                    compiler.setUpdatingEnabled(false);
+                }
+            }
+
+            if (optionsMap.containsKey("-streaming")) {
+                if (optionsMap.get("-streaming").equals("1")) {
+                    compiler.setStreaming(true);
+                } else {
+                    compiler.setStreaming(false);
+                }
+            }
+
+            if (optionsMap.containsKey("-lang-version")) {
+                String versionStr = (String) optionsMap.get("-lang-version");
+                compiler.setLanguageVersion(versionStr);
+            }
+
+            if (optionsMap.containsKey("-use-schema:")) {
+                Object schemaObj = optionsMap.get("-use-schema:");
+                if(schemaObj instanceof XsdSchema) {
+                    if (SaxonCAPI.debug) {
+                        System.err.println("Found -use-schema: and obj of type XsdSchema");
+                    }
+                    compiler.useSchema((XsdSchema) schemaObj);
+                } else if (SaxonCAPI.debug) {
+                    System.err.println("Found -use-schema:  but object not a XsdSchema");
+                }
+
+            }
+        }
+
+
         if(query != null) {
             executable = compiler.compile(query);
         }
 
         if (params != null && params.length != 0) {
-                if(optionsMap.containsKey("updating")) {
-                    if(optionsMap.get("updating").equals("on")) {
-                         compiler.setUpdatingEnabled(true);
-                    } else {
-                        compiler.setUpdatingEnabled(false);
-                    }
-                }
 
-                if(optionsMap.containsKey("-streaming")) {
-                    if(optionsMap.get("-streaming").equals("1")) {
-                         compiler.setStreaming(true);
-                    } else {
-                        compiler.setStreaming(false);
-                    }
-                }
-
-                if(optionsMap.containsKey("-lang-version")) {
-                    String versionStr = (String)optionsMap.get("-lang-version");
-                    compiler.setLanguageVersion(versionStr);
-                }
 
                 if (optionsMap.containsKey("qs")) {
                     query = (String) optionsMap.get("qs");
@@ -298,6 +317,7 @@ public class XQueryEngine extends SaxonCAPI {
             ByteArrayOutputStream bStream = new ByteArrayOutputStream();
             Serializer serializer = processor.newSerializer(bStream);
             XQueryEvaluator eval = xqueryEvaluator(processor, cwd, queryStr, params, values, serializer, errorReporter);
+            eval.setErrorReporter(errorReporter);
             eval.run(serializer);
             return SaxonCAPI.stringToNative(alloc, bStream);
         } catch (Exception ex) {
@@ -340,6 +360,7 @@ public class XQueryEngine extends SaxonCAPI {
                     }
                 }
                 XQueryEvaluator eval = xqueryEvaluator(processor, cwd, null, params, values, serializer, errorReporter);
+                eval.setErrorReporter(errorReporter);
                 eval.run(serializer);
 
                 //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
@@ -377,6 +398,7 @@ public class XQueryEngine extends SaxonCAPI {
                 queryStr = SaxonCAPI.toJavaString(c_queryStr, c_encoding);
             }
             XQueryEvaluator eval = xqueryEvaluator(processor, cwd, queryStr, params, values, null, errorReporter);
+            eval.setErrorReporter(errorReporter);
             XdmValue value = eval.evaluate();
             ObjectHandle handle = SaxonCAPI.createHandle(value);
             return handle.rawValue();
@@ -420,6 +442,7 @@ public class XQueryEngine extends SaxonCAPI {
                 serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
             }
             XQueryEvaluator eval = xqueryEvaluator(processor, cwd, queryStr, params, values, serializer, errorReporter);
+            eval.setErrorReporter(errorReporter);
             if (serializer != null) {
 
                 eval.run(serializer);

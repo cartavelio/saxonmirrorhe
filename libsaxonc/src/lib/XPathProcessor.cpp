@@ -9,6 +9,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <saxonc/XsdSchema.h>
 
 #ifdef MEM_DEBUG
 #define new new (__FILE__, __LINE__)
@@ -200,6 +201,49 @@ void XPathProcessor::setContextFile(const char *filename) {
     }
 }
 
+
+void XPathProcessor::setSchemaAware(bool schemaAware) {
+    std::map<std::string, std::string>::iterator it;
+    it = properties.find("sa:");
+    if (it != properties.end()) {
+        parameters.erase("sa:");
+    }
+    if (schemaAware) {
+        setProperty("sa:", "true");
+    } else {
+        setProperty("sa:", "false");
+    }
+}
+
+bool XPathProcessor::isSchemaAware() {
+    std::map<std::string, std::string>::iterator it;
+    it = properties.find("sa:");
+    if (it != properties.end()) {
+        std::string valuei = it->second;
+        if (valuei == "true" || valuei == "on") {
+            return true;
+        }
+    }
+    return false;
+}
+
+void XPathProcessor::useSchema(XsdSchema *schema) {
+    if (schema == nullptr) {
+        throw SaxonApiException("XsdSchema cannot be null()");
+    }
+
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    j_xp_useSchema(thread, (void *) cppXP,
+                          (void *) schema->getUnderlyingSchema(), &r);
+
+    if (r.status == SXN_EXCEPTION) {
+        throw SaxonApiException(r);
+    }
+    setSchemaAware(true);
+
+}
+
 void XPathProcessor::setUnprefixedElementMatchingPolicy(
         UnprefixedElementMatchingPolicy policy) {
     std::map<std::string, std::string>::iterator it;
@@ -235,6 +279,10 @@ void XPathProcessor::declareNamespace(const char *prefix, const char *uri) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     j_xp_declareNamespace(thread, (void *) cppXP,
                           (char *) prefix, (char *) uri, &r);
+
+    if (r.status == SXN_EXCEPTION) {
+        throw SaxonApiException(r);
+    }
 }
 
 void XPathProcessor::declareVariable(const char *name) {
@@ -244,6 +292,10 @@ void XPathProcessor::declareVariable(const char *name) {
     saxon_error_t r = SAXON_ERROR_DEFAULT;
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     j_xp_declareVariable(thread, (void *) cppXP, (char *) name, &r);
+
+    if (r.status == SXN_EXCEPTION) {
+        throw SaxonApiException(r);
+    }
 }
 
 void XPathProcessor::setBackwardsCompatible(bool option) {
@@ -285,8 +337,8 @@ void XPathProcessor::setBaseURI(const char *uriStr) {
         xp_baseURI = nullptr;
     }
 
-    if (status == SXN_EXCEPTION) {
-        throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    if (r.status == SXN_EXCEPTION) {
+        throw SaxonApiException(r);
     }
 }
 

@@ -1,4 +1,7 @@
 #include "saxonc/XQueryProcessor.h"
+
+#include <saxonc/XsdSchema.h>
+
 #include "saxonc/XdmArray.h"
 #include "saxonc/XdmAtomicValue.h"
 #include "saxonc/XdmFunctionItem.h"
@@ -33,6 +36,10 @@ XQueryProcessor::~XQueryProcessor() {
                       (void *)procRef);
     procRef = SXN_UNSET;
   }
+  if (schemaRef != SXN_UNSET) {
+    j_handles_destroy(thread,(void *)schemaRef);
+    schemaRef = SXN_UNSET;
+  }
 }
 
 SaxonProcessor* XQueryProcessor::getSaxonProcessor() {
@@ -50,6 +57,7 @@ XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   procRef = j_copy_handles(thread, (void *)p->procRef);
+  schemaRef = SXN_UNSET;
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   cppXQ = j_createXQueryEngineWithProcessor(thread,(void *)procRef, &r);
   if (r.status != SAXON_OK) {
@@ -69,6 +77,11 @@ XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   procRef = j_copy_handles(thread, (void *)other.procRef);
   cppXQ = j_copy_handles(thread, (void *)other.cppXQ);
+  if (schemaRef != SXN_UNSET) {
+    schemaRef = j_copy_handles(thread, (void *)other.schemaRef);
+  } else {
+    schemaRef = other.schemaRef;
+  }
 
   std::map<std::string, XdmValue *>::const_iterator paramIter =
       other.parameters.begin();
@@ -222,6 +235,45 @@ void XQueryProcessor::clearParameters(bool delValues) {
     parameters.clear();
 }
 
+
+void XQueryProcessor::useSchema(XsdSchema * schema) {
+  if (schema != nullptr) {
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    schemaRef = j_copy_handles(thread, (void *)schema->getUnderlyingSchema());
+    setSchemaAware(true);
+  }
+}
+
+void XQueryProcessor::setSchemaAware(bool schemaAware) {
+  std::map<std::string, std::string>::iterator it;
+  it = properties.find("sa:");
+  if (it != properties.end()) {
+    parameters.erase("sa:");
+  }
+  if (schemaAware) {
+    setProperty("sa:", "true");
+  } else {
+    setProperty("sa:", "false");
+    if (schemaRef != SXN_UNSET) {
+      graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+      j_handles_destroy(thread,(void *)schemaRef);
+      schemaRef = SXN_UNSET;
+    }
+  }
+}
+
+bool XQueryProcessor::isSchemaAware() {
+  std::map<std::string, std::string>::iterator it;
+  it = properties.find("sa:");
+  if (it != properties.end()) {
+    std::string valuei = it->second;
+    if (valuei == "true" || valuei == "on") {
+      return true;
+    }
+  }
+  return false;
+}
+
 void XQueryProcessor::clearProperties() {
   properties.clear();
   // outputfile1.clear();
@@ -262,9 +314,27 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
+
+  int addition = 0;
+  if (schemaRef > SXN_UNSET) {
+    addition += 1;
+  }
+
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
-  int64_t status = j_executeQueryToFile(thread, (void *)procRef,
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+
+  if (schemaRef != SXN_UNSET) {
+    std::string schemaOptionStr = "-use-schema:";
+    addProcessorDataPair(thread, (void *)processorDataRef,
+        (char *)schemaOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
+  }
+
+
+  j_executeQueryToFile(thread, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)ofilename, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef), &r);
@@ -274,7 +344,7 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
     processorDataRef = SXN_UNSET;
   }
   if (r.status != SAXON_OK) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
 
 }
@@ -286,9 +356,26 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
     setProperty("s", infilename);
   }
   saxon_error_t r = SAXON_ERROR_DEFAULT;
+
+  int addition = 0;
+  if (schemaRef > SXN_UNSET) {
+    addition += 1;
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+
+  if (schemaRef > SXN_UNSET) {
+
+    std::string schemaOptionStr = "-use-schema:";
+    addProcessorDataPair(thread, (void *)processorDataRef,
+        (char *)schemaOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
+  }
+
   int64_t result = j_executeQueryToValue(thread, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
@@ -315,9 +402,27 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
   }
   allocFn fn = operator new;
   saxon_error_t r = SAXON_ERROR_DEFAULT;
+
+  int addition = 0;
+  if (schemaRef > SXN_UNSET) {
+    addition += 1;
+  }
+
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+
+
+  if (schemaRef != SXN_UNSET) {
+    std::string schemaOptionStr = "-use-schema:";
+    addProcessorDataPair(thread, (void *)processorDataRef,
+        (char *)schemaOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
+  }
+
   char *result = j_executeQueryToString(thread, (void *)fn, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL

@@ -940,7 +940,7 @@ def testCallFunctionArgInvalid(saxonproc):
         argArr = [saxonproc.make_integer_value(2), saxonproc.make_integer_value(3)]
         v = executable.call_function_returning_value("{http://localhost/}add", argArr)
     except  Exception as err:
-        assert "Cannot invoke function add#2 externally" in str(err)
+        assert "XTDE0041  Cannot invoke function add#2 externally" in str(err)
 
 
 def testCallNamedTemplateWithTunnelParams(saxonproc):

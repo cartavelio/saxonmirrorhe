@@ -303,6 +303,44 @@ public class XPathProcessor extends SaxonCAPI {
        // selector = null;
     }
 
+    /**
+     * Set the {@link XsdSchema} to be used with this {@code XPathCompiler}.
+     * <p>This automatically marks the XPath expression as schema-aware.</p>
+     * <p>The method should only be called once; supplying a schema cancels the effect
+     * of any previous call. The method must be called before the XPath expression is compiled.</p>
+     *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
+     * @param schemaRef the schema to be imported
+     * @param saxonError - Exception callback if failure in useSchema such as unlicensed processor detected. Exception handled and returned as -2
+     * @since 13.0
+     **/
+    @CEntryPoint(name = "j_xp_useSchema")
+    public static long j_xp_useSchema(IsolateThread thread, ObjectHandle xpathProcessorRef,  ObjectHandle schemaRef, SaxonError saxonError) {
+        if(xpathProcessorRef == WordFactory.nullPointer()) {
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XPathProcessor is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
+        }
+        XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
+
+        if(schemaRef == WordFactory.nullPointer()) {
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XsdSchema object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
+        }
+        try {
+            XsdSchema schema = objectHandles.get(schemaRef);
+
+            XPathCompiler compiler = xPathProcessor.getCompiler();
+            compiler.useSchema(schema);
+            return SaxonCAPI.STATUS_OK;
+
+        }  catch (Exception ex) {
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, ex.getMessage());
+            return SaxonCAPI.STATUS_EXCEPTION;
+        }
+
+    }
+
 
     /**
      * Compile and evaluate an XPath expression, supplied as a character string, with properties and parameters required

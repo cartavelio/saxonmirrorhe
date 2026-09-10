@@ -67,6 +67,9 @@ void DocumentBuilder::setSchemaValidator(SchemaValidator *validator) {
     }
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     schemaValRef = j_copy_handles(thread, (void *)validator->getUnderlyingValidator());
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "setSchemaValidator oldRef="<< ((long)validator->getUnderlyingValidator()) <<" new schemaValRef ="<<((long)schemaValRef) << std::endl;
+    }
   }
 }
 
@@ -90,9 +93,9 @@ void DocumentBuilder::setBaseUri(const char *uri) {
   baseURI = std::string(uri);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  int64_t status = j_db_setBaseURI(thread, (void *)docBuilderObject, (char *)uri, &r);
+  j_db_setBaseURI(thread, (void *)docBuilderObject, (char *)uri, &r);
   if (r.status == SXN_EXCEPTION) {
-    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    throw SaxonApiException(r);
   }
 }
 
@@ -125,6 +128,9 @@ XdmNode *DocumentBuilder::parseXmlFromString(const char *source,
 XdmNode *DocumentBuilder::parseXmlFromFile(const char *filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "parseXmlFromFile schemaValRef ="<<((long)schemaValRef) << std::endl;
+  }
   int64_t result = j_main_parseXmlFile(thread, (char *)cwdDB.c_str(),
       (void *)proc->procRef, (void *)docBuilderObject,
       (schemaValRef != SXN_UNSET

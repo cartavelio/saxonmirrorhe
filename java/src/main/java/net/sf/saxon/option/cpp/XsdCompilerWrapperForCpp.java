@@ -300,6 +300,9 @@ public class XsdCompilerWrapperForCpp extends SaxonCAPI  {
      */
     @CEntryPoint(name = "j_xsdCompileFromProcessorData")
     public static long j_xsdCompileFromProcessorData(IsolateThread thread, ObjectHandle processorRef, ObjectHandle xsdCompilerRef, CCharPointer csystemId, ObjectHandle xsdFilenamesRef, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {
+        if(SaxonCAPI.debug) {
+            System.err.println("j_xsdCompileFromProcessorData called");
+        }
         XsdCompiler compiler = null;
         Processor processor = null;
         if (xsdCompilerRef == WordFactory.nullPointer()) {
@@ -337,11 +340,21 @@ public class XsdCompilerWrapperForCpp extends SaxonCAPI  {
                 SaxonCExceptionHandler.createStandardErrorResult(saxonError, "No filenames specified");
                 return SaxonCAPI.STATUS_EXCEPTION;
             }
-            Source [] sources = new Source[pd_filenames.size()];
             String [] filenames = pd_filenames.getParameterNames();
+            Source [] sources = new Source[filenames.length];
 
-            for (int i = 0; i < pd_filenames.size(); i++) {
+
+            for (int i = 0; i < filenames.length; i++) {
                 sources[i] = resolveFileToSource(processor, systemId, filenames[i], ResourceRequest.XSD_NATURE);
+                if(SaxonCAPI.debug) {
+                    System.err.println("XsdCompilerWrapperForCpp filename= " + sources[i]);
+                }
+            }
+
+            if(SaxonCAPI.debug && sources.length == 0) {
+                System.err.println("XsdCompilerWrapperForCpp zero filenames specified");
+            } else if(SaxonCAPI.debug) {
+                System.err.println("XsdCompilerWrapperForCpp filename.length= " + sources.length);
             }
 
             reporter = new SaxonCErrorReporter();

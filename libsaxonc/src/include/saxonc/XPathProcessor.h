@@ -12,8 +12,10 @@
 
 #include "saxonc_export.h"
 #include "saxonc/SaxonProcessor.h"
+#include "saxonc/XsdSchema.h"
 //#include "XdmValue.h"
 //#include "XdmItem.h"
+
 
 #include <string>
 
@@ -21,6 +23,7 @@ class SaxonProcessor;
 class SaxonApiException;
 class XdmValue;
 class XdmItem;
+class XsdSchema;
 
 enum class SAXONC_EXPORT UnprefixedElementMatchingPolicy {
 
@@ -306,6 +309,37 @@ public:
    * no-namespace schema, supply a zero-length string.
    */
   void importSchemaNamespace(const char *uri);
+
+
+    /**
+     * Set the XsdSchema to be used with this XPathProcessor.
+     *
+     * This automatically marks the XPath expression as schema-aware.
+     * The method should only be called once; supplying a schema cancels the effect
+     * of any previous call. The method must be called before the XPath expression is compiled.
+     * @param schema the schema to be imported
+     * @since 13.0
+     */
+
+    void useSchema(XsdSchema * schema);
+
+
+    /**
+     * Say whether XPath expressions compiled using this {@code XPathCompiler} are
+     * schema-aware. They will automatically be schema-aware if the method
+     * {@link #useSchema(XsdSchema)} is called. An XPath expression
+     * must be marked as schema-aware if it is to handle typed (validated)
+     * input documents.
+     *
+     * @param schemaAware true if expressions are to be schema-aware, false otherwise
+     * @throws UnsupportedOperationException if schema-awareness is requested when this is
+     * not a licensed Saxon-EE configuration.
+     * @since 9.3. Changed in 9.9 to throw an exception if Saxon-EE is not available (previously,
+     * the option was either silently ignored, or caused a failure at some later time.)
+     */
+    void setSchemaAware(bool schemaAware);
+
+    bool isSchemaAware();
 
   /**
    * Get the value of a parameter

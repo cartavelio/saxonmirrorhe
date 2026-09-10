@@ -1398,6 +1398,18 @@ cdef class PyXslt30Processor:
         py_string_i = make_py_str(c_string)
         return py_string_i
 
+    def set_schema_aware(self, schema_aware):
+        cdef bool c_option
+        c_option = schema_aware
+        self.thisxptr.setSchemaAware(c_option)
+
+    def is_schema_aware(self):
+        return self.thisxptr.isSchemaAware()
+
+    def use_schema(self, schema: PyXsdSchema):
+        if schema is not None:
+            self.thisxptr.useSchema(schema.thisxsdptr)
+
     def set_cwd(self, cwd):
         """Set the current working directory.
 
@@ -3138,6 +3150,18 @@ cdef class PyXQueryProcessor:
         c_outfile = py_value_string if output_file is not None else ""
         self.thisxqptr.setOutputFile(c_outfile)
 
+     def set_schema_aware(self, schema_aware):
+         cdef bool c_option
+         c_option = schema_aware
+         self.thisxqptr.setSchemaAware(c_option)
+
+     def is_schema_aware(self):
+         return self.thisxqptr.isSchemaAware()
+
+     def use_schema(self, schema: PyXsdSchema):
+         if schema is not None:
+             self.thisxqptr.useSchema(schema.thisxsdptr)
+
      def set_parameter(self, name, PyXdmValue value):
         """
         set_parameter(self, name, PyXdmValue value)
@@ -3728,6 +3752,18 @@ cdef class PyXPathProcessor:
         py_string_i = make_py_str(c_string)
         return py_string_i
 
+    def set_schema_aware(self, schema_aware):
+        cdef bool c_option
+        c_option = schema_aware
+        self.thisxpptr.setSchemaAware(c_option)
+
+    def is_schema_aware(self):
+        return self.thisxpptr.isSchemaAware()
+
+    def use_schema(self, schema: PyXsdSchema):
+        if schema is not None:
+            self.thisxpptr.useSchema(schema.thisxsdptr)
+
     def declare_namespace(self, prefix, uri):
         """
         declare_namespace(self, prefix, uri)
@@ -3989,10 +4025,10 @@ cdef class PyXsdCompiler:
                 if c_filename_string is not NULL:
                     file_names_array[x] = c_filename_string
                 else:
-                    raise Exception("Noe value found in xsd_list")
+                    raise Exception("None value found in xsd_list")
             schema.thisxsdptr = self.thiscompilerptr.compileFromFiles(file_names_array, _len)
 
-            if schema.thisxsdptr is NULL:
+            if schema.thisxsdptr == NULL:
                 raise Exception("Error: Internal error while compiling Schema")
             return schema
 

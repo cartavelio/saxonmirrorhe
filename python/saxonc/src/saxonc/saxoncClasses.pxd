@@ -209,6 +209,12 @@ cdef extern from "saxonc/SaxonProcessor.h":
         # Set the base output URI.
         void setBaseOutputURI(const char * baseURI)
 
+        void setSchemaAware(bool schemaAware)  except +handle_saxonc_api_exceptions
+
+        bool isSchemaAware()  except +handle_saxonc_api_exceptions
+
+        void useSchema(XsdSchema * schema)  except +handle_saxonc_api_exceptions
+
         # Set the value of a stylesheet parameter
         void setParameter(const char* name, XdmValue*value)
 
@@ -476,6 +482,12 @@ cdef extern from "saxonc/XsdSchema.h":
 
         const char * getBaseURI()
 
+        void setSchemaAware(bool schemaAware)  except +handle_saxonc_api_exceptions
+
+        bool isSchemaAware()  except +handle_saxonc_api_exceptions
+
+        void useSchema(XsdSchema * schema)  except +handle_saxonc_api_exceptions
+
         XdmValue * evaluate(const char * xpathStr, const char* encoding)  except +handle_saxonc_api_exceptions
    
         XdmItem * evaluateSingle(const char * xpathStr, const char* encoding)  except +handle_saxonc_api_exceptions
@@ -549,6 +561,12 @@ cdef extern from "saxonc/XsdSchema.h":
         void setStreaming(bool option)
 
         void isStreaming()
+
+        void setSchemaAware(bool schemaAware)  except +handle_saxonc_api_exceptions
+
+        bool isSchemaAware()  except +handle_saxonc_api_exceptions
+
+        void useSchema(XsdSchema * schema)  except +handle_saxonc_api_exceptions
 
         XdmValue * runQueryToValue() except +handle_saxonc_api_exceptions
         const char * runQueryToString() except +handle_saxonc_api_exceptions
