@@ -21,7 +21,7 @@ import java.util.Comparator;
 
 public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
 
-    // TODO: drop this class (still used from bytecode)
+    // TODO: drop this class (still used when streaming)
 
     private final SequenceIterator e1;
     private final SequenceIterator e2;

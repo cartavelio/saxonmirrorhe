@@ -335,36 +335,7 @@ public class CompilerInfo {
     }
 
 
-    /**
-     * Set whether bytecode should be generated for the compiled stylesheet. This option
-     * is available only with Saxon-EE. The default depends on the setting in the configuration
-     * at the time the XsltCompiler is instantiated, and by default is true for Saxon-EE.
-     * <p>The same effect can be achieved by {@link #setOptimizerOptions(OptimizerOptions)} with the appropriate
-     * setting of {@link OptimizerOptions#BYTE_CODE}.</p>
-     *
-     * @param option true if bytecode is to be generated, false otherwise
-     * @since 9.6
-     */
 
-    public void setGenerateByteCode(boolean option) {
-        if (option) {
-            optimizerOptions = optimizerOptions.union(new OptimizerOptions(OptimizerOptions.BYTE_CODE));
-        } else {
-            optimizerOptions = optimizerOptions.except(new OptimizerOptions(OptimizerOptions.BYTE_CODE));
-        }
-    }
-
-
-    /**
-     * Ask whether bytecode is to be generated in the compiled code.
-     *
-     * @return true if bytecode is to be generated, false if not.
-     * @since 9.6
-     */
-
-    public boolean isGenerateByteCode() {
-        return optimizerOptions.isSet(OptimizerOptions.BYTE_CODE);
-    }
 
     //#if CSHARP==false
     /**

@@ -465,11 +465,9 @@ public class PackageLoaderHE implements IPackageLoader {
                 NodeInfo grandchild = child.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
                 Actor cc;
                 String kind = grandchild.getLocalPart();
-                boolean codeGen = false;
                 switch (kind) {
                     case "template":
                         cc = readNamedTemplate(grandchild);
-                        codeGen = true;
                         break;
                     case "globalVariable":
                         cc = readGlobalVariable(grandchild);
@@ -479,7 +477,6 @@ public class PackageLoaderHE implements IPackageLoader {
                         break;
                     case "function":
                         cc = readGlobalFunction(grandchild);
-                        codeGen = ((UserFunction)cc).getDeclaredStreamability() == FunctionStreamability.UNCLASSIFIED;
                         break;
                     case "mode":
                         cc = readMode(grandchild);
@@ -493,23 +490,6 @@ public class PackageLoaderHE implements IPackageLoader {
                 component = Component.makeComponent(cc, vis, provenance, pack, declaringPackage);
                 cc.setDeclaringComponent(component);
                 cc.setDeclaredVisibility(vis);
-                //#if BYTECODE==true
-                Optimizer optimizer = config.obtainOptimizer();
-                StructuredQName name = cc.getComponentName();
-                int evaluationModes = Expression.ITERATE_METHOD | Expression.PROCESS_METHOD;
-                if (codeGen) {
-                    String objectName = name == null ? ("h" + component.hashCode()) : name.getLocalPart();
-                    cc.setBody(optimizer.makeByteCodeCandidate(cc, cc.getBody(), objectName, evaluationModes));
-                    optimizer.injectByteCodeCandidates(cc.getBody());
-                } else if (cc instanceof Mode) {
-                    ((Mode)cc).processRules(rule -> {
-                        TemplateRule tr = (TemplateRule)rule.getAction();
-                        String objectName = "match=\"" + tr.getMatchPattern() + '"';
-                        tr.setBody(optimizer.makeByteCodeCandidate(tr, tr.getBody(), objectName, evaluationModes));
-                        optimizer.injectByteCodeCandidates(tr.getBody());
-                    });
-                }
-                //#endif
             }
             externalReferences.put(component, binds);
             componentIdMap.put(id, component);
@@ -1693,9 +1673,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("attVal", (loader, element) -> {
             StructuredQName name = loader.getQNameAttribute(element, "name");
             FingerprintedQName attName = new FingerprintedQName(name, loader.config.getNamePool());
-            AttributeGetter getter = new AttributeGetter(attName);
-            getter.setRequiredChecks(loader.getIntegerAttribute(element, "chk"));
-            return getter;
+            return new AttributeGetter(attName);
         });
 
         eMap.put("axis", (loader, element) -> {

@@ -405,14 +405,6 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
         this.redundant = redundant;
     }
 
-    /**
-     * Generate byte code if appropriate
-     *
-     * @param opt the optimizer
-     *
-     */
-    @Override
-    public void generateByteCode(Optimizer opt) {}
 
 
 }

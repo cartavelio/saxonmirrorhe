@@ -19,7 +19,6 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.TypeHierarchy;
@@ -466,45 +465,12 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
         if (streamability.isStreaming()) {
             compiledFunction.prepareForStreaming();
-        } else if (visitor.getConfiguration().isDeferredByteCode(HostLanguage.XSLT)) {
-            int evaluationModes = Expression.ITERATE_METHOD | Expression.PROCESS_METHOD;
-            compiledFunction.setBody(getConfiguration().obtainOptimizer().makeByteCodeCandidate(
-                    compiledFunction, compiledFunction.getBody(), nameAtt, evaluationModes));
         }
 
         if (explaining) {
             exp2.explain(getConfiguration().getLogger());
         }
     }
-
-    /**
-     * Generate byte code if appropriate
-     *
-     * @param opt the optimizer
-     * @throws net.sf.saxon.trans.XPathException if bytecode generation fails
-     */
-    @Override
-    public void generateByteCode(Optimizer opt) throws XPathException {
-        //#if BYTECODE==true
-        // Generate byte code if appropriate
-        if (getCompilation().getCompilerInfo().isGenerateByteCode() &&
-                streamability == FunctionStreamability.UNCLASSIFIED) {
-            try {
-                ICompilerService compilerService = getConfiguration().makeCompilerService(HostLanguage.XSLT);
-                Expression cbody = opt.compileToByteCode(compilerService, compiledFunction.getBody(), nameAtt,
-                                                         Expression.PROCESS_METHOD | Expression.ITERATE_METHOD);
-                if (cbody != null) {
-                    compiledFunction.setBody(cbody);
-                }
-            } catch (Exception e) {
-                System.err.println("Failed while compiling function " + nameAtt);
-                e.printStackTrace();
-                throw new XPathException(e);
-            }
-        }
-        //#endif
-    }
-
 
 
     /**

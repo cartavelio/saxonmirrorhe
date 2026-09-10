@@ -18,8 +18,7 @@ import net.sf.saxon.trans.XPathException;
  * each item being processed becomes the context item while it is being processed.</p>
  *
  * <p>NOTE: because this class is converted to a delegate in C#, it should not be subclassed;
- * it should only be implemented by lambda expressions. This restriction does not apply
- * to bytecode generation, which is not converted to C#.</p>
+ * it should only be implemented by lambda expressions.</p>
  */
 
 @FunctionalInterface

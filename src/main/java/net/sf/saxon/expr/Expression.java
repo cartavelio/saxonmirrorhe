@@ -126,17 +126,6 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     }
 
     /**
-     * Get the interpreted form of the expression. Normally this returns the expression unchanged;
-     * but on a CompiledExpression (the result of bytecode generation) it returns the original
-     * interpreted form.
-     * @return the interpreted form of this expression
-     */
-
-    public Expression getInterpretedExpression() {
-        return this;
-    }
-
-    /**
      * Get the immediate sub-expressions of this expression, verifying that the parent pointers
      * in the child expressions are correct.
      * @return the list of sub-expressions, in the same way as with the {@link #operands()} method,
@@ -1446,7 +1435,6 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     }
 
     private static void gatherSlotsUsed(Expression exp, IntHashSet slots) {
-        exp = exp.getInterpretedExpression();
         if (exp instanceof LocalVariableReference) {
             slots.add(((LocalVariableReference)exp).getSlotNumber());
         } else if (exp instanceof SuppliedParameterReference) {

@@ -547,24 +547,7 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
 
         //compiledFunction.computeEvaluationMode();
         ExpressionTool.allocateSlots(body, arity, compiledFunction.getStackFrameMap());
-        //#if BYTECODE==true
-        if (config.isGenerateByteCode(HostLanguage.XQUERY)) {
-            if (config.getCountDown() == 0) {
-                ICompilerService compilerService = config.makeCompilerService(HostLanguage.XQUERY);
-                Expression cbody = opt.compileToByteCode(compilerService, body, getFunctionName().getDisplayName(),
-                                                         Expression.PROCESS_METHOD | Expression.ITERATE_METHOD);
-                if (cbody != null) {
-                    body = cbody;
-                }
-            } else {
-                opt.injectByteCodeCandidates(body);
-                body = opt.makeByteCodeCandidate(compiledFunction, body, getDisplayName(),
-                                                 Expression.PROCESS_METHOD | Expression.ITERATE_METHOD);
-            }
-            compiledFunction.setBody(body);
-            compiledFunction.computeEvaluationMode();
-        }
-        //#endif
+
     }
 
     /**

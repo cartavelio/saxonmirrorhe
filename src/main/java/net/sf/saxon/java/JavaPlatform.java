@@ -7,7 +7,6 @@
 
 package net.sf.saxon.java;
 
-import com.saxonica.ee.bytecode.util.GeneratedClassLoader;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Platform;
 import net.sf.saxon.dom.DOMEnvelope;
@@ -548,32 +547,6 @@ public class JavaPlatform implements Platform {
         return new StandardModuleURIResolver(config);
     }
 
-
-//#if BYTECODE==true
-
-    /**
-     * Return the class loader required to load the bytecode generated classes
-     *
-     * @param config    The saxon configuration
-     * @param thisClass The class object generated
-     * @return the class loader object
-     * @since 9.6.0.3
-     */
-    @Override
-    public ClassLoader makeGeneratedClassLoader(Configuration config, Class<?> thisClass) {
-        ClassLoader parentClassLoader = null;
-        if (config.getDynamicLoader() instanceof DynamicLoader) {
-            parentClassLoader = ((DynamicLoader)config.getDynamicLoader()).getClassLoader();
-        }
-        if (parentClassLoader == null) {
-            parentClassLoader = Thread.currentThread().getContextClassLoader();
-        }
-        if (parentClassLoader == null) {
-            parentClassLoader = thisClass.getClassLoader();
-        }
-        return new GeneratedClassLoader(parentClassLoader);
-    }
-//#endif
 
 
 }

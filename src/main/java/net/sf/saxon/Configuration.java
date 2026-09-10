@@ -201,7 +201,6 @@ public class Configuration implements SourceResolver, NotationSet {
     private final Map<String, String> fileExtensions = new HashMap<>();
     private final Map<String, ResourceFactory> resourceFactoryMapping = new HashMap<>();
     private final Map<NamespaceUri, FunctionAnnotationHandler> functionAnnotationHandlers = new HashMap<>();
-    protected int byteCodeThreshold = 100;
     private int regexBacktrackingLimit = 10000000;
 
     private final TreeStatistics treeStatistics = new TreeStatistics();
@@ -4454,8 +4453,6 @@ public class Configuration implements SourceResolver, NotationSet {
                     if (optimizer != null) {
                         optimizer.setOptimizerOptions(optimizerOptions);
                     }
-                    internalSetBooleanProperty(FeatureCode.GENERATE_BYTE_CODE, FeatureKeys.GENERATE_BYTE_CODE,
-                                               optimizerOptions.isSet(OptimizerOptions.BYTE_CODE));
                     defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
                     break;
 
@@ -5301,36 +5298,6 @@ public class Configuration implements SourceResolver, NotationSet {
 
 
     /**
-     * Ask whether bytecode should be generated. The default setting
-     * is true in Saxon Enterprise Edition and false in all other cases. Setting the option to
-     * true has no effect if Saxon-EE is not available (but if it is set to true, this method will
-     * return true). Setting the option to false in Saxon-EE
-     * is permitted if for some reason bytecode generation is to be suppressed (one possible reason
-     * is to improve compilation performance at the expense of evaluation performance).
-     *
-     * @param hostLanguage one of XSLT or XQUERY
-     * @return true if the option is switched on
-     */
-
-    public boolean isGenerateByteCode(HostLanguage hostLanguage) {
-        return false;
-    }
-
-    /**
-     * Ask whether bytecode should be generated in Just-In-time compilation and therefore deferring the byte code generation. The default setting
-     * is false. Setting the option to
-     * true has no effect if Saxon-EE is not available (but if it is set to true, this method will
-     * return true). Setting the option to false in Saxon-EE
-     * is permitted and therefore byte code generation will be generated in the compile phase.
-     *
-     * @param hostLanguage one of XSLT or XQUERY
-     * @return true if the option is switched on
-     */
-    public boolean isDeferredByteCode(HostLanguage hostLanguage) {
-        return false;
-    }
-
-    /**
      * Ask whether just-in-time compilation of XSLT template rules is in force
      * @return true if just-in-time compilation is enabled (this is the default in Saxon-EE and
      * not available in other configurations)
@@ -5370,16 +5337,6 @@ public class Configuration implements SourceResolver, NotationSet {
     public InvalidityReportGenerator createValidityReporter() {
         throw new UnsupportedOperationException("Schema validation requires Saxon-EE");
     }
-
-    /**
-     * Get the threshold for generating byte code
-     * @return a value indicating the number of times an expression should be evaluated intepretatively before
-     * it is optimized by generating bytecode
-     */
-    public int getCountDown() {
-        return byteCodeThreshold;
-    }
-
 
     /**
      * This class contains constants representing features of the software that may or may
@@ -5448,15 +5405,6 @@ public class Configuration implements SourceResolver, NotationSet {
         return null;
     }
 
-    /**
-     * Generate a report on byte code instrumentation to a specified file
-     *
-     * @param fileName the specified file name
-     */
-
-    public void createByteCodeReport(String fileName) {
-        // no action in Saxon-HE
-    }
 
     /**
      * Set a label for this configuration

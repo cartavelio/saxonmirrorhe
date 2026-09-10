@@ -307,18 +307,6 @@ public interface Platform {
     ModuleURIResolver makeStandardModuleURIResolver(Configuration config);
 
 
-//#if BYTECODE==true
-    /**
-     * Return the class loader required to load the bytecode generated classes
-     *
-     * @param config           The saxon configuration
-     * @param thisClass        The class object generated
-     * @return the class loader object
-     * @since 9.6.0.3
-     */
-
-    ClassLoader makeGeneratedClassLoader(Configuration config, Class<?> thisClass);
-//#endif
 
 }
 

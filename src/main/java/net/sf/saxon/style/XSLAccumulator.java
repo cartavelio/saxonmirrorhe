@@ -22,7 +22,6 @@ import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.AccumulatorFn;
 import net.sf.saxon.lib.Feature;
@@ -333,15 +332,6 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
         return accumulator.getType();
     }
 
-
-    /**
-     * Generate byte code if appropriate
-     * @param opt the optimizer
-     */
-    @Override
-    public void generateByteCode(Optimizer opt) {
-        // no action currently
-    }
 
     private void checkInitialStreamability(Expression init) {
         //#ifdefined STREAM

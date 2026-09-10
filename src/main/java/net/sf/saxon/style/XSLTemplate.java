@@ -20,7 +20,6 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
@@ -1023,11 +1022,6 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 body.explain(err);
             }
             body.restoreParentPointers();
-            if (config.isDeferredByteCode(HostLanguage.XSLT) && !isTailRecursive) {
-                Optimizer opt = config.obtainOptimizer();
-                int evaluationModes = Expression.ITERATE_METHOD | Expression.PROCESS_METHOD;
-                compiledNamedTemplate.setBody(opt.makeByteCodeCandidate(compiledNamedTemplate, body, diagnosticId, evaluationModes));
-            }
         }
         if (match != null) {
             ItemType contextItemType = getContextItemTypeForTemplateRule();
@@ -1061,11 +1055,6 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                                 if (m2 != match) {
                                     r.setPattern(m2);
                                 }
-                            }
-
-                            if (visitor.getConfiguration().isDeferredByteCode(HostLanguage.XSLT) && !isTailRecursive) {
-                                int evaluationModes = Expression.ITERATE_METHOD | Expression.PROCESS_METHOD;
-                                compiledTemplateRule.setBody(opt.makeByteCodeCandidate(compiledTemplateRule, templateRuleBody, diagnosticId, evaluationModes));
                             }
 
                             if (explaining) {
@@ -1113,53 +1102,6 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         return contextItemType;
     }
 
-
-    /**
-     * Generate byte code for the template (if appropriate)
-     *
-     * @param opt the optimizer
-     * @throws XPathException if byte code generation fails
-     */
-
-    @Override
-    public void generateByteCode(Optimizer opt) throws XPathException {
-        // Generate byte code if appropriate
-        //#if BYTECODE==true
-        if (getCompilation().getCompilerInfo().isGenerateByteCode() && !isTailRecursive) {
-            ICompilerService compilerService = getConfiguration().makeCompilerService(HostLanguage.XSLT);
-            if (getTemplateName() != null) {
-                try {
-                    Expression exp = compiledNamedTemplate.getBody();
-                    Expression cbody = opt.compileToByteCode(compilerService, exp, nameAtt, Expression.PROCESS_METHOD);
-                    if (cbody != null) {
-                        compiledNamedTemplate.setBody(cbody);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Failed while compiling named template " + nameAtt);
-                    e.printStackTrace();
-                    throw new XPathException(e);
-                }
-            }
-            for (TemplateRule compiledTemplateRule : compiledTemplateRules.values()) {
-                if (!compiledTemplateRule.isDeclaredStreamable()) {
-                    try {
-                        Expression exp = compiledTemplateRule.getBody();
-                        if (exp != null) {
-                            Expression cbody = opt.compileToByteCode(compilerService, exp, matchAtt, Expression.PROCESS_METHOD);
-                            if (cbody != null) {
-                                compiledTemplateRule.setBody(cbody);
-                            }
-                        }
-                    } catch (Exception e) {
-                        System.err.println("Failed while compiling template rule with match = '" + matchAtt + "'");
-                        e.printStackTrace();
-                        throw new XPathException(e);
-                    }
-                }
-            }
-        }
-        //#endif
-    }
 
 
     /**

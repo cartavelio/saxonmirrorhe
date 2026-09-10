@@ -92,7 +92,6 @@ public class XsltCompiler {
         this.processor = processor;
         this.config = processor.getUnderlyingConfiguration();
         compilerInfo = new CompilerInfo(config.getDefaultXsltCompilerInfo());
-        compilerInfo.setGenerateByteCode(config.isGenerateByteCode(HostLanguage.XSLT));
         compilerInfo.setTargetEdition(config.getEditionCode());
         compilerInfo.setJustInTimeCompilation(config.isJITEnabled());
     }
@@ -549,26 +548,30 @@ public class XsltCompiler {
 
     /**
      * Set whether bytecode should be generated for the compiled stylesheet. This option
-     * is available only with Saxon-EE. The default depends on the setting in the configuration
-     * at the time the XsltCompiler is instantiated, and by default is true for Saxon-EE.
+     * has no effect from 12.0 (bytecode generation has been dropped from the product)
      *
      * @param option true if bytecode is to be generated, false otherwise
-     * @since 9.6
+     * @since 9.6.
+     * @deprecated since 12.0 - the call has no effect.
      */
 
+    @Deprecated
     public void setGenerateByteCode(boolean option) {
-        compilerInfo.setGenerateByteCode(option);
+        // no action
     }
 
     /**
-     * Ask whether bytecode is to be generated in the compiled code.
+     * Ask whether bytecode is to be generated in the compiled code. From 12.0 this
+     * always returns false.
      *
      * @return true if bytecode is to be generated, false if not.
      * @since 9.6
+     * @deprecated since 12.0 - always returns false.
      */
 
+    @Deprecated
     public boolean isGenerateByteCode() {
-        return compilerInfo.isGenerateByteCode();
+        return false;
     }
 
 

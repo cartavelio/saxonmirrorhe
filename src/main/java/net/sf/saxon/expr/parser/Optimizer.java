@@ -496,43 +496,6 @@ public class Optimizer {
         return instruction;
     }
 
-    /**
-     * Generate Java byte code for an expression
-     *
-     * @param compilerService   the compiler service
-     * @param expr              the expression to be compiled
-     * @param objectName        the name of the object (e.g. function) being compiled
-     * @param evaluationMethods The evaluation modes for which code is generated. Currently a subset of
-     *                          {@link Expression#PROCESS_METHOD}, {@link Expression#ITERATE_METHOD}. If no code is generated for
-     *                          a given evaluation method, the fallback implementation from the superclass is used.
-     * @return the compiled expression if possible, or null if compilation is not possible
-     */
-
-    public Expression compileToByteCode(ICompilerService compilerService, Expression expr, String objectName, int evaluationMethods) {
-        return null;
-    }
-
-    /**
-     * Insert a ByteCodeCandidate into the expression tree. A ByteCodeCandidate monitors how many
-     * times it is executed, and after reaching a certain threshold, generates bytecode for faster
-     * evaluation of its target expression
-     *
-     * @param owner                   the owning construct in the expression tree
-     * @param expr                    the child (target) expression
-     * @param objectName              name to be used in forming the name of the bytecode class
-     * @param requiredEvaluationModes the evaluation modes for which code should be generated
-     * @return a new ByteCodeCandidate if the expression is suitable for bytecode generation,
-     * or the supplied target expression otherwise.
-     */
-
-
-    public Expression makeByteCodeCandidate(ExpressionOwner owner, Expression expr, String objectName, int requiredEvaluationModes) {
-        return expr;
-    }
-
-    public void injectByteCodeCandidates(Expression exp) throws XPathException {
-
-    }
 
     public Expression optimizeNumberInstruction(NumberInstruction ni, ContextItemStaticInfo contextInfo) {
         return null;

@@ -65,7 +65,6 @@ public class QT3TestReport extends TestReport {
         results.writeAttribute("released", "false");
         results.writeAttribute("open-source", "false");
         results.writeAttribute("language", spec.specAndVersion);
-        results.writeAttribute("bytecode", testDriver.isByteCode()?"on":"off");
 
 
         Map<String, QT3TestDriverHE.Dependency> dependencyMap = ((QT3TestDriverHE) testDriver).getDependencyMap();

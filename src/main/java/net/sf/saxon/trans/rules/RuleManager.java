@@ -9,11 +9,9 @@ package net.sf.saxon.trans.rules;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Component;
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.TemplateRule;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.Token;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.style.StylesheetModule;
@@ -234,28 +232,6 @@ public final class RuleManager {
         return 1;
     }
 
-
-    /**
-     * Get the template rule matching a given item whose import precedence
-     * is in a particular range. This is used to support the xsl:apply-imports function
-     *
-     * @param item The item to be matched
-     * @param mode The mode for which a rule is required
-     * @param min  The minimum import precedence that the rule must have
-     * @param max  The maximum import precedence that the rule must have
-     * @param c    The Controller for the transformation
-     * @return The template rule to be invoked
-     * @throws XPathException if an error occurs matching a pattern
-     */
-
-    public Rule getTemplateRule(Item item, Mode mode, int min, int max, XPathContext c)
-            throws XPathException {
-        // DO NOT DELETE: USED FROM BYTECODE
-        if (mode == null) {
-            mode = unnamedMode;
-        }
-        return mode.getRule(item, min, max, c);
-    }
 
     /**
      * Allocate rankings to the rules within each mode. This method must be called when all

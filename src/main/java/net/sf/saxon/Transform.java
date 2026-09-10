@@ -185,8 +185,6 @@ public class Transform {
         options.addRecognizedOption("T", CommandLineOptions.TYPE_CLASSNAME,
                                     "Use named TraceListener class, or standard TraceListener");
         //#if CSHARP==false
-        options.addRecognizedOption("TB", CommandLineOptions.TYPE_FILENAME,
-                                    "Trace hotspot bytecode generation to specified XML file");
         options.addRecognizedOption("TJ", CommandLineOptions.TYPE_BOOLEAN,
                                     "Debug binding and execution of extension functions");
         options.setPermittedValues("TJ", new String[]{"on", "off"}, "on");
@@ -934,10 +932,6 @@ public class Transform {
                         }
                     }
 
-                }
-                if (options.getOptionValue("TB")!=null) {
-                    // report on hotspot bytecode generation
-                    config.createByteCodeReport(options.getOptionValue("TB"));
                 }
                 if (Instrumentation.ACTIVE && !run) {
                     Instrumentation.report();

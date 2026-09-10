@@ -10,7 +10,6 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 
@@ -40,14 +39,6 @@ public interface StylesheetComponent {
      */
 
     void optimize(ComponentDeclaration declaration) throws XPathException;
-
-    /**
-     * Generate byte code if appropriate
-     * @param opt the optimizer
-     * @throws XPathException if bytecode generation fails
-     */
-
-    void generateByteCode(Optimizer opt) throws XPathException;
 
     /**
      * Get the corresponding Actor object that results from the compilation of this
