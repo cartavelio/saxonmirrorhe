@@ -149,8 +149,23 @@
                     the Feature Matrix. (e.g. used to add info for 'Import stylesheet packages' when
                     product does not also have 'Export' feature) -->
                 <xsl:choose>
-                    <xsl:when test="exists(description)">
+                    <xsl:when test="exists(description[not(@generic)])">
                         <xsl:copy-of select="description/*"/>
+                    </xsl:when>
+                    <xsl:when test="alt-description">
+                        <xsl:variable name="feature" select="ancestor::feature"/>
+                        <xsl:for-each select="description[not(@generic)]">
+                            <xsl:variable name="variants" select="local:get-variants(.)" as="xs:string*"/>
+                            <div variant="{string-join($variants, ' ')}">
+                                <xsl:copy-of select="./*"/>
+                            </div>
+                        </xsl:for-each>
+                        <xsl:for-each select="alt-description">
+                            <xsl:variable name="variants" select="local:get-variants-range(., ancestor::product/description)" as="xs:string*"/>
+                            <div variant="{string-join($variants, ' ')}">
+                                <xsl:copy-of select="./*"/>
+                            </div>
+                        </xsl:for-each>
                     </xsl:when>
                     <xsl:when test="ancestor::feature/alt-description">
                         <xsl:variable name="feature" select="ancestor::feature"/>
@@ -185,7 +200,7 @@
                                 <xsl:text>, </xsl:text>
                             </xsl:if>
                         </xsl:for-each>. </p>
-                    <xsl:if test="$variants = 'JS'">
+                    <xsl:if test="$variants = 'JS' and exists($details[@JSlink])">
                         <p variant="JS">For more details see: <xsl:for-each select="$details[@JSlink]">
                             <a href="https://www.saxonica.com/saxon-js/documentation/index.html#!{./@JSlink}"
                                 class="bodylink"><xsl:value-of select="./@JSname"/></a>
