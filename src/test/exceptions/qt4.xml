@@ -144,5 +144,10 @@
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Not yet implemented</reason>
    </exception>
+   
+   <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="insufficient tests">
+      <created by="Michael Kay" on="2023-01-03"/>
+      <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
+   </exception>
 
 </exceptions>
