@@ -126,10 +126,10 @@ void SaxonProcessor::exceptionClear() {
 }
 
 
-SaxonProcessor::SaxonProcessor() {
+/*SaxonProcessor::SaxonProcessor():  {
     licensei = false;
     SaxonProcessor(false);
-}
+}*/
 
 
 void SaxonProcessor::createException(const char * message) {
@@ -244,8 +244,17 @@ SaxonApiException * SaxonProcessor::checkForExceptionCPP(JNIEnv *env, jclass cal
 }
 
 
-SaxonProcessor::SaxonProcessor(bool l) {
+SaxonProcessor::SaxonProcessor() {
+    initialize(false);
+}
 
+
+SaxonProcessor::SaxonProcessor(bool l) {
+    initialize(l);
+}
+
+
+void SaxonProcessor::initialize(bool l) {
     cwd = "";
     licensei = l;
     exception = nullptr;
