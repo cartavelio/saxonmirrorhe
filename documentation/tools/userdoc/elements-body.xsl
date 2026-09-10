@@ -196,12 +196,12 @@
     <xsl:template match="el:in-spec">
         <!-- Add relevant links to XSLT specifications, using in-spec elements -->
         <xsl:variable name="elemName" select="../el:name"/>
-        <xsl:if test=". = 'xslt20'">
+        <!--<xsl:if test=". = 'xslt20'">
             <p>
                 <a href="http://www.w3.org/TR/xslt20/#element-{$elemName}">XSLT 2.0
                     Specification</a>
             </p>
-        </xsl:if>
+        </xsl:if>-->
         <xsl:if test=". = 'xslt30'">
             <p>
                 <a href="http://www.w3.org/TR/xslt-30/#element-{$elemName}">XSLT 3.0
