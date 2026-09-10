@@ -21,10 +21,10 @@
                 <meta name="coverage" content="Worldwide" />
                 <meta name="copyright" content="Copyright Saxonica Ltd" />
                 <meta name="robots" content="follow" />
-                <title>Saxonica: Saxon Product/Feature Matrix</title>
+                <title>Saxonica: Saxon product feature matrix</title>
             </head>
             <body class="main">
-                <h1>Saxon <xsl:value-of select="$version"/> product comparison (Feature Matrix)</h1>
+                <h1>Saxon <xsl:value-of select="$version"/> product comparison (feature matrix)</h1>
                 <p>This chart describes the features present in each edition of Saxon <xsl:value-of
                     select="$version"/> available for Java, .NET, and C/C++, PHP and Python, and the latest
                     release of SaxonJS.</p>
