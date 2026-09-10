@@ -300,25 +300,47 @@ public class CommandLineOptions {
         String optionValue = getOptionValue("catalog");
         if (optionValue != null) {
             ArrayList<String> catalogs = new ArrayList<>();
-            if ((getOptionValue("u") != null) || isImplicitURI(optionValue)) {
-                ResourceRequest request = new ResourceRequest();
-                request.nature = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
-                request.purpose = ResourceRequest.ANY_PURPOSE;
-                for (String s : optionValue.split(";")) {
+            // The catalog list can be a mixture of filenames and URIs; test each separately for implicit URI-ness
+            for (String acatalog : optionValue.split(";")) {
+                if ((getOptionValue("u") != null) || isImplicitURI(acatalog)) {
+                    ResourceRequest request = new ResourceRequest();
+                    request.nature = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
+                    request.purpose = ResourceRequest.ANY_PURPOSE;
                     Source sourceInput;
                     try {
-                        request.uri = s;
+                        request.uri = acatalog;
                         sourceInput = new DirectResourceResolver(config).resolve(request);
                     } catch (XPathException e) {
-                        throw new SaxonApiException("Catalog file not found: " + s, e);
+                        // The DirectResourceResolver doesn't throw this for a simple "file not found" error
+                        throw new SaxonApiException("Catalog file not found: " + acatalog, e);
                     }
+                    // So we have to work a little harder. This is a bit heuristic. If we get back
+                    // an AugmentedSource, we can find its contained source which will have an open stream.
+                    // (We're never going to read from this stream, so we'll close it if please close is true.)
+                    // If we don't get back an AugmentedSource, I think it'll always be a SAXSource.
+                    InputSource isource = null;
+                    if (sourceInput instanceof AugmentedSource asource) {
+                        Source csource = asource.getContainedSource();
+                        if (csource instanceof SAXSource) {
+                            isource = ((SAXSource) csource).getInputSource();
+                        }
+                        if (asource.isPleaseCloseAfterUse()) {
+                            asource.close();
+                        }
+                    } else if (sourceInput instanceof SAXSource) {
+                        isource = ((SAXSource) sourceInput).getInputSource();
+                    }
+
+                    // If we found a source and if it has no streams attached, raise catalog not found.
+                    if (isource != null && isource.getByteStream() == null && isource.getCharacterStream() == null) {
+                        throw new SaxonApiException("Catalog file not found: " + acatalog);
+                    }
+
                     catalogs.add(sourceInput.getSystemId());
-                }
-            } else {
-                for (String s : optionValue.split(";")) {
-                    File catalogFile = new File(s);
+                } else {
+                    File catalogFile = new File(acatalog);
                     if (!catalogFile.exists()) {
-                        throw new SaxonApiException("Catalog file not found: " + s);
+                        throw new SaxonApiException("Catalog file not found: " + acatalog);
                     }
                     catalogs.add(catalogFile.toURI().toASCIIString());
                 }
