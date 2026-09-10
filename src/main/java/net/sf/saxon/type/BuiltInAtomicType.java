@@ -1312,7 +1312,15 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
             case StandardNames.XS_UNSIGNED_INT:
             case StandardNames.XS_UNSIGNED_SHORT:
             case StandardNames.XS_UNSIGNED_BYTE:
-                return ((IntegerValue) primValue).validateAgainstSubType(this);
+                if (primValue instanceof BigDecimalValue && ((BigDecimalValue)primValue).isWholeNumber()) {
+                    primValue = IntegerValue.makeIntegerValue(((BigDecimalValue) primValue).getDecimalValue().toBigInteger());
+                }
+                if (primValue instanceof IntegerValue) {
+                    return ((IntegerValue) primValue).validateAgainstSubType(this);
+                } else {
+                    return new ValidationFailure("xs:decimal value " + primValue.toShortString() + 
+                                                         " cannot be used where integer subtype " + this + " is required");
+                }
             case StandardNames.XS_YEAR_MONTH_DURATION:
             case StandardNames.XS_DAY_TIME_DURATION:
                 return null;  // treated as primitive

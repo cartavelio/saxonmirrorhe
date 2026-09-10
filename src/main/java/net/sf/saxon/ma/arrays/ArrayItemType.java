@@ -15,6 +15,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
@@ -181,6 +182,14 @@ public class ArrayItemType extends AnyFunctionType {
     @Override
     public SequenceType getResultType() {
         return memberType;
+    }
+
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        if (version >= 40 && memberType != SequenceType.ANY_SEQUENCE) {
+            return net.sf.saxon.type.coercion.ArrayCoercionPlan.getInstance();
+        }
+        return super.getCoercionPlan(version);
     }
 
     /**

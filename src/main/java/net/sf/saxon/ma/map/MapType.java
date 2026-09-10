@@ -15,6 +15,8 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.MapCoercionPlan;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -193,6 +195,15 @@ public class MapType extends AnyFunctionType {
                     valueType.getPrimaryType(), Cardinality.union(valueType.getCardinality(), StaticProperty.ALLOWS_ZERO));
         }
     }
+
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        if (version >= 40 && !(keyType == BuiltInAtomicType.ANY_ATOMIC && valueType == SequenceType.ANY_SEQUENCE)) {
+            return MapCoercionPlan.getInstance();
+        }
+        return super.getCoercionPlan(version);
+    }
+
 
     /**
      * Produce a representation of this type name for use in error messages.

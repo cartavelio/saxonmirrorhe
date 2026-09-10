@@ -205,6 +205,8 @@
             <code>union(xs:integer, xs:string)</code> (which only allowed unions of atomic types)
         is dropped.</p>
         
+        <p>Arrays and maps are coerced to the required type using the 4.0 coercion rules. (PR 1501)</p>
+        
         <p>In a try/catch expression, the variable <code>err:map</code> is available within the catch clause.</p>
         
         <!--<p>Variadic functions (syntax <code>declare %variadic function</code>) are implemented in XQuery.</p>-->

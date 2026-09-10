@@ -18,8 +18,8 @@ import java.util.function.Supplier;
 
 /**
  * A coercion plan represents a process for implementing the coercion rules for converting
- * a supplied value to a given required type. The {@code NoCoercionPlan} is used for types
- * such as item(), node(), or map(*) where no coercions take place.
+ * a supplied value to a given required type. This class handles the case where the required
+ * type is a record type.
  */
 public final class RecordCoercionPlan extends CoercionPlan {
 
