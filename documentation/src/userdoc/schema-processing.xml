@@ -1773,7 +1773,7 @@
        in-memory tree.</p>
      </section>
       
-      <section id="saxon-order-unique" title="saxon:order - rrdered uniqueness constraints">
+      <section id="saxon-order-unique" title="saxon:order - ordered uniqueness constraints">
          <h1>saxon:order - ordered uniqueness constraints</h1>
          
          <p>Saxon allows the additional attribute <code>xs:unique/xs:field/@saxon:order</code>, with the permitted values

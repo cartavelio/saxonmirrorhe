@@ -1729,7 +1729,7 @@
 		<section id="comparisons" title="Comparisons">
 			<h1>Comparisons</h1>
 			<p>The simplest comparison operators are <code>eq</code>, <code>ne</code>,
-					<code>lt</code><code>le</code>, <code>gt</code>, and <code>ge</code>. These compare
+					<code>lt</code>, <code>le</code>, <code>gt</code>, and <code>ge</code>. These compare
 				two atomic items of the same type, for example two integers, two dates, or two strings.
 				In the case of strings, the default collation is used (this can be set using the
 				configuration property <a class="feature" href="DEFAULT_COLLATION"/>). If the operands

@@ -1083,8 +1083,11 @@
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
-      <saxon-edition>PE/EE 13</saxon-edition>
+      <status>
+        <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.4 provided that syntax
+          extensions are enabled.</p>
+      </status>
+      <saxon-edition>PE/EE 12</saxon-edition>
       <description>
         <p>Decodes URI-escaped characters in a string.</p>
       </description>
