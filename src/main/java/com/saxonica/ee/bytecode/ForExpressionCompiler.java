@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.map.ForItemMappingAction;
 import com.saxonica.ee.bytecode.map.ForSequenceMappingAction;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -38,13 +39,14 @@ public class ForExpressionCompiler extends ToIteratorCompiler {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "ForExpression-push");
-        compiler.compileToIterator(sequence);
-        int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
+        IteratorDetails seqIter = compiler.compileToIterator(sequence);
+        int iterVar = methodInfo.allocateLocal(seqIter.iteratorClass);
         ga.storeLocal(iterVar);
         LabelInfo done = methodInfo.newLabel("doneFor");
+
         LabelInfo loop = methodInfo.placeNewLabel("loopFor");
         ga.loadLocal(iterVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(seqIter.iteratorClass, "next");
         ga.dup();
         ga.ifNull(done.label());
         compiler.generateGetContext();
@@ -66,13 +68,13 @@ public class ForExpressionCompiler extends ToIteratorCompiler {
      * Generate bytecode to evaluate the ForExpression as an iterator
      * Precondition: none.
      * Postcondition: the stack contains an iterator representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
 
         Expression sequence = ((ForExpression) expression).getSequence();
         Expression action = ((ForExpression) expression).getAction();
@@ -101,6 +103,7 @@ public class ForExpressionCompiler extends ToIteratorCompiler {
             ga.pop();
             allocateStatic(compiler, EmptyIterator.emptyIterator());
             methodInfo.placeLabel(endLabel);
+            return new IteratorDetails(SequenceIterator.class, Item.class);
 
         } else if (Cardinality.allowsMany(action.getCardinality())) {
 
@@ -135,6 +138,8 @@ public class ForExpressionCompiler extends ToIteratorCompiler {
             ga.invokeConstructor(MappingIterator.class, SequenceIterator.class, MappingFunction.class);
 
             // assert stack : MappingIterator
+
+            return new IteratorDetails(MappingIterator.class, Item.class);
 
         } else {
 
@@ -172,6 +177,7 @@ public class ForExpressionCompiler extends ToIteratorCompiler {
 
             // assert stack : MappingIterator
 
+            return new IteratorDetails(ItemMappingIterator.class, Item.class);
         }
     }
 

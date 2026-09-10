@@ -3,9 +3,11 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.IteratorDetails;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.value.BooleanValue;
 
@@ -26,10 +28,11 @@ public abstract class ToBooleanCompiler extends ExpressionCompiler {
     }
 
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         compileToItem(compiler, expression);
         Generator ga = compiler.getCurrentGenerator();
         ga.invokeStaticMethod(SingletonIterator.class, "makeIterator", Item.class);
+        return new IteratorDetails(SequenceIterator.class, BooleanValue.class);
     }
 
     @Override

@@ -3,10 +3,12 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.IteratorDetails;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 
 /**
  * Compiler for a CompiledExpression. This arises when we need to compile an expression such as
@@ -17,13 +19,14 @@ import net.sf.saxon.om.Item;
 public class CompiledExpressionCompiler extends ExpressionCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
+    public IteratorDetails compileToIterator(CompilerService compiler,
                                   /*@NotNull*/ Expression expression) throws CannotCompileException {
         CompiledExpression ce = (CompiledExpression)expression;
         Generator ga = compiler.getCurrentGenerator();
         allocateStatic(compiler, ce.getGeneratedCode());
         compiler.generateGetContext();
         ga.invokeInstanceMethod(GeneratedCode.class, "iterate", XPathContext.class);
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
     @Override

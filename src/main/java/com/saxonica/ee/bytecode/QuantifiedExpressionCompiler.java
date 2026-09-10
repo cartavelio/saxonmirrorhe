@@ -6,7 +6,6 @@ import net.sf.saxon.expr.QuantifiedExpression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
 
 /**
  * Compile the QuantifiedExpression to Java bytecode
@@ -47,8 +46,8 @@ public class QuantifiedExpressionCompiler extends ToBooleanCompiler {
         Expression action = quanExpr.getAction();
         boolean some = (quanExpr.getOperator() == Token.SOME);
         int slotNum = quanExpr.getLocalSlotNumber();
-        compiler.compileToIterator(base);
-        int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
+        IteratorDetails baseIter = compiler.compileToIterator(base);
+        int iterVar = methodInfo.allocateLocal(baseIter.iteratorClass);
         ga.storeLocal(iterVar);
         LabelInfo end = methodInfo.newLabel("endQF");
         LabelInfo notSatisfied = methodInfo.newLabel("notSatisfied");
@@ -56,7 +55,7 @@ public class QuantifiedExpressionCompiler extends ToBooleanCompiler {
 
         LabelInfo loop = methodInfo.placeNewLabel("loop");
         ga.loadLocal(iterVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(baseIter.iteratorClass, "next");
         ga.dup();
         ga.ifNull(done.label());
         compiler.generateGetContext();
@@ -71,7 +70,7 @@ public class QuantifiedExpressionCompiler extends ToBooleanCompiler {
             ga.ifTrue(notSatisfied);
         }
         ga.loadLocal(iterVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "close");
+        ga.invokeInstanceMethod(baseIter.iteratorClass, "close");
         ga.push(some);
         ga.goTo(end);
 

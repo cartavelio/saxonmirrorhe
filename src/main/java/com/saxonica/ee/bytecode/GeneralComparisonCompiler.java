@@ -203,21 +203,23 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
             methodInfo.placeLabel(nonNullArg1);
         }
 
-        int item0Var = methodInfo.allocateLocal(AtomicValue.class);
+
         int item1Var = methodInfo.allocateLocal(AtomicValue.class);
         ga.checkClass(AtomicValue.class);
         ga.storeLocal(item1Var);
 
-        compiler.compileToIterator(arg0);
-        int iter0Var = methodInfo.allocateLocal(SequenceIterator.class);
+        IteratorDetails arg0Iter = compiler.compileToIterator(arg0);
+        int iter0Var = methodInfo.allocateLocal(arg0Iter.iteratorClass);
         ga.storeLocal(iter0Var);
 
         LabelInfo loop = methodInfo.placeNewLabel("compLoop");
         LabelInfo out = methodInfo.newLabel("compout");
 
         ga.loadLocal(iter0Var);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
-        ga.checkClass(AtomicValue.class);
+        ga.invokeInstanceMethod(arg0Iter.iteratorClass, "next");
+        Class<? extends Item> arg0ItemClass = arg0Iter.itemClass;
+        arg0ItemClass = ga.downCast(arg0ItemClass, AtomicValue.class, true);
+        int item0Var = methodInfo.allocateLocal(arg0ItemClass);
         ga.storeLocal(item0Var);
         ga.loadLocal(item0Var);
         ga.ifNull(returnFalse.label());
@@ -235,7 +237,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
         // return true
         methodInfo.placeLabel(returnTrue);
         ga.loadLocal(iter0Var);
-        ga.invokeInstanceMethod(SequenceIterator.class, "close");
+        ga.invokeInstanceMethod(arg0Iter.iteratorClass, "close");
         ga.push(true);
         ga.goTo(end);
 

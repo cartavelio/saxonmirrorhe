@@ -142,20 +142,23 @@ public class LiteralCompiler extends ExpressionCompiler {
     }
 
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "LiteralCompiler-itr");
         visitLineNumber(compiler, ga, expression);
         GroundedValue value = ((Literal) expression).getGroundedValue();
         if (value.getLength() == 0) {
             ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
+            return new IteratorDetails(EmptyIterator.class, Item.class);
         } else if (value instanceof Item) {
-            compileToItem(compiler, expression);
+            Class<? extends Item> itemClass = compileToItem(compiler, expression);
             ga.invokeStaticMethod(SingletonIterator.class, "makeIterator", Item.class);
+            return new IteratorDetails(SequenceIterator.class, itemClass);
         } else {
             //	allocateStatic(compiler, value);
             ExpressionCompiler.allocateStatic(compiler, value);
             ga.invokeInstanceMethod(Sequence.class, "iterate");
+            return new IteratorDetails(SequenceIterator.class, Item.class);
         }
 
     }

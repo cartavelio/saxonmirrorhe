@@ -7,6 +7,7 @@ import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.Evaluator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.EmptySequence;
 import org.objectweb.asm.Type;
 
@@ -17,12 +18,13 @@ import org.objectweb.asm.Type;
 public class UserFunctionCallCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
         visitAnnotation(compiler, "UserFunctionCallCompiler-Itr");
         compileFunctionCall(compiler, expression, true);
         Generator ga = compiler.getCurrentGenerator();
         ga.invokeInstanceMethod(Sequence.class, "iterate");
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
     @Override

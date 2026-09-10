@@ -29,9 +29,9 @@ public abstract class ToIteratorCompiler extends ExpressionCompiler {
         // Therefore this method does not need to insert any type-checking code; it simply returns the first
         // item (or null if there is no first item)
         Generator ga = compiler.getCurrentGenerator();
-        compiler.compileToIterator(expression);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
-        return Item.class;
+        IteratorDetails details = compiler.compileToIterator(expression);
+        ga.invokeInstanceMethod(details.iteratorClass, "next");
+        return details.itemClass;
     }
 
     @Override

@@ -11,6 +11,7 @@ import net.sf.saxon.expr.instruct.Bindery;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -21,8 +22,8 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 public class IndexedFilterExpressionCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         IndexedFilterExpression indexedFilter = (IndexedFilterExpression) expression;
@@ -124,6 +125,7 @@ public class IndexedFilterExpressionCompiler extends ToIteratorCompiler {
         methodInfo.placeLabel(end);
 
         methodInfo.releaseLocal(baseVar);
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
 }

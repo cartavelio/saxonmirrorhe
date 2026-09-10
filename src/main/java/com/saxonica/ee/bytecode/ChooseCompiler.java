@@ -5,6 +5,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -17,12 +18,12 @@ public class ChooseCompiler extends ToIteratorCompiler {
      * Generate bytecode to evaluate the expression as a SequenceIterator
      * Precondition: none.
      * Postcondition: the stack contains a SequenceIterator representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         Choose choose = (Choose) expression;
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -52,6 +53,7 @@ public class ChooseCompiler extends ToIteratorCompiler {
             ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
         }
         methodInfo.placeLabel(end);
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
     @Override

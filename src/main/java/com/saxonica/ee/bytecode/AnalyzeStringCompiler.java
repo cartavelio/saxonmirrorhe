@@ -11,6 +11,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.value.StringValue;
 
 import java.util.List;
 
@@ -20,8 +21,8 @@ import java.util.List;
 public class AnalyzeStringCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(/*@NotNull*/ CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(/*@NotNull*/ CompilerService compiler,
+                                                          Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo mi = compiler.getCurrentMethod();
         AnalyzeString analyzeStr = (AnalyzeString) expression;
@@ -87,6 +88,7 @@ public class AnalyzeStringCompiler extends ToIteratorCompiler {
         ga.loadLocal(c2Var);
         ga.invokeConstructor(ContextMappingIterator.class, ContextMappingFunction.class, XPathContext.class);
         mi.popContextVariableInfo();
+        return new IteratorDetails(ContextMappingIterator.class, StringValue.class);
     }
 
     @Override
@@ -152,7 +154,7 @@ public class AnalyzeStringCompiler extends ToIteratorCompiler {
 //            }
 
         ga.loadLocal(focusIterVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(FocusTrackingIterator.class, "next");
         ga.ifNull(breakLoop.label());
 
 //            if (iter.isMatching()) {

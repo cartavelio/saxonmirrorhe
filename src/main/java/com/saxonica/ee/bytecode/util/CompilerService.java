@@ -728,15 +728,18 @@ public class CompilerService implements ICompilerService {
      * Generate bytecode to evaluate an expression leaving a SequenceIterator on the stack
      *
      * @param expr the expression to be evaluated
+     * @return details of the SequenceIterator that will be found on the stack on completion
      * @throws CannotCompileException if the expression cannot be compiled
      */
 
-    public void compileToIterator(Expression expr) throws CannotCompileException {
+    public IteratorDetails compileToIterator(Expression expr) throws CannotCompileException {
         ExpressionCompiler comp = getExpressionCompiler(expr);
         if (expr instanceof ByteCodeCandidate) {
             expr = ((ByteCodeCandidate) expr).getBaseExpression();
         }
-        comp.compileToIterator(this, expr);
+        IteratorDetails details = comp.compileToIterator(this, expr);
+        //System.err.println("Returning " + details.iteratorClass);
+        return details;
     }
 
     /**
@@ -761,7 +764,7 @@ public class CompilerService implements ICompilerService {
      *
      * @param expr the expression to be evaluated
      * @throws CannotCompileException if the expression cannot be compiled
-     * @returns the class of Item that will be left on the stack after execution of the generated code
+     * @return the class of Item that will be left on the stack after execution of the generated code
      */
 
     public Class<? extends Item> compileToItem(Expression expr) throws CannotCompileException {

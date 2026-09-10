@@ -1,9 +1,6 @@
 package com.saxonica.ee.bytecode;
 
-import com.saxonica.ee.bytecode.util.CannotCompileException;
-import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
-import com.saxonica.ee.bytecode.util.LabelInfo;
+import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.TailCallLoop;
 import net.sf.saxon.om.Item;
@@ -14,12 +11,12 @@ import net.sf.saxon.om.Item;
 public class TailCallLoopCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         LabelInfo tailCallLabel = methodInfo.newLabel("tailCallLabel");
         methodInfo.placeLabel(tailCallLabel);
         methodInfo.setTailCallLabel(tailCallLabel);
-        compiler.compileToIterator(((TailCallLoop) expression).getBaseExpression());
+        return compiler.compileToIterator(((TailCallLoop) expression).getBaseExpression());
     }
 
     @Override

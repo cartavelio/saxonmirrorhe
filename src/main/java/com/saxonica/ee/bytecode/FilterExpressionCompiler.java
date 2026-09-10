@@ -24,7 +24,7 @@ import org.objectweb.asm.commons.Method;
 public class FilterExpressionCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         FilterExpression filterExpr = (FilterExpression) expression;
         Expression start = filterExpr.getSelectExpression();
         Expression filter = filterExpr.getActionExpression();
@@ -33,14 +33,12 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
         visitLineNumber(compiler, ga, expression);
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "FilterExpressionCompiler-Itr");
-        LabelInfo phase2Lab = methodInfo.newLabel("phaseTwoLab");
         LabelInfo endLab = methodInfo.newLabel("endFilterExp");
         LabelInfo notNullLab = methodInfo.newLabel("notNullLab");
         LabelInfo emptyIterLab = methodInfo.newLabel("emptyIterLab");
         int firstVar = ga.newLocal(Item.class);
         int seqItrVar = ga.newLocal(SequenceIterator.class);
         int posVar = ga.newLocal(Integer.TYPE);
-        int boolVar = ga.newLocal(Boolean.TYPE);
         boolean seqItrVarCreated = false;
 
         GroundedValue literalValue = null;
@@ -55,7 +53,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                         literalIntValue = Integer.parseInt(literalValue.getUnicodeStringValue().toString());
                     } catch (XPathException e) {
                         ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
-                        return;
+                        return new IteratorDetails(EmptyIterator.class, Item.class);
                     }
                     if (literalIntValue > 0 && literalIntValue < Integer.MAX_VALUE) {
 
@@ -158,14 +156,14 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                             // Stack: SequenceIterator
 
                             methodInfo.placeLabel(endLab);
-                            return;
+                            return new IteratorDetails(SubsequenceIterator.class, Item.class);
 
                         }
 
 
                     } else {
                         ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
-                        return;
+                        return new IteratorDetails(EmptyIterator.class, Item.class);
 
 
                     }
@@ -178,12 +176,12 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                             compiler.compileToIterator(start);
                         } else {
                             ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
-                            return;
+                            return new IteratorDetails(EmptyIterator.class, Item.class);
                         }
 
                     } catch (XPathException e) {
                         ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
-                        return;
+                        return new IteratorDetails(EmptyIterator.class, Item.class);
                     }
 
                 }
@@ -411,7 +409,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
         ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
 
         methodInfo.placeLabel(endLab);
-
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
     /**

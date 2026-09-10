@@ -1,9 +1,6 @@
 package com.saxonica.ee.bytecode;
 
-import com.saxonica.ee.bytecode.util.CannotCompileException;
-import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
-import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -12,14 +9,15 @@ import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.HostLanguage;
 
 public class ToPushCompiler extends ToIteratorCompiler {
 
 
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
 
         /*
           SequenceReceiver saved = context.getReceiver();
@@ -32,6 +30,7 @@ public class ToPushCompiler extends ToIteratorCompiler {
 
         Generator ga = compilePushToSequenceCollector(compiler, expression);
         ga.invokeInstanceMethod(SequenceCollector.class, "iterate");
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
     public static Generator compilePushToSequenceCollector(CompilerService compiler, Expression expression) throws CannotCompileException {

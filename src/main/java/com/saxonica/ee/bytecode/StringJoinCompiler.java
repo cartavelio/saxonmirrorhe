@@ -84,13 +84,13 @@ public class StringJoinCompiler extends ToStringCompiler {
         LabelInfo end = methodInfo.newLabel("endSJ");
         LabelInfo nonEmptyInput = methodInfo.newLabel("strJnotNull");
 
-        compiler.compileToIterator(expr0);
+        IteratorDetails argIter = compiler.compileToIterator(expr0);
         visitLineNumber(compiler, ga, expression);
         visitAnnotation(compiler, "StringJoin-Item-1");
-        int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
+        int iterVar = methodInfo.allocateLocal(argIter.iteratorClass);
         ga.storeLocal(iterVar);
         ga.loadLocal(iterVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(argIter.iteratorClass, "next");
         ga.dup();
         ga.ifNonNull(nonEmptyInput.label());
         visitAnnotation(compiler, "StringJoin-Item-1-null");
@@ -116,7 +116,7 @@ public class StringJoinCompiler extends ToStringCompiler {
         // Stack: firstUString
 
         ga.loadLocal(iterVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(argIter.iteratorClass, "next");
         ga.dup();
         // Stack: firstUString secondItem secondItem
 
@@ -163,7 +163,7 @@ public class StringJoinCompiler extends ToStringCompiler {
             // Stack: builder
             ga.loadLocal(iterVar);
             // Stack: builder iterator
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(argIter.iteratorClass, "next");
             // Stack: builder nextItem
             ga.dupX1();
             // Stack: nextItem builder nextItem
@@ -186,7 +186,7 @@ public class StringJoinCompiler extends ToStringCompiler {
             ga.invokeInstanceMethod(builderClass, "append", stringClass);
             // Stack: builder
             ga.loadLocal(iterVar);
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(argIter.iteratorClass, "next");
             // Stack: builder nextItem
             ga.dup();
             ga.ifNonNull(simpleLoop.label());

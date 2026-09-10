@@ -19,8 +19,8 @@ import java.util.Map;
 public class TraceExpressionCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
 
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -32,7 +32,7 @@ public class TraceExpressionCompiler extends ToIteratorCompiler {
 
         enterTrace(compiler, ga, controllerVar, expression);
         Expression expr0 = getTracedExpression(expression);
-        compiler.compileToIterator(expr0);
+        IteratorDetails argIterator = compiler.compileToIterator(expr0);
         int itrVar = methodInfo.allocateLocal(SequenceIterator.class);
         ga.storeLocal(itrVar);
         visitLineNumber(compiler, ga, expression);
@@ -42,6 +42,8 @@ public class TraceExpressionCompiler extends ToIteratorCompiler {
 
         methodInfo.releaseLocal(controllerVar);
         methodInfo.releaseLocal(itrVar);
+
+        return new IteratorDetails(SequenceIterator.class, argIterator.itemClass);
 
     }
 

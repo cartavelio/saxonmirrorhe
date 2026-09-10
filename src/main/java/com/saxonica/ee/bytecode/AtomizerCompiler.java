@@ -8,7 +8,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 
@@ -98,25 +97,23 @@ public class AtomizerCompiler extends ToIteratorCompiler {
      * (i.e. return new MappingIterator(base, AtomizingFunction.getInstance()))
      * Precondition: none.
      * Postcondition: the stack contains a MappingIterator representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler,
+    public IteratorDetails compileToIterator(CompilerService compiler,
                                   /*@NotNull*/ Expression expression) throws CannotCompileException {
 
         Expression arg = ((Atomizer) expression).getBaseExpression();
         Generator ga = compiler.getCurrentGenerator();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        GeneratedMethodInfo mi = compiler.getCurrentMethod();
         visitAnnotation(compiler, "AtomizerCompiler-Itr");
         boolean untyped = ((Atomizer) expression).isUntyped();
 
         compiler.compileToIterator(arg);
         ga.push(untyped && arg.getItemType() instanceof NodeTest);
         ga.invokeStaticMethod(Atomizer.class, "getAtomizingIterator", SequenceIterator.class, Boolean.TYPE);
-
+        return new IteratorDetails(SequenceIterator.class, AtomicValue.class);
     }
 
 }

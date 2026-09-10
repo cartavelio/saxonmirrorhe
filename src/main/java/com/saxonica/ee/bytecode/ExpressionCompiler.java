@@ -49,9 +49,10 @@ public abstract class ExpressionCompiler {
      * @param compiler   the compiler service
      * @param expression the expression to be compiled
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
+     * @return details of the SequenceIterator that will be on the stack at execution time
      */
 
-    public abstract void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException;
+    public abstract IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException;
 
     /**
      * Generate bytecode to evaluate the expression as a boolean

@@ -3,10 +3,10 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.IteratorDetails;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.FirstItemExpression;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
 
 
 /**
@@ -30,13 +30,13 @@ public class FirstItemExpressionCompiler extends ToItemCompiler {
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "FirstItemExpression");
         Expression expr = ((FirstItemExpression) expression).getBaseExpression();
-        compiler.compileToIterator(expr);
+        IteratorDetails argIter = compiler.compileToIterator(expr);
         visitLineNumber(compiler, ga, expression);
         ga.dup();
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(argIter.iteratorClass, "next");
         ga.swap();
-        ga.invokeInstanceMethod(SequenceIterator.class, "close");
-        return Item.class;
+        ga.invokeInstanceMethod(argIter.iteratorClass, "close");
+        return argIter.itemClass;
     }
 
 }

@@ -9,6 +9,7 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
@@ -19,7 +20,7 @@ import net.sf.saxon.type.TypeHierarchy;
 public class AxisExpressionCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler, final Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, final Expression expression) throws CannotCompileException {
         final int axis = ((AxisExpression) expression).getAxis();
         NodeTest test = ((AxisExpression) expression).getNodeTest();
 
@@ -65,6 +66,7 @@ public class AxisExpressionCompiler extends ToIteratorCompiler {
         if (end != null) {
             methodInfo.placeLabel(end);
         }
+        return new IteratorDetails(AxisIterator.class, NodeInfo.class);
     }
 
     /**

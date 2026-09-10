@@ -27,11 +27,11 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "CardinalityCheckerCompiler-Item");
 
-        compiler.compileToIterator(operand);
+        IteratorDetails baseIter = compiler.compileToIterator(operand);
         //ga.checkClass(SequenceIterator.class);
         if (requiredCardinality == StaticProperty.EMPTY) {
             LabelInfo returnNull = methodInfo.newLabel("returnNull00");
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(baseIter.iteratorClass, "next");
             ga.ifNull(returnNull.label());
             compiler.generateDynamicError("An empty sequence is the only allowed value for the " + role.getMessage(),
                     role.getErrorCode(), expression.getLocation(), true);
@@ -42,11 +42,11 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
             LabelInfo returnFirst = methodInfo.newLabel("returnFirst01");
             ga.dup();
             // assert stack: iterator iterator
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(baseIter.iteratorClass, "next");
             // assert stack: iterator firstItem
             ga.swap();
             // assert stack: firstItem iterator
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(baseIter.iteratorClass, "next");
             // assert stack: firstItem secondItem
             ga.ifNull(returnFirst.label());
             // report error: multiple items found
@@ -62,7 +62,7 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
             LabelInfo returnFirst = methodInfo.newLabel("returnFirst11");
             ga.dup();
             // assert stack: iterator iterator
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(baseIter.iteratorClass, "next");
             // assert stack: iterator firstItem
             ga.dup();
             // assert stack: iterator firstItem firstItem
@@ -73,7 +73,7 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
             // assert stack: iterator firstItem
             ga.swap();
             // assert stack: firstItem iterator
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(baseIter.iteratorClass, "next");
             // assert stack: firstItem secondItem
             ga.ifNull(returnFirst.label());
             // report error: multiple items found
@@ -87,13 +87,13 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
         } else {
             throw new IllegalStateException("CardinalityChecker: compileToItem called when multiple items allowed");
         }
-        return Item.class;
+        return baseIter.itemClass;
 
     }
 
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
         Expression base = ((CardinalityChecker) expression).getBaseExpression();
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -124,7 +124,7 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
         LabelInfo notLastFinder = methodInfo.newLabel("notLastFinder");
         LabelInfo ok = methodInfo.newLabel("cardinalityOK");
 
-        compiler.compileToIterator(base);
+        IteratorDetails argIterator = compiler.compileToIterator(base);
         // assert stack : iterator
         if (CountCompiler.maybeLastPositionFinder(base)) {
             ga.dup();
@@ -208,8 +208,7 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
 
         // assert stack : checkingIterator
         methodInfo.placeLabel(ok);
-        ga.checkClass(SequenceIterator.class);
-
+        return new IteratorDetails(SequenceIterator.class, argIterator.itemClass);
     }
 
     @Override

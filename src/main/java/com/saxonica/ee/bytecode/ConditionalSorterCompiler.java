@@ -5,6 +5,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.sort.ConditionalSorter;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.DocumentSorter;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 
 import java.util.Comparator;
@@ -16,7 +17,7 @@ import java.util.Comparator;
 public class ConditionalSorterCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
+    public IteratorDetails compileToIterator(CompilerService compiler,
                                   Expression expression) throws CannotCompileException {
         ConditionalSorter sortExpr = (ConditionalSorter) expression;
         DocumentSorter docSortExpr = sortExpr.getDocumentSorter();
@@ -49,6 +50,7 @@ public class ConditionalSorterCompiler extends ToIteratorCompiler {
 
         methodInfo.placeLabel(end);
         ga.checkClass(SequenceIterator.class);
+        return new IteratorDetails(SequenceIterator.class, NodeInfo.class);
     }
 }
 

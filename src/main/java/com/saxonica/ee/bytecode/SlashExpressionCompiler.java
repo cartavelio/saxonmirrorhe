@@ -7,6 +7,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.FocusTrackingIterator;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import org.objectweb.asm.ClassVisitor;
@@ -26,13 +27,13 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
      * Generate bytecode to evaluate the SlashExpression as a ContextMappingIterator
      * Precondition: none.
      * Postcondition: the stack contains an iterator representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
         if (expression instanceof ForEach && ((ForEach)expression).getSeparatorExpression() != null) {
             throw new CannotCompileException("Separator attribute", true);
         }
@@ -54,6 +55,7 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
             CompiledAxisMappingFunction fn = generateAxisMappingFunction(compiler, (AxisExpression) step);
             allocateStatic(compiler, fn);
             ga.invokeConstructor(MappingIterator.class, SequenceIterator.class, MappingFunction.class);
+            return new IteratorDetails(MappingIterator.class, Item.class);
         } else {
             /*
                *
@@ -93,6 +95,7 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
             ga.invokeConstructor(ContextMappingIterator.class, net.sf.saxon.expr.ContextMappingFunction.class, XPathContext.class);
 
             // assert stack: ContextMappingIterator
+            return new IteratorDetails(ContextMappingIterator.class, Item.class);
         }
 
     }

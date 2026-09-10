@@ -5,6 +5,7 @@ import net.sf.saxon.expr.AxisExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SlashExpression;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.value.Cardinality;
@@ -17,8 +18,8 @@ import net.sf.saxon.value.Cardinality;
 public class SimpleStepExpressionCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
 
         Expression start = ((SlashExpression) expression).getSelectExpression();
         Expression step = ((SlashExpression) expression).getActionExpression();
@@ -52,6 +53,7 @@ public class SimpleStepExpressionCompiler extends ToIteratorCompiler {
             ga.checkClass(NodeInfo.class);
             AxisExpressionCompiler.iterate(compiler, axis, test);
         }
+        return new IteratorDetails(SequenceIterator.class, NodeInfo.class);
     }
 
 }

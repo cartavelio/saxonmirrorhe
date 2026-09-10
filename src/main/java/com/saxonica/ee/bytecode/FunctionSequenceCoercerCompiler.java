@@ -25,8 +25,8 @@ import org.objectweb.asm.commons.Method;
 public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
 
         FunctionSequenceCoercer functionCoercer = (FunctionSequenceCoercer) expression;
@@ -45,6 +45,7 @@ public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
         ga.checkCast(Type.getType(CompiledItemMappingFunction.class));
         ga.push(true);
         ga.invokeConstructor(ItemMappingIterator.class, SequenceIterator.class, ItemMappingFunction.class, Boolean.TYPE);
+        return new IteratorDetails(ItemMappingIterator.class, CoercedFunction.class);
     }
 
 

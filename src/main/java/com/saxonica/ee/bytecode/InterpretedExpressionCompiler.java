@@ -1,13 +1,11 @@
 package com.saxonica.ee.bytecode;
 
-import com.saxonica.ee.bytecode.util.CannotCompileException;
-import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
-import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 
 /**
  * Bytecode generator for instructions that calls back to the interpreter. This generates code which simply invokes the
@@ -36,15 +34,16 @@ public class InterpretedExpressionCompiler extends ToIteratorCompiler {
      * Generate bytecode to evaluate the expression as an Iterator
      * Precondition: none.
      * Postcondition: at execution time, the stack contains either an iterator (the result of the expression)
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         allocateStatic(compiler, expression);
         compiler.generateGetContext();
         compiler.getCurrentGenerator().invokeInstanceMethod(Expression.class, "iterate", XPathContext.class);
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
     /**

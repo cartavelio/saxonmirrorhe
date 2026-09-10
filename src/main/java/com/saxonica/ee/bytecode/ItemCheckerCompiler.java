@@ -55,7 +55,7 @@ public class ItemCheckerCompiler extends ToIteratorCompiler {
     }
 
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "ItemCheckerCompiler");
         Class checkingIterator = compiler.getCompiledClass(expression);
@@ -67,10 +67,11 @@ public class ItemCheckerCompiler extends ToIteratorCompiler {
         ga.invokeInstanceMethod(Class.class, "newInstance");
         ga.checkClass(OneToOneMappingIterator.class);
         ga.dup();
-        compiler.compileToIterator(((ItemChecker) expression).getBaseExpression());
+        IteratorDetails baseIterator = compiler.compileToIterator(((ItemChecker) expression).getBaseExpression());
         visitLineNumber(compiler, ga, expression);
         compiler.generateGetContext();
         ga.invokeInstanceMethod(OneToOneMappingIterator.class, "setSequence", SequenceIterator.class, XPathContext.class);
+        return new IteratorDetails(OneToOneMappingIterator.class, baseIterator.itemClass);
     }
 
     private Class generateItemCheckingIterator(CompilerService compiler, ItemChecker expression) throws CannotCompileException {

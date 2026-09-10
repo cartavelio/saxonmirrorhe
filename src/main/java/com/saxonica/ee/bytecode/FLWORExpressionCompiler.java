@@ -1,13 +1,11 @@
 package com.saxonica.ee.bytecode;
 
-import com.saxonica.ee.bytecode.util.CannotCompileException;
-import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
-import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.flwor.*;
+import net.sf.saxon.om.Item;
 
 import java.util.List;
 
@@ -16,7 +14,7 @@ import java.util.List;
  */
 public class FLWORExpressionCompiler extends ToIteratorCompiler {
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
 
 
         Generator ga = compiler.getCurrentGenerator();
@@ -38,6 +36,7 @@ public class FLWORExpressionCompiler extends ToIteratorCompiler {
         allocateStatic(compiler, flworExpr);
         compiler.generateGetContext();
         ga.invokeConstructor(ReturnClauseIterator.class, TuplePull.class, FLWORExpression.class, XPathContext.class);
+        return new IteratorDetails(ReturnClauseIterator.class, Item.class);
     }
 
 

@@ -9,6 +9,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 
@@ -35,8 +36,9 @@ public class SwitchExpressionCompiler extends ToIteratorCompiler {
     }
 
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         compileGeneric(compiler, expression, Expression.ITERATE_METHOD);
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
     /**

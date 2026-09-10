@@ -240,7 +240,7 @@ public class ForEachGroupCompiler extends ToPushCompiler {
     }
 
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
 
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -288,7 +288,7 @@ public class ForEachGroupCompiler extends ToPushCompiler {
         ga.invokeConstructor(ContextMappingIterator.class, ContextMappingFunction.class, XPathContext.class);
 
         methodInfo.releaseLocal(groupIterVar);
-
+        return new IteratorDetails(ContextMappingIterator.class, Item.class);
     }
 
     private void getStringCollator(CompilerService compiler, ForEachGroup instr) throws CannotCompileException {

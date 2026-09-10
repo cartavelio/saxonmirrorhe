@@ -5,7 +5,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.IntegerRangeTest;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -45,11 +44,8 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
         int valueVar = 0;
         valueVar = methodInfo.allocateLocal(NumericValue.class);
 
-        compiler.compileToIterator(valExp);
-
-
-        int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
-
+        IteratorDetails valIter = compiler.compileToIterator(valExp);
+        int iterVar = methodInfo.allocateLocal(valIter.iteratorClass);
         ga.storeLocal(iterVar);
 
         LabelInfo intRangeLoop = methodInfo.newLabel("intRange_loop");
@@ -84,11 +80,12 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
 
         methodInfo.placeLabel(intRangeLoop);
         ga.loadLocal(iterVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(valIter.iteratorClass, "next");
         ga.dup();
         ga.ifNull(falseLabel.label());
-        ga.checkClass(AtomicValue.class);
-        int atomicValueVar = methodInfo.allocateLocal(AtomicValue.class);
+        Class<? extends Item> itemClass = valIter.itemClass;
+        itemClass = ga.downCast(itemClass, AtomicValue.class, true);
+        int atomicValueVar = methodInfo.allocateLocal(itemClass);
         ga.storeLocal(atomicValueVar);
 
 
@@ -98,7 +95,7 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
 
         if (maybeUntypedAtomic) {
             ga.loadLocal(atomicValueVar);
-            ga.invokeInstanceMethod(AtomicValue.class, "isUntypedAtomic");
+            ga.invokeInstanceMethod(itemClass, "isUntypedAtomic");
             ga.ifFalse(not_untypedAtomicValueLb);
             untypedAtomicChecker(test, ga, methodInfo, valueVar, toDoubleVar, atomicValueVar, checkWholeNumber_lb);
             methodInfo.placeLabel(not_untypedAtomicValueLb);
@@ -109,7 +106,7 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
         //throw error
         ga.push("Cannot compare value of type ");
         ga.loadLocal(atomicValueVar);
-        ga.invokeInstanceMethod(AtomicValue.class, "getUType");
+        ga.invokeInstanceMethod(itemClass, "getUType");
         ga.invokeInstanceMethod(UType.class, "toString");
         ga.push(" to xs:integer");
         ga.concatenateStrings(3);

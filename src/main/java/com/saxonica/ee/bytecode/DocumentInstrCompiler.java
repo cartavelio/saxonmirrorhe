@@ -89,14 +89,14 @@ public class DocumentInstrCompiler extends ToPushCompiler {
 //                StringBuilder sb = new StringBuilder(StringBuilder.SMALL);
 //                SequenceIterator iter = content.iterate(context);
                 //int fsbVar = methodInfo.allocateLocal(UnicodeBuilder.class);
-                int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
 
                 ga.newInstance(UnicodeBuilder.class);
                 ga.dup();
                 ga.invokeConstructor(UnicodeBuilder.class);
                 //ga.storeLocal(fsbVar);
                 // Stack: config UniBuilder
-                compiler.compileToIterator(instr.getContentExpression());
+                IteratorDetails contentIter = compiler.compileToIterator(instr.getContentExpression());
+                int iterVar = methodInfo.allocateLocal(contentIter.iteratorClass);
                 ga.storeLocal(iterVar);
 
                 LabelInfo loopDone = methodInfo.newLabel("docLoopDone");
@@ -108,7 +108,7 @@ public class DocumentInstrCompiler extends ToPushCompiler {
 //                    sb.append(item.getStringValueCS());
 //                }
                 ga.loadLocal(iterVar);
-                ga.invokeInstanceMethod(SequenceIterator.class, "next");
+                ga.invokeInstanceMethod(contentIter.iteratorClass, "next");
                 // Stack: config UniBuilder Item
                 ga.dup();
                 ga.ifNull(loopDone.label());
@@ -248,7 +248,7 @@ public class DocumentInstrCompiler extends ToPushCompiler {
     }
 
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         DocumentInstr documentInstr = (DocumentInstr) expression;
@@ -267,8 +267,10 @@ public class DocumentInstrCompiler extends ToPushCompiler {
             methodInfo.placeLabel(notNull);
             ga.invokeStaticMethod(SingletonIterator.class, "makeIterator", Item.class);
             methodInfo.placeLabel(end);
+            return new IteratorDetails(SequenceIterator.class, NodeInfo.class);
         } else if ((m & DocumentInstr.ITERATE_METHOD) != 0) {
             ga.throwException(Type.getType(AssertionError.class), "iterate() is not implemented in the subclass ");
+            return null;
         } else {
             /*
             *  Controller controller = context.getController();
@@ -298,6 +300,7 @@ public class DocumentInstrCompiler extends ToPushCompiler {
             ga.invokeInstanceMethod(SequenceCollector.class, "close");
             ga.loadLocal(seqCollectorVar);
             ga.invokeInstanceMethod(SequenceCollector.class, "iterate");
+            return new IteratorDetails(SequenceIterator.class, NodeInfo.class);
         }
 
     }

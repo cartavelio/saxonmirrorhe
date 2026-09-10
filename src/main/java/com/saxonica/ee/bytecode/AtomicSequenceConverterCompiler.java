@@ -173,7 +173,7 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
     }
 
     @Override
-    public void compileToIterator(CompilerService compiler,
+    public IteratorDetails compileToIterator(CompilerService compiler,
                                   /*@NotNull*/ Expression expression) throws CannotCompileException {
 
         Expression operand = ((AtomicSequenceConverter) expression).getBaseExpression();
@@ -198,7 +198,7 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
             ga.getStaticField(AtomicSequenceConverter.class, "TO_STRING_MAPPER", ToStringMappingFunction.class);
             ga.push(true);
             ga.invokeConstructor(ItemMappingIterator.class, SequenceIterator.class, ItemMappingFunction.class, Boolean.TYPE);
-
+            return new IteratorDetails(ItemMappingIterator.class, StringValue.class);
         } else {
 
             visitAnnotation(compiler, "AtomicSequenceConverterCompiler-1");
@@ -218,6 +218,7 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
             allocateStatic(compiler, amf);
             ga.push(true);
             ga.invokeConstructor(ItemMappingIterator.class, SequenceIterator.class, ItemMappingFunction.class, Boolean.TYPE);
+            return new IteratorDetails(ItemMappingIterator.class, AtomicValue.class);
         }
     }
 

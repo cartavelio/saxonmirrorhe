@@ -2,6 +2,7 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -20,7 +21,7 @@ import java.util.List;
 public class CallableExpressionCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
+    public IteratorDetails compileToIterator(CompilerService compiler,
                                   /*@NotNull*/ Expression expression) throws CannotCompileException {
         List<Expression> subExpressions = new ArrayList<Expression>(5);
         for (Operand o: expression.operands()) {
@@ -39,6 +40,7 @@ public class CallableExpressionCompiler extends ToIteratorCompiler {
         ga.invokeInstanceMethod(Callable.class, "call", XPathContext.class, Sequence[].class);
         ga.invokeInstanceMethod(Sequence.class, "iterate");
         visitAnnotation(compiler, "CallableCompiler-Done");
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
     public static int buildArgumentArray(CompilerService compiler, Generator ga, GeneratedMethodInfo methodInfo, List<Expression> subExpressions) throws CannotCompileException {

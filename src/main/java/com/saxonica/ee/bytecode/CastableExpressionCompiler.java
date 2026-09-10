@@ -8,7 +8,6 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -42,8 +41,8 @@ public class CastableExpressionCompiler extends ToBooleanCompiler {
         LabelInfo notInstance = methodInfo.newLabel("notInstanceCastable");
         LabelInfo notGTLab = methodInfo.newLabel("GTLab");
         LabelInfo GTLab2 = methodInfo.newLabel("GTLab2");
-        compiler.compileToIterator(operand);
-        int itrVar = methodInfo.allocateLocal(SequenceIterator.class);
+        IteratorDetails opIter = compiler.compileToIterator(operand);
+        int itrVar = methodInfo.allocateLocal(opIter.iteratorClass);
         ga.storeLocal(itrVar);
         ga.push(0);
         int countVar = ga.newLocal(Type.INT_TYPE);
@@ -53,7 +52,7 @@ public class CastableExpressionCompiler extends ToBooleanCompiler {
         //TODO: Do not need to iterate if static cardinality is zero or one
         LabelInfo loop = methodInfo.placeNewLabel("loop");
         ga.loadLocal(itrVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(opIter.iteratorClass, "next");
         ga.dup();
         ga.ifNonNull(notNull.label());
         ga.pop();

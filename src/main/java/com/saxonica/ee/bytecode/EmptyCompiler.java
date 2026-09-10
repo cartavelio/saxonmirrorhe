@@ -3,7 +3,6 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.Cardinality;
 
 /**
@@ -23,9 +22,9 @@ public class EmptyCompiler extends ToBooleanCompiler {
         LabelInfo end = methodInfo.newLabel("endEmpty");
 
         if (Cardinality.allowsMany(arg.getCardinality())) {
-            compiler.compileToIterator(arg);
+            IteratorDetails argIter = compiler.compileToIterator(arg);
             ga.dup();
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(argIter.iteratorClass, "next");
             ga.ifNull(returnTrue.label());
             ga.push(false);
             ga.goTo(end);
@@ -33,7 +32,7 @@ public class EmptyCompiler extends ToBooleanCompiler {
             ga.push(true);
             methodInfo.placeLabel(end);
             ga.swap();
-            ga.invokeInstanceMethod(SequenceIterator.class, "close");
+            ga.invokeInstanceMethod(argIter.iteratorClass, "close");
         } else {
             compiler.compileToItem(arg);
             ga.ifNull(returnTrue.label());

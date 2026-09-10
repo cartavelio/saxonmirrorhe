@@ -62,9 +62,9 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
             boolean alwaysExternal = th.isSubType(baseType, config.getJavaExternalObjectType(Object.class));
 
             int iterVar;
-            compiler.compileToIterator(arg);
+            IteratorDetails argIter = compiler.compileToIterator(arg);
             visitLineNumber(compiler, ga, expression);
-            iterVar = methodInfo.allocateLocal(SequenceIterator.class);
+            iterVar = methodInfo.allocateLocal(argIter.iteratorClass);
             ga.storeLocal(iterVar);
 
             int countVar = ga.newLocal(Type.INT_TYPE);
@@ -80,7 +80,7 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
             LabelInfo moreThanOne = methodInfo.newLabel("moreThanOne");
             LabelInfo loop = methodInfo.placeNewLabel("loop");
             ga.loadLocal(iterVar);
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(argIter.iteratorClass, "next");
 
             int itemVar = methodInfo.allocateLocal(Item.class);
             ga.storeLocal(itemVar);

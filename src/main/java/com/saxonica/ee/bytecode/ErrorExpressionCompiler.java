@@ -2,10 +2,12 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
+import com.saxonica.ee.bytecode.util.IteratorDetails;
 import com.saxonica.ee.bytecode.util.OnEmpty;
 import net.sf.saxon.expr.ErrorExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 
 /**
  * Generate bytecode for an error expression (an expression that throws a dynamic error if evaluated)
@@ -32,13 +34,14 @@ public class ErrorExpressionCompiler extends ExpressionCompiler {
      * Generate bytecode to evaluate the expression as a {@link net.sf.saxon.om.SequenceIterator}
      * Precondition: none.
      * Postcondition: at execution time, the stack contains a SequenceIterator representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         compileToItem(compiler, expression);
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
     /**

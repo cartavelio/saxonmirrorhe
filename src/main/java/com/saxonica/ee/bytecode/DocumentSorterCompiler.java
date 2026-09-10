@@ -3,6 +3,7 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.IteratorDetails;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.DocumentSorter;
@@ -18,8 +19,8 @@ import java.util.Comparator;
 public class DocumentSorterCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "DocumentSorterCompiler");
         DocumentSorter docSorterExpr = ((DocumentSorter) expression);
@@ -30,6 +31,7 @@ public class DocumentSorterCompiler extends ToIteratorCompiler {
         compiler.compileToIterator(operand);
         ExpressionCompiler.allocateStatic(compiler, comparer);
         ga.invokeConstructor(DocumentOrderIterator.class, SequenceIterator.class, Comparator.class);
+        return new IteratorDetails(DocumentOrderIterator.class, NodeInfo.class);
     }
 }
 

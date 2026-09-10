@@ -31,9 +31,9 @@ public class LastItemExpressionCompiler extends ToItemCompiler {
         Expression expr = ((LastItemExpression) expression).getBaseExpression();
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        compiler.compileToIterator(expr);
+        IteratorDetails argIter = compiler.compileToIterator(expr);
         visitLineNumber(compiler, ga, expression);
-        int forwardsVar = methodInfo.allocateLocal(SequenceIterator.class);
+        int forwardsVar = methodInfo.allocateLocal(argIter.iteratorClass);
         ga.storeLocal(forwardsVar);
         LabelInfo notReversible = methodInfo.newLabel("notReversible");
         LabelInfo end = methodInfo.newLabel("endLast");
@@ -50,7 +50,7 @@ public class LastItemExpressionCompiler extends ToItemCompiler {
         LabelInfo done = methodInfo.newLabel("doneLast");
         ga.pushNull();
         ga.loadLocal(forwardsVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(argIter.iteratorClass, "next");
         ga.dup();
 
         LabelInfo loop = methodInfo.placeNewLabel("loopLast");
@@ -58,7 +58,7 @@ public class LastItemExpressionCompiler extends ToItemCompiler {
         ga.swap();
         ga.pop();
         ga.loadLocal(forwardsVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(argIter.iteratorClass, "next");
         ga.dup();
         ga.goTo(loop);
 
@@ -67,7 +67,7 @@ public class LastItemExpressionCompiler extends ToItemCompiler {
         methodInfo.placeLabel(end);
 
         methodInfo.releaseLocal(forwardsVar);
-        return Item.class;
+        return argIter.itemClass;
     }
 }
 

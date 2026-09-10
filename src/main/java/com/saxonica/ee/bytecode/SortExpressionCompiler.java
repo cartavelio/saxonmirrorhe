@@ -4,14 +4,15 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.*;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import org.objectweb.asm.Type;
 
 public class SortExpressionCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
         SortExpression sorter = (SortExpression) expression;
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -55,7 +56,7 @@ public class SortExpressionCompiler extends ToIteratorCompiler {
         methodInfo.releaseLocal(baseIterVar);
         methodInfo.releaseLocal(context2Var);
         methodInfo.releaseLocal(compsVar);
-
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
     /**

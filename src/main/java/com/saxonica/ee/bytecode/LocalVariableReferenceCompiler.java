@@ -99,13 +99,13 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
      * Generate bytecode to get the LocalVariable from the Context as a ValueRepresentation
      * Precondition: none.
      * Postcondition: the stack contains an ValueRepresentation as a SingletonIterator representing the LocalVariable
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
 
         LocalVariableReference varRef = (LocalVariableReference) expression;
 
@@ -122,6 +122,7 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
 //        ga.push(localSlot);
 //        ga.invokeInstanceMethod(XPathContext.class, "evaluateLocalVariable", Integer.TYPE);
         ga.invokeInstanceMethod(Sequence.class, "iterate");
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
 }

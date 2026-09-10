@@ -3,7 +3,6 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.Cardinality;
 
 /**
@@ -24,11 +23,11 @@ public class ExistsCompiler extends ToBooleanCompiler {
         LabelInfo returnFalse = methodInfo.newLabel("returnFalse");
         LabelInfo end = methodInfo.newLabel("endExists");
         if (Cardinality.allowsMany(arg.getCardinality())) {
-            compiler.compileToIterator(arg);
+            IteratorDetails argIter = compiler.compileToIterator(arg);
             ga.dup();
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(argIter.iteratorClass, "next");
             ga.ifNull(returnFalse.label());
-            ga.invokeInstanceMethod(SequenceIterator.class, "close");
+            ga.invokeInstanceMethod(argIter.iteratorClass, "close");
             ga.push(true);
             ga.goTo(end);
             methodInfo.placeLabel(returnFalse);

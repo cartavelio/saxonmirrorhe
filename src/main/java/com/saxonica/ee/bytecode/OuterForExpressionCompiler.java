@@ -2,8 +2,9 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.map.ForSequenceMappingAction;
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.expr.flwor.OuterForExpression;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.flwor.OuterForExpression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -85,13 +86,13 @@ public class OuterForExpressionCompiler extends ToIteratorCompiler {
      * Generate bytecode to evaluate the OuterForExpression as an iterator
      * Precondition: none.
      * Postcondition: the stack contains an iterator representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
 
         Expression sequence = ((OuterForExpression) expression).getSequence();
         Expression action = ((OuterForExpression) expression).getAction();
@@ -139,6 +140,7 @@ public class OuterForExpressionCompiler extends ToIteratorCompiler {
         compiler.compileToIterator(action);
         ga.checkClass(SequenceIterator.class);
         methodInfo.placeLabel(end);
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 }
 

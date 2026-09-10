@@ -1,15 +1,14 @@
 package com.saxonica.ee.bytecode;
 
-import com.saxonica.ee.bytecode.util.CannotCompileException;
-import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
-import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.StaticFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import java.util.List;
 public class StaticFunctionCallCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToIterator(CompilerService compiler,
+    public IteratorDetails compileToIterator(CompilerService compiler,
                                   /*@NotNull*/ Expression expression) throws CannotCompileException {
         StaticFunctionCall call = (StaticFunctionCall)expression;
         Function function = call.getTargetFunction();
@@ -43,6 +42,8 @@ public class StaticFunctionCallCompiler extends ToIteratorCompiler {
         ga.invokeInstanceMethod(Function.class, "call", XPathContext.class, Sequence[].class);
         ga.invokeInstanceMethod(Sequence.class, "iterate");
         visitAnnotation(compiler, "StaticFunctionCallCompiler-Done");
+
+        return new IteratorDetails(SequenceIterator.class, Item.class);
     }
 
 }

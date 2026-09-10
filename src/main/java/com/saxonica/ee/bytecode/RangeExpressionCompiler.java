@@ -1,12 +1,10 @@
 package com.saxonica.ee.bytecode;
 
-import com.saxonica.ee.bytecode.util.CannotCompileException;
-import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
-import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.RangeExpression;
+import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.IntegerValue;
 
 /**
@@ -18,12 +16,12 @@ public class RangeExpressionCompiler extends ToIteratorCompiler {
      * Generate bytecode to evaluate the expression as a {@link net.sf.saxon.om.SequenceIterator}
      * Precondition: none.
      * Postcondition: at execution time, the stack contains a SequenceIterator representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         RangeExpression range = (RangeExpression) expression;
 //        if (range.getStepExpression() != null) {
 //            throw new CannotCompileException("'by' operator", true);
@@ -81,7 +79,7 @@ public class RangeExpressionCompiler extends ToIteratorCompiler {
             ga.invokeStaticMethod(AscendingRangeIterator.class, "makeRangeIterator",
                                   IntegerValue.class, IntegerValue.class, IntegerValue.class);
 //        }
-
+        return new IteratorDetails(AtomicIterator.class, IntegerValue.class);
 
     }
 

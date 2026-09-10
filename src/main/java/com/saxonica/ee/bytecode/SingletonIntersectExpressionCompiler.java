@@ -22,12 +22,12 @@ public class SingletonIntersectExpressionCompiler extends ToIteratorCompiler {
      * Generate bytecode to evaluate the expression as a {@link net.sf.saxon.om.SequenceIterator}
      * Precondition: none.
      * Postcondition: at execution time, the stack contains a SequenceIterator representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         Configuration config = compiler.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
         final Generator ga = compiler.getCurrentGenerator();
@@ -67,13 +67,13 @@ public class SingletonIntersectExpressionCompiler extends ToIteratorCompiler {
         ga.checkClass(NodeInfo.class);
         ga.storeLocal(mVar);
 
-        compiler.compileToIterator(sie.getRhsExpression());
-        int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
+        IteratorDetails argIter = compiler.compileToIterator(sie.getRhsExpression());
+        int iterVar = methodInfo.allocateLocal(argIter.iteratorClass);
         ga.storeLocal(iterVar);
 
         LabelInfo loop = methodInfo.placeNewLabel("SIEloop");
         ga.loadLocal(iterVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        ga.invokeInstanceMethod(argIter.iteratorClass, "next");
         ga.dup();
         LabelInfo notNull2 = methodInfo.newLabel("SIEnotNull2");
         ga.ifNonNull(notNull2.label());
@@ -92,6 +92,8 @@ public class SingletonIntersectExpressionCompiler extends ToIteratorCompiler {
 
         methodInfo.releaseLocal(mVar);
         methodInfo.releaseLocal(iterVar);
+
+        return new IteratorDetails(SequenceIterator.class, NodeInfo.class);
     }
 
 

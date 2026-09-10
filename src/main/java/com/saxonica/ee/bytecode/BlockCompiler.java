@@ -1,14 +1,12 @@
 package com.saxonica.ee.bytecode;
 
-import com.saxonica.ee.bytecode.util.CannotCompileException;
-import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
-import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.AbstractBlockIterator;
 import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
@@ -44,14 +42,14 @@ public class BlockCompiler extends ToIteratorCompiler {
      * Generate bytecode to evaluate the BlockExpression as an iterator
      * Precondition: none.
      * Postcondition: the stack contains an iterator representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     //@Override
     @Override
-    public void compileToIterator(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler,
+                                             Expression expression) throws CannotCompileException {
 
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -59,8 +57,9 @@ public class BlockCompiler extends ToIteratorCompiler {
         visitAnnotation(compiler, "BlockCompiler-Itr");
         if (children.length == 0) {
             ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
+            return new IteratorDetails(EmptyIterator.class, Item.class);
         } else if (children.length == 1) {
-            compiler.compileToIterator(children[0].getChildExpression());
+            return compiler.compileToIterator(children[0].getChildExpression());
         } else {
             visitLineNumber(compiler, ga, expression);
             //Class blockIterator = generateBlockIterator(compiler, expression, children);
@@ -80,6 +79,7 @@ public class BlockCompiler extends ToIteratorCompiler {
             ga.invokeInstanceMethod(AbstractBlockIterator.class, "init", Integer.TYPE, XPathContext.class);
             ga.loadLocal(compiledBlockVar);
             ga.checkClass(AbstractBlockIterator.class);
+            return new IteratorDetails(AbstractBlockIterator.class, Item.class);
         }
     }
 

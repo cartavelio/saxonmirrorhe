@@ -70,8 +70,8 @@ public class InstanceOfCompiler extends ToBooleanCompiler {
 
             // static cardinality allows more than one item
 
-            compiler.compileToIterator(arg);
-            int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
+            IteratorDetails argIter = compiler.compileToIterator(arg);
+            int iterVar = methodInfo.allocateLocal(argIter.iteratorClass);
             ga.storeLocal(iterVar);
             visitLineNumber(compiler, ga, expression);
 
@@ -98,7 +98,7 @@ public class InstanceOfCompiler extends ToBooleanCompiler {
 
             LabelInfo loop = methodInfo.placeNewLabel("loop");
             ga.loadLocal(iterVar);
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            ga.invokeInstanceMethod(argIter.iteratorClass, "next");
             if (!itemTypeOK) {
                 ga.dup();
             }

@@ -25,12 +25,12 @@ public class JavaExtensionFunctionCallCompiler extends ToIteratorCompiler {
      * Generate bytecode to evaluate the expression as a {@link net.sf.saxon.om.SequenceIterator}
      * Precondition: none.
      * Postcondition: at execution time, the stack contains a SequenceIterator representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public IteratorDetails compileToIterator(CompilerService compiler, Expression expression) throws CannotCompileException {
         JavaExtensionFunctionCall jefc = (JavaExtensionFunctionCall) expression;
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -129,6 +129,7 @@ public class JavaExtensionFunctionCallCompiler extends ToIteratorCompiler {
         }
 
         methodInfo.placeLabel(end);
+        return new IteratorDetails(SequenceIterator.class, Item.class);
 
     }
 
