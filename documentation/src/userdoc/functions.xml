@@ -2923,6 +2923,8 @@
         <p>Available since Saxon 9.7. The options available are listed in the specification. There
           are no specific Saxon-defined configuration options for use with the
             <code>vendor-options</code> parameter.</p>
+        <p>Separate compilation of XQuery modules requires Saxon-EE. If the function is
+        called in Saxon-HE or -PE, it raises FOQM0006 (no suitable XQuery processor available).</p>
       </status>
       <saxon-edition>EE 9.7</saxon-edition>
       <description>
