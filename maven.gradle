@@ -1,0 +1,111 @@
+// ============================================================
+// The following tasks exist to build jar files that will be
+// published on Maven. They're saved in build/maven so that
+// they're distinct from the other jar files
+
+task mavenHe(dependsOn: ['mavenHeXqjJar', 'mavenHeXqjSourcesJar']) {
+  // Just a container to hang dependencies on
+}
+
+task mavenPe() {
+  // Just a container to hang dependencies on
+}
+task mavenEe() {
+  // Just a container to hang dependencies on
+}
+
+["h", "p", "e"].each { initial ->
+  def release = initial + "e"
+  def Release = initial.toUpperCase() + "e"
+  def RELEASE = release.toUpperCase()
+
+  def containerTask = tasks.findByName("maven${Release}")
+
+  Task t = task "maven${Release}JavadocJar"(
+    type: Jar,
+    dependsOn: ["${release}_javadoc"]
+  ) {
+    archiveBaseName = "Saxon-${RELEASE}"
+    archiveVersion = saxonVersion
+    classifier = 'javadoc'
+    destinationDirectory = project.file("${buildDir}/maven")
+    from "${buildDir}/${release}_javadoc"
+    doLast {
+      signJar("${buildDir}/maven/Saxon-${RELEASE}-${saxonVersion}-javadoc.jar")
+    }
+  }
+  containerTask.dependsOn t
+
+  t = task "maven${Release}SaxonJar"(
+    type: Jar,
+    dependsOn: ["${release}jJar", "compile_function_library"]) {
+    archiveBaseName = "Saxon-${RELEASE}"
+    archiveVersion = saxonVersion
+    destinationDirectory = project.file("${buildDir}/maven")
+    manifest {
+      attributes "Project-Name": "Saxon-${RELEASE}"
+      attributes "Main-Class": "net.sf.saxon.Transform"
+    }
+    from ("${buildDir}/services/saxon-${release}") {
+      include "META-INF/**"
+    }
+    from ("${buildDir}/classes/${release}j") {
+      include "**/*.class"
+      exclude "net/sf/saxon/option/**"
+    }
+    from ("${buildDir}/resources/main") {
+      include "net/sf/saxon/data/**"
+    }
+    doLast {
+      signJar("${buildDir}/maven/Saxon-${RELEASE}-${saxonVersion}.jar")
+    }
+  }
+  containerTask.dependsOn t
+
+  t = task "maven${Release}SourceJar"(
+    type: Jar,
+    dependsOn: ["${release}j_preprocess", "eej_preprocess", "compile_function_library"]) {
+    archiveBaseName = "Saxon-${RELEASE}"
+    classifier = 'sources'
+    archiveVersion = saxonVersion
+    destinationDirectory = project.file("${buildDir}/maven")
+    from ("${buildDir}/src/${release}j") {
+      include "**/*.java"
+    }
+    from ("${buildDir}/resources/main") {
+      include "net/sf/saxon/data/**"
+    }
+    doLast {
+      signJar("${buildDir}/maven/Saxon-${RELEASE}-${saxonVersion}-sources.jar")
+    }
+  }
+  containerTask.dependsOn t
+}
+
+task mavenHeXqjJar(type: Jar, dependsOn: ["eejCompile"]) {
+  archiveBaseName = "Saxon-HE"
+  classifier = 'xqj'
+  archiveVersion = saxonVersion
+  destinationDirectory = project.file("${buildDir}/maven")
+  from ("${buildDir}/classes/eej") {
+    include "com/saxonica/xqj/**/*.class"
+    include "javax/xml/xquery/**/*.class"
+  }
+  doLast {
+    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-xqj.jar")
+  }
+}
+
+task mavenHeXqjSourcesJar(type: Jar, dependsOn: ["eejCompile"]) {
+  archiveBaseName = "Saxon-HE"
+  classifier = 'xqj-sources'
+  archiveVersion = saxonVersion
+  destinationDirectory = project.file("${buildDir}/maven")
+  from ("${projectDir}/src/main/java") {
+    include "com/saxonica/xqj/**/*.java"
+    include "javax/xml/xquery/**/*.java"
+  }
+  doLast {
+    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-xqj-sources.jar")
+  }
+}

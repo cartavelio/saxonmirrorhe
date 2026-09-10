@@ -117,66 +117,74 @@ task product_javadoc(
   }
 }
 
-task he_javadoc(
-  dependsOn: ["filter_sources_for_javadoc"],
-  description: "Generate Javadoc files for HE"
-) {
-  // This task is specifically for the JavaDoc that's get published
-  // with Saxon-HE on Maven. It doesn't include any of the PE/EE docs.
-  inputs.files fileTree(dir: "${buildDir}/javadoc_src")
-  outputs.files fileTree(dir: "${buildDir}/he_javadoc")
+["he", "pe", "ee"].each { release ->
+  task "${release}_javadoc"(
+    dependsOn: ["filter_sources_for_javadoc"],
+    description: "Generate Javadoc files for ${release}"
+  ) {
+    // The HE version of this task is specifically for the JavaDoc
+    // that's get published with Saxon-HE on Maven. It doesn't include
+    // any of the PE/EE docs.
+    inputs.files fileTree(dir: "${buildDir}/javadoc_src")
+    outputs.files fileTree(dir: "${buildDir}/${release}_javadoc")
 
-  def cp = ""
-  configurations.documentation.resolve().each { path ->
-    cp = cp + System.getProperty("path.separator") + path
-  }
-
-  def command = []
-
-  doFirst {
-    mkdir "${buildDir}/he_javadoc"
-
-    // If there are back slashes in the filesep, make sure they're escaped!
-    def filesep = fileSeparator
-    def fsre = filesep.replaceAll("\\\\", "\\\\\\\\")
-    def packages = [:]
-
-    // Any directory that contains a java file is assumed to be a
-    // package...because that's the way packages work in Java.
-    fileTree(dir: "${buildDir}/javadoc_src",
-             // Kind of a hack to exclude everything except com.saxonica.xqj
-             exclude: ["com/saxonica/*.java",
-                       "com/saxonica/config/**",
-                       "com/saxonica/ee/**",
-                       "com/saxonica/expr/**",
-                       "com/saxonica/functions/**",
-                       "com/saxonica/serialize/**",
-                       "com/saxonica/trans/**",
-                       "com/saxonica/xsltextn/**"]).each { pkg ->
-      def fn = pkg.toString()
-      fn = fn.substring("{$buildDir}/javadoc_src".length()-1)
-      def pos = fn.lastIndexOf(filesep)
-      fn = fn.substring(0, pos).replaceAll(fsre, ".")
-      packages[fn] = 1
+    def cp = ""
+    configurations.documentation.resolve().each { path ->
+      cp = cp + System.getProperty("path.separator") + path
     }
 
-    command = ["javadoc",
-               "-sourcepath", "${buildDir}/javadoc_src",
-               "-Xdoclint:none",
-               "-d", "${buildDir}/he_javadoc",
-               "-protected",
-               "-classpath", cp,
-               "-bottom", "Copyright (c) 2004-2022 Saxonica Limited. All rights reserved.",
-               "-doctitle", "Saxon ${saxonVersion} Java API Documentation",
-               "-group", "s9api Interface", "net.sf.saxon.s9api:net.sf.saxon.s9api.push:net.sf.saxon.s9api.streams",
-               "-group", "Other Interfaces", "net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
-               "-group", "External Interfaces", "javax.xml.xquery",
-               "-source", "1.8"] + packages.keySet()
-  }
+    def command = []
 
-  doLast {
-    exec {
-      commandLine command
+    doFirst {
+      mkdir "${buildDir}/he_javadoc"
+
+      // If there are back slashes in the filesep, make sure they're escaped!
+      def filesep = fileSeparator
+      def fsre = filesep.replaceAll("\\\\", "\\\\\\\\")
+      def packages = [:]
+
+      def exclude_files = []
+      if (release == "he") {
+        // Kind of a hack to exclude everything except com.saxonica.xqj
+        exclude_files = ["com/saxonica/*.java",
+                         "com/saxonica/config/**",
+                         "com/saxonica/ee/**",
+                         "com/saxonica/expr/**",
+                         "com/saxonica/functions/**",
+                         "com/saxonica/serialize/**",
+                         "com/saxonica/trans/**",
+                         "com/saxonica/xsltextn/**"]
+      }
+
+      // Any directory that contains a java file is assumed to be a
+      // package...because that's the way packages work in Java.
+      fileTree(dir: "${buildDir}/javadoc_src",
+               exclude: exclude_files).each { pkg ->
+        def fn = pkg.toString()
+        fn = fn.substring("{$buildDir}/javadoc_src".length()-1)
+        def pos = fn.lastIndexOf(filesep)
+        fn = fn.substring(0, pos).replaceAll(fsre, ".")
+        packages[fn] = 1
+      }
+
+      command = ["javadoc",
+                 "-sourcepath", "${buildDir}/javadoc_src",
+                 "-Xdoclint:none",
+                 "-d", "${buildDir}/${release}_javadoc",
+                 "-protected",
+                 "-classpath", cp,
+                 "-bottom", "Copyright (c) 2004-2022 Saxonica Limited. All rights reserved.",
+                 "-doctitle", "Saxon ${saxonVersion} Java API Documentation",
+                 "-group", "s9api Interface", "net.sf.saxon.s9api:net.sf.saxon.s9api.push:net.sf.saxon.s9api.streams",
+                 "-group", "Other Interfaces", "net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
+                 "-group", "External Interfaces", "javax.xml.xquery",
+                 "-source", "1.8"] + packages.keySet()
+    }
+
+    doLast {
+      exec {
+        commandLine command
+      }
     }
   }
 }

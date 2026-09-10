@@ -51,7 +51,7 @@ configurations {
   documentation.extendsFrom(implementation)
   jeldoclet.extendsFrom(implementation)
   samples.extendsFrom(implementation)
-  //xqjtck.extendsFrom(testImplementation)
+  pomDependencies
 }
 
 sourceSets {
@@ -147,6 +147,7 @@ dependencies {
     files(saxonLicenseDir)
   )
   implementation (
+    // N.B. Some of these are also listed in pomDependencies below!
     [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.2.15'],
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.2.15'],
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.2.15'],
@@ -215,12 +216,20 @@ dependencies {
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion],
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion, classifier: 'data']
   )
-  /* ??? not working yet
-  xqjtck (
-    files("${projectDir}/tools/xqj/ri/src"),
-    files("${projectDir}/tools/xqj/tck/src")
+  pomDependencies (
+    [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion],
+    // Resolver data dependency is handled automatically during POM construction,
+    // don't attempt to list it here; the classifier doesn't get handled correctly.
+    [group: 'org.jdom', name: 'jdom', version: '1.1.3'],
+    [group: 'org.jdom', name: 'jdom2', version: '2.0.6'],
+    [group: 'xom', name: 'xom', version: '1.3.5'],
+    [group: 'com.ibm.icu', name: 'icu4j', version: icu4jVersion ],
+    [group: 'dom4j', name: 'dom4j', version: '1.6.1'],
+    [group: 'jline', name: 'jline', version: jlineVersion ],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.2.15'],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.2.15'],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.2.15']
   )
-  */
 }
 
 javadoc {
@@ -809,7 +818,7 @@ task pej_copyTestDrivers(
   def fileMap = [:]
   files("${projectDir}/src/main/java")
     .asFileTree
-    .matching { 
+    .matching {
       include "com/saxonica/testdriver/QT3TestDriverPE.java"
       include "com/saxonica/testdriver/Xslt30TestSuiteDriverPE.java"
       include "com/saxonica/testdriver/Licensor.java"
@@ -820,7 +829,7 @@ task pej_copyTestDrivers(
 
   files("${projectDir}/src/main/java")
     .asFileTree
-    .matching { 
+    .matching {
       include "com/saxonica/testdriver/gui/images/*"
     }
     .files
@@ -846,7 +855,7 @@ task eej_copyTestDrivers(
   def fileMap = [:]
   files("${projectDir}/src/main/java")
     .asFileTree
-    .matching { 
+    .matching {
       include "com/saxonica/testdriver/**/*.java"
       include "com/saxonica/js/*.java"
       include "net/sf/saxon/testdriver/*.java"
@@ -856,7 +865,7 @@ task eej_copyTestDrivers(
 
   files("${projectDir}/src/main/java")
     .asFileTree
-    .matching { 
+    .matching {
       include "com/saxonica/testdriver/gui/images/*"
     }
     .files
@@ -900,7 +909,7 @@ task asm_jarjar(
         writer.writeLine("rule org.objectweb.** com.saxonica.objectweb.@1")
       }
   }
-  
+
   doLast {
     jars.each { asm ->
       javaexec {
@@ -924,7 +933,7 @@ task asm_unzip(dependsOn: ["asm_jarjar"]) {
       into outputDir
     }
   }
-  
+
   doLast {
     ["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"].each { asm ->
       copy {
@@ -1482,101 +1491,127 @@ task javaArchiveEE(
 // published on Maven. They're saved in build/maven so that
 // they're distinct from the other jar files
 
-task mavenHeJavadocJar(
-  type: Jar,
-  dependsOn: ["he_javadoc"]
-) {
-  archiveBaseName = "Saxon-HE"
-  archiveVersion = saxonVersion
-  classifier = 'javadoc'
-  destinationDirectory = project.file("${buildDir}/maven")
-  from "${buildDir}/he_javadoc"
-  doLast {
-    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-javadoc.jar")
-  }
-}
-
-task mavenHeSaxonJar(type: Jar, dependsOn: [hejJar, "compile_function_library"]) {
-  archiveBaseName = "Saxon-HE"
-  archiveVersion = saxonVersion
-  destinationDirectory = project.file("${buildDir}/maven")
-  manifest {
-    attributes "Project-Name": "Saxon-HE"
-    attributes "Main-Class": "net.sf.saxon.Transform"
-  }
-  from ("${buildDir}/services/saxon-he") {
-    include "META-INF/**"
-  }
-  from ("${buildDir}/classes/hej") {
-    include "net/**/*.class"
-    exclude "net/sf/saxon/option/**"
-  }
-  from ("${buildDir}/resources/main") {
-    include "net/sf/saxon/data/**"
-  }
-  doLast {
-    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}.jar")
-  }
-}
-
-task mavenHeSourceJar(type: Jar,
-                      dependsOn: ["hej_preprocess", "eej_preprocess", "compile_function_library"]) {
-  archiveBaseName = "Saxon-HE"
-  classifier = 'sources'
-  archiveVersion = saxonVersion
-  destinationDirectory = project.file("${buildDir}/maven")
-  from ("${buildDir}/src/hej") {
-    include "net/**/*.java"
-  }
-  from ("${buildDir}/resources/main") {
-    include "net/sf/saxon/data/**"
-  }
-  doLast {
-    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-sources.jar")
-  }
-}
-
-task mavenHeXqjJar(type: Jar, dependsOn: ["eejCompile"]) {
-  archiveBaseName = "Saxon-HE"
-  classifier = 'xqj'
-  archiveVersion = saxonVersion
-  destinationDirectory = project.file("${buildDir}/maven")
-  from ("${buildDir}/classes/eej") {
-    include "com/saxonica/xqj/**/*.class"
-    include "javax/xml/xquery/**/*.class"
-  }
-  doLast {
-    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-xqj.jar")
-  }
-}
-
-task mavenHeXqjSourcesJar(type: Jar, dependsOn: ["eejCompile"]) {
-  archiveBaseName = "Saxon-HE"
-  classifier = 'xqj-sources'
-  archiveVersion = saxonVersion
-  destinationDirectory = project.file("${buildDir}/maven")
-  from ("${projectDir}/src/main/java") {
-    include "com/saxonica/xqj/**/*.java"
-    include "javax/xml/xquery/**/*.java"
-  }
-  doLast {
-    signJar("${buildDir}/maven/Saxon-HE-${saxonVersion}-xqj-sources.jar")
-  }
-}
-
-task mavenHe(dependsOn: ['mavenHeJavadocJar', 'mavenHeSaxonJar',
-                         'mavenHeSourceJar', 'mavenHeXqjJar',
-                         'mavenHeXqjSourcesJar']) {
-  // Just a container to hang dependencies on
-}
+apply from: "maven.gradle"
 
 signing {
   sign publishing.publications
 }
 
+def pomDevelopers(String release) {
+  return {
+    developer {
+      id = 'mike'
+      name = 'Michael Kay'
+      email = 'mike@saxonica.com'
+    }
+    developer {
+      id = 'ond1'
+      name = 'O’Neil Delpratt'
+      email = 'oneil@saxonica.com'
+    }
+    developer {
+      id = 'debbie'
+      name = 'Debbie Lockett'
+      email = 'debbie@saxonica.com'
+    }
+    developer {
+      id = 'john'
+      name = 'John Lumley'
+      email = 'john@saxonica.com'
+    }
+    developer {
+      id = 'norm'
+      name = 'Norman Walsh'
+      email = 'norm@saxonica.com'
+    }
+  }
+}
+
+def pomOrganization(String release) {
+  return {
+    name = 'Saxonica'
+    url = 'https://www.saxonica.com/'
+  }
+}
+
+def pomScm(String release) {
+  return {
+    url = 'https://saxonica.plan.io/projects/saxonmirrorhe/repository'
+    connection = 'scm:git:https://saxonica.plan.io/projects/saxonmirrorhe/repository'
+    developerConnection = 'scm:git:https://saxonica.plan.io/projects/saxonmirrorhe/repository'
+  }
+}
+
+def pomLicenses(String release) {
+  if (release == "he") {
+    return {
+      license {
+        name = 'Mozilla Public License Version 2.0'
+        url = 'http://www.mozilla.org/MPL/2.0/'
+        distribution = 'repo'
+      }
+    }
+  }
+  return {
+    license {
+      name = 'Saxon Commercial License'
+      url = 'https://www.saxonica.com/'
+      distribution = 'jar'
+    }
+  }
+}
+
+def pomIssueManagement(String release) {
+  return {
+    system = "Saxon Community"
+    url = 'https://saxonica.plan.io/projects/saxon'
+  }
+}
+
+def pomMailingLists(String release) {
+  return {
+    mailingList {
+      name = 'User List'
+      post = 'saxon-help@lists.sourceforge.net'
+      archive = 'http://sourceforge.net/mailarchive/forum.php?forum_name=saxon-help'
+    }
+  }
+}
+
+def pomXml(String release) {
+  return {
+    def prop = asNode().appendNode('properties')
+    prop.appendNode('skipTests', 'false')
+    prop.appendNode('maven.build.timestamp.format', "yyyy-MM-dd'T'HH:mm:ss")
+    prop.appendNode('project.build.sourceEncoding', 'UTF-8')
+    prop.appendNode('maven.javadoc.skip', true)
+    prop.appendNode('maven.javadoc.failOnError', false)
+    prop.appendNode('maven.compiler.source', javaVersion)
+    prop.appendNode('maven.compiler.target', javaVersion)
+
+    def dependenciesNode = asNode().appendNode('dependencies')
+    configurations.pomDependencies.allDependencies.each {
+      def dependencyNode = dependenciesNode.appendNode('dependency')
+      dependencyNode.appendNode('groupId', it.group)
+      dependencyNode.appendNode('artifactId', it.name)
+      dependencyNode.appendNode('version', it.version)
+      // Special case the data classifier
+      if (it.group == "org.xmlresolver" && it.name == "xmlresolver") {
+        dependencyNode = dependenciesNode.appendNode('dependency')
+        dependencyNode.appendNode('groupId', it.group)
+        dependencyNode.appendNode('artifactId', it.name)
+        dependencyNode.appendNode('version', xmlresolverDataVersion)
+        dependencyNode.appendNode('classifier', 'data')
+      } else {
+        dependencyNode.appendNode('optional', 'true')
+      }
+    }
+  }
+}
+
 publishing {
   publications {
-    mavenJava(MavenPublication) {
+    mavenHE(MavenPublication) {
       pom {
         name = 'Saxon-HE'
         packaging = 'jar'
@@ -1584,76 +1619,14 @@ publishing {
         url = 'http://www.saxonica.com/'
         inceptionYear = '1999'
 
-        organization {
-          name = 'Saxonica'
-          url = 'https://www.saxonica.com/'
-        }
+        organization pomOrganization("he")
+        scm pomScm("he")
+        licenses pomLicenses("he")
+        developers pomDevelopers("he")
+        pomIssueManagement("he")
+        pomMailingLists("he")
 
-        scm {
-          url = 'https://dev.saxonica.com/repos/archive/opensource/'
-          connection = 'scm:svn:https://dev.saxonica.com/repos/archive/opensource/'
-          developerConnection = 'scm:svn:https://dev.saxonica.com/repos/archive/opensource/'
-        }
-
-        licenses {
-          license {
-            name = 'Mozilla Public License Version 2.0'
-            url = 'http://www.mozilla.org/MPL/2.0/'
-            distribution = 'repo'
-          }
-        }
-
-        developers {
-          developer {
-            id = 'mike'
-            name = 'Michael Kay'
-            email = 'mike@saxonica.com'
-          }
-          developer {
-            id = 'ond1'
-            name = 'O’Neil Delpratt'
-            email = 'oneil@saxonica.com'
-          }
-          developer {
-            id = 'debbie'
-            name = 'Debbie Lockett'
-            email = 'debbie@saxonica.com'
-          }
-          developer {
-            id = 'john'
-            name = 'John Lumley'
-            email = 'john@saxonica.com'
-          }
-          developer {
-            id = 'norm'
-            name = 'Norman Walsh'
-            email = 'norm@saxonica.com'
-          }
-        }
-
-        issueManagement {
-          system = "Saxon Community"
-          url = 'https://saxonica.plan.io/projects/saxon'
-        }
-
-        mailingLists {
-          mailingList {
-            name = 'User List'
-            post = 'saxon-help@lists.sourceforge.net'
-            archive = 'http://sourceforge.net/mailarchive/forum.php?forum_name=saxon-help'
-          }
-        }
-
-        withXml {
-          def prop = asNode().appendNode('properties')
-          prop.appendNode('skipTests', 'false')
-          prop.appendNode('maven.build.timestamp.format', "yyyy-MM-dd'T'HH:mm:ss")
-          prop.appendNode('project.build.sourceEncoding', 'UTF-8')
-          prop.appendNode('maven.javadoc.skip', true)
-          prop.appendNode('maven.javadoc.failOnError', false)
-          prop.appendNode('maven.compiler.source', '1.8')
-          prop.appendNode('maven.compiler.target', '1.8')
-        }
+        withXml pomXml("he")
       }
 
       groupId = "net.sf.saxon"
@@ -1665,16 +1638,69 @@ publishing {
       artifact mavenHeXqjJar
       artifact mavenHeXqjSourcesJar
     }
+
+    if (project.findProperty("mavenLocalPublish") != null) {
+      mavenPE(MavenPublication) {
+        pom {
+          name = 'Saxon-PE'
+          packaging = 'jar'
+          description = 'The XSLT and XQuery Processor'
+          url = 'http://www.saxonica.com/'
+          inceptionYear = '1999'
+
+          organization pomOrganization("pe")
+          //scm pomScm("pe")
+          licenses pomLicenses("pe")
+          developers pomDevelopers("pe")
+          pomIssueManagement("pe")
+          pomMailingLists("pe")
+
+          withXml pomXml("pe")
+        }
+
+        groupId = "com.saxonica"
+        artifactId = "Saxon-PE"
+        version = saxonVersion
+        artifact mavenPeSaxonJar
+        artifact mavenPeJavadocJar
+      }
+
+      mavenEE(MavenPublication) {
+        pom {
+          name = 'Saxon-EE'
+          packaging = 'jar'
+          description = 'The XSLT and XQuery Processor'
+          url = 'http://www.saxonica.com/'
+          inceptionYear = '1999'
+
+          organization pomOrganization("ee")
+          //scm pomScm("ee")
+          licenses pomLicenses("ee")
+          developers pomDevelopers("ee")
+          pomIssueManagement("ee")
+          pomMailingLists("ee")
+
+          withXml pomXml("ee")
+        }
+
+        groupId = "com.saxonica"
+        artifactId = "Saxon-EE"
+        version = saxonVersion
+        artifact mavenEeSaxonJar
+        artifact mavenEeJavadocJar
+      }
+    }
   }
 
   repositories {
-    if (project.findProperty("mavenTestPublish") != null) {
+    if (project.findProperty("mavenLocalPublish") != null) {
       maven {
-        url = project.findProperty("mavenTestPublish")
+        url = project.findProperty("mavenLocalPublish")
       }
     } else {
       maven {
-        url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        url = project.findProperty("mavenLocalPublish")
+        //url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
         credentials {
           username = project.findProperty("sonatypeUsername") ?: "NOUSER"
           password = project.findProperty("sonatypePassword") ?: "NOPASS"
@@ -1734,7 +1760,7 @@ task sqlServerStart(dependsOn: ["docker-sql-up"]) {
       }
     }
   }
-  
+
   doLast {
     exec {
       commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
@@ -1864,7 +1890,7 @@ task sendriaServerStart() {
       println("****************************************************")
       println("Docker unavailable; saxon:send-mail tests will fail.")
       println("***************************************************")
-    }      
+    }
   }
 }
 
@@ -1920,23 +1946,6 @@ task dockerDown() {
     }
   }
 }
-
-// ============================================================
-
-/* I didn't get this to work. I got them to work by moving
-   them under src/test/java, but that's inconvenient...
-task compileXqjTck(
-  dependsOn: ['eejCompile'],
-  type: JavaCompile,
-  description: "Compile XQJ TCK"
-) {
-  classpath = configurations.compileClasspath + files("${projectDir}/tools/xqj/ri/src") + files("${projectDir}/tools/xqj/tck/src") + files("${buildDir}/classes/eej")
-
-
-  source "tools/xqj/tck/src"
-  destinationDirectory = new File("${buildDir}/xjqtck")
-}
-*/
 
 // ============================================================
 
