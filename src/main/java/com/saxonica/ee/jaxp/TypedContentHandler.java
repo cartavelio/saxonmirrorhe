@@ -98,7 +98,7 @@ public class TypedContentHandler extends ContentHandlerProxy {
          *
          * @param index The index of the attribute. The same index for
          *              the {@link org.xml.sax.Attributes} object passed to the
-         *              <tt>startElement</tt> callback.
+         *              <code>startElement</code> callback.
          * @return An immutable {@link org.w3c.dom.TypeInfo} object that represents the
          *         type of the specified attribute.
          *         Note that the caller can keep references to the obtained
@@ -119,12 +119,12 @@ public class TypedContentHandler extends ContentHandlerProxy {
         }
 
         /**
-         * Returns <tt>true</tt> if the specified attribute is determined
+         * Returns <code>true</code> if the specified attribute is determined
          * to be an ID.
          *
          * @param index The index of the attribute. The same index for
          *              the {@link org.xml.sax.Attributes} object passed to the
-         *              <tt>startElement</tt> callback.
+         *              <code>startElement</code> callback.
          * @return true
          *         if the type of the specified attribute is ID.
          */
@@ -134,13 +134,13 @@ public class TypedContentHandler extends ContentHandlerProxy {
         }
 
         /**
-         * Returns <tt>false</tt> if the attribute was added by the validator.
+         * Returns <code>false</code> if the attribute was added by the validator.
          *
          * @param index The index of the attribute. The same index for
          *              the {@link org.xml.sax.Attributes} object passed to the
-         *              <tt>startElement</tt> callback.
-         * @return <tt>true</tt> if the attribute was present before the validator
-         *         processes input. <tt>false</tt> if the attribute was added
+         *              <code>startElement</code> callback.
+         * @return <code>true</code> if the attribute was present before the validator
+         *         processes input. <code>false</code> if the attribute was added
          *         by the validator.
          */
 

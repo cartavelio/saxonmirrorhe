@@ -92,7 +92,7 @@ public abstract class Precondition {
         private final StringCollator collator;
 
         /**
-         * Create a <tt>StringHashPrecondition</tt>
+         * Create a <code>StringHashPrecondition</code>
          * @param characteristic the characteristic that is tested by this precondition. This
          *                       must evaluate to a set of hashcodes for permitted string values.
          *                       The precondition is satisfied if the set of hash codes obtained
@@ -190,7 +190,7 @@ public abstract class Precondition {
     }
 
     /**
-     * A <tt>BooleanPrecondition</tt> can in principle test any boolean characteristic
+     * A <code>BooleanPrecondition</code> can in principle test any boolean characteristic
      * of a pattern. In practice it is used to test for the existence of a named ancestor/parent
      * element. That is, in current use the {@link Characteristic} will always be an
      * {@link AncestorCharacteristic}

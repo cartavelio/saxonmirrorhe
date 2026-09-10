@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- * A <tt>SchemaValidator</tt> is an object that is used for validating instance documents against a schema.
+ * A <code>SchemaValidator</code> is an object that is used for validating instance documents against a schema.
  * The schema consists of the collection of schema components that are available within the schema
  * cache maintained by the SchemaManager, together with any additional schema components located
  * during the course of validation by means of an xsl:schemaLocation or xsi:noNamespaceSchemaLocation
@@ -44,10 +44,10 @@ import java.util.concurrent.*;
  * augmented with default values for absent elements and attributes, and carrying type annotations
  * derived from the schema processing. Expansion of defaults can be suppressed by means of the method
  * {@link #setExpandAttributeDefaults(boolean)}.</p>
- * <p>A <tt>SchemaValidator</tt> is serially reusable but not thread-safe. That is, it should normally
+ * <p>A <code>SchemaValidator</code> is serially reusable but not thread-safe. That is, it should normally
  * be used in the thread where it is created, but it can be used more than once, to validate multiple
  * input documents.</p>
- * <p>A <tt>SchemaValidator</tt> is a <tt>Destination</tt>, which allows it to receive the output of a
+ * <p>A <code>SchemaValidator</code> is a <code>Destination</code>, which allows it to receive the output of a
  * query or transformation to be validated.</p>
  * <p>Saxon does not deliver the full PSVI as described in the XML schema specifications,
  * only the subset of the PSVI properties featured in the XDM data model.</p>

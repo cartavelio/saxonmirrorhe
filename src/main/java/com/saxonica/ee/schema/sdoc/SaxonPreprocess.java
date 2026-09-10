@@ -15,8 +15,8 @@ import net.sf.saxon.type.SchemaException;
  * constraining facets.
  * <p>The effect of saxon:preprocess is that the lexical space for a type derived by restriction is no longer
  * constrained to be a subset of the lexical space for the type that it restricts. For example, a type derived
- * from xs:decimal can use <tt>&lt;saxon:preprocess action="translate($value, ',', '.')"&gt;</tt> to convert the input
- * value "3,14159" to "3.14159", which then validates as an <tt>xs:decimal</tt>.</p>
+ * from xs:decimal can use <code>&lt;saxon:preprocess action="translate($value, ',', '.')"&gt;</code> to convert the input
+ * value "3,14159" to "3.14159", which then validates as an <code>xs:decimal</code>.</p>
  * <p>More specifically, the saxon:preprocess facet converts the value from the lexical space of a restricted
  * type to the lexical space of its base type. This means that preprocessing may be defined at multiple levels
  * of the type hierarchy; the preprocessing will be performed on the most specific type first.</p>

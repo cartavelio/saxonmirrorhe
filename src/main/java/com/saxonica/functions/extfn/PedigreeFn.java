@@ -19,11 +19,11 @@ import net.sf.saxon.value.Int64Value;
  * that is, information about its position within the containing tree.</p>
  * <p>This information is returned in the form of a map that contains the following
  * entries.</p>
- * <p><tt>container</tt> - the containing map or array, or an empty sequence if the
+ * <p><code>container</code> - the containing map or array, or an empty sequence if the
  * supplied map or array is the root of the pedigree tree</p>
- * <p><tt>index</tt> - if the container is an array, this entry is an integer holding
+ * <p><code>index</code> - if the container is an array, this entry is an integer holding
  * the 1-based index of the supplied map or array within the containing array</p>
- * <p><tt>key</tt> - if the container is a map, this entry is an atomic value holding
+ * <p><code>key</code> - if the container is a map, this entry is an atomic value holding
  * the key of the entry in this map that contains the supplied map or array.</p>
  */
 

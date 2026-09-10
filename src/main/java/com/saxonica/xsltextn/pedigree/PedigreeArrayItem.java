@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A <tt>PedigreeArrayItem</tt> represents an XDM array together with a {@link Pedigree}:
+ * A <code>PedigreeArrayItem</code> represents an XDM array together with a {@link Pedigree}:
  * that is, retained information about how the array was selected with a JSON-like tree.
  */
 public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeValue {

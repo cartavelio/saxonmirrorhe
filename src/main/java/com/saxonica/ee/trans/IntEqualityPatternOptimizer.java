@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * A PatternOptimizer is an agent responsible for optimizing a particular class
- * of patterns. An <tt>IntEqualityPatternOptimizer</tt> is used for patterns of the
+ * of patterns. An <code>IntEqualityPatternOptimizer</code> is used for patterns of the
  * form <code>match="XXX[f(.) = 23]"</code>, that is, patterns containing a predicate
  * that compares some value with an integer constant.
  */

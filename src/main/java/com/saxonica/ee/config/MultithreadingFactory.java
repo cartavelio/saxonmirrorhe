@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 
 /**
  * This class defines a number of methods that support the use of multi-threading in Saxon.
- * By subclassing <tt>MultithreadingFactory</tt> and registering the subclass with the
+ * By subclassing <code>MultithreadingFactory</code> and registering the subclass with the
  * configuration using the method {@link EnterpriseConfiguration#setMultithreadingFactory(MultithreadingFactory)},
  * it is possible to customize Saxon's multithreading behavior.
  */
@@ -24,7 +24,7 @@ public class MultithreadingFactory {
     private final EnterpriseConfiguration config;
 
     /**
-     * Create a <tt>MultithreadingFactory</tt>
+     * Create a <code>MultithreadingFactory</code>
      * @param config the Saxon Configuration (must be a Saxon-EE configuration)
      */
 

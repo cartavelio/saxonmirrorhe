@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  * A PatternOptimizer is an agent responsible for optimizing a particular class
- * of patterns. The <tt>GeneralPatternOptimizer</tt> is an umbrella implementation
+ * of patterns. The <code>GeneralPatternOptimizer</code> is an umbrella implementation
  * that delegates to a number of more specific pattern optimizers.
  */
 public class GeneralPatternOptimizer extends PatternOptimizer {

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A <tt>PedigreeMapItem</tt> represents an XDM map together with a {@link Pedigree}:
+ * A <code>PedigreeMapItem</code> represents an XDM map together with a {@link Pedigree}:
  * that is, retained information about how the map was selected within a JSON-like tree.
  */
 
