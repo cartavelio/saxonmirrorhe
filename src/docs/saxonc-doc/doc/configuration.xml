@@ -112,18 +112,22 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
          <tr>
             <td>'![serialization property]'</td>
             <td>
-               <code>setProperty("!indent", "yes")
-                  <br/>setProperty("!{http://saxon.sf.net/}canonical", "yes")</code>
+               <code>setProperty("!indent", "yes")</code>
+               <br/>
+               <code>setProperty("!{http://saxon.sf.net/}canonical", "yes")</code>
             </td>
             <td>
                <p>Influence the serialization of the result output. Serialization parameters are
                   specified by name, preceded by a leading exclamation mark (!). This is equivalent
                   to specifying the corresponding attribute (e.g. <code>indent="yes"</code>) on an
-                     <code>xsl:output</code> declaration in the stylesheet. An output parameter
-                  specified on the command line or in the API using the <code>setProperty</code> method overrides
-                  one specified within the stylesheet. For other parameters
-                  see the section: <a href="https://www.saxonica.com/documentation12/index.html#!extensions/output-extras">Additional
-                     serialization parameters</a>.</p>
+                  <code>xsl:output</code> declaration in the stylesheet. An output parameter
+                  specified on the command line or in the API using the <code>setProperty</code>
+                  method overrides one specified within the stylesheet. To specify serialization
+                  parameters in a non-null namespace, supply the name in Clark format i.e.
+                  <code>{uri}local</code>. For more details about the serialization parameters
+                  available, see the <a target="_blank"
+                     href="https://www.saxonica.com/documentation12/index.html#!extensions/output-extras">Additional 
+                     serialization parameters</a> section in the main Saxon documentation.</p>
             </td>
          </tr>
          <tr>
@@ -288,12 +292,19 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
             <td>![serialization property]</td>
             <td>
                <code>setProperty("!indent", "yes")</code>
+               <br/>
+               <code>setProperty("!{http://saxon.sf.net/}indent-spaces", "4")</code>
             </td>
             <td>
                <p>Influence the serialization of the result output. Serialization parameters are
                   specified by name, preceded by a leading exclamation mark (!). This is equivalent
                   to specifying the corresponding output declaration (e.g. <code>declare option
-                     output:indent "yes";</code>) in the query prolog.</p>
+                     output:indent "yes";</code>) in the query prolog. To specify serialization
+                  parameters in a non-null namespace, supply the name in Clark format i.e.
+                  <code>{uri}local</code>. For more details about the serialization parameters
+                  available, see the <a target="_blank"
+                     href="https://www.saxonica.com/documentation12/index.html#!extensions/output-extras">Additional 
+                     serialization parameters</a> section in the main Saxon documentation.</p>
             </td>
          </tr>
          <tr>
