@@ -210,13 +210,12 @@ abstract class GraalNativeImageTask
     private fun graalExperimentalArgs(): Array<String> {
         val experimentalArgs = mutableListOf<String>(
             "-H:Path=${outputDir.get().asFile}",
-            "-H:+ReportExceptionStackTraces",
             "-H:+GenerateBuildArtifactsFile",
             "-H:+GenerateEmbeddedResourcesFile",
         )
         experimentalArgs.addAll(_graalExperimentalArgs.get())
         if (experimentalArgs.isNotEmpty()) {
-//            experimentalArgs.addFirst("-H:+UnlockExperimentalVMOptions")
+            experimentalArgs.addFirst("-H:+UnlockExperimentalVMOptions")
         }
         return experimentalArgs.toTypedArray()
     }
@@ -233,9 +232,7 @@ abstract class GraalNativeImageTask
             "-Dfile.encoding=UTF-8",
             "-Dlibsaxonc-core.include_path=${layout.projectDirectory.dir("../src/main/c/include").asFile.absolutePath}",
             "-Dlibsaxonc-core.cmake_include_path=${layout.buildDirectory.dir("ersatz/build-release").get().asFile.absolutePath}",
-            "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
-            "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
-            "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
+            "-H:+ReportExceptionStackTraces",
             "--enable-url-protocols=https",
             "--enable-url-protocols=http",
             "--shared")
