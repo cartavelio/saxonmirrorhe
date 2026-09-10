@@ -516,6 +516,7 @@ namespace TestDriver {
                     }
                     catch (Exception e) {
                         driver.println("**** Error in Decimal format: " + e.Message);
+                        Console.WriteLine(e.StackTrace);
                     }
                 }
 

@@ -319,6 +319,28 @@ public class ZenoString extends UnicodeString {
 
     }
 
+    /**
+     * Replace a character at a given position with a supplied string
+     */
+
+    public ZenoString replace(int index, UnicodeString replacement) {
+        return ZenoString.of(
+                substring(0, index)
+                .concat(replacement)
+                .concat(substring(index+1)));
+    }
+
+    /**
+     * Insert a supplied string at a given position
+     */
+
+    public ZenoString insert(int index, UnicodeString replacement) {
+        return ZenoString.of(
+                substring(0, index)
+                        .concat(replacement)
+                        .concat(substring(index)));
+    }
+
 
     /**
      * Concatenate another string

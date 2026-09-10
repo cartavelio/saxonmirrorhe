@@ -170,7 +170,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                 return value.getStringValue();
 
             case StandardNames.XS_DOUBLE:
-                return FormatNumber.formatExponential((DoubleValue)value);
+                return FormatNumber.formatExponential((DoubleValue)value).toString();
 
             case StandardNames.XS_FLOAT:
             case StandardNames.XS_DURATION:

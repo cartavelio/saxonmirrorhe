@@ -15,6 +15,7 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathEvaluator;
 import net.sf.saxon.sxpath.XPathExpression;
@@ -703,43 +704,7 @@ public class XPathCompiler {
         DecimalSymbols symbols = dfm.obtainNamedDecimalFormat(format.getStructuredQName());
 
         try {
-            switch (property) {
-                case "decimal-separator":
-                    symbols.setDecimalSeparator(value);
-                    break;
-                case "grouping-separator":
-                    symbols.setGroupingSeparator(value);
-                    break;
-                case "exponent-separator":
-                    symbols.setExponentSeparator(value);
-                    break;
-                case "infinity":
-                    symbols.setInfinity(value);
-                    break;
-                case "NaN":
-                    symbols.setNaN(value);
-                    break;
-                case "minus-sign":
-                    symbols.setMinusSign(value);
-                    break;
-                case "percent":
-                    symbols.setPercent(value);
-                    break;
-                case "per-mille":
-                    symbols.setPerMille(value);
-                    break;
-                case "zero-digit":
-                    symbols.setZeroDigit(value);
-                    break;
-                case "digit":
-                    symbols.setDigit(value);
-                    break;
-                case "pattern-separator":
-                    symbols.setPatternSeparator(value);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown decimal format attribute " + property);
-            }
+            symbols.setProperty(property, StringView.of(value));
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }

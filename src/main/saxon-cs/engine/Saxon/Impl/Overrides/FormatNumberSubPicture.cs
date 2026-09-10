@@ -2,7 +2,7 @@ using Singulink.Numerics;
 
 namespace Saxon.Impl.Overrides {
     public class FormatNumberSubPicture : Saxon.Hej.functions.FormatNumber.SubPicture {
-        public FormatNumberSubPicture(int[] pic, Saxon.Hej.trans.DecimalSymbols dfs) : base(pic, dfs) {
+        public FormatNumberSubPicture(Saxon.Hej.str.UnicodeString pic, Saxon.Hej.trans.DecimalSymbols dfs) : base(pic, dfs) {
         }
         // Override the Java handling of formatDecimal().
         protected override void formatDecimal(BigDecimal dval, Saxon.Ejava.lang.StringBuilder fsb) {

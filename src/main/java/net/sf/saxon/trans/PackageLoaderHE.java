@@ -1000,7 +1000,6 @@ public class PackageLoaderHE implements IPackageLoader {
         AxisIterator iterator = packageElement.iterateAxis(AxisInfo.CHILD,
                                                            new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "decimalFormat", config.getNamePool()));
 
-        String[] propertyNames = DecimalSymbols.propertyNames;
         while ((formatElement = iterator.next()) != null) {
             StructuredQName name = getQNameAttribute(formatElement, "name");
             DecimalSymbols symbols;
@@ -1009,25 +1008,15 @@ public class PackageLoaderHE implements IPackageLoader {
             } else {
                 symbols = decimalFormatManager.obtainNamedDecimalFormat(name);
             }
-            symbols.setHostLanguage(HostLanguage.XSLT, 31);
-            for (String p : propertyNames) {
-                if (formatElement.getAttributeValue(NamespaceUri.NULL,p) != null) {
-                    switch (p) {
-                        case "NaN":
-                            symbols.setNaN(formatElement.getAttributeValue(NamespaceUri.NULL,"NaN"));
-                            break;
-                        case "infinity":
-                            symbols.setInfinity(formatElement.getAttributeValue(NamespaceUri.NULL,"infinity"));
-                            break;
-                        case "name":
-                            // no action
-                            break;
-                        default:
-                            symbols.setIntProperty(p, getIntegerAttribute(formatElement, p));
-                            break;
-                    }
+            AxisIterator attributeIter = formatElement.iterateAxis(AxisInfo.ATTRIBUTE);
+            NodeInfo att;
+            while ((att = attributeIter.next()) != null) {
+                if (DecimalSymbols.isValidPropertyName(att.getLocalPart())) {
+                    symbols.setProperty(att.getLocalPart(), att.getUnicodeStringValue());
                 }
             }
+            symbols.setHostLanguage(HostLanguage.XSLT, 31);
+
         }
     }
 

@@ -253,6 +253,10 @@
         <p>The rules for the <code>number-parser</code> callback in <code>fn:parse-json</code> and 
             <code>fn:json-doc</code> have been changed to reflect changes in the specification.</p>
         
+        <p>In decimal format properties, it is now possible to set composite values for some properties,
+        for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
+        in the picture string, but the value "pc" will appear in the output.</p>
+        
         <p>The functions <code>math:e</code>, <code>math:sinh</code>, <code>math:cosh</code>,
         and <code>math:tanh</code> are implemented.</p>
         

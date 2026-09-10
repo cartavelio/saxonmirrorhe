@@ -208,7 +208,7 @@ public class PackageData {
 
     public DecimalFormatManager getDecimalFormatManager() {
         if (decimalFormatManager == null) {
-            decimalFormatManager = new DecimalFormatManager(hostLanguage, 31);
+            decimalFormatManager = new DecimalFormatManager(hostLanguage, getHostLanguageVersion());
         }
         return decimalFormatManager;
     }

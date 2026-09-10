@@ -32,6 +32,7 @@ import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.AttributeValueTemplate;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
@@ -1477,51 +1478,10 @@ public class XQueryParser extends XPathParser {
             }
             nextToken();
             readToken(Token.EQUALS);
-            String propertyValue = unescape(expectStringLiteral());
+            UnicodeString propertyValue = StringView.of(unescape(expectStringLiteral()));
             nextToken();
             propertyNames.add(propertyName);
-            switch (propertyName) {
-                case "decimal-separator":
-                    dfs.setDecimalSeparator(propertyValue);
-                    break;
-                case "grouping-separator":
-                    dfs.setGroupingSeparator(propertyValue);
-                    break;
-                case "infinity":
-                    dfs.setInfinity(propertyValue);
-                    break;
-                case "minus-sign":
-                    dfs.setMinusSign(propertyValue);
-                    break;
-                case "NaN":
-                    dfs.setNaN(propertyValue);
-                    break;
-                case "percent":
-                    dfs.setPercent(propertyValue);
-                    break;
-                case "per-mille":
-                    dfs.setPerMille(propertyValue);
-                    break;
-                case "zero-digit":
-                    try {
-                        dfs.setZeroDigit(propertyValue);
-                    } catch (XPathException err) {
-                        throw err.withErrorCode("XQST0097");
-                    }
-                    break;
-                case "digit":
-                    dfs.setDigit(propertyValue);
-                    break;
-                case "pattern-separator":
-                    dfs.setPatternSeparator(propertyValue);
-                    break;
-                case "exponent-separator":
-                    dfs.setExponentSeparator(propertyValue);
-                    break;
-                default:
-                    grumble("Unknown decimal-format property: " + propertyName, "XPST0003", offset);
-                    break;
-            }
+            dfs.setProperty(propertyName,propertyValue);
         }
 
 
