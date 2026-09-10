@@ -19,6 +19,12 @@
         </span>
     </xsl:template>
     
+    <xsl:template match="a[@class = 'cslink']" mode="jdp">
+        <span class="cslink" data-href="{@href}">
+            <xsl:value-of select="f:last-substring-after(. , 46)"/>
+        </span>
+    </xsl:template>
+    
     <xsl:template match="section" mode="jdp">
         <xsl:apply-templates mode="jdp"/>
     </xsl:template>
@@ -181,7 +187,7 @@
                     <xsl:for-each select="section">
                         <tr>
                             <td>
-                                <span class="javalink" data-href="{@id}">
+                                <span class="cslink" data-href="{@id}">
                                     <xsl:value-of select="@id"/>
                                 </span>
                             </td>

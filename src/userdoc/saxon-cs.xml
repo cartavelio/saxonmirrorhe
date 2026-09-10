@@ -67,7 +67,7 @@ available in the <a href="/dotnetdoc" class="apilink">.NET API</a>.</p>
 
       <p>All the classes referred to below are in the namespace <code>Saxon.Api</code>.</p>
 
-      <p>The first thing the application needs to do is to create a <a class="javalink" href="Saxon.Api.Processor">Processor</a>. The <code>Processor</code>
+      <p>The first thing the application needs to do is to create a <a class="cslink" href="Saxon.Api.Processor">Processor</a>. The <code>Processor</code>
 holds configuration information for Saxon, and shared resources such as the name pool and schema pool. It is possible
 to run multiple processors concurrently if required, but it is usually more economical for all Saxon processes within
 a single application to use the same <code>Processor</code>.</p>
@@ -75,7 +75,7 @@ a single application to use the same <code>Processor</code>.</p>
       <p>XSLT, XQuery, and XPath processing all follow the same pattern:</p>
       <ul>
          <li>
-            <p>From the <a class="javalink" href="Saxon.Api.Processor">Processor</a>, create a <code>Compiler</code> for the appropriate language, using one of the
+            <p>From the <a class="cslink" href="Saxon.Api.Processor">Processor</a>, create a <code>Compiler</code> for the appropriate language, using one of the
 methods <code>NewXsltCompiler()</code>, <code>NewXQueryCompiler()</code>, or <code>NewXPathCompiler()</code>.</p>
          </li>
          <li>
@@ -87,8 +87,8 @@ to accept input from a variety of sources.</p>
          <li>
             <p>The <code>Executable</code> object represents the compiled stylesheet, query, or XPath expression. It can be evaluated
 as often as required, in the same thread or in different threads. The first stage in this evaluation is to call
-the <code>Load()</code> method on the <code>Executable</code>. The resulting loaded object is an <a class="javalink" href="Saxon.Api.XsltTransformer">XsltTransformer</a>,
-<a class="javalink" href="Saxon.Api.XQueryEvaluator">XQueryEvaluator</a>, or <a class="javalink" href="Saxon.Api.XPathSelector">XPathSelector</a> depending on the language in use.</p>
+the <code>Load()</code> method on the <code>Executable</code>. The resulting loaded object is an <a class="cslink" href="Saxon.Api.XsltTransformer">XsltTransformer</a>,
+               <a class="cslink" href="Saxon.Api.XQueryEvaluator">XQueryEvaluator</a>, or <a class="cslink" href="Saxon.Api.XPathSelector">XPathSelector</a> depending on the language in use.</p>
          </li>
          <li>
             <p>Properties and configuration methods can then be set on the loaded object to establish the dynamic
@@ -103,48 +103,48 @@ in the case of XQuery and XPath where the output is an arbitrary sequence.</p>
       <ul>
          <li>
             <p>
-            <a class="javalink" href="Saxon.Api.XdmValue">XdmValue</a>: an XPath value. This is in general a sequence, whose items are nodes or atomic values.
+               <a class="cslink" href="Saxon.Api.XdmValue">XdmValue</a>: an XPath value. This is in general a sequence, whose items are nodes or atomic values.
 You can supply an <code>XdmValue</code> as the value of a stylesheet or query parameter, and receive an <code>XdmValue</code>
 as the result of evaluating a query or XPath expression.</p>
          </li>
          <li>
             <p>
-            <a class="javalink" href="Saxon.Api.XdmItem">XdmItem</a>: an XPath item. This is a subtype of <code>XdmValue</code>, since any item can be treated
+               <a class="cslink" href="Saxon.Api.XdmItem">XdmItem</a>: an XPath item. This is a subtype of <code>XdmValue</code>, since any item can be treated
 as a sequence of length one. You can call <code>GetEnumeration</code> on an <code>XdmValue</code> object to iterate
 over the items in the sequence.</p>
          </li>
          <li>
             <p>
-            <a class="javalink" href="Saxon.Api.XdmNode">XdmNode</a>: a node. This object provides access to most of the properties of nodes defined in the
+               <a class="cslink" href="Saxon.Api.XdmNode">XdmNode</a>: a node. This object provides access to most of the properties of nodes defined in the
 XDM model: the node kind, the string value, the name, the typed value, the base URI. It also provides a method <code>EnumerateAxis()</code>
 which allows you to find related nodes using any of the 13 XPath axes. For convenience, the <code>OuterXml</code>
 property provides a simple way to serialize the node.</p>
          </li>
          <li>
             <p>
-               <a class="javalink" href="Saxon.Api.XdmAtomicValue">XdmAtomicValue</a>: an atomic value, as defined in the XDM model. You can construct an atomic value directly
+               <a class="cslink" href="Saxon.Api.XdmAtomicValue">XdmAtomicValue</a>: an atomic value, as defined in the XDM model. You can construct an atomic value directly
 from common objects such as an integer, a string, a double, or a URI; or you can construct one by specifying a string
 containing the lexical representation, and a QName identifying the required type.</p>
          </li>
       </ul>
 
-      <p>The <a class="javalink" href="Saxon.Api.Processor">Processor</a> provides a method <code>NewDocumentBuilder()</code> which, as the name implies, returns
-a <a class="javalink" href="Saxon.Api.DocumentBuilder">DocumentBuilder</a>. This may be used to construct a document (specifically, an <code>XdmNode</code>)
+      <p>The <a class="cslink" href="Saxon.Api.Processor">Processor</a> provides a method <code>NewDocumentBuilder()</code> which, as the name implies, returns
+         a <a class="cslink" href="Saxon.Api.DocumentBuilder">DocumentBuilder</a>. This may be used to construct a document (specifically, an <code>XdmNode</code>)
 from a variety of sources. The input can come from raw lexical XML by specifying a <code>Stream</code> or a <code>Uri</code>,
 or it may come from a DOM document built using the Microsoft XML parser by specifying an <code>XmlNode</code>,
 or it may be supplied programmatically by nominating an <code>XmlReader</code>. Various processing options
 can be set as properties of the <code>DocumentBuilder</code>: these determine, for example, how whitespace is handled 
 and whether schema validation is performed. The resulting document can be
 used as the input to a transformation, a query, or an XPath expression. It might also contain a stylesheet or a schema
-which can then be used as input to the <a class="javalink" href="Saxon.Api.XsltCompiler">XsltCompiler</a> or the <a class="javalink" href="Saxon.Api.SchemaManager">SchemaManager</a>.</p>
+which can then be used as input to the <a class="cslink" href="Saxon.Api.XsltCompiler">XsltCompiler</a> or the <a class="cslink" href="Saxon.Api.SchemaManager">SchemaManager</a>.</p>
 
-      <p>The <a class="javalink" href="Saxon.Api.SchemaManager">SchemaManager</a> exists only in the Saxon-EE product, and its job is to compile schema documents
+      <p>The <a class="cslink" href="Saxon.Api.SchemaManager">SchemaManager</a> exists only in the Saxon-EE product, and its job is to compile schema documents
 and to maintain a cache containing the compiled schemas. It thus contains methods to compile schemas from a variety
 of document sources. It also contains a factory method <code>NewSchemaValidator()</code>, which returns a 
-<a class="javalink" href="Saxon.Api.SchemaValidator">SchemaValidator</a>. The <code>SchemaValidator</code>, in turn, is used to validate a source document
+         <a class="cslink" href="Saxon.Api.SchemaValidator">SchemaValidator</a>. The <code>SchemaValidator</code>, in turn, is used to validate a source document
 against the set of schema definitions held in the <code>SchemaManager</code>'s cache.</p>
 
-      <p>Finally, the API offers a class <a class="javalink" href="Saxon.Api.XmlDestination">XmlDestination</a> to define the possible ways of handling a document
+      <p>Finally, the API offers a class <a class="cslink" href="Saxon.Api.XmlDestination">XmlDestination</a> to define the possible ways of handling a document
 constructed as the output of a transformation, query, or validation episode. Various subtypes of <code>XdmDestination</code>
  allow such results to be serialized as XML (using either the Saxon serializer or an <code>XmlTextWriter</code>),
  or to be materialized as a Saxon <code>XdmNode</code> or as a DOM <code>XmlNode</code>.</p>
@@ -175,7 +175,7 @@ The places where such escape hatches are provided are shown below:</p>
          <tbody>
             <tr>
                <td>
-                  <p><a class="javalink" href="Saxon.Api.Processor">Saxon.Api.Processor</a></p>
+                  <p><a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a></p>
                </td>
                <td>
                   <p>Implementation</p>
@@ -186,7 +186,7 @@ The places where such escape hatches are provided are shown below:</p>
             </tr>
             <tr>
                <td>
-                  <p><a class="javalink" href="Saxon.Api.XdmNode">Saxon.Api.XdmNode</a></p>
+                  <p><a class="cslink" href="Saxon.Api.XdmNode">Saxon.Api.XdmNode</a></p>
                </td>
                <td>
                   <p>Implementation</p>
@@ -197,7 +197,7 @@ The places where such escape hatches are provided are shown below:</p>
             </tr>
             <tr>
                <td>
-                  <p><a class="javalink" href="Saxon.Api.XsltTransformer">Saxon.Api.XsltTransformer</a></p>
+                  <p><a class="cslink" href="Saxon.Api.XsltTransformer">Saxon.Api.XsltTransformer</a></p>
                </td>
                <td>
                   <p>Implementation</p>
@@ -208,7 +208,7 @@ The places where such escape hatches are provided are shown below:</p>
             </tr>
             <tr>
                <td>
-                  <p><a class="javalink" href="Saxon.Api.XQueryCompiler">Saxon.Api.XQueryCompiler</a></p>
+                  <p><a class="cslink" href="Saxon.Api.XQueryCompiler">Saxon.Api.XQueryCompiler</a></p>
                </td>
                <td>
                   <p>Implementation</p>
@@ -233,7 +233,7 @@ supplied with the .NET platform.</p>
       <ul>
          <li><p>It does not notify ID or IDREF values from the DTD, or expand attributes with
             fixed or default values, unless DTD validation is requested. This can be requested using the <code>-v</code> option on the
-            command line, or via the API. (See the <code>DtdValidation</code> property of the <a class="javalink" href="Saxon.Api.DocumentBuilder">DocumentBuilder</a>
+            command line, or via the API. (See the <code>DtdValidation</code> property of the <a class="cslink" href="Saxon.Api.DocumentBuilder">DocumentBuilder</a>
             class.)</p></li>
          <li><p>It rejects documents that specify <code><![CDATA[<?xml version="1.1"?>]]></code>, 
             or that use namespace undeclarations in the form <code>xmlns:p=""</code>.</p></li>

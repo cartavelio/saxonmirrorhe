@@ -69,7 +69,7 @@
         </span>
     </xsl:template>
 
-    <xsl:template match="a[@class ='javalink']" mode="secondary">
+    <xsl:template match="a[@class =('javalink','cslink')]" mode="secondary">
         <span data-href="{@href}">
             <xsl:copy-of select="@* except @href"/>
             <xsl:apply-templates/>
@@ -77,17 +77,24 @@
     </xsl:template>
     
     <xsl:template match="a[@class ='feature']" mode="secondary">
-        <span data-href="/configuration/config-features@{@href}" class="javalink">
-            <xsl:copy-of select="@* except @href"/>
+        <span data-href="/configuration/config-features@{@href}" class="link bodylink">
+            <xsl:copy-of select="@* except (@href,@class)"/>
             <xsl:value-of select="@href"/>
         </span>
     </xsl:template>
     
     <xsl:template match="code[@java]" mode="secondary">
-    <span data-href="{@java}" class="javalink">
-        <xsl:copy-of select="@* except @java|@class"/>
-        <xsl:apply-templates/>
-    </span>
+        <span data-href="{@java}" class="javalink">
+            <xsl:copy-of select="@* except (@java,@class)"/>
+            <xsl:apply-templates/>
+        </span>
+    </xsl:template>
+    
+    <xsl:template match="code[@cs]" mode="secondary">
+        <span data-href="{@cs}" class="cslink">
+            <xsl:copy-of select="@* except (@cs,@class)"/>
+            <xsl:apply-templates/>
+        </span>
     </xsl:template>
 
     <xsl:template match="a" mode="secondary">

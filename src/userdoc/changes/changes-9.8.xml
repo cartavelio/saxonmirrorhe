@@ -569,13 +569,13 @@
 
     <category name="dotnet">
 
-        <p>It is now possible to define a custom <code java="Saxon.Api.WhitespacePolicy">WhitespacePolicy</code> by supplying a
+        <p>It is now possible to define a custom <code cs="Saxon.Api.WhitespacePolicy">WhitespacePolicy</code> by supplying a
             callback predicate which indicates whether
         whitespace for a particular element name is to be stripped or preserved. This provides XQuery users with a mechanism comparable to
         XSLT's <code>xsl:strip-space</code> and <code>xsl:preserve-space</code>, and allows fine-grained control of whitespace stripping
         to be taken out of the control of the transformation.</p>
 
-        <p>The <code java="Saxon.Api.Serializer">Serializer</code> class has two new convenience methods, allowing serialization
+        <p>The <code cs="Saxon.Api.Serializer">Serializer</code> class has two new convenience methods, allowing serialization
             of an <code>XdmNode</code> to an arbitrary <code>Destination</code>,
             or more simply to a string in .NET. These methods are equivalent to the Java versions.</p>
 

@@ -157,7 +157,7 @@ else concat('/',$h)"/>
     <xsl:template match="attribute()" mode="get-refs"/>
 
     <xsl:template match="@data-href|@href" mode="get-refs" as="node()*">
-        <xsl:if test="parent::*[not(@class = ('javalink','apilink'))]">
+        <xsl:if test="parent::*[not(@class = ('javalink','apilink','cslink'))]">
             <xsl:sequence select="."/>
         </xsl:if>
     </xsl:template>

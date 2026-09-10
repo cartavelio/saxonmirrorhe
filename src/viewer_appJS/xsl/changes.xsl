@@ -257,6 +257,13 @@
         </span>
     </xsl:template>
     
+    <xsl:template match="ch:code[@cs]" priority="5">
+        <span data-href="{@cs}" class="cslink">
+            <xsl:copy-of select="@* except @cs|@class"/>
+            <xsl:apply-templates/>
+        </span>
+    </xsl:template>
+    
     <xsl:template match="*:xref" priority="5">
         <span data-href="{string-join((concat('/',@section), @page, @subpage), '/')}" class="link">
             <xsl:apply-templates/>
@@ -278,7 +285,7 @@
         </xsl:choose>
     </xsl:template>
     
-    <xsl:template match="*:a[@class ='javalink']" priority="5">
+    <xsl:template match="*:a[@class =('javalink','cslink')]" priority="5">
         <span data-href="{@href}">
             <xsl:copy-of select="@* except @href"/>
             <xsl:apply-templates/>

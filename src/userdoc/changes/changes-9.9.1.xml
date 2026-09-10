@@ -70,94 +70,94 @@
 
         <p>We are now using generic types for the handling of error lists for the Xslt, XPath, XQuery and Schema
             processors. For example the property <code>ErrorList</code> (on <code
-                java="Saxon.Api.XQueryCompiler">XQueryCompiler</code>, <code
-                    java="Saxon.Api.XsltCompiler">XsltCompiler</code>, etc.) uses parameterized lists
+                cs="Saxon.Api.XQueryCompiler">XQueryCompiler</code>, <code
+                    cs="Saxon.Api.XsltCompiler">XsltCompiler</code>, etc.) uses parameterized lists
          <code>IList&lt;StaticError&gt;</code>.</p>
 
-        <p>The <code java="Saxon.Api.Processor">Processor</code> class is now an implementation of the Saxon Java
+        <p>The <code cs="Saxon.Api.Processor">Processor</code> class is now an implementation of the Saxon Java
                 interface <code java="net.sf.saxon.Configuration.ApiProvider">ApiProvider</code>.This provides a marker interface to
                     represent an API that is provided as a layer on top of this <code java="net.sf.saxon.Configuration">Configuration</code>. This also make it
                 possible to retrieve the .NET <code>Processor</code> object via the <code>Processor</code> property on
-            the class <code java="Saxon.Api.XdmNode">XdmNode</code>.</p>
+            the class <code cs="Saxon.Api.XdmNode">XdmNode</code>.</p>
 
-        <p>The class <code java="Saxon.Api.FeatureKeys">FeatureKeys</code> is now available on .NET. Java users would be familiar with
+        <p>The class <code cs="Saxon.Api.FeatureKeys">FeatureKeys</code> is now available on .NET. Java users would be familiar with
         this class which defines a set of constants, representing the names of Saxon configuration options which can be supplied to the Saxon
-            <code java="Saxon.Api.Processor">Processor</code> using the <code>SetProperty</code> method.</p>
+            <code cs="Saxon.Api.Processor">Processor</code> using the <code>SetProperty</code> method.</p>
 
-        <p>The class <code java="Saxon.Api.Feature">Feature</code> is now available on .NET. As on Java
+        <p>The class <code cs="Saxon.Api.Feature">Feature</code> is now available on .NET. As on Java
                 this class defines a set of constants, representing the details of Saxon configuration
                   options which can be supplied to the Saxon method Configuration.setProperty() using the
-            <code java="Saxon.Api.Processor">Processor</code> using the <code>SetProperty</code> method.</p>
+            <code cs="Saxon.Api.Processor">Processor</code> using the <code>SetProperty</code> method.</p>
 
-        <p>The classes <code java="Saxon.Api.XPathCompiler">XPathCompiler</code>, <code
-                    java="Saxon.Api.XQueryCompiler">XQueryCompiler</code>, and <code
-                        java="Saxon.Api.XsltCompiler">XsltCompiler</code> now have
+        <p>The classes <code cs="Saxon.Api.XPathCompiler">XPathCompiler</code>, <code
+                    cs="Saxon.Api.XQueryCompiler">XQueryCompiler</code>, and <code
+                        cs="Saxon.Api.XsltCompiler">XsltCompiler</code> now have
                 the property <code>FastCompilation</code> which causes the compiler to reduce the amount of time it spends
                 optimizing the code for run-time execution speed; it may also reduce the effort devoted to ensuring good error diagnostics.
                 This option is appropriate when compiling code that will only execute once, with a modest amount of input data,
                 and where the code is known to be functionally correct.</p>
 
-        <p>In the class <code java="Saxon.Api.XQueryCompiler">XQueryCompiler</code> the <code>XQueryLanaguageVersion</code> property now only accepts "3.1". Any attempt
-            to set a different value is ignored. The <code>Processor</code> property can now only be used to get the <code java="Saxon.Api.Processor">Processor</code> object.</p>
+        <p>In the class <code cs="Saxon.Api.XQueryCompiler">XQueryCompiler</code> the <code>XQueryLanaguageVersion</code> property now only accepts "3.1". Any attempt
+            to set a different value is ignored. The <code>Processor</code> property can now only be used to get the <code cs="Saxon.Api.Processor">Processor</code> object.</p>
 
         <p>In the <code>XsltCompiler</code> class the <code>CompilePackages</code> method is now deprecated, please use the configuration to add list of packages. The <code>XsltLanaguageVersion</code> property now only accepts "3.1". Any attempt
-                    to set a different value is ignored. The <code>Processor</code> property can now only be used to get the <code java="Saxon.Api.Processor">Processor</code> object. </p>
+                    to set a different value is ignored. The <code>Processor</code> property can now only be used to get the <code cs="Saxon.Api.Processor">Processor</code> object. </p>
 
-        <p>The <code java="Saxon.Api.XPathExecutable">XPathExecutable</code> class now has the method
+        <p>The <code cs="Saxon.Api.XPathExecutable">XPathExecutable</code> class now has the method
             <code>EnumerateExternalVariable2</code> which returns <code>IEnumerator&lt;QName&gt;</code>.</p>
 
-        <p>We have added the interface class <code java="Saxon.Api.ExtensionFunction">ExtensionFunction</code> for
+        <p>We have added the interface class <code cs="Saxon.Api.ExtensionFunction">ExtensionFunction</code> for
             simple external/extension functions. Users can implement
-            this interface and register the implementation with the <code java="Saxon.Api.Processor">Processor</code>.</p>
+            this interface and register the implementation with the <code cs="Saxon.Api.Processor">Processor</code>.</p>
 
-        <p>In the <code java="Saxon.Api.SchemaValidator">SchemaValidator</code> class we have changed the
+        <p>In the <code cs="Saxon.Api.SchemaValidator">SchemaValidator</code> class we have changed the
             <code>ErrorList</code> property to return the list of validation errors as an <code>IList</code> with
-            generic parameter <code java="Saxon.Api.ValidationFailure">ValidationFailure</code>. The <code>ValidationFailure</code> class
+            generic parameter <code cs="Saxon.Api.ValidationFailure">ValidationFailure</code>. The <code>ValidationFailure</code> class
             is a new class which better represents validation errors.
             The following new properties have been added to handle the top-level element to be validated:
             <code>DocumentElementName</code>, <code>DocumentelementTypeName</code>,
         <code>DocumentElementType</code>.</p>
 
-        <p>The <code java="Saxon.Api.DocumentBuilder">DocumentBuilder</code> class now contains the <code>SchemaValidator</code> property to set and get the <code java="Saxon.Api.SchemaValidator">SchemaValidator</code>
+        <p>The <code cs="Saxon.Api.DocumentBuilder">DocumentBuilder</code> class now contains the <code>SchemaValidator</code> property to set and get the <code cs="Saxon.Api.SchemaValidator">SchemaValidator</code>
         to be used.</p>
 
-        <p><code java="Saxon.Api.XmlDestination">XmlDestination</code> is now an interface instead of abstract class. This interface has the method <code>GetUnderlyingDestination</code> which
+        <p><code cs="Saxon.Api.XmlDestination">XmlDestination</code> is now an interface instead of abstract class. This interface has the method <code>GetUnderlyingDestination</code> which
             returns a Java <code>Destination</code> class supported by Saxon internals.</p>
 
-        <p>The class <code java="Saxon.Api.Serializer">Serializer</code> is no longer available as a free standing
-                    class, it must be created using the <code java="Saxon.Api.Processor">Processor</code> class. The return type
+        <p>The class <code cs="Saxon.Api.Serializer">Serializer</code> is no longer available as a free standing
+                    class, it must be created using the <code cs="Saxon.Api.Processor">Processor</code> class. The return type
             of the method <code>Serializer.GetOutputDestination()</code> has been changed to <code>object</code>. This
             class has a number of serialization parameters available for use by the <code>Serializer</code>.
             The <code>BaseUri</code> property allows the setting and getting of the base Uri for the <code>Serializer</code></p>
 
-        <p>We have added the <code java="Saxon.Api.RawDestination">RawDestination</code> class which is a <code>Destination</code> that accepts a sequence output by
+        <p>We have added the <code cs="Saxon.Api.RawDestination">RawDestination</code> class which is a <code>Destination</code> that accepts a sequence output by
             xmlns:app="http://schemas.android.com/apk/res-auto" stylesheet or query and returns it directly as an <code
-                java="Saxon.Api.XdmValue">XdmValue</code>, without constructing an XML tree, and without serialization.</p>
+                cs="Saxon.Api.XdmValue">XdmValue</code>, without constructing an XML tree, and without serialization.</p>
 
         <p>For the <code>NullDestination</code> we can now set and get the <code>BaseUri</code> property.</p>
 
 
-        <p>In the class <code java="Saxon.Api.XdmValue">XdmValue</code> we now use generics for the methods <code>XdmValue.GetList</code>
+        <p>In the class <code cs="Saxon.Api.XdmValue">XdmValue</code> we now use generics for the methods <code>XdmValue.GetList</code>
             which now returns <code>IList&lt;XdmItem&gt;</code>. Likewise the <code>GetEnumerator</code> method returns
             <code>IEnumerator&lt;XdmITem&gt;</code>. We have added the method <code>ItemAt(int i)</code>
         which returns the i'th item in the value. We have also added the method <code>DocumentOrder</code> which returns
             a new <code>XdmValue</code> containing the nodes present in the
         <code>XdmValue</code> with duplicates eliminated, and sorted into document order.</p>
 
-        <p>The class <code java="Saxon.Api.XdmArray">XdmArray</code> now offers the methods <code>Concat</code> and <code>AppendMember</code>.</p>
+        <p>The class <code cs="Saxon.Api.XdmArray">XdmArray</code> now offers the methods <code>Concat</code> and <code>AppendMember</code>.</p>
 
-        <p>In the class <code java="Saxon.Api.XdmMap">XdmMap</code> we have changed the parameter for the methods
+        <p>In the class <code cs="Saxon.Api.XdmMap">XdmMap</code> we have changed the parameter for the methods
             <code>Get</code> and <code>ContainsKey</code> to receive <code>XdmAtomicValue</code> instead of object.</p>
         
-        <p>In the class <code java="Saxon.Api.XdmNode">XdmNode</code> we now use generics for the method <code>EnurateAxis</code>, which
+        <p>In the class <code cs="Saxon.Api.XdmNode">XdmNode</code> we now use generics for the method <code>EnurateAxis</code>, which
         now returns an <code>IEnumerator&lt;XdmNode&gt;</code> object.</p>
 
-        <p>In the class <code java="Saxon.Api.XdmAtomicValue">XdmAtomicValue</code> we have added the constructor
+        <p>In the class <code cs="Saxon.Api.XdmAtomicValue">XdmAtomicValue</code> we have added the constructor
             <code>XdmAtomicValue(String lexicalForm, XdmAtomicType type)</code>, which is used to construct an atomic
-            value of a given type given as an <code java="Saxon.Api.XdmAtomicType">XdmAtomicType</code>.</p>
+            value of a given type given as an <code cs="Saxon.Api.XdmAtomicType">XdmAtomicType</code>.</p>
 
-        <p>The interface <code>IXdmEnumerator</code> and <code>IXdmEnumerable</code> now use generic type parameter <code java="Saxon.Api.XdmItem">XdmItem</code>.
-            This change affects the implemented classes <code java="Saxon.Api.SequenceEnumerator">SequenceEnumerator</code>, <code java="Saxon.Api.DotNetSequenceIterator">DotNetSequenceIterator</code> and <code java="Saxon.Api.EmptyIterator">EmptyIterator</code>.</p>
+        <p>The interface <code>IXdmEnumerator</code> and <code>IXdmEnumerable</code> now use generic type parameter <code cs="Saxon.Api.XdmItem">XdmItem</code>.
+            This change affects the implemented classes <code cs="Saxon.Api.SequenceEnumerator">SequenceEnumerator</code>, <code cs="Saxon.Api.DotNetSequenceIterator">DotNetSequenceIterator</code> and <code cs="Saxon.Api.EmptyIterator">EmptyIterator</code>.</p>
     </category>
     
     <category name="optimization">

@@ -161,7 +161,7 @@
         </xsl:choose>
     </xsl:template>
 
-    <xsl:template match="a[@class ='javalink']|fc:a[@class ='javalink']" mode="f">
+    <xsl:template match="a[@class =('javalink','cslink')]|fc:a[@class =('javalink','cslink')]" mode="f">
         <span data-href="{@href}">
             <xsl:copy-of select="@* except @href"/>
             <xsl:apply-templates/>

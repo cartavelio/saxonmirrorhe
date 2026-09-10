@@ -11,7 +11,7 @@
       specifications.</p>
 
    <aside>See the <a class="bodylink" href="/xpath-api">XPath API for Java</a> section for details
-      on using the XPath Java interfaces, or the <a class="bodylink" href="/dotnet/dotnetapi">Saxon
+      on using the XPath Java interfaces, or the <a class="bodylink" href="/saxon-cs/dotnetapi">Saxon
          API for .NET</a> section for the .NET interface.</aside>
    
    <aside>Saxon provides further extensions to the XPath expression syntax (these require Saxon-PE

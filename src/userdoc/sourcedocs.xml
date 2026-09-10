@@ -18,7 +18,7 @@
 
 
     <p>When Saxon (either XSLT or XQuery) is invoked from the command line, the source document will
-      normally be an XML 1.0 document. See also <a class="bodylink" href="xml11">XML 1.1</a>.</p>
+      normally be an XML 1.0 document. See also <a class="bodylink" href="../xml11">XML 1.1</a>.</p>
 
     <p class="javaonly">If a custom parser is specified using the <code>-x</code> option on the command line, then
       the source document can be in any format accepted by this custom parser. The parser must behave as a 
@@ -481,8 +481,8 @@
       so it is always possible to supply an existing Saxon tree as
     the source for any of these interfaces.</p>
 
-    <p>Similarly in the .NET API, there is a <a class="javalink" href="Saxon.Api.DocumentBuilder"
-        >DocumentBuilder</a> object that can be created from the <a class="javalink"
+    <p>Similarly in the .NET API, there is a <a class="cslink" href="Saxon.Api.DocumentBuilder"
+        >DocumentBuilder</a> object that can be created from the <a class="cslink"
         href="Saxon.Api.Processor">Processor</a>. This allows options to be set controlling the way
       documents are built, and provides an overloaded <code>Build</code> method allowing a tree to
       be built from various kinds of source.</p>
@@ -887,7 +887,7 @@
     <p>On the .NET platform, there is a customized <code>XmlReader</code> that performs XInclude
       processing available at <a href="https://github.com/keimpema/Mvp.Xml.NetStandard" class="bodylink"
         >GitHub project Mvp.Xml.NetStandard</a>. You can supply this as an argument to the method
-        <code>Build(XmlReader parser)</code> in the <a class="javalink"
+        <code>Build(XmlReader parser)</code> in the <a class="cslink"
         href="Saxon.Api.DocumentBuilder">DocumentBuilder</a> class of the .NET Saxon API. (Not tested).</p>
     </div>
   
@@ -1442,7 +1442,7 @@
 
     <p>When documents are built using the <a class="javalink"
         href="net.sf.saxon.s9api.DocumentBuilder">DocumentBuilder</a> in the s9api interface, or the
-        <a class="javalink" href="Saxon.Api.DocumentBuilder">DocumentBuilder</a> in the Saxon.Api
+      <a class="cslink" href="Saxon.Api.DocumentBuilder">DocumentBuilder</a> in the Saxon.Api
       interface on .NET, validation may be controlled by setting the appropriate options on the
         <code>DocumentBuilder</code>.</p>
 

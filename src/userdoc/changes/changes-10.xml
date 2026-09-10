@@ -949,8 +949,8 @@
     
     <category name="dotnet">
         
-        <p>The classes <code java="Saxon.Api.Step">Step</code> and <code
-            java="Saxon.Api.Predicate">Predicate</code> are now available on .NET. As on Java these
+        <p>The classes <code cs="Saxon.Api.Step">Step</code> and <code
+            cs="Saxon.Api.Predicate">Predicate</code> are now available on .NET. As on Java these
             classes can be used to navigate XML documents from the Saxon API. The extensions
             are designed to make it easier to manipulate the inputs and outputs of the XPath, XSLT,
             XQuery, and XSD processors directly in the Java or .NET code. (These were introduced for
@@ -958,11 +958,11 @@
             change log in the "S9API interface" category.) In the .NET API, <code>Step</code> and
             <code>Predicate</code> are wrapper classes for <code>Func</code>s, which map an
             <code>XdmItem</code> to an <code>IEnumerable</code> of <code>XdmItem</code> objects,
-            or to a boolean value respectively. The <code java="Saxon.Api.Steps">Steps</code>
-            and <code java="Saxon.Api.Predicates">Predicates</code> classes provide
+            or to a boolean value respectively. The <code cs="Saxon.Api.Steps">Steps</code>
+            and <code cs="Saxon.Api.Predicates">Predicates</code> classes provide
             a library of useful predefined <code>Step</code> and <code>Predicate</code> functions.</p>
 
-        <p>For use with the above classes, the <code java="Saxon.Api.XdmValue">XdmValue</code> class
+        <p>For use with the above classes, the <code cs="Saxon.Api.XdmValue">XdmValue</code> class
             has a number of new methods. The <code>Select</code> method makes use of the
             <code>Step</code> class to apply a function to the items of the XDM value, to produce an
             <code>IEnumerable</code> of XDM items. The <code>Concat</code> method provides a way
@@ -970,29 +970,29 @@
             The methods <code>Where</code>, <code>AnyMatch</code> and <code>AllMatch</code> provide
             a way to filter the items of the <code>XdmValue</code> by some predicate.</p>
         
-        <p>In addition, the <code java="Saxon.Api.XdmNode">XdmNode</code> class now has a
+        <p>In addition, the <code cs="Saxon.Api.XdmNode">XdmNode</code> class now has a
             <code>Select</code> method which applies a step navigation to the node object. The class also
             has new <code>Children</code> methods: the first has a single <code>Predicate</code>
             argument to filter the child nodes, while the other versions can be used to select the
             child nodes with a specified name.</p>
 
-        <p>The <code java="Saxon.Api.XdmItem">XdmItem</code> class has a new <code>IsNode</code>
+        <p>The <code cs="Saxon.Api.XdmItem">XdmItem</code> class has a new <code>IsNode</code>
             method to provide an simple way to determine if the item is a node or some other type.</p>
         
-        <p>The <code java="Saxon.Api.Processor">Processor</code> class now has the
+        <p>The <code cs="Saxon.Api.Processor">Processor</code> class now has the
             <code>BindExtensions</code> method which provides a simple way to load reflexive
             extension functions written in C# or VB.NET, as an alternative dynamic loading. The
             method passes Saxon a reference to the containing type.</p>
 
-        <p>The enum type <code java="Saxon.Api.HostLanguage">HostLanguage</code> is added which
+        <p>The enum type <code cs="Saxon.Api.HostLanguage">HostLanguage</code> is added which
             provides a better way to identify the origins of an error.</p>
 
         <p>For the XPath, XQuery, and XSLT compilers it is now possible to set the error list as an
             <code>IList</code> of <code
-                java="Saxon.Api.XmlProcessingError">XmlProcessingError</code> objects. This new
+                cs="Saxon.Api.XmlProcessingError">XmlProcessingError</code> objects. This new
             error class provides more informative details about the error detected.</p>
 
-        <p>The <code java="Saxon.Api.XsltCompiler">XsltCompiler</code> class now has a
+        <p>The <code cs="Saxon.Api.XsltCompiler">XsltCompiler</code> class now has a
             <code>ClearParameter</code> method to clear the values of all stylesheet parameters
             previously set.</p>
         

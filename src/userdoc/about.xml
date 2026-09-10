@@ -900,7 +900,7 @@
 
 
       <p>For more information about Saxon on the .NET platform, see <a class="bodylink"
-            href="/dotnet">Saxon on .NET</a>.</p>
+            href="/saxon-cs">Saxon-CS</a>.</p>
 
 
       <h2 class="subtitle">Prerequisites: .NET platform</h2>
@@ -1026,7 +1026,7 @@
          are several programs in the <code>/samples/cs</code> directory that are specifically
          designed to illustrate ways of using the <code>Saxon.Api</code> interface. This interface
          is exclusive to the .NET product, and is described in more detail in <a class="bodylink"
-            href="/dotnet/dotnetapi">Saxon API for .NET</a>. These sample applications are described
+            href="/saxon-cs/dotnetapi">Saxon API for .NET</a>. These sample applications are described
          in <a class="bodylink" href="/samples/dotnetsamples">Example applications for .NET</a>.</p>
       </div>
    </section>
