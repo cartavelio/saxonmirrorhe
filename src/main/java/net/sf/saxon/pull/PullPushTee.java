@@ -20,6 +20,7 @@ import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Stack;
 
 /**
@@ -108,7 +109,7 @@ public class PullPushTee extends PullFilter {
                 }
                 nsStack.push(nsMap);
                 int options = ReceiverOption.NAMESPACE_OK;
-                if (!systemIdStack.isEmpty() && !loc.getSystemId().equals(systemIdStack.peek())) {
+                if (!systemIdStack.isEmpty() && !Objects.equals(loc.getSystemId(), systemIdStack.peek())) {
                     options |= ReceiverOption.TOP_IN_ENTITY;
                 }
                 out.startElement(in.getNodeName(), in.getSchemaType(),
