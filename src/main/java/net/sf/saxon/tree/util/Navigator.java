@@ -21,6 +21,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.PrependAxisIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.tree.jiter.WrappingJavaIterator;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
@@ -1174,6 +1175,15 @@ public final class Navigator {
         }
     }
 
+    public static AxisIterator orSelfIterator(NodeInfo node, int axis, NodePredicate nodeTest) {
+        int continuationAxis = AxisInfo.excludeSelfAxis[axis];
+        if (nodeTest.test(node)) {
+            return new PrependAxisIterator(node, node.iterateAxis(continuationAxis, nodeTest));
+        } else {
+            return node.iterateAxis(continuationAxis, nodeTest);
+        }
+    }
+
     /**
      * Get the sibling position of a node: specifically, count how many preceding siblings
      * of a node satisfy the nodetest.
@@ -1307,7 +1317,7 @@ public final class Navigator {
      * General-purpose implementation of the ancestor and ancestor-or-self axes
      */
 
-    public static final class AncestorEnumeration implements AxisIterator {
+    public static final class AncestorIterator implements AxisIterator {
 
         private final boolean includeSelf;
         private boolean atStart;
@@ -1320,7 +1330,7 @@ public final class Navigator {
          * @param includeSelf true if the "self" node is to be included
          */
 
-        public AncestorEnumeration(NodeInfo start, boolean includeSelf) {
+        public AncestorIterator(NodeInfo start, boolean includeSelf) {
             this.includeSelf = includeSelf;
             current = start;
             atStart = true;
@@ -1348,7 +1358,7 @@ public final class Navigator {
      * returned first.
      */
 
-    public static final class DescendantEnumeration implements AxisIterator {
+    public static final class DescendantIterator implements AxisIterator {
 
         private SequenceIterator children = null;
         private AxisIterator descendants = null;
@@ -1365,8 +1375,8 @@ public final class Navigator {
          * @param forwards    true for a forwards iteration, false for reverse order
          */
 
-        public DescendantEnumeration(NodeInfo start,
-                                     boolean includeSelf, boolean forwards) {
+        public DescendantIterator(NodeInfo start,
+                                  boolean includeSelf, boolean forwards) {
             this.start = start;
             this.includeSelf = includeSelf;
             this.forwards = forwards;
@@ -1387,10 +1397,10 @@ public final class Navigator {
                 if (n != null) {
                     if (n.hasChildNodes()) {
                         if (forwards) {
-                            descendants = new DescendantEnumeration(n, false, true);
+                            descendants = new DescendantIterator(n, false, true);
                             return n;
                         } else {
-                            descendants = new DescendantEnumeration(n, true, false);
+                            descendants = new DescendantIterator(n, true, false);
                             return next();
                         }
                     } else {
@@ -1437,7 +1447,7 @@ public final class Navigator {
      * ancestor, child, and following-sibling axes
      */
 
-    public static final class FollowingEnumeration implements AxisIterator {
+    public static final class FollowingIterator implements AxisIterator {
         /*@NotNull*/ private final AxisIterator ancestorEnum;
         /*@Nullable*/ private AxisIterator siblingEnum;
         /*@Nullable*/ private AxisIterator descendEnum = null;
@@ -1448,8 +1458,8 @@ public final class Navigator {
          * @param start the initial context node
          */
 
-        public FollowingEnumeration(/*@NotNull*/ NodeInfo start) {
-            ancestorEnum = new AncestorEnumeration(start, false);
+        public FollowingIterator(/*@NotNull*/ NodeInfo start) {
+            ancestorEnum = new AncestorIterator(start, false);
             switch (start.getNodeKind()) {
                 case Type.ELEMENT:
                 case Type.TEXT:
@@ -1490,7 +1500,7 @@ public final class Navigator {
                 NodeInfo nexts = siblingEnum.next();
                 if (nexts != null) {
                     if (nexts.hasChildNodes()) {
-                        descendEnum = new DescendantEnumeration(nexts, false, true);
+                        descendEnum = new DescendantIterator(nexts, false, true);
                     } else {
                         descendEnum = null;
                     }
@@ -1522,7 +1532,7 @@ public final class Navigator {
      * preceding-sibling axes.
      */
 
-    public static final class PrecedingEnumeration implements AxisIterator {
+    public static final class PrecedingIterator implements AxisIterator {
 
         /*@NotNull*/ private final AxisIterator ancestorEnum;
         /*@Nullable*/ private AxisIterator siblingEnum;
@@ -1538,9 +1548,9 @@ public final class Navigator {
          *                         in the result
          */
 
-        public PrecedingEnumeration(/*@NotNull*/ NodeInfo start, boolean includeAncestors) {
+        public PrecedingIterator(/*@NotNull*/ NodeInfo start, boolean includeAncestors) {
             this.includeAncestors = includeAncestors;
-            ancestorEnum = new AncestorEnumeration(start, false);
+            ancestorEnum = new AncestorIterator(start, false);
             switch (start.getNodeKind()) {
                 case Type.ELEMENT:
                 case Type.TEXT:
@@ -1569,7 +1579,7 @@ public final class Navigator {
                 NodeInfo nexts = siblingEnum.next();
                 if (nexts != null) {
                     if (nexts.hasChildNodes()) {
-                        descendEnum = new DescendantEnumeration(nexts, true, false);
+                        descendEnum = new DescendantIterator(nexts, true, false);
                         return next();
                     } else {
                         descendEnum = null;

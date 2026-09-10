@@ -556,16 +556,16 @@ public class TinyTextualElement extends TinyElementImpl {
                     return element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
 
                 case AxisInfo.PRECEDING_OR_ANCESTOR:
-                    return new Navigator.PrecedingEnumeration(this, true);
+                    return new Navigator.PrecedingIterator(this, true);
 
                 case AxisInfo.ANCESTOR_OR_SELF:
                     return new PrependAxisIterator(this, getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF));
 
                 case AxisInfo.FOLLOWING:
-                    return new Navigator.FollowingEnumeration(this);
+                    return new Navigator.FollowingIterator(this);
 
                 case AxisInfo.PRECEDING:
-                    return new Navigator.PrecedingEnumeration(this, false);
+                    return new Navigator.PrecedingIterator(this, false);
 
                 case AxisInfo.PARENT:
                     return SingleNodeIterator.makeIterator(getParent());
@@ -606,7 +606,7 @@ public class TinyTextualElement extends TinyElementImpl {
 
                 case AxisInfo.PRECEDING_OR_ANCESTOR:
                     return new Navigator.AxisFilter(
-                            new Navigator.PrecedingEnumeration(this, true),
+                            new Navigator.PrecedingIterator(this, true),
                             nodeTest);
 
                 case AxisInfo.ANCESTOR_OR_SELF:
@@ -616,12 +616,12 @@ public class TinyTextualElement extends TinyElementImpl {
 
                 case AxisInfo.FOLLOWING:
                     return new Navigator.AxisFilter(
-                            new Navigator.FollowingEnumeration(this),
+                            new Navigator.FollowingIterator(this),
                             nodeTest);
 
                 case AxisInfo.PRECEDING:
                     return new Navigator.AxisFilter(
-                            new Navigator.PrecedingEnumeration(this, false),
+                            new Navigator.PrecedingIterator(this, false),
                             nodeTest);
 
                 case AxisInfo.PARENT:
@@ -638,6 +638,12 @@ public class TinyTextualElement extends TinyElementImpl {
                 case AxisInfo.SELF:
                 case AxisInfo.DESCENDANT_OR_SELF:
                     return Navigator.filteredSingleton(this, nodeTest);
+
+                case AxisInfo.FOLLOWING_OR_SELF:
+                case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+                case AxisInfo.PRECEDING_OR_SELF:
+                case AxisInfo.PRECEDING_SIBLING_OR_SELF:
+                    return Navigator.orSelfIterator(this, axisNumber, nodeTest);
 
                 default:
                     throw new IllegalArgumentException("Unknown axis number " + axisNumber);

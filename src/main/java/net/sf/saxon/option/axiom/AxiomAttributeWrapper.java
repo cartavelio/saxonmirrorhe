@@ -416,20 +416,20 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
                 return EmptyIterator.ofNodes();
 
             case AxisInfo.FOLLOWING:
-                return new Navigator.AxisFilter(new Navigator.FollowingEnumeration(this), nodeTest);
+                return new Navigator.AxisFilter(new Navigator.FollowingIterator(this), nodeTest);
 
             case AxisInfo.PARENT:
                 return Navigator.filteredSingleton(parent, nodeTest);
 
             case AxisInfo.PRECEDING:
-                return new Navigator.AxisFilter(new Navigator.PrecedingEnumeration(this, false), nodeTest);
+                return new Navigator.AxisFilter(new Navigator.PrecedingIterator(this, false), nodeTest);
 
             case AxisInfo.DESCENDANT_OR_SELF:
             case AxisInfo.SELF:
                 return Navigator.filteredSingleton(this, nodeTest);
 
             case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return new Navigator.AxisFilter(new Navigator.PrecedingEnumeration(this, true), nodeTest);
+                return new Navigator.AxisFilter(new Navigator.PrecedingIterator(this, true), nodeTest);
 
             default:
                 throw new IllegalArgumentException("Unknown axis number " + axisNumber);

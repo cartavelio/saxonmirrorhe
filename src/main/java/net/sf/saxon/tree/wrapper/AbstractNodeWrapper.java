@@ -279,7 +279,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
                     return EmptyIterator.ofNodes();
                 }
                 return new Navigator.AxisFilter(
-                        new Navigator.AncestorEnumeration(this, false),
+                        new Navigator.AncestorIterator(this, false),
                         nodeTest);
 
             case AxisInfo.ANCESTOR_OR_SELF:
@@ -287,7 +287,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
                     return Navigator.filteredSingleton(this, nodeTest);
                 }
                 return new Navigator.AxisFilter(
-                        new Navigator.AncestorEnumeration(this, true),
+                        new Navigator.AncestorIterator(this, true),
                         nodeTest);
 
             case AxisInfo.ATTRIBUTE:
@@ -319,7 +319,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
 
             case AxisInfo.FOLLOWING:
                 return new Navigator.AxisFilter(
-                        new Navigator.FollowingEnumeration(this),
+                        new Navigator.FollowingIterator(this),
                         nodeTest);
 
             case AxisInfo.FOLLOWING_SIBLING:
@@ -343,7 +343,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
 
             case AxisInfo.PRECEDING:
                 return new Navigator.AxisFilter(
-                        new Navigator.PrecedingEnumeration(this, false),
+                        new Navigator.PrecedingIterator(this, false),
                         nodeTest);
 
             case AxisInfo.PRECEDING_SIBLING:
@@ -361,7 +361,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
 
             case AxisInfo.PRECEDING_OR_ANCESTOR:
                 return new Navigator.AxisFilter(
-                        new Navigator.PrecedingEnumeration(this, true),
+                        new Navigator.PrecedingIterator(this, true),
                         nodeTest);
 
             default:
@@ -412,7 +412,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
 
     @CSharpModifiers(code={"protected", "virtual"})
     protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
-        AxisIterator iter = new Navigator.DescendantEnumeration(this, includeSelf, true);
+        AxisIterator iter = new Navigator.DescendantIterator(this, includeSelf, true);
         if (!(nodeTest instanceof AnyNodeTest)) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
         }

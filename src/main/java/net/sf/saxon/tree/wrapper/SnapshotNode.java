@@ -263,7 +263,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
                         case AxisInfo.DESCENDANT:
                         case AxisInfo.DESCENDANT_OR_SELF:
                             // Use the child axis recursively, for efficiency
-                            AxisIterator iter = new Navigator.DescendantEnumeration(
+                            AxisIterator iter = new Navigator.DescendantIterator(
                                 this, axisNumber == AxisInfo.DESCENDANT_OR_SELF, true);
                             if (!(nodeTest instanceof AnyNodeTest)) {
                                 iter = new Navigator.AxisFilter(iter, nodeTest);

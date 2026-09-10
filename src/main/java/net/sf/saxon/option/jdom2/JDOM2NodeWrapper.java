@@ -483,7 +483,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             // if selecting text nodes, we have to handle adjacent sibling text nodes. The best way
             // to achieve this is by using the recursive implementation of the descendant axis available
             // in the Navigator class, which works in terms of the child axis only. See bug #5348.
-            AxisIterator allDescendants = new Navigator.DescendantEnumeration(this, includeSelf, true);
+            AxisIterator allDescendants = new Navigator.DescendantIterator(this, includeSelf, true);
             if (nodeTest == AnyNodeTest.getInstance()) {
                 return allDescendants;
             } else {

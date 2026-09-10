@@ -368,8 +368,8 @@ public abstract class TinyNodeImpl implements NodeInfo {
     /**
      * Return an iterator over all the nodes reached by the given axis from this node
      *
-     * @param axisNumber Identifies the required axis, eg. Axis.CHILD or Axis.PARENT
-     * @return a AxisIteratorImpl that scans the nodes reached by the axis in turn.
+     * @param axisNumber Identifies the required axis, for example {@link AxisInfo#CHILD} or {@link AxisInfo#PARENT}
+     * @return a AxisIterator that scans the nodes reached by the axis in turn.
      */
 
     @Override
@@ -389,7 +389,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
     /**
      * Return an iterator over the nodes reached by the given axis from this node
      *
-     * @param axisNumber Identifies the required axis, eg. Axis.CHILD or Axis.PARENT
+     * @param axisNumber Identifies the required axis, for example {@link AxisInfo#CHILD} or {@link AxisInfo#PARENT}
      * @param predicate   A condition to be matched by the returned nodes.
      * @return a AxisIteratorImpl that scans the nodes reached by the axis in turn.
      */
@@ -434,6 +434,12 @@ public abstract class TinyNodeImpl implements NodeInfo {
 
             case AxisInfo.PRECEDING_SIBLING:
                 return iteratorPRECEDING_SIBLING(type, nodeTest);
+
+            case AxisInfo.FOLLOWING_OR_SELF:
+            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+            case AxisInfo.PRECEDING_OR_SELF:
+            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
+                return Navigator.orSelfIterator(this, axisNumber, nodeTest);
 
             case AxisInfo.SELF:
                 return Navigator.filteredSingleton(this, nodeTest);

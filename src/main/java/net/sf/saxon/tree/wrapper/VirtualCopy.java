@@ -463,10 +463,10 @@ public class VirtualCopy implements NodeInfo {
             // that relies on getParent() to escape from the subtree
             case AxisInfo.ANCESTOR:
                 return new Navigator.AxisFilter(
-                        new Navigator.AncestorEnumeration(this, false), nodeTest);
+                        new Navigator.AncestorIterator(this, false), nodeTest);
             case AxisInfo.ANCESTOR_OR_SELF:
                 return new Navigator.AxisFilter(
-                        new Navigator.AncestorEnumeration(this, true), nodeTest);
+                        new Navigator.AncestorIterator(this, true), nodeTest);
             case AxisInfo.NAMESPACE:
                 if (getNodeKind() != Type.ELEMENT) {
                     return EmptyIterator.ofNodes();
@@ -476,13 +476,13 @@ public class VirtualCopy implements NodeInfo {
                 return Navigator.filteredSingleton(getParent(), nodeTest);
             case AxisInfo.PRECEDING:
                 return new Navigator.AxisFilter(
-                        new Navigator.PrecedingEnumeration(this, false), nodeTest);
+                        new Navigator.PrecedingIterator(this, false), nodeTest);
             case AxisInfo.FOLLOWING:
                 return new Navigator.AxisFilter(
-                        new Navigator.FollowingEnumeration(this), nodeTest);
+                        new Navigator.FollowingIterator(this), nodeTest);
             case AxisInfo.PRECEDING_OR_ANCESTOR:
                 return new Navigator.AxisFilter(
-                        new Navigator.PrecedingEnumeration(this, true), nodeTest);
+                        new Navigator.PrecedingIterator(this, true), nodeTest);
 
         }
         return makeCopier(original.iterateAxis(axisNumber, nodeTest), newParent, !AxisInfo.isSubtreeAxis[axisNumber]);

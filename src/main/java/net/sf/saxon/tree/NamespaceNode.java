@@ -413,7 +413,7 @@ public class NamespaceNode implements NodeInfo {
 
             case AxisInfo.FOLLOWING:
                 return new Navigator.AxisFilter(
-                        new Navigator.FollowingEnumeration(this),
+                        new Navigator.FollowingIterator(this),
                         nodeTest);
 
             case AxisInfo.PARENT:
@@ -421,15 +421,21 @@ public class NamespaceNode implements NodeInfo {
 
             case AxisInfo.PRECEDING:
                 return new Navigator.AxisFilter(
-                        new Navigator.PrecedingEnumeration(this, false),
+                        new Navigator.PrecedingIterator(this, false),
                         nodeTest);
 
             case AxisInfo.SELF:
+            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
                 return Navigator.filteredSingleton(this, nodeTest);
+
+            case AxisInfo.FOLLOWING_OR_SELF:
+            case AxisInfo.PRECEDING_OR_SELF:
+                return Navigator.orSelfIterator(this, axisNumber, nodeTest);
 
             case AxisInfo.PRECEDING_OR_ANCESTOR:
                 return new Navigator.AxisFilter(
-                        new Navigator.PrecedingEnumeration(this, true),
+                        new Navigator.PrecedingIterator(this, true),
                         nodeTest);
             default:
                 throw new IllegalArgumentException("Unknown axis number " + axisNumber);

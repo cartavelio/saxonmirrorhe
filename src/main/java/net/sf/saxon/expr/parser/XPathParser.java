@@ -3263,6 +3263,14 @@ public class XPathParser {
         if (axis == AxisInfo.PRECEDING_OR_ANCESTOR) {
             grumble("The preceding-or-ancestor axis is for internal use only", errorCode);
         }
+        if (!allowXPath40Syntax && (
+                axis == AxisInfo.PRECEDING_SIBLING_OR_SELF ||
+                axis == AxisInfo.FOLLOWING_SIBLING_OR_SELF ||
+                axis == AxisInfo.FOLLOWING_OR_SELF ||
+                axis == AxisInfo.PRECEDING_OR_SELF)) {
+            grumble("The " + AxisInfo.axisName[axis] + " axis requires 4.0 to be enabled");
+        }
+
     }
 
 
