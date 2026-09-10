@@ -1386,6 +1386,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
     //JNIEnv *senv = SaxonProcessor::sxn_environ->env;
     //char *nativeString = functionName;
     if(functionName == NULL) {
+        std::cerr<<"Error: phpNativeCall - functionName is null"<<std::endl;
         return NULL;
     }
     std::string nativeString2 = std::string(functionName);
@@ -1424,6 +1425,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
 
     if(useNativeTypes) {
+            std::cerr<<"Error: phpNativeCall - useNativeTypes"<<std::endl;
         for(int i=0; i<argLength;i++){
              XdmValue * valuei = arguments[i];
             int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
@@ -1472,9 +1474,10 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
 
     } else {
-
+                     std::cerr<<"Error: phpNativeCall - not using nativeTypes"<<std::endl;
 
     }
+                std::cerr<<"Error: phpNativeCall - end"<<std::endl;
     return nullptr;
   /*  for(int i=0; i<argLength;i++){
  

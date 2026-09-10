@@ -99,7 +99,7 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
 
 #elif defined PHP_SAXONC_API
 
-    fprintf(stdout, "We are in a c function preprocessor directive for Python\n");
+    fprintf(stdout, "We are in a c function preprocessor directive for PHP\n");
     fflush(stdout);
     fflush(stdout);
     return phpNativeCall(functionName, proc, useNativeTypes, numOfArguments, arguments1);
