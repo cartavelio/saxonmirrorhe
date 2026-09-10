@@ -962,7 +962,7 @@ tasks.register("pyBuildVenv") {
                        ? "${pypiDir}/libs/darwin"
                        : (systemOs.isLinux()
                           ? "${pypiDir}/libs/nix"
-                          : "libs/win"))
+                          : "${pypiDir}/libs/win"))
 
     doLast {
       if (SAXONC_HOME == null) {
@@ -971,10 +971,31 @@ tasks.register("pyBuildVenv") {
       copy {
         into SAXONC_HOME
         from "${buildDir}/c"
-        include "libsaxon-${edition}c-*"
+        include "graal*.h"
+        include "libsaxon-${edition}c-${saxonVersion}.*"
       }
     }
 
+//    doLast {
+//      def libdir = (systemOs.isMacOsX()
+//              ? "libs/darwin"
+//              : (systemOs.isLinux()
+//              ? "libs/nix"
+//              : "libs/win"))
+//      if (libdir == null) {
+//        throw GradleException("Don't know how to create Python wheels on this OS.");
+//      }
+//
+//      copy {
+//        into "${buildDir}/wheels/${systemOsName}/${edition}c_pypi/${libdir}"
+//        from "${buildDir}/c"
+//        include "graal*.h"
+//        include "libsaxon-${edition}c-${saxonVersion}.*"
+//      }
+//    }
+
+
+    // What does this do?
     doLast {
       copy {
         from "${buildDir}/c/"
@@ -1071,17 +1092,13 @@ tasks.register("pyBuildVenv") {
       exec {
         workingDir layout.buildDirectory.dir("${edition}c_pypi")
 
-//        def venvDir = project.pythonEnv.venvDirPath
-        System.err.println("PIP INSTALL: " + project.pythonEnv.venvDirPath.toString())
-        System.err.println("PIP INSTALL: " + project.pythonEnv.venvPip.toString())
-
         executable file(project.pythonEnv.venvPip)
         args "install", "-r", "requirements.txt"
       }
     }
   }
 
-  task "saxon_${edition}c_pypi"(
+  task "saxon_${edition}c_local_wheel"(
     dependsOn: ["setup_${edition}c_pypi", "saxon_${edition}c_pipInstall"]
   ) {
     inputs.files tasks.findByName("setup_${edition}c_pypi").outputs.getFiles()
