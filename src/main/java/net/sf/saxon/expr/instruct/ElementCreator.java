@@ -15,6 +15,7 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -227,7 +228,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
                     // in an XQuery construct like <a>{@x}{@y}</b>
                     if (component instanceof ValueOf &&
                             ((ValueOf) component).getSelect() instanceof StringLiteral) {
-                        String value = ((StringLiteral) ((ValueOf) component).getSelect()).stringify();
+                        UnicodeString value = ((StringLiteral) ((ValueOf) component).getSelect()).getString();
                         if (value.isEmpty()) {
                             // continue;  // not an error
                         } else {

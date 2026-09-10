@@ -43,7 +43,6 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.*;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.util.IndexedStack;
@@ -2275,9 +2274,9 @@ public class XPathParser {
      */
 
     public ItemType parseTypePattern() throws XPathException {
-        // The initial "type(" has been read
         checkLanguageVersion40("the syntax type(T)");
         nextToken();
+        readToken(Token.LPAREN);
         List<ItemType> memberTypes = new ArrayList<>(6);
         while (true) {
             memberTypes.add(parseItemType());
@@ -2996,7 +2995,13 @@ public class XPathParser {
                             return parseFunctionCall(name, null);
                         };
                         testPermittedAxis(AxisInfo.NAMESPACE, "XQST0134");
-                        CSharp.emitCode("goto case \"node\";");
+                        nextToken();
+                        readToken(Token.LPAREN);
+                        readToken(Token.RPAREN);
+                        nextToken();
+                        AxisExpression nsExp = new AxisExpression(AxisInfo.NAMESPACE, NodeKindTest.NAMESPACE);
+                        setLocation(nsExp);
+                        return nsExp;
                     case "node":
                     case "schema-element":
                     case "processing-instruction":
@@ -3603,8 +3608,8 @@ public class XPathParser {
                 nextToken();
                 result = parserExtension.lookupStar(lhs, modifier, requiredType, deep, allowXPath40Syntax);
             } else {
-                result = parserExtension.makeLookupExpression(
-                        env.getConfiguration(), lhs, modifier, new StringLiteral(name), deep, allowXPath40Syntax);
+                result = env.getConfiguration().makeLookupExpression(
+                        lhs, modifier, new StringLiteral(name), deep, allowXPath40Syntax);
             }
         } else if (token instanceof Token.NumericLiteral) {
             NumericValue number = ((Token.NumericLiteral)token).getValue();
@@ -3624,8 +3629,8 @@ public class XPathParser {
         } else if (token instanceof Token.StringLiteral) {
             checkLanguageVersion40("a string literal after `?`");
             String key = ((Token.StringLiteral)token).getValue();
-            result = parserExtension.makeLookupExpression(
-                    env.getConfiguration(), lhs, modifier, new StringLiteral(key), deep, allowXPath40Syntax);
+            result = env.getConfiguration().makeLookupExpression(
+                    lhs, modifier, new StringLiteral(key), deep, allowXPath40Syntax);
             nextToken();
         } else if (token == Token.DOLLAR) {
             checkLanguageVersion40("a variable reference directly after `?`");
@@ -3641,7 +3646,7 @@ public class XPathParser {
     }
 
     protected Expression makeLookupExpression(Configuration config, Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep) throws XPathException {
-        return parserExtension.makeLookupExpression(config, lhs, modifier, rhs, deep, allowXPath40Syntax);
+        return config.makeLookupExpression(lhs, modifier, rhs, deep, allowXPath40Syntax);
     }
 
 

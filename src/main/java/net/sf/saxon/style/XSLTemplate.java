@@ -25,10 +25,7 @@ import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.linked.NodeImpl;
-import net.sf.saxon.type.Affinity;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ErrorType;
-import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.BigDecimalValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
@@ -1029,6 +1026,16 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                             Expression templateRuleBody = compiledTemplateRule.getBody();
                             visitor.setOptimizeForStreaming(compiledTemplateRule.isDeclaredStreamable());
                             templateRuleBody = templateRuleBody.typeCheck(visitor, cisi);
+                            TypeHierarchy th = config.getTypeHierarchy();
+                            if (!SequenceType.ANY_SEQUENCE.isSameType(compiledTemplateRule.getRequiredType(), th)) {
+                                TypeChecker tc = config.getTypeChecker(false);
+                                Supplier<RoleDiagnostic> roleSupplier =
+                                        () -> new RoleDiagnostic(RoleDiagnostic.TEMPLATE_RESULT, diagnosticId, 0);
+                                templateRuleBody = tc.staticTypeCheck(
+                                        templateRuleBody,
+                                        compiledTemplateRule.getRequiredType(),
+                                        roleSupplier, visitor);
+                            }
                             templateRuleBody = ExpressionTool.optimizeComponentBody(templateRuleBody, getCompilation(), visitor, cisi, true);
                             compiledTemplateRule.setBody(templateRuleBody);
                             opt.checkStreamability(this, compiledTemplateRule);

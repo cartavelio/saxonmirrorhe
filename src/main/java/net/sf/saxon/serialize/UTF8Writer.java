@@ -433,6 +433,8 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
             } else if (chars instanceof Slice16) {
                 Slice16 s16 = (Slice16) chars;
                 write(s16.getCharArray(), s16.getStart(), s16.getEnd() - s16.getStart());
+            } else {
+                write(chars.toString());
             }
         } else {
             IntIterator iter = chars.codePoints();

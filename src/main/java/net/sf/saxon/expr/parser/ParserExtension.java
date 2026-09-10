@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.parser;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -73,16 +72,6 @@ public class ParserExtension {
 
     public ItemType parseExtendedItemType(XPathParser p) throws XPathException {
         return null;
-    }
-
-    public Expression makeLookupExpression(Configuration config, Expression lhs,
-                                           LookupExpression.Modifier modifier,
-                                           Expression rhs, boolean deep, boolean allow40) throws XPathException {
-        if (deep) {
-            return config.makeDeepLookupExpression(lhs, modifier, rhs);
-        } else {
-            return new LookupExpression(lhs, modifier, rhs);
-        }
     }
 
 

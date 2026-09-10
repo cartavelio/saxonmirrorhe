@@ -389,7 +389,7 @@ public class KeyManager {
             }
             // Now we build the index (which isn't synchronized because it doesn't write to any shared data)
             buildIndex(index, keySet, doc, context);
-            // On completion we synchronize again, and decide whether to use this index, or one that was
+            // On completion, we synchronize again, and decide whether to use this index, or one that was
             // completed earlier by a different thread.
             synchronized(this) {
                 index.setStatus(BUILT);

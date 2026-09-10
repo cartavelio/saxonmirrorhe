@@ -414,21 +414,27 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 compiler.setParameter(new QName(name), value);
             });
 
-            for (XdmNode pack : usedPackages) {
-                String fileName = pack.attribute("file");
-                Source styleSource = new StreamSource(testCase.getBaseURI().resolve(fileName).toString());
-                XsltPackage xpack = compiler.compilePackage(styleSource);
-                compiler.importPackage(xpack);
-            }
-            String fileName = principalPackage.get().attribute("file");
-            Source styleSource = new StreamSource(testCase.getBaseURI().resolve(fileName).toString());
-
+            Source styleSource = null;
             try {
+                for (XdmNode pack : usedPackages) {
+                    String fileName = pack.attribute("file");
+                    Source styleSource2 = new StreamSource(testCase.getBaseURI().resolve(fileName).toString());
+                    XsltPackage xpack = compiler.compilePackage(styleSource2);
+                    compiler.importPackage(xpack);
+                }
+                String fileName = principalPackage.get().attribute("file");
+                styleSource = new StreamSource(testCase.getBaseURI().resolve(fileName).toString());
+
+
                 XsltPackage xpack = compiler.compilePackage(styleSource);
                 sheet = xpack.link();
             } catch (SaxonApiException err) {
                 System.err.println(err.getMessage());
-                outcome.setException(err.getErrorCode());
+                QName code = err.getErrorCode();
+                if (code == null) {
+                    code = collector.lastError.getErrorCode();
+                }
+                outcome.setException(code);
                 outcome.setErrorsReported(collector.getErrorCodes());
                 collector.checkLocationInfo(err);
             } catch (Exception err) {

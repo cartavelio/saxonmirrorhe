@@ -3474,6 +3474,17 @@ public class Configuration implements SourceResolver, NotationSet {
         }
     }
 
+    public Expression makeLookupExpression(Expression lhs,
+                                           LookupExpression.Modifier modifier,
+                                           Expression rhs, boolean deep, boolean allow40) throws XPathException {
+        if (deep) {
+            return makeDeepLookupExpression(lhs, modifier, rhs);
+        } else {
+            return new LookupExpression(lhs, modifier, rhs);
+        }
+    }
+
+
     /**
      * Get a new ExpressionPresenter capable of exporting a compiled stylesheet
      * @param target the target environment, e.g. EE, JS
