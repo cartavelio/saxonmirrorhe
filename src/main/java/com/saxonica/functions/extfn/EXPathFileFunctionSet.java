@@ -26,7 +26,6 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;        
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntPredicateLambda;
-import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
@@ -318,7 +317,6 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         }
     }
 
-    @NotNull
     @CSharpReplaceBody(code="return file.makeAppendOutputStream();")
     private static FileOutputStream makeFileAppendOutputStream(File file) throws FileNotFoundException {
         // Separate method to enable C# conversion

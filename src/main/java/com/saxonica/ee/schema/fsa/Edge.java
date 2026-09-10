@@ -6,7 +6,6 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 
@@ -382,7 +381,6 @@ public class Edge implements Iterable<Edge> {
         return "No match";
     }
 
-    @NotNull
     @Override
     public Iterator<Edge> iterator() {
         return new MonoIterator<>(this);

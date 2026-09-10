@@ -21,7 +21,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.Cardinality;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -227,7 +226,6 @@ public class StreamingAdjunct {
         return new StreamingAdjunct();
     }
 
-    @NotNull
     @CSharpInnerClass(outer=false, extra={"com.saxonica.ee.stream.StreamInstr stream"})
     private static StreamingAdjunct adjunctForStreamInstr(final StreamInstr stream) {
         return new StreamingAdjunct() {

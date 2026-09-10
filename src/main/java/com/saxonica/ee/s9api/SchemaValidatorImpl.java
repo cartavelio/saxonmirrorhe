@@ -23,7 +23,6 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.type.ValidationParams;
-import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -638,7 +637,6 @@ public class SchemaValidatorImpl extends SchemaValidator {
             backing.add(node);
         }
 
-        @NotNull
         @Override
         public Iterator<XdmNode> iterator() {
             return backing.iterator();

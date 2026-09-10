@@ -38,7 +38,6 @@ import net.sf.saxon.tree.util.ProcInstParser;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntPredicateProxy;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.time.format.DateTimeFormatter;
@@ -694,7 +693,6 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         }
     }
 
-    @NotNull
     private static StringValue decodeString(XPathContext context, byte[] bytes, String encoding) throws IOException, XPathException {
         ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
         InputStreamReader reader = new InputStreamReader(stream, encoding);

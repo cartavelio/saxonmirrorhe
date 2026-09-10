@@ -9,7 +9,6 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntIterator;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -239,7 +238,6 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
         return PREFIX;
     }
 
-    @NotNull
     @CSharpReplaceBody(code = "return System.Text.Encoding.GetEncoding(encoding).GetBytes(s);")
     public static byte[] encode(String s, String encoding) throws XPathException {
         CharsetEncoder encoder;
@@ -266,12 +264,10 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
         return data;
     }
 
-    @NotNull
     public static String decode(byte[] value, String encoding) throws XPathException {
         return decode(value, 0, value.length, encoding);
     }
 
-    @NotNull
     @CSharpReplaceBody(code = "return new String(System.Text.Encoding.GetEncoding(encoding).GetChars(value, offset, len));")
     public static String decode(byte[] value, int offset, int len, String encoding) throws XPathException {
         CharsetDecoder decoder;
