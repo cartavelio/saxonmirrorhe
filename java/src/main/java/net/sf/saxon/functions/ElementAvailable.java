@@ -119,7 +119,8 @@ public class ElementAvailable extends SystemFunction {
         return isXslt30Element(fp)
                 || fp == StandardNames.XSL_ARRAY
                 || fp == StandardNames.XSL_ARRAY_MEMBER
-               // || fp == StandardNames.XSL_RECORD
+                || fp == StandardNames.XSL_NOTE
+                || fp == StandardNames.XSL_RECORD
                 || fp == StandardNames.XSL_SELECT;
     }
     
