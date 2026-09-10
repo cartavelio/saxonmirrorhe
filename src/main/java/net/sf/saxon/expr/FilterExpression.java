@@ -566,6 +566,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         // local variables, even variables declared within the predicate)
         try {
             if (getBase() instanceof Literal &&
+                    !(((Literal)getBase()).getGroundedValue() instanceof IntegerRange) &&
                     !ExpressionTool.refersToVariableOrFunction(getFilter()) &&
                     (getFilter().getDependencies() & ~StaticProperty.DEPENDS_ON_FOCUS) == 0) {
                 XPathContext context = visitor.getStaticContext().makeEarlyEvaluationContext();

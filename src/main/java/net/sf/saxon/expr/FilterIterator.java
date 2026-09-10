@@ -115,6 +115,7 @@ public class FilterIterator implements SequenceIterator {
             return false;
         }
         if (first instanceof NodeInfo) {
+            iterator.close();
             return true;
         } else {
             if (first instanceof BooleanValue) {
@@ -157,12 +158,14 @@ public class FilterIterator implements SequenceIterator {
             return false;
         }
         if (first instanceof NodeInfo) {
+            iterator.close();
             return true;
 
         } else if (first instanceof NumericValue) {
             NumericValue val = (NumericValue) first;
             while (true) {
                 if (val.compareTo(position) == 0) {
+                    iterator.close();
                     return true;
                 }
                 Item next = iterator.next();
@@ -185,7 +188,9 @@ public class FilterIterator implements SequenceIterator {
             if (iterator.next() != null) {
                 ExpressionTool.ebvError("a sequence of two or more items starting with a string", filter);
             }
-            return !((StringValue) first).isEmpty();
+            boolean result = !((StringValue) first).isEmpty();
+            iterator.close();
+            return result;
 
         } else if (first instanceof AtomicValue) {
             ExpressionTool.ebvError("a sequence starting with an atomic value of type "
