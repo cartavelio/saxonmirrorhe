@@ -6,10 +6,7 @@ import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.FilterExpression;
 import net.sf.saxon.expr.FilterIterator;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.FocusTrackingIterator;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
@@ -27,7 +24,7 @@ public class FilterExprElaborator extends PullElaborator {
             return context -> {
                 SequenceIterator base = baseEval.eval(context);
                 XPathContext c2 = context.newMinorContext();
-                c2.setCurrentIterator(new FocusTrackingIterator(base));
+                c2.setCurrentIterator(SequenceTool.focusTracker(base));
                 return new SimpleFilteredIterator(c2, conditionEval);
             };
         } else {
@@ -35,7 +32,7 @@ public class FilterExprElaborator extends PullElaborator {
             return context -> {
                 SequenceIterator base = baseEval.eval(context);
                 XPathContext c2 = context.newMinorContext();
-                c2.setCurrentIterator(new FocusTrackingIterator(base));
+                c2.setCurrentIterator(SequenceTool.focusTracker(base));
                 return new PositionalFilteredIterator(c2, conditionEval);
             };
         }

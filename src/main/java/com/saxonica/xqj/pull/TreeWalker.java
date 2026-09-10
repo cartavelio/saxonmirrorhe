@@ -108,7 +108,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
 
             case START_DOCUMENT:
             case START_ELEMENT:
-                FocusIterator kids = new FocusTrackingIterator(currentNode.iterateAxis(AxisInfo.CHILD));
+                FocusIterator kids = SequenceTool.focusTracker(currentNode.iterateAxis(AxisInfo.CHILD));
                 iteratorStack.push(kids);
 
                 currentNode = (NodeInfo)kids.next();

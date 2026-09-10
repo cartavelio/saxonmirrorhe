@@ -10,7 +10,7 @@ package com.saxonica.xqj;
 import com.saxonica.xqj.pull.PullFromIterator;
 import com.saxonica.xqj.pull.PullToStax;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.FocusTrackingIterator;
+import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pull.PullProvider;
@@ -37,12 +37,12 @@ import java.util.Properties;
  */
 public class SaxonXQForwardSequence extends Closable implements XQResultSequence {
 
-    private final FocusTrackingIterator iterator;
+    private final FocusIterator iterator;
     SaxonXQPreparedExpression expression;
     int position = 0;   // set to -count when positioned after the end
     int lastReadPosition = Integer.MIN_VALUE;   // used to prevent reading the same item twice, which XQJ doesn't allow
 
-    protected SaxonXQForwardSequence(FocusTrackingIterator iterator, SaxonXQPreparedExpression expression) {
+    protected SaxonXQForwardSequence(FocusIterator iterator, SaxonXQPreparedExpression expression) {
         this.iterator = iterator;
         this.expression = expression;
         setClosableContainer(expression);

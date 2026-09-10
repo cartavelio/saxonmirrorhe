@@ -94,7 +94,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
                 GroundedValue value = SequenceTool.toGroundedValue(iter);
                 return new SaxonXQSequence(value, this);
             } else {
-                return new SaxonXQForwardSequence(new FocusTrackingIterator(iter), this);
+                return new SaxonXQForwardSequence(SequenceTool.focusTracker(iter), this);
             }
         } catch (XPathException de) {
             XQException xqe = new XQException(de.getMessage());

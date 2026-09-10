@@ -171,7 +171,7 @@ public class TabulateMaps extends Instruction {
     }
 
     private void processRootItem(Outputter output, Item root, XPathContext c2) throws XPathException {
-        FocusIterator selectIterator = new FocusTrackingIterator(
+        FocusIterator selectIterator = SequenceTool.focusTracker(
                 getSelectExpression().iterate(c2));
         Item selected;
         while ((selected = selectIterator.next()) != null) {

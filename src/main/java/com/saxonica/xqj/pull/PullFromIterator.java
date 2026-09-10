@@ -37,7 +37,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      */
 
     public PullFromIterator(SequenceIterator base) {
-        this.base = base instanceof FocusIterator ? (FocusIterator)base : new FocusTrackingIterator(base);
+        this.base = SequenceTool.focusTracker(base);
     }
 
     /**
