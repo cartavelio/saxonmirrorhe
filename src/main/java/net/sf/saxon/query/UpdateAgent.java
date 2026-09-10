@@ -10,12 +10,15 @@ package net.sf.saxon.query;
 import net.sf.saxon.Controller;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpDelegate;
 
 /**
  * An UpdateAgent is a callback class that is called to handle a document after it has been updated.
  * Typically the UpdateAgent might take responsibility for writing the updated document back to
  * persistent storage.
  */
+@FunctionalInterface
+@CSharpDelegate(true)
 public interface UpdateAgent {
 
     /**

@@ -56,12 +56,13 @@ public class SourceBinding {
 
     //private int properties;
 
-    @CSharpSimpleEnum
+    @CSharpSimpleEnum(flags=true)
     public enum BindingProperty {
         PRIVATE, GLOBAL, PARAM, TUNNEL, REQUIRED, IMPLICITLY_REQUIRED, ASSIGNABLE,
         SELECT, AS, DISALLOWS_CONTENT, STATIC, VISIBILITY, IMPLICITLY_DECLARED}
 
-    private final EnumSet<BindingProperty> properties = EnumSet.noneOf(BindingProperty.class);
+    @SuppressWarnings("FieldMayBeFinal")
+    private EnumSet<BindingProperty> properties = EnumSet.noneOf(BindingProperty.class);
 
     // List of VariableReference objects that reference this XSLVariableDeclaration
     private final List<BindingReference> references = new ArrayList<>(10);

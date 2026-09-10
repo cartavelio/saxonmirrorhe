@@ -10,6 +10,7 @@ import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class EnumerationType implements AtomicType {
@@ -147,8 +148,8 @@ public class EnumerationType implements AtomicType {
      * in its transitive membership
      */
     @Override
-    public Iterable<? extends PlainType> getPlainMemberTypes() throws MissingComponentException {
-        return Collections.singleton(this);
+    public List<? extends PlainType> getPlainMemberTypes() throws MissingComponentException {
+        return Collections.singletonList(this);
     }
 
     /**

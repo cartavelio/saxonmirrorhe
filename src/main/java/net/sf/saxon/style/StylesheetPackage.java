@@ -810,12 +810,12 @@ public class StylesheetPackage extends PackageData {
                 }
             }
         }
-        return null;
+        return Visibility.UNDEFINED;
     }
 
     private Visibility wildcardAcceptedVisibility(SymbolicName name, List<XSLAccept> acceptors) throws XPathException {
         // Note: last one wins
-        Visibility vis = null;
+        Visibility vis = Visibility.UNDEFINED;
         for (XSLAccept acceptor : acceptors) {
             for (ComponentTest test : acceptor.getWildcardComponentTests()) {
                 if (((NodeTest) test.getQNameTest()).getDefaultPriority() == -0.25 && test.matches(name)) {
@@ -823,7 +823,7 @@ public class StylesheetPackage extends PackageData {
                 }
             }
         }
-        if (vis != null) {
+        if (vis != Visibility.UNDEFINED) {
             return vis;
         }
         for (XSLAccept acceptor : acceptors) {

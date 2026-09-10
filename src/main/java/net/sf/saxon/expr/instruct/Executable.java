@@ -366,7 +366,7 @@ public class Executable {
         if (queryLibraryModules == null) {
             return Collections.emptyIterator();
         } else {
-            List<QueryModule> modules = new ArrayList<>();
+            ArrayList<QueryModule> modules = new ArrayList<>();
             for (List<QueryModule> queryModules : queryLibraryModules.values()) {
                 modules.addAll(queryModules);
             }

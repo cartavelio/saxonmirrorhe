@@ -21,8 +21,8 @@ import net.sf.saxon.value.*;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
@@ -1280,8 +1280,8 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
      */
     /*@NotNull*/
     @Override
-    public Set<? extends PlainType> getPlainMemberTypes() {
-        return Collections.singleton(this);
+    public List<? extends PlainType> getPlainMemberTypes() {
+        return Collections.singletonList(this);
     }
 
     /**

@@ -7,9 +7,7 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.transpile.CSharpReplaceBody;
-
-import java.util.Collections;
+import java.util.ArrayList;
 
 /**
  * The class <tt>XdmEmptySequence</tt> represents an empty sequence in the XDM Data Model.
@@ -37,9 +35,8 @@ public class XdmEmptySequence extends XdmValue {
         return THE_INSTANCE;
     }
 
-    @CSharpReplaceBody(code="super(Collections.emptyList<XdmItem>());")
     private XdmEmptySequence() {
-        super(Collections.emptyList());
+        super(new ArrayList<XdmItem>(0));  // written this way for C#
     }
 
     /**

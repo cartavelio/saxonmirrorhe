@@ -204,7 +204,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
     }
 
     private boolean isOneLinerMap(MapItem map) {
-        int totalSize = 0;
+        long totalSize = 0;
         if (map.size() < 2) {
             return true;
         }

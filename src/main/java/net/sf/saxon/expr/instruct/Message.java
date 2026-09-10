@@ -305,7 +305,7 @@ public class Message extends Instruction {
 
     }
 
-    @CSharpReplaceBody(code="return new javax.xml.transform.stream.StreamResult(new net.sf.saxon.dotnet.DotNetWriter(System.Console.Error));")
+    @CSharpReplaceBody(code="return new javax.xml.transform.stream.StreamResult(System.Console.Error);")
     private static Result standardErrorResult() {
         return new StreamResult(System.err);
     }

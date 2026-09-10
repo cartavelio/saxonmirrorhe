@@ -284,12 +284,14 @@ public class XdmAtomicValue extends XdmItem {
             return new XdmAtomicValue((URI) value);
         } else if (value instanceof QName) {
             return new XdmAtomicValue((QName) value);
+        //#if CSHARP==false
         } else if (value instanceof ZonedDateTime) {
             return new XdmAtomicValue((ZonedDateTime) value);
         } else if (value instanceof LocalDateTime) {
             return new XdmAtomicValue((LocalDateTime) value);
         } else if (value instanceof LocalDate) {
             return new XdmAtomicValue((LocalDate) value);
+        //#endif
         } else if (value instanceof XdmAtomicValue) {
             return (XdmAtomicValue)value;
         } else {

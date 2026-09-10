@@ -18,6 +18,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StylesheetSpaceStrippingRule;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.IPackageLoader;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -142,7 +143,7 @@ public class StylesheetModule {
         return options;
     }
 
-
+    @CSharpReplaceBody(code="net.sf.saxon.@event.Sender.send(styleSource, sourcePipeline, options);")
     private static void sendStylesheetSource(Source styleSource, Configuration config, Receiver sourcePipeline, ParseOptions options) throws XPathException {
         boolean knownParser =
                 options.getXMLReader() != null ||
@@ -174,14 +175,15 @@ public class StylesheetModule {
      */
     public static PreparedStylesheet loadStylesheet (
             Source styleSource, Compilation compilation) throws XPathException {
-
+        //#if CSHARP==false
         if (styleSource instanceof SAXSource &&
                 compilation.getConfiguration().getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
             // This option is provided to allow the parser set by applications such as Ant to be overridden by
             // the parser requested using FeatureKeys.SOURCE_PARSER
             ((SAXSource) styleSource).setXMLReader(null);
         }
-
+        //#endif
+        
         String systemId = styleSource.getSystemId();
         DocumentKey docURI = systemId == null ? null : new DocumentKey(systemId);
         if (systemId != null && compilation.getImportStack().contains(docURI)) {
@@ -348,6 +350,7 @@ public class StylesheetModule {
      * @throws XPathException if there is a static error in the stylesheet
      */
 
+    @CSharpReplaceBody(code="return sources[0]; // TODO: either implement this feature, or pull it completely")
     private static Source compositeStylesheet(Configuration config, String baseURI, Source[] sources)
             throws XPathException {
 

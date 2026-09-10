@@ -9,12 +9,15 @@ package net.sf.saxon.type;
 
 
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.om.*;
-
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.List;
 import java.util.Optional;
 
 import static net.sf.saxon.om.Genre.ATOMIC;
@@ -53,7 +56,7 @@ public interface UnionType extends ItemType, CastingTarget {
      * @return the atomic types and plain union types in the transitive membership of the union type.
      */
 
-    Iterable<? extends PlainType> getPlainMemberTypes() throws MissingComponentException;
+    List<? extends PlainType> getPlainMemberTypes() throws MissingComponentException;
 
     /**
      * Get the result type of a cast operation to this union type, as a sequence type.

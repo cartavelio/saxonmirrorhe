@@ -108,7 +108,7 @@ public final class UTF8CharacterSet implements CharacterSet {
             if (cp < 0) {
                 throw new IllegalStateException("No negative code point allowed");
             } else if (cp < 0x80) {
-                baos.write(cp);
+                baos.write((byte)cp);
             } else {
                 int bi = 0;
                 int lastPrefix = 0xC0;

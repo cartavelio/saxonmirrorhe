@@ -8,6 +8,7 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.query.InputStreamMarker;
 import net.sf.saxon.resource.BinaryResource;
 import net.sf.saxon.resource.DataURIScheme;
 import net.sf.saxon.resource.Loader;
@@ -249,10 +250,11 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
      */
 
     public static String inferStreamEncoding(InputStream is, Logger err) throws IOException {
-        is.mark(100);
+        InputStreamMarker marker = new InputStreamMarker(is);
+        marker.mark(100);
         byte[] start = new byte[100];
         int read = is.read(start, 0, 100);
-        is.reset();
+        marker.reset();
         return inferEncoding(start, read, err);
     }
 

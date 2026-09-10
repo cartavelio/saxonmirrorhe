@@ -926,11 +926,13 @@ public class XsltController extends Controller {
             if (!initialMode.getActor().isDeclaredStreamable()) {
                 throw new IllegalArgumentException("Initial mode is not streamable");
             }
+            //#if CSHARP==false
             if (source instanceof SAXSource && config.getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
                 // This option is provided to allow the parser set by applications such as Ant to be overridden by
                 // the parser requested using FeatureKeys.SOURCE_PARSER
                 ((SAXSource) source).setXMLReader(null);
             }
+            //#endif
 
             XPathContextMajor initialContext = newXPathContext();
             initialContext.createThreadManager();

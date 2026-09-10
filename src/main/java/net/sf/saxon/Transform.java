@@ -228,14 +228,16 @@ public class Transform {
     }
 
 
-    class TransformThread extends Thread {
+    private static class TransformThread extends Thread {
+        private final Transform transform;
         private final File outputDir;
         private final XsltExecutable sheet;
         private final CommandLineOptions options;
         private final List<Source> sources;
         private final int start;
 
-        TransformThread(int i, XsltExecutable st, List<Source> s, File out, CommandLineOptions opt) {
+        TransformThread(Transform t, int i, XsltExecutable st, List<Source> s, File out, CommandLineOptions opt) {
+            transform = t;
             start = i;
             sheet = st;
             sources = s;
@@ -250,7 +252,7 @@ public class Transform {
         @Override
         public void run() {
             try {
-                processDirectory(sources, sheet, outputDir, options);
+                processDirectory(transform, sources, sheet, outputDir, options);
             } catch (Exception err) {
                 err.printStackTrace();
             }
@@ -698,7 +700,6 @@ public class Transform {
                 XsltExecutable sheet = null;
 
                 Source styleSource = null;
-                XMLReader styleParser;
 
                 if (isURI) {
                     styleSource = config.getURIResolver().resolve(styleFileName, null);
@@ -708,16 +709,18 @@ public class Transform {
                 } else if (styleFileName.equals("-")) {
                     // take input from stdin
                     String sysId = new File(System.getProperty("user.dir")).toURI().toASCIIString();
-                    if (styleParserName == null) {
-                        styleSource = new StreamSource(System.in, sysId);
-                    } else if (Version.platform.isJava()) {
-                        styleParser = config.getStyleParser();
+                    //#if CSHARP==false
+                    if (styleParserName != null && Version.platform.isJava()) {
+                        XMLReader styleParser = config.getStyleParser();
                         final InputSource inputSource = new InputSource(System.in);
                         inputSource.setSystemId(sysId);
                         styleSource = new SAXSource(styleParser, inputSource);
                     } else {
+                    //#endif
                         styleSource = new StreamSource(System.in, sysId);
+                    //#if CSHARP==false
                     }
+                    //#endif
                 } else {
                     PackageLibrary library = config.getDefaultXsltCompilerInfo().getPackageLibrary();
                     PackageDetails details = library.findDetailsForAlias(styleFileName);
@@ -729,13 +732,17 @@ public class Transform {
                         if (!sheetFile.exists()) {
                             quit("Stylesheet file " + sheetFile + " does not exist", 2);
                         }
-                        if (styleParserName == null) {
-                            styleSource = new StreamSource(sheetFile.toURI().toString());
-                        } else {
+                        //#if CSHARP==false
+                        if (styleParserName != null && Version.platform.isJava()) {
                             InputSource eis = new InputSource(sheetFile.toURI().toString());
-                            styleParser = config.getStyleParser();
+                            XMLReader styleParser = config.getStyleParser();
                             styleSource = new SAXSource(styleParser, eis);
+                        } else {
+                            //#endif
+                            styleSource = new StreamSource(sheetFile.toURI().toString());
+                            //#if CSHARP==false
                         }
+                        //#endif
                     }
                 }
 
@@ -848,7 +855,7 @@ public class Transform {
                                 // long elapsedTime = System.nanoTime();
                                 for (int i = 0, j = 0, z = 0; i < sources.size(); j++, i += sourcesPerThread + z) {
                                     z = j < rem ? 1 : 0;  //split remainder of sources amongst rem threads
-                                    th[j] = new TransformThread(i, sheet, sources.subList(i, i + sourcesPerThread + z), outputFile, options);
+                                    th[j] = new TransformThread(this, i, sheet, sources.subList(i, i + sourcesPerThread + z), outputFile, options);
                                     th[j].start();
                                 }
                                 for (TransformThread aTh : th) {
@@ -859,7 +866,7 @@ public class Transform {
 
 
                             } else {
-                                processDirectory(sources, sheet, outputFile, options);
+                                processDirectory(this, sources, sheet, outputFile, options);
                             }
                         } else {
                             Source source = sources == null || sources.isEmpty() ? null : sources.get(0);
@@ -1164,17 +1171,17 @@ public class Transform {
      *                           transformation
      */
 
-    private void processDirectory(List<Source> sources, XsltExecutable sheet, File outputDir, CommandLineOptions options)
+    private static void processDirectory(Transform t, List<Source> sources, XsltExecutable sheet, File outputDir, CommandLineOptions options)
             throws SaxonApiException {
         int failures = 0;
         for (Source source : sources) {
             String localName = getLocalFileName(source);
             try {
-                File outputFile = makeOutputFile(outputDir, localName, sheet);
-                processFile(source, sheet, outputFile, options);
+                File outputFile = t.makeOutputFile(outputDir, localName, sheet);
+                t.processFile(source, sheet, outputFile, options);
             } catch (SaxonApiException err) {
                 failures++;
-                getConfiguration().getLogger().info("While processing " + localName + ": " + err.getMessage() + '\n');
+                t.getConfiguration().getLogger().info("While processing " + localName + ": " + err.getMessage() + '\n');
             }
         }
         if (failures > 0) {

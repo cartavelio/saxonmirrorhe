@@ -63,9 +63,9 @@ public class XMLEmitter extends Emitter {
     protected CharacterReferenceGenerator characterReferenceGenerator = HexCharacterReferenceGenerator.THE_INSTANCE;
 
 
-    static boolean[] specialInText;         // lookup table for special characters in text
-    static boolean[] specialInAtt;          // lookup table for special characters in attributes
-    static boolean[] specialInAttSingle;    // lookup table for special characters in attributes with single-quote delimiter
+    protected static boolean[] specialInText;         // lookup table for special characters in text
+    protected static boolean[] specialInAtt;          // lookup table for special characters in attributes
+    protected static boolean[] specialInAttSingle;    // lookup table for special characters in attributes with single-quote delimiter
     // create look-up table for ASCII characters that need special treatment
 
     static {

@@ -58,7 +58,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
     private GlobalParameterSet parameters;
     private Source initialSource;
     private Destination destination;
-    private final DestinationHelper destinationHelper = new DestinationHelper(this);
+    private final DestinationHelper destinationHelper;
     private URI destinationBaseUri;
 
     /**
@@ -72,6 +72,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
     protected XsltTransformer(Processor processor, XsltController controller, GlobalParameterSet staticParameters) {
         super(processor, controller);
         parameters = new GlobalParameterSet(/*staticParameters*/);
+        destinationHelper = new DestinationHelper(this);
     }
 
     /**

@@ -119,7 +119,7 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
         base.close();
     }
 
-
+    //#if CSHARP==false
     /**
      * Convert this iterator to a Stream
      *
@@ -132,6 +132,7 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
         base = base.onClose(XdmSequenceIterator.this::close);
         return new XdmStream<>(base);
     }
+    //#endif
 
 }
 

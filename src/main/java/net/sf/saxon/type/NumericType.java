@@ -18,6 +18,7 @@ import net.sf.saxon.transpile.CSharpReplaceMethod;
 import net.sf.saxon.value.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
@@ -99,7 +100,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * @return the atomic types and plain union types in the transitive membership of the union type.
      */
     @Override
-    public synchronized Iterable<AtomicType> getPlainMemberTypes() {
+    public List<? extends PlainType> getPlainMemberTypes() {
         return getMemberTypes();
     }
 
@@ -298,7 +299,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
             double d = StringToDouble.getInstance().stringToNumber(value);
             return new DoubleValue(d);
         } catch (NumberFormatException e) {
-            String message = String.format("Cannot convert string \"%s\" to xs:numeric", value);
+            String message = "Cannot convert string \"" + value + "\" to xs:numeric";
             throw new ValidationFailure(message).makeException();
         }
     }

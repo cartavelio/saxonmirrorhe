@@ -27,7 +27,6 @@ import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpInnerClass;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import java.io.File;
 import java.io.OutputStream;
@@ -288,11 +287,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             destination.closeAndNotify();
         } catch (XPathException e) {
             if (!e.hasBeenReported()) {
-                try {
-                    getErrorListener().fatalError(e);
-                } catch (TransformerException e1) {
-                    // ignore secondary error
-                }
+                getErrorReporter().report(new XmlProcessingException(e));
             }
             throw new SaxonApiException(e);
         }
@@ -379,11 +374,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             destination.closeAndNotify();
         } catch (XPathException e) {
             if (!e.hasBeenReported()) {
-                try {
-                    getErrorListener().fatalError(e);
-                } catch (TransformerException e1) {
-                    // ignore secondary error
-                }
+                getErrorReporter().report(new XmlProcessingException(e))                                                                                                                                            ;
             }
             throw new SaxonApiException(e);
         }
@@ -420,11 +411,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             destination.closeAndNotify();
         } catch (XPathException e) {
             if (!e.hasBeenReported()) {
-                try {
-                    getErrorListener().fatalError(e);
-                } catch (TransformerException e1) {
-                    // ignore secondary error
-                }
+                getErrorReporter().report(new XmlProcessingException(e));
             }
             throw new SaxonApiException(e);
         }

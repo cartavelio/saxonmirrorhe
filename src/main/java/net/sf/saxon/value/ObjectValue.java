@@ -11,6 +11,7 @@ import net.sf.saxon.om.Genre;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 
@@ -99,6 +100,7 @@ public class ObjectValue<T> implements ExternalObject<T> {
 
     /*@NotNull*/
     @Override
+    @CSharpReplaceBody(code="return net.sf.saxon.type.AnyExternalObjectType.THE_INSTANCE;")
     public ItemType getItemType(/*@Nullable*/ TypeHierarchy th) {
         return th.getConfiguration().getJavaExternalObjectType(value.getClass());
     }
