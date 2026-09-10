@@ -178,6 +178,8 @@ public class Transform {
         options.addRecognizedOption("strip", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                                     "Handling of whitespace text nodes in source documents");
         options.setPermittedValues("strip", new String[]{"none", "all", "ignorable"}, null);
+        options.addRecognizedOption("stublib", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
+                                    "JSON file holding function signatures, for SaxonJS");
         options.addRecognizedOption("t", CommandLineOptions.TYPE_BOOLEAN,
                                     "Display version and timing information, and names of output files");
         options.addRecognizedOption("target", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
@@ -699,6 +701,11 @@ public class Transform {
             value = options.getOptionValue("scmin");
             if (value != null) {
                 config.importComponents(new StreamSource(value));
+            }
+
+            value = options.getOptionValue("stublib");
+            if (value != null) {
+                compiler.getUnderlyingCompilerInfo().importStubFunctionLibrary(new StreamSource(new File(value)));
             }
 
             if (additionalSchemas != null) {

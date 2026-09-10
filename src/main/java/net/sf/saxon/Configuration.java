@@ -68,6 +68,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -1562,6 +1563,10 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public void addExtensionBinders(FunctionLibraryList list) {
         // no action in this class
+    }
+
+    public FunctionLibrary loadStubFunctionLibrary(StreamSource jsonSignatures) throws XPathException {
+        throw new UnsupportedOperationException();
     }
 
     /**

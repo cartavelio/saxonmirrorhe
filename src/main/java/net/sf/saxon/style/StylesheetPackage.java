@@ -866,6 +866,10 @@ public class StylesheetPackage extends PackageData {
 
     protected void addIxsl3FunctionLibrary(FunctionLibraryList functionLibrary) {}
 
+    protected void addStubFunctionLibrary(FunctionLibrary stubFunctions) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Get the function library.
      *
