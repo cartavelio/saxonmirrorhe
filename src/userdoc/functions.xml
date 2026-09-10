@@ -6220,7 +6220,44 @@
       </details>
     </function>
     
-    
+    <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <name namespace="http://saxon.sf.net/">escape-NCName</name>
+      <description>
+        <p>Converts any string to a valid NCName, by escaping characters that would otherwise be invalid.</p>
+      </description>
+      <signatures>
+        <proto return-type="xs:NCName">
+          <arg name="input" type="xs:string" desc="The input string to be converted"/>
+        </proto>
+      </signatures>
+      <status>
+        <p>Available since Saxon 11.0</p>
+      </status>
+      <saxon-edition>EE</saxon-edition>
+      <details>
+        <div>
+          <p>If the supplied string is a valid NCName, it is returned unchanged.</p>
+          
+          <p>The zero-length string is converted to a single underscore, <code>"_"</code>.</p>
+          
+          <p>An underscore is converted to a pair of underscores, <code>"__"</code>.</p>
+          
+          <p>A character that would not be valid in an NCName (or, if it is the first character,
+          at the start of an NCName) is converted to the form <code>"_XXX_"</code> where <code>XXX</code>
+          is the shortest hexadecimal representation of the Unicode codepoint. For example, <code>"£"</code>
+          becomes <code>"_a3_"</code>. Lower case is used for digits a-f.</p>
+          
+          <p>The rules for NCName characters are those in XML 1.0 Fifth Edition (which match the rules in XML 1.1).</p>
+          
+          <p>For example, <code>saxon:escape-NCName("date of birth")</code> returns <code>"date_20_of_20_birth</code>.</p>
+          
+          <p>The function is primarily intended for use when converting JSON to XML.</p>
+          
+          <p>The reverse conversion is available from the function <code>saxon:unescape-NCName</code>.</p>
+          
+        </div>
+      </details>
+    </function>
     
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">EQName</name>
@@ -10120,6 +10157,44 @@ return saxon:transform($splitter, $results)]]></samp>
       </details>
       <see-also name="type" namespace="http://saxon.sf.net/"/>
     </function>
+    
+    <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <name namespace="http://saxon.sf.net/">unescape-NCName</name>
+      <description>
+        <p>Reverses the escaping performed by the <code>saxon:escape-NCName</code> function.</p>
+      </description>
+      <signatures>
+        <proto return-type="xs:string">
+          <arg name="input" type="xs:NCName" desc="The escaped string to be converted back to its original form"/>
+        </proto>
+      </signatures>
+      <status>
+        <p>Available since Saxon 11.0</p>
+      </status>
+      <saxon-edition>EE</saxon-edition>
+      <details>
+        <div>
+          <p>If the supplied string is valid according to the escaping rules of the <code>saxon:escape-NCName</code>
+            function, then the original string is returned.</p>
+          
+          <p>For example:</p>
+          
+          <ul>
+            <li><code>saxon:unescape-NCName(xs:NCName("_"))</code> returns <code>""</code></li>
+            <li><code>saxon:unescape-NCName(xs:NCName("__"))</code> returns <code>"_"</code></li>
+            <li><code>saxon:unescape-NCName(xs:NCName("phone_20_number"))</code> returns <code>"phone number"</code></li>
+          </ul>
+          
+          <p>If the string is invalid according to these rules, a dynamic error is raised (FORG0001).</p>
+          
+          <p>Hex digits a-f may be uppercase or lowercase, and leading zeroes are accepted in hex codepoint values.</p>
+          
+        
+          
+        </div>
+      </details>
+    </function>
+    
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">unparsed-entities</name>
       <description>

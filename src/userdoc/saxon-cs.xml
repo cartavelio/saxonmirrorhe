@@ -348,6 +348,12 @@ class.)</p>
       is now a <code>Uri</code> rather than a <code>string</code>, bringing these classes into line with
       <code>Saxon.Api.XsltCompiler</code>.</p>
       
+      <p>The <code>Xslt30Compiler</code> class (and others????) no longer has an <code>ErrorList</code> property.
+      Replace <code>compiler.ErrorList = errorList;</code> by <code>compiler.ErrorReporter = (err => errorList.Add);</code>.</p>
+      
+      <p>The <code>MessageListener</code> property of <code>XsltTransformer</code> and <code>Xslt30Transformer</code>
+      is now a delegate in the form <code>Consumer&lt;Message&gt;</code></p>
+      
       
    </section>
    
