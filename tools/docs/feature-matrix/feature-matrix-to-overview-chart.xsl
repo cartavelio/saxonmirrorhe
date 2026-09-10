@@ -42,8 +42,8 @@
                 <p>The table below lists product features and indicates which features are available for
                     products on the different platforms. If the feature is restricted to certain packages on
                     a platform, then the table shows the <b>minimal</b> product package(s) required. The
-                    product packages are ordered as: PE &#x2282; EE-V &#x2282; (EE-T | EE-Q) &#x2282; EE. For
-                    instance, this means all PE and EE-V features are available with all EE packages.</p>
+                    product packages are ordered as: PE &#x2282; EEV &#x2282; (EET | EEQ) &#x2282; EE. For
+                    instance, this means all PE and EEV features are available with all EE packages.</p>
                 <p>'&#x25cf;' means the feature is available for all editions on that platform.</p>
                 <table class="feature-matrix feature-matrix-11" id="overview">
                         <tbody>
@@ -123,23 +123,23 @@
                                                 </div>                                                
                                             </td>
                                             <td>
-                                                <p>                                                    
-                                                  <xsl:sequence select="f:license(java)"/>
+                                                <p>
+                                                    <xsl:sequence select="f:license(@J)"/>
                                                 </p>
                                             </td>
                                             <td>
                                                 <p>
-                                                    <xsl:sequence select="f:licenseCS(cs)"/>
+                                                    <xsl:sequence select="f:licenseCS(@CS)"/>
                                                 </p>
                                             </td>
                                             <td>
                                                 <p>
-                                                    <xsl:sequence select="f:license(c)"/>
+                                                    <xsl:sequence select="f:license(@C)"/>
                                                 </p>
                                             </td>
                                             <td>
                                                 <p>
-                                                    <xsl:sequence select="f:licenseJS(js)"/>
+                                                    <xsl:sequence select="f:licenseJS(@JS)"/>
                                                 </p>
                                             </td>
                                         </tr>
@@ -171,18 +171,24 @@
                             <b>PE: </b>Saxon Professional Edition</a></li>
                         <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EE.pdf">
                             <b>EE: </b>Saxon Enterprise Edition</a></li>
-                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EE-T.pdf">
-                            <b>EE-T: </b>Saxon Enterprise Edition, Transformation package 
-                            (restricted license allowing XSLT
-                            and Schema processing only)</a></li>
-                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EE-Q.pdf">
-                            <b>EE-Q: </b>Saxon Enterprise Edition, Query package
-                            (restricted license allowing
-                            XQuery and Schema processing only)</a></li>
-                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EE-V.pdf">
-                            <b>EE-V: </b>Saxon Enterprise Edition, Validation package
-                            (restricted license allowing
-                            Schema processing only)</a></li>
+                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EET.pdf">
+                            <b>EET: </b>Enterprise Edition Transformation package - 
+                            includes enterprise features for XSLT and Schema processing only.
+                            No XQuery enterprise features.
+                            <i>(In the online shop, select the "No XQuery" language option.)</i>
+                        </a></li>
+                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EEQ.pdf">
+                            <b>EEQ: </b>Enterprise Edition Query package - 
+                            includes enterprise features for XQuery and Schema processing only.
+                            No XSLT enterprise features.
+                            <i>(In the online shop, select the "No XSLT" language option.)</i>
+                        </a></li>
+                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EEV.pdf">
+                            <b>EEV: </b>Enterprise Edition Validation package - 
+                            includes enterprise features for Schema processing only.
+                            No XSLT and XQuery enterprise features.
+                            <i>(In the online shop, select the "No XSLT" and "No XQuery" language options.)</i>
+                        </a></li>
                         <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/CS.pdf">
                             <b>CS: </b>Saxon Enterprise Edition for .NET 5</a></li>
                         <li><a class="title" href="../saxon-js/index.xml"><b>JS2: </b>SaxonJS 2, JavaScript processor</a></li>
@@ -212,17 +218,23 @@
                         <li>
                             <b>EE: </b>Saxon Enterprise Edition</li>
                         <li>
-                            <b>EE-T: </b>Saxon Enterprise Edition, Transformation package 
-                            (restricted license allowing XSLT
-                            and Schema processing only)</li>
+                            <b>EET: </b>Enterprise Edition Transformation package -
+                            includes enterprise features for XSLT and Schema processing only.
+                            No XQuery enterprise features.
+                            <i>(In the online shop, select the "No XQuery" language option.)</i>
+                        </li>
                         <li>
-                            <b>EE-Q: </b>Saxon Enterprise Edition, Query package
-                            (restricted license allowing
-                            XQuery and Schema processing only)</li>
+                            <b>EEQ: </b>Enterprise Edition Query package -
+                            includes enterprise features for XQuery and Schema processing only.
+                            No XSLT enterprise features.
+                            <i>(In the online shop, select the "No XSLT" language option.)</i>
+                        </li>
                         <li>
-                            <b>EE-V: </b>Saxon Enterprise Edition, Validation package
-                            (restricted license allowing
-                            Schema processing only)</li>
+                            <b>EEV: </b>Enterprise Edition Validation package -
+                            includes enterprise features for Schema processing only.
+                            No XSLT and XQuery enterprise features.
+                            <i>(In the online shop, select the "No XSLT" and "No XQuery" language options.)</i>
+                        </li>
                     </ul>
                 </div>
             </xsl:otherwise>
@@ -231,39 +243,39 @@
     </xsl:template>
     
     <xsl:function name="f:license" as="xs:string">
-        <xsl:param name="platform" as="element()?"/>
+        <xsl:param name="minEdition" as="xs:string?"/>
         <xsl:choose>
-            <xsl:when test="empty($platform)">
+            <xsl:when test="empty($minEdition)">
                 <xsl:value-of select="'&#xa0;'"/>
             </xsl:when>
-            <xsl:when test="$platform/@editions = 'HE'">
+            <xsl:when test="$minEdition = 'HE'">
                 <xsl:value-of select="'&#x25cf;'"/>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:value-of select="$platform/@editions"/>
+                <xsl:value-of select="$minEdition"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
     
     <xsl:function name="f:licenseCS" as="xs:string">
-        <xsl:param name="platform" as="element()?"/>
+        <xsl:param name="minEdition" as="xs:string?"/>
         <xsl:choose>
-            <xsl:when test="empty($platform)">
+            <xsl:when test="empty($minEdition)">
                 <xsl:value-of select="'&#xa0;'"/>
             </xsl:when>
-            <xsl:when test="$platform/@editions = ('HE','PE','EE-V')">
+            <xsl:when test="$minEdition = ('HE','PE','EEV')">
                 <xsl:value-of select="'&#x25cf;'"/>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:value-of select="$platform/@editions"/>
+                <xsl:value-of select="$minEdition"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
     
-    <xsl:function name="f:licenseJS">
-        <xsl:param name="platform" as="element()?"/>
+    <xsl:function name="f:licenseJS" as="xs:string">
+        <xsl:param name="minEdition" as="xs:string?"/>
         <xsl:choose>
-            <xsl:when test="empty($platform)">
+            <xsl:when test="empty($minEdition)">
                 <xsl:value-of select="'&#xa0;'"/>
             </xsl:when>
             <xsl:otherwise>
