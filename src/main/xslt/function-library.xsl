@@ -310,7 +310,7 @@
 
    <!-- Implementation of fn:highest and fn:lowest assuming all three parameters are explicitly supplied,
         with an extra parameter to distinguish whether we want the highest or lowest -->
-   <xsl:function name="FN:mhk_highest" as="item()*" use-when="$add-mhk">
+   <xsl:function name="FN:mhk_highest" as="item()*">
       <xsl:param name="input" as="item()*"/>
       <xsl:param name="collation" as="xs:string?"/>
       <xsl:param name="key" as="function(item()) as xs:anyAtomicType*"/>
