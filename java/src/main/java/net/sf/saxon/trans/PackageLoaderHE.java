@@ -1219,7 +1219,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
     public static NamespaceMap fromExportedNamespaces(String nsAtt) {
         NamespaceMap map = NamespaceMap.emptyMap();
-        if (nsAtt != null) {
+        if (nsAtt != null && !nsAtt.isEmpty()) {
             String[] namespaces = nsAtt.split(" ");
             for (String ns : namespaces) {
                 int eq = ns.indexOf('=');
@@ -3837,10 +3837,11 @@ public class PackageLoaderHE implements IPackageLoader {
 
         pMap.put("p.nodeTest", (loader, element) -> {
             ItemType test = loader.parseAlphaCodeForItemType(element, "test");
-            if (test instanceof NodeTest) {
-                return new NodeTestPattern((NodeTest) test);
-            } else {
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
+            if ("t".equals(flags) || !(test instanceof NodeTest)) {
                 return new ItemTypePattern(test);
+            } else {
+                return new NodeTestPattern((NodeTest) test);
             }
         });
 

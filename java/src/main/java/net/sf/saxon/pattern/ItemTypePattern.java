@@ -106,6 +106,7 @@ public class ItemTypePattern extends Pattern {
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.nodeTest");
         presenter.emitAttribute("test", AlphaCode.fromItemType(itemType));
+        presenter.emitAttribute("flags", "t");
         presenter.endElement();
     }
 
