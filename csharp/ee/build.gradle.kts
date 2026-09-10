@@ -276,7 +276,7 @@ val preprocessJava = tasks.register<JavaExec>("preprocessJava") {
                  exclude("com/saxonica/functions/extfn/LastModified.java")
                  exclude("com/saxonica/functions/extfn/Mailer2.java")
                  exclude("com/saxonica/functions/extfn/ObjectMap.java")
-                 exclude("com/saxonica/functions/qt4/ParseHtml.java")
+                 //exclude("com/saxonica/functions/qt4/ParseHtml.java")
                  //exclude("com/saxonica/functions/extfn/ReadBinaryResource.java")
                  exclude("com/saxonica/functions/extfn/SendMail.java")
                  exclude("com/saxonica/xqj/**")

@@ -5,17 +5,17 @@ using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using Saxon.Hej.expr;
-using Saxon.Hej.functions;
+using Saxon.Hej.om;
 using Saxon.Hej.value;
 using Saxon.Impl.Dom;
 
 namespace Saxon.Impl.Helpers {
-    public class ParseHtml : SystemFunction {
+    public class ParseHtml {
 
-        public override Saxon.Hej.om.Sequence call(XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+        public static Sequence BuildHtmlDocument(AtomicValue content, bool failOnError, string encoding, string baseUri, XPathContext context)  {
+
             Saxon.Hej.Controller controller = context.getController();
             Saxon.Hej.Configuration config = controller.getConfiguration();
-            Saxon.Hej.value.AtomicValue content = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
             if (content == null) {
                 return EmptySequence.INSTANCE;
             }
@@ -26,7 +26,7 @@ namespace Saxon.Impl.Helpers {
             
             IHtmlParser parser = angleSharpContext.GetService<IHtmlParser>();
             IDocument htmlDoc = parser.ParseDocument(content.getStringValue());
-            return new HtmlDocumentWrapper(htmlDoc, getRetainedStaticContext().getStaticBaseUriString(), config);
+            return new HtmlDocumentWrapper(htmlDoc, baseUri, config);
             
         }
 
