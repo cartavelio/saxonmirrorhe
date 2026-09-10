@@ -9,7 +9,7 @@
       <ul/>
    </nav>
 
-   <p>Extension functions allow code written in a host programming language such as C++ to be
+   <p>Extension functions allow code written in a host programming language such as C++, Python and PHP to be
       invoked directly from a function call in an XPath expression (whether in XSLT, XQuery, or pure
       XPath). For this to work the Saxon processor needs to be able to locate the executable
       code corresponding to a particular function name. For the function arguments these can be as XDM types
@@ -47,8 +47,8 @@
         "arity": [2]}
         }</samp>
 
-    <p>The <code>namespace</code> identifies the function namespace, the <code>signature</code>
-        for the function. The local name of the function identifies the function name; each signature has four properties:</p>
+    <p>The <code>namespace</code> identifies the function namespace, the local name of the function identifies the
+        function name which maps to the signature of the function. The signature has four properties:</p>
 
     <table>
         <thead>
@@ -80,7 +80,7 @@
         </tbody>
     </table>
 
-    <p>When compiling a stylesheet (with the SaxonC EE compiler),
+    <p>When compiling a stylesheet (with the SaxonCEE compiler),
     the registered extension functions are provided in a JSON object using
         <code>SaxonProcessor.registerUserFunction(apiDescription)</code>.</p>
 
@@ -116,27 +116,30 @@
        <p>The registering of the user function we use the SaxonProcessor method <code>registerUserFunction</code>:
 
        <samp>void registerUserFunction(const char * ns, XdmValue * (*func)(int, XdmValue **),
-           const char * signatureJSON, bool useNativeTypes=false)</samp>
+           const char * signatureJSON)</samp>
 
        </p>
 
        <p>Example C++ code to register user function:
 
-       <samp>  processor->registerUserFunction("http://www.example.com", &amp;myFunc, "{ \"myFunc\": {"
-           "      \"as\": \"xs:integer?\","
+       <samp>
+           SaxonProcessor * processor = new SaxonProcessor(true);
+           processor->registerUserFunction("http://www.example.com", &amp;myFunc, "{ \"myFunc\": {"
+           "      \"as\": \"xs:integer\","
            "      \"param\": ["
            "        \"xs:integer\""
            "      ],"
            "      \"arity\": [1]"
            "    }"
-           "}");</samp></p>
+           "}");
+       </samp></p>
 
-       <p>Notice in the registration of the user function in C++ that we pass the function as a void pointer to the
+       <p>Notice that the registration of the user function in C++ that we pass the function as a void pointer to the
            <code>registerUserFunction</code> method. This is essential for the call-back mechanism.
-           The arguments must also have the signature (int length, XdmValue*). Where length is the number of
-           arguments being passed to the function from the SaxonC processor.
+           The arguments must also have the signature (int length, XdmValue* arguments). The <code>length</code> argument is the number of
+           arguments being passed to the function from the SaxonC processor. The <code>arguments</code> are tjhe inputs to the user function.
+           In C++ we only accept arguments of XDM types.<br/>
            See example of the user function <code>myFunc</code>:</p>
-
        <p>
            <samp>
 XdmValue * myFunc(int length, XdmValue ** values) {
@@ -179,135 +182,204 @@ XdmValue * myFunc(int length, XdmValue ** values) {
           On Linux or MacOS we use the following commands:</p>
 
       <kbd>g++ -std=c++14 -g -fPIC -I../../Saxon.C.API/graalvm   -c ../../Saxon.C.API/CPPUserFunctionHandler.cpp -o CPPUserFunctionHandler.o $@</kbd>
-      <p>Secondly, we need to pass in the SaxonC library as an option to the compiler:</p>
+      <p>Secondly, we need to pass in the SaxonC library as an option to the C++ compiler:</p>
        <kbd>g++ -std=c++14 -g -v -fPIC -I../../Saxon.C.API/graalvm   bin/CPPUserFunctionHandler.o b testXPath.cpp $library_dir/libsaxon-eec-13.0.dylib -o testXPath  -Wl, -ldl -lsaxon-eec-13.0</kbd>
 
-      <p>The C++ code below (taken from <code>testXSLT.cpp</code>) shows how to register this
-         extension function library, before running the testExtension.xsl stylesheet, using the C++
-         API:</p>
 
-      <pre><code class="language-cpp"><![CDATA[char fname[] = "_nativeCall";
-char funcParameters[] = "(Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;)Ljava/lang/Object;";
 
-JNINativeMethod cppMethods[] =
-{
-  {
-    fname,
-    funcParameters,
-    (void *)&cppNativeCall
-  }
-};
-
-/*
-* Test transform to String. Source and stylesheet supplied as arguments
-*/
-void testTransformToStringExtensionFunc(SaxonProcessor * processor, XsltProcessor * trans){
-  
-  trans->setProperty("extc", "/path/cppExtensionFunction");
-
-  bool nativeFound = processor->registerNativeMethods(SaxonProcessor::sxn_environ->env,
-      "com/saxonica/functions/extfn/cpp/NativeCall",
-      cppMethods, sizeof(cppMethods) / sizeof(cppMethods[0]));
-  
-  if(nativeFound) {
-    const char * output = trans->transformFileToString("cat.xml", "testExtension.xsl");
-
-    if(output == NULL) {
-      printf("result is null \n");
-
-    } else {
-      //printf("%s", output);
-      printf("result is OK \n");
-    }
-    fflush(stdout);
-    delete output;
-    
-  } else {
-    printf("native Class not found");
-  }
-}
-]]></code></pre>
-
-      <p>To run the <code>testXSLT.cpp</code> sample, use the following command:</p>
-
-      <kbd>g++ -m64 bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o
-         bin/XsltProcessor.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o
-         bin/XdmNode.o bin/XdmAtomicValue.o bin/SchemaValidator.o testXSLT.cpp -o testXSLT -ldl
-         -lc</kbd>
+      <p>To run the <code>testXPath.cpp</code> sample you can then run the executable <code>./testXPath</code>
+      See also in the documentation the guide on compiling and running samples using the batch file
+          <a href="samples/samples_cpp">C++ Sample</a>.</p>
 
    </section>
 
   <section id="extensions_php" title="Writing extension functions in PHP">
       <h1>Writing extension functions in PHP</h1>
 
-      <p>An example of the use of extension functions can be found in the sample file
-            <code>xsltExamples.php</code> in the <code>samples/php</code> directory. The example
-         registers a user written PHP extension function called "userFunction", which is then called
-         from an XSLT stylesheet by calling the <code>php:function()</code> function.</p>
+      <p>Examples of the User extension functions in PHP are found in the sample file
+            <code>userFunctionTest.php</code> in the <code>samples/php</code> directory. The PHP file
+          contains a variety of examples illustrating the capabilities of the feature.</p>
+      <p>For the registering of a user function we use the SaxonProcessor method <code>registerUserFunction</code>:
+
+          <samp>registerUserFunction(string ns, string json, bool useNativeTypes)</samp>
+      </p>
+
+      <p>User extension functions in PHP can both handle arguments of XDM and native PHP types. The same for the
+          return type from the function. The boolean flag <code>useNativeTypes=True</code> on <code>registerUserFunction</code>
+          is used to switch on native type conversion option. This means that users can use native PHP types within the function
+          they have written and return them too. If <code>useNativeTypes=False</code> means we are only handling XDM types.
+          <code>XdmNode</code> types does not have a native type mapping. Therefore, we just
+          pass arguments of this type to the user function.</p>
+
+      <p>Mapping of XDM types to native PHP types:
+        <ul>
+            <li><code>XdmNode</code> -> <code>XdmNode</code> - No conversion</li>
+            <li><code>XdmFunctionItem</code> -> <code>XdmXdmFunctionItem</code> - No conversion</li>
+            <li><code>XdmArray</code> -> <code>Array</code></li>
+            <li><code>XdmMap</code> -> <code>Array</code> with keys from the <code>XdmMap</code></li>
+            <li><code>XdmValue</code> (sequence) -> <code>ArrayIterator</code></li>
+            <li><code>EmptySequence</code> -> <code>NULL</code></li>
+            <li><code>XdmAtomicValue</code>:
+                <ul>
+                    <li>Xdm int types -> <code>Integer</code></li>
+                    <li>Xdm double type (inc decimal, float) -> <code>Float</code></li>
+                    <li>Xdm double type (inc decimal) -> <code>Float</code></li>
+                    <li>Xdm boolean -> <code>Boolean</code></li>
+                    <li>All other XdmAtomic types -> <code>String</code></li>
+                </ul>
+            </li>
+
+        </ul>
+
+          The return types works in the same mapping in reverse. If the user chooses to convert sequence type (i.e. an XdmValue)
+          to a native type this will be done as an <code>ArrayIterator</code>. For the return value to interpret an XdmValue
+          from a native type the user must create an <code>ArrayIterator</code> object.
+      </p>
+
+
+      <p>Example PHP code to register user function:
+
+          <samp>
+              $saxonProc = new Saxon\SaxonProcessor(true);
+              $xpath = $saxonProc->newXPathProcessor();
+              $saxonProc->registerUserFunction("http://www.example.com", "{ \"sumASequence\": {".
+              "      \"as\": \"xs:integer?\"," .
+              "      \"param\": [" .
+              "        \"array(xs:integer*)\"" .
+              "      ],".
+              "      \"arity\": [1]" .
+              "    }".
+              "}", True);
+          </samp></p>
+
+
 
       <h2 class="subtitle">Calling extension functions from XSLT and XQuery</h2>
 
-      <p>User written PHP extension functions can be called from XSLT and XQuery by using the
-            <code>php:function()</code> function. This is a Saxon extension function in a special
-         namespace ("http://php.net/xsl"), which takes two arguments: the function name, as an
-            <code>xs:string</code>, and the arguments to the function, supplied as an XDM array.</p>
+      <p>Calling the user extension functions from XSLT, XPath and XQuery is done firstly by
+          declaring the namespace for the function. Then using the function name in your query or stylesheet.
+          The arguments passed must match what is declared in the JSON signature.
+          For example using the XPath API the following example calls the function:
 
-      <p>For instance, the PHP "userFunction" extension function is called from the XSLT stylesheet
-            <code>testExFunc.xsl</code> (in the <code>samples/php/xsl</code> directory), where the
-            <code>php</code> namespace has been declared (using
-            <code>xmlns:php="http://php.net/xsl"</code>), as shown in the following code
-         snippet:</p>
+          <samp>
+              $xpath->declareNamespace("dy", "http://www.example.com");
+              $result = $xpath->evaluateSingle("dy:sumASequence([1,2,3,4,5])");
+              if($result != null) {
+              $value = $result->getAtomicValue()->getLongValue();
+              echo 'Correct Result='.$value;
+          </samp></p>
 
-      <samp><![CDATA[<xsl:variable name="args" select="['param1-data', .]"/>
-<xsl:variable name="phpCall" select="php:function('userFunction', $args)"/>]]></samp>
+      <p>In the example above the PHP "sumASequence" extension function is called from XPath, but can be called
+          from the XSLT stylesheet. The implementation of the <Code>sumASequence</Code> as PHP is given
+          below. We make the assumption that the array contains numbers. This is a simple example but better error checking
+          is required to make the code more robust. The returned integer is internally converted to an XdmAtomicValue:
 
-      <h2 class="subtitle">Registering the use of PHP extension functions</h2>
+      <samp>
+          function sumASequence($arr){
+          if(is_array($arr)){
+            return array_sum($arr);
+          }
+          throw new Exception('$arr argument is not an array type');
 
-      <p>The example below illustrates how to write user written extension functions in PHP which
-         can be used in XSLT and XQuery. As shown, the use of extension functions is enabled by
-         registering the PHP extension library in SaxonC, by using the
-            <code>registerPHPFunctions</code> function of the <code>SaxonProcessor</code>, before
-         running a transform as specified:</p>
+          }
+      </samp>
+      </p>
 
-      <pre><code class="language-php"><![CDATA[// define an extension function
-function userFunction($param , $param2)
-{
-  if(is_numeric($param2)){
-    echo("userspace function called cp1\n");
-    $result = $param2*2;
-    return $result;
-  }
-}
 
-function userFunctionExample($saxon, $proc, $xmlfile, $xslFile){
-  echo '<b>userFunctionExample:</b><br/>';
-  global $resultg;
 
-  $saxon->registerPHPFunctions(" /usr/lib/php/20190718/saxon");
-  $proc->setSourceFromFile($xmlfile);
-  $proc->compileFromFile($xslFile);
-
-  $result = $proc->transformToString();
-  if($result != null) {
-    echo 'Output=======:'.$result;
-  } else {
-    echo "Result is null";
-    if($proc->exceptionOccurred()){
-      echo 'Error Message='.$proc->getErrorMessage();
-    }
-  }
-
-  $proc->clearParameters();
-  $proc->clearProperties();
-
-}
-
-]]></code></pre>
 
    </section>
 
    <section id="extensions_python" title="Writing extension functions in Python">
    <h1>Writing extension functions in Python</h1>
+
+       <p>Examples of the User extension functions  feature in Python are found in the pytests file
+           <code>test_saxonc.py</code> in the <code>pypi</code> directory.</p>
+       <p>For the registering of a user function we use the PySaxonProcessor method <code>register_user_function</code>:
+
+           <samp>register_user_function(string ns, func, string json, encoding=None, use_python_types=False)</samp>
+       </p>
+
+       <p>User extension functions in Python can both handle arguments of XDM and native PHP types. The same for the
+           return type from the function. The boolean flag <code>use_python_types=True</code> on <code>register_user_function</code>
+           is used to switch on native type conversion option.
+           This means that users can use native PHP types within the function
+           they have written and return them too. The default option is <code>use_python_types=False</code>.
+           which means we are only handling XDM types in the user function.
+           <code>XdmNode</code> types does not have a native type mapping. Therefore, we just
+           pass arguments of this type to the user function.</p>
+
+       <p>Mapping of XDM types to native PHP types:
+           <ul>
+               <li><code>PyXdmNode</code> -> <code>PyXdmNode</code> - No conversion</li>
+               <li><code>PyXdmFunctionItem</code> -> <code>PyXdmXdmFunctionItem</code> - No conversion</li>
+               <li><code>PyXdmArray</code> -> <code>list</code></li>
+               <li><code>PyXdmMap</code> -> <code>dict</code></li>
+               <li><code>PyXdmValue</code> (sequence) -> <code>iter??</code></li>
+               <li><code>PyXdmAtomicValue</code>:
+                   <ul>
+                       <li>Xdm int types -> <code>int</code></li>
+                       <li>Xdm double type (inc decimal, float) -> <code>float</code></li>
+                       <li>Xdm double type (inc decimal) -> <code>Float</code></li>
+                       <li>Xdm boolean -> <code>bool</code></li>
+                       <li>All other XdmAtomic types -> <code>str</code></li>
+                   </ul>
+               </li>
+
+           </ul>
+
+           The return types works in the same mapping in reverse. If the user chooses to convert sequence type (i.e. an PyXdmValue)
+           to a native type this will be done as an <code>iter</code>. For the return value to interpret an PyXdmValue
+           from a native type the user must create an <code>iter</code> object.
+       </p>
+
+
+       <p>Example Python code to register user function:
+
+           <samp>
+               proc.register_user_function("http://www.example.com", user_function, "{ \"myFunc\": {"
+               "      \"as\": \"xs:integer?\","
+               "      \"param\": ["
+               "        \"xs:integer\""
+               "      ],"
+               "      \"arity\": [1]"
+               "    }"
+               "}", use_python_types=False)
+           </samp></p>
+
+
+
+       <h2 class="subtitle">Calling extension functions from XSLT and XQuery</h2>
+
+       <p>Calling the user extension functions from XSLT, XPath and XQuery is done firstly by
+           declaring the namespace for the function. Then using the function name in your query or stylesheet.
+           The arguments passed must match what is declared in the JSON signature.
+           For example using the XPath API the following example calls the function:
+
+           <samp>
+               $xpath->declareNamespace("dy", "http://www.example.com");
+               $result = $xpath->evaluateSingle("dy:sumASequence([1,2,3,4,5])");
+               if($result != null) {
+               $value = $result->getAtomicValue()->getLongValue();
+               echo 'Correct Result='.$value;
+           </samp></p>
+
+       <p>In the example above the PHP "sumASequence" extension function is called from XPath, but can be called
+           from the XSLT stylesheet. The implementation of the <Code>sumASequence</Code> as PHP is given
+           below. We make the assumption that the array contains numbers. This is a simple example but better error checking
+           is required to make the code more robust. The returned integer is internally converted to an XdmAtomicValue:
+
+           <samp>
+               function sumASequence($arr){
+               if(is_array($arr)){
+               return array_sum($arr);
+               }
+               throw new Exception('$arr argument is not an array type');
+
+               }
+           </samp>
+       </p>
+
 
    </section>
 
