@@ -362,8 +362,9 @@ public:
   XsltExecutable *compileFromXdmNode(XdmNode *node);
 
   /**
-   * Checks for pending exceptions without creating a local reference to the
-   * exception object
+   * Deprecated. Checks for pending exceptions without creating a local reference to the
+   * exception object.
+   * @deprecated - This method is no longer used. We now throw exceptions
    * @return True when there is a pending exception; otherwise false
    */
   bool exceptionOccurred();
@@ -378,6 +379,7 @@ public:
 
   /**
    * Clear any thrown exceptions
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   void exceptionClear();
 
@@ -385,6 +387,7 @@ public:
    * Get the first error message if there are any errors.
    * A transformation may have a number of errors reported against it.
    * @return The message of the exception
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   const char *getErrorMessage();
 
@@ -393,6 +396,7 @@ public:
    * A transformation may have a number of errors reported against it.
    * @return The error code of the exception. The error codes are
    * related to the specific specification
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   const char *getErrorCode();
 

@@ -207,6 +207,7 @@ public:
    * Get any error message thrown by the processor.
    * @return String value of the error message. JNI exceptions thrown by this
    * processor are handled internally and can be retrieved by this method.
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   const char *getErrorMessage();
 

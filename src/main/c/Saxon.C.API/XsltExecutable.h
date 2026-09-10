@@ -543,12 +543,14 @@ public:
    * Checks for pending exceptions without creating a local reference to the
    * exception object
    * @return True when there is a pending exception; otherwise false
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   bool exceptionOccurred();
 
   /**
    * Get the SaxonApiException object created when we have an error.
    * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   SaxonApiException *getException();
 
@@ -556,11 +558,13 @@ public:
    * Get the first error message if there are any errors.
    * A transformation may have a number of errors reported against it.
    * @return The message of the exception
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   const char *getErrorMessage();
 
   /**
    * Clear any thrown exceptions.
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   void exceptionClear();
 
