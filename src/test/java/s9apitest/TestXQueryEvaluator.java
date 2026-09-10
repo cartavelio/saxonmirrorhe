@@ -4,6 +4,8 @@ import jaxptest.ConfigTest;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.flwor.*;
+import net.sf.saxon.expr.instruct.FixedAttribute;
+import net.sf.saxon.expr.instruct.FixedElement;
 import net.sf.saxon.expr.instruct.TraceExpression;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.lib.Feature;
@@ -712,6 +714,120 @@ public class TestXQueryEvaluator {
                             assertEquals("$x", properties.get("var"), "varName" + i);
                             assertEquals(1, instruction.getLocation().getLineNumber(), "lineNumber" + i);
                             break;
+
+                        default:
+                    }
+
+                }
+
+                @Override
+                public void leave(Traceable instruction) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                public void startCurrentItem(Item currentItem) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                public void endCurrentItem(Item currentItem) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                /**
+                 * Method called when a rule search has completed.
+                 *
+                 * @param rule the rule (or possible built-in ruleset) that has been selected
+                 * @param mode the mode in operation
+                 */
+                @SuppressWarnings("EmptyMethod")
+                public void endRuleSearch(Object rule, SimpleMode mode) {
+                    //
+                }
+
+                /**
+                 * Method called when a search for a template rule is about to start
+                 */
+                @Override
+                public void startRuleSearch() {
+                    //
+                }
+            });
+            eval.setDestination(new SAXDestination(new XMLFilterImpl()));
+            eval.run();
+
+        } catch (SaxonApiException err) {
+            err.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testConstructionTracing() {
+        try {
+            String q = "<out>{\nfor $i in 1 to 10 \nreturn \n<in att='{$i}'>{$i+2}\n</in>}\n</out>";
+            Processor p = new Processor(false);
+            p.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "");
+            XQueryCompiler comp = p.newXQueryCompiler();
+            comp.setCompileWithTracing(true);
+            XQueryExecutable exec = comp.compile(q);
+            XQueryEvaluator eval = exec.load();
+            eval.setTraceListener(new TraceListener() {
+                int i = 0;
+
+                @Override
+                public void setOutputDestination(Logger stream) {
+
+                }
+
+                @Override
+                public void open(Controller controller) {
+                    // no action
+                }
+
+                @Override
+                public void close() {
+                    // no action
+                }
+
+                @Override
+                public void enter(Traceable instruction, Map<String, Object> properties, XPathContext context) {
+
+                    System.err.println(i + ": @" + instruction.getLocation().getLineNumber() + " " +
+                                               (instruction instanceof ClauseInfo ? ((ClauseInfo) instruction).getClause().getClauseKey() : instruction.getClass()));
+                    switch (i++) {
+                        case 0:
+                            assertTrue(instruction instanceof XQueryExpression, "isXQueryExpression");
+                            break;
+                        case 1:
+                            assertTrue(instruction instanceof FixedElement);
+                            assertEquals("out", properties.get("name").toString());
+                            break;
+                        case 2:
+                        case 5:
+                        case 8:
+                            assertTrue(instruction instanceof ClauseInfo);
+                            assertTrue(((ClauseInfo)instruction).getClause() instanceof ForClause);
+                            assertEquals("$i", properties.get("var").toString());
+                            break;
+                        case 3:
+                        case 6:
+                        case 9:
+                            assertTrue(instruction instanceof FixedElement);
+                            assertEquals("in", properties.get("name").toString());
+                            break;
+                        case 4:
+                        case 7:
+                        case 10:
+                            assertTrue(instruction instanceof FixedAttribute);
+                            assertTrue(properties.get("name").toString().equals("att"));
+//                            assertTrue(instruction instanceof UserFunction);
+//                            assertEquals(1, instruction.getLocation().getLineNumber());
+//                            assertEquals("local:x", properties.get("name").toString(), "functionName" + i);
+//                            assertEquals(1, properties.get("arity"), "functionArity" + i);
+                            break;
+
 
                         default:
                     }
