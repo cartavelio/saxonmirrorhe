@@ -623,13 +623,16 @@ public class XPathParser {
                 }
             }
             exp = parseExpression();
-            if (!finished.test(t)) {
-                if (t.currentToken == Token.EOF && finished.test(t)) {
-                    grumble("Missing curly brace after expression in value template", "XTSE0350");
-                } else {
-                    grumble("Unexpected token " + currentTokenDisplay() + " beyond end of expression");
-                }
+            if (t.currentToken != Token.EOF) {
+                grumble("Unexpected token " + currentTokenDisplay() + ": no further input expected");
             }
+//            if (t.peekAhead() != Token.EOF && !finished.test(t)) {
+//                if (t.currentToken == Token.EOF && finished.test(t)) {
+//                    grumble("Missing curly brace after expression in value template", "XTSE0350");
+//                } else {
+//                    grumble("Unexpected token " + currentTokenDisplay() + " beyond end of expression");
+//                }
+//            }
             setLocation(exp, offset);
         }
         exp.setRetainedStaticContextThoroughly(env.makeRetainedStaticContext());
@@ -645,6 +648,16 @@ public class XPathParser {
 
     protected void customizeTokenizer(Tokenizer t) {
         // do nothing
+    }
+
+    /**
+     * On completion of parsing, get the position in the input string of the first significant content
+     * after the expression was terminated. This assumes that the parsing was invoked with a termination
+     * condition other than the end of the string being reached.
+     */
+
+    public int getOffsetAfterParsing() {
+        return t.currentTokenStartOffset;
     }
 
 
@@ -3590,7 +3603,8 @@ public class XPathParser {
                 nextToken();
                 result = parserExtension.lookupStar(lhs, modifier, requiredType, deep, allowXPath40Syntax);
             } else {
-                result = parserExtension.lookupName(lhs, modifier, name, deep, allowXPath40Syntax);
+                result = parserExtension.makeLookupExpression(
+                        env.getConfiguration(), lhs, modifier, new StringLiteral(name), deep, allowXPath40Syntax);
             }
         } else if (token instanceof Token.NumericLiteral) {
             NumericValue number = ((Token.NumericLiteral)token).getValue();
@@ -3601,21 +3615,23 @@ public class XPathParser {
                 grumble("Number following '" + (deep ? "??" : "?") + "' must be a decimal integer");
             }
             nextToken();
-            result = makeLookupExpression(lhs, modifier, Literal.makeLiteral(number), deep);
+            result = makeLookupExpression(env.getConfiguration(), lhs, modifier, Literal.makeLiteral(number), deep);
         } else if (token == Token.STAR) {
             nextToken();
             result = parserExtension.lookupStar(lhs, modifier, SequenceType.ANY_SEQUENCE, deep, allowXPath40Syntax);
         } else if (token == Token.LPAREN) {
-            result = makeLookupExpression(lhs, modifier, parseParenthesizedExpression(), deep);
+            result = makeLookupExpression(env.getConfiguration(), lhs, modifier, parseParenthesizedExpression(), deep);
         } else if (token instanceof Token.StringLiteral) {
             checkLanguageVersion40("a string literal after `?`");
-            result = parserExtension.lookupName(lhs, modifier, ((Token.StringLiteral)token).getValue(), deep, allowXPath40Syntax);
+            String key = ((Token.StringLiteral)token).getValue();
+            result = parserExtension.makeLookupExpression(
+                    env.getConfiguration(), lhs, modifier, new StringLiteral(key), deep, allowXPath40Syntax);
             nextToken();
         } else if (token == Token.DOLLAR) {
             checkLanguageVersion40("a variable reference directly after `?`");
             offset = t.currentTokenStartOffset;
             StructuredQName varName = parseVariableName();
-            result = makeLookupExpression(lhs, modifier, resolveVariableReference(offset, varName), deep);
+            result = makeLookupExpression(env.getConfiguration(), lhs, modifier, resolveVariableReference(offset, varName), deep);
         } else {
             grumble("Unexpected " + token + " after '?'");
             return null;
@@ -3624,8 +3640,8 @@ public class XPathParser {
         return result;
     }
 
-    protected Expression makeLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep) {
-        return parserExtension.makeLookupExpression(lhs, modifier, rhs, deep, allowXPath40Syntax);
+    protected Expression makeLookupExpression(Configuration config, Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep) throws XPathException {
+        return parserExtension.makeLookupExpression(config, lhs, modifier, rhs, deep, allowXPath40Syntax);
     }
 
 

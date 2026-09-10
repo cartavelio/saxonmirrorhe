@@ -7,10 +7,7 @@
 
 package net.sf.saxon;
 
-import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.ComplexContentOutputter;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
@@ -352,7 +349,7 @@ public class Gizmo {
                 String remainder = command.substring(space).trim();
                 if (keyword.equals("quit")) {
                     boolean quit = true;
-                    if (unsaved && !remainder.equals("now")) {
+                    if (interactive && unsaved && !remainder.equals("now")) {
                         while (true) {
                             String answer = talker.exchange("Quit without saving? (Y|N)");
                             if (answer.equalsIgnoreCase("y")) {
@@ -447,7 +444,7 @@ public class Gizmo {
         }
         XPathParser scanner = config.newExpressionParser("XP", false, env);
         scanner.parse(selection.toString(), 0, terminator, env);
-        int endPoint = scanner.getTokenizer().currentTokenStartOffset;
+        int endPoint = scanner.getOffsetAfterParsing();
         XPathExpression expr = evaluator.createExpression(selection.substring(0, endPoint));
         selection.replace(0, endPoint, "");
         return expr;
@@ -726,7 +723,7 @@ public class Gizmo {
         saveCurrentDoc();
         List<NodeInfo> nodes = listOfSelectedItems(buffer, Tokenizer.finishOnKeyword("with"));
         dropElementIndexes();
-        buffer.replace(0, 5, "");
+        buffer.replace(0, "with".length(), "");
         XQueryExpression newContent = getQuery(buffer);
         for (NodeInfo item : nodes) {
             if (item instanceof MutableNodeInfo) {
@@ -765,7 +762,8 @@ public class Gizmo {
                         throw new XPathException("Cannot supply attributes for " + where + " command (use 'prefix')");
                     }
                     if (!replacement.isEmpty()) {
-                        NodeInfo[] childArray = replacement.toArray(new NodeInfo[0]);
+                        // Bug 6489 - copy the replacement elements
+                        NodeInfo[] childArray = copyNodes(config, replacement);
                         switch (where) {
                             case "content":
                                 target.replace(childArray, true);
@@ -803,6 +801,39 @@ public class Gizmo {
         unsaved = true;
     }
 
+    private NodeInfo[] copyNodes(Configuration config, Iterable<NodeInfo> supplied) throws XPathException {
+        // Make copies of the inserted nodes, and convert them to use the same object model implementation
+        // as the node into which they are being inserted
+
+        PipelineConfiguration pipe = config.makePipelineConfiguration();
+        LinkedTreeBuilder builder = new LinkedTreeBuilder(pipe, Durability.MUTABLE);
+        builder.setAllocateSequenceNumbers(false);
+
+
+        TreeReceiver out = new TreeReceiver(builder);
+        out.setPipelineConfiguration(pipe);
+
+        out.open();
+        out.startDocument(ReceiverOption.NONE);
+
+        int copyNs = ReceiverOption.ALL_NAMESPACES;
+        for (NodeInfo n : supplied) {
+            out.append(n, Loc.NONE, copyNs);
+        }
+
+        out.endDocument();
+        out.close();
+
+        NodeInfo root = builder.getCurrentRoot();
+        AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
+        SequenceExtent extent = SequenceExtent.from(top);
+        int len = extent.getLength();
+        NodeInfo[] array = new NodeInfo[len];
+        for (int i = 0; i < len; i++) {
+            array[i] = (NodeInfo) extent.itemAt(i);
+        }
+        return array;
+    }
 
     private void save(StringBuilder buffer) throws XPathException {
         needCurrentDoc();

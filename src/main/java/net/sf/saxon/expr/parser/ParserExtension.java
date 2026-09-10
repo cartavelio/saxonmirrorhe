@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.parser;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -47,24 +48,7 @@ public class ParserExtension {
             return new LookupAllExpression(lhs);
         }
     }
-
-    /**
-     * Supporting code for lookup expressions (A?B) where B is an NCName
-     *
-     * @param lhs  the LHS operand of the lookup expression
-     * @param rhs  the RHS operand of the lookup expression
-     * @param deep true if the operator is "??" (in 4.0)
-     * @return the result of parsing the expression
-     */
-
-    public Expression lookupName(Expression lhs, LookupExpression.Modifier modifier, String rhs, boolean deep, boolean allow40) {
-        if (deep) {
-            throw new UnsupportedOperationException();
-        } else {
-            return new LookupExpression(lhs, modifier, new StringLiteral(rhs));
-        }
-    }
-
+    
 
     public void needExtension(XPathParser p, String what) throws XPathException {
         p.grumble(what + " require support for Saxon extensions, available in Saxon-PE or higher");
@@ -91,9 +75,11 @@ public class ParserExtension {
         return null;
     }
 
-    public Expression makeLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep, boolean allow40) {
+    public Expression makeLookupExpression(Configuration config, Expression lhs,
+                                           LookupExpression.Modifier modifier,
+                                           Expression rhs, boolean deep, boolean allow40) throws XPathException {
         if (deep) {
-            throw new UnsupportedOperationException();
+            return config.makeDeepLookupExpression(lhs, modifier, rhs);
         } else {
             return new LookupExpression(lhs, modifier, rhs);
         }

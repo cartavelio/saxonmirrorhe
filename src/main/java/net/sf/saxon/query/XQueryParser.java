@@ -196,11 +196,11 @@ public class XQueryParser extends XPathParser {
     public static void createRunTimeFunctionLibrary(QueryModule mainModule, Configuration config, Executable exec) {
         // Make the function library that's available at run-time (e.g. for saxon:evaluate() and function-lookup()).
         // This includes all user-defined functions regardless of which module they are in
-
+        int languageVersion = mainModule.getXPathVersion();
         FunctionLibrary userlib = exec.getFunctionLibrary();
         FunctionLibraryList lib = new FunctionLibraryList();
         lib.addFunctionLibrary(mainModule.getBuiltInFunctionSet());
-        lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
+        lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(languageVersion));
         lib.addFunctionLibrary(new ConstructorFunctionLibrary(config));
         lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
         lib.addFunctionLibrary(mainModule.getGlobalFunctionLibrary());
@@ -3247,9 +3247,9 @@ public class XQueryParser extends XPathParser {
      */
 
     /*@NotNull*/
-//    protected Expression parseDeepUpdateExpression() throws XPathException {
-//        return parserExtension.parseDeepUpdateExpression(this);
-//    }
+    protected Expression parseDeepUpdateExpression() throws XPathException {
+        return parserExtension.parseDeepUpdateExpression(this);
+    }
 
     /**
      * Parse an Extension Expression.

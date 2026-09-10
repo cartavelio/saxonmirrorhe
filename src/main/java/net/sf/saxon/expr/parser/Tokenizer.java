@@ -69,8 +69,20 @@ public final class Tokenizer {
      * @return a suitable predicate
      */
     public static Predicate<Tokenizer> finishOnKeyword(String keyword) {
-        return tok -> tok.nextToken instanceof Token.NameToken
-                && ((Token.NameToken)tok.nextToken).getValue().equals(keyword);
+        return tok -> {
+            if (tok.inputOffset >= tok.inputLength) {
+                return true;
+            }
+            if (tok.input.substring(tok.inputOffset).startsWith(keyword)) {
+                char beyond = tok.inputOffset + keyword.length() >= tok.inputLength
+                        ? NUL
+                        : tok.input.charAt(tok.inputOffset + keyword.length());
+                return !Character.isLetterOrDigit(beyond);
+            }
+            return false;
+        };
+//        return tok -> tok.nextToken instanceof Token.NameToken
+//                && ((Token.NameToken)tok.nextToken).getValue().equals(keyword);
     }
 
 
@@ -143,12 +155,6 @@ public final class Tokenizer {
     private Token precedingToken = Token.UNKNOWN;
 
     /**
-     * Flag to disallow "union" as a synonym for "|" when parsing XSLT 2.0 patterns
-     */
-
-    public boolean disallowUnionKeyword;
-
-    /**
      * Flag to indicate that this is XQuery as distinct from XPath
      */
 
@@ -176,7 +182,11 @@ public final class Tokenizer {
 
     /**
      * Set the condition that is used to decide when tokenization is complete
-     * @param condition the completion condition
+     * @param condition the completion condition. This condition is tested during
+     *                  lookAhead() processing. The call on lookAhead() first
+     *                  reads past all whitespace and comments, then tests the
+     *                  finish condition, and if the finish condition is satisfied
+     *                  at that point, it sets the next (pending) token to Token.EOF.
      */
     public void setFinishCondition(Predicate<Tokenizer> condition) {
         finishCondition = condition;
@@ -212,7 +222,6 @@ public final class Tokenizer {
         // correct category, by looking at the following token. In addition, it combines compound tokens
         // such as "instance of" and "cast as".
 
-        skipWhitespaceAndComments();
         lookAhead();
         next();
     }
@@ -245,7 +254,7 @@ public final class Tokenizer {
         currentTokenStartOffset = nextTokenStartOffset;
         lineNumber = nextLineNumber;
 
-        skipWhitespaceAndComments();
+        //skipWhitespaceAndComments();
         // This is needed because the test of finishCondition looks at characters rather than
         // tokens, so we need to skip insignificant characters
 
@@ -255,8 +264,8 @@ public final class Tokenizer {
             nextToken = Token.UNKNOWN;
         } else if (currentToken == Token.EOF) {
             // no action
-        } else if (finishCondition.test(this)) {
-            nextToken = Token.EOF;
+//        } else if (finishCondition.test(this)) {
+//            nextToken = Token.EOF;
         } else {
             lookAhead();
         }
@@ -293,15 +302,18 @@ public final class Tokenizer {
      */
     public void lookAhead() throws XPathException {
 
+        skipWhitespaceAndComments();
+
         if (finishCondition.test(this)) {
             nextToken = Token.EOF;
+            nextTokenStartOffset = inputOffset;
             return;
         }
 
         precedingToken = nextToken;
         nextTokenStartOffset = inputOffset;
         String nextTokenValue = "";
-        for (; ; ) {
+        while (true) {
             if (inputOffset >= inputLength) {
                 nextToken = Token.EOF;
                 return;
@@ -981,7 +993,6 @@ public final class Tokenizer {
         finishConditionStack.push(finishCondition);
         finishCondition = CLOSING_CURLY;
         braceDepth = 0;
-        skipWhitespaceAndComments();
         lookAhead();
         next();
     }
