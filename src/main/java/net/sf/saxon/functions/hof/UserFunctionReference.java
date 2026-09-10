@@ -81,7 +81,7 @@ public class UserFunctionReference extends Expression
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         // if this is an inline function, typecheck that function now
-        System.err.println("typeCheck " + this);
+        //System.err.println("typeCheck " + this);
         if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && typeCheckCounter == 0) {
             // Prevent recursive type-checking: test case -s:misc-HigherOrderFunctions -t:xqhof2
             typeCheckCounter++;
@@ -109,7 +109,7 @@ public class UserFunctionReference extends Expression
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         // if this is an inline function, optimize that function now
-        System.err.println("optimize " + this);
+        //System.err.println("optimize " + this);
         if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && optimizeCounter == 0) {
             // Prevent recursive optimization: test case -s:misc-HigherOrderFunctions -t:xqhof2 ; and bug #5054
             optimizeCounter++;
