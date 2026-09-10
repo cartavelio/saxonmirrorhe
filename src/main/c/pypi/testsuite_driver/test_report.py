@@ -39,7 +39,7 @@ class PyTestReport:
         ET.register_namespace("", self.test_driver_namespace)
         self.result_root = ET.Element('test-suite-result', xmlns=self.test_driver_namespace)
         implementation = ET.SubElement(self.result_root, "implementation", name=self.product, version=self.version)
-        ET.SubElement(implementation, "organization",  name="http://www.saxonica.com/", anonymous="false")
+        ET.SubElement(implementation, "organization",  name="https://www.saxonica.com/", anonymous="false")
         ET.SubElement(implementation, "submitter", name="O'Neil Delpratt", email="oneil@saxonica.com")
         ET.SubElement(implementation, "configuration", timeRun=str(current_time), lang=self.language)
         ET.SubElement(self.result_root, "test-run", dateRun=str(datetime.today())[0:10], testsuiteVersion="3.0.1")

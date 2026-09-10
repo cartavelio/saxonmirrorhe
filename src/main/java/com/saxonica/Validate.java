@@ -303,9 +303,8 @@ public class Validate {
 
             long startTime = now();
 
-            XsdCompiler compiler = processor.newXsdCompiler();
+            SchemaManager manager = processor.getSchemaManager();
 
-            List<Source> schemaSources = new ArrayList<>();
             for (String schemaFileName : schemaFileNames) {
                 Source schemaSource;
                 if (useURLs || CommandLineOptions.isImplicitURI(schemaFileName)) {
@@ -351,25 +350,21 @@ public class Validate {
                     return quit("URIResolver for schema file must return a Source", 2);
                 }
 
-                schemaSources.add(schemaSource);
-            }
-
-            XsdSchema schema;
-            try {
-                schema = compiler.compile(schemaSources.toArray(new Source[0]));
-            } catch (SaxonApiException e) {
-                if (e.getCause() instanceof SchemaException) {
-                    // bug 2351
-                    throw (SchemaException) e.getCause();
-                } else {
-                    throw e;
+                try {
+                    manager.load(schemaSource);
+                } catch (SaxonApiException e) {
+                    if (e.getCause() instanceof SchemaException) {
+                        // bug 2351
+                        throw (SchemaException) e.getCause();
+                    } else {
+                        throw e;
+                    }
                 }
             }
 
-
             if (scmInput != null) {
                 Source scm = new StreamSource(new File(scmInput));
-                schema = compiler.importComponents(scm);
+                manager.importComponents(scm);
             }
 
             if (showTime && !schemaFileNames.isEmpty()) {
@@ -381,7 +376,7 @@ public class Validate {
 
             // Validate the document instances
 
-            final SchemaValidator validator = schema.newValidator();
+            final SchemaValidator validator = manager.newSchemaValidator();
             validator.setLax("lax".equals(validationMode));
             if (topLevelElementName != null) {
                 validator.setDocumentElementName(QName.fromClarkName(topLevelElementName));
@@ -493,7 +488,7 @@ public class Validate {
                 Serializer scmSerializer = processor.newSerializer(scmOutputFile);
                 scmSerializer.setOutputProperty(Serializer.Property.METHOD, "xml");
                 scmSerializer.setOutputProperty(Serializer.Property.INDENT, "yes");
-                schema.exportComponents(scmSerializer);
+                manager.exportComponents(scmSerializer);
                 if (showTime) {
                     config.getLogger().info("Schema component model written to " + scmOutputFile.getAbsolutePath());
                 }
@@ -665,7 +660,7 @@ public class Validate {
         if (!showTime) {
             config.getLogger().info(config.getProductTitle());
         }
-        config.getLogger().info("Usage: see http://www.saxonica.com/documentation/index.html#!schema-processing/commandline");
+        config.getLogger().info("Usage: see https://www.saxonica.com/documentation/index.html#!schema-processing/commandline");
         config.getLogger().info("Format: " + CommandLineOptions.getCommandName(this) + " options");
         CommandLineOptions options = new CommandLineOptions();
         setPermittedOptions(options);

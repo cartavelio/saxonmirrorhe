@@ -3607,7 +3607,7 @@ public class XQueryParser extends XPathParser {
             if ("validate-type".equals(localName)) {
                 if (!env.getConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
                     warning("Ignoring saxon:validate-type. To use this feature " +
-                                    "you need the Saxon-EE processor from http://www.saxonica.com/", SaxonErrorCode.SXWN9042);
+                                    "you need the Saxon-EE processor from https://www.saxonica.com/", SaxonErrorCode.SXWN9042);
                 } else {
                     String typeName = Whitespace.trim(pragmaContents);
                     if (!NameChecker.isQName(StringTool.codePoints(typeName))) {
