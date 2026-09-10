@@ -450,7 +450,7 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
     }
 
     /**
-     * Configure a SAX parser to ensure it has the correct namesapce properties set
+     * Configure a SAX parser to ensure it has the correct namespace properties set
      *
      * @param parser the parser to be configured
      * @throws XPathException if the parser cannot be configured to the

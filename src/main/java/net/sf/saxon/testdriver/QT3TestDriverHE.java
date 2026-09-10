@@ -282,6 +282,11 @@ public class QT3TestDriverHE extends TestDriver {
                 return !inverse;
             } else if ("advanced-uca-fallback".equals(value)) {
                 return (edition.equals("PE") || edition.equals("EE")) ^ inverse;
+            } else if ("XQUpdate".equals(value)) {
+                if (!inverse) {
+                    env.xqueryCompiler.setUpdatingEnabled(true);
+                }
+                return (edition.equals("EE")) ^ inverse;
             } else {
                 println("**** feature = " + value + "  ????");
                 return false;
@@ -315,6 +320,7 @@ public class QT3TestDriverHE extends TestDriver {
         boolean run = true;
         String hostLang;
         String langVersion;
+        boolean updating = true;
         Spec specOpt = null;
         XPathCompiler xpath = driverProc.newXPathCompiler();
         String testCaseName = testCase.attribute("name");
@@ -404,6 +410,9 @@ public class QT3TestDriverHE extends TestDriver {
                     }
                 };
                 env.processor.setConfigurationProperty(FeatureKeys.ENVIRONMENT_VARIABLE_RESOLVER, resolver);
+            }
+            if (type.equals("feature") && value.equals("XQUpdate")) {
+                updating = true;
             }
             /*if (type.equals("feature") && value.equals("xpath-1.0-compatibility")) {
                 hostLang = "XP";
@@ -628,16 +637,33 @@ public class QT3TestDriverHE extends TestDriver {
                             if (env.unparsedTextResolver != null) {
                                 selector.getUnderlyingQueryContext().setUnparsedTextURIResolver(env.unparsedTextResolver);
                             }
-                            if (needSerializedResult) {
-                                StringWriter sw = new StringWriter();
-                                Serializer serializer = env.processor.newSerializer(sw);
-                                selector.setDestination(serializer);
+                            if (updating && q.isUpdateQuery()) {
                                 selector.run();
-                                outcome.setPrincipalSerializedResult(sw.toString());
-                            }
-                            if (needResultValue) {
-                                XdmValue result = selector.evaluate();
-                                outcome.setPrincipalResult(result);
+                                XdmNode resultDoc = null;
+                                Iterator<XdmNode> iter = selector.getUpdatedDocuments();
+                                while (iter.hasNext()) {
+                                    if (resultDoc != null) {
+                                        outcome.setException(new QName("MULTIPLE_UPDATED_DOCUMENTS"));
+                                    }
+                                    resultDoc = iter.next();
+                                }
+                                if (resultDoc == null) {
+                                    outcome.setException(new QName("NO_UPDATED_DOCUMENTS"));
+                                }
+                                outcome.setPrincipalResult(resultDoc);
+                            } else {
+                                if (needSerializedResult) {
+                                    StringWriter sw = new StringWriter();
+                                    Serializer serializer = env.processor.newSerializer(sw);
+                                    selector.setDestination(serializer);
+                                    selector.run();
+                                    outcome.setPrincipalSerializedResult(sw.toString());
+                                }
+
+                                if (needResultValue) {
+                                    XdmValue result = selector.evaluate();
+                                    outcome.setPrincipalResult(result);
+                                }
                             }
                         } catch (SaxonApiException err) {
                             println("in TestSet " + testSetName);
