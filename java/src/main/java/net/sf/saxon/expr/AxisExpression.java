@@ -312,8 +312,10 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
             itemType = target;
         } else if (target instanceof AnyXNodeType || targetUType.subsumes(test.getUType())) {
             itemType = test.getItemType();
-        } else {
+        } else if (target instanceof NodeTest) {
             itemType = new CombinedNodeTest((NodeTest) target, OperatorSymbol.INTERSECT, test).getItemType();
+        } else {
+            itemType = target;
         }
 
         if (test != null) {

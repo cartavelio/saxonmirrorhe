@@ -61,6 +61,7 @@ public class ParamKeywords {
         arrayParamNames.put("split", "array");
         arrayParamNames.put("sort", "array|collation|key");
         arrayParamNames.put("sort-by", "array|keys");
+        arrayParamNames.put("sort-with", "array|comparators");
         arrayParamNames.put("subarray", "array|start|length");
         arrayParamNames.put("tail", "array");
         arrayParamNames.put("trunk", "array");
