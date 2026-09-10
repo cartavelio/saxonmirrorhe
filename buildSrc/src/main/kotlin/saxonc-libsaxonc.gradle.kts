@@ -368,8 +368,6 @@ val sourceZipTask = tasks.register<Zip>("source_release_zip") {
     archiveAppendix = "source"
     archiveVersion = saxonBuild.version
 
-    destinationDirectory = packagedDir
-
     val topLevelDir = extension.package_name.map { name -> "${name}-${saxonBuild.version.get()}" }
     into(topLevelDir)
 
@@ -409,6 +407,7 @@ val sourceZipTask = tasks.register<Zip>("source_release_zip") {
 
 val release = tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
     dependsOn(if (saxonBuild.targetHost.get().isWindows) releaseZipWindowsTask else releaseZipUnicesTask)
+    dependsOn(sourceZipTask)
 }
 
 libDir.outgoing.artifact(releaseStagingPath.map { it.dir("lib") }) { builtBy(stage) }
