@@ -243,30 +243,31 @@ public class TypeHierarchy {
                 }
             } else if (t2 instanceof AnyItemType) {
                 return SUBSUMED_BY;
-            } else if (t2 instanceof ChoiceItemType) {
-                boolean allSubsumes = true;
-                boolean allDisjoint = true;
-                for (ItemType it : ((ChoiceItemType)t2).getMemberTypes()) {
-                    Affinity a0 = relationship(t1, it);
-                    if (a0 == SAME_TYPE || a0 == SUBSUMED_BY) {
-                        return SUBSUMED_BY;
-                    }
-                    if (a0 != DISJOINT) {
-                        allDisjoint = false;
-                    }
-                    if (a0 != SUBSUMES) {
-                        allSubsumes = false;
-                    }
-                }
-                if (allDisjoint) {
-                    return DISJOINT;
-                }
-                if (allSubsumes) {
-                    return SUBSUMES;
-                }
-                return OVERLAPS;
-            } else if (t1 instanceof ChoiceItemType) {
-                return inverseRelationship(relationship(t2, t1));
+            } else if (t1 instanceof ChoiceItemType || t2 instanceof ChoiceItemType) {
+                ChoiceItemType c1 = t1 instanceof ChoiceItemType ? (ChoiceItemType) t1 : ChoiceItemType.of(t1);
+                ChoiceItemType c2 = t2 instanceof ChoiceItemType ? (ChoiceItemType) t2 : ChoiceItemType.of(t2);
+                return choiceItemRelationship(c1, c2);
+//                boolean allSubsumes = true;
+//                boolean allDisjoint = true;
+//                for (ItemType it : ((ChoiceItemType)t2).getMemberTypes()) {
+//                    Affinity a0 = relationship(t1, it);
+//                    if (a0 == SAME_TYPE || a0 == SUBSUMED_BY) {
+//                        return SUBSUMED_BY;
+//                    }
+//                    if (a0 != DISJOINT) {
+//                        allDisjoint = false;
+//                    }
+//                    if (a0 != SUBSUMES) {
+//                        allSubsumes = false;
+//                    }
+//                }
+//                if (allDisjoint) {
+//                    return DISJOINT;
+//                }
+//                if (allSubsumes) {
+//                    return SUBSUMES;
+//                }
+//                return OVERLAPS;
             } else if (t1.isPlainType()) {
                 if (t2 instanceof NodeTest || t2 instanceof FunctionItemType || t2 instanceof JavaExternalObjectType) {
                     return DISJOINT;
@@ -727,6 +728,63 @@ public class TypeHierarchy {
         }
 
         return OVERLAPS;
+    }
+
+    public Affinity choiceItemRelationship(ChoiceItemType c1, ChoiceItemType c2) {
+        // Algorithm (issue #1395):  A ⊆ B is true if every item type a among the
+        // alternatives of A satisfies a ⊆ b for some item type b among the alternatives of B.
+        // However, we are interested in more than just the subtype relationship. So we apply
+        // the following rules:
+        //
+        // * Let SUB := every predicate on the RHS is subsumed by (or same as) a predicate on the LHS
+        // * Let SUP := every predicate on the LHS is subsumed by (or same as) a predicate on the RHS
+        // * If SUB && SUP return SAME
+        // * If SUB return SUBSUMES
+        // * If SUP return SUBSUMED_BY
+        // * If every pair of item types is disjoint, then DISJOINT
+        // * Else OVERLAPS
+
+        boolean allSUB = true;
+        boolean allSUP = true;
+        boolean allDIS = true;
+        for (ItemType lhs : c1.memberTypes) {
+            boolean foundSUP = false;
+            for (ItemType rhs : c2.memberTypes) {
+                Affinity a = relationship(lhs, rhs);
+                if (a != DISJOINT) {
+                    allDIS = false;
+                }
+                if (a == Affinity.SAME_TYPE || a == SUBSUMED_BY) {
+                    foundSUP = true;
+                }
+            }
+            if (!foundSUP) {
+                allSUP = false;
+            }
+        }
+        for (ItemType rhs : c2.memberTypes) {
+            boolean foundSUB = false;
+            for (ItemType lhs : c1.memberTypes) {
+                Affinity a = relationship(lhs, rhs);
+                if (a == Affinity.SAME_TYPE || a == SUBSUMES) {
+                    foundSUB = true;
+                    break;
+                }
+            }
+            if (!foundSUB) {
+                allSUB = false;
+            }
+        }
+        if (allSUB && allSUP) {
+            return SAME_TYPE;
+        }
+        if (allSUB) {
+            return SUBSUMES;
+        }
+        if (allSUP) {
+            return SUBSUMED_BY;
+        }
+        return allDIS ? DISJOINT : OVERLAPS;
     }
 
     /**
