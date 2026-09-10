@@ -232,7 +232,6 @@ public class GenericAtomicComparer implements AtomicComparer {
 
                 case StandardNames.XS_QNAME:
                 case StandardNames.XS_NOTATION:
-                case StandardNames.XS_DURATION:
                     switch (operator) {
                         case Token.FEQ:
                             return (a, b, context) -> a.equals(b);
@@ -261,7 +260,7 @@ public class GenericAtomicComparer implements AtomicComparer {
         }
 
         if (type0.isDurationType() && type1.isDurationType()) {
-            // different subtypes of xs:duration - only equality comparison allowed
+            // potentially different subtypes of xs:duration - only equality comparison allowed
             switch (operator) {
                 case Token.FEQ:
                     return (a, b, context) -> a.equals(b);
