@@ -609,77 +609,93 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 }
             } else {
                 SequenceIterator iter = arguments[0].iterate();
-                MapItem baseMap = (MapItem) iter.next();
-                if (baseMap == null) {
-                    return new HashTrieMap();
-                } else {
-                    MapItem next;
-                    while ((next = (MapItem) iter.next()) != null) {
-                        // Merge the next map and the base map. Merge the smaller of the two
-                        // maps into the larger. The complication is that this affects duplicates handling.
-                        // See bug #4865
-                        boolean inverse = next.size() > baseMap.size();
-                        MapItem larger = inverse ? next : baseMap;
-                        MapItem smaller = inverse ? baseMap : next;
-                        String dup = inverse ? invertDuplicates(duplicates) : duplicates;
-                        for (KeyValuePair pair : smaller.keyValuePairs()) {
-                            Sequence existing = larger.get(pair.key);
-                            if (existing != null) {
-                                switch (dup) {
-                                    case "use-first":
-                                    case "unspecified":
-                                    case "use-any":
-                                        // no action
-                                        break;
-                                    case "use-last":
-                                        larger = larger.addEntry(pair.key, pair.value);
-                                        break;
-                                    case "combine": {
-                                        InsertBefore.InsertIterator combinedIter =
-                                                new InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
-                                        GroundedValue combinedValue = SequenceTool.toGroundedValue(combinedIter);
-                                        larger = larger.addEntry(pair.key, combinedValue);
-                                        break;
-                                    }
-                                    case "combine-reverse": {
-                                        InsertBefore.InsertIterator combinedIter =
-                                                new InsertBefore.InsertIterator(existing.iterate(), pair.value.iterate(), 1);
-                                        GroundedValue combinedValue = SequenceTool.toGroundedValue(combinedIter);
-                                        larger = larger.addEntry(pair.key, combinedValue);
-                                        break;
-                                    }
-                                    case "use-callback":
-                                        assert onDuplicates != null;
-                                        Sequence[] args;
-                                        if (inverse) {
-                                            args = onDuplicates.getArity() == 2 ?
-                                                    new Sequence[]{pair.value, existing} :
-                                                    new Sequence[]{pair.value, existing, pair.key};
-                                        } else {
-                                            args = onDuplicates.getArity() == 2 ?
-                                                    new Sequence[]{existing, pair.value} :
-                                                    new Sequence[]{existing, pair.value, pair.key};
-                                        }
-                                        Sequence combined = onDuplicates.call(context, args);
-                                        larger = larger.addEntry(pair.key, combined.materialize());
-                                        break;
-                                    default:
-                                        throw new XPathException("Duplicate key in constructed map: " +
-                                                                         Err.wrap(pair.key.getStringValue()), duplicatesErrorCode);
-                                }
-                            } else {
-                                larger = larger.addEntry(pair.key, pair.value);
-                            }
-                        }
-                        baseMap = larger;
-                    }
-                    return baseMap;
-                }
+                return mergeMaps(iter, context, duplicates, duplicatesErrorCode, onDuplicates);
             }
 
         }
 
-        private String invertDuplicates(String duplicates) {
+        /**
+         * Merge a sequence of maps into a single map
+         * @param iter iterator over the input maps
+         * @param context The XPath dynamic context
+         * @param duplicates action to be taken when duplicate keys are encountered
+         * @param duplicatesErrorCode if duplicates are not allowed, the error code to be used
+         * @param onDuplicates callback to be used when duplicates = "use-callback"
+         * @return the merged map
+         * @throws XPathException if any error occurs, including detection of disallowed duplicates
+         */
+        public static MapItem mergeMaps(SequenceIterator iter, XPathContext context,
+                                        String duplicates, String duplicatesErrorCode, Function onDuplicates)
+                throws XPathException {
+            MapItem baseMap = (MapItem) iter.next();
+            if (baseMap == null) {
+                return new HashTrieMap();
+            } else {
+                MapItem next;
+                while ((next = (MapItem) iter.next()) != null) {
+                    // Merge the next map and the base map. Merge the smaller of the two
+                    // maps into the larger. The complication is that this affects duplicates handling.
+                    // See bug #4865
+                    boolean inverse = next.size() > baseMap.size();
+                    MapItem larger = inverse ? next : baseMap;
+                    MapItem smaller = inverse ? baseMap : next;
+                    String dup = inverse ? invertDuplicates(duplicates) : duplicates;
+                    for (KeyValuePair pair : smaller.keyValuePairs()) {
+                        Sequence existing = larger.get(pair.key);
+                        if (existing != null) {
+                            switch (dup) {
+                                case "use-first":
+                                case "unspecified":
+                                case "use-any":
+                                    // no action
+                                    break;
+                                case "use-last":
+                                    larger = larger.addEntry(pair.key, pair.value);
+                                    break;
+                                case "combine": {
+                                    InsertBefore.InsertIterator combinedIter =
+                                            new InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
+                                    GroundedValue combinedValue = SequenceTool.toGroundedValue(combinedIter);
+                                    larger = larger.addEntry(pair.key, combinedValue);
+                                    break;
+                                }
+                                case "combine-reverse": {
+                                    InsertBefore.InsertIterator combinedIter =
+                                            new InsertBefore.InsertIterator(existing.iterate(), pair.value.iterate(), 1);
+                                    GroundedValue combinedValue = SequenceTool.toGroundedValue(combinedIter);
+                                    larger = larger.addEntry(pair.key, combinedValue);
+                                    break;
+                                }
+                                case "use-callback":
+                                    assert onDuplicates != null;
+                                    Sequence[] args;
+                                    if (inverse) {
+                                        args = onDuplicates.getArity() == 2 ?
+                                                new Sequence[]{pair.value, existing} :
+                                                new Sequence[]{pair.value, existing, pair.key};
+                                    } else {
+                                        args = onDuplicates.getArity() == 2 ?
+                                                new Sequence[]{existing, pair.value} :
+                                                new Sequence[]{existing, pair.value, pair.key};
+                                    }
+                                    Sequence combined = onDuplicates.call(context, args);
+                                    larger = larger.addEntry(pair.key, combined.materialize());
+                                    break;
+                                default:
+                                    throw new XPathException("Duplicate key in constructed map: " +
+                                                                     Err.wrap(pair.key.getStringValue()), duplicatesErrorCode);
+                            }
+                        } else {
+                            larger = larger.addEntry(pair.key, pair.value);
+                        }
+                    }
+                    baseMap = larger;
+                }
+                return baseMap;
+            }
+        }
+
+        private static String invertDuplicates(String duplicates) {
             switch (duplicates) {
                 case "use-first":
                 case "unspecified":
