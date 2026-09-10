@@ -172,6 +172,29 @@ void testXPathAttrValues(SaxonProcessor * processor, XPathProcessor * xpath, sRe
 
 }
 
+
+void testXPathValues2(SaxonProcessor * processor, XPathProcessor * xpath, sResultCount *sresult){
+    XdmValue * resultValues = xpath->evaluate("1, 'string', true(), parse-xml-fragment(string-join((1 to 3) ! ('<item>' || . || '</item>')))/node(), array { 1 to 5 }, map { 'key1' : 1, 'key2' : 'foo' }");
+
+
+    if(resultValues == nullptr) {
+        printf("result is null \n");
+        SaxonApiException * exception = xpath->getException();
+        if(exception != nullptr) {
+            const char *message = xpath->getErrorMessage();
+            cout << "Error Message = " << message << endl;
+            xpath->exceptionClear();
+        }
+        sresult->failure++;
+        sresult->failureList.push_back("testXPathValues2");
+
+    } else {
+        cout << "Number of items=" << resultValues->size() << endl;
+        cout << "toString()=" << resultValues->toString() << endl;
+
+    }
+}
+
 // Test case on the evaluate method in XPathProcessor. Here we test that we have morethan one XdmItem.
 void testXPathOnFile(SaxonProcessor * processor, XPathProcessor * xpath, sResultCount *sresult){
     	 cout<<endl<<"Test testXPath with file source:"<<endl;
@@ -262,7 +285,7 @@ int main()
     testXPathAttrValues(processor, xpathProc, sresult);
     testXPathOnFile(processor, xpathProc, sresult);
     testXPathOnFile2(xpathProc, sresult);
-
+    testXPathValues2(processor, xpathProc, sresult);
 
     std::cout << "\nTest Results - Number of tests= " << (sresult->success + sresult->failure) << ", Successes = "
               << sresult->success << ",  Failures= " << sresult->failure << std::endl;

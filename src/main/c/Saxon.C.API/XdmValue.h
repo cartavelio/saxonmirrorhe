@@ -195,6 +195,7 @@ protected:
     refCount  = 0;
     valueType = nullptr;
     xdmSize   = 0;
+    toStringValue ="";
   }
 
     char* valueType;  /*!< Cached. The type of the XdmValue */

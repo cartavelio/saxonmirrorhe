@@ -34,13 +34,13 @@ int main()
      */
     //initDefaultJavaRT (&environi);
     initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
-    const char *verCh = version(*environi);
+    const char *verCh = version(environi);
     printf("XSLT Tests\n\nSaxon version: %s \n", verCh);	
-    jobject num = integerValue(*environi, 5);
+    jobject num = integerValue(environi, 5);
     setParameter(&parameters, &parLen, &parCap,"", "numParam", num);
   
 
-    const char *result = xsltApplyStylesheet(*environi, &processor, NULL, "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
+    const char *result = xsltApplyStylesheet(environi, &processor, NULL, "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
   
 	
 

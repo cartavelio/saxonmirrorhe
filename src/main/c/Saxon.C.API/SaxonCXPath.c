@@ -32,23 +32,23 @@ jobject booleanValue(sxnc_environment *environi, bool b){
      * Create an boxed Integer value
      * @param val - int value
      */
-jobject integerValue(sxnc_environment environi, int i){
+jobject integerValue(sxnc_environment *environi, int i){
 	
-	 if(environi.env == NULL) {
+	 if(environi->env == NULL) {
 		printf("Error: Saxon-C env variable is NULL\n");
 		fflush (stdout);
            	return NULL;
 	 }
 
-	 jclass  integerClass = lookForClass(environi.env, "java/lang/Integer");
+	 jclass  integerClass = lookForClass(environi->env, "java/lang/Integer");
  	/*static */ jmethodID intMID = NULL;
 	 //if(!intMID){
-		intMID = (jmethodID)(*(environi.env))->GetMethodID (environi.env, integerClass, "<init>", "(I)V");
+		intMID = (jmethodID)(*(environi->env))->GetMethodID (environi->env, integerClass, "<init>", "(I)V");
 	 //}
 if(!intMID){
 	printf("error in intMID");
 }	
-	 jobject intValue = (*(environi.env))->NewObject(environi.env, integerClass, intMID, (jint)i);
+	 jobject intValue = (*(environi->env))->NewObject(environi->env, integerClass, intMID, (jint)i);
       	 if (!intValue) {
 	    	printf("Error: failed to allocate Integer object\n");
 printf("Value to build: %i",i);

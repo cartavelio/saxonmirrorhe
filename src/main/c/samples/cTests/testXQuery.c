@@ -35,14 +35,14 @@ int main()
      */
     //initDefaultJavaRT (&environi);
     initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
-    const char *verCh = version(*environi);
+    const char *verCh = version(environi);
     printf("XQuery Tests\n\nSaxon version: %s \n", verCh);
 
-    setProperty(&properties, &propLen, &propCap, "s", "cat.xml");
+    setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
 
     setProperty(&properties, &propLen, &propCap, "qs", "<out>{count(/out/person)}</out>");
 
-    const char * result = executeQueryToString(*environi, &processor, NULL, 0,properties,0,propLen);
+    const char * result = executeQueryToString(environi, &processor, NULL, 0,properties,0,propLen);
 
     if(!result) {
       printf("result is null\n");

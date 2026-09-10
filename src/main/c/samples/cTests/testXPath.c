@@ -33,7 +33,7 @@ int main()
      */
     //initDefaultJavaRT (&environi);
     initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
-    const char *verCh = version(*environi);
+    const char *verCh = version(environi);
     printf("XPath Tests\n\nSaxon version: %s \n", verCh);
     setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
     
