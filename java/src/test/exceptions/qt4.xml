@@ -115,7 +115,7 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case=" fo-test-fn-build-dateTime-001
                   fo-test-fn-build-dateTime-002
                   fo-test-fn-build-dateTime-003
@@ -126,7 +126,7 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-02-10"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="fn-serialize" 
       test-case="serialize-xhtml-149" 
