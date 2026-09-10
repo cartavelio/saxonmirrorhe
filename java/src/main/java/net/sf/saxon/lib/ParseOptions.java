@@ -1140,7 +1140,7 @@ public class ParseOptions {
      */
 
     public boolean isTrusted() {
-        return getBooleanProperty(Key.STABLE, true);
+        return getBooleanProperty(Key.TRUSTED, false);
     }
 
     /**
