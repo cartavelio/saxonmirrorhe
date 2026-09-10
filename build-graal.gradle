@@ -916,6 +916,40 @@ task all_saxonc_releases() {
   }
 }
 
+
+tasks.register("pyBuildVenv") {
+  dependsOn 'record_branch'
+  description "Create Python Venv for the current branch if none exists"
+
+  BufferedReader branch = new BufferedReader(new FileReader(layout.buildDirectory.file("built-branch").get().asFile))
+  def currentBranch = branch.readLine()
+  System.err.println(currentBranch)
+  def venvDir = layout.buildDirectory.dir("py_venvs/${currentBranch}")
+
+  // only if the venv is not there
+  // (caching this won't work - we don't know the outputs until the task is run)
+  onlyIf {
+    !venvDir.get().file("pyvenv.cfg").asFile.exists()
+  }
+  outputs.dir(venvDir)
+
+  ext {
+    venvPath = venvDir
+  }
+
+  doFirst {
+    System.err.println(venvDir.get().toString())
+    exec {
+      if(systemOs.isMacOsX() || systemOs.isLinux()) {
+        executable "python3"
+      } else {
+        executable "python"
+      }
+      args "-m", "venv", venvDir.get().toString()
+    }
+  }
+}
+
 ["he", "pe", "ee"].each { edition ->
   //def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
   def graalEdition = "graal_ce_home"
@@ -1043,29 +1077,44 @@ task all_saxonc_releases() {
     }
   }
 
+  tasks.register("saxon_${edition}c_pipInstall") {
+    dependsOn 'pyBuildVenv', "setup_${edition}c_pypi"
+    description "Install pip requirements into the current Python Venv"
+
+    doFirst {
+      exec {
+        workingDir layout.buildDirectory.dir("${edition}c_pypi")
+
+        def venvDir = tasks.named("pyBuildVenv").get().venvPath
+
+        if(systemOs.isMacOsX() || systemOs.isLinux()) {
+          executable venvDir.get().file("bin/pip")
+        } else {
+          executable venvDir.get().file("Scripts/pip")
+        }
+        args "install", "-r", "requirements.txt"
+      }
+    }
+  }
+
   task "saxon_${edition}c_pypi"(
-    dependsOn: ["setup_${edition}c_pypi"]
+    dependsOn: ["setup_${edition}c_pypi", "saxon_${edition}c_pipInstall"]
   ) {
     inputs.files tasks.findByName("setup_${edition}c_pypi").outputs.getFiles()
-    outputs.files fileTree(dir: "${buildDir}/${edition}c_pypi/dist")
+    outputs.files layout.buildDirectory.dir("${edition}c_pypi/dist")
 
     doLast {
       exec {
-        workingDir "${buildDir}/${edition}c_pypi"
-        if(systemOs.isMacOsX() || systemOs.isLinux()) {
-          commandLine "python3", "-mpip", "install", "-r", "requirements.txt"
-        } else {
-          commandLine "python", "-mpip", "install", "-r", "requirements.txt"
-        }
-      }
-    }
+        workingDir layout.buildDirectory.dir("${edition}c_pypi")
 
-    if(systemOs.isMacOsX() || systemOs.isLinux()) {
-      doLast {
-        exec {
-          workingDir "${buildDir}/${edition}c_pypi"
-          commandLine "python3", "setup.py", "bdist_wheel"
-	}
+        def venvDir = tasks.named("pyBuildVenv").get().venvPath
+
+        if(systemOs.isMacOsX() || systemOs.isLinux()) {
+          executable venvDir.get().file("bin/python")
+        } else {
+          executable venvDir.get().file("Scripts/python")
+        }
+        args "setup.py", "bdist_wheel"
       }
     }
   }
