@@ -258,4 +258,4 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
 }
 
 
-// Original Code is Copyright (c) 2009-2020 Saxonica Limited
+// Original Code is Copyright (c) 2009-2026 Saxonica Limited

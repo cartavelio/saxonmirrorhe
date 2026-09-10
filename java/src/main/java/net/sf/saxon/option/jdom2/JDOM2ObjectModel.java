@@ -302,4 +302,4 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
 }
 
 
-// Original Code is Copyright (c) 2009-2020 Saxonica Limited
+// Original Code is Copyright (c) 2009-2026 Saxonica Limited

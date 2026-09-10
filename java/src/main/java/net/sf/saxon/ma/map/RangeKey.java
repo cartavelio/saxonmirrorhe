@@ -299,4 +299,4 @@ public class RangeKey extends MapItem {
     }
 }
 
-// Copyright (c) 2012-2021 Saxonica Limited
+// Copyright (c) 2012-2026 Saxonica Limited

@@ -56,4 +56,4 @@ public class FunctionAnnotations extends SystemFunction {
     }
 }
 
-// Copyright (c) 2024 Saxonica Limited
+// Copyright (c) 2024-2026 Saxonica Limited

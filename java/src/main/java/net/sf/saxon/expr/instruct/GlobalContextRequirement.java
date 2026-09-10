@@ -183,4 +183,4 @@ public class GlobalContextRequirement {
     }
 }
 
-// Copyright (c) 2018-2025 Saxonica Limited
+// Copyright (c) 2018-2026 Saxonica Limited

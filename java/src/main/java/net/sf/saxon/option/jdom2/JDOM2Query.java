@@ -47,4 +47,4 @@ public class JDOM2Query extends Query {
 }
 
 
-// Original Code is Copyright (c) 2009-2020 Saxonica Limited
+// Original Code is Copyright (c) 2009-2026 Saxonica Limited

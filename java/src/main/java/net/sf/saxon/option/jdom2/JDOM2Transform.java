@@ -67,4 +67,4 @@ public class JDOM2Transform extends Transform {
     }
 }
 
-// Original Code is Copyright (c) 2009-2020 Saxonica Limited
+// Original Code is Copyright (c) 2009-2026 Saxonica Limited
