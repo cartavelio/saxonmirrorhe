@@ -3,8 +3,7 @@
    <h1>Extension functions in C++/PHP</h1>
 
    <p>This section describes how to extend the capability of Saxon XSLT stylesheets and XQuery
-      queries by adding user written extension functions in the C++ and PHP languages. It is not
-      currently possible to write extension functions in Python.</p>
+      queries by adding user written extension functions in the C++, Python and PHP languages.</p>
 
    <nav>
       <ul/>
@@ -12,10 +11,9 @@
 
    <p>Extension functions allow code written in a host programming language such as C++ to be
       invoked directly from a function call in an XPath expression (whether in XSLT, XQuery, or pure
-      XPath). For this to work, (a) the Saxon processor needs to be able to locate the executable
-      code corresponding to a particular function name, and (b) function arguments need to be
-      converted from the XDM type system to the host language type system, with the opposite
-      conversion applied to the function result.</p>
+      XPath). For this to work the Saxon processor needs to be able to locate the executable
+      code corresponding to a particular function name. For the function arguments these can be as XDM types
+      or converted to the host language type system, with the opposite conversion applied to the function result.</p>
 
    <p>XSLT, XQuery, and XPath are functional languages where it is assumed that functions do not
       have side effects. Saxon cannot stop you calling extension functions that have side effects,

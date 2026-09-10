@@ -6,6 +6,6 @@
    <section ref="configuration">Configuration</section>
    <section ref="api">SaxonC API</section>
    <section ref="samples">SaxonC samples</section>
-   <!--<section ref="extensibility">Extension functions in C++/PHP</section> -->
+   <section ref="extensibility">Extension functions in C++/PHP/Python</section>
    <section ref="technical">Technical information</section>
 </catalog>

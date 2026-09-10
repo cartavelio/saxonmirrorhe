@@ -43,15 +43,10 @@
 #include "XPathProcessor.h"
 #include "XQueryProcessor.h"
 #include "Xslt30Processor.h"
+#include "UserFunctionHandler.h"
 #include "XsltExecutable.h"
 
-#if defined PYTHON_SAXONC_API
-#include "CythonUserFunctionHandler.h"
-#elif defined PHP_SAXONC_API
-#include "PHPUserFunctionHandler.h"
-#endif
-//#include "com_saxonica_functions_extfn_PhpCall.h"
-//#include "com_saxonica_functions_extfn_PhpCall_PhpFunctionCall.h"
+
 //#define MEM_DEBUG
 #if defined MEM_DEBUG
 
@@ -123,7 +118,6 @@ struct UserFunctionDescriptor{
 } ;
 
 
-typedef XdmValue *(*sxnExtensionFunction)(int, XdmValue **);
 
 extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments);
 

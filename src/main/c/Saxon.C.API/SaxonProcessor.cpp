@@ -91,43 +91,12 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
         arguments1[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)arguments[i]);
   }
 
-
-#if defined PYTHON_SAXONC_API
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    fprintf(stdout, "We are in a c function preprocessor directive for Python\n");
-    fflush(stdout);
-  }
-  userFuncResult = python_nativeFunctionCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
-  //TODO reset XdmValue, See PHP code below
-
-#elif defined PHP_SAXONC_API
-
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    fprintf(stdout, "We are in a c function preprocessor directive for PHP\n");
-    fflush(stdout);
-  }
-
-  userFuncResult  = phpNativeCall(functionName, proc, useNativeTypes, numOfArguments, arguments1);
+  userFuncResult  = userFunctionNativeCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
 
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr<<"after user function call - c_nativeCall ref="<<((long)userFuncResult)<<std::endl;
   }
 
-#else
-
-
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    fprintf(stdout, "We are in a c function name= %s\n", functionName);
-
-    fprintf(stdout, "We are in a c function pointer= %p\n", func);
-    fflush(stdout);
-  }
-  sxnExtensionFunction func1 = sxnExtensionFunction(func);
-
-  result = func1(numOfArguments, arguments1);   // call of the user function
-
-  userFuncResult = (void *)result->getUnderlyingValue();
-#endif
   //destroy arguments
   /*if(useNativeTypes) {
     for(int i =0; i< numOfArguments; i++) {

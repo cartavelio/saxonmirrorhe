@@ -1867,7 +1867,7 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
 
 
 
-void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
+void * userFunctionNativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
 {
 
     //JNIEnv *senv = SaxonProcessor::sxn_environ->env;

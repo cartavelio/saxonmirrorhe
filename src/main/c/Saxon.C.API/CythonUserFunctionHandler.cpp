@@ -1,9 +1,10 @@
-#include "CythonUserFunctionHandler.h"
+#include "UserFunctionHandler.h"
+#include "Python.h"
 #include "XdmValue.h"
 
 extern "C" PyObject * CythonUserFunctionHandler;
 
-void * python_nativeFunctionCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  XdmValue ** arguments){
+void * userFunctionNativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  XdmValue ** arguments){
     //PyObject_CallNoArgs((PyObject *)func);
     PyObject* argsList = nullptr;
     PyObject* arg = nullptr;

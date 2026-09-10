@@ -307,7 +307,7 @@ function testTwoSequence($saxonProc) {
                 $value = $result3->itemAt(0);
                 if($value->isArray()) {
                     $arrValue1 = $value->getArray();
-                    echo 'Output size='.$size." Result for 1st item = ".$arrValue1->get(0)->toString();
+                    echo 'Output size='.$size." Result for 1st item = ".$arrValue1->get(0);
                     echo "\n";
                 }
              }

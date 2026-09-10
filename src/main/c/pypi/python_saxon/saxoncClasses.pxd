@@ -7,7 +7,7 @@ from libcpp.map cimport map
 cdef extern from "@@location@@Saxon.C.API/CythonExceptionHandler.h":
   cdef void raise_py_error()
 
-cdef extern from "@@location@@Saxon.C.API/CythonUserFunctionHandler.h":
+cdef extern from "@@location@@Saxon.C.API/UserFunctionHandler.h":
   cdef void userFunctionCall(object func)
 
 
