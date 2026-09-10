@@ -666,6 +666,7 @@ TODO: rethink redefines and override
             <li><p>PR2051 - merge-when attribute for xsl:for-each-group</p></li>
             <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
             <li><p>PR2213 - trusted attribute for xsl:evaluate</p></li>
+            <li><p>Canonical XHTML serialization (<code>method="xhtml"</code> wih <code>canonical="yes"</code>code>)</p></li>
             <li><p>The fn:invisible-xml function is not implemented in SaxonCS</p></li>
         </ul>
         
