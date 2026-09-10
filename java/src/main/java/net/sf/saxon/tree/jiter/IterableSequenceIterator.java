@@ -8,50 +8,79 @@
 package net.sf.saxon.tree.jiter;
 
 import net.sf.saxon.om.Item;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.LookaheadIteratorImpl;
 import net.sf.saxon.om.SequenceIterator;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
- * A Java Iterator which wraps a supplied unfailing SequenceIterator
- * @param <T> the type of the delivered items
+ * Wraps a SequenceIterator in a Java iterable, allowing the convenience of
+ * processing the items in a Java for-each loop. The iterable can only be used
+ * once: it implements both {@code Iterable<T>} and {@code Iterator<T>}, and
+ * throws an exception if the {@code iterator()} method is called more than once.
+ *
+ * @param <T> The type of items returned. It is the caller's responsibility to
+ *           ensure that the supplied SequenceIterator returns items of the correct type.
  */
 
 
-public class WrappingJavaIterator<T extends Item> implements Iterator<T> {
+public class IterableSequenceIterator<T extends Item> implements Iterable<T>, Iterator<T> {
 
-    private final LookaheadIterator input;
+    private final SequenceIterator input;
+    private boolean used = false;
+    private T nextItem;
 
     /**
      * Create a wrapping iterator
      * @param in the input iterator
      */
 
-    public WrappingJavaIterator(SequenceIterator in) {
-        try {
-            this.input = LookaheadIteratorImpl.makeLookaheadIterator(in);
-        } catch (XPathException e) {
-            throw new AssertionError(e);
-        }
+    public IterableSequenceIterator(SequenceIterator in) {
+        input = in;
     }
 
+    /**
+     * Returns an iterator over elements of type {@code T}.
+     *
+     * @return an Iterator.
+     */
+    @Override
+    public Iterator<T> iterator() {
+        if (used) {
+            throw new IllegalStateException("This iterable can only be used once");
+        }
+        used = true;
+        advance();
+        return this;
+    }
+
+
+    private void advance() {
+        //noinspection unchecked
+        nextItem = (T)input.next();
+    }
+
+    /**
+     * Returns {@code true} if the iteration has more elements.
+     * @return {@code true} if the iteration has more elements
+     */
     @Override
     public boolean hasNext() {
-        return input.hasNext();
+        return nextItem != null;
     }
 
+    /**
+     * Returns the next element in the iteration.
+     * @return the next element in the iteration
+     */
     @Override
     public T next() {
-        return (T)input.next();
+        if (nextItem == null) {
+            throw new NoSuchElementException();
+        }
+        T temp = nextItem;
+        advance();
+        return temp;
     }
-
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
-    }
-
 }
 

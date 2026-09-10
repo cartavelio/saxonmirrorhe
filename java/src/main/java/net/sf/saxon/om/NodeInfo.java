@@ -19,6 +19,7 @@ import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.jiter.IterableSequenceIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import org.xml.sax.Locator;
@@ -463,7 +464,8 @@ public interface NodeInfo extends GNode, Location
      */
 
     default Iterable<? extends NodeInfo> children() {
-        return new Navigator.ChildrenAsIterable(this);
+        //return new Navigator.ChildrenAsIterable(this);
+        return new IterableSequenceIterator<>(iterateChildAxis(null));
     }
 
     default Iterable<? extends NodeInfo> children(NodePredicate filter) {
