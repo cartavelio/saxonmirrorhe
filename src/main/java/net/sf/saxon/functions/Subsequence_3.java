@@ -8,7 +8,6 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -72,48 +71,48 @@ public class Subsequence_3 extends SystemFunction implements Callable {
             // Fast path where the second and third arguments evaluate to integers
             long lstart = startVal.longValue();
             if (lstart > Integer.MAX_VALUE) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             }
             long llength = lengthVal.longValue();
             if (llength > Integer.MAX_VALUE) {
                 llength = Integer.MAX_VALUE;
             }
             if (llength < 1) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             }
             long lend = lstart + llength - 1;
             if (lend < 1) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             }
             int start = lstart < 1 ? 1 : (int) lstart;
             return SubsequenceIterator.make(seq, start, (int) lend);
         } else {
             if (startVal.isNaN()) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             }
             if (startVal.compareTo(Int64Value.MAX_LONG) > 0) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             }
             startVal = startVal.round(0);
 
             if (lengthVal.isNaN()) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             }
             lengthVal = lengthVal.round(0);
 
             if (lengthVal.compareTo(Int64Value.ZERO) <= 0) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             }
             NumericValue rend = (NumericValue) ArithmeticExpression.compute(
                     startVal, Calculator.PLUS, lengthVal, context);
             if (rend.isNaN()) {
                 // Can happen when start = -INF, length = +INF
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             }
             rend = (NumericValue) ArithmeticExpression.compute(
                     rend, Calculator.MINUS, Int64Value.PLUS_ONE, context);
             if (rend.compareTo(Int64Value.ZERO) <= 0) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             }
 
             long lstart;
@@ -123,7 +122,7 @@ public class Subsequence_3 extends SystemFunction implements Callable {
                 lstart = startVal.longValue();
             }
             if (lstart > Integer.MAX_VALUE) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             }
 
             long lend;

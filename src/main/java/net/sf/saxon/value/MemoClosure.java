@@ -55,7 +55,7 @@ import java.util.function.Consumer;
 public class MemoClosure extends Closure implements ContextOriginator {
 
     private Sequence sequence;
-    private Consumer<MemoClosureStatistics> bindingExpression;
+    private MemoClosureStatisticsConsumer bindingExpression;
 
     /**
      * Constructor should not be called directly, instances should be made using the make() method.
@@ -74,7 +74,7 @@ public class MemoClosure extends Closure implements ContextOriginator {
         saveContext(expr, context);
     }
 
-    public void setBindingExpression(Consumer<MemoClosureStatistics> bindingExpression) {
+    public void setBindingExpression(MemoClosureStatisticsConsumer bindingExpression) {
         this.bindingExpression = bindingExpression;
     }
 
@@ -170,6 +170,10 @@ public class MemoClosure extends Closure implements ContextOriginator {
     public static class MemoClosureStatistics {
         public boolean allRead;
         public int size;
+    }
+
+    public interface MemoClosureStatisticsConsumer {
+        void accept(MemoClosureStatistics statistics);
     }
 
 

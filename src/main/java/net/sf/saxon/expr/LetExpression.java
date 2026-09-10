@@ -24,7 +24,6 @@ import net.sf.saxon.value.SequenceType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
@@ -34,7 +33,7 @@ import java.util.function.Supplier;
  */
 
 public class LetExpression extends Assignation
-        implements Consumer<MemoClosure.MemoClosureStatistics> {
+        implements MemoClosure.MemoClosureStatisticsConsumer {
 
     //private int evaluationMode = ExpressionTool.UNDECIDED;
     private SequenceEvaluator evaluator = null;
@@ -598,18 +597,7 @@ public class LetExpression extends Assignation
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        // minimize stack consumption by evaluating nested LET expressions iteratively
-        LetExpression let = this;
-        while (true) {
-            Sequence val = let.eval(context);
-            context.setLocalVariable(let.getLocalSlotNumber(), val);
-            if (let.getAction() instanceof LetExpression) {
-                let = (LetExpression) let.getAction();
-            } else {
-                break;
-            }
-        }
-        return let.getAction().evaluateItem(context);
+        return makeElaborator().elaborateForItem().eval(context);
     }
 
     /**
@@ -916,10 +904,10 @@ public class LetExpression extends Assignation
         }
 
         @Override
-        public EagerEvaluator eagerly() {
+        public SequenceEvaluator eagerly() {
             final LetExpression expr = (LetExpression) getExpression();
-            final EagerEvaluator selectEval = expr.getSequence().makeElaborator().eagerly();
-            final EagerEvaluator actionPull = expr.getAction().makeElaborator().eagerly();
+            final SequenceEvaluator selectEval = expr.getSequence().makeElaborator().eagerly();
+            final SequenceEvaluator actionPull = expr.getAction().makeElaborator().eagerly();
             final int slot = expr.getLocalSlotNumber();
             return context -> {
                 int savedOutputState = context.getTemporaryOutputState();

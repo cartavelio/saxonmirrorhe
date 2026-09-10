@@ -24,7 +24,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -1114,7 +1113,8 @@ public class SlashExpression extends BinaryExpression
                 AxisExpression step = (AxisExpression)expr.getStep();
                 return context -> MappingIterator.map(select.iterate(context), item -> step.iterate((NodeInfo)item));
             } else {
-                ContextMappingFunction mapper = CSharp.methodRef(action::iterate);
+                @SuppressWarnings("Convert2MethodRef")
+                ContextMappingFunction mapper = cxt -> action.iterate(cxt);
                 return context -> {
                     XPathContextMinor c2 = context.newMinorContext();
                     c2.trackFocus(select.iterate(context));

@@ -1110,7 +1110,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 SequenceIterator it = getFilter().iterate(context);
                 Item first = it.next();
                 if (first == null) {
-                    return EmptyIterator.emptyIterator();
+                    return EmptyIterator.getInstance();
                 }
                 if (first instanceof NumericValue) {
                     if (it.next() != null) {
@@ -1136,7 +1136,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                             }
                         }
                         // a non-integer value or non-positive number will never be equal to position()
-                        return EmptyIterator.emptyIterator();
+                        return EmptyIterator.getInstance();
                     }
                 } else {
                     // Filter is focus-independent, but not numeric: need to use the effective boolean value
@@ -1159,7 +1159,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     if (ebv) {
                         return getBase().iterate(context);
                     } else {
-                        return EmptyIterator.emptyIterator();
+                        return EmptyIterator.getInstance();
                     }
                 }
             } catch (XPathException e) {

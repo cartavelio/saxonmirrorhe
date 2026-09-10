@@ -406,12 +406,7 @@ public final class Atomizer extends UnaryExpression {
 
     @Override
     public AtomicValue evaluateItem(XPathContext context) throws XPathException {
-        Item i = getBaseExpression().evaluateItem(context);
-        if (i == null) {
-            return null;
-        } else {
-            return i.atomize().head();
-        }
+        return (AtomicValue)makeElaborator().elaborateForItem().eval(context);
     }
 
     /**
@@ -573,7 +568,7 @@ public final class Atomizer extends UnaryExpression {
         if (SequenceTool.supportsGetLength(base)) {
             int count = SequenceTool.getLength(base);
             if (count == 0) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             } else if (count == 1) {
                 Item first = base.next();
                 return first.atomize().iterate();

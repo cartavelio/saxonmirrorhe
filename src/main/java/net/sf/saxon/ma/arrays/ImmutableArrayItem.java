@@ -38,6 +38,13 @@ public class ImmutableArrayItem extends AbstractArrayItem {
         this.vector = vector;
     }
 
+    /**
+     * Construct an array whose members are all single items, from the items supplied by
+     * a {@link SequenceIterator}
+     * @param iter delivers the items to make up the array
+     * @return an array whose members are single items.
+     */
+
     public static ImmutableArrayItem from(SequenceIterator iter) {
         ZenoChain<GroundedValue> content = new ZenoChain<>();
         for (Item item; (item = iter.next()) != null; ) {

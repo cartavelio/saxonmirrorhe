@@ -37,8 +37,6 @@ import java.util.function.Supplier;
 public final class LocalParam extends Instruction implements LocalBinding {
 
     private Operand conversionOp = null;
-    //private SequenceEvaluator evaluator = null;
-    //private SequenceEvaluator conversionEvaluator = null;
 
     private static final int REQUIRED = 4;
     private static final int TUNNEL = 8;
@@ -224,7 +222,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * @return true if this variable is an implicitly required parameter
      */
 
-    public final boolean isImplicitlyRequiredParam() {
+    public boolean isImplicitlyRequiredParam() {
         return (properties & IMPLICITLY_REQUIRED) != 0;
     }
 
@@ -234,7 +232,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * @return true if this is a tunnel parameter
      */
 
-    public final boolean isTunnelParam() {
+    public boolean isTunnelParam() {
         return (properties & TUNNEL) != 0;
     }
 
@@ -249,17 +247,6 @@ public final class LocalParam extends Instruction implements LocalBinding {
         return this;
     }
 
-    @Override
-    public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-        Expression e2 = super.optimize(visitor, contextItemType);
-        if (e2 != this) {
-            return e2;
-        }
-//        if (selectOp != null) {
-//            computeEvaluationMode();
-//        }
-        return this;
-    }
 
     public void computeEvaluationMode() {
 //        if (getSelectExpression() != null) {
@@ -326,18 +313,18 @@ public final class LocalParam extends Instruction implements LocalBinding {
             select = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(select, requiredType, role, visitor);
         }
     }
-
-    /**
-     * Evaluate the variable. That is,
-     * get the value of the select expression if present or the content
-     * of the element otherwise, either as a tree or as a sequence
-     *
-     * @param context the XPath dynamic context
-     * @return the result of evaluating the variable
-     * @throws net.sf.saxon.trans.XPathException
-     *          if evaluation of the select expression fails
-     *          with a dynamic error
-     */
+//
+//    /**
+//     * Evaluate the variable. That is,
+//     * get the value of the select expression if present or the content
+//     * of the element otherwise, either as a tree or as a sequence
+//     *
+//     * @param context the XPath dynamic context
+//     * @return the result of evaluating the variable
+//     * @throws net.sf.saxon.trans.XPathException
+//     *          if evaluation of the select expression fails
+//     *          with a dynamic error
+//     */
 
 //    public Sequence getSelectValue(XPathContext context) throws XPathException {
 //        Expression select = getSelectExpression();
@@ -598,7 +585,6 @@ public final class LocalParam extends Instruction implements LocalBinding {
         if (!flags.isEmpty()) {
             out.emitAttribute("flags", flags);
         }
-        ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
         if (getRequiredType() != SequenceType.ANY_SEQUENCE) {
             out.emitAttribute("as", getRequiredType().toAlphaCode());
         }
@@ -644,10 +630,19 @@ public final class LocalParam extends Instruction implements LocalBinding {
         return false;
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
 
     public Elaborator getElaborator() {
         return new LocalParamElaborator();
     }
+
+    /**
+     * The Elaborator for this kind of expression
+     */
     public static class LocalParamElaborator extends PushElaborator {
 
         @Override
@@ -663,7 +658,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
             } else {
                 selectEvaluator = expr.getSelectExpression().makeElaborator().lazily(true);
             }
-            SequenceEvaluator conversionEval = (expr.conversionOp == null) ? null :
+            SequenceEvaluator conversionEval = (expr.getConversion() == null) ? null :
                     expr.getConversion().makeElaborator().eagerly();
             return (out, context) -> {
                 int wasSupplied = context.useLocalParameter(expr.variableQName, expr.slotNumber, expr.isTunnelParam());

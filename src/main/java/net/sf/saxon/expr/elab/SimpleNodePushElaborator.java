@@ -13,7 +13,7 @@ import net.sf.saxon.tree.util.Orphan;
 public abstract class SimpleNodePushElaborator extends Elaborator {
 
     @Override
-    public EagerEvaluator eagerly() {
+    public SequenceEvaluator eagerly() {
         ItemEvaluator itemEval = elaborateForItem();
         //noinspection Convert2MethodRef
         return CSharp.methodRef(context -> itemEval.eval(context));

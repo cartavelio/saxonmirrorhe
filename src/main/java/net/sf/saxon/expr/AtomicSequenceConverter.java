@@ -379,9 +379,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
 
     @Override
     public AtomicValue evaluateItem(XPathContext context) throws XPathException{
-
-        AtomicValue item = (AtomicValue) getBaseExpression().evaluateItem(context);
-        return convertItem(item, context);
+        return (AtomicValue)makeElaborator().elaborateForItem().eval(context);
     }
 
     public AtomicValue convertItem(AtomicValue item, XPathContext context) throws XPathException {

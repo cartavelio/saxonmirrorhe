@@ -8,7 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.elab.Ping;
+import net.sf.saxon.expr.elab.Pingable;
 import net.sf.saxon.functions.Fold;
 import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
@@ -28,7 +28,6 @@ import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XPath 2.0
@@ -207,7 +206,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
      * first place.
      */
 
-    public static abstract class ArrayGeneratingFunction extends SystemFunction implements Consumer<Ping> {
+    public static abstract class ArrayGeneratingFunction extends SystemFunction implements Pingable {
 
         private double numberOfCalls = 0;
         private double numberOfConversions = 0;
@@ -216,11 +215,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         /**
          * Callback function, invoked when a SimpleArrayItem created by this function needs to be converted
          * to an {@code ImmutableArrayItem}
-         * @param ping not used
          */
 
         @Override
-        public void accept(Ping ping) {
+        public void ping() {
             numberOfConversions++;
         }
 
@@ -647,7 +645,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
      * is used internally for the implementation of array{} and of the saxon:array extension
      */
 
-    public static class ArrayFromSequence extends FoldingFunction implements Consumer<Ping> {
+    public static class ArrayFromSequence extends FoldingFunction implements Pingable {
 
         private double numberOfCalls = 0;
         private double numberOfConversions = 0;
@@ -655,12 +653,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         /**
          * Callback function, invoked when a SimpleArrayItem created by this function needs to be converted
          * to an {@code ImmutableArrayItem}
-         *
-         * @param ping not used
          */
 
         @Override
-        public void accept(Ping ping) {
+        public void ping() {
             numberOfConversions++;
         }
 

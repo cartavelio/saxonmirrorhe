@@ -9,7 +9,7 @@ import net.sf.saxon.value.EmptySequence;
 public abstract class ItemElaborator extends Elaborator {
 
     @Override
-    public EagerEvaluator eagerly() {
+    public SequenceEvaluator eagerly() {
         boolean maybeEmpty = Cardinality.allowsZero(getExpression().getCardinality());
         ItemEvaluator ie = elaborateForItem();
         if (maybeEmpty) {

@@ -72,7 +72,7 @@ public final class EmptySequence implements GroundedValue {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate() {
-        return EmptyIterator.emptyIterator();
+        return EmptyIterator.getInstance();
     }
 
     /**

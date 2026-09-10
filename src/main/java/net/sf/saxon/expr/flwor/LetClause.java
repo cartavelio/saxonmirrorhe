@@ -18,7 +18,6 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.MemoClosure;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static net.sf.saxon.expr.flwor.Clause.ClauseName.LET;
@@ -26,7 +25,7 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.LET;
 /**
  * A "let" clause in a FLWOR expression
  */
-public class LetClause extends Clause implements Consumer<MemoClosure.MemoClosureStatistics> { //MemoClosure.MemoClosureStatisticsGatherer {
+public class LetClause extends Clause implements MemoClosure.MemoClosureStatisticsConsumer {
 
     private LocalVariableBinding rangeVariable;
     private Operand sequenceOp;

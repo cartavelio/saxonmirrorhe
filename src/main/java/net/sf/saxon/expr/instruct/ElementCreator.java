@@ -7,12 +7,8 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
@@ -21,7 +17,10 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.FunctionItemType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.value.Cardinality;
 
 
@@ -321,72 +320,6 @@ public abstract class ElementCreator extends ParentNodeConstructor {
     @Override
     public int getImplementationMethod() {
         return Expression.PROCESS_METHOD;
-    }
-
-    /**
-     * Evaluate the instruction to produce a new element node. This method is typically used when there is
-     * a parent element or document in a result tree, to which the new element is added.
-     * @param out        The destination for the result
-     * @param context    XPath dynamic evaluation context
-     * @param details    Callbacks to supply details of the node being constructed
-     * @throws XPathException if a dynamic error occurs
-     */
-    public final void specificProcess(Outputter out,
-                                      XPathContext context,
-                                      ElementCreationDetails details) throws XPathException {
-
-        try {
-
-            NodeName elemName = details.getNodeName(context);
-            SchemaType typeCode;
-            if (getValidationAction() == Validation.PRESERVE) {
-                typeCode = AnyType.getInstance();
-            } else {
-                typeCode = Untyped.getInstance();
-            }
-
-            Receiver elemOut = out;
-            if (!preservingTypes) {
-                ParseOptions options = new ParseOptions(getValidationOptions());
-                options.setTopLevelElement(elemName.getStructuredQName());
-                context.getConfiguration().prepareValidationReporting(context, options);
-                Receiver validator = context.getConfiguration().getElementValidator(elemOut, options, getLocation());
-
-                if (validator != elemOut) {
-                    out = new ComplexContentOutputter(validator);
-                }
-                //elemOut = validator;
-            }
-
-            if (out.getSystemId() == null) {
-                out.setSystemId(details.getSystemId(context));
-            }
-            int properties = ReceiverOption.NONE;
-            if (!bequeathNamespacesToChildren) {
-                properties |= ReceiverOption.DISINHERIT_NAMESPACES;
-            }
-            if (!inheritNamespacesFromParent) {
-                properties |= ReceiverOption.REFUSE_NAMESPACES;
-            }
-            properties |= ReceiverOption.ALL_NAMESPACES;
-
-            out.startElement(elemName, typeCode, getLocation(), properties);
-
-            // output the required namespace nodes via a callback
-
-            outputNamespaceNodes(out, elemName, details);
-
-            // process subordinate instructions to generate attributes and content
-            details.processContent(out, context);
-
-            // output the element end tag (which will fail if validation fails)
-            out.endElement();
-
-        } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            throw e;
-        }
     }
 
 

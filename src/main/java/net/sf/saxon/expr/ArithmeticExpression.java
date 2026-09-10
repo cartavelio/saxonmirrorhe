@@ -7,11 +7,11 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.compat.ArithmeticExpression10;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StandardNames;
@@ -430,25 +430,7 @@ public class ArithmeticExpression extends BinaryExpression {
 
     @Override
     public AtomicValue evaluateItem(XPathContext context) throws XPathException {
-
-        AtomicValue v0 = (AtomicValue) getLhsExpression().evaluateItem(context);
-        if (v0 == null) {
-            return null;
-        }
-
-        AtomicValue v1 = (AtomicValue) getRhsExpression().evaluateItem(context);
-        if (v1 == null) {
-            return null;
-        }
-
-        try {
-            return calculator.compute(v0, v1, context);
-        } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            e.maybeSetFailingExpression(this);
-            e.maybeSetContext(context);
-            throw e;
-        }
+        return (AtomicValue)makeElaborator().elaborateForItem().eval(context);
     }
 
     @Override
@@ -507,6 +489,10 @@ public class ArithmeticExpression extends BinaryExpression {
                         throw e;
                     }
                 };
+            } else if (calc instanceof Calculator.DoublePlusDouble && exp.getRhsExpression() instanceof Literal) {
+                // Fast path for common case such as $x + 1
+                double addend = ((NumericValue)((Literal)exp.getRhsExpression()).getGroundedValue()).getDoubleValue();
+                return context -> new DoubleValue(((NumericValue)arg0Eval.eval(context)).getDoubleValue() + addend);
             } else {
                 return context -> {
                     AtomicValue v0 = (AtomicValue) arg0Eval.eval(context);

@@ -4912,7 +4912,7 @@ public class XQueryParser extends XPathParser {
      * to identify pseudo-XML character and entity references
      *
      * @param token the string as written (or as returned by the tokenizer)
-     * @param unescape
+     * @param doUnescaping
      * @return The string value of the string literal, after dereferencing entity and
      * character references
      * @throws XPathException if parsing fails
@@ -4920,8 +4920,8 @@ public class XQueryParser extends XPathParser {
 
     @Override
     /*@NotNull*/
-    protected Literal makeStringLiteral(/*@NotNull*/ String token, boolean unescape) throws XPathException {
-        if (unescape) {
+    protected Literal makeStringLiteral(/*@NotNull*/ String token, boolean doUnescaping) throws XPathException {
+        if (doUnescaping) {
             StringLiteral lit;
             if (token.indexOf('&') == -1) {
                 lit = new StringLiteral(token);
@@ -4932,7 +4932,7 @@ public class XQueryParser extends XPathParser {
             setLocation(lit);
             return lit;
         } else {
-            return super.makeStringLiteral(token, unescape);
+            return super.makeStringLiteral(token, doUnescaping);
         }
     }
 

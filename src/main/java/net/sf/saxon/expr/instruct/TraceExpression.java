@@ -358,7 +358,7 @@ public class TraceExpression extends Instruction {
         }
 
         @Override
-        public EagerEvaluator eagerly() {
+        public SequenceEvaluator eagerly() {
             TraceExpression expr = (TraceExpression) getExpression();
             SequenceEvaluator baseEval = expr.getBody().makeElaborator().eagerly();
             return context -> {

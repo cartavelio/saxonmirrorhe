@@ -8,10 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.EagerEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PushElaborator;
-import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -136,17 +133,17 @@ public class LocalParamBlock extends Instruction {
 
     public static class LocalParamBlockElaborator extends PushElaborator {
 
-        EagerEvaluator[] paramEval;
+        SequenceEvaluator[] paramEval;
 
         @Override
         public PushEvaluator elaborateForPush() {
             LocalParamBlock expr = (LocalParamBlock) getExpression();
-            paramEval = new EagerEvaluator[expr.operanda.length];
+            paramEval = new SequenceEvaluator[expr.operanda.length];
             for (int i=0; i<expr.operanda.length; i++) {
                 paramEval[i] = expr.operanda[i].getChildExpression().makeElaborator().eagerly();
             }
             return (out, context) -> {
-                for (EagerEvaluator eagerEvaluator : paramEval) {
+                for (SequenceEvaluator eagerEvaluator : paramEval) {
                     eagerEvaluator.evaluate(context);
                 }
                 return null;

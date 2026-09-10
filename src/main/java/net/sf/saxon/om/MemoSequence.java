@@ -20,7 +20,6 @@ import net.sf.saxon.value.MemoClosure;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.Arrays;
-import java.util.function.Consumer;
 
 /**
  * A Sequence implementation that represents a lazy evaluation of a supplied iterator. Items
@@ -36,7 +35,7 @@ public class MemoSequence implements Sequence {
     private Item[] reservoir = null;
     private int used;
 
-    private Consumer<MemoClosure.MemoClosureStatistics> callingExpression;
+    private MemoClosure.MemoClosureStatisticsConsumer callingExpression;
 
     @CSharpSimpleEnum
     private enum State {
@@ -60,7 +59,7 @@ public class MemoSequence implements Sequence {
     }
 
 
-    public void setCallingExpression(Consumer<MemoClosure.MemoClosureStatistics> caller) {
+    public void setCallingExpression(MemoClosure.MemoClosureStatisticsConsumer caller) {
         this.callingExpression = caller;
     }
 
@@ -92,7 +91,7 @@ public class MemoSequence implements Sequence {
                 switch (used) {
                     case 0:
                         state = State.EMPTY;
-                        return EmptyIterator.emptyIterator();
+                        return EmptyIterator.getInstance();
                     case 1:
                         assert reservoir != null;
                         return SingletonIterator.makeIterator(reservoir[0]);
@@ -109,7 +108,7 @@ public class MemoSequence implements Sequence {
                 throw new UncheckedXPathException(de);
 
             case EMPTY:
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
 
             default:
                 throw new IllegalStateException("Unknown iterator state");

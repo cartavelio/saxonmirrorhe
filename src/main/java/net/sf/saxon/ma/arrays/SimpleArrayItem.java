@@ -8,7 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.OperandRole;
-import net.sf.saxon.expr.elab.Ping;
+import net.sf.saxon.expr.elab.Pingable;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -22,7 +22,6 @@ import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * A simple implementation of XDM array items, in which the array is backed by a Java List.
@@ -38,7 +37,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
 
     private final List<GroundedValue> _members;
     private boolean knownToBeGrounded = false;
-    private Consumer<Ping> conversionInformee;
+    private Pingable conversionPingable;
 
     /**
      * Construct an array whose members are arbitrary sequences
@@ -83,8 +82,8 @@ public class SimpleArrayItem extends AbstractArrayItem {
      * as an ImmutableArrayItem in the first place.
      */
 
-    public void requestNotification(Consumer<Ping> informee) {
-        this.conversionInformee = informee;
+    public void requestNotification(Pingable informee) {
+        this.conversionPingable = informee;
     }
 
     /**
@@ -92,8 +91,8 @@ public class SimpleArrayItem extends AbstractArrayItem {
      */
 
     public void notifyConversion() {
-        if (conversionInformee != null) {
-            conversionInformee.accept(Ping.INSTANCE);
+        if (conversionPingable != null) {
+            conversionPingable.ping();
         }
     }
 
