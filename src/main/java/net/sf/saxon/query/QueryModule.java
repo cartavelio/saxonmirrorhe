@@ -30,6 +30,7 @@ import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 
 import java.net.URI;
@@ -1040,8 +1041,9 @@ public class QueryModule implements StaticContext {
     public void declareFunction(/*@NotNull*/ XQueryFunction function) throws XPathException {
         Configuration config = getConfiguration();
         if (function.getMinimumArity() <= 1 && function.getNumberOfParameters() >= 1) {
+            Schema schema = getPackageData().getImportedSchema();
             StructuredQName name = function.getFunctionName();
-            SchemaType t = config.getSchemaType(name);
+            SchemaType t = schema.getSchemaType(name);
             if (t != null && t.isAtomicType()) {
                 String message = "Function name " + function.getDisplayName() +
                         " clashes with the name of the constructor function for an atomic type";

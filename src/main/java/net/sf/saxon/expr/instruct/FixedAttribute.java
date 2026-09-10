@@ -19,10 +19,7 @@ import net.sf.saxon.functions.NormalizeSpace_1;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -118,7 +115,9 @@ public final class FixedAttribute extends AttributeCreator {
         if (schemaType == null) {
             int validation = getValidationAction();
             if (validation == Validation.STRICT) {
-                SchemaDeclaration decl = config.getAttributeDeclaration(nodeName.getStructuredQName());
+                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                StructuredQName attributeName = nodeName.getStructuredQName();
+                SchemaDeclaration decl = schema.getAttributeDecl(attributeName);
                 if (decl == null) {
                     throw new XPathException(
                             "Strict validation fails: there is no global attribute declaration for " +
@@ -128,7 +127,9 @@ public final class FixedAttribute extends AttributeCreator {
                 schemaType = (SimpleType) decl.getType();
                 errorCode = "XTTE1510";
             } else if (validation == Validation.LAX) {
-                SchemaDeclaration decl = config.getAttributeDeclaration(nodeName.getStructuredQName());
+                StructuredQName attributeName = nodeName.getStructuredQName();
+                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                SchemaDeclaration decl = schema.getAttributeDecl(attributeName);
                 if (decl != null) {
                     schemaType = (SimpleType) decl.getType();
                     errorCode = "XTTE1515";

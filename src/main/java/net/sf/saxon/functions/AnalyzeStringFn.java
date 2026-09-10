@@ -60,10 +60,10 @@ public class AnalyzeStringFn extends RegexFunction {
 
         //#if EE==true
         if (schemaAware) {
-            vocab.resultType = config.getSchemaType(new StructuredQName("", NamespaceUri.FN, "analyze-string-result-type"));
+            vocab.resultType = config.getSchema().getSchemaType(new StructuredQName("", NamespaceUri.FN, "analyze-string-result-type"));
             vocab.nonMatchType = BuiltInAtomicType.STRING;
-            vocab.matchType = config.getSchemaType(new StructuredQName("", NamespaceUri.FN, "match-type"));
-            vocab.groupType = config.getSchemaType(new StructuredQName("", NamespaceUri.FN, "group-type"));
+            vocab.matchType = config.getSchema().getSchemaType(new StructuredQName("", NamespaceUri.FN, "match-type"));
+            vocab.groupType = config.getSchema().getSchemaType(new StructuredQName("", NamespaceUri.FN, "group-type"));
             vocab.groupNrType = BuiltInAtomicType.POSITIVE_INTEGER;
             if (vocab.resultType == null || vocab.matchType == null || vocab.groupType == null) {
                 throw new XPathException("Schema for analyze-string has not been successfully loaded");

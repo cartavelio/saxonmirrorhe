@@ -3012,6 +3012,14 @@ public class Configuration implements SourceResolver, NotationSet {
     }
     //#endif
 
+    public Schema getSchema() {
+        return MinimalSchema.getInstance();
+    }
+
+    public Schema getSchemaForNamespace(NamespaceUri uri) {
+        return null;
+    }
+
     /**
      * Simple interface to load a schema document
      *
@@ -3226,76 +3234,7 @@ public class Configuration implements SourceResolver, NotationSet {
         needEnterpriseEdition();
     }
 
-    /**
-     * Get a global element declaration by fingerprint
-     *
-     * @param fingerprint the NamePool fingerprint of the element name
-     * @return the element declaration whose name matches the given
-     * fingerprint, or null if no element declaration with this name has
-     * been registered.
-     */
-
-    public SchemaDeclaration getElementDeclaration(int fingerprint) {
-        return null;
-    }
-
-    /**
-     * Get a global element declaration by name.
-     *
-     * @param qName the name of the required
-     *              element declaration
-     * @return the element declaration whose name matches the given
-     * name, or null if no element declaration with this name has
-     * been registered.
-     */
-
-
-    public SchemaDeclaration getElementDeclaration(StructuredQName qName) {
-        return null;
-    }
-
-    /**
-     * Get a global attribute declaration by fingerprint
-     *
-     * @param fingerprint the NamePool fingerprint of the element name
-     * @return the attribute declaration whose name matches the given
-     * fingerprint, or null if no element declaration with this name has
-     * been registered.
-     */
-
-    public SchemaDeclaration getAttributeDeclaration(int fingerprint) {
-        return null;
-    }
-
-    /**
-     * Get a global attribute declaration by name
-     *
-     * @param attributeName the name of the required attribute declaration
-     * @return the attribute declaration whose name matches the given
-     * fingerprint, or null if no element declaration with this name has
-     * been registered.
-     */
-
-    public SchemaDeclaration getAttributeDeclaration(StructuredQName attributeName) {
-        return null;
-    }
-
-    /**
-     * Get the top-level schema type definition with a given QName.
-     *
-     * @param name the name of the required schema type
-     * @return the schema type , or null if there is none
-     * with this name.
-     * @since 9.7
-     */
-
     /*@Nullable*/
-    public SchemaType getSchemaType(StructuredQName name) {
-        if (name.hasURI(NamespaceUri.SCHEMA)) {
-             return BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
-        }
-        return null;
-    }
 
     /**
      * Make a union type with a given list of member types

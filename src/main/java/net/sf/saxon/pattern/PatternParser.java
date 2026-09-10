@@ -264,7 +264,8 @@ public class PatternParser extends XPathParser {
             nextToken();
             expect(Token.RPAR);
             nextToken();
-            SchemaType type = env.getConfiguration().getSchemaType(typeName);
+            Schema schema = env.getPackageData().getImportedSchema();
+            SchemaType type = schema.getSchemaType(typeName);
             if (type == null || !type.isAtomicType()) {
                 grumble("Unknown atomic type " + typeName);
             }

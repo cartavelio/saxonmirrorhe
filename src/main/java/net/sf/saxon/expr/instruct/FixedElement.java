@@ -191,7 +191,8 @@ public class FixedElement extends ElementCreator {
         int fp = elementName.obtainFingerprint(config.getNamePool());   // Bug #2563 - namespaced alias in unoptimized export
         if (schemaType == null) {
             if (validation == Validation.STRICT) {
-                SchemaDeclaration decl = config.getElementDeclaration(fp);
+                Schema schema = env.getPackageData().getImportedSchema();
+                SchemaDeclaration decl = schema.getElementDecl(fp);
                 if (decl == null) {
                     throw new XPathException("There is no global element declaration for " +
                             elementName.getStructuredQName().getEQName() + ", so strict validation will fail")
@@ -240,7 +241,8 @@ public class FixedElement extends ElementCreator {
                     }
                 }
             } else if (validation == Validation.LAX) {
-                SchemaDeclaration decl = config.getElementDeclaration(fp);
+                Schema schema = env.getPackageData().getImportedSchema();
+                SchemaDeclaration decl = schema.getElementDecl(fp);
                 if (decl == null) {
                     env.issueWarning("There is no global element declaration for " +
                             elementName.getDisplayName(), SaxonErrorCode.SXWN9031, instr.getLocation());
@@ -396,7 +398,8 @@ public class FixedElement extends ElementCreator {
                     if (uri == null) {
                         return null;
                     } else {
-                        return env.getConfiguration().getSchemaType(new StructuredQName("", uri, parts[1]));
+                        Schema schema = env.getPackageData().getImportedSchema();
+                        return schema.getSchemaType(new StructuredQName("", uri, parts[1]));
                     }
                 } catch (QNameException e) {
                     throw new XPathException(e.getMessage());

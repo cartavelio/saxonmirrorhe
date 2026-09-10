@@ -81,8 +81,10 @@ public class Doc_2 extends SystemFunction implements Callable {
         value = checkedOptions.get("type");
         if (value != null) {
             QNameValue qval = (QNameValue) value.head();
+            Configuration configuration = context.getConfiguration();
+            StructuredQName name = qval.getStructuredQName();
             result = result
-                    .withTopLevelType(context.getConfiguration().getSchemaType(qval.getStructuredQName()))
+                    .withTopLevelType(configuration.getSchema().getSchemaType(name))
                     .withSchemaValidationMode(Validation.BY_TYPE);
         }
         value = checkedOptions.get("strip-space");

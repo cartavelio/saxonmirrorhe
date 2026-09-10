@@ -155,7 +155,7 @@ public class JsonHandlerXML extends JsonHandler {
                     "mapWithinMapType", "arrayWithinMapType", "stringWithinMapType",
                     "numberWithinMapType", "booleanWithinMapType", "nullWithinMapType"};
                 for (String t : typeNames) {
-                    setType(t, config.getSchemaType(new StructuredQName(PREFIX, JSON_NS, t)));
+                    setType(t, config.getSchema().getSchemaType(new StructuredQName(PREFIX, JSON_NS, t)));
                 }
             } catch (SchemaException e) {
                 throw new XPathException(e);

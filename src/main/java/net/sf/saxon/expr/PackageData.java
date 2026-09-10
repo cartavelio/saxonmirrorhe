@@ -15,6 +15,7 @@ import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.TypeAliasManager;
+import net.sf.saxon.type.Schema;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.List;
 public class PackageData {
 
     protected Configuration config;
+    private Schema importedSchema;
     private HostLanguage hostLanguage;
     protected int hostLanguageVersion;
     private boolean schemaAware;
@@ -52,6 +54,7 @@ public class PackageData {
         this.config = config;
         targetEdition = config.getEditionCode();
         globalSlotManager = config.makeSlotManager();
+        importedSchema = config.getSchema();
     }
 
     /**
@@ -110,6 +113,14 @@ public class PackageData {
     public void setHostLanguage(HostLanguage hostLanguage, int version) {
         this.hostLanguage = hostLanguage;
         this.hostLanguageVersion = version;
+    }
+
+    public void setImportedSchema(Schema schema) {
+        this.importedSchema = schema;
+    }
+
+    public Schema getImportedSchema() {
+        return this.importedSchema;
     }
 
     /**

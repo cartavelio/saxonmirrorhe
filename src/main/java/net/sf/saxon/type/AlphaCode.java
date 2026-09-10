@@ -729,7 +729,8 @@ public class AlphaCode {
             }
             itemType = builtIn;
             if (tree.name != null) {
-                SchemaType type = config.getSchemaType(StructuredQName.fromEQName(tree.name));
+                StructuredQName name = StructuredQName.fromEQName(tree.name);
+                SchemaType type = config.getSchema().getSchemaType(name);
                 if (!(type instanceof PlainType)) {
                     throw new IllegalArgumentException("Schema type " + tree.name + " is not known");
                 }
@@ -754,7 +755,7 @@ public class AlphaCode {
             boolean nillable = tree.nillable;
             if (contentName != null) {
                 contentQName = StructuredQName.fromEQName(contentName);
-                SchemaType contentType = config.getSchemaType(contentQName);
+                SchemaType contentType = config.getSchema().getSchemaType(contentQName);
                 if (contentType == null) {
                     throw new IllegalArgumentException("Unknown type " + contentName);
                 }
@@ -882,7 +883,7 @@ public class AlphaCode {
                             break;
                         case "NES": {
                             assert qName != null;
-                            SchemaDeclaration decl = config.getElementDeclaration(qName);
+                            SchemaDeclaration decl = config.getSchema().getElementDecl(qName);
                             if (decl != null) {
                                 try {
                                     itemType = decl.makeSchemaNodeTest();
@@ -897,7 +898,7 @@ public class AlphaCode {
                         }
                         case "NAS": {
                             assert qName != null;
-                            SchemaDeclaration decl = config.getAttributeDeclaration(qName);
+                            SchemaDeclaration decl = config.getSchema().getAttributeDecl(qName);
                             if (decl != null) {
                                 try {
                                     itemType = decl.makeSchemaNodeTest();

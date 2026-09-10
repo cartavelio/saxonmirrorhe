@@ -15,6 +15,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.Whitespace;
 
@@ -82,6 +83,14 @@ public class XSLImportSchema extends StyleElement {
                 namespace = namespace.trim();
             }
             Configuration config = getConfiguration();
+            NamespaceUri targetNamespace = NamespaceUri.of(namespace);
+            Schema schema = config.getSchemaForNamespace(targetNamespace);
+            if (schema != null) {
+                // TODO: handle multiple schema imports
+                getPackageData().setImportedSchema(schema);
+                getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
+                return;
+            }
             try {
                 config.checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT,
                                             "xsl:import-schema",
@@ -90,7 +99,6 @@ public class XSLImportSchema extends StyleElement {
                 throw new XPathException(err).withErrorCode("XTSE1650").withLocation(this);
             }
             NodeInfo inlineSchema = null;
-            NamespaceUri targetNamespace = null;
             for (NodeInfo child : children()) {
                 if (inlineSchema != null) {
                     compileError(getDisplayName() + " must not have more than one child element");

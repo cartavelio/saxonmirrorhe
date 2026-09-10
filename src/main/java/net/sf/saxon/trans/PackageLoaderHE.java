@@ -1208,10 +1208,10 @@ public class PackageLoaderHE implements IPackageLoader {
             return null;
         }
         if (val.startsWith("xs:")) {
-            return config.getSchemaType(new StructuredQName("xs", NamespaceUri.SCHEMA, val.substring(3)));
+            return config.getSchema().getSchemaType(new StructuredQName("xs", NamespaceUri.SCHEMA, val.substring(3)));
         } else {
             StructuredQName name = getQNameAttribute(element, attName);
-            return config.getSchemaType(name);
+            return config.getSchema().getSchemaType(name);
         }
     }
 
@@ -1724,14 +1724,14 @@ public class PackageLoaderHE implements IPackageLoader {
                 return new CastExpression(body, (AtomicType) seqType.getPrimaryType(), allowEmpty);
             } else if (flags.contains("l")) {
                 StructuredQName typeName = StructuredQName.fromEQName((element.getAttributeValue(NamespaceUri.NULL,"as")));
-                SchemaType type = loader.config.getSchemaType(typeName);
+                SchemaType type = loader.config.getSchema().getSchemaType(typeName);
                 NamespaceResolver resolver = element.getAllNamespaces();
                 ListConstructorFunction ucf = new ListConstructorFunction((ListType) type, resolver, allowEmpty);
                 return new StaticFunctionCall(ucf, new Expression[]{body});
             } else if (flags.contains("u")) {
                 if (element.getAttributeValue(NamespaceUri.NULL,"as") != null) {
                     StructuredQName typeName = StructuredQName.fromEQName((element.getAttributeValue(NamespaceUri.NULL,"as")));
-                    SchemaType type = loader.config.getSchemaType(typeName);
+                    SchemaType type = loader.config.getSchema().getSchemaType(typeName);
                     NamespaceResolver resolver = element.getAllNamespaces();
                     UnionConstructorFunction ucf = new UnionConstructorFunction((UnionType) type, resolver, allowEmpty);
                     return new StaticFunctionCall(ucf, new Expression[]{body});
@@ -1755,14 +1755,14 @@ public class PackageLoaderHE implements IPackageLoader {
                 return new CastableExpression(body, (AtomicType) seqType.getPrimaryType(), allowEmpty);
             } else if (flags.contains("l")) {
                 StructuredQName typeName = StructuredQName.fromEQName((element.getAttributeValue(NamespaceUri.NULL,"as")));
-                SchemaType type = loader.config.getSchemaType(typeName);
+                SchemaType type = loader.config.getSchema().getSchemaType(typeName);
                 NamespaceResolver resolver = element.getAllNamespaces();
                 ListCastableFunction ucf = new ListCastableFunction((ListType) type, resolver, allowEmpty);
                 return new StaticFunctionCall(ucf, new Expression[]{body});
             } else if (flags.contains("u")) {
                 if (element.getAttributeValue(NamespaceUri.NULL,"as") != null) {
                     StructuredQName typeName = StructuredQName.fromEQName((element.getAttributeValue(NamespaceUri.NULL,"as")));
-                    SchemaType type = loader.config.getSchemaType(typeName);
+                    SchemaType type = loader.config.getSchema().getSchemaType(typeName);
                     NamespaceResolver resolver = element.getAllNamespaces();
                     UnionCastableFunction ucf = new UnionCastableFunction((UnionType) type, resolver, allowEmpty);
                     return new StaticFunctionCall(ucf, new Expression[]{body});
@@ -3061,7 +3061,7 @@ public class PackageLoaderHE implements IPackageLoader {
             SchemaType schemaType = null;
             StructuredQName typeAtt = loader.getQNameAttribute(element, "type");
             if (typeAtt != null) {
-                schemaType = loader.config.getSchemaType(typeAtt);
+                schemaType = loader.config.getSchema().getSchemaType(typeAtt);
                 validation = Validation.BY_TYPE;
             }
             ResultDocument instr = new ResultDocument(globals, locals, href, format, validation, schemaType,
@@ -3133,7 +3133,8 @@ public class PackageLoaderHE implements IPackageLoader {
             SchemaType schemaType = null;
             StructuredQName typeAtt = loader.getQNameAttribute(element, "schemaType");
             if (typeAtt != null) {
-                schemaType = loader.getConfiguration().getSchemaType(typeAtt);
+                Configuration configuration = loader.getConfiguration();
+                schemaType = configuration.getSchema().getSchemaType(typeAtt);
                 validation = Validation.BY_TYPE;
             }
             ParseOptions options = loader.getConfiguration().getParseOptions()

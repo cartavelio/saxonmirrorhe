@@ -21,6 +21,7 @@ import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationParams;
 import org.xml.sax.EntityResolver;
@@ -72,6 +73,7 @@ public class ParseOptions {
         LINE_NUMBERING,
         MODEL,
         PLEASE_CLOSE,
+        SCHEMA,
         SCHEMA_VALIDATION,
         SPACE_STRIPPING_RULE,
         STABLE,
@@ -587,6 +589,27 @@ public class ParseOptions {
 
     public ParseOptions withSchemaValidationMode(int option) {
         return withProperty(Key.SCHEMA_VALIDATION, option);
+    }
+
+    /**
+     * Set the schema to be used for validation.
+     *
+     * @return the schema to be used for validation, assuming validation has been requested.
+     * Returns null if validation is not requested.
+     */
+
+    public ParseOptions withSchema(Schema schema) {
+        return withProperty(Key.SCHEMA, schema);
+    }
+
+    /**
+     * Get the schema to be used for validation.
+     * @return the schema to be used for validation, assuming validation has been requested.
+     * Returns null if validation is not requested.
+     */
+
+    public Schema getSchema() {
+        return (Schema)getProperty(Key.SCHEMA);
     }
 
     /**

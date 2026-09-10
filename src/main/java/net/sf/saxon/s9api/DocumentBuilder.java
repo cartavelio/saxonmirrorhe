@@ -353,6 +353,7 @@ public class DocumentBuilder {
                 .withDTDValidationMode(dtdValidation ? Validation.STRICT : Validation.STRIP);
 
         if (schemaValidator != null) {
+            options = options.withSchema(schemaValidator.getSchema());
             options = options.withSchemaValidationMode(schemaValidator.isLax() ? Validation.LAX : Validation.STRICT);
             if (schemaValidator.getDocumentElementName() != null) {
                 QName qn = schemaValidator.getDocumentElementName();

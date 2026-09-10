@@ -327,7 +327,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         if (fp != -1) {
                             Affinity e = th.relationship(in, NodeKindTest.ELEMENT);
                             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                                SchemaDeclaration elem = config.getElementDeclaration(fp);
+                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                                SchemaDeclaration elem = schema.getElementDecl(fp);
                                 if (elem != null) {
                                     try {
                                         return new ContentTypeTest(Type.ELEMENT, elem.getType(), config, false);
@@ -341,7 +342,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                             }
                             Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
                             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                                SchemaDeclaration attr = config.getElementDeclaration(fp);
+                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                                SchemaDeclaration attr = schema.getElementDecl(fp);
                                 if (attr != null) {
                                     try {
                                         return new ContentTypeTest(Type.ATTRIBUTE, attr.getType(), config, false);
@@ -624,7 +626,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                                 throw new XPathException("Invalid QName in xsi:type attribute of element being validated: "
                                                                  + xsitype + ". " + e.getMessage(), "XTTE1510");
                             }
-                            type = config.getSchemaType(typeName);
+                            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                            type = schema.getSchemaType(typeName);
                             if (type == null) {
                                 throw new XPathException("Unknown xsi:type in element being validated: " + xsitype, "XTTE1510");
                             }

@@ -387,7 +387,8 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         int maxArity = getNumberOfParameters();
         int minArity = maxArity - getNumberOfOptionalParameters();
         if (minArity <= 1 && maxArity >= 1) {
-            SchemaType type = getConfiguration().getSchemaType(getObjectName());
+            StructuredQName name = getObjectName();
+            SchemaType type = getPackageData().getImportedSchema().getSchemaType(name);
             if (type instanceof PlainType) {
                 compileError("Stylesheet function clashes with constructor function for an imported atomic type", "XTSE0770");
             }

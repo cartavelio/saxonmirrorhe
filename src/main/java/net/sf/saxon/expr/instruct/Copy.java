@@ -234,7 +234,7 @@ public class Copy extends ElementCreator {
     }
 
     private ItemType computeItemType(TypeHierarchy th) {
-        ItemType selectItemType = this.selectItemType; //select.getItemType();
+        ItemType selectItemType = this.selectItemType;
         if (!getPackageData().isSchemaAware()) {
             return selectItemType;
         }
@@ -281,7 +281,8 @@ public class Copy extends ElementCreator {
                         if (fp != -1) {
                             Affinity e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
                             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                                SchemaDeclaration elem = config.getElementDeclaration(fp);
+                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                                SchemaDeclaration elem = schema.getElementDecl(fp);
                                 if (elem != null) {
                                     try {
                                         return new ContentTypeTest(Type.ELEMENT, elem.getType(), config, false);
@@ -295,7 +296,8 @@ public class Copy extends ElementCreator {
                             }
                             Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
                             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                                SchemaDeclaration attr = config.getElementDeclaration(fp);
+                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                                SchemaDeclaration attr = schema.getElementDecl(fp);
                                 if (attr != null) {
                                     try {
                                         return new ContentTypeTest(Type.ATTRIBUTE, attr.getType(), config, false);

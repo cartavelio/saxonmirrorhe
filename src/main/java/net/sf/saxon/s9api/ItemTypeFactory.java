@@ -104,7 +104,7 @@ public class ItemTypeFactory {
                         (ItemType.BuiltInAtomicItemType) getBuiltInAtomicType(fp), config.getConversionRules());
             }
         } else {
-            SchemaType type = config.getSchemaType(name);
+            SchemaType type = config.getSchema().getSchemaType(name);
             if (type == null || !type.isAtomicType()) {
                 throw new SaxonApiException("Unknown atomic type " + name.getClarkName());
             }
@@ -335,7 +335,8 @@ public class ItemTypeFactory {
      */
 
     public ItemType getSchemaElementTest(QName name) throws SaxonApiException {
-        SchemaDeclaration decl = config.getElementDeclaration(name.getStructuredQName());
+        StructuredQName qName = name.getStructuredQName();
+        SchemaDeclaration decl = config.getSchema().getElementDecl(qName);
         if (decl == null) {
             throw new SaxonApiException("No global declaration found for element " + name.getClarkName());
         }
@@ -372,8 +373,8 @@ public class ItemTypeFactory {
             nameTest = new NameTest(Type.ELEMENT, elementFP, config.getNamePool());
         }
         if (schemaType != null) {
-            SchemaType type = config.getSchemaType(
-                new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName()));
+            StructuredQName name1 = new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName());
+            SchemaType type = config.getSchema().getSchemaType(name1);
             if (type == null) {
                 throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
             }
@@ -413,7 +414,7 @@ public class ItemTypeFactory {
 
     public ItemType getSchemaAttributeTest(QName name) throws SaxonApiException {
         StructuredQName nn = new StructuredQName("", name.getNamespaceUri(), name.getLocalName());
-        SchemaDeclaration decl = config.getAttributeDeclaration(nn);
+        SchemaDeclaration decl = config.getSchema().getAttributeDecl(nn);
         if (decl == null) {
             throw new SaxonApiException("No global declaration found for attribute " + name.getClarkName());
         }
@@ -448,8 +449,8 @@ public class ItemTypeFactory {
             nameTest = new NameTest(Type.ATTRIBUTE, attributeFP, config.getNamePool());
         }
         if (schemaType != null) {
-            SchemaType type = config.getSchemaType(
-                new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName()));
+            StructuredQName name1 = new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName());
+            SchemaType type = config.getSchema().getSchemaType(name1);
             if (type == null) {
                 throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
             }

@@ -3397,8 +3397,9 @@ public class XQueryParser extends XPathParser {
                 if (!NameChecker.isQName(StringTool.codePoints(t.currentTokenValue))) {
                     grumble("Schema type name expected after 'validate type");
                 }
-                requiredType = env.getConfiguration().getSchemaType(
-                        makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace()));
+                StructuredQName name = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
+                Schema schema = env.getPackageData().getImportedSchema();
+                requiredType = schema.getSchemaType(name);
                 if (requiredType == null) {
                     grumble("Unknown schema type " + t.currentTokenValue, "XQST0104");
                 }
@@ -3492,8 +3493,9 @@ public class XQueryParser extends XPathParser {
                     if (!NameChecker.isQName(StringTool.codePoints(typeName))) {
                         grumble("Schema type name expected in saxon:validate-type pragma: found " + Err.wrap(typeName));
                     }
-                    requiredType = env.getConfiguration().getSchemaType(
-                            makeStructuredQName(typeName, env.getDefaultElementNamespace()));
+                    StructuredQName name = makeStructuredQName(typeName, env.getDefaultElementNamespace());
+                    Schema schema = env.getPackageData().getImportedSchema();
+                    requiredType = schema.getSchemaType(name);
                     if (requiredType == null) {
                         grumble("Unknown schema type " + typeName);
                     }

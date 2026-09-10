@@ -18,6 +18,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.JavaExternalObjectType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.BooleanValue;
 
@@ -52,7 +53,8 @@ public class TypeAvailable extends SystemFunction {
                 return false;
             }
         } else {
-            SchemaType type = config.getSchemaType(qName);
+            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+            SchemaType type = schema.getSchemaType(qName);
             if (type == null) {
                 return false;
             }

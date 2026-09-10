@@ -1454,7 +1454,7 @@ public abstract class StyleElement extends ElementImpl {
                 return null;
             }
             StructuredQName qName = new StructuredQName("", uri, lname);
-            SchemaType stype = getConfiguration().getSchemaType(qName);
+            SchemaType stype = getPackageData().getImportedSchema().getSchemaType(qName);
             if (stype == null) {
                 compileError("There is no type named " + typeAtt + " in an imported schema", "XTSE1520");
             }

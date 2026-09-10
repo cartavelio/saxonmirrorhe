@@ -12,9 +12,11 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AlphaCode;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaDeclaration;
 import net.sf.saxon.type.UType;
 
@@ -128,7 +130,9 @@ public class NodeTestPattern extends Pattern {
     @Override
     public Pattern convertToTypedPattern(String val) throws XPathException {
         if (nodeTest instanceof NameTest && nodeTest.getUType() == UType.ELEMENT) {
-            SchemaDeclaration decl = getConfiguration().getElementDeclaration(nodeTest.getMatchingNodeName());
+            StructuredQName qName = nodeTest.getMatchingNodeName();
+            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+            SchemaDeclaration decl = schema.getElementDecl(qName);
             if (decl == null) {
                 if ("lax".equals(val)) {
                     return this;
