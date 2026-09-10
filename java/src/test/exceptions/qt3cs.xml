@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- exceptions file for the QT3 Test Suite -->
+<exceptions>
+  
+
+  
+  <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009" run="false" report="known bug in ICU">
+    <created by="Michael Kay" on="2018-02-01"/>
+    <reason>Known bug in ICU</reason>
+  </exception>
+  
+  <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-010" run="false" report="known bug in ICU">
+    <created by="Michael Kay" on="2018-02-01"/>
+    <reason>Known bug in ICU</reason>
+  </exception>
+  
+  <exception test-set="fn-collection" test-case="cbcl-collection-002" run="false" report="test queried">
+    <created by="Michael Kay" on="2021-08-23"/>
+    <reason>Saxon-CS delivers collection results in wrong order due to multithreading. Should this be allowed? See bug 5067.</reason>
+  </exception>
+  
+  <exception test-set="fn-format-integer" 
+             test-case="format-integer-032 format-integer-032-fr format-integer-032-it
+                        format-integer-065 format-integer-066" 
+             run="false" report="not supported">
+    <created by="Michael Kay" on="2021-12-07"/>
+    <reason>SaxonCS doesn't format "numbers as words" for languages other than English.</reason>
+  </exception>
+  
+  <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="known restriction">
+    <created by="Michael Kay" on="2019-03-11"/>
+    <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
+  </exception>
+  
+  <exception test-set="prod-CastExpr" test-case="K-SeqExprCast-71a" run="false" report="known restriction">
+    <created by="Michael Kay" on="2019-03-11"/>
+    <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
+  </exception>
+  
+  <exception test-set="prod-CastableExpr" test-case="CastableAs648" run="false" report="known restriction">
+    <created by="Michael Kay" on="2019-03-11"/>
+    <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
+  </exception>
+  
+  <exception test-set="prod-FunctionCall" test-case="K-FunctionCallExpr-15" run="false" report="known restriction">
+    <created by="Michael Kay" on="2021-08-08"/>
+    <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
+  </exception>
+  
+  <exception test-set="misc-JsonTestSuite" test-case="n_structure_100000_opening_arrays n_structure_open_array_object" run="false" report="tooBig">
+    <created by="Michael Kay" on="2021-10-04"/>
+    <reason>Fails with a stack overflow (we've set a limit but it's too low)</reason>
+  </exception>
+  
+  <!--<exception test-set="app-spec-examples" test-case="
+    fo-test-fn-contains-004
+    fo-test-fn-contains-005
+    fo-test-fn-contains-006
+    fo-test-fn-contains-007
+    fo-test-fn-starts-with-004
+    fo-test-fn-starts-with-005
+    fo-test-fn-starts-with-006
+    fo-test-fn-starts-with-007
+    fo-test-fn-starts-with-008
+    fo-test-fn-ends-with-004
+    fo-test-fn-ends-with-005
+    fo-test-fn-ends-with-006
+    fo-test-fn-ends-with-007
+    fo-test-fn-ends-with-008
+    fo-test-fn-substring-before-004
+    fo-test-fn-substring-before-005
+    fo-test-fn-substring-before-006
+    fo-test-fn-substring-before-007
+    fo-test-fn-substring-after-004
+    fo-test-fn-substring-after-005
+    fo-test-fn-substring-after-006
+    fo-test-fn-substring-after-007
+    " run="false" report="known restriction">
+    <created by="Michael Kay" on="2019-03-11"/>
+    <reason>alternate=blanked not supported by ICU4N (apparently?)</reason>
+  </exception>-->
+  
+  <!--<exception test-set="fn-contains" test-case="
+    fn-contains-34
+    fn-contains-35
+    fn-contains-36
+    fn-contains-37
+    fn-contains-38
+    " run="false" report="known restriction">
+    <created by="Michael Kay" on="2021-08-08"/>
+    <reason>alternate=blanked not supported by ICU4N (apparently?)</reason>
+  </exception>-->
+  
+  
+ 
+ 
+ 
+
+
+</exceptions>

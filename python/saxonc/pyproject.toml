@@ -1,0 +1,40 @@
+[project]
+name = "saxonc"
+version = "12.6.0"
+requires-python = ">=3.8"
+description="Official Saxonica python package for the SaxonC-{{EDITION}} {{version}} processor: for XSLT 3.0, XQuery 3.1, XPath 3.1 and XML Schema processing."
+authors = [
+    {name = "ONeil Delpratt", email = "oneil@saxonica.com"},
+    {name = "Matt Patterson", email = "matt@saxonica.com"},
+]
+
+[project.readme]
+file="README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://www.saxonica.com/saxon-c/index.xml"
+Documentation = "https://www.saxonica.com/saxon-c/documentation12/index.html"
+Issues = "https://saxonica.plan.io/projects/saxon-c"
+
+[build-system]
+requires = [
+    "setuptools >= 72.2",
+    "cython ~= 3.0.10"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.saxonica-build]
+requires= [
+    "wheel >= 0.44.0",
+    "pip >= 19.1",
+    "build[virtualenv] >= 1.0.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+pythonpath = ["test/saxon_import"]
+norecursedirs = ["test/saxon_import"]
+addopts = [
+    "--import-mode=importlib",
+]

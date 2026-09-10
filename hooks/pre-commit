@@ -14,13 +14,13 @@ exec 1>&2
 # Files and directories that begin with these prefixes are considered
 # commercial and must be in separate commits from files that are
 # non-commercial
-COMMERCIAL=(src/main/java/com src/main/java/javax src/test/java/com)
+COMMERCIAL=(java/src/main/java/com/ java/src/main/java/javax/ java/src/test/java/com/)
 
 # Files and directories that begin with these prefixes will be
 # excluded from mirroring. (Update the mirror script as well if you
 # change this list!) Files that begin with these prefixes must be
 # in separate commits from all other files.
-EXCLUDE=(src/test/bugs src/test/nunit src/test/xmark)
+EXCLUDE=(java/src/test/bugs/ csharp/src/test/nunit/ submodules/ .gitmodules)
 
 # Count all the files, all the commercial files, and all the excluded
 # files

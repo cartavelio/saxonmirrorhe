@@ -1,0 +1,4 @@
+set(SaxonCCore@SAXON_EDITION@ @SaxonCCore_VERSION@)
+@PACKAGE_INIT@
+
+include(${CMAKE_CURRENT_LIST_DIR}/SaxonCCore@SAXON_EDITION@.cmake)

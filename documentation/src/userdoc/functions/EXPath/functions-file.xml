@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="expath-file" spec="expath-file" title="Namespace expath-file"
+  catalog="${GitHub}/specs/file/src/function-catalog.xml"
+  namespace="http://expath.org/ns/file" xmlns:doc="http://www.saxonica.com/ns/doc">
+  <defaults doc:doc="Default values across the set.">
+    <arg-descriptions
+      doc:doc="Descriptions of arguments, keyed by the name. In theory we could also key by type.">
+      <path>Path to file/directory</path>
+      <file>Path to file</file>
+      <items>Sequence of items to be written</items>
+      <params>Control parameters for serialization - semantics similar to fs:serialize()</params>
+      <value>Base64 binary value to be written</value>
+      <values>Strings to be written</values>
+      <lines>Strings to be written</lines>
+      <source>The path to the source file/directory</source>
+      <target>The path to the source file/directory</target>
+      <encoding>Encoding used for string-binary conversion</encoding>
+      <dir>Path to the directory</dir>
+      <prefix>Prefix to be used for the start of a temporary file name</prefix>
+      <suffix>Suffix to be used for the end of a temporary file name - conventionally of a '.ext'
+        extension form, but need not be</suffix>
+      <recursive>Whether the operation should recurse down though the filesystem tree</recursive>
+      <pattern>A glob pattern to match/filter file names</pattern>
+      <offset>Byte offset into the file for reading or writing</offset>
+      <length>Byte length of data to be returned</length>
+    </arg-descriptions>
+  </defaults>
+
+  <h1 xmlns="">Namespace expath-file</h1>
+  <function name="exists"/>
+  <function name="is-dir"/>
+  <function name="is-file"/>
+  <function name="last-modified"/>
+  <function name="size"/>
+  <function name="append"/>
+  <function name="append-binary"/>
+  <function name="append-text">
+    <args>
+      <value>String value to be written</value>
+    </args>
+  </function>
+  <function name="append-text-lines"/>
+  <function name="copy"/>
+  <function name="create-dir"/>
+  <function name="create-temp-dir" saxon="9.6 PE/EE"/>
+  <function name="create-temp-file" saxon="9.6 PE/EE"/>
+  <function name="delete"/>
+  <function name="list"/>
+  <function name="move"/>
+  <function name="read-binary"/>
+  <function name="read-text"/>
+  <function name="read-text-lines"/>
+  <function name="write"/>
+  <function name="write-binary"/>
+  <function name="write-text">
+    <args>
+      <value>String value to be written</value>
+    </args>
+  </function>
+  <function name="write-text-lines"/>
+  <function name="name" saxon="9.6 PE/EE"/>
+  <function name="parent" saxon="9.6 PE/EE"/>
+  <function name="children" saxon="9.6 PE/EE"/>
+  <function name="path-to-native"/>
+  <function name="path-to-uri"/>
+  <function name="resolve-path"/>
+  <function name="dir-separator"/>
+  <function name="line-separator"/>
+  <function name="path-separator"/>
+  <function name="temp-dir" saxon="9.6 PE/EE"/>
+  <function name="base-dir" saxon="9.6 PE/EE"/>
+  <function name="current-dir" saxon="9.6 PE/EE">
+    <status>
+      <p>The EXPath specification says that the current working directory is implementation-defined. The Saxon implementation
+        of <code>file:current-dir()</code> effectively invokes <code>file:resolve-path(".")</code>. The <code>file:resolve-path()</code>
+        function relies on Java's <code>File.getAbsolutePath()</code>. On Unix systems, this resolves the file name against the
+        current directory (as defined by the system property <code>user.dir</code>). On Windows, it is possible for a relative file
+        name to include a drive letter, and for each drive to have a different current directory: this affects the handling of
+        relative file names in <code>file:resolve-path()</code> and in other functions (such as <code>file:exists()</code>),
+        but it is not reflected in the result of <code>file:current-dir()</code>.</p>
+      <p>For convenience in testing, Saxon recognizes the Java system property <code>expath.base.directory</code> and uses
+        this as the current directory if the property exists. Applications should not rely on this feature.</p>
+    </status>
+  </function>
+
+  <!--<function name="shift">
+    <args>
+      <size>The number of bit positions to shift left or right</size>
+    </args>
+  </function>-->
+</section>

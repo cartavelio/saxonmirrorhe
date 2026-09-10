@@ -1,0 +1,21 @@
+//
+// Created by Matthew Patterson on 23/01/2025.
+//
+
+#include "saxonc/saxonc_version.h"
+
+char*    get_saxonc_version() {
+    return "@SaxonC_VERSION@";
+}
+unsigned get_saxonc_version_major() {
+    return @SaxonC_VERSION_MAJOR@ +0;
+}
+unsigned get_saxonc_version_minor() {
+    return @SaxonC_VERSION_MINOR@ +0;
+}
+unsigned get_saxonc_version_patch() {
+    return @SaxonC_VERSION_PATCH@ +0;
+}
+unsigned get_saxonc_version_tweak() {
+    return @SaxonC_VERSION_TWEAK@ +0;
+}

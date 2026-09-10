@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="build\arm64\TestDrivers\core.csproj"/>
+   <ItemGroup>
+      <Compile Include="..\src\test\testrunner\**"/>
+   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="SaxonCS">
+      <HintPath>bin/Debug/net6.0/osx-arm64/SaxonCS.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -1,38 +1,9 @@
-/.gradle/
-/build/
-/buildSrc/build/
-/buildSrc/.gradle/
-/out/
-/extra/lib/
-java_*.hprof
-/Saxon-bytecode/
-/.idea/
-/src/test/testdata/temp/
-/src/test/testdata/sandpit/
-/src/test/cstestrunner/TestDriver/bin
-/src/test/extra/qt3/expath/file/sandpit/temp/
+out/
+.idea/
+/*.iml
 .DS_Store
-.vs/
-*.iml
-._.DS_Store
-
-# Created by running the unit tests :-(
-/secondary-out.xml
-/src/test/testdata/welch-ser/out/
-
-# Auto-generated sources
-/src/main/java/net/sf/saxon/lib/Feature.java
-/src/main/java/net/sf/saxon/lib/FeatureCode.java
-/src/main/java/net/sf/saxon/lib/FeatureKeys.java
-/src/main/java/net/sf/saxon/lib/FeatureData.java
-/src/main/csharp/api/Saxon.Api/Feature.cs
-/src/main/csharp/api/Saxon.Api/FeatureKeys.cs
-/src/main/saxon-cs/engine/Saxon/Api/Feature.cs
-/src/main/saxon-cs/engine/Saxon/Api/FeatureKeys.cs
-
-# Binaries built by Rider and friends
-/src/samples/cs/bin/
-
-# SaxonC Python genrated library file
-/src/main/c/Saxon.C.API/python-saxon/saxonc.cpp
-/src/main/c/Saxon.C.API/*.lo
+.gradle/
+build/
+__pycache__
+src/test/testdata/sandpit/
+src/test/testdata/temp/

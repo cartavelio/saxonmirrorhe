@@ -1,0 +1,48 @@
+<exceptions>
+  
+  <!-- Exceptions file for xslt30-extra tests with Saxon-CS -->
+  
+  <exception test-case="evaluate-010 evaluate-027" run="false" report="not-applicable">
+    <created by="Michael Kay" on="2021-08-31"/>
+    <reason>Requires Java reflexive functions</reason>
+  </exception>
+  
+  <exception test-case="key-map-001" run="false" report="not-applicable">
+    <created by="Michael Kay" on="2021-08-31"/>
+    <reason>saxon:key-map() not available in Saxon-CS</reason>
+  </exception>
+  
+  <exception test-case="last-modified-001 last-modified-002 last-modified-003" run="false" report="not-applicable">
+    <created by="Michael Kay" on="2021-08-31"/>
+    <reason>saxon:last-modified() not available in Saxon-CS</reason>
+  </exception>
+  
+  <exception test-case="local-001 local-002" run="false" report="not-applicable">
+    <created by="Michael Kay" on="2021-08-31"/>
+    <reason>Requested localization not available in Saxon-CS</reason>
+  </exception>
+  
+  <exception test-case="send-mail-001" run="false" report="not-applicable">
+    <created by="Michael Kay" on="2021-08-31"/>
+    <reason>saxon:send-mail() not available in Saxon-CS</reason>
+  </exception>
+  
+  <exception test-case="query-001 query-002 query-003" run="false" report="not-applicable">
+    <created by="Michael Kay" on="2021-08-31"/>
+    <reason>saxon:compile-query() and saxon:query() not available in Saxon-CS</reason>
+  </exception>
+  
+  <exception test-case="collation-001" run="false" report="not-applicable">
+    <created by="Michael Kay" on="2021-08-31"/>
+    <reason>Rule-based collation not supported in Saxon-CS</reason>
+  </exception>
+  
+  <exception test-case="unparsed-entities-001" run="false" report="not-applicable">
+    <created by="Michael Kay" on="2021-08-31"/>
+    <reason>saxon:unparsed-entities() not supported in Saxon-CS</reason>
+  </exception>
+  
+ 
+
+
+</exceptions>

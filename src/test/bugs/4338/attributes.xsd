@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-    targetNamespace="http://dita.oasis-open.org/architecture/2005/" xmlns="http://dita.oasis-open.org/architecture/2005/">
-
-    <xs:attribute default="val1" name="DITAArchVersion"/>
-</xs:schema>
