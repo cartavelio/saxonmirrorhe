@@ -950,11 +950,11 @@ public class OptimizerEE extends Optimizer {
             return f0.getCost() < f1.getCost() ? -1 : +1;
         });
 
-        Expression predicate = null;
+        Expression newPredicate = null;
         for (Expression e : filters) {
-            predicate = predicate == null ? e : new AndExpression(predicate, e);
+            newPredicate = newPredicate == null ? e : new AndExpression(newPredicate, e);
         }
-        return new FilterExpression(base, predicate);
+        return new FilterExpression(base, newPredicate);
     }
 
     private static void addTerms(Expression predicate, List<Expression> filters) {
