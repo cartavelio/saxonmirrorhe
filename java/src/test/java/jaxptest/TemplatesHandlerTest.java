@@ -120,7 +120,8 @@ public class TemplatesHandlerTest {
             System.out.println("XSLT finished.");
             fail(); // should not succeed
         } catch (TransformerException e) {
-            assertTrue(e.getMessage().contains("Errors were reported during stylesheet compilation")) ;
+            assertTrue(e.getMessage().contains("Cannot find a 1-argument function")) ;
+            assertTrue(e.getMessage().contains("Cannot load Java class"));
             //e.printStackTrace();
         }
     }
