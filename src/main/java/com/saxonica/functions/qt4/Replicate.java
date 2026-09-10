@@ -1,12 +1,11 @@
 package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.instruct.AbstractBlockIterator;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.hof.ForEachFn;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.NumericValue;
@@ -42,25 +41,10 @@ public class Replicate extends SystemFunction {
                 return baseValue;
             }
         } else {
-            return new LazySequence(new RepeatingIterator(baseValue, count, context));
+            return new LazySequence(new ForEachFn.RepeatingIterator(baseValue, count, context));
         }
     }
 
-    public static class RepeatingIterator extends AbstractBlockIterator {
-
-        private final GroundedValue baseValue;
-
-        public RepeatingIterator(GroundedValue baseValue, int count, XPathContext context) {
-            super(count, context);
-            this.baseValue = baseValue;
-        }
-
-        @Override
-        public SequenceIterator getNthChildIterator(int n) {
-            return baseValue.iterate();
-        }
-    }
-    
 }
 
 // Copyright (c) 2023 Saxonica Limited.

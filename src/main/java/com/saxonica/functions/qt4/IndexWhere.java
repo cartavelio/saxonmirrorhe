@@ -84,6 +84,7 @@ public class IndexWhere extends SystemFunction {
                             break;
                         default:
                             result = EmptySequence.getInstance();
+                            break;
                     }
                     BooleanValue val = (BooleanValue)result.head();
                     if (val != null && val.getBooleanValue()) {
