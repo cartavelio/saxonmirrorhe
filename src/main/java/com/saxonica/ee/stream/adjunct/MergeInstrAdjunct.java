@@ -184,7 +184,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
 
             wm.addWatch(new StreamWatch((Inversion) ms.invertedAction, wm, c2), true);
 
-            DocumentFn.sendDoc(href, ms.baseURI, context, ms.location, out, options);
+            DocumentFn.sendDoc(href, ms.baseURI, pd, context, ms.location, out, options);
         }
 
     }

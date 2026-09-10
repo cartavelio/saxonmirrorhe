@@ -272,7 +272,8 @@ public class StreamInstr extends SourceDocument implements Pusher {
                 }
             }
             try {
-                DocumentFn.sendDoc(href, getStaticBaseURIString(), context, getLocation(), stream, parseOptions);
+                DocumentFn.sendDoc(href, getStaticBaseURIString(), getPackageData(),
+                                   context, getLocation(), stream, parseOptions);
             } catch (QuitParsingException q) {
                 // This is an early exit indicating success
                 if (verbose) {
