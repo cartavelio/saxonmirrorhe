@@ -56,12 +56,12 @@ public class Siblings_1 extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo node = (NodeInfo) arguments[0].head();
-        if (node == null || node.getNodeKind() == Type.ATTRIBUTE || node.getNodeKind() == Type.NAMESPACE) {
+        if (node == null) {
             return EmptySequence.getInstance();
         }
         NodeInfo parent = node.getParent();
-        if (parent == null) {
-            return EmptySequence.getInstance();
+        if (parent == null || node.getNodeKind() == Type.ATTRIBUTE || node.getNodeKind() == Type.NAMESPACE) {
+            return node;
         }
         return new LazySequence(parent.iterateAxis(AxisInfo.CHILD));
     }
