@@ -48,7 +48,9 @@ import java.util.function.Supplier;
  * <p>An <code>Xslt30Transformer</code> must not be used concurrently in multiple threads.
  * It is safe to reuse the object within a single thread to run several transformations using
  * the same stylesheet, but the values of the global context item and of stylesheet parameters
- * must be initialized before any transformations are run, and must remain unchanged thereafter.</p>
+ * must be initialized before any transformations are run, and must remain unchanged thereafter.
+ * The date/time value returned by <code>fn:current-dateTime()</code> also remains constant for the
+ * duration of an <code>Xslt30Transformer.</code></p>
  * <p>Some of the entry point methods are synchronized. This is not
  * because multi-threaded execution is permitted; rather it is to reduce the damage if it is attempted.</p>
  * <p>An <code>Xslt30Transformer</code> is always constructed by running the
