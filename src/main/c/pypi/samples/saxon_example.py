@@ -41,7 +41,7 @@ with saxonc@@edition@@.PySaxonProcessor(license=True) as proc:
    print('test 1\n node='+node.string_value)
    xp.set_context(xdm_item=node)
    item = xp.evaluate_single('//person[1]')
-   if isinstance(item,saxonc.PyXdmNode):
+   if isinstance(item,saxonc@@edition@@.PyXdmNode):
        print(item.string_value)
 
    value = proc.make_double_value(3.5)
