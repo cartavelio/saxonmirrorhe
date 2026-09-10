@@ -628,4 +628,85 @@ public class TestPackage {
             fail(e);
         }
     }
+
+    @Test
+    public void testBug6762a() {
+        // TopLevel.xsl attempts to use package version "1.1-alpha", which matches entry in config file.
+        // The package actually has @package-version="1.1".
+        // Package compile succeeds.
+        try {
+            File configFile = Testdata.file("packages/6762a/package-config.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            XsltCompiler compiler = processor.newXsltCompiler();
+            XsltExecutable top = compiler.compile(
+                    new StreamSource(Testdata.file("packages/6762a/TopLevel.xsl")));
+            Xslt30Transformer trans = top.load30();
+            XdmValue result = trans.callTemplate(null);
+            System.err.println(result);
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testBug6762b() {
+        // TopLevel.xsl attempts to use package version "1.1-alpha".
+        // Entry in config file says version "1.1" (though package actually has @package-version="1.1-alpha").
+        // Package compile fails.
+        try {
+            File configFile = Testdata.file("packages/6762b/package-config.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            XsltCompiler compiler = processor.newXsltCompiler();
+            XsltExecutable top = compiler.compile(
+                    new StreamSource(Testdata.file("packages/6762b/TopLevel.xsl")));
+            fail("Package compile should not have succeeded");
+        } catch (SaxonApiException e) {
+            // that's expected
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Unexpected exception attempting to use unavailable package");
+        }
+    }
+
+    @Test
+    public void testBug6762c() {
+        // TopLevel.xsl attempts to use package version "1.1.*".
+        // Entry in config file says version "1.1-alpha".
+        // The package actually has @package-version="1.1".
+        // Package compile succeeds.
+        try {
+            File configFile = Testdata.file("packages/6762c/package-config.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            XsltCompiler compiler = processor.newXsltCompiler();
+            XsltExecutable top = compiler.compile(
+                    new StreamSource(Testdata.file("packages/6762c/TopLevel.xsl")));
+            Xslt30Transformer trans = top.load30();
+            XdmValue result = trans.callTemplate(null);
+            System.err.println(result);
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testBug6762d() {
+        // TopLevel.xsl attempts to use package version "1.1-alpha", which matches entry in config file.
+        // The package actually has @package-version="1.0".
+        // Package compile fails.
+        try {
+            File configFile = Testdata.file("packages/6762d/package-config.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            XsltCompiler compiler = processor.newXsltCompiler();
+            XsltExecutable top = compiler.compile(
+                    new StreamSource(Testdata.file("packages/6762d/TopLevel.xsl")));
+            fail("Package compile should not have succeeded");
+        } catch (SaxonApiException e) {
+            // that's expected
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Unexpected exception attempting to use unavailable package");
+        }
+    }
 }
