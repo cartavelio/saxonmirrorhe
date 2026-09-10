@@ -44,6 +44,13 @@ public abstract class AttributeValidator extends ContentValidator {
     // The schema type used to validate the most recent attribute of this element, if any
     SimpleType latestAttributeType = null;
 
+    // The validateAttributes method is called twice when assertions are present. So
+    // we remember the previous result (bug 5737)
+
+    private AttributeMap previousAttributeMap;
+    private AttributeMap previousValidatedAttributes;
+    private List<NamespaceBinding> previousNamespaceBindings;
+
     /**
      * Create an AttributeValidator
      *
@@ -86,6 +93,11 @@ public abstract class AttributeValidator extends ContentValidator {
     @Override
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
     public AttributeMap validateAttributes(AttributeMap in, List<NamespaceBinding> additionalNamespaces) throws XPathException {
+
+        if (in == previousAttributeMap) {
+            additionalNamespaces.addAll(previousNamespaceBindings);
+            return previousValidatedAttributes;
+        }
         PipelineConfiguration pipe = getPipelineConfiguration();
         AttributeMap result = EmptyAttributeMap.getInstance();
 
@@ -286,6 +298,10 @@ public abstract class AttributeValidator extends ContentValidator {
                 }
             }
         }
+
+        previousAttributeMap = in;
+        previousValidatedAttributes = result;
+        previousNamespaceBindings = additionalNamespaces;
 
         return result;
     }
