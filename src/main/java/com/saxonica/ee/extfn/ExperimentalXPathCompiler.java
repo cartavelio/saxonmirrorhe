@@ -321,7 +321,7 @@ public class ExperimentalXPathCompiler {
             this.localVariableMap = localVariableMap;
             this.nsAttribute = nsAttribute;
             PackageData pd = new PackageData(config);
-            pd.setHostLanguage(HostLanguage.XPATH);
+            pd.setHostLanguage(HostLanguage.XPATH, getXPathVersion());
             pd.setSchemaAware(false);
             packageData = pd;
         }

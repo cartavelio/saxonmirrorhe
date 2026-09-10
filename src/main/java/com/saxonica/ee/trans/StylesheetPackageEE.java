@@ -127,7 +127,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
         }
         presenter.emitAttribute("id", packageId+"");
         presenter.emitAttribute("name", getPackageName());
-        presenter.emitAttribute("version", getVersion() + "");
+        presenter.emitAttribute("version", getHostLanguageVersion() + "");
         if (getDefaultMode() != null && !getDefaultMode().getStructuredQName().equals(Mode.UNNAMED_MODE_NAME)) {
             presenter.emitAttribute("defaultMode", getDefaultMode().getStructuredQName());
         }

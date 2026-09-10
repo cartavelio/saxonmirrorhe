@@ -84,7 +84,7 @@ public class SaxonParam extends AnnotationParent {
         }
 
         PackageData pd = new PackageData(getConfiguration());
-        pd.setHostLanguage(HostLanguage.XML_SCHEMA);
+        pd.setHostLanguage(HostLanguage.XML_SCHEMA, getConfiguration().getXsdVersion());
         pd.setSchemaAware(true);
 
         GlobalParam param = new GlobalParam();
