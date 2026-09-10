@@ -419,9 +419,9 @@ public final class FloatValue extends NumericValue {
     @Override
     public int transitiveCompareTo(NumericValue other) {
         if (other instanceof FloatValue f) {
-            return Float.compare(value, f.getFloatValue());
+            return Float.compare(getFloatValue(), f.getFloatValue());
         } else if (other instanceof DoubleValue) {
-            return Double.compare(value, other.getDoubleValue());
+            return Double.compare(getDoubleValue(), other.getDoubleValue());
         } else if (other instanceof Int64Value) {
             try {
                 return compareTo(other.longValue());
