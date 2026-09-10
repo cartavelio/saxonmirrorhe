@@ -161,12 +161,75 @@ public class XdmUtils {
         return holder.get();
     }
 
-    public static String getFunctionName(XdmFunctionItem item) {
-        return getEQName(item.getName());
+    @CEntryPoint(name = "j_getFunctionName", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static CCharPointer j_getFunctionName(IsolateThread thread,  SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle itemRef) throws SaxonApiException {
+
+        if(itemRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XdmFunctionItem is null");
+        }
+        XdmFunctionItem item = SaxonCAPI.objectHandles.get(itemRef);
+
+        String eqname = getEQName(item.getName());
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, eqname);
+
+        return a;
+
     }
 
-    public static XdmFunctionItem getSystemFunction(Processor proc, String eqname, int arity) throws SaxonApiException {
-        return  XdmFunctionItem.getSystemFunction(proc, QName.fromClarkName(eqname), arity);
+
+    @CEntryPoint(name = "j_xdmFunctionItem_getArity")
+    public static int xdmFunctionItem_getArity(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
+        XdmFunctionItem value = SaxonCAPI.objectHandles.get(valueRef);
+        int arity = value.getArity();
+        return arity;
+    }
+
+
+    @CEntryPoint(name = "j_xdmFunctionItem_call", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmFunctionItem_call(IsolateThread thread, ObjectHandle procRef, ObjectHandle xdmFuncValueRef, ObjectHandle procDataRef) throws SaxonApiException {
+        if(procRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor object is null");
+        }
+        if(xdmFuncValueRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XdmFunctionItem object is null");
+        }
+        Processor proc = SaxonCAPI.objectHandles.get(procRef);
+
+        XdmFunctionItem functionItem = SaxonCAPI.objectHandles.get(xdmFuncValueRef);
+
+        ProcessorDataAccumulator processorDataAccumulator = null;
+        XdmValue arguments [] = null;
+        if(procDataRef != WordFactory.nullPointer()){
+            processorDataAccumulator = SaxonCAPI.objectHandles.get(procDataRef);
+
+            arguments = Xslt30Processor.getArguments(processorDataAccumulator.getValues());
+
+        }
+        XdmValue value = functionItem.call(proc, arguments);
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+        return handle.rawValue();
+    }
+
+
+    @CEntryPoint(name = "j_getSystemFunction", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_getSystemFunction(IsolateThread thread, ObjectHandle procRef, CCharPointer c_eqname, int arity) throws SaxonApiException {
+
+        if(procRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor object is null");
+        }
+        if(c_eqname == WordFactory.nullPointer()) {
+            throw new SaxonApiException("SystemFunction name is null");
+        }
+        Processor proc = SaxonCAPI.objectHandles.get(procRef);
+        String eqname = CTypeConversion.toJavaString(c_eqname);
+        XdmFunctionItem function = XdmFunctionItem.getSystemFunction(proc, QName.fromClarkName(eqname), arity);
+        if(function == null) {
+            return -1;
+        } else {
+            ObjectHandle handle = SaxonCAPI.objectHandles.create(function);
+            return handle.rawValue();
+        }
+
     }
 
     /**

@@ -20,6 +20,7 @@ import net.sf.saxon.value.StringValue;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
@@ -123,7 +124,6 @@ public class XdmValueForCpp {
         ObjectHandle objectHandle = SaxonCAPI.createHandle(resultValue);
         return objectHandle.rawValue();
     }
-
 
 
     @CEntryPoint(name = "j_getBooleanValue")
