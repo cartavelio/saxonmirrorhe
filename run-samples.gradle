@@ -479,7 +479,7 @@ def eeSampleArgs = ["JDOM2Example": ["data/books.xml", "styles/books.xsl"],
                     "SchemaValidatorExample_2": ["--", "data/books.xml"],
                     "SchemaValidatorHandlerExample_1": ["data/books.xsd", "data/books.xml"],
                     "SchemaValidatorHandlerExample_2": ["--", "data/books.xml"],
-                    "XMarkBenchmark_1": ["-dir:${projectDir}/src/test/xmark/"],
+                    "XMarkBenchmark_1": ["-dir:${buildDir}/tests/extra/data/xmark/"],
                     "XPathExampleSA": ["data/books.xml", "data/books.xsd"],
                     "XQJExamples": ["all"]]
 
@@ -489,7 +489,7 @@ def eeSampleArgs = ["JDOM2Example": ["data/books.xml", "styles/books.xsl"],
   ) {
     description "Compile the HE samples with EE for ${tver} testing"
     if (tver == "run") {
-      dependsOn "eej_setup_samples", "eejCompile", "${tver}_eej_samples_he"
+      dependsOn "eej_setup_samples", "eejCompile", "${tver}_eej_samples_he", "copySaxonExtraTestSuites"
       classpath = configurations.samples \
       + files("${buildDir}/samples/classes/${tver}/ee") \
       + files("${buildDir}/classes/eej")
