@@ -3,6 +3,7 @@
 #include "../../Saxon.C.API/XdmAtomicValue.h"
 #include "../../Saxon.C.API/XdmNode.h"
 #include "../../Saxon.C.API/XdmValue.h"
+#include "../../Saxon.C.API/XdmMap.h"
 #include "CppTestUtils.h"
 #include <string>
 
@@ -511,6 +512,23 @@ void testXPathOnFile(SaxonProcessor *processor, XPathProcessor *xpath,
   }
 }
 
+void testEmptyXdmMap(sResultCount *sresult) {
+  cout << endl << " testEmptyXdmMap" << endl;
+  try {
+    XdmMap *d = new XdmMap();
+    bool r = d->isEmpty();
+    sresult->success++;
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("testXPathOnFile2");
+  }
+
+}
+
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
 void testXPathOnFile2(XPathProcessor *xpath, sResultCount *sresult) {
@@ -628,6 +646,13 @@ int main() {
        << "============================================================="
        << endl
        << endl;
+
+  testEmptyXdmMap(sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
   testUnprefixedElementMatchingPolicy(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
@@ -649,6 +674,8 @@ int main() {
        << endl
        << endl;
   testXPathAttrValues(processor, xpathProc, sresult);
+
+
   cout << endl
        << "============================================================="
        << endl

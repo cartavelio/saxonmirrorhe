@@ -14,6 +14,9 @@ XdmMap::XdmMap(const XdmMap &d) {
 XdmMap::XdmMap(int64_t obj) : XdmFunctionItem(obj) {}
 
 const char *XdmMap::toString() {
+  if (value == SXN_UNSET) {
+    return nullptr;
+  }
   allocFn fn = operator new;
   const char *str = xdmMapToString(SaxonProcessor::sxn_environ->thread,
                                    (void *)fn, (void *)value);
@@ -24,10 +27,16 @@ const char *XdmMap::toString() {
 
 
 int XdmMap::mapSize() {
+  if (value == SXN_UNSET) {
+    return 0;
+  }
   return j_xdmMap_size(SaxonProcessor::sxn_environ->thread, (void *)value);
 }
 
 XdmValue *XdmMap::get(XdmAtomicValue *key) {
+  if (key == nullptr || value == SXN_UNSET) {
+    return nullptr;
+  }
   int64_t result =
       j_xdmMap_get(SaxonProcessor::sxn_environ->thread, (void *)value,
                    (void *)key->getUnderlyingValue());
@@ -36,7 +45,7 @@ XdmValue *XdmMap::get(XdmAtomicValue *key) {
 }
 
 XdmValue *XdmMap::get(const char *key) {
-  if (key == nullptr) {
+  if (key == nullptr || value == SXN_UNSET) {
     return nullptr;
   }
   int64_t result = j_xdmMap_get_with_key_as_string(
@@ -45,7 +54,7 @@ XdmValue *XdmMap::get(const char *key) {
 }
 
 XdmValue *XdmMap::get(int key) {
-  if (key < 0) {
+  if (key < 0 || value == SXN_UNSET) {
     return nullptr;
   }
   int64_t result = j_xdmMap_get_with_key_as_int(
@@ -54,7 +63,7 @@ XdmValue *XdmMap::get(int key) {
 }
 
 XdmValue *XdmMap::get(double key) {
-  if (key < 0) {
+  if (key < 0 || value == SXN_UNSET) {
     return nullptr;
   }
   int64_t result = j_xdmMap_get_with_key_as_double(
@@ -63,7 +72,7 @@ XdmValue *XdmMap::get(double key) {
 }
 
 XdmValue *XdmMap::get(long key) {
-  if (key < 0) {
+  if (key < 0 || value == SXN_UNSET) {
     return nullptr;
   }
   int64_t result = j_xdmMap_get_with_key_as_long(
@@ -73,6 +82,7 @@ XdmValue *XdmMap::get(long key) {
 
 // TODO test this method
 XdmMap *XdmMap::put(XdmAtomicValue *key, XdmValue *valuei) {
+  //TODO if the value is unset we need to create it first
   if (key == nullptr || valuei == nullptr) {
     return nullptr;
   }
@@ -86,7 +96,7 @@ XdmMap *XdmMap::put(XdmAtomicValue *key, XdmValue *valuei) {
 }
 
 XdmMap *XdmMap::remove(XdmAtomicValue *key) {
-  if (key == nullptr) {
+  if (key == nullptr || value == SXN_UNSET) {
     return nullptr;
   }
   int64_t result =
@@ -143,12 +153,18 @@ XdmAtomicValue **XdmMap::keys() {
 // std::map<XdmAtomicValue*, XdmValue*> XdmMap::asMap();
 
 bool XdmMap::isEmpty() {
+  if(value == SXN_UNSET) {
+    return false;
+  }
   char result =
       j_xdmMap_isEmpty(SaxonProcessor::sxn_environ->thread, (void *)value);
   return result != 0;
 }
 
 bool XdmMap::containsKey(XdmAtomicValue *key) {
+  if(value == SXN_UNSET) {
+    return false;
+  }
   char result =
       j_xdmMap_containsKey(SaxonProcessor::sxn_environ->thread, (void *)value,
                            (void *)key->getUnderlyingValue());
@@ -159,8 +175,13 @@ std::list<XdmValue *> XdmMap::valuesAsList() {
   std::list<XdmValue *> mylist;
   allocFn fn = operator new;
   int sizex = mapSize();
-  long long *results = j_xdmMap_values(SaxonProcessor::sxn_environ->thread,
+  long long *results = nullptr;
+
+  if(value != SXN_UNSET) {
+
+  	results = j_xdmMap_values(SaxonProcessor::sxn_environ->thread,
                                        (void *)fn, (void *)value);
+  }
 
   if (results != nullptr) {
 
@@ -176,6 +197,10 @@ std::list<XdmValue *> XdmMap::valuesAsList() {
 }
 
 XdmValue **XdmMap::values() {
+  if(value == SXN_UNSET) {
+    return nullptr;
+  }
+
   allocFn fn = operator new;
   int size = mapSize();
   long long *results = j_xdmMap_values(SaxonProcessor::sxn_environ->thread,
