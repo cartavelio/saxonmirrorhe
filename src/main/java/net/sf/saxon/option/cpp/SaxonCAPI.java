@@ -709,23 +709,39 @@ public class SaxonCAPI {
     @CEntryPoint(name = "j_setCatalogFiles", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_setCatalogFiles(IsolateThread thread, ObjectHandle processorRef, ObjectHandle catalogFilesRef) throws SaxonApiException {
 
+        if (debug) {
+            System.err.println("JAVA DEBUG: start j_setCatalogFiles");
+        }
         if (processorRef == WordFactory.nullPointer() || catalogFilesRef == WordFactory.nullPointer()) {
+            if (debug) {
+                System.err.println("catalog failed!!");
+            }
             return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
         }
 
         Processor processor = objectHandles.get(processorRef);
         ProcessorDataAccumulator accumulator = objectHandles.get(catalogFilesRef);
 
-        String [] catalogFiles = accumulator.getParameterNames();
-        if(catalogFiles.length == 0) {
+        ArrayList<String>  catalogFiles = accumulator.getParameterNamesAsArrayList();
+        if(catalogFiles.size() == 0) {
+            if (debug) {
+                System.err.println("catalog size = " + 0);
+            }
             return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
         }
 
-        ArrayList<String> list = (ArrayList<String>) Arrays.asList(catalogFiles);
+
+        if (debug) {
+            System.err.println("catalog size  =" + catalogFiles.size());
+            int sizea = catalogFiles.size();
+            for(int i =0; i < sizea;i++) {
+                System.err.println("catalog file= " + catalogFiles.get(i));
+            }
+        }
         //list.add(SaxonCAPI.toJavaString(catalogFile, WordFactory.nullPointer()));
         Configuration config = processor.getUnderlyingConfiguration();
         if (config.getResourceResolver() instanceof ConfigurableResourceResolver) {
-            CommandLineOptions.setCatalogFiles(((ConfigurableResourceResolver) config.getResourceResolver() ), list);
+            CommandLineOptions.setCatalogFiles(((ConfigurableResourceResolver) config.getResourceResolver() ), catalogFiles);
         }  else {
             return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
         }
@@ -1671,6 +1687,9 @@ public class SaxonCAPI {
 
         try {
             if(cwd != null) {
+                if (debug) {
+                    System.err.println("ccwd-cp0 = " + cwd);
+                }
                 cwd = escapeURIPathParam(cwd);
                 cwdURI = new URI(cwd);
             }

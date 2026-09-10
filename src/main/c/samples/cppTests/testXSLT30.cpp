@@ -2528,7 +2528,7 @@ void testCatalog(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
   Xslt30Processor *trans = nullptr;
   const char ** catalogFiles = nullptr;
   try {
-    catalogFiles = new const char*[1]{"data/catalog.xml"};
+    catalogFiles = new const char*[1]{"../data/catalog.xml"};
 
     proc->setCatalogFiles(catalogFiles, 1);
 
@@ -2597,53 +2597,18 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) 
   Xslt30Processor *trans = nullptr;
   const char ** catalogFiles = nullptr;
   try {
-    catalogFiles = new const char*[2]{"data/catalog.xml", "data/catalog2.xml"};
+    catalogFiles = new const char*[2]{"../data/catalog.xml", "../data/catalog2.xml"};
     
     proc->setCatalogFiles(catalogFiles, 2);
-
+    proc->setcwd(cwd);
     trans = proc->newXslt30Processor();
 
-    executable = trans->compileFromFile("data/example.xsl");
-
-    executable->setInitialMatchSelectionAsFile("data/example.xml");
-
-    const char *result = executable->applyTemplatesReturningString();
-
-    if (result != NULL) {
-      std::cerr << "testCatalog result= " << result << std::endl;
-      delete result;
-      sresult->success++; // TODO - check the results more carefully
-    } else {
-      sresult->failure++;
-      sresult->failureList.push_back("testCatalog2-1");
-
-    }
-    if (executable != nullptr) {
-        delete executable;
-    }
-    executable = nullptr;
-
-
-  } catch (SaxonApiException &e) {
-    const char *message = e.getMessage();
-    if (message != nullptr) {
-      cerr << "exception-proc=" << message << endl;
-    }
-    sresult->failure++;
-    sresult->failureList.push_back("testCatalog2");
-    if (executable != nullptr) {
-        delete executable;
-        executable = nullptr;
-    }
-
-
-  }
-
-  try{
+    trans->setcwd(cwd);
 
     executable2 = trans->compileFromFile("http://example.com/books.xsl");
 
     executable2->setInitialMatchSelectionAsFile("data/books.xml");
+    executable2->setGlobalContextFromFile("data/books.xml");
 
     XdmValue *resultValue = executable2->applyTemplatesReturningValue();
     if (resultValue != nullptr) {
