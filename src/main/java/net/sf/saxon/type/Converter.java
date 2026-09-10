@@ -9,7 +9,9 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.value.*;
 
 import java.math.BigDecimal;
@@ -771,6 +773,30 @@ public abstract class Converter {
                         "Cannot promote non-numeric value to xs:double");
                 err.setErrorCode("XPTY0004");
                 return err;
+            }
+        }
+    }
+
+    /**
+     * Converter that implements the promotion rules from xs:anyURI to xs:string
+     */
+
+    public static class PromoterToString extends Converter {
+
+        public static PromoterToString INSTANCE = new PromoterToString();
+        @Override
+        public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
+            switch (input.getPrimitiveType().getFingerprint()) {
+                case StandardNames.XS_STRING:
+                    return input;
+                case StandardNames.XS_ANY_URI:
+                case StandardNames.XS_UNTYPED_ATOMIC:
+                    return new StringValue(input.getUnicodeStringValue());
+                default:
+                    ValidationFailure err = new ValidationFailure(
+                            "Required type is xs:string; supplied value is " + Err.depict(input));
+                    err.setErrorCode("XPTY0004");
+                    return err;
             }
         }
     }

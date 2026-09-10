@@ -136,8 +136,8 @@ public class TypeChecker {
                         !(suppliedCard == StaticProperty.EMPTY)) {
                     if (!suppliedItemType.isAtomizable(th)) {
                         String shortItemType;
-                        if (suppliedItemType instanceof TupleType) {
-                            shortItemType = "a tuple type";
+                        if (suppliedItemType instanceof RecordType) {
+                            shortItemType = "a record type";
                         } else if (suppliedItemType instanceof MapType) {
                             shortItemType = "a map type";
                         } else if (suppliedItemType instanceof FunctionItemType) {
@@ -290,7 +290,7 @@ public class TypeChecker {
 
                     // Rule 3b: promotion from anyURI -> string
 
-                    if (rt == StandardNames.XS_STRING && th.isSubType(suppliedItemType, BuiltInAtomicType.ANY_URI)) {
+                    if (rt == StandardNames.XS_STRING && th.relationship(suppliedItemType, BuiltInAtomicType.ANY_URI) != DISJOINT) {
                         itemTypeOK = true;
                         Expression cexp = makePromoterToString(exp);
                         if (cexp instanceof AtomicSequenceConverter) {
@@ -308,6 +308,30 @@ public class TypeChecker {
                         suppliedItemType = BuiltInAtomicType.STRING;
                         suppliedCard = -1;
                     }
+
+
+                    // Rule 3c: promotion between xs:hexBinary and xs:base64Binary
+
+//                    if (rt == StandardNames.XS_HEX_BINARY) {
+//                        itemTypeOK = true;
+//                        Expression cexp = makePromoter(exp, Converter.Base64BinaryToHexBinary.INSTANCE, BuiltInAtomicType.HEX_BINARY);
+//                        if (cexp instanceof AtomicSequenceConverter) {
+//                            ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
+//                        }
+//                        ExpressionTool.copyLocationInfo(exp, cexp);
+//                        exp = cexp;
+//                        try {
+//                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+//                        } catch (XPathException err) {
+//                            throw err.maybeWithLocation(exp.getLocation())
+//                                    .withFailingExpression(supplied)
+//                                    .asStaticError();
+//                        }
+//                        suppliedItemType = BuiltInAtomicType.HEX_BINARY;
+//                        suppliedCard = -1;
+//                    }
+
+                    // New 4.0 rule - relabelling (or "downcasting")
 
                     if (!itemTypeOK && reqItemType.getBasicAlphaCode().length() > 2 && visitor.getStaticContext().getXPathVersion() >= 40) {
                         // allow down-conversion ("relabelling")
@@ -725,7 +749,7 @@ public class TypeChecker {
     }
 
     private static Expression makePromoterToString(Expression exp) {
-        return makePromoter(exp, new Converter.ToStringConverter(), BuiltInAtomicType.STRING);
+        return makePromoter(exp, Converter.PromoterToString.INSTANCE, BuiltInAtomicType.STRING);
     }
 
     private static Expression makePromoter(Expression exp, Converter converter, BuiltInAtomicType type) {

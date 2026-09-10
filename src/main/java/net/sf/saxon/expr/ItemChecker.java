@@ -34,7 +34,10 @@ import java.util.function.Supplier;
 
 /**
  * A ItemChecker implements the item type checking of "treat as": that is,
- * it returns the supplied sequence, checking that all its items are of the correct type
+ * it returns the supplied sequence, checking that all its items are of the correct type.
+ * It is used both for actual "treat as" expressions, and more commonly, for the
+ * run-time type checking invoked by function calls. Note that these differ in the
+ * error code produced when type checking fails.
  */
 
 public final class ItemChecker extends UnaryExpression {
@@ -47,14 +50,13 @@ public final class ItemChecker extends UnaryExpression {
      *
      * @param sequence the expression whose value we are checking
      * @param itemType the required type of the items in the sequence
-     * @param roleSupplier     information used in constructing an error message
+     * @param roleSupplier information used in constructing an error message
      */
 
     public ItemChecker(Expression sequence, ItemType itemType, Supplier<RoleDiagnostic> roleSupplier) {
         super(sequence);
         requiredItemType = itemType;
         this.roleSupplier = roleSupplier;
-        //adoptChildExpression(sequence);
     }
 
     /**
@@ -134,10 +136,7 @@ public final class ItemChecker extends UnaryExpression {
         if (relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMES) {
             return operand;
         } else if (relation == Affinity.DISJOINT) {
-            if (requiredItemType.equals(BuiltInAtomicType.STRING) && th.isSubType(supplied, BuiltInAtomicType.ANY_URI)) {
-                // URI promotion will take care of this at run-time
-                return operand;
-            } else if (Cardinality.allowsZero(card)) {
+            if (Cardinality.allowsZero(card)) {
                 if (!(operand instanceof Literal)) {
                     RoleDiagnostic role = roleSupplier.get();
                     String message = role.composeErrorMessage(
@@ -238,15 +237,11 @@ public final class ItemChecker extends UnaryExpression {
         return makeElaborator().elaborateForPull().iterate(context);
     }
 
-    public SequenceIterator checkSequence(SequenceIterator base, XPathContext context) {
+    private SequenceIterator checkSequence(SequenceIterator base, XPathContext context) {
         final Expression baseExpr = getBaseExpression();
         final TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         Consumer<Item> checker = item -> {
-            if (requiredItemType.matches(item, th)) {
-                // OK, no action
-            } else if (requiredItemType.getUType().subsumes(UType.STRING) && BuiltInAtomicType.ANY_URI.matches(item, th)) {
-                // OK, no action
-            } else {
+            if (!requiredItemType.matches(item, th)) {
                 RoleDiagnostic role = roleSupplier.get();
                 String message = role.composeErrorMessage(requiredItemType, item, th);
                 String errorCode = role.getErrorCode();
@@ -276,9 +271,6 @@ public final class ItemChecker extends UnaryExpression {
             return null;
         }
         if (requiredItemType.matches(item, th)) {
-            return item;
-        } else if (requiredItemType.getUType().subsumes(UType.STRING) &&
-                (BuiltInAtomicType.ANY_URI.matches(item, th) || BuiltInAtomicType.UNTYPED_ATOMIC.matches(item, th))) {
             return item;
         } else {
             RoleDiagnostic role = roleSupplier.get();

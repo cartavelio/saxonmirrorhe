@@ -1387,17 +1387,21 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Get the set of functions in the "fn" namespace defined in the XSLT and F&amp;O specifications
-     * @param version The XSLT version (30 or 40)
-     * @return the function library
+     * Get the set of functions in the "fn" namespace
+     *
+     * @param version The XPath or XSLT version. 20 requests the XPath 2.0 function set (used in XSD assertion processing),
+     *                30 or 31 gives the XSLT 3.0 function set, and 40 the XSLT 4.0 function set
+     * @return the relevant function library
      */
     public BuiltInFunctionSet getXSLTFunctionSet(int version) {
-        if (version == 30) {
+        if (version == 20) {
+            return XPath20FunctionSet.getInstance();
+        } else if (version == 30 || version == 31) {
             return XSLT30FunctionSet.getInstance();
         } else if (version == 40) {
             throw new IllegalArgumentException("XSLT 4.0 requires Saxon-PE or higher");
         } else {
-            throw new IllegalArgumentException("Unsupported XSLT version " + version + " (must be 30)");
+            throw new IllegalArgumentException("Unsupported function library version " + version + " (must be 20|30|31|40)");
         }
     }
 
