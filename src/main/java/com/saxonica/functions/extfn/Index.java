@@ -49,12 +49,12 @@ public class Index extends SystemFunction {
                         if (existingVal == null) {
                             imap.initialPut(key, next);
                         } else if (existingVal instanceof ZenoSequence) {
-                            ((ZenoSequence) existingVal).append(next);
+                            imap.initialPut(key, ((ZenoSequence) existingVal).append(next));
                         } else {
-                            ZenoSequence chain = new ZenoSequence();
-                            chain.appendSequence(existingVal);
-                            chain.append(next);
-                            imap.initialPut(key, chain);
+                            ZenoSequence zenoSeq = new ZenoSequence();
+                            zenoSeq = zenoSeq.appendSequence(existingVal);
+                            zenoSeq = zenoSeq.append(next);
+                            imap.initialPut(key, zenoSeq);
                         }
                     }
                 }

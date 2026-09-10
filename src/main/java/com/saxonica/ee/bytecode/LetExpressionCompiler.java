@@ -409,64 +409,43 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
 //                    ZenoSequence chain = new ZenoSequence();
 //                    for (Operand o : children) {
 //                        Expression child = o.getChildExpression();
-//                        if (Cardinality.allowsMany(child.getCardinality())) {
-//                            chain.appendSequence(SequenceTool.toGroundedValue(child.iterate(context)));
+//                        if (child instanceof VariableReference) {
+//                            GroundedValue seq = ((VariableReference)child).evaluateVariable(context).materialize();
+//                            chain = chain.appendSequence(seq);
 //                        } else {
-//                            Item j = child.evaluateItem(context);
-//                            if (j != null) {
-//                                chain.append(j);
+//                            SequenceIterator iter = child.iterate(context);
+//                            Item item;
+//                            while ((item = iter.next()) != null) {
+//                                chain = chain.append(item);
 //                            }
 //                        }
 //                    }
-//                    return chain;
+
                     Block block = (Block) exp;
                     Operand[] children = block.getOperanda();
                     ga.newInstance(ZenoSequence.class);
                     ga.dup();
                     ga.invokeConstructor(ZenoSequence.class);
-                    // Stack: ZenoSequence
+                    // Stack: ZenoSeq
                     for (Operand o : children) {
                         Expression child = o.getChildExpression();
-                        if (Cardinality.allowsMany(child.getCardinality())) {
-                            // chain.appendSequence(SequenceTool.toGroundedValue(child.iterate(context)));
-                            ga.dup();
-                            // Stack: ZenoSequence ZenoSequence
-                            compiler.compileToIterator(child);
-                            // Stack: ZenoSequence ZenoSequence SeqIterator
-                            ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
-                            // Stack: ZenoSequence ZenoSequence GroundedValue
-                            ga.invokeInstanceMethod(ZenoSequence.class, "appendSequence", GroundedValue.class);
-                            // Stack: ZenoSequence
+                        if (child instanceof VariableReference) {
+//                            GroundedValue seq = ((VariableReference) child).evaluateVariable(context).materialize();
+//                            chain = chain.appendSequence(seq);
+                             VariableReferenceCompiler.compileToSequence(compiler,(VariableReference)child);
+                             ga.invokeInstanceMethod(Sequence.class, "materialize" );
+                             ga.invokeInstanceMethod(ZenoSequence.class, "appendSequence", GroundedValue.class);
                         } else {
-//                            Item j = child.evaluateItem(context);
-//                            if (j != null) {
-//                                chain.append(j);
-//                            }
-                            // Stack: ZenoSequence
-                            ga.dup();
-                            // Stack: ZenoSequence ZenoSequence
-                            compiler.compileToItem(child);
-                            // Stack: ZenoSequence ZenoSequence Item
-                            LabelInfo itemIsNull = methodInfo.newLabel("itemIsNull");
-                            LabelInfo itemDone = methodInfo.newLabel("itemDone");
-                            ga.dup();
-                            // Stack: ZenoSequence ZenoSequence Item Item
-                            ga.ifNull(itemIsNull.label());
-                            // Stack: ZenoSequence ZenoSequence Item
-                            ga.invokeInstanceMethod(ZenoSequence.class, "append", Item.class);
-                            // Stack: ZenoSequence
-                            ga.goTo(itemDone);
-                            methodInfo.placeLabel(itemIsNull);
-                            // Stack: ZenoSequence ZenoSequence null
-                            ga.pop();
-                            // Stack: ZenoSequence ZenoSequence
-                            ga.pop();
-                            // Stack: ZenoSequence
-                            methodInfo.placeLabel(itemDone);
+                            // Stack: ZenoSeq
+                            compiler.compileToIterator(child);
+                            // Stack: ZenoSeq SeqIterator
+                            ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
+                            // Stack: ZenoSeq GroundedValue
+                            ga.invokeInstanceMethod(ZenoSequence.class, "appendSequence", GroundedValue.class);
+                            // Stack: ZenoSeq
                         }
                     }
-                    // Stack: ZenoSequence
-
+                    // Stack: ZenoSeq
                 } else {
                     // not a Block
                     throw new CannotCompileException("Shared append expression is not a Block", true);
