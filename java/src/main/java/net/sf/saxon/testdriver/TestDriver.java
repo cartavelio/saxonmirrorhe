@@ -7,8 +7,6 @@
 
 package net.sf.saxon.testdriver;
 
-
-import com.saxonica.ee.domino.DominoTreeModel;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.dom.DOMObjectModel;
