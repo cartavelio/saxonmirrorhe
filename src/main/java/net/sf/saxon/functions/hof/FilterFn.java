@@ -9,12 +9,12 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 
 /**
@@ -44,7 +44,7 @@ public class FilterFn extends SystemFunction {
             final FunctionItem function, SequenceIterator basis, final XPathContext context) throws XPathException {
         switch (function.getArity()) {
             case 0:
-                if (ExpressionTool.effectiveBooleanValue(dynamicCall(function, context).iterate())) {
+                if (((BooleanValue)dynamicCall(function, context).head()).getBooleanValue()) {
                     return basis;
                 } else {
                     return EmptyIterator.getInstance();
@@ -52,7 +52,7 @@ public class FilterFn extends SystemFunction {
             case 1:
                 return ItemMappingIterator.filter(
                         basis,
-                        item -> ExpressionTool.effectiveBooleanValue(dynamicCall(function, context, item).iterate()));
+                        item -> ((BooleanValue)dynamicCall(function, context, item).head()).getBooleanValue());
 
             case 2:
                 // New in 4.0, position() as a second argument
@@ -60,8 +60,8 @@ public class FilterFn extends SystemFunction {
                         basis,
                         (item, pos) -> {
                             try {
-                                return ExpressionTool.effectiveBooleanValue(
-                                        dynamicCall(function, context, item, Int64Value.makeIntegerValue(pos)).iterate());
+                                Int64Value position = Int64Value.makeIntegerValue(pos);
+                                return ((BooleanValue)dynamicCall(function, context, item, position).head()).getBooleanValue();
                             } catch (XPathException err) {
                                 throw new UncheckedXPathException(err);
                             }
