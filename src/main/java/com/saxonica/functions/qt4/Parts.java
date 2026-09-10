@@ -375,6 +375,7 @@ public class Parts extends SystemFunction implements Callable {
         DictionaryMap dict = new DictionaryMap();
         try {
             URI uri = new URI(arg);
+            doExtraChecks(uri);
             dict.initialPut("isValid", BooleanValue.TRUE);
             boolean absolute = uri.isAbsolute();
             dict.initialPut("isAbsolute", BooleanValue.get(absolute));
@@ -485,6 +486,11 @@ public class Parts extends SystemFunction implements Callable {
     @CSharpReplaceBody(code="return new System.Uri(new System.Uri(\"http://dummy.uri/\"), relative);")
     private static URI getSurrogateURI(URI relative) {
         return relative;
+    }
+
+    @CSharpReplaceBody(code="if (!uri.IsWellFormedOriginalString()) throw new System.UriFormatException(\"Invalid URI\");")
+    private static void doExtraChecks(URI uri) {
+        // no action on Java
     }
 }
 
