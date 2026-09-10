@@ -408,7 +408,7 @@
             <li><p>The new <code>fn:all()</code> function is renamed <code>fn:every()</code>.</p></li>
             <li><p>The new <code>map:of()</code> function is renamed <code>map:of-pairs()</code>.</p></li>
             <li><p>The new <code>array:of()</code> function is renamed <code>array:of-members()</code>.</p></li>
-            <li><p>Implemented <code>array:split()</code>.</p></li>
+            <li><p>Implemented <code>array:split()</code>, <code>map:pair</code>.</p></li>
         </ul>
         
       

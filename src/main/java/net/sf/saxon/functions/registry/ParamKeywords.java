@@ -56,6 +56,7 @@ public class ParamKeywords {
         arrayParamNames.put("reverse", "array");
         arrayParamNames.put("size", "array");
         arrayParamNames.put("slice", "input|start|end|step");
+        arrayParamNames.put("split", "array");
         arrayParamNames.put("sort", "array|collation|key");
         arrayParamNames.put("subarray", "array|start|length");
         arrayParamNames.put("tail", "array");
@@ -270,6 +271,7 @@ public class ParamKeywords {
         mapParamNames.put("keys", "map|predicate");
         mapParamNames.put("merge", "maps|options");
         mapParamNames.put("of", "pairs|combine");
+        mapParamNames.put("pair", "key|value");
         mapParamNames.put("put", "map|key|value");
         mapParamNames.put("remove", "map|keys");
         mapParamNames.put("replace", "map|key|action");
