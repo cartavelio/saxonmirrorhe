@@ -1,20 +1,14 @@
 package com.saxonica.functions.registry;
 
 import com.saxonica.functions.qt4.*;
-import net.sf.saxon.functions.AtomicEqual;
-import net.sf.saxon.functions.CodepointsToString;
-import net.sf.saxon.functions.CollatingFunctionFree;
-import net.sf.saxon.functions.Concat;
+import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
@@ -236,23 +230,13 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("parts", 1, e -> e.populate(Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
-//        register("range", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
-//                .arg(0, AnyItemType.getInstance(), STAR, null)
-//                .arg(1, predicate, OPT, null));
-//
-//        register("range", 3, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
-//                .arg(0, AnyItemType.getInstance(), STAR, null)
-//                .arg(1, predicate, OPT, null)
-//                .arg(2, predicate, OPT, null));
-//
-//        register("range", 4, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
-//                .arg(0, AnyItemType.getInstance(), STAR, null)
-//                .arg(1, predicate, OPT, null)
-//                .arg(2, predicate, OPT, null)
-//                .arg(3, MapType.ANY_MAP_TYPE,ONE, null));
-
         register("parse-QName", 1, e -> e.populate(ParseQNameFn::new, BuiltInAtomicType.QNAME, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
+
+        // remove() changes in 4.0 to allow multiple integers in the second argument
+        register("remove", 2, e -> e.populate(Remove::new, Type.ITEM_TYPE, STAR, AS_ARG0 | FILTER)
+                .arg(0, Type.ITEM_TYPE, STAR | TRA, EMPTY)
+                .arg(1, BuiltInAtomicType.INTEGER, STAR, null));
 
         register("replicate", 2, e -> e.populate(Replicate::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
