@@ -77,6 +77,8 @@ public class MetaTagAdjuster extends ProxyReceiver {
 
     /**
      * Indicate whether we're handling HTML or XHTML
+     *
+     * @param xhtml true if handling XHTML
      */
 
     public void setIsXHTML(boolean xhtml) {

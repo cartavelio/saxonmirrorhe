@@ -35,7 +35,7 @@ public interface FunctionLibrary {
      *
      * @param functionName the qualified name of the function being called, together with its arity.
      *                     For legacy reasons, the arity may be set to -1 to mean any arity will do
-     * @param languageLevel The XPath language level (times 10, e.g. 31 for XPath 3.1)
+     * @param languageLevel the XPath language level (times 10, e.g. 31 for XPath 3.1)
      * @return true if a function of this name and arity is available for calling
      */
 

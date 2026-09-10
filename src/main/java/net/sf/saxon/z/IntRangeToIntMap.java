@@ -37,6 +37,8 @@ public class IntRangeToIntMap implements IntToIntMap {
 
     /**
      * Create an empty map, with given initial capacity
+     *
+     * @param capacity the initial capacity
      */
     public IntRangeToIntMap(int capacity) {
         startPoints = new int[capacity];
@@ -166,6 +168,10 @@ public class IntRangeToIntMap implements IntToIntMap {
 
     /**
      * Add an entry to the map. Ranges of entries must be added in ascending numerical order
+     *
+     * @param start
+     * @param end
+     * @param value
      */
 
     public void addEntry(int start, int end, int value) {
@@ -242,6 +248,8 @@ public class IntRangeToIntMap implements IntToIntMap {
 
     /**
      * Get the start points of the ranges
+     *
+     * @return the start points
      */
 
     public int[] getStartPoints() {
@@ -250,6 +258,8 @@ public class IntRangeToIntMap implements IntToIntMap {
 
     /**
      * Get the end points of the ranges
+     *
+     * @return the end points
      */
 
     public int[] getEndPoints() {
@@ -258,6 +268,8 @@ public class IntRangeToIntMap implements IntToIntMap {
 
     /**
      * Get the number of ranges actually in use
+     *
+     * @return the number of ranges
      */
 
     public int getNumberOfRanges() {

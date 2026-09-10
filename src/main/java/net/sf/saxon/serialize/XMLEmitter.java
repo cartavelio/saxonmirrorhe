@@ -208,6 +208,8 @@ public class XMLEmitter extends Emitter {
 
     /**
      * Output the XML declaration
+     *
+     * @throws XPathException if any error occurs
      */
 
     public void writeDeclaration() throws XPathException {
@@ -406,6 +408,16 @@ public class XMLEmitter extends Emitter {
 
     /**
      * Start of an element. Output the start tag, escaping special characters.
+     *
+     * @param elemName   the name of the element
+     * @param type       the type annotation of the element
+     * @param attributes the attributes of this element
+     * @param namespaces the in-scope namespaces of this element: generally this is all the in-scope
+     *                   namespaces, without relying on inheriting namespaces from parent elements
+     * @param location   an object providing information about the module, line, and column where the node originated
+     * @param properties bit-significant properties of the element node. If there are no relevant
+     *                   properties, zero is supplied. The definitions of the bits are in class {@link ReceiverOption}
+     * @throws XPathException if an error occurs
      */
 
     @Override
@@ -602,8 +614,9 @@ public class XMLEmitter extends Emitter {
 
     /**
      * Close an empty element tag. (This is overridden in XHTMLEmitter).
-     *  @param displayName the name of the empty element
+     * @param displayName the name of the empty element
      * @param nameCode    the fingerprint of the name of the empty element
+     * @throws IOException if an IO exception occurs
      */
 
     protected void writeEmptyElementTagCloser(String displayName, NodeName nameCode) throws IOException {
@@ -682,6 +695,9 @@ public class XMLEmitter extends Emitter {
 
     /**
      * Where characters are not available in the selected encoding, substitute them
+     *
+     * @param chars the characters to be converted
+     * @return the converted string
      */
 
     protected UnicodeString convertToAscii(UnicodeString chars) {
@@ -840,6 +856,8 @@ public class XMLEmitter extends Emitter {
      * predefined entities.
      * @param chars       The character sequence containing the string
      * @param inAttribute Set to true if the text is in an attribute value
+     * @throws IOException if an IO exception occurs
+     * @throws XPathException if an IO exception occurs
      */
 
     protected void writeEscape(UnicodeString chars, final boolean inAttribute)

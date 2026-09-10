@@ -38,6 +38,8 @@ public class SerializationProperties {
     /**
      * Create a set of serialization parameters based on defined output properties,
      * with no character maps
+     *
+     * @param props the output properties
      */
 
     public SerializationProperties(Properties props) {
@@ -48,6 +50,9 @@ public class SerializationProperties {
      * Create a set of serialization parameters based on defined output properties,
      * with an index of named character maps that may be referred to from the
      * {@code USE_CHARACTER_MAPS} property
+     *
+     * @param props        the output properties
+     * @param charMapIndex the index of named character maps
      */
 
     public SerializationProperties(Properties props, CharacterMapIndex charMapIndex) {
@@ -149,6 +154,7 @@ public class SerializationProperties {
      * parameters to create a new set of serialization parameters. Neither of the
      * input parameter sets is modified
      * @param defaults the parameters to use when no explicit values are supplied
+     * @return the new set of serialization parameters
      */
 
     public SerializationProperties combineWith(SerializationProperties defaults) {

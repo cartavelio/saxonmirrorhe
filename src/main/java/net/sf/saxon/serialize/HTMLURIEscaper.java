@@ -110,7 +110,9 @@ public class HTMLURIEscaper extends ProxyReceiver {
 
     /**
      * Start of a document node.
-     * @param properties
+     * @param properties bit-significant integer indicating properties of the document node.
+     *                   The definitions of the bits are in class {@link ReceiverOption}
+     * @throws XPathException if an error occurs
      */
 
     @Override
@@ -170,7 +172,9 @@ public class HTMLURIEscaper extends ProxyReceiver {
      *
      * @param url       the URI to be escaped
      * @param normalize
+     * @param config    the configuration
      * @return the URI after escaping non-ASCII characters
+     * @throws XPathException if any error occurs
      */
 
     /*@NotNull*/

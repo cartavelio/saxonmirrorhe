@@ -33,6 +33,8 @@ public abstract class IntSet {
 
     /**
      * Ask whether the set permits in-situ modifications using add() and remove()
+     *
+     * @return true if the set permits in-situ modifications
      */
 
     public boolean isMutable() {

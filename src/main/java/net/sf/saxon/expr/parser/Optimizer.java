@@ -154,7 +154,7 @@ public class Optimizer {
      * @param visitor             the expression visitor
      * @param gc                  the GeneralComparison to be simplified
      * @param backwardsCompatible true if in 1.0 compatibility mode
-     * @param contextItemType 
+     * @param contextItemType     the static type of the context item
      * @return the simplified expression
      */
 
@@ -291,6 +291,7 @@ public class Optimizer {
      * @param expr    the expression supplied for the value of the streaming argument
      * @param context the XPath evaluation context of the caller
      * @return the (nominal) result of the evaluation
+     * @throws XPathException if any error occurs
      */
 
     public Sequence evaluateStreamingArgument(Expression expr, XPathContext context) throws XPathException {

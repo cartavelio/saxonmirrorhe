@@ -188,6 +188,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
     /**
      * Decide whether an element is "serialized as an HTML element" in the language of the 3.0 specification
      *
+     * @param name the name of the element
      * @return true if the element is to be serialized as an HTML element
      */
 
@@ -242,6 +243,16 @@ public abstract class HTMLEmitter extends XMLEmitter {
 
     /**
      * Output element start tag
+     *
+     * @param elemName   the name of the element
+     * @param type       the type annotation of the element
+     * @param attributes the attributes of this element
+     * @param namespaces the in-scope namespaces of this element: generally this is all the in-scope
+     *                   namespaces, without relying on inheriting namespaces from parent elements
+     * @param location   an object providing information about the module, line, and column where the node originated
+     * @param properties bit-significant properties of the element node. If there are no relevant
+     *                   properties, zero is supplied. The definitions of the bits are in class {@link ReceiverOption}
+     * @throws XPathException if an error occurs
      */
 
     @Override

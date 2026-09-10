@@ -38,7 +38,7 @@ public class LoopLifter {
      * Apply loop-lifting to an expression (typically the body of a template or function)
      * @param exp         the expression to which loop lifting is applied
      * @param visitor     the expression visitor
-     * @param contextInfo
+     * @param contextInfo the static type of the context item
      * @return the optimized expression
      * @throws XPathException if any error occurs
      */

@@ -253,6 +253,10 @@ public class IntHashSet extends IntSet {
 
     /**
      * Test if one set has overlapping membership with another set
+     *
+     * @param one the first set
+     * @param two the second set
+     * @return true if the sets overlap
      */
 
     public static boolean containsSome(IntSet one, IntSet two) {
@@ -276,6 +280,8 @@ public class IntHashSet extends IntSet {
 
     /**
      * Test whether this set has exactly the same members as another set
+     *
+     * @param other the other set
      */
 
     public boolean equals(Object other) {

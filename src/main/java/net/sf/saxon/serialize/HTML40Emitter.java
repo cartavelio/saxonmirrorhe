@@ -7,6 +7,7 @@
 
 package net.sf.saxon.serialize;
 
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
@@ -51,6 +52,7 @@ public class HTML40Emitter extends HTMLEmitter {
     /**
      * Decide whether an element is "serialized as an HTML element" in the language of the 3.0 specification
      *
+     * @param name the name of the element
      * @return true if the element is to be serialized as an HTML element
      */
     @Override
@@ -82,12 +84,15 @@ public class HTML40Emitter extends HTMLEmitter {
     /**
      * Output element start tag
      *
-     * @param elemName
-     * @param type
-     * @param attributes
-     * @param namespaces
-     * @param location
-     * @param properties
+     * @param elemName   the name of the element
+     * @param type       the type annotation of the element
+     * @param attributes the attributes of this element
+     * @param namespaces the in-scope namespaces of this element: generally this is all the in-scope
+     *                   namespaces, without relying on inheriting namespaces from parent elements
+     * @param location   an object providing information about the module, line, and column where the node originated
+     * @param properties bit-significant properties of the element node. If there are no relevant
+     *                   properties, zero is supplied. The definitions of the bits are in class {@link ReceiverOption}
+     * @throws XPathException if an error occurs
      */
     @Override
     public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
