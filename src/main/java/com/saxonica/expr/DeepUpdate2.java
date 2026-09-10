@@ -1,6 +1,11 @@
-package net.sf.saxon.expr;
+package com.saxonica.expr;
 
+import com.saxonica.ee.pin.pin.LabelTool;
 import com.saxonica.functions.extfn.PinFn;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Operand;
+import net.sf.saxon.expr.OperandRole;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.*;
@@ -9,7 +14,6 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.StringMap;
-import net.sf.saxon.ma.pin.LabelTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;

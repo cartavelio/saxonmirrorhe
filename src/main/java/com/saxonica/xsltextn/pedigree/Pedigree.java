@@ -1,6 +1,6 @@
 package com.saxonica.xsltextn.pedigree;
 
-import net.sf.saxon.ma.pin.LabeledItem;
+import com.saxonica.ee.pin.pin.LabeledItem;
 import net.sf.saxon.value.AtomicValue;
 
 /**

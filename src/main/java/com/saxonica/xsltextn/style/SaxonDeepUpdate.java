@@ -2,7 +2,6 @@ package com.saxonica.xsltextn.style;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ContextItemExpression;
-import net.sf.saxon.expr.DeepUpdate2;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.om.AttributeInfo;

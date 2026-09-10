@@ -1,4 +1,4 @@
-package net.sf.saxon.ma.pin;
+package com.saxonica.ee.pin.pin;
 
 import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.om.Item;

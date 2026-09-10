@@ -1,9 +1,9 @@
 package com.saxonica.xsltextn.instruct;
 
 import com.saxonica.xsltextn.pedigree.Pedigree;
-import net.sf.saxon.ma.pin.LabeledArrayItem;
-import net.sf.saxon.ma.pin.LabeledMapItem;
-import net.sf.saxon.ma.pin.LabeledItem;
+import com.saxonica.ee.pin.pin.LabeledArrayItem;
+import com.saxonica.ee.pin.pin.LabeledMapItem;
+import com.saxonica.ee.pin.pin.LabeledItem;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;

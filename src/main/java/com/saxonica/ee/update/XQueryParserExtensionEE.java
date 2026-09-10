@@ -1,33 +1,17 @@
 package com.saxonica.ee.update;
 
-import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.ee.schema.CachedSchemaSource;
-import com.saxonica.ee.schema.PreparedSchema;
-import com.saxonica.ee.schema.SchemaCompiler;
-import com.saxonica.ee.schema.sdoc.SchemaReader;
+import com.saxonica.expr.DeepUpdate2;
 import com.saxonica.expr.XQueryParserExtensionPE;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
-import net.sf.saxon.lib.AugmentedSource;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.XQueryParser;
-import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Schema;
-import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.value.Whitespace;
-
-import javax.xml.transform.Source;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Parser extension for syntax in XQuery Update and/or XQuery 3.0 that is supported
@@ -38,17 +22,29 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
     private boolean acceptUpdateSyntax = false;
     private boolean foundRevalidationDeclaration = false;
 
-    private SchemaCompiler schemaCompiler;
-    private XQueryParser parser;
 
-
-    public XQueryParserExtensionEE(XQueryParser parser, boolean updating, com.saxonica.ee.schema.SchemaCompiler schemaCompiler) {
+    public XQueryParserExtensionEE(boolean updating) {
         acceptUpdateSyntax = updating;
-        this.parser = parser;
-        this.schemaCompiler = schemaCompiler;
-
     }
 
+
+    /**
+     * Get the permitted set of standard functions in this environment
+     */
+
+//    public int getPermittedFunctions() {
+//        int allowed = BuiltInFunctionSet.CORE;
+//        if (allowXPath30Syntax) {
+//            allowed |= BuiltInFunctionSet.XPATH30;
+//        }
+//        if (allowXPath31Syntax) {
+//            allowed |= BuiltInFunctionSet.XPATH31;
+//        }
+//        if (acceptUpdateSyntax) {
+//            allowed |= BuiltInFunctionSet.XQUPDATE;
+//        }
+//        return allowed;
+//    }
 
     /**
      * Parse the "declare revalidation" declaration (XQuery Update).
@@ -131,87 +127,40 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
         }
     }
 
+    /**
+     * Parse an update map|array Expression.
+     *
+     * @return the parsed expression; except that this version of the method always
+     * throws an exception
+     * @throws XPathException if a static error is found
+     */
 
-    public void processSchemaImports(QueryModule module, List<XQueryParser.Import> schemaImports) throws XPathException {
-        Configuration config = module.getConfiguration();
-        try {
-            config.checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY,
-                                        "import schema",
-                                        module.getPackageData().getLocalLicenseId());
-        } catch (LicenseException err) {
-            throw new XPathException(err).withErrorCode("XTSE1650");   //TODO error code
+    /*@NotNull*/
+    @Override
+    public Expression parseDeepUpdateExpression(XQueryParser parser) throws XPathException {
+        Tokenizer t = parser.getTokenizer();
+        if (!parser.isAllowXPath40Syntax()) {
+            parser.grumble("update map/array syntax requires 4.0 to be enabled");
         }
-        if (schemaCompiler == null) {
-            schemaCompiler = new SchemaCompiler((EnterpriseConfiguration)module.getConfiguration());
+
+        int operation = t.currentToken;
+        parser.nextToken();
+        Expression rootExpr = parser.parseExprSingle();
+        if (t.currentToken != Token.REPLACE && !parser.isKeyword("replace")) {
+            parser.grumble("expected keyword 'replace'");
         }
-        List<Source> sources = new ArrayList<>();
-        for (XQueryParser.Import schemaImport : schemaImports) {
-            try {
-                gatherSources(module, schemaImport, sources);
-            } catch (XPathException e) {
-                throw e.maybeWithLocation(parser.makeLocation(schemaImport.offset));
-            }
+        parser.nextToken();
+        Expression selectExpr = parser.parseExprSingle();
+        if (t.currentToken != Token.WITH && !parser.isKeyword("with")) {
+            parser.grumble("expected keyword 'with");
         }
-        PreparedSchema schema = schemaCompiler.loadSources(sources);
-        module.getPackageData().setImportedSchema(schema);
+        parser.nextToken();
+        Expression actionExpr = parser.parseExprSingle();
+
+        return new DeepUpdate2(operation, rootExpr, selectExpr, actionExpr);
     }
 
 
-    private void gatherSources(QueryModule env, XQueryParser.Import schemaImport, List<Source> sources) throws XPathException {
-        try {
-            Configuration config = env.getConfiguration();
-
-            String namespace = Whitespace.trim(schemaImport.namespaceURI.toString());
-            if (namespace == null) {
-                namespace = "";
-            } else {
-                namespace = namespace.trim();
-            }
-            NamespaceUri targetNamespace = NamespaceUri.of(namespace);
-            Schema preLoaded = env.getUserQueryContext().getPreLoadedSchema();
-            if (preLoaded != null) {
-                if (preLoaded.includesTargetNamespace(targetNamespace)) {
-                    sources.add(new CachedSchemaSource(preLoaded));
-                    return;
-                }
-            }
-            if (namespace.equals(NamespaceConstant.XML) ||
-                    namespace.equals(NamespaceConstant.FN) ||
-                    namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
-                targetNamespace = NamespaceUri.of(namespace);
-                Schema xmlSchema = config.getSchemaForBuiltInNamespace(targetNamespace);
-                sources.add(new CachedSchemaSource(xmlSchema));
-                return;
-            }
-
-            if (schemaImport.locationURIs.isEmpty()) {
-                throw new XPathException("Unable to locate any schema for target namespace "
-                                                 + schemaImport.namespaceURI, "XQST0059");
-            }
-
-            for (String hint : schemaImport.locationURIs) {
-                if (targetNamespace.equals(NamespaceUri.XML) ||
-                        targetNamespace.equals(NamespaceUri.FN) ||
-                        targetNamespace.equals(NamespaceUri.SCHEMA_INSTANCE)) {
-                    Schema xmlSchema = config.getSchemaForBuiltInNamespace(targetNamespace);
-                    sources.add(new CachedSchemaSource(xmlSchema));
-                    continue;
-                }
-
-                Source source = SchemaReader.getSource(env.getStaticBaseURI(), hint, schemaCompiler, targetNamespace);
-                if (source != null) {
-
-                    AugmentedSource as = AugmentedSource.makeAugmentedSource(source);
-                    as.setRequiredTargetNamespace(targetNamespace);
-                    sources.add(as);
-                }
-            }
-        } catch (SchemaException err) {
-            throw XPathException.makeXPathException(err);
-        }
-
-
-    }
 }
 
 // Copyright (c) 2008-2023 Saxonica Limited

@@ -19,7 +19,7 @@ import net.sf.saxon.ma.json.JsonToXMLFn;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.pin.LabelFn;
+import com.saxonica.ee.pin.pin.LabelFn;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.transpile.CSharp;

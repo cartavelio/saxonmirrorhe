@@ -1,4 +1,4 @@
-package net.sf.saxon.ma.pin;
+package com.saxonica.ee.pin.pin;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;

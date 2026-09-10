@@ -1,4 +1,4 @@
-package net.sf.saxon.ma.pin;
+package com.saxonica.ee.pin.pin;
 
 import com.saxonica.xsltextn.pedigree.DelegatingMapItem;
 import net.sf.saxon.expr.Callable;
