@@ -179,7 +179,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         final Optional<XdmNode> outputFile = testCase.select(path("test", "output", "@file")).asOptionalNode();
         if (outputFile.isPresent() && "#absent".equals(outputFile.get().getStringValue())) {
             notrun++;
-            resultsDoc.writeTestcaseElement(testName, "notRun", "requires absent base URI");
+            resultsDoc.writeTestcaseElement(testName, "notRun", "requires absent output base URI");
             return;
         }
 
