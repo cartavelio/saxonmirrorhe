@@ -140,7 +140,7 @@ public class ComputedElement extends ElementCreator {
         final SchemaType schemaType = getSchemaType();
         if (schemaType != null) {
             itemType = new ContentTypeTest(Type.ELEMENT, schemaType, config, false);
-            schemaType.analyzeContentExpression(getContentExpression(), Type.ELEMENT);
+            schemaType.analyzeContentExpression(getContentExpression(), Type.ELEMENT, getRetainedStaticContext().getPackageData().getImportedSchema());
         } else if (getValidationAction() == Validation.STRIP || !schemaAware) {
             itemType = new ContentTypeTest(Type.ELEMENT, Untyped.getInstance(), config, false);
         } else {

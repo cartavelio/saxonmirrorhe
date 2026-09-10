@@ -222,7 +222,7 @@ public class FixedElement extends ElementCreator {
                 if (xsiType != null || !decl.hasTypeAlternatives()) {
                     instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
                     try {
-                        schemaType.analyzeContentExpression(content, Type.ELEMENT);
+                        schemaType.analyzeContentExpression(content, Type.ELEMENT, env.getPackageData().getImportedSchema());
                     } catch (XPathException e) {
                         throw e.withErrorCode(instr.isXSLT() ? "XTTE1510" : "XQDY0027")
                                 .withLocation(instr.getLocation());
@@ -255,7 +255,7 @@ public class FixedElement extends ElementCreator {
                             Token.INTERSECT,
                             new ContentTypeTest(Type.ELEMENT, instr.getSchemaType(), config, false));
                     try {
-                        schemaType.analyzeContentExpression(content, Type.ELEMENT);
+                        schemaType.analyzeContentExpression(content, Type.ELEMENT, env.getPackageData().getImportedSchema());
                     } catch (XPathException e) {
                         throw e.withErrorCode(instr.isXSLT() ? "XTTE1515" : "XQDY0027")
                                 .withLocation(instr.getLocation());
@@ -281,7 +281,7 @@ public class FixedElement extends ElementCreator {
                     new ContentTypeTest(Type.ELEMENT, schemaType, config, false)
             );
             try {
-                schemaType.analyzeContentExpression(content, Type.ELEMENT);
+                schemaType.analyzeContentExpression(content, Type.ELEMENT, env.getPackageData().getImportedSchema());
             } catch (XPathException e) {
                 throw e.withErrorCode(instr.isXSLT() ? "XTTE1540" : "XQDY0027").withLocation(instr.getLocation());
             }
@@ -433,14 +433,14 @@ public class FixedElement extends ElementCreator {
         if (whole) {
             Expression parent = getParentExpression();
             Block block = new Block(new Expression[]{this});
-            parentType.analyzeContentExpression(block, Type.ELEMENT);
+            parentType.analyzeContentExpression(block, Type.ELEMENT, getRetainedStaticContext().getPackageData().getImportedSchema());
             setParentExpression(parent);
         }
 
         SchemaType type;
         try {
             int fp = elementName.obtainFingerprint(getConfiguration().getNamePool());
-            type = ((ComplexType) parentType).getElementParticleType(fp, true);
+            type = ((ComplexType) parentType).getElementParticleType(fp, null, true);
         } catch (MissingComponentException e) {
             throw new XPathException(e);
         }

@@ -17,6 +17,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationParams;
 
@@ -45,6 +46,13 @@ import javax.xml.transform.Source;
 
 @CSharpModifiers(code = {"abstract", "internal"})
 public abstract class SchemaValidator extends AbstractDestination {
+
+    /**
+     * Get the schema used by this schema validator
+     * @return the relevant schema
+     */
+
+    public abstract Schema getSchema();
 
     /**
      * The validation mode may be either strict or lax. The default is strict; this method may be called

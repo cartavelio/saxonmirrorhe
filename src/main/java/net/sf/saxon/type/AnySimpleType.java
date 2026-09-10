@@ -428,11 +428,12 @@ public enum AnySimpleType implements SimpleType {
      *
      * @param expression the expression that delivers the content
      * @param kind       the node kind whose content is being delivered: {@link Type#ELEMENT},
-*                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
+     *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
+     * @param schema
      */
 
     @Override
-    public void analyzeContentExpression(Expression expression, int kind) {
+    public void analyzeContentExpression(Expression expression, int kind, Schema schema) {
         //return;
     }
 

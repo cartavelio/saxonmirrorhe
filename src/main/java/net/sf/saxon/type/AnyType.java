@@ -7,6 +7,7 @@
 
 package net.sf.saxon.type;
 
+import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.UserComplexType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
@@ -433,11 +434,12 @@ public enum AnyType implements ComplexType {
      *
      * @param expression the expression that delivers the content
      * @param kind       the node kind whose content is being delivered: {@link Type#ELEMENT},
-*                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
+     *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
+     * @param schema
      */
 
     @Override
-    public void analyzeContentExpression(Expression expression, int kind) {
+    public void analyzeContentExpression(Expression expression, int kind, Schema schema) {
         //return;
     }
 
@@ -476,13 +478,15 @@ public enum AnyType implements ComplexType {
      * If there is no such particle, return null. If the fingerprint matches an element wildcard,
      * return the type of the global element declaration with the given name if one exists, or AnyType
      * if none exists and lax validation is permitted by the wildcard.
+     *
      * @param elementName        Identifies the name of the child element within this content model
+     * @param schema
      * @param considerExtensions true if the analysis should take into account types derived by extension
      */
 
     /*@NotNull*/
     @Override
-    public SchemaType getElementParticleType(int elementName, boolean considerExtensions) {
+    public SchemaType getElementParticleType(int elementName, PreparedSchema schema, boolean considerExtensions) {
         return this;
     }
 
@@ -493,12 +497,14 @@ public enum AnyType implements ComplexType {
      * {@link net.sf.saxon.expr.StaticProperty#EXACTLY_ONE}, {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ZERO_OR_ONE},
      * {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ZERO_OR_MORE}, {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ONE_OR_MORE},
      * If there is no such particle, return zero.
+     *
      * @param elementName        Identifies the name of the child element within this content model
-     * @param considerExtensions  true if the analysis should take into account types derived by extension
+     * @param schema
+     * @param considerExtensions true if the analysis should take into account types derived by extension
      */
 
     @Override
-    public int getElementParticleCardinality(int elementName, boolean considerExtensions) {
+    public int getElementParticleCardinality(int elementName, PreparedSchema schema, boolean considerExtensions) {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
@@ -510,11 +516,12 @@ public enum AnyType implements ComplexType {
      * if none exists and lax validation is permitted by the wildcard.
      *
      * @param attributeName Identifies the name of the child element within this content model
+     * @param schema
      */
 
     /*@NotNull*/
     @Override
-    public SimpleType getAttributeUseType(StructuredQName attributeName) {
+    public SimpleType getAttributeUseType(StructuredQName attributeName, Schema schema) {
         return AnySimpleType.getInstance();
     }
 
@@ -528,12 +535,13 @@ public enum AnyType implements ComplexType {
      * <p>If there are types derived from this type by extension, search those too.</p>
      *
      * @param attributeName Identifies the name of the child element within this content model
+     * @param schema
      * @return the schema type associated with the attribute use identified by the fingerprint.
-     *         If there is no such attribute use, return null.
+     * If there is no such attribute use, return null.
      */
 
     @Override
-    public int getAttributeUseCardinality(StructuredQName attributeName) {
+    public int getAttributeUseCardinality(StructuredQName attributeName, Schema schema) {
         return StaticProperty.ALLOWS_ZERO_OR_ONE;
     }
 

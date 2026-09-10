@@ -890,10 +890,20 @@ public class Configuration implements SourceResolver, NotationSet {
         throw new XPathException("Class " + className + " is not a ResourceResolver");
     }
 
+    /**
+     * Register a factory for constructing instances of class {@link ErrorReporter}. The default factory
+     * creates an instance of class {@link StandardErrorReporter}, writing to the {@link Logger} registered
+     * with this {@link Configuration}.
+     * @param factory the factory class to be used when an {@link ErrorReporter} is required
+     */
     public void setErrorReporterFactory(java.util.function.Function<Configuration, ? extends ErrorReporter> factory) {
         errorReporterFactory = factory;
     }
-    
+
+    /**
+     * Create an {@link ErrorReporter}, using the registered factory
+     * @return the result of invoking the registered {@link ErrorReporter} factory.
+     */
     public ErrorReporter makeErrorReporter() {
         if (errorReporterFactory == null) {
             errorReporterFactory = config -> {
@@ -905,6 +915,11 @@ public class Configuration implements SourceResolver, NotationSet {
         return errorReporterFactory.apply(this);
     }
 
+    /**
+     * Get the {@link Logger} to which messages from this configuration will be sent. The default
+     * {@code Logger} writes messages to the standard error stream
+     * @return the {@code Logger} used by this configuration.
+     */
     public Logger getLogger() {
         return traceOutput;
     }
@@ -3204,7 +3219,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return an iterator over the types that are derived from the given type by extension
      */
 
-    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type) {
+    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type, Schema schema) {
         return Collections.emptyList();
     }
 

@@ -8,6 +8,7 @@
 
 package net.sf.saxon.type;
 
+import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.z.IntHashSet;
 
@@ -121,14 +122,15 @@ public interface ComplexType extends SchemaType {
      * if none exists and lax validation is permitted by the wildcard.
      *
      * @param elementName        Identifies the name of the child element within this content model
+     * @param schema
      * @param considerExtensions True if types derived from this type by extension are to be included in the search
      * @return the schema type associated with the child element particle with the given name.
-     *         If there is no such particle, return null.
+     * If there is no such particle, return null.
      * @throws MissingComponentException if the schema is incomplete
      */
 
     /*@Nullable*/
-    SchemaType getElementParticleType(int elementName, boolean considerExtensions) throws MissingComponentException;
+    SchemaType getElementParticleType(int elementName, PreparedSchema schema, boolean considerExtensions) throws MissingComponentException;
 
     /**
      * Find an element particle within this complex type definition having a given element name
@@ -139,13 +141,14 @@ public interface ComplexType extends SchemaType {
      * If there is no such particle, return {@link net.sf.saxon.expr.StaticProperty#EMPTY}.
      *
      * @param elementName        Identifies the name of the child element within this content model
+     * @param schema
      * @param considerExtensions True if types derived from this type by extension are to be included in the search
      * @return the cardinality associated with the child element particle with the given name.
-     *         If there is no such particle, return {@link net.sf.saxon.expr.StaticProperty#EMPTY}.
+     * If there is no such particle, return {@link net.sf.saxon.expr.StaticProperty#EMPTY}.
      * @throws MissingComponentException if the schema is incomplete
      */
 
-    int getElementParticleCardinality(int elementName, boolean considerExtensions) throws MissingComponentException;
+    int getElementParticleCardinality(int elementName, PreparedSchema schema, boolean considerExtensions) throws MissingComponentException;
 
     /**
      * Find an attribute use within this complex type definition having a given attribute name
@@ -156,12 +159,13 @@ public interface ComplexType extends SchemaType {
      * <p>If there are types derived from this type by extension, search those too.</p>
      *
      * @param attributeName Identifies the name of the required attribute within this content model
+     * @param schema
      * @return the schema type associated with the attribute use identified by the fingerprint.
-     *         If there is no such attribute use, return null.
+     * If there is no such attribute use, return null.
      */
 
     /*@Nullable*/
-    SimpleType getAttributeUseType(StructuredQName attributeName) throws SchemaException;
+    SimpleType getAttributeUseType(StructuredQName attributeName, Schema schema) throws SchemaException;
 
     /**
      * Find an attribute use within this complex type definition having a given attribute name
@@ -172,10 +176,11 @@ public interface ComplexType extends SchemaType {
      * <p>If there are types derived from this type by extension, search those too.</p>
      *
      * @param attributeName Identifies the name of the required attribute within this content model
+     * @param schema
      * @return the cardinality associated with the attribute use identified by the fingerprint.
      */
 
-    int getAttributeUseCardinality(StructuredQName attributeName) throws SchemaException;
+    int getAttributeUseCardinality(StructuredQName attributeName, Schema schema) throws SchemaException;
 
     /**
      * Return true if this type (or any known type derived from it by extension) allows the element

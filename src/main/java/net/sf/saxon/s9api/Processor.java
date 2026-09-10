@@ -34,6 +34,7 @@ import java.text.RuleBasedCollator;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The <code>Processor</code> class serves three purposes: it allows global Saxon configuration options to be set;
@@ -50,7 +51,7 @@ import java.util.Objects;
 public class Processor implements Configuration.ApiProvider {
 
     private Configuration config;
-    private SchemaManager schemaManager;
+    private ConcurrentHashMap<String, SchemaManager> schemaManagerCache;
 
 
     /**
@@ -82,7 +83,7 @@ public class Processor implements Configuration.ApiProvider {
         if (licensedEdition) {
             config = Configuration.newConfiguration();
             if (config.getEditionCode().equals("EE")) {
-                schemaManager = makeSchemaManager();
+                schemaManagerCache =  initSchemaManagerCache();
             }
         } else {
             config = new Configuration();
@@ -105,7 +106,7 @@ public class Processor implements Configuration.ApiProvider {
     public Processor(/*@NotNull*/ Configuration config) {
         this.config = config;
         if (config.getEditionCode().equals("EE")) {
-            schemaManager = makeSchemaManager();
+            schemaManagerCache = initSchemaManagerCache();
         }
     }
 
@@ -121,7 +122,7 @@ public class Processor implements Configuration.ApiProvider {
         try {
             config = Configuration.readConfiguration(source);
             //#if CSHARP==false
-            schemaManager = makeSchemaManager();
+            schemaManagerCache = initSchemaManagerCache();
             //#endif
         } catch (XPathException e) {
             throw new SaxonApiException(e);
@@ -306,15 +307,35 @@ public class Processor implements Configuration.ApiProvider {
     //#endif
 
     /**
-     * Get the associated SchemaManager. The SchemaManager provides capabilities to load and cache
-     * XML schema definitions. There is exactly one SchemaManager in a schema-aware Processor, and none
-     * in a Processor that is not schema-aware. The SchemaManager is created automatically by the system.
+     * Get the SchemaManager for the global schema. The SchemaManager provides capabilities to load and cache
+     * XML schema definitions. There is exactly one global SchemaManager in a schema-aware Processor, and none
+     * in a Processor that is not schema-aware. The global SchemaManager is created automatically by the system.
      *
-     * @return the associated SchemaManager, or null if the Processor is not schema-aware.
+     * @return the global SchemaManager, or null if the Processor is not schema-aware.
      */
 
     public SchemaManager getSchemaManager() {
-        return schemaManager;
+        return getSchemaManager("#global");
+    }
+
+    /**
+     * Get the SchemaManager for a named schema. The SchemaManager is created if it does not already exist.
+     * @param name An name in the form of an NCName, used to identify the schema within the {@link Processor}
+     *             and its underlying {@link Configuration}. Two names are specially recognised: "#global"
+     *             returns the global schema (as does {@link #getSchemaManager()} with no argument; and
+     *             "#local"  returns a new uninitialised schema for purely local use. Any other name allows
+     *             the construction of an independent schema which is registered by name with the {@link Processor}
+     *             and {@link Configuration}.
+     *
+     * @return the requested {@link SchemaManager}, or null if the processor is not schema-aware.
+     */
+
+    public SchemaManager getSchemaManager(String name) {
+        SchemaManager manager = schemaManagerCache.get(name);
+        if (manager == null) {
+            manager = makeSchemaManager(name);
+        }
+        return manager;
     }
 
     /**
@@ -749,10 +770,20 @@ public class Processor implements Configuration.ApiProvider {
     }
     //#endif
 
-    private SchemaManager makeSchemaManager() {
+    private ConcurrentHashMap<String, SchemaManager> initSchemaManagerCache() {
+        //#if EE==true
+        schemaManagerCache = new ConcurrentHashMap<>();
+        SchemaManager manager = makeSchemaManager("#global");
+        schemaManagerCache.put("#global", manager);
+        //#endif
+        return schemaManagerCache;
+    }
+
+    private SchemaManager makeSchemaManager(String name) {
         SchemaManager manager = null;
         //#if EE==true
-        manager = new com.saxonica.ee.s9api.SchemaManagerImpl(this);
+        manager = new com.saxonica.ee.s9api.SchemaManagerImpl(this, name);
+        schemaManagerCache.put(name, manager);
         //#endif
         return manager;
     }

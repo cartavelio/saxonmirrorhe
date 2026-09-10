@@ -18,6 +18,11 @@ import java.io.File;
 
 /**
  * The SchemaManager is used to load schema documents, and to set options for the way in which they are loaded.
+ *
+ * <p>A Saxon {@link Processor} (and its underlying {@link net.sf.saxon.Configuration} can hold a number of
+ * independent schemas. A schema is a collection of schema components, which may come from one schema document
+ * or from a collection of schema documents. A {@link SchemaManager} is instantiated to create one of these
+ * schemas.</p>
  * At present all the resulting schema components are held in a single pool owned by the Processor object.
  * <p>To obtain a <code>SchemaManager</code>, use the method {@link net.sf.saxon.s9api.Processor#getSchemaManager()}.</p>
  * <p>In a schema-aware Processor there is exactly one
@@ -40,7 +45,7 @@ public abstract class SchemaManager {
     }
 
     /**
-     * Set the version of XSD in use. The value must be "1.0" or "1.1". The default is currently "1.0",
+     * Set the version of XSD in use for this schema. The value must be "1.0" or "1.1". The default is currently "1.0",
      * but this may change in a future release.
      *
      * @param version the version of the XSD specification/language: either "1.0" or "1.1".
@@ -49,7 +54,7 @@ public abstract class SchemaManager {
     public abstract void setXsdVersion(String version);
 
     /**
-     * Get the version of XSD in use. The value will be "1.0" or "1.1"
+     * Get the version of XSD in use for this schema. The value will be "1.0" or "1.1"
      *
      * @return the version of XSD in use.
      */
@@ -119,7 +124,7 @@ public abstract class SchemaManager {
      *                           with the schema components already held by this SchemaManager.
      */
 
-    public abstract void load(Source source) throws SaxonApiException;
+    public abstract void load(Source... source) throws SaxonApiException;
 
     /**
      * Load a schema document from a given File. The schema components derived from this schema

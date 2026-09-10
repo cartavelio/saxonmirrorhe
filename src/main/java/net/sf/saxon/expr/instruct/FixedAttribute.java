@@ -241,7 +241,9 @@ public final class FixedAttribute extends AttributeCreator {
         }
         SchemaType type;
         try {
-            type = ((ComplexType) parentType).getAttributeUseType(nodeName.getStructuredQName());
+            type = ((ComplexType) parentType).getAttributeUseType(
+                    nodeName.getStructuredQName(),
+                    getRetainedStaticContext().getPackageData().getImportedSchema());
         } catch (SchemaException e) {
             throw new XPathException(e);
         }
