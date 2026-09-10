@@ -4462,11 +4462,7 @@ public class XQueryParser extends XPathParser {
 //            if (attName.equals("xml:id") && !NameChecker.isValidNCName(rval)) {
 //                grumble("Value of xml:id must be a valid NCName", "XQST0082");
 //            }
-            AttributeDetails a = new AttributeDetails();
-            a.lexicalName = attName;
-            a.value = val;
-            a.startOffset = attOffset;
-            a.endOffset = end;
+            AttributeDetails a = new AttributeDetails(attName, val, attOffset, end);
             attributes.add(a);
 
             // on return, the current character is the closing quote
@@ -4510,9 +4506,9 @@ public class XQueryParser extends XPathParser {
         IntHashSet attFingerprints = new IntHashSet(attributes.size());
         // we've checked for duplicate lexical QNames, but not for duplicate expanded-QNames
         for (AttributeDetails a : attributes) {
-            String attName = a.lexicalName;
-            String attValue = a.value;
-            int attOffset = a.startOffset;
+            String attName = a.lexicalName();
+            String attValue = a.value();
+            int attOffset = a.startOffset();
 
             if ("xmlns".equals(attName) || attName.startsWith("xmlns:")) {
                 // do nothing
@@ -5460,11 +5456,11 @@ public class XQueryParser extends XPathParser {
         return "XQuery";
     }
 
-    private static class AttributeDetails {
-        String lexicalName;
-        String value;
-        int startOffset;
-        int endOffset;
+    private record AttributeDetails (
+        String lexicalName,
+        String value,
+        int startOffset,
+        int endOffset) {
     }
 
     public static class Import {
