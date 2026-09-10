@@ -172,17 +172,6 @@ public class UserFunctionParameter implements LocalBinding {
     }
 
 
-//    /**
-//     * Set the (nominal) number of references within the function body to this parameter, where a reference
-//     * inside a loop is counted as multiple references
-//     *
-//     * @param count the nominal number of references
-//     */
-//
-//    public void setReferenceCount(int count) {
-//        referenceCount = count;
-//    }
-
     /**
      * Get the (nominal) number of references within the function body to this parameter, where a reference
      * inside a loop is counted as multiple references
