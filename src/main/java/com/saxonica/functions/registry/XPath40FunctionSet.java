@@ -80,6 +80,17 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
                 SequenceType.ANY_SEQUENCE); //.withAcceptReducedArity();
 
+        ChoiceItemType chronoType = ChoiceItemType.of(
+                BuiltInAtomicType.DATE_TIME,
+                BuiltInAtomicType.DATE,
+                BuiltInAtomicType.TIME,
+                BuiltInAtomicType.G_YEAR,
+                BuiltInAtomicType.G_YEAR_MONTH,
+                BuiltInAtomicType.G_MONTH,
+                BuiltInAtomicType.G_MONTH_DAY,
+                BuiltInAtomicType.G_DAY);
+
+
         register("all-equal", 1, e -> e.populate(AllEqual::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
 
@@ -175,6 +186,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(CsvToXml.OPTION_DETAILS));
+
+        register("day-from-dateTime", 1, e -> e.populate(() -> new AccessorFn.DayFromDateTime(),
+                                                           BuiltInAtomicType.INTEGER, OPT, CARD0)
+                .arg(0, chronoType, OPT, EMPTY));
 
         register("deep-equal", 2, 3, e -> e.populate(DeepEqual.makeDeepEqual(40), BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, Type.ITEM_TYPE, STAR | ABS, null)
@@ -351,6 +366,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null));
 
+        register("hours-from-dateTime", 1, e -> e.populate(() -> new AccessorFn.HoursFromDateTime(),
+                                                           BuiltInAtomicType.INTEGER, OPT, CARD0)
+                .arg(0, chronoType, OPT, EMPTY));
+
         register("identity", 1, e -> e.populate(IdentityFn::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
@@ -448,6 +467,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("min", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.ANY_ATOMIC, OPT, BASE | UO | CARD0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
+        register("minutes-from-dateTime", 1, e -> e.populate(() -> new AccessorFn.MinutesFromDateTime(),
+                                                           BuiltInAtomicType.INTEGER, OPT, CARD0)
+                .arg(0, chronoType, OPT, EMPTY));
+
+        register("month-from-dateTime", 1, e -> e.populate(() -> new AccessorFn.MonthFromDateTime(),
+                                                           BuiltInAtomicType.INTEGER, OPT, CARD0)
+                .arg(0, chronoType, OPT, EMPTY));
 
         register("normalize-unicode", 2, e -> e.populate(NormalizeUnicode::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
@@ -581,6 +608,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("seconds", 1, e -> e.populate(SecondsFn::new, BuiltInAtomicType.DAY_TIME_DURATION, OPT, 0)
                 .arg(0, BuiltInAtomicType.DECIMAL, OPT, null));
 
+        register("seconds-from-dateTime", 1, e -> e.populate(() -> new AccessorFn.SecondsFromDateTime(),
+                                                           BuiltInAtomicType.DECIMAL, OPT, CARD0)
+                .arg(0, chronoType, OPT, EMPTY));
+
         register("slice", 1, 4, e -> e.populate(Slice::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.INTEGER, OPT, null)
@@ -651,6 +682,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate2, ONE, null));
 
+        register("timezone-from-dateTime", 1, e -> e.populate(() -> new AccessorFn.TimezoneFromDateTime(),
+                                                           BuiltInAtomicType.DAY_TIME_DURATION, OPT, CARD0)
+                .arg(0, chronoType, OPT, EMPTY));
+
         register("tokenize", 2, e -> e.populate(RegexFunctionSansFlags::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
@@ -713,6 +748,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyNodeTest.getInstance(), OPT | ABS, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT | ABS, null)
                 .setOptionDetails(XMLToJsonFn.makeOptionsParameter(40)));
+
+        register("year-from-dateTime", 1, e -> e.populate(() -> new AccessorFn.YearFromDateTime(),
+                                                           BuiltInAtomicType.INTEGER, OPT, CARD0)
+                .arg(0, chronoType, OPT, EMPTY));
 
 
     }
