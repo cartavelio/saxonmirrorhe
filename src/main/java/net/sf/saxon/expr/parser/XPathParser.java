@@ -2636,7 +2636,7 @@ public class XPathParser {
             Expression fn = parseInlineFunction(AnnotationList.EMPTY);
             expect(Token.LPAR);
             return parseDynamicFunctionCall(fn, lhs);
-        } else if (token == Token.KEYWORD_CURLY && t.currentTokenValue.equals("function")) {
+        } else if (token == Token.KEYWORD_CURLY && (t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn"))) {
             Expression fn = parseFocusFunction(AnnotationList.EMPTY);
             expect(Token.LPAR);
             return parseDynamicFunctionCall(fn, lhs);
@@ -2683,7 +2683,7 @@ public class XPathParser {
             Expression fn = parseInlineFunction(AnnotationList.EMPTY);
             expect(Token.LPAR);
             rhs = parseDynamicFunctionCall(fn, varRef);
-        } else if (token == Token.KEYWORD_CURLY && t.currentTokenValue.equals("function")) {
+        } else if (token == Token.KEYWORD_CURLY && (t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn"))) {
             Expression fn = parseFocusFunction(AnnotationList.EMPTY);
             expect(Token.LPAR);
             rhs = parseDynamicFunctionCall(fn, varRef);
@@ -2875,6 +2875,7 @@ public class XPathParser {
                     case "array":
                         return parseArrayCurlyConstructor();
                     case "function":
+                    case "fn":
                         return parseFocusFunction(null);
                 }
                 CSharp.emitCode("goto case Saxon.Hej.expr.parser.Token.ELEMENT_QNAME;");
