@@ -178,6 +178,7 @@ public abstract class SchemaStructure implements UserSchemaComponent, Location {
 
     /**
      * Set the generated ID, used to test whether two components are "identical"
+     * @param generatedId the ID acting as a unique identifier
      */
 
     public void setGeneratedId(String generatedId) {
@@ -356,6 +357,7 @@ public abstract class SchemaStructure implements UserSchemaComponent, Location {
 
     /**
      * Helper method to make an XPathExpression property record
+     * @return a function that delivers the information in this component
      */
 
     protected static Function makeXPathExpressionPropertyRecord(

@@ -99,7 +99,7 @@ public class ModelGroupParticle extends Particle {
      * @param references A list of objects that contain direct or indirect references
      *                   to this object, and that must therefore not be referred to from this object.
      * @param compiler   The schema compiler
-     * @throws net.sf.saxon.type.SchemaException
+     * @throws net.sf.saxon.type.SchemaException if cycles are found
      *
      */
 
@@ -243,7 +243,7 @@ public class ModelGroupParticle extends Particle {
     /**
      * Checks the validity of this Schema definition.
      *
-     * @throws net.sf.saxon.type.SchemaException
+     * @throws net.sf.saxon.type.SchemaException if it is found to be invalid
      *
      */
     @Override

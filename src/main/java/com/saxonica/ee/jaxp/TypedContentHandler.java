@@ -29,6 +29,7 @@ public class TypedContentHandler extends ContentHandlerProxy {
     /**
      * Get a TypeInfoProvider to provide type information for the current element or attribute
      * event.
+     * @return a new TypeInfoProvider
      */
 
     public TypeInfoProvider getTypeInfoProvider() {

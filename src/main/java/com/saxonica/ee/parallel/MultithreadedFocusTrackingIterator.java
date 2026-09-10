@@ -3,7 +3,6 @@ package com.saxonica.ee.parallel;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 /**
@@ -49,7 +48,6 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * on next() has returned null, no further calls should be made. The preferred
      * action for an iterator if subsequent calls on next() are made is to return
      * null again, and all implementations within Saxon follow this rule.
-     * @throws XPathException if an error occurs retrieving the next item
      * @since 8.4
      */
     @Override
@@ -106,7 +104,6 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * may change.
      *
      * @return the position of the last item
-     * @throws XPathException if a failure occurs reading the sequence
      */
     @Override
     public synchronized int getLength() {

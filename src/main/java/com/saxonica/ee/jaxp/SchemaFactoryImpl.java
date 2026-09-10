@@ -332,9 +332,6 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      *
      * @param name The property name, which is a non-null fully-qualified URI.
      * @return The current value of the property.
-     * @throws org.xml.sax.SAXNotRecognizedException
-     *                              If the property
-     *                              value can't be assigned or retrieved.
      * @throws org.xml.sax.SAXNotSupportedException
      *                              When the
      *                              XMLReader recognizes the property name but

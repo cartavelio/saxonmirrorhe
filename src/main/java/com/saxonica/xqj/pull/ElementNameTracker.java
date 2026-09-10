@@ -29,7 +29,7 @@ public class ElementNameTracker extends PullFilter {
      * currentEvent to the event returned by any call on next().</p>
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link #END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link PullEvent#END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override

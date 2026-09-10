@@ -21,7 +21,7 @@ import net.sf.saxon.type.Type;
  * (that is, start|end Document|Element events) are not accepted, and parentless leaf nodes supplied
  * using methods such as {@link #characters} or {@link Outputter#attribute(NodeName, SimpleType, String, Location, int)}
  * are converted into calls on {@link #append(Item)} supplying an {@link net.sf.saxon.tree.util.Orphan}
- * item.</p>
+ * item.
  */
 
 public abstract class GroundedItemFeed extends ItemFeed {

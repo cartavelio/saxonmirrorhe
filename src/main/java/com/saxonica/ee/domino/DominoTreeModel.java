@@ -155,7 +155,7 @@ public class DominoTreeModel extends TreeModel implements ExternalObjectModel {
      * Get a converter from values in the external object model to XPath values.
      *
      * @param sourceClass the class (static or dynamic) of values to be converted
-     * @param config
+     * @param config the Saxon Configuration
      * @return a converter, if the sourceClass is recognized as belonging to this object model;
      * otherwise null
      */

@@ -399,8 +399,6 @@ public class MultiIndex {
          *         on next() has returned null, no further calls should be made. The preferred
          *         action for an iterator if subsequent calls on next() are made is to return
          *         null again, and all implementations within Saxon follow this rule.
-         * @throws net.sf.saxon.trans.XPathException
-         *          if an error occurs retrieving the next item
          * @since 8.4
          */
 

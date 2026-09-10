@@ -35,8 +35,6 @@ public abstract class CompiledBlockIterator implements SequenceIterator {
      * Get the next item in the sequence. <BR>
      *
      * @return the next item, or null if there are no more items.
-     * @throws net.sf.saxon.trans.XPathException
-     *          if an error occurs retrieving the next item
      */
 
     @Override

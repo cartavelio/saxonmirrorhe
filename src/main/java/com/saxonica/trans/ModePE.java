@@ -17,7 +17,7 @@ public class ModePE extends SimpleMode {
     /**
      * Prepare for possible streamability - probably eventually in EE
      *
-     * @throws XPathException
+     * @throws XPathException if not streamable
      */
     @Override
     public void prepareStreamability() throws XPathException {

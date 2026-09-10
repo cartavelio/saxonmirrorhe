@@ -53,7 +53,7 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
     private HashMap<String, cli.System.Type> explicitMappings = new HashMap<>(10);
 
     /**
-     * Construct a JavaExtensionLibrary and establish the default uri->class mappings.
+     * Construct a JavaExtensionLibrary and establish the default uri-to-class mappings.
      *
      * @param config The Saxon configuration
      */

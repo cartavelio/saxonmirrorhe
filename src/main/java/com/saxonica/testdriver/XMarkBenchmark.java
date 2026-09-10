@@ -53,7 +53,7 @@ import java.util.Properties;
 
 /**
  * Runs the XMark XQuery benchmark: see
- * <a href="http://monetdb.cwi.nl/xml/index.html">http://monetdb.cwi.nl/xml/index.html</a
+ * <a href="http://monetdb.cwi.nl/xml/index.html">http://monetdb.cwi.nl/xml/index.html</a>
  */
 public class XMarkBenchmark {
 
@@ -109,7 +109,7 @@ public class XMarkBenchmark {
      *
      * @param argv command line arguments. The following arguments are recognised:
      *             <dl>
-     *             <dt>-dir:directory</dt><dd>The directory containing the tests</dt>
+     *             <dt>-dir:directory</dt><dd>The directory containing the tests</dd>
      *             <dt>-pull</dt><dd>Run in pull mode</dd>
      *             <dt>-lazy</dt><dd>Enable lazy construction mode</dd>
      *             <dt>-sa</dt><dd>Run standard tests in schema-aware mode</dd>

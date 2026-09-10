@@ -106,7 +106,7 @@ public class Erector implements Receiver {
 
     /**
      * Write a document node to the tree
-     * @param properties
+     * @param properties any special properties of the node (none currently defined)
      */
 
     @Override

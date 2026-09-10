@@ -159,7 +159,7 @@ public class SaxonXQConnection extends SaxonXQDataFactory implements XQConnectio
      * @return a copy of the supplied expression, that can be used in a different connection or thread with its
      *         own dynamic context. The new copy of the expression belongs to this connection, and can be used in the same
      *         way as an expression created using any of the prepareExpression() methods on this class.
-     * @throws XQException, for example if either of the connections has been closed
+     * @throws XQException for example if either of the connections has been closed
      */
 
     public XQPreparedExpression copyPreparedExpression(XQPreparedExpression expression) throws XQException {

@@ -17,7 +17,7 @@ public interface UserSchemaComponent extends SchemaComponent {
     /**
      * Check references from this component to other components
      *
-     * @param compiler
+     * @param compiler the schema compiler
      * @return true if all is well, false if errors found
      */
 
@@ -31,8 +31,8 @@ public interface UserSchemaComponent extends SchemaComponent {
      *
      * @param references A stack of objects that contain direct or indirect references
      *                   to this object, and that must therefore not be referred to from this object.
-     * @param compiler
-     * @throws SchemaException
+     * @param compiler the schema compiler
+     * @throws SchemaException if cycles are found
      */
 
     void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler)
@@ -41,7 +41,7 @@ public interface UserSchemaComponent extends SchemaComponent {
     /**
      * Checks the validity of this Schema component.
      *
-     * @param compiler
+     * @param compiler the schema compiler
      * @return true when this Schema definition is valid, otherwise false.
      * @throws SchemaException if the ErrorListener decides that an error is fatal.
      */
@@ -53,7 +53,7 @@ public interface UserSchemaComponent extends SchemaComponent {
      * this expands the component with derived information needed during validation episodes.
      * The model is assumed to be valid.
      *
-     * @param compiler
+     * @param compiler the schema compiler
      */
 
     void elaborate(SchemaCompiler compiler) throws SchemaException;

@@ -26,7 +26,7 @@ public interface ObjectConverter {
      *
      * @param xqItemAccessor the XQJ object representing the item to be converted
      * @return the Java object that results from the conversion
-     * @throws XQException
+     * @throws XQException if no conversion is possible
      */
 
     Object toObject(XQItemAccessor xqItemAccessor) throws XQException;

@@ -13,7 +13,7 @@ import net.sf.saxon.type.SimpleType;
  * An AtomicItemFeed is an ItemFeed in which the only allowed event is {@link #append(Item)}
  * passing an atomic value. All other events result in an {@link IllegalStateException}. This
  * is appropriate for feeds implementing expressions that atomize their operands, since the
- * compiler should ensure that only atomic values are delivered to such expressions.</p>
+ * compiler should ensure that only atomic values are delivered to such expressions.
  */
 
 public abstract class AtomicItemFeed extends ItemFeed {
