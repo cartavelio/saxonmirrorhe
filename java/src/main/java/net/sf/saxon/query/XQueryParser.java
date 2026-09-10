@@ -30,7 +30,10 @@ import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationParamsHandler;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.Latin1;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.AttributeValueTemplate;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
@@ -854,52 +857,10 @@ public class XQueryParser extends XPathParser {
                     grumble("Annotation parameter list cannot be empty");
                 }
                 while (true) {
-                    boolean negative = t.currentToken == Token.MINUS;
-                    if (negative) {
-                        if (languageVersion < 40) {
-                            grumble("Minus sign in annotation value requires 4.0 to be enabled");
-                            return null;
-                        }
-                        nextToken();
-                    }
-                    AtomicValue arg;
-                    Token tok = t.currentToken;
-                    if (tok instanceof Token.StringLiteral) {
-                        arg = new StringValue(expectStringLiteral());
-                        nextToken();
-                    } else if (tok instanceof Token.NumericLiteral) {
-                        arg = ((Token.NumericLiteral)tok).getValue();
-                        nextToken();
-                    } else if (tok == Token.HASH && languageVersion >= 40) {
-                        StructuredQName qn = parseEQName();
-                        arg = new QNameValue(qn, BuiltInAtomicType.QNAME);
-                    } else if ((isKeyword("true") || isKeyword("false")) && t.peekAhead() == Token.LPAREN) {
-                        if (isKeyword("true")) {
-                            arg = BooleanValue.TRUE;
-                        } else if (isKeyword("false")) {
-                            arg = BooleanValue.FALSE;
-                        } else {
-                            grumble("The only function calls allowed in an annotation are true() and false()");
-                            return null;
-                        }
-                        if (languageVersion < 40) {
-                            grumble("Annotation values true() and false() require 4.0 to be enabled");
-                            return null;
-                        }
-                        nextToken();
-                        readToken(Token.LPAREN);
-                        readToken(Token.RPAREN);
-                    } else {
-                        grumble("Annotation parameter must be a literal");
-                        return null;
-                    }
-                    if (negative) {
-                        if (arg instanceof NumericValue) {
-                            arg = ((NumericValue)arg).negate();
-                        } else {
-                            grumble("Minus sign in annotation parameter must be followed by a numeric literal");
-                        }
-                    }
+
+                    AtomicValue arg = parseConstant();
+
+
                     annotation.addAnnotationParameter(arg);
 
                     //nextToken();
@@ -916,6 +877,7 @@ public class XQueryParser extends XPathParser {
             }
         }
     }
+
 
     /**
      * Method called once the setters have been read to do tidying up that can't be done until we've got

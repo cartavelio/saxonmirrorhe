@@ -306,6 +306,55 @@ public class XPathParser {
         nextToken();
     }
 
+    public AtomicValue parseConstant() throws XPathException {
+        boolean negative = t.currentToken == Token.MINUS;
+        if (negative) {
+            if (languageVersion < 40) {
+                grumble("Minus sign in annotation value requires 4.0 to be enabled");
+                return null;
+            }
+            nextToken();
+            if (!(t.currentToken instanceof Token.NumericLiteral)) {
+                grumble("Minus sign in annotation parameter must be followed by a numeric literal");
+            }
+        }
+        if (t.currentToken instanceof Token.StringLiteral str) {
+            String value = str.getValue();
+            nextToken();
+            return new StringValue(value);
+        } else if (t.currentToken instanceof Token.NumericLiteral num) {
+            NumericValue value = num.getValue();
+            if (negative) {
+                value = value.negate();
+            }
+            nextToken();
+            return value;
+        } else if (t.currentToken == Token.HASH && languageVersion >= 40) {
+            StructuredQName qn = parseEQName();
+            return new QNameValue(qn, BuiltInAtomicType.QNAME);
+        } else if ((isKeyword("true") || isKeyword("false")) && t.peekAhead() == Token.LPAREN) {
+            BooleanValue value = null;
+            if (isKeyword("true")) {
+                value = BooleanValue.TRUE;
+            } else if (isKeyword("false")) {
+                value = BooleanValue.FALSE;
+            } else {
+                grumble("The only function calls allowed in an annotation are true() and false()");
+            }
+            if (languageVersion < 40) {
+                grumble("Annotation values true() and false() require 4.0 to be enabled");
+            }
+            nextToken();
+            readToken(Token.LPAREN);
+            readToken(Token.RPAREN);
+            return value;
+        } else {
+            grumble("Expected a constant, found " + t.currentToken);
+            return null;
+        }
+    }
+
+
     public String expectStringLiteral() throws XPathException {
         if (t.currentToken instanceof Token.StringLiteral) {
             return ((Token.StringLiteral) t.currentToken).getValue();
@@ -2177,19 +2226,20 @@ public class XPathParser {
             case "namespace-node":
             case "schema-element":
             case "schema-attribute":
-                return parseKindTest();
+                return parseKindTest(true);
             case "jnode":
                 checkLanguageVersion40("jnode() item type");
-                nextToken();
-                readToken(Token.LPAREN);
-                if (t.currentToken == Token.RPAREN) {
-                    nextToken();
-                    return AnyJNodeType.getInstance();
-                } else {
-                    SequenceType valueType = parseSequenceType();
-                    readToken(Token.RPAREN);
-                    return new SpecificJNodeType(valueType);
-                }
+                return parseJNodeType();
+//                nextToken();
+//                readToken(Token.LPAREN);
+//                if (t.currentToken == Token.RPAREN) {
+//                    nextToken();
+//                    return AnyJNodeType.getInstance();
+//                } else {
+//                    SequenceType valueType = parseSequenceType();
+//                    readToken(Token.RPAREN);
+//                    return new SpecificJNodeType(valueType);
+//                }
             case "map":
                 return parseMapItemType();
             case "array":
@@ -3085,24 +3135,18 @@ public class XPathParser {
                         return ae;
                     }
                     case "jnode": {
-                        notAllowedInPattern();
+                        //notAllowedInPattern();
                         if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
-                        JNodeType jType;
-                        if (t.currentToken == Token.RPAREN) {
-                            jType = AnyJNodeType.getInstance();
-                        } else {
-                            SequenceType contentType = parseSequenceType();
-                            jType = new SpecificJNodeType(contentType);
-                        }
+                        JNodeType jType = parseJNodeType();
                         int defaultAxis = AxisInfo.CHILD;
                         AxisExpression ae = new AxisExpression(defaultAxis, jType);
                         setLocation(ae);
                         return ae;
                     }
                     case "gnode": {
-                        notAllowedInPattern();
+                        //notAllowedInPattern();
                         if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
@@ -3135,50 +3179,50 @@ public class XPathParser {
                         setLocation(getExpr);
                         return getExpr;
                     }
-                    case "type": {
-                        notAllowedInPattern();
-                        if (languageVersion < 40) {
-                            return parseFunctionCall(name, null);
-                        }
-                        nextToken();
-                        readToken(Token.LPAREN);
-                        SequenceType type = parseSequenceType();
-                        readToken(Token.RPAREN);
-                        AxisExpression typeExpr = new AxisExpression(
-                                AxisInfo.CHILD,
-                                new SpecificJNodeType(type));
-                        setLocation(typeExpr);
-                        return typeExpr;
-                    }
-                    case "record": {
-                        notAllowedInPattern();
-                        if (languageVersion < 40) {
-                            return parseFunctionCall(name, null);
-                        }
-                        ItemType type = parseRecordTest(this);
-                        AxisExpression recordExpr = new AxisExpression(
-                                AxisInfo.CHILD,
-                                new SpecificJNodeType(SequenceType.one(type)
-                                ));
-                        setLocation(recordExpr);
-                        return recordExpr;
-                    }
-                    case "array":
-                    case "map":
-                    case "enum":
-                    case "item": {
-                        notAllowedInPattern();
-                        if (languageVersion < 40) {
-                            return parseFunctionCall(name, null);
-                        }
-                        ItemType type = parseItemType();
-                        AxisExpression axisExpr = new AxisExpression(
-                                AxisInfo.CHILD,
-                                new SpecificJNodeType(SequenceType.one(type)
-                                ));
-                        setLocation(axisExpr);
-                        return axisExpr;
-                    }
+//                    case "type": {
+//                        notAllowedInPattern();
+//                        if (languageVersion < 40) {
+//                            return parseFunctionCall(name, null);
+//                        }
+//                        nextToken();
+//                        readToken(Token.LPAREN);
+//                        SequenceType type = parseSequenceType();
+//                        readToken(Token.RPAREN);
+//                        AxisExpression typeExpr = new AxisExpression(
+//                                AxisInfo.CHILD,
+//                                new SpecificJNodeType(type));
+//                        setLocation(typeExpr);
+//                        return typeExpr;
+//                    }
+//                    case "record": {
+//                        notAllowedInPattern();
+//                        if (languageVersion < 40) {
+//                            return parseFunctionCall(name, null);
+//                        }
+//                        ItemType type = parseRecordTest(this);
+//                        AxisExpression recordExpr = new AxisExpression(
+//                                AxisInfo.CHILD,
+//                                new SpecificJNodeType(SequenceType.one(type)
+//                                ));
+//                        setLocation(recordExpr);
+//                        return recordExpr;
+//                    }
+//                    case "array":
+//                    case "map":
+//                    case "enum":
+//                    case "item": {
+//                        notAllowedInPattern();
+//                        if (languageVersion < 40) {
+//                            return parseFunctionCall(name, null);
+//                        }
+//                        ItemType type = parseItemType();
+//                        AxisExpression axisExpr = new AxisExpression(
+//                                AxisInfo.CHILD,
+//                                new SpecificJNodeType(SequenceType.one(type)
+//                                ));
+//                        setLocation(axisExpr);
+//                        return axisExpr;
+//                    }
                     case "function":
                     case "fn":
                         notAllowedInPattern();
@@ -3849,7 +3893,7 @@ public class XPathParser {
         Token tok = t.currentToken;
         if (tok instanceof Token.NameToken) {
             if (t.peekAhead() == Token.LPAREN) {
-                return parseKindTest();
+                return parseKindTest(false);
             }
             QNameTest test = makeNameTest(nodeKind, ((Token.NameToken)tok).getValue(), nodeKind == Type.ELEMENT);
             boolean asNCName = NameChecker.isValidNCName(((Token.NameToken) tok).getValue());
@@ -3890,20 +3934,72 @@ public class XPathParser {
         return test;
     }
 
+    private JNodeType parseJNodeType() throws XPathException {
+        Token firstArg = null;
+        AtomicValue selector = null;
+        expectKeyword("jnode");
+        nextToken();
+        readToken(Token.LPAREN);
+        if (t.currentToken == Token.RPAREN) {
+            nextToken();
+            return AnyJNodeType.getInstance();
+        } else {
+            firstArg = t.currentToken;
+            if (firstArg == Token.LPAREN) {
+                nextToken();
+                expect(Token.RPAREN);
+                nextToken();
+                if (t.currentToken == Token.RPAREN) {
+                    nextToken();
+                    return new SpecificJNodeType(null);
+                }
+            } else if (firstArg == Token.STAR) {
+                nextToken();
+                if (t.currentToken == Token.RPAREN) {
+                    nextToken();
+                    return AnyJNodeType.getInstance();
+                }
+            } else if (firstArg instanceof Token.NameToken) {
+                String key = ((Token.NameToken)firstArg).getValue();
+                if (!NameChecker.isValidNCName(key)) {
+                    grumble("JNode selector " + key + " is not a valid NCName");
+                }
+                selector = new StringValue(key);
+            } else {
+                selector = parseConstant();
+            }
+            if (t.currentToken == Token.COMMA) {
+                nextToken();
+                SequenceType contentType = parseSequenceType();
+                readToken(Token.RPAREN);
+                return new SpecificJNodeType(contentType);
+            } else {
+                return new SpecificJNodeType(selector, SequenceType.ANY_SEQUENCE);
+            }
+
+        }
+    }
+
+    // Keywords that can start an item type but not a node test
+    private final static String[] notAllowedAsNodeTest = new String[]{"array", "enum", "item", "map", "record"};
+    
     /**
      * Parse a KindTest. On entry we are positioned on a keyword (such as "item")
      * and we know it is followed by a left paren.
-     *
+     * @param expectItemType if we are allowing any item type, not just a NodeTest/JNodeType
      * @return the KindTest, expressed as a NodeTest object
      * @throws net.sf.saxon.trans.XPathException if a static error is found
      */
 
     /*@NotNull*/
-    private GNodeType parseKindTest() throws XPathException {
+    private GNodeType parseKindTest(boolean expectItemType) throws XPathException {
         Configuration config = env.getConfiguration();
         NamePool pool = config.getNamePool();
 
         String kind = expectName();
+        if (!expectItemType && Arrays.binarySearch(notAllowedAsNodeTest, kind) >= 0) {
+            grumble("Item type " + kind + "() cannot be used as a node test (or as an expression)");
+        }
         switch (kind) {
             case "item":
                 expectEmptyParens();
@@ -3927,7 +4023,7 @@ public class XPathParser {
                     nextToken();
                     return NodeKindType.DOCUMENT;
                 } else if (isKeyword("element") || isKeyword("schema-element")) {
-                    XNodeType inner = (XNodeType)parseKindTest();
+                    XNodeType inner = (XNodeType)parseKindTest(true);
                     readToken(Token.RPAREN);
                     return new DocumentNodeType(inner);
                 } else if (languageVersion >= 40) {
@@ -4067,15 +4163,7 @@ public class XPathParser {
 
             case "jnode": {
                 checkLanguageVersion40("NodeTest jnode()");
-                nextToken();
-                readToken(Token.LPAREN);
-                if (t.currentToken == Token.RPAREN) {
-                    return AnyJNodeType.getInstance();
-                }
-                SequenceType type = parseSequenceType();
-                readToken(Token.RPAREN);
-                return new SpecificJNodeType(type
-                );
+                return parseJNodeType();
 
             }
             case "gnode":
@@ -4085,16 +4173,16 @@ public class XPathParser {
                 return new SpecificJNodeType(AnyGNodeType.getInstance().one()
                 );
 
-            case "type": {
-                checkLanguageVersion40("nodeTest type()");
-                nextToken();
-                readToken(Token.LPAREN);
-                SequenceType type = parseSequenceType();
-                readToken(Token.RPAREN);
-                return new SpecificJNodeType(type
-                );
-
-            }
+//            case "type": {
+//                checkLanguageVersion40("nodeTest type()");
+//                nextToken();
+//                readToken(Token.LPAREN);
+//                SequenceType type = parseSequenceType();
+//                readToken(Token.RPAREN);
+//                return new SpecificJNodeType(type
+//                );
+//
+//            }
             case "record": {
                 checkLanguageVersion40("nodeTest record(...)");
                 ItemType type = parseRecordTest(this);
