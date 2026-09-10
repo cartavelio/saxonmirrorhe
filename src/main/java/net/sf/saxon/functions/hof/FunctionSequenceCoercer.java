@@ -242,7 +242,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         return new FunctionSequenceCoercerElaborator();
     }
 
-    private static void checkAnnotations(FunctionItem item, FunctionItemType requiredItemType, Configuration config) throws XPathException {
+    public static void checkAnnotations(FunctionItem item, FunctionItemType requiredItemType, Configuration config) throws XPathException {
         for (Annotation ann : requiredItemType.getAnnotationAssertions()) {
             FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getNamespaceUri());
             if (handler != null && !handler.satisfiesAssertion(ann, item.getAnnotations())) {

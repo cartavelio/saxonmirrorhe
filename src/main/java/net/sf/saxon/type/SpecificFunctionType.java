@@ -23,6 +23,8 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.FunctionItemCoercionPlan;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -512,4 +514,14 @@ public class SpecificFunctionType extends AnyFunctionType {
         return new FunctionSequenceCoercer(exp, this, role, allow40, acceptReducedArity);
     }
 
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath langauge version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        return FunctionItemCoercionPlan.getInstance(version);
+    }
 }

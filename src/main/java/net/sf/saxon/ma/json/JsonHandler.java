@@ -250,10 +250,10 @@ public class JsonHandler {
                 SpecificFunctionType required = new SpecificFunctionType(
                         new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.ANY_SEQUENCE);
                 if (!required.matches(fallbackFunction, context.getConfiguration().getTypeHierarchy())) {
-                    throw new XPathException("Fallback function does not match the required type", "FOJS0005");
+                    throw new XPathException("Fallback function does not match the required type", "XPTY0004");
                 }
             } else {
-                throw new XPathException("Value of option 'fallback' is not a function", "FOJS0005");
+                throw new XPathException("Value of option 'fallback' is not a function", "XPTY0004");
             }
         }
     }

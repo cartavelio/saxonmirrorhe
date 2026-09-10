@@ -684,10 +684,10 @@ public class JsonParser {
                 SpecificFunctionType required = new SpecificFunctionType(
                         new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
                 if (!required.matches(numberParser, context.getConfiguration().getTypeHierarchy())) {
-                    throw new XPathException("Number-parser function does not match the required type", "FOJS0005");
+                    throw new XPathException("Number-parser function does not match the required type", "XPTY0004");
                 }
             } else {
-                throw new XPathException("Value of option 'number-parser' is not a function", "FOJS0005");
+                throw new XPathException("Value of option 'number-parser' is not a function", "XPTY0004");
             }
         }
     }
