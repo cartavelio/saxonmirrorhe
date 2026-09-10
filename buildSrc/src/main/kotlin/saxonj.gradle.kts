@@ -625,3 +625,18 @@ val query = tasks.register<JavaExec>("query") {
 saxonJarArtifact.outgoing.artifact(editionMavenJarTask) { builtBy(editionMavenJarTask) }
 releaseZips.outgoing.artifact(downloadRelease) { builtBy(downloadRelease) }
 releaseMaven.outgoing.artifact(stageMaven) { builtBy(stageMaven)}
+
+tasks.register("list-source-sets") {
+    group = LifecycleTasks.DEBUG_GROUP
+
+    doLast{
+        sourceSets.forEach { srcSet ->
+            println("* [${srcSet.name}]")
+            println("  + Source directories:")
+            srcSet.allJava.srcDirs.forEach { dir -> println("    - ${dir}") }
+            println("  + Output directories:")
+            srcSet.output.classesDirs.files.forEach { dir -> println("    - ${dir}") }
+            println("")
+        }
+    }
+}
