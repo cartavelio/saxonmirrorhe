@@ -182,7 +182,8 @@ public class StyleNodeFactory implements NodeFactory {
                     if (((XSLStylesheet) parent).getEffectiveVersion() <= 20) {
                         temp = new AbsentExtensionElement();
                         temp.setCompilation(compilation);
-                        temp.setValidationError(new XmlProcessingIncident("Unknown top-level XSLT declaration"),
+                        temp.setValidationError(new XmlProcessingIncident(
+                                "Unknown top-level XSLT declaration " + elemName.getDisplayName(), "XTSE0010", location),
                                 StyleElement.OnFailure.REPORT_UNLESS_FORWARDS_COMPATIBLE);
                     }
                 } else {
