@@ -52,13 +52,11 @@ public class ComputedElement extends ElementCreator {
 
     /**
      * Create an instruction that creates a new element node
-     *
-     * @param elementName       Expression that evaluates to produce the name of the
+     *  @param elementName       Expression that evaluates to produce the name of the
      *                          element node as a lexical QName
      * @param namespace         Expression that evaluates to produce the namespace URI of
      *                          the element node. Set to null if the namespace is to be deduced from the prefix
      *                          of the elementName.
-     * @param schema            The schema to be used for validation. Can be null if not validating.
      * @param schemaType        The required schema type for the content
      * @param validation        Required validation mode (e.g. STRICT, LAX, SKIP)
      * @param inheritNamespaces true if child elements automatically inherit the namespaces of their parent
@@ -66,7 +64,6 @@ public class ComputedElement extends ElementCreator {
      */
     public ComputedElement(Expression elementName,
                            Expression namespace,
-                           Schema schema,
                            SchemaType schemaType,
                            int validation,
                            boolean inheritNamespaces,
@@ -76,7 +73,7 @@ public class ComputedElement extends ElementCreator {
         if (namespace != null) {
             namespaceOp = new Operand(this, namespace, OperandRole.SINGLE_ATOMIC);
         }
-        setValidationAction(schema, validation, schemaType);
+        setValidationAction(validation, schemaType);
         preservingTypes = schemaType == null && validation == Validation.PRESERVE;
         this.bequeathNamespacesToChildren = inheritNamespaces;
         allowNameAsQName = allowQName;
@@ -143,7 +140,7 @@ public class ComputedElement extends ElementCreator {
         final SchemaType schemaType = getSchemaType();
         if (schemaType != null) {
             itemType = new ContentTypeTest(Type.ELEMENT, schemaType, config, false);
-            schemaType.analyzeContentExpression(getContentExpression(), Type.ELEMENT, getRetainedStaticContext().getPackageData().getImportedSchema());
+            schemaType.analyzeContentExpression(getContentExpression(), Type.ELEMENT);
         } else if (getValidationAction() == Validation.STRIP || !schemaAware) {
             itemType = new ContentTypeTest(Type.ELEMENT, Untyped.getInstance(), config, false);
         } else {
@@ -217,10 +214,9 @@ public class ComputedElement extends ElementCreator {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Schema schema = getSchema();
         ComputedElement ce = new ComputedElement(
                 getNameExp().copy(rebindings), getNamespaceExp() == null ? null : getNamespaceExp().copy(rebindings),
-                /*defaultNamespace,*/ schema, getSchemaType(),
+                /*defaultNamespace,*/ getSchemaType(),
                 getValidationAction(), bequeathNamespacesToChildren, allowNameAsQName);
         ExpressionTool.copyLocationInfo(this, ce);
         ce.setContentExpression(getContentExpression().copy(rebindings));
@@ -422,10 +418,6 @@ public class ComputedElement extends ElementCreator {
                 return getStaticBaseURIString();
             }
 
-            @Override
-            public void processContent(Outputter outputter, XPathContext context) throws XPathException {
-                getContentExpression().process(outputter, context);
-            }
         };
     }
 
@@ -621,7 +613,7 @@ public class ComputedElement extends ElementCreator {
             SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
                     ? AnyType.getInstance()
                     : Untyped.getInstance();
-            Schema schema = expr.getRetainedStaticContext().getPackageData().getImportedSchema();
+
             return (out, context) -> {
                 try {
 
@@ -632,7 +624,7 @@ public class ComputedElement extends ElementCreator {
                         ParseOptions options = expr.getValidationOptions()
                                 .withTopLevelElement(elemName.getStructuredQName());
                         context.getConfiguration().prepareValidationReporting(context, options);
-                        Receiver validator = schema.getElementValidator(
+                        Receiver validator = context.getConfiguration().getElementValidator(
                                 elemOut, options, expr.getLocation());
 
                         if (validator != elemOut) {

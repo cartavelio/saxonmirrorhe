@@ -54,7 +54,6 @@ public class FixedElement extends ElementCreator {
      *                                    Supply an empty array if none are required.
      * @param inheritNamespacesToChildren true if the children of this element inherit its namespaces
      * @param inheritNamespacesFromParent true if this element inherits namespaces from its parent
-     * @param schema
      * @param schemaType                  Type annotation for the new element node
      * @param validation                  Validation mode to be applied, for example STRICT, LAX, SKIP
      */
@@ -62,14 +61,13 @@ public class FixedElement extends ElementCreator {
                         NamespaceMap namespaceBindings,
                         boolean inheritNamespacesToChildren,
                         boolean inheritNamespacesFromParent,
-                        Schema schema,
                         SchemaType schemaType,
                         int validation) {
         this.elementName = elementName;
         this.namespaceBindings = namespaceBindings;
         this.bequeathNamespacesToChildren = inheritNamespacesToChildren;
         this.inheritNamespacesFromParent = inheritNamespacesFromParent;
-        setValidationAction(schema, validation, schemaType);
+        setValidationAction(validation, schemaType);
         preservingTypes = schemaType == null && validation == Validation.PRESERVE;
     }
 
@@ -165,9 +163,8 @@ public class FixedElement extends ElementCreator {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Schema schema = getSchema();
         FixedElement fe = new FixedElement(elementName, namespaceBindings, bequeathNamespacesToChildren,
-                                           inheritNamespacesFromParent, schema, getSchemaType(), getValidationAction());
+                                           inheritNamespacesFromParent, getSchemaType(), getValidationAction());
         fe.setContentExpression(getContentExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, fe);
         return fe;
@@ -194,8 +191,7 @@ public class FixedElement extends ElementCreator {
         int fp = elementName.obtainFingerprint(config.getNamePool());   // Bug #2563 - namespaced alias in unoptimized export
         if (schemaType == null) {
             if (validation == Validation.STRICT) {
-                Schema schema = env.getPackageData().getImportedSchema();
-                SchemaDeclaration decl = schema.getElementDecl(fp);
+                SchemaDeclaration decl = config.getElementDeclaration(fp);
                 if (decl == null) {
                     throw new XPathException("There is no global element declaration for " +
                             elementName.getStructuredQName().getEQName() + ", so strict validation will fail")
@@ -225,7 +221,7 @@ public class FixedElement extends ElementCreator {
                 if (xsiType != null || !decl.hasTypeAlternatives()) {
                     instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
                     try {
-                        schemaType.analyzeContentExpression(content, Type.ELEMENT, env.getPackageData().getImportedSchema());
+                        schemaType.analyzeContentExpression(content, Type.ELEMENT);
                     } catch (XPathException e) {
                         throw e.withErrorCode(instr.isXSLT() ? "XTTE1510" : "XQDY0027")
                                 .withLocation(instr.getLocation());
@@ -244,8 +240,7 @@ public class FixedElement extends ElementCreator {
                     }
                 }
             } else if (validation == Validation.LAX) {
-                Schema schema = env.getPackageData().getImportedSchema();
-                SchemaDeclaration decl = schema.getElementDecl(fp);
+                SchemaDeclaration decl = config.getElementDeclaration(fp);
                 if (decl == null) {
                     env.issueWarning("There is no global element declaration for " +
                             elementName.getDisplayName(), SaxonErrorCode.SXWN9031, instr.getLocation());
@@ -258,7 +253,7 @@ public class FixedElement extends ElementCreator {
                             Token.INTERSECT,
                             new ContentTypeTest(Type.ELEMENT, instr.getSchemaType(), config, false));
                     try {
-                        schemaType.analyzeContentExpression(content, Type.ELEMENT, env.getPackageData().getImportedSchema());
+                        schemaType.analyzeContentExpression(content, Type.ELEMENT);
                     } catch (XPathException e) {
                         throw e.withErrorCode(instr.isXSLT() ? "XTTE1515" : "XQDY0027")
                                 .withLocation(instr.getLocation());
@@ -284,7 +279,7 @@ public class FixedElement extends ElementCreator {
                     new ContentTypeTest(Type.ELEMENT, schemaType, config, false)
             );
             try {
-                schemaType.analyzeContentExpression(content, Type.ELEMENT, env.getPackageData().getImportedSchema());
+                schemaType.analyzeContentExpression(content, Type.ELEMENT);
             } catch (XPathException e) {
                 throw e.withErrorCode(instr.isXSLT() ? "XTTE1540" : "XQDY0027").withLocation(instr.getLocation());
             }
@@ -401,8 +396,7 @@ public class FixedElement extends ElementCreator {
                     if (uri == null) {
                         return null;
                     } else {
-                        Schema schema = env.getPackageData().getImportedSchema();
-                        return schema.getSchemaType(new StructuredQName("", uri, parts[1]));
+                        return env.getConfiguration().getSchemaType(new StructuredQName("", uri, parts[1]));
                     }
                 } catch (QNameException e) {
                     throw new XPathException(e.getMessage());
@@ -433,18 +427,17 @@ public class FixedElement extends ElementCreator {
         }
 
         // Check that a sequence consisting of this element alone is valid against the content model
-        Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
         if (whole) {
             Expression parent = getParentExpression();
             Block block = new Block(new Expression[]{this});
-            parentType.analyzeContentExpression(block, Type.ELEMENT, schema);
+            parentType.analyzeContentExpression(block, Type.ELEMENT);
             setParentExpression(parent);
         }
 
         SchemaType type;
         try {
             int fp = elementName.obtainFingerprint(getConfiguration().getNamePool());
-            type = ((ComplexType) parentType).getElementParticleType(fp, schema, true);
+            type = ((ComplexType) parentType).getElementParticleType(fp, true);
         } catch (MissingComponentException e) {
             throw new XPathException(e);
         }
@@ -481,10 +474,6 @@ public class FixedElement extends ElementCreator {
                 return getStaticBaseURIString();
             }
 
-            @Override
-            public void processContent(Outputter output, XPathContext context) throws XPathException {
-                getContentExpression().process(output, context);
-            }
         };
     }
 
@@ -603,8 +592,6 @@ public class FixedElement extends ElementCreator {
                     ? AnyType.getInstance()
                     : Untyped.getInstance();
 
-            Schema schema = expr.getRetainedStaticContext().getPackageData().getImportedSchema();
-
             int properties = ReceiverOption.NONE;
             if (!expr.bequeathNamespacesToChildren) {
                 properties |= ReceiverOption.DISINHERIT_NAMESPACES;
@@ -625,7 +612,7 @@ public class FixedElement extends ElementCreator {
                         ParseOptions options = expr.getValidationOptions()
                                 .withTopLevelElement(elemName.getStructuredQName());
                         context.getConfiguration().prepareValidationReporting(context, options);
-                        Receiver validator = schema.getElementValidator(
+                        Receiver validator = context.getConfiguration().getElementValidator(
                                 elemOut, options, expr.getLocation());
 
                         if (validator != elemOut) {

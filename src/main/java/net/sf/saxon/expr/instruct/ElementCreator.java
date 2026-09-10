@@ -62,15 +62,6 @@ public abstract class ElementCreator extends ParentNodeConstructor {
 
         public abstract String getSystemId(XPathContext context) throws XPathException;
 
-        /**
-         * Callback to process the content expression, generating attributes, children and descendants
-         * (but not namespaces) of the new element node
-         * @param out the output destination
-         * @param context evaluation context
-         * @throws XPathException if processing fails
-         */
-
-        public abstract void processContent(Outputter out, XPathContext context) throws XPathException;
     }
 
 
@@ -190,7 +181,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
     public void suppressValidation(int parentValidationMode) {
         if (getValidationAction() == parentValidationMode && getSchemaType() == null) {
             // TODO: is this safe? e.g. if the child has validation=strict but matches a skip wildcard in the parent
-            setValidationAction(null, Validation.PRESERVE, null);
+            setValidationAction(Validation.PRESERVE, null);
         }
     }
 

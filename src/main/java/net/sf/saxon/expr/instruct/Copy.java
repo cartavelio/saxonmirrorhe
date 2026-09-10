@@ -53,18 +53,17 @@ public class Copy extends ElementCreator {
      *
      * @param copyNamespaces    true if namespace nodes are to be copied when copying an element
      * @param inheritNamespaces true if child elements are to inherit the namespace nodes of their parent
-     * @param schema
      * @param schemaType        the Schema type against which the content is to be validated
      * @param validation        the schema validation mode
      */
 
     public Copy(boolean copyNamespaces,
                 boolean inheritNamespaces,
-                Schema schema, SchemaType schemaType,
+                SchemaType schemaType,
                 int validation) {
         this.copyNamespaces = copyNamespaces;
         this.bequeathNamespacesToChildren = inheritNamespaces;
-        setValidationAction(schema, validation, schemaType);
+        setValidationAction(validation, schemaType);
         preservingTypes = schemaType == null && validation == Validation.PRESERVE;
     }
 
@@ -157,9 +156,8 @@ public class Copy extends ElementCreator {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Schema schema = getSchema();
         Copy copy = new Copy(
-                copyNamespaces, bequeathNamespacesToChildren, schema, getSchemaType(), getValidationAction());
+                copyNamespaces, bequeathNamespacesToChildren, getSchemaType(), getValidationAction());
         ExpressionTool.copyLocationInfo(this, copy);
         copy.setContentExpression(getContentExpression().copy(rebindings));
         copy.resultItemType = resultItemType;
@@ -236,7 +234,7 @@ public class Copy extends ElementCreator {
     }
 
     private ItemType computeItemType(TypeHierarchy th) {
-        ItemType selectItemType = this.selectItemType;
+        ItemType selectItemType = this.selectItemType; //select.getItemType();
         if (!getPackageData().isSchemaAware()) {
             return selectItemType;
         }
@@ -283,8 +281,7 @@ public class Copy extends ElementCreator {
                         if (fp != -1) {
                             Affinity e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
                             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
-                                SchemaDeclaration elem = schema.getElementDecl(fp);
+                                SchemaDeclaration elem = config.getElementDeclaration(fp);
                                 if (elem != null) {
                                     try {
                                         return new ContentTypeTest(Type.ELEMENT, elem.getType(), config, false);
@@ -298,8 +295,7 @@ public class Copy extends ElementCreator {
                             }
                             Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
                             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
-                                SchemaDeclaration attr = schema.getElementDecl(fp);
+                                SchemaDeclaration attr = config.getElementDeclaration(fp);
                                 if (attr != null) {
                                     try {
                                         return new ContentTypeTest(Type.ATTRIBUTE, attr.getType(), config, false);
@@ -508,10 +504,6 @@ public class Copy extends ElementCreator {
             return copiedNode.getBaseURI();
         }
 
-        @Override
-        public void processContent(Outputter out, XPathContext context) throws XPathException {
-            Expression.dispatchTailCall(contentEvaluator.processLeavingTail(out, context));
-        }
     }
 
     public static class CopyElaborator extends PushElaborator {
@@ -519,7 +511,6 @@ public class Copy extends ElementCreator {
         @Override
         public PushEvaluator elaborateForPush() {
             Copy expr = (Copy)getExpression();
-            Schema schema = expr.getRetainedStaticContext().getPackageData().getImportedSchema();
             PushEvaluator contentPush = expr.getContentExpression().makeElaborator().elaborateForPush();
 
             SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
@@ -563,7 +554,7 @@ public class Copy extends ElementCreator {
                                 ParseOptions options = expr.getValidationOptions()
                                         .withTopLevelElement(elemName.getStructuredQName());
                                 context.getConfiguration().prepareValidationReporting(context, options);
-                                Receiver validator = schema.getElementValidator(
+                                Receiver validator = context.getConfiguration().getElementValidator(
                                         elemOut, options, expr.getLocation());
 
                                 if (validator != elemOut) {
@@ -638,7 +629,8 @@ public class Copy extends ElementCreator {
                             ParseOptions options = expr.getValidationOptions()
                                     .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                             controller.getConfiguration().prepareValidationReporting(context, options);
-                            Receiver val = schema.getDocumentValidator(output, source.getBaseURI(), options, expr.getLocation());
+                            Receiver val = controller.getConfiguration().
+                                    getDocumentValidator(output, source.getBaseURI(), options, expr.getLocation());
                             output = new ComplexContentOutputter(val);
                         }
                         if (output.getSystemId() == null) {
