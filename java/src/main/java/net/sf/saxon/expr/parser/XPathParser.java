@@ -767,7 +767,7 @@ public class XPathParser {
     public ItemType parseItemType(String input, StaticContext env) throws XPathException {
         this.env = env;
         t = new Tokenizer();
-        t.languageLevel = env.getXPathVersion();
+        languageVersion = t.languageLevel = env.getXPathVersion();
         try {
             t.tokenize(input, 0, -1);
         } catch (XPathException err) {
