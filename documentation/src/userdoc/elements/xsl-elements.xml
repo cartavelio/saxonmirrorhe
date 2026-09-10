@@ -617,69 +617,76 @@
                     element.</attribute>
             </attributes>
             <details>
-                <p>TODO FIXME: composite attribute is no longer used</p>
-                <p>TODO FIXME: the QT4 specifications are yet to settle on how array members are
-                    represented: parcels or value records.</p>
                 <p>The content of an array is a sequence of sequences, which the XDM data model
-                    cannot represent directly. To work around this, the QT4 specifications represent
-                    the array members as ... TBC</p>
-                <p>If every member of the array is to be a singleton item, then it is simplest to
-                    use the default value <code>composite="no"</code>. The setting
-                        <code>composite="yes"</code> is needed if any of the members is to be an
-                    empty sequence, or a sequence containing multiple items. (Note that when
-                    constructing an array destined for serialization as JSON, the members of the
-                    array will always contain either a single item, or be empty. Empty members
-                    translate to the JSON value <code>null</code>.)</p>
-                <p>With <code>composite="yes"</code>, the array members can conveniently be
-                    constructed using the <a class="bodylink code" href="../array-member"
-                        >xsl:array-member</a> instruction. In fact, the following constructions are
-                    all equivalent:</p>
-                <pre><code class="language-xml">&lt;xsl:array-member select="1 to 3"/&gt;</code></pre>
-                <pre><code class="language-xml">&lt;xsl:sequence select="parcel(1 to 3)"/&gt;</code></pre>
-                <pre><code class="language-xml">&lt;xsl:sequence select="map{'value': 1 to 3}"/&gt;</code></pre>
-                <pre><code class="language-xml">&lt;xsl:map key="'value'" select="1 to 3"/&gt;</code></pre>
-                <p>A type error occurs if <code>composite="yes"</code> is used and there are items
-                    in the sequence that do not match the item type <code>record(value, *)</code>
-                    (that is, a map having an entry whose key is the string "value"). Any other
-                    entries in the map are ignored.</p>
-                
-                <p>TODO FIXME: the following is to be integrated here. It moved from
-                    /v4extensions/xslt-syntax-extensions/creating-arrays </p>
-                <p>There are two forms of the instruction.</p>
-                
-                <ul>
-                    <li>
-                        <p>To create a simple array in which every member is a singleton item, use
-                            <code>&lt;xsl:array composite="no"></code> (this is the default so the
-                            attribute can be omitted). Every item delivered by the sequence constructor then
-                            becomes an individual member of the array.</p>
-                    </li>
-                    <li>
-                        <p>To create an array in which some members might be non-singleton sequences, use
-                            <code>&lt;xsl:array composite="yes"></code>. In this case every item delivered
-                            by the sequence constructor must be a <i>parcel</i>. A parcel is an item of type
-                            <code>record(value, *)</code>, that is, a map containing an entry whose key is
-                            the string "value", and whose corresponding value is an arbitrary sequence. This
-                            sequence is used as the value of the array member.</p>
-                        <p>It's often convenient to construct a parcel using the <a class="bodylink code"
-                            href="/xsl-elements/array-member">xsl:array-member</a> instruction, but that's
-                            not the only way to do it. You could also do it, for example, by calling
-                            <code>fn:parcel()</code>. Or you could decompose an existing array into parcels
-                            using the function <code>array:members</code>, and use some of those parcels to
-                            form the new array.</p>
-                    </li>
-                </ul>
-
+                    cannot represent directly. To work around this, the XSLT 4.0 specification
+                    represents the array members as <em>parcels</em> (zero-arity function
+                    items). A parcel encapsulates a value, which can be any sequence.</p>
             </details>
+            <examples>
+                <example>
+                    <p>Creating a simple array in which every member is a singleton item:</p>
+                    <pre><code class="language-xml">&lt;xsl:array select="1 to 4"/&gt;</code></pre>
+                    <p>constructs the array <code>[1, 2, 3, 4]</code>.</p>
+                </example>
+                <example>
+                    <p>The <a class="bodylink code"
+                        href="/xsl-elements/array-member">xsl:array-member</a> instruction
+                        can be used to create arbitrary members for an array:</p>
+                    <pre><code class="language-xml"><![CDATA[<xsl:array>
+  <xsl:array-member select="1 to 4"/>
+  <xsl:array-member select="'A'"/>
+  <xsl:array-member select="'B'"/>
+</xsl:array>]]></code></pre>
+                    <p>constructs the array <code>[(1, 2, 3, 4), "A", "B"]</code>.</p>
+                </example>
+            </examples>
             <in-spec>xslt40</in-spec>
             <saxon-edition>PE/EE 13 11_EXPERIMENTAL</saxon-edition>
             <status>
                 <p>The <code>xsl:array</code> instruction is available from Saxon 13 in XSLT 4.0.</p>
-                <p>The instruction is available in Saxon 11 and 12 provided that syntax extensions
-                    are enabled, but note that specification and implementation changes were made
-                    between the Saxon 12 and 13 releases, so for accurate information it is best to
-                    refer to the specific documentation for those versions. (It was also available
-                    in earlier releases under the synonym <code>saxon:array</code>.)</p>
+                <aside>The instruction is available in Saxon 11 and 12 provided that syntax extensions
+                    are enabled, but note that major specification and implementation changes were made
+                    between the Saxon 12 and 13 releases (in particular, the proposed
+                    <code>composite</code> attribute is dropped in Saxon 13), so for accurate
+                    information it is best to refer to the specific documentation for those
+                    versions. (It was also available in earlier releases under the synonym
+                    <code>saxon:array</code>.)</aside>
+                <p>The XSLT 4.0 specification describes three methods for constructing arrays.
+                    In Saxon 13.0, only the first and third of these is fully implemented:</p>
+                <ul>
+                    <li>
+                        <p>A simple array in which every member is a singleton item can be
+                            created by using either the <code>select</code> attribute or the sequence
+                            constructor to supply the sequence of items. Every item in the
+                            sequence becomes an individual member of the array.</p>
+                    </li>
+                    <li>
+                        <p>The <a class="bodylink code"
+                            href="/xsl-elements/array-member">xsl:array-member</a> instruction
+                            can be used to create members for an array.</p>
+                    </li>
+                </ul>
+                <p>Constructing an array using the <code>for-each</code> attribute is currently only
+                    partially implemented in Saxon. The specification says that "when the
+                    <code>for-each</code> attribute is present, then it is not necessary to use
+                    the <code>xsl:array-member</code> instruction". However in Saxon 13.0, when
+                    using the <code>for-each</code> attribute, the members must explicitly be
+                    constructed using the <code>xsl:array-member</code> instruction to ensure
+                    that they are parcels.</p>
+                <!-- or obtained by decomposing an
+                    existing array into parcels using the function <a class="bodylink code"
+                        href="/functions/array/members">array:members()</a>. -->
+                
+                <p>For example, an array whose members are computed by applying a mapping to a
+                    sequence of items can be created by using the <code>for-each</code>
+                    attribute with <code>xsl:array-member</code>:</p>
+                <pre><code class="language-xml"><![CDATA[<xsl:array for-each="1 to 4">
+  <xsl:array-member select="1 to ."/>
+</xsl:array>]]></code></pre>
+                <p>constructs the array <code>[1, (1, 2), (1, 2, 3), (1, 2, 3, 4)]</code>.</p>
+                <p>But attempting to construct the same array without use of the <code>xsl:array-member</code>
+                instruction will currently fail: </p>
+                <pre><code class="language-xml">&lt;xsl:array for-each="1 to 4" select="1 to ."/&gt;</code></pre>
             </status>
             <see-also name="array-member" type="xsl-elements"/>
 
@@ -690,32 +697,29 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>array-member</name>
             <description>
-                <p>Experimental: proposed new XSLT 4.0 instruction. Constructs a parcel, typically
-                    for use as a member of an array being constructed using <a class="bodylink code"
-                        href="../array">xsl:array</a> with <code>composite="yes"</code>.</p>
+                <p>New in XSLT 4.0. Constructs a parcel, typically for use as a member of an
+                    array being constructed using <a class="bodylink code"
+                        href="../array">xsl:array</a>.</p>
             </description>
             <attributes>
                 <attribute name="select" use="optional">The <code>select</code> attribute, or the
                     contained sequence constructor if there is no <code>select</code> attribute, may
-                    deliver any sequence. This sequence is wrapped into a <i>parcel</i>, which is an
-                    item of type <code>record(value, *)</code>: that is, a map with a single entry,
-                    whose key is the string "value", and whose corresponding value is the wrapped
-                    sequence.</attribute>
+                    deliver any sequence.</attribute>
             </attributes>
             <details>
-                <p>TODO FIXME: the QT4 specifications are yet to settle on how array members are
-                    represented: parcels or value records.</p>
+                <p>The sequence delivered by the <code>select</code> attribute or sequence
+                    constructor is encapsulated as a <em>parcel</em>, a zero-arity function item
+                    which returns the sequence when called.</p>
                 <p>The intended usage is to deliver a single member of an array being constructed
-                    using <code>&lt;xsl:array composite="yes"&gt;</code>. However, the result of the
-                    instruction is well-defined whether or not it is used in this way.</p>
-
+                    using <code>xsl:array</code>. However, the result of the instruction is
+                    well-defined whether or not it is used in this way.</p>
             </details>
             <in-spec>xslt40</in-spec>
-
             <saxon-edition>PE/EE 13 11_EXPERIMENTAL</saxon-edition>
             <status>
-                <p>Available from Saxon 11; requires syntax extensions to be enabled. Also available
-                    in earlier releases under the synonym <code>saxon:array-member</code>.</p>
+                <p>Available from Saxon 13 in XSLT 4.0; available in Saxon 11 and 12 provided
+                    that syntax extensions are enabled. Also available in earlier releases
+                    under the synonym <code>saxon:array-member</code>.</p>
             </status>
             <see-also name="array" type="xsl-elements"/>
 

@@ -442,6 +442,12 @@ TODO: rethink redefines and override
             both representations and converting where appropriate; however, this situation is unstable and the specification
             can be expected to change in this area.</p>
         
+        <p>Constructing an array with <code>xsl:array</code> using the new <code>for-each</code> attribute is currently
+            only partially implemented in Saxon. The specification says that "when the <code>for-each</code> attribute
+            is present, then it is not necessary to use the <code>xsl:array-member</code> instruction". However in Saxon
+            13.0, when using the <code>for-each</code> attribute, the members must explicitly be parcels, constructed
+            using the <code>xsl:array-member</code> instruction.</p>
+        
         <p>In the current 4.0 specification, an XSLT match pattern of the form <code>match="order"</code> is defined to
             match both an element node with node-name <code>"order"</code>, and a JNode with selector value "order".
             This has proved troublesome from an implementation viewpoint (it affects type-checking and streamability analysis)
