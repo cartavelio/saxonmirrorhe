@@ -31,9 +31,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -1012,6 +1010,61 @@ public class TestXsltCompiler {
             XsltCompiler comp2 = proc2.newXsltCompiler();
             comp2.setSchemaAware(true);
             XsltExecutable exec = comp2.loadExecutablePackage(sefFile.toURI());
+            Xslt30Transformer trans = exec.load30();
+            StringWriter out = new StringWriter();
+            trans.callTemplate(null, proc2.newSerializer(out));
+            assertTrue(out.toString().contains("<test:e xmlns:test=\"http://www.example.com/test\"/>"));
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testReloadFromSource() {
+        // Variant of testBug4969 that reloads the SEF file from a string
+        try {
+            Processor proc = new Processor(true);
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setSchemaAware(true);
+            String xsl1 = "<xsl:stylesheet exclude-result-prefixes=\"#all\" version=\"3.0\"\n"
+                    + "  xmlns:test=\"http://www.example.com/test\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
+                    + "  xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+                    + "<xsl:template name=\"xsl:initial-template\">\n"
+                    + "  <xsl:variable as=\"element(test:e)\" name=\"e\">\n"
+                    + "    <test:e />\n"
+                    + "  </xsl:variable>\n"
+                    + "  <xsl:variable as=\"element(test:e)\" name=\"ve\">\n"
+                    + "    <xsl:copy-of select=\"$e\" validation=\"strict\" />\n"
+                    + "  </xsl:variable>\n"
+                    + "  <xsl:sequence select=\"$ve, $ve\" />\n"
+                    + "</xsl:template>"
+                    + "</xsl:stylesheet>";
+
+            String xsd = "<xs:schema elementFormDefault=\"qualified\" targetNamespace=\"http://www.example.com/test\"\n"
+                    + "  xmlns=\"http://www.example.com/test\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n"
+                    + "  <xs:element name=\"e\">\n"
+                    + "    <xs:complexType />\n"
+                    + "  </xs:element>\n"
+                    + "</xs:schema>";
+            SchemaManager sm = proc.getSchemaManager();
+            sm.load(new StreamSource(new StringReader(xsd)));
+            StringWriter scm = new StringWriter();
+            Serializer scmOut = proc.newSerializer(scm);
+            sm.exportComponents(scmOut);
+
+            XsltExecutable pack = comp.compile(new StreamSource(new StringReader(xsl1)));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            pack.export(baos);
+
+            Processor proc2 = new Processor(true);
+            SchemaManager sm2 = proc2.getSchemaManager();
+            sm2.importComponents(new StreamSource(new StringReader(scm.toString())));
+            XsltCompiler comp2 = proc2.newXsltCompiler();
+            comp2.setSchemaAware(true);
+            XsltExecutable exec = comp2.loadExecutablePackage(
+                    new StreamSource(new ByteArrayInputStream(baos.toByteArray())));
             Xslt30Transformer trans = exec.load30();
             StringWriter out = new StringWriter();
             trans.callTemplate(null, proc2.newSerializer(out));

@@ -710,6 +710,26 @@ public class XsltCompiler {
     }
 
     /**
+     * Load a compiled package from a supplied source, with the intent to use this as a complete
+     * executable stylesheet, not as a library package.
+     * <p>The supplied source represents the location of a resource which must have been originally
+     * created using {@link XsltPackage#save(java.io.File)} or some equivalent.</p>
+     * <p>The result of loading the package is returned as an <code>XsltExecutable</code> object.</p>
+     *
+     * @param source the source from which the package is to be loaded
+     * @return the compiled package loaded from the supplied file or remote location
+     * @throws SaxonApiException if no resource can be loaded from the supplied location or if the
+     *                           resource that is loaded is not a compiled package, or if the compiled package is not
+     *                           consistent with this <code>XsltCompiler</code> (for example, if it was created using an
+     *                           incompatible Saxon version).
+     * @since 11
+     */
+
+    public XsltExecutable loadExecutablePackage(Source source) throws SaxonApiException {
+        return loadLibraryPackage(source).link();
+    }
+
+    /**
      * Import a library package. Calling this method makes the supplied package available for reference
      * in the <code>xsl:use-package</code> declarations of subsequent compilations performed using this
      * <code>XsltCompiler</code>.
