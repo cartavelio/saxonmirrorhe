@@ -8,15 +8,18 @@
 package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.StringToDouble;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.*;
 
 import java.util.Map;
 
@@ -42,6 +45,8 @@ public class JsonParser {
     private static final String ERR_SCHEMA = "FOJS0004";
     private static final String ERR_OPTIONS = "FOJS0005";
     private static final String ERR_LIMITS = "FOJS0001";  // No specific code in spec
+
+    private Function numberParser = null;
 
     /**
      * Create a JSON parser
@@ -165,7 +170,7 @@ public class JsonParser {
 
             case NUMERIC_LITERAL:
                 String lexical = tokenizer.currentTokenValue.toString();
-                double d = parseNumericLiteral(lexical, flags, tokenizer.lineNumber);
+                AtomicValue d = parseNumericLiteral(lexical, flags, tokenizer.lineNumber, context);
                 handler.writeNumeric(lexical, d);
                 break;
 
@@ -212,7 +217,7 @@ public class JsonParser {
             }
             String key = tokenizer.currentTokenValue.toString();
             key = unescape(key, flags, ERR_GRAMMAR, tokenizer.lineNumber);
-            String reEscaped = handler.reEscape(key).toString();
+            String reEscaped = handler.reEscape(key);
             tok = tokenizer.next();
             if (tok != JsonToken.COLON) {
                 invalidJSON("Missing colon after \"" + Err.wrap(key) + "\"", ERR_GRAMMAR, tokenizer.lineNumber);
@@ -306,7 +311,7 @@ public class JsonParser {
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs (such as invalid JSON input)
      */
 
-    private double parseNumericLiteral(String token, int flags, int lineNumber) throws XPathException {
+    private AtomicValue parseNumericLiteral(String token, int flags, int lineNumber, XPathContext context) throws XPathException {
         try {
             if ((flags & LIBERAL) == 0) {
                 // extra checks on the number disabled by choosing spec="liberal"
@@ -329,10 +334,17 @@ public class JsonParser {
                     }
                 }
             }
-            return StringToDouble.getInstance().stringToNumber(StringView.tidy(token));
+            if (numberParser != null) {
+                Sequence[] args = new Sequence[1];
+                args[0] = new StringItem(token);
+                Sequence result = SystemFunction.dynamicCall(numberParser, context, args).head();
+                return (AtomicValue)result.head();
+            } else {
+                return new DoubleValue(StringToDouble.getInstance().stringToNumber(StringView.tidy(token)));
+            }
         } catch (NumberFormatException e) {
             invalidJSON("Invalid numeric literal: " + e.getMessage(), ERR_GRAMMAR, lineNumber);
-            return Double.NaN;
+            return DoubleValue.NaN;
         }
     }
 
@@ -517,7 +529,6 @@ public class JsonParser {
                         if (afterBackslash && c == 'u') {
                             try {
                                 String hex = input.substring(position, position + 4);
-                                //noinspection ResultOfMethodCallIgnored
                                 Integer.parseInt(hex, 16);
                             } catch (Exception e) {
                                 invalidJSON("\\u must be followed by four hex characters", ERR_GRAMMAR, lineNumber);
@@ -630,6 +641,27 @@ public class JsonParser {
                 return "<eof>";
             default:
                 return "<" + token + ">";
+        }
+    }
+
+
+    public void setNumberParser(Map<String, Sequence> options, XPathContext context) throws XPathException {
+        Sequence val = options.get("number-parser");
+        if (val != null) {
+            Item fn = val.head();
+            if (fn instanceof Function) {
+                numberParser = (Function) fn;
+                if (numberParser.getArity() != 1) {
+                    throw new XPathException("Number-parser function must have arity=1", "FOJS0005");
+                }
+                SpecificFunctionType required = new SpecificFunctionType(
+                        new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
+                if (!required.matches(numberParser, context.getConfiguration().getTypeHierarchy())) {
+                    throw new XPathException("Number-parser function does not match the required type", "FOJS0005");
+                }
+            } else {
+                throw new XPathException("Value of option 'number-parser' is not a function", "FOJS0005");
+            }
         }
     }
 

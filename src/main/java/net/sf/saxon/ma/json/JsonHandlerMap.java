@@ -15,10 +15,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.DoubleValue;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -127,13 +124,12 @@ public class JsonHandlerMap extends JsonHandler {
 
     /**
      * Write a numeric value
-     *
-     * @param asString the string representation of the value
-     * @param asDouble the double representation of the value
+     *  @param asString the string representation of the value
+     * @param parsedValue the double representation of the value
      */
     @Override
-    public void writeNumeric(String asString, double asDouble) {
-        writeItem(new DoubleValue(asDouble));
+    public void writeNumeric(String asString, AtomicValue parsedValue) {
+        writeItem(parsedValue);
     }
 
     /**

@@ -20,6 +20,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.value.AtomicValue;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -118,7 +119,7 @@ public class JsonHandlerXML extends JsonHandler {
      * @throws XPathException if anything goes wrong (for example, with getting schema information)
      */
     private void init(XPathContext context, int flags) throws XPathException {
-        keys = new Stack<String>();
+        keys = new Stack<>();
        /* This may not need to be a stack as there should only be at most one pre-selected key
        * However, the stack neatly indicates its empty state
        * */
@@ -251,7 +252,7 @@ public class JsonHandlerXML extends JsonHandler {
             if (escape) {
                 markAsEscaped(uk, true);
             }
-            out.attribute(keyQN, validate ? STRING_TYPE : SIMPLE_TYPE, uk.toString(),
+            out.attribute(keyQN, validate ? STRING_TYPE : SIMPLE_TYPE, uk,
                           Loc.NONE, ReceiverOption.NONE);
         }
     }
@@ -338,11 +339,11 @@ public class JsonHandlerXML extends JsonHandler {
      * Write a numeric value
      *
      * @param asString the string representation of the value
-     * @param asDouble the double representation of the value
+     * @param parsedValue the double representation of the value
      * @throws XPathException if a dynamic error occurs
      */
     @Override
-    public void writeNumeric(String asString, double asDouble) throws XPathException {
+    public void writeNumeric(String asString, AtomicValue parsedValue) throws XPathException {
         startElement(numberQN, isInMap() ? "numberWithinMapType" : "numberType");
         startContent();
         characters(asString);
@@ -364,13 +365,13 @@ public class JsonHandlerXML extends JsonHandler {
             markAsEscaped(escaped, false);
         }
         startContent();
-        characters(escaped.toString());
+        characters(escaped);
         endElement();
     }
 
  @Override
     protected void markAsEscaped(String escaped, boolean isKey) throws XPathException {
-        if (containsEscape(escaped.toString()) && escape) {
+        if (containsEscape(escaped) && escape) {
             NodeName name = isKey ? escapedKeyQN : escapedQN;
             out.attribute(name, validate ? BOOLEAN_TYPE : SIMPLE_TYPE, "true",
                           Loc.NONE, ReceiverOption.NONE);
