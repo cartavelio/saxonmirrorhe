@@ -19,10 +19,13 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.lib.TraceListener;
+import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.AttributeLocation;
@@ -242,6 +245,12 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
                     + "\" file=\"" + abbreviateLocationURI(curr.getSystemId())
                     + "\">");
             indent++;
+        } else if ((item instanceof MapItem) && detail > 0) {
+            stack.push(item);
+            out.info(AbstractTraceListener.spaces(indent) + "<source map='" + Err.depict(item) + "'>");
+        } else if ((item instanceof ArrayItem) && detail > 0) {
+            stack.push(item);
+            out.info(AbstractTraceListener.spaces(indent) + "<source array='" + Err.depict(item) + "'>");
         }
     }
 
@@ -256,6 +265,12 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
             NodeInfo curr = (NodeInfo) item;
             out.info(AbstractTraceListener.spaces(indent) + "</source><!-- " +
                     Navigator.getPath(curr) + " -->");
+            stack.pop();
+        } else if ((item instanceof MapItem) && detail > 0) {
+            out.info(AbstractTraceListener.spaces(indent) + "</source><!-- map -->");
+            stack.pop();
+        } else if ((item instanceof ArrayItem) && detail > 0) {
+            out.info(AbstractTraceListener.spaces(indent) + "</source><!-- array -->");
             stack.pop();
         }
     }

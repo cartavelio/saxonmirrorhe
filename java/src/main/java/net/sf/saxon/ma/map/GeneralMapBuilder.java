@@ -5,6 +5,7 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
@@ -132,7 +133,15 @@ public class GeneralMapBuilder {
                 } else if (combiner == null) {
                     throw new XPathException("Duplicate key " + Err.depict(key) + " in map");
                 } else {
-                    GroundedValue newVal = combiner.combine(existing, value, context);
+                    GroundedValue newVal;
+                    try {
+                        newVal = combiner.combine(existing, value, context);
+                    } catch (UncheckedXPathException e) {
+                        throw new XPathException("Duplicate key " + Err.depict(key)
+                                                         + " in map. First value: "
+                                + Err.depictSequence(existing) + "; second value: "
+                                + Err.depictSequence(value), e);
+                    }
                     map = map.put(key, newVal);
                 }
             }

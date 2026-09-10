@@ -242,7 +242,7 @@ public abstract class MapItem implements FunctionItem {
     @Override
     public String toShortString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("map{");
+        sb.append("{");
         int count = size();
         if (count == 0) {
             sb.append("}");
