@@ -312,6 +312,9 @@
             are now written as <code>->{.+1}</code>. "Underscore functions" (written as <code>_{$1 + $2}</code>) are dropped
             entirely (write instead <code>->($p1, $p2){$p1 + $p2}</code>).</p>
         
+        <p>Union NodeTests are implemented. This feature allows steps such as <code>ancestor::(div1|div2|div3)</code>,
+        <code>@(id|name)</code>, and <code>following-sibling::(comment()|processing-instruction())</code>.</p>
+        
         <h2>XSLT extensions</h2>
         
         
