@@ -241,7 +241,7 @@ public class PatternParser extends XPathParser {
         if (inPredicate > 0) {
             return super.parseExpression();
         } else if (allowXPath40Syntax && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
-                (t.currentTokenValue.equals("record")  || t.currentTokenValue.equals("type") || t.currentTokenValue.equals("map") || t.currentTokenValue.equals("array"))) {
+                (isKeyword("record")  || isKeyword("type") || isKeyword("map") || isKeyword("array"))) {
             ItemType type = parseItemType();
             Expression expr = new ItemTypePattern(type);
             expr.setRetainedStaticContext(env.makeRetainedStaticContext());
@@ -251,7 +251,7 @@ public class PatternParser extends XPathParser {
             }
             return expr;
         } else if (allowXPath40Syntax && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
-                t.currentTokenValue.equals("atomic")) {
+                isKeyword("atomic")) {
             nextToken();
             String name = readName();
             StructuredQName typeName = makeStructuredQName(name, env.getDefaultElementNamespace());
@@ -321,7 +321,7 @@ public class PatternParser extends XPathParser {
             }
             if (tok instanceof Token.NameToken) {
                 if (t.peekAhead() == Token.LPAREN) {
-                    switch (t.currentTokenValue) {
+                    switch (t.currentName()) {
                         case "type":
                         case "tuple":
                         case "union":

@@ -505,7 +505,7 @@ public class XQueryParser extends XPathParser {
                 env.getPackageData().setHostLanguage(HostLanguage.XQUERY, 40);
             }
             nextToken();
-            if ("encoding".equals(t.currentTokenValue)) {
+            if (isKeyword("encoding")) {
                 nextToken();
                 String enc = expectStringLiteral();
                 if (!encNamePattern.matcher(unescape(enc)).matches()) {
@@ -829,7 +829,7 @@ public class XQueryParser extends XPathParser {
                 }
                 annotation.addAnnotationParameter(Int64Value.ZERO); // MHK 2024-07-15 - Why?
             } else if (isReservedInQuery(uri)) {
-                grumble("The annotation " + t.currentTokenValue + " is in a reserved namespace", "XQST0045");
+                grumble("The annotation " + t.currentName() + " is in a reserved namespace", "XQST0045");
             } else {
                 // no action - ignore namespaced annotations
             }
@@ -851,13 +851,13 @@ public class XQueryParser extends XPathParser {
                     AtomicValue arg;
                     Token tok = t.currentToken;
                     if (tok instanceof Token.StringLiteral) {
-                        arg = new StringValue(((Token.StringLiteral) tok).getValue());
+                        arg = new StringValue(expectStringLiteral());
                     } else if (tok instanceof Token.NumericLiteral) {
                         arg = ((Token.NumericLiteral)tok).getValue();
                     } else if ((isKeyword("true") || isKeyword("false")) && t.peekAhead() == Token.LPAREN) {
                         if (isKeyword("true")) {
                             arg = BooleanValue.TRUE;
-                        } else if (t.currentTokenValue.equals("false")) {
+                        } else if (isKeyword("false")) {
                             arg = BooleanValue.FALSE;
                         } else {
                             grumble("The only function calls allowed in an annotation are true() and false()");
@@ -1471,7 +1471,7 @@ public class XQueryParser extends XPathParser {
         Set<String> propertyNames = new HashSet<>(10);
         while (t.currentToken != Token.SEMICOLON) {
             int offset = t.currentTokenStartOffset;
-            String propertyName = t.currentTokenValue;
+            String propertyName = expectStringLiteral();
             if (propertyNames.contains(propertyName)) {
                 grumble("Property name " + propertyName + " is defined more than once", "XQST0114", offset);
             }
@@ -1683,7 +1683,7 @@ public class XQueryParser extends XPathParser {
             }
             var.setBody(exp);
         } else if (t.currentToken instanceof Token.NameToken) {
-            if ("external".equals(t.currentTokenValue)) {
+            if (isKeyword("external")) {
                 GlobalParam par = new GlobalParam();
                 par.setPackageData(env.getPackageData());
                 //par.setExecutable(var.getExecutable());
@@ -1896,7 +1896,7 @@ public class XQueryParser extends XPathParser {
                 //     Param       ::=     "$" VarName  TypeDeclaration?
                 StructuredQName argQName = readVariableName();
                 if (paramNames.contains(argQName)) {
-                    grumble("Duplicate parameter name " + Err.wrap(t.currentTokenValue, Err.VARIABLE), "XQST0039");
+                    grumble("Duplicate parameter name " + Err.wrap(argQName.getDisplayName(), Err.VARIABLE), "XQST0039");
                 }
                 paramNames.add(argQName);
                 SequenceType paramType = readOptionalAsClause(SequenceType.ANY_SEQUENCE);
@@ -3391,26 +3391,6 @@ public class XQueryParser extends XPathParser {
         String nodeKind = readName();
         if (t.currentToken == Token.LCURLY) {
             switch (nodeKind) {
-//                case "validate":
-//                    grumble("A validate expression is not allowed within a path expression");
-//
-//                    //if (nodeKind.equals("validate")) {
-//                    // this allows a validate{} expression to appear as an operand of '/', which the grammar does not allow
-//                    // return parseValidateExpression();
-//                    break;
-//                case "ordered":
-//                case "unordered":
-//                    // these are currently no-ops in Saxon
-//                    nextToken();
-//                    Expression content;
-//                    if (t.currentToken == Token.RCURLY && allowXPath31Syntax) {
-//                        content = Literal.makeEmptySequence();
-//                    } else {
-//                        content = parseExpression();
-//                    }
-//                    expect(Token.RCURLY);
-//                    nextToken();
-//                    return content;
                 case "document":
                     return parseDocumentConstructor(offset);
 
@@ -3432,11 +3412,8 @@ public class XQueryParser extends XPathParser {
                 case "namespace":
                     return parseNamespaceConstructor(offset);
 
-//                case "switch":
-//                    return parseSwitchExpression();
-
                 default:
-                    grumble("Unrecognized keyword '" + t.currentTokenValue + "' before {...} ");
+                    grumble("Unrecognized keyword '" + nodeKind + "' before {...} ");
                     return null;
             }
         } else {
@@ -3459,7 +3436,9 @@ public class XQueryParser extends XPathParser {
     }
 
     protected Expression parseDirectPIConstructor() throws XPathException {
-        String body = t.currentTokenValue;
+
+        Token.DirectProcessingInstructionConstructor token = (Token.DirectProcessingInstructionConstructor)t.currentToken;
+        String body = token.toString();
         int firstSpace = -1;
         for (int i=0; i<body.length(); i++) {
             if (Whitespace.isWhite(body.charAt(i))) {
@@ -3500,7 +3479,8 @@ public class XQueryParser extends XPathParser {
     }
 
     protected Expression parseDirectCommentConstructor() throws XPathException {
-        String body = t.currentTokenValue;
+        Token.DirectCommentConstructor token = (Token.DirectCommentConstructor) t.currentToken;
+        String body = token.getContent();
         Comment instruction = new Comment();
         instruction.setSelect(new StringLiteral(body));
         setLocation(instruction);
@@ -3646,7 +3626,7 @@ public class XQueryParser extends XPathParser {
      */
 
     private Expression parseNamedElementConstructor(int offset) throws XPathException {
-        NodeName nodeName = makeNodeName(t.currentTokenValue, true);
+        NodeName nodeName = makeNodeName(t.currentName(), true);
         Expression content = null;
         nextToken();
         readToken(Token.LCURLY);
@@ -3760,10 +3740,11 @@ public class XQueryParser extends XPathParser {
 
     private Expression parseNamedAttributeConstructor(int offset) throws XPathException {
         String warningMessage = null;
-        if (t.currentTokenValue.equals("xmlns") || t.currentTokenValue.startsWith("xmlns:")) {
+        String attName = expectName();
+        if (attName.equals("xmlns") || attName.startsWith("xmlns:")) {
             warningMessage = "Cannot create a namespace declaration using an attribute constructor";
         }
-        NodeName attributeName = makeNodeName(t.currentTokenValue, false);
+        NodeName attributeName = makeNodeName(attName, false);
         if (!attributeName.hasURI(NamespaceUri.NULL) && attributeName.getPrefix().isEmpty()) {
             // This must be because the name was given as Q{uri}local. Invent a prefix.
             attributeName = new FingerprintedQName("_", attributeName.getNamespaceUri(), attributeName.getLocalPart());
@@ -3854,7 +3835,7 @@ public class XQueryParser extends XPathParser {
      */
 
     private Expression parseNamedProcessingInstructionConstructor(int offset) throws XPathException {
-        String target = t.currentTokenValue;
+        String target = expectName();
         String warningMessage = null;
         if (target.equalsIgnoreCase("xml")) {
             warningMessage = "A processing instruction must not be named 'xml' in any combination of upper and lower case";
@@ -4002,7 +3983,7 @@ public class XQueryParser extends XPathParser {
         if (!allowXPath30Syntax) {
             grumble("Namespace node constructors require XQuery 3.0");
         }
-        String target = t.currentTokenValue;
+        String target = expectName();
         if (!NameChecker.isValidNCName(target)) {
             grumble("Invalid namespace prefix " + Err.wrap(target));
         }

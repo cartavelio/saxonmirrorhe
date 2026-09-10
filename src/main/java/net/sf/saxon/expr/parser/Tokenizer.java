@@ -67,10 +67,6 @@ public final class Tokenizer {
      */
     public Token currentToken = Token.EOF;
     /**
-     * The string value of the most recently read token
-     */
-    /*@Nullable*/ public String currentTokenValue = null;
-    /**
      * The position in the input expression where the current token starts
      */
     public int currentTokenStartOffset = 0;
@@ -78,10 +74,6 @@ public final class Tokenizer {
      * The number of the next token to be returned
      */
     private Token nextToken = Token.EOF;
-    /**
-     * The string value of the next token to be returned
-     */
-    private String nextTokenValue = null;
     /**
      * The position in the expression of the start of the next token
      */
@@ -182,7 +174,6 @@ public final class Tokenizer {
      */
     public void tokenize(String input, int start, int end) throws XPathException {
         nextToken = Token.EOF;
-        nextTokenValue = null;
         nextTokenStartOffset = 0;
         inputOffset = start;
         this.input = input;
@@ -229,12 +220,7 @@ public final class Tokenizer {
 
     public void next() throws XPathException {
         precedingToken = currentToken;
-        precedingTokenValue = currentTokenValue;
         currentToken = nextToken;
-        currentTokenValue = nextTokenValue;
-        if (currentTokenValue == null) {
-            currentTokenValue = "";
-        }
         currentTokenStartOffset = nextTokenStartOffset;
         lineNumber = nextLineNumber;
 
@@ -246,12 +232,10 @@ public final class Tokenizer {
             // A complex token is one that includes embedded expressions. We can't look ahead
             // to the next token until we have parsed these.
             nextToken = Token.UNKNOWN;
-            nextTokenValue = null;
         } else if (currentToken == Token.EOF) {
             // no action
         } else if (finishCondition.test(this)) {
             nextToken = Token.EOF;
-            nextTokenValue = null;
         } else {
             lookAhead();
         }
@@ -271,6 +255,16 @@ public final class Tokenizer {
     }
 
     /**
+     * Get the string value of the current name token
+     * @return the string value of the current token, assuming it is
+     * a name.
+     * @throws ClassCastException if the current token is not a NameToken
+     */
+    public String currentName() {
+        return ((Token.NameToken)currentToken).getValue();
+    }
+
+    /**
      * Look ahead by one token. This method does the real tokenization work.
      * The method is normally called internally, but the XQuery parser also
      * calls it to resume normal tokenization after dealing with pseudo-XML
@@ -282,14 +276,12 @@ public final class Tokenizer {
 
         if (finishCondition.test(this)) {
             nextToken = Token.EOF;
-            nextTokenValue = null;
             return;
         }
 
         precedingToken = nextToken;
-        precedingTokenValue = nextTokenValue;
-        nextTokenValue = null;
         nextTokenStartOffset = inputOffset;
+        String nextTokenValue = "";
         for (; ; ) {
             if (inputOffset >= inputLength) {
                 nextToken = Token.EOF;
@@ -1097,31 +1089,6 @@ public final class Tokenizer {
     }
 
     /**
-     * Checkpoint the state of this tokenizer so that unbounded lookahead is possible
-     * (or, restore the state of the tokenizer from a checkpoint)
-     * @param u When checkpointing, a Tokenizer used simply to hold the state so that
-     *          it can be restored later. This tokenizer is not capable of active
-     *          tokenizing because many of its variables are uninitialised. When restoring
-     *          from a checkpoint, the original tokenizer whose state is to be restored.
-     */
-    public void copyTo(Tokenizer u) {
-        u.currentToken = currentToken;
-        u.currentTokenValue = currentTokenValue;
-        u.precedingToken = precedingToken;
-        u.precedingTokenValue = precedingTokenValue;
-        u.nextToken = nextToken;
-        u.nextTokenValue = nextTokenValue;
-        u.inputOffset = inputOffset;
-        u.lineNumber = lineNumber;
-        u.nextLineNumber = nextLineNumber;
-        if (newlineOffsets == null) { // written this way for transpilation reasons
-            u.newlineOffsets = null;
-        } else {
-            u.newlineOffsets = new ArrayList<>(newlineOffsets);
-        }
-    }
-
-    /**
      * Get the line number of the current token
      *
      * @return the line number. Line numbers reported by the tokenizer start at zero.
@@ -1195,7 +1162,6 @@ public final class Tokenizer {
             return false;
         }
         nextToken = new Token.DirectProcessingInstructionConstructor(input.substring(inputOffset + 1, end));
-        nextTokenValue = input.substring(inputOffset+1, end);
         inputOffset = end + 2;
         return true;
     }
@@ -1218,7 +1184,6 @@ public final class Tokenizer {
             return false;
         }
         nextToken = new Token.DirectCommentConstructor(input.substring(start, end));
-        nextTokenValue = input.substring(start, end);
         inputOffset = end + 3;
         return true;
     }
