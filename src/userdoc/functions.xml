@@ -10004,7 +10004,7 @@ return saxon:transform($splitter, $results)]]></samp>
         </proto>
       </signatures>
       <status-ok/>
-      <saxon-edition>PE/EE 9.5</saxon-edition>
+      <saxon-edition>EE 9.5</saxon-edition>
       <details>
         <div>
           <p>The information is returned in the same form as information from the <a
