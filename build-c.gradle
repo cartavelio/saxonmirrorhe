@@ -607,7 +607,7 @@ task eecCompile(
 
 task hec_jar(
   type: Jar,
-  dependsOn: ["hecCompile", "hej_MetaInf", "rejar_Xerces"],
+  dependsOn: ["hecCompile", "hej_MetaInf", "rejar_Xerces", "compile_function_library"],
   description: "Build the HE jar file for SaxonC"
 ) {
   archiveBaseName = "saxon9he"
@@ -631,6 +631,9 @@ task hec_jar(
       exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
       exclude "META-INF/MANIFEST.MF"
     }
+  from("${buildDir}/resources/main"){
+    include "net/sf/saxon/data/sef/function-library.sef.xml"
+  }
   doFirst {
     mkdir "build/c/jars/hec"
   }
@@ -638,7 +641,7 @@ task hec_jar(
 
 task pec_jar(
   type: Jar,
-  dependsOn: ["pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_ICU4jJar"],
+  dependsOn: ["pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_ICU4jJar", "compile_function_library"],
   description: "Build the PE jar file for SaxonC"
 ) {
   archiveBaseName = "saxon9pe"
@@ -682,6 +685,9 @@ task pec_jar(
       include "**/*.properties"
       exclude "META-INF/MANIFEST.MF"
     }
+  from("${buildDir}/resources/main"){
+    include "net/sf/saxon/data/sef/function-library.sef.xml"
+  }
   doFirst {
     mkdir "build/c/pec"
   }
@@ -689,7 +695,7 @@ task pec_jar(
 
 task eec_jar(
   type: Jar,
-  dependsOn: ["eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_ICU4jJar"],
+  dependsOn: ["eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_ICU4jJar", "compile_function_library"],
   description: "Build the EE jar file for SaxonC"
 ) {
   archiveBaseName = "saxon9ee"
@@ -723,6 +729,9 @@ task eec_jar(
       include "**/*.properties"
       exclude "META-INF/MANIFEST.MF"
     }
+  from("${buildDir}/resources/main"){
+    include "net/sf/saxon/data/sef/function-library.sef.xml"
+  }
   doFirst {
     mkdir "build/c/eec"
   }
