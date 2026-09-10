@@ -1070,9 +1070,9 @@ public class UserComplexType extends UserDefinedType
         // exit. This can happen when the same schema is processed more than once.
 
         if (base instanceof UserDefinedType) {
-            Set<UserComplexType> existingExtensions = schema.getExtensionsOfType((UserDefinedType) base);
-            for (UserComplexType ex : existingExtensions) {
-                if (ex.getTypeName().equals(getTypeName()) && ex.isSameType(this)) {
+            Set<? extends SchemaType> existingExtensions = schema.getExtensionsOfType((UserDefinedType) base);
+            for (SchemaType ex : existingExtensions) {
+                if (((UserComplexType)ex).getTypeName().equals(getTypeName()) && ex.isSameType(this)) {
                     return true;
                 }
             }

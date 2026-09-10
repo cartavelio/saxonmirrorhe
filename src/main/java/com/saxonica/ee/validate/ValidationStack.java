@@ -222,7 +222,8 @@ public class ValidationStack extends ValidatingFilter {
                             ((ComplexContentValidator) initialReceiver).setSchemaType(compiledType);
                             initial = (ContentValidator) getNextReceiver();
                         } else {
-                            ElementDecl decl = schema.getElementDecl(fp);
+                            @SuppressWarnings("RedundantCast")
+                            ElementDecl decl = (ElementDecl)schema.getElementDecl(fp);
                             initial = ContentValidator.makeValidator(decl, elemName.getStructuredQName(), location,
                                     getValidationContext(), xsiType,
                                     initialValidationMode, pipe,

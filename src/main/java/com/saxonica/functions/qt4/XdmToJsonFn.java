@@ -18,7 +18,6 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.serialize.JSONEmitter;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -35,7 +34,6 @@ import java.util.*;
  */
 public class XdmToJsonFn extends SystemFunction {
 
-    @CSharpModifiers(code = {"public", "static", "new"})
     public static OptionsParameter OPTION_DETAILS;
     private final static SequenceType layoutMapType =
             new SequenceType(

@@ -114,9 +114,9 @@ public class CompiledComplexType {
             if (ocw != null && ocw.matches(elementName, true, schema, type)) {
                 return AnyType.getInstance();
             }
-            for (UserComplexType ext : ((PreparedSchema)schema).getExtensionsOfType(type)) {
+            for (SchemaType ext : schema.getExtensionsOfType(type)) {
                 // No need to consider further extensions, as getExtensionsOfType() returns the transitive set
-                SchemaType st = ext.getElementParticleType(elementName, schema, false);
+                SchemaType st = ((UserComplexType)ext).getElementParticleType(elementName, schema, false);
                 if (st != null) {
                     if (child == null) {
                         child = st;
@@ -165,13 +165,13 @@ public class CompiledComplexType {
         // Now we need to look in all complex types derived from this type by extension. These might allow
         // (additional) occurrences of the sought element particle.
         if (considerExtensions) {
-            for (UserComplexType ext : ((PreparedSchema)schema).getExtensionsOfType(type)) {
+            for (SchemaType ext : schema.getExtensionsOfType(type)) {
                 if (baseCardinality == StaticProperty.ALLOWS_ZERO_OR_MORE) {
                     // quick exit
                     return baseCardinality;
                 }
                 // No need to consider extensions recursively, since iterateExtensionTypes() is already transitive
-                int extCardinality = ext.getElementParticleCardinality(elementName, schema, false);
+                int extCardinality = ((UserComplexType)ext).getElementParticleCardinality(elementName, schema, false);
                 baseCardinality = Cardinality.union(baseCardinality, extCardinality);
             }
         }
@@ -199,8 +199,8 @@ public class CompiledComplexType {
             return;
         }
         p.gatherAllPermittedElements(schema, children, ignoreWildcards);
-        for (UserComplexType uct : ((PreparedSchema)schema).getExtensionsOfType(type)) {
-            uct.gatherAllPermittedChildren(schema, children, ignoreWildcards);
+        for (SchemaType uct : schema.getExtensionsOfType(type)) {
+            ((UserComplexType)uct).gatherAllPermittedChildren(schema, children, ignoreWildcards);
         }
     }
 
@@ -394,8 +394,8 @@ public class CompiledComplexType {
             return ((AttributeDecl) use.getTarget()).getType();
         }
         SimpleType attType = null;
-        for (UserComplexType ext : ((PreparedSchema) schema).getExtensionsOfType(type)) {
-            SimpleType st = ext.getAttributeUseType(attributeName, schema);
+        for (SchemaType ext : schema.getExtensionsOfType(type)) {
+            SimpleType st = ((UserComplexType)ext).getAttributeUseType(attributeName, schema);
             if (st != null) {
                 if (attType == null) {
                     attType = st;
@@ -465,8 +465,8 @@ public class CompiledComplexType {
             return use.getCardinality();
         }
         int card = 0;
-        for (UserComplexType ext : ((PreparedSchema) schema).getExtensionsOfType(type)) {
-            int c = ext.getAttributeUseCardinality(attributeName, schema);
+        for (SchemaType ext : schema.getExtensionsOfType(type)) {
+            int c = ((UserComplexType)ext).getAttributeUseCardinality(attributeName, schema);
             card |= c;
         }
         if (card != 0) {
@@ -500,8 +500,8 @@ public class CompiledComplexType {
         if (ag.getAttributeWildcard(null) != null) {
             return true;
         }
-        for (UserComplexType ext : ((PreparedSchema) schema).getExtensionsOfType(type)) {
-            if (ext.allowsAttributes(schema)) {
+        for (SchemaType ext : schema.getExtensionsOfType(type)) {
+            if (((UserComplexType)ext).allowsAttributes(schema)) {
                 return true;
             }
         }
@@ -520,8 +520,8 @@ public class CompiledComplexType {
         if (type.getParticle() != null && type.getParticle().containsElementWildcard()) {
             return true;
         }
-        for (UserComplexType ext : ((PreparedSchema) schema).getExtensionsOfType(type)) {
-            if (ext.containsElementWildcard(schema)) {
+        for (SchemaType ext : schema.getExtensionsOfType(type)) {
+            if (((UserComplexType)ext).containsElementWildcard(schema)) {
                 return true;
             }
         }

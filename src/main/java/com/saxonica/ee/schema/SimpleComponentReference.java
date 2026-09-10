@@ -145,10 +145,12 @@ public class SimpleComponentReference extends SchemaStructure implements Compone
     private void tryToResolve(PreparedSchema schema) {
         switch (symbolSpace) {
             case SymbolSpace.ELEMENT:
-                target = schema.getElementDecl(getTargetComponentName());
+                //noinspection RedundantCast
+                target = (ElementDecl)schema.getElementDecl(getTargetComponentName());
                 return;
             case SymbolSpace.ATTRIBUTE:
-                target = schema.getAttributeDecl(getTargetComponentName());
+                //noinspection RedundantCast
+                target = (AttributeDecl)schema.getAttributeDecl(getTargetComponentName());
                 return;
             default:
                 throw new IllegalStateException();

@@ -50,7 +50,8 @@ public class LaxValidator extends ContentValidator {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
         int fp = elemName.obtainFingerprint(getNamePool());
-        ElementDecl decl = getValidationContext().getSchema().getElementDecl(fp);
+        @SuppressWarnings("RedundantCast")
+        ElementDecl decl = (ElementDecl)getValidationContext().getSchema().getElementDecl(fp);
         makeChildValidator(decl, elemName.getStructuredQName(), location, Validation.LAX);
         checkNoChildrenWhenNil(location);
         List<AttributeInfo> attList = new ArrayList<>(attributes.size());
@@ -80,7 +81,8 @@ public class LaxValidator extends ContentValidator {
         //  exists, the attribute must be valid against that declaration.
         Configuration configuration = getConfiguration();
         StructuredQName attributeName = att.getNodeName().getStructuredQName();
-        AttributeDecl decl = getValidationContext().getSchema().getAttributeDecl(attributeName);
+        @SuppressWarnings("RedundantCast")
+        AttributeDecl decl = (AttributeDecl)getValidationContext().getSchema().getAttributeDecl(attributeName);
         if (decl != null) {
             SimpleType type = decl.getSimpleType();
             ValidationFailure err = type.validateContent(

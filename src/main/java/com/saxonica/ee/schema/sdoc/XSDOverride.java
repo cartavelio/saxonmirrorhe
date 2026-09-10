@@ -256,7 +256,9 @@ public class XSDOverride extends SchemaElement {
                     if (attribute == null) {
                         break; // error already reported;
                     }
-                    AttributeDecl existing = originalSchema.getAttributeDecl(attribute.getComponentName());
+                    // SaxonCS:
+                    // noinspection RedundantCast
+                    AttributeDecl existing = (AttributeDecl)originalSchema.getAttributeDecl(attribute.getComponentName());
                     if (existing != null) {
                         attribute.setRedefinitionLevel(existing.getRedefinitionLevel() + 1);
                     }
@@ -311,7 +313,9 @@ public class XSDOverride extends SchemaElement {
                         break; // error already reported;
                     }
 
-                    ElementDecl existing = originalSchema.getElementDecl(element.getComponentName());
+                    // SaxonCS:
+                    // noinspection RedundantCast
+                    ElementDecl existing = (ElementDecl)originalSchema.getElementDecl(element.getComponentName());
                     if (existing != null) {
                         element.setRedefinitionLevel(existing.getRedefinitionLevel() + 1);
                     }

@@ -624,7 +624,7 @@ public class PreparedSchema implements Schema, NotationSet {
      */
 
     @Override
-    public Set<UserComplexType> getExtensionsOfType(SchemaType type) {
+    public Set<? extends SchemaType> getExtensionsOfType(SchemaType type) {
         if (type instanceof UserDefinedType) {
             Set<UserComplexType> types = typeExtensions.get(((UserDefinedType)type));
             return types == null ? Collections.emptySet() : types;

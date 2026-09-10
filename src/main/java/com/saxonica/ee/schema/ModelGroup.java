@@ -416,7 +416,9 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
         while (iterM.hasNext()) {
             ElementDecl local = iterM.next();
             if (!local.isGlobal()) {
-                ElementDecl global = compiler.getPreparedSchema().getElementDecl(local.getComponentName());
+                // SaxonCS:
+                // noinspection RedundantCast
+                ElementDecl global = (ElementDecl)compiler.getPreparedSchema().getElementDecl(local.getComponentName());
                 if (global != null) {
                     // There's a local declaration with the same name as a global declaration. Now see if there's
                     // a wildcard that matches the same name
