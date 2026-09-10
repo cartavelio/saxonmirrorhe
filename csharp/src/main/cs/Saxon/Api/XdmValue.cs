@@ -14,6 +14,7 @@ using Saxon.Hej.om;
 using Saxon.Hej.value;
 using Saxon.Hej.expr;
 using Saxon.Hej.functions;
+using Saxon.Hej.s9api;
 using Saxon.Hej.serialize;
 using Saxon.Hej.trans;
 using Exception = System.Exception;
@@ -357,6 +358,7 @@ namespace Saxon.Api {
 
                     return first.getGenre() switch {
                         Genre.XNODE => new XdmNode((NodeInfo)first),
+                        Genre.JNODE => new XdmJNode((Saxon.Hej.ma.jnode.JNode)first),
                         Genre.ATOMIC => new XdmAtomicValue((AtomicValue)first),
                         Genre.MAP => new XdmMap((MapItem)first),
                         Genre.ARRAY => new XdmArray((ArrayItem)first),
