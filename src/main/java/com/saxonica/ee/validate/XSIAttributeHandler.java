@@ -19,7 +19,6 @@ import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.Whitespace;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -100,10 +99,14 @@ public class XSIAttributeHandler extends ValidatingFilter {
                     int fp = attName.obtainFingerprint(getNamePool());
                     if (fp == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION) {
                         attType = BuiltInAtomicType.ANY_URI;
-                        processXsiNoNamespaceSchemaLocation(location, value);
+                        if (useXsiSchemaLocation) {
+                            processXsiNoNamespaceSchemaLocation(value, location);
+                        }
                     } else if (fp == StandardNames.XSI_SCHEMA_LOCATION) {
                         attType = BuiltInListType.ANY_URIS;
-                        processXsiSchemaLocation(value, location);
+                        if (useXsiSchemaLocation) {
+                            processXsiSchemaLocation(value, location);
+                        }
                     } else if (fp == StandardNames.XSI_TYPE) {
                         attType = BuiltInAtomicType.QNAME;
                         xsiType = processXsiType(value, namespaces);
@@ -153,11 +156,12 @@ public class XSIAttributeHandler extends ValidatingFilter {
             } else {
                 // even-numbered tokens
                 boolean ignore;
+                URI absoluteLocation = null;
                 try {
-                    URI abs = ResolveURI.makeAbsolute(tok, getSystemId());
+                    absoluteLocation = ResolveURI.makeAbsolute(tok, locationId.getSystemId());
                     // ignore a duplicate xsi:schemaLocation (can occur with XInclude, for example)
-                    ignore = abs.equals(schemaDocumentsRead.get(targetNS));
-                    schemaDocumentsRead.put(targetNS, abs);
+                    ignore = absoluteLocation.equals(schemaDocumentsRead.get(targetNS));
+                    schemaDocumentsRead.put(targetNS, absoluteLocation);
                 } catch (URISyntaxException err) {
                     // we'll deal with this later
                     ignore = false;
@@ -177,7 +181,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                             reportValidationError(ve, false, locationId);
                         }
                     }
-                    loadSchema(tok, targetNS);
+                    loadSchema(absoluteLocation, targetNS);
                 }
                 targetNS = null;
             }
@@ -202,13 +206,14 @@ public class XSIAttributeHandler extends ValidatingFilter {
         }
     }
 
-    private void processXsiNoNamespaceSchemaLocation(Location locationId, String value) throws XPathException {
+    private void processXsiNoNamespaceSchemaLocation(String value, Location locationId) throws XPathException {
         boolean ignore;
+        URI absoluteLocation = null;
         try {
-            URI abs = ResolveURI.makeAbsolute(value, getSystemId());
+            absoluteLocation = ResolveURI.makeAbsolute(value, locationId.getSystemId());
             // ignore a duplicate xsi:noNamespaceSchemaLocation (can occur with XInclude, for example)
-            ignore = abs.equals(schemaDocumentsRead.get(""));
-            schemaDocumentsRead.put("", abs);
+            ignore = absoluteLocation.equals(schemaDocumentsRead.get(""));
+            schemaDocumentsRead.put("", absoluteLocation);
             // Following removed code suppresses rejection of xsi:schemaLocation when encountered after existing elements
             // in the relevant namespace.
 //            if (getConfiguration().getImportedNamespaces().contains("") &&
@@ -227,7 +232,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 ve.setConstraintReference(1, "schema-loc", "4");
                 reportValidationError(ve, false, locationId);
             }
-            loadSchema(value, "");
+            loadSchema(absoluteLocation, "");
         }
     }
 
@@ -303,11 +308,11 @@ public class XSIAttributeHandler extends ValidatingFilter {
     /**
      * Load a schema identified in an xsi:schemaLocation or xsi:noNamespaceSchemaLocation attribute
      *
-     * @param value    The value of the location URI
+     * @param value    The absolute URI of the location hint
      * @param targetNS The required target namespace
      * @throws XPathException
      */
-    private void loadSchema(String value, String targetNS) throws XPathException {
+    private void loadSchema(URI value, String targetNS) throws XPathException {
 
         // First see if we already have a loaded schema for this namespace. If so, assume it's the same one.
 
@@ -328,9 +333,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
             return;
         }
 
-        String href = Whitespace.trim(value);
-        String base = getSystemId();
-        PipelineConfiguration pipe = null;
+        PipelineConfiguration pipe;
         try {
             pipe = new PipelineConfiguration(getPipelineConfiguration());
             InvalidityHandler handler = getValidationContext().getInvalidityHandler();
@@ -339,7 +342,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 pipe.setErrorReporter(listener);
             }
             EnterpriseConfiguration config = (EnterpriseConfiguration) pipe.getConfiguration();
-            config.readSchema(pipe, base, href, targetNS);
+            config.readSchema(pipe, null, value.toString(), targetNS);
         } catch (SchemaException e) {
             // Recovery path. At this point we MAY have added components to the schema pool that have not
             // been fully validated/compiled. This is unfortunate, because it means that the whole

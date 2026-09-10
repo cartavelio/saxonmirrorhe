@@ -698,7 +698,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
                 ((InvalidityReportGenerator) invalidityHandler).setXsdVersion(config.getXsdVersion() == Configuration.XSD11 ? "1.1" : "1.0");
             }
             invalidityHandler.startReporting(source.getSystemId());
-            Sender.send(source, receiver, receiver.getPipelineConfiguration().getParseOptions());
+            Sender.send(source, receiver, new ParseOptions());
         } catch (QuitParsingException qpe) {
             // This happens when the result of validation is fed into a streaming transformer, and the transformer
             // decides it doesn't need the whole input. Although we haven't actually validated the whole input, we
