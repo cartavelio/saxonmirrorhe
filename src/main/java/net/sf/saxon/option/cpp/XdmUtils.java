@@ -298,9 +298,9 @@ public class XdmUtils {
     public static CCharPointer xdmValueArrayToString(IsolateThread thread, ObjectHandle processorDataAccumulatorRef){
         ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
         XdmValue [] values = (XdmValue[]) processorDataAccumulator.getValues();
-        if(values == null) {
+        /*if(values == null) {
             return null;
-        }
+        } */
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(buildXdmValue(values).toString());
         return holder.get();
     }
