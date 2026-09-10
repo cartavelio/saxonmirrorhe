@@ -261,7 +261,7 @@ public class TypeChecker {
                     } catch (XPathException err) {
                         throw err.maybeWithLocation(exp.getLocation())
                                 .withFailingExpression(supplied)
-                                .withErrorCode(roleSupplier.get().getErrorCode())
+                                .maybeWithErrorCode(roleSupplier.get().getErrorCode())
                                 .asStaticError();
                     }
                     itemTypeOK = true;
