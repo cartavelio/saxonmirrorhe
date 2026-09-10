@@ -8,7 +8,6 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
@@ -325,8 +324,8 @@ public class ArrayItemType extends AnyFunctionType {
     }
 
     @Override
-    public ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
-        SequenceType m2  = memberType.resolveAliases(env, path);
+    public ItemType resolveAliases(Stack<Object> path) throws XPathException {
+        SequenceType m2  = memberType.resolveAliases(path);
         if (m2 != memberType) {
             return new ArrayItemType(m2);
         }

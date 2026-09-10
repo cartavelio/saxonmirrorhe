@@ -7,7 +7,6 @@
 
 package net.sf.saxon.type;
 
-import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.nodetest.NodeTest;
@@ -227,12 +226,11 @@ public interface ItemType {
     /**
      * Resolve any item type aliases within this item type, recursively
      *
-     * @param env  map from QNames of named item types to their definitions
      * @param path stack of names being resolved, used to detect cycles
      * @return the item type after resolving any item type name references
      */
 
-    default ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
+    default ItemType resolveAliases(Stack<Object> path) throws XPathException {
         return this;
     }
 

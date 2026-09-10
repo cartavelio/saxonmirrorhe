@@ -7,7 +7,6 @@
 
 package net.sf.saxon.ma.jnode;
 
-import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -124,8 +123,8 @@ public class RootJNodeType extends JNodeType {
     }
 
     @Override
-    public ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
-        SequenceType v2 = valueType.resolveAliases(env, path);
+    public ItemType resolveAliases(Stack<Object> path) throws XPathException {
+        SequenceType v2 = valueType.resolveAliases(path);
         if (v2 != valueType) {
             return new RootJNodeType(v2);
         }

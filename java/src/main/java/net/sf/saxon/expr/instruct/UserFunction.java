@@ -650,10 +650,10 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
         if (visitor.getStaticContext() instanceof QueryModule qm) {
             for (UserFunctionParameter param : parameterDefinitions) {
                 SequenceType type = param.getRequiredType();
-                SequenceType resolved = type.resolveAliases(qm, new Stack<>());
+                SequenceType resolved = type.resolveAliases(new Stack<>());
                 param.setRequiredType(resolved);
             }
-            declaredResultType = declaredResultType.resolveAliases(qm, new Stack<>());
+            declaredResultType = declaredResultType.resolveAliases(new Stack<>());
         }
 
         Expression exp = getBody();

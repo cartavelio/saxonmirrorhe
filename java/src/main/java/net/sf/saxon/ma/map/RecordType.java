@@ -8,7 +8,6 @@
 package net.sf.saxon.ma.map;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
@@ -807,7 +806,7 @@ public class RecordType implements FunctionItemType {
     }
 
     @Override
-    public ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
+    public ItemType resolveAliases(Stack<Object> path) throws XPathException {
         List<SequenceType> fieldTypes2 = new ArrayList<>(fieldTypes.size());
         boolean changed = false;
         if (path.contains(this)) {
@@ -817,7 +816,7 @@ public class RecordType implements FunctionItemType {
         path.push(this);
         for (String s : fieldNamesInOrder) {
             SequenceType oldType = fieldTypes.get(s);
-            SequenceType newType = oldType.resolveAliases(env, path);
+            SequenceType newType = oldType.resolveAliases(path);
             if (oldType != newType) {
                 changed = true;
             }

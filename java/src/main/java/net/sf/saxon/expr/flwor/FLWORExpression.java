@@ -184,7 +184,7 @@ public class FLWORExpression extends Expression {
 
             LocalVariableBinding[] bindings = clauses.get(i).getRangeVariables();
             for (LocalVariableBinding b : bindings) {
-                b.setRequiredType(b.getRequiredType().resolveAliases(visitor.getStaticContext(), new Stack<>()));
+                b.setRequiredType(b.getRequiredType().resolveAliases(new Stack<>()));
             }
 
             clauses.get(i).typeCheck(visitor, contextInfo);

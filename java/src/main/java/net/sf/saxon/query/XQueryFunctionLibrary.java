@@ -390,7 +390,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             try {
                 for (int i = 0; i < fn.getNumberOfParameters(); i++) {
                     UserFunctionParameter p = fn.getParameterDefinitions()[i];
-                    p.setRequiredType(p.getRequiredType().resolveAliases(env, new Stack<>()));
+                    p.setRequiredType(p.getRequiredType().resolveAliases(new Stack<>()));
                     Supplier<Expression> init = fn.getDefaultValueExpression(i);
                     if (init != null) {
                         Expression initExp = init.get();
@@ -400,7 +400,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                         }
                     }
                 }
-                fn.setResultType(fn.getResultType().resolveAliases(env, new Stack<>()));
+                fn.setResultType(fn.getResultType().resolveAliases(new Stack<>()));
                 fn.compile();
                 Expression body = fn.getBody();
                 Expression e2 = body.simplify();

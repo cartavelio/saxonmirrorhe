@@ -1,8 +1,8 @@
 package net.sf.saxon.type;
 
-import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.Stack;
@@ -20,9 +20,11 @@ import java.util.Stack;
 public class DraftItemType extends ErrorType {
 
     private final StructuredQName name;
+    private final QueryModule queryModule;
 
-    public DraftItemType(StructuredQName name) {
+    public DraftItemType(StructuredQName name, QueryModule queryModule) {
         this.name = name;
+        this.queryModule = queryModule;
     }
 
     public StructuredQName getTargetName() {
@@ -40,7 +42,7 @@ public class DraftItemType extends ErrorType {
     }
 
     public String toString() {
-        return "named item type " + name.getEQName();
+        return name.getEQName();
     }
 
     @Override
@@ -51,23 +53,21 @@ public class DraftItemType extends ErrorType {
     /**
      * Resolve the item type alias to a real item type
      *
-     * @param env  map from QNames of named item types to their definitions (which may
-     *             themselves contain references to other named item types)
      * @param path stack of names being resolved, used to detect cycles
      * @return the item type after resolving any item type name references
      */
 
     @Override
-    public ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
-        ItemType target = env.resolveTypeAlias(getTargetName());
+    public ItemType resolveAliases(Stack<Object> path) throws XPathException {
+        ItemType target = queryModule.resolveTypeAlias(getTargetName());
         if (target == null) {
-            throw new XPathException("Item type " + name.getEQName() + " is not defined in the static context " + getTargetName(), "XPST0051");
+            throw new XPathException("Item type " + name.getEQName() + " is not defined in the static context", "XPST0051");
         }
         if (path.contains(getTargetName())) {
-            throw new XPathException("Definition of item type " + name.getEQName() + " is cyclic " + getTargetName(), "XQST0140");
+            throw new XPathException("Definition of item type " + name.getEQName() + " is cyclic", "XQST0140");
         }
         path.push(getTargetName());
-        ItemType finalTarget = target.resolveAliases(env, path);
+        ItemType finalTarget = target.resolveAliases(path);
         path.pop();
         return finalTarget;
     }

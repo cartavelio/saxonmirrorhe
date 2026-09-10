@@ -7,7 +7,6 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.ma.map.MapType;
@@ -702,14 +701,14 @@ public final class SequenceType {
 
     /**
      * Resolve any item type aliases within this sequence type, recursively
-     * @param env the static context maps QNames of named item types to their definitions
+     *
      * @param path the stack of names being expanded, used to detect cycles
      * @return the sequence type after resolving any item type name references
      * @throws XPathException if an alias cannot be resolved
      */
 
-    public SequenceType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
-        ItemType it2 = primaryType.resolveAliases(env, path);
+    public SequenceType resolveAliases(Stack<Object> path) throws XPathException {
+        ItemType it2 = primaryType.resolveAliases(path);
         if (it2 != primaryType) {
             return new SequenceType(it2, cardinality);
         }

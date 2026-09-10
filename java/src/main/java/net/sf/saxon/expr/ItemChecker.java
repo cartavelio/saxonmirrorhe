@@ -109,7 +109,7 @@ public final class ItemChecker extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        requiredItemType = requiredItemType.resolveAliases(visitor.getStaticContext(), new Stack<>());
+        requiredItemType = requiredItemType.resolveAliases(new Stack<>());
         getOperand().typeCheck(visitor, contextInfo);
         Expression operand = getBaseExpression();
 

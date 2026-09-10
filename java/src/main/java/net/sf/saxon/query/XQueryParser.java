@@ -199,7 +199,7 @@ public class XQueryParser extends XPathParser {
 
             Map<StructuredQName, ItemType> expandedItemTypes = new HashMap<>();
             for (Map.Entry<StructuredQName, ItemType> entry : visibleItemTypes.entrySet()) {
-                ItemType expanded = entry.getValue().resolveAliases(env, new Stack());
+                ItemType expanded = entry.getValue().resolveAliases(new Stack());
                 expandedItemTypes.put(entry.getKey(), expanded);
             }
 
@@ -211,7 +211,7 @@ public class XQueryParser extends XPathParser {
 
             for (GlobalVariable var : env.getPackageData().getGlobalVariableList()) {
                 if (languageVersion >= 40 && var.getRequiredType() != SequenceType.ANY_SEQUENCE) {
-                    var.setRequiredType(var.getRequiredType().resolveAliases(env, new Stack<>()));
+                    var.setRequiredType(var.getRequiredType().resolveAliases(new Stack<>()));
                     if (var.getBody() != null) {
                         TypeChecker checker = env.getConfiguration().getTypeChecker(false);
                         ExpressionVisitor visitor = ExpressionVisitor.make(env);

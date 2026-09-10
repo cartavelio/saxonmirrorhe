@@ -540,7 +540,6 @@ public abstract class Assignation extends Expression implements LocalBinding {
         PackageData pack = visitor.getStaticContext().getPackageData();
         if (pack.getHostLanguage() == HostLanguage.XQUERY && pack.getHostLanguageVersion() >= 40) {
             requiredType = requiredType.resolveAliases(
-                    visitor.getStaticContext(),
                     new Stack<>());
         }
     }

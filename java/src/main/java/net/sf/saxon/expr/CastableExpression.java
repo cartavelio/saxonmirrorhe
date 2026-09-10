@@ -51,7 +51,7 @@ public final class CastableExpression extends CastingExpression {
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         if (getTargetType() instanceof DraftItemType draft) {
-            ItemType resolved = getTargetType().resolveAliases(visitor.getStaticContext(), new Stack<>());
+            ItemType resolved = getTargetType().resolveAliases(new Stack<>());
             if (resolved instanceof AtomicType) {
                 setTargetType((AtomicType) resolved);
             } else if (resolved instanceof CastingTarget target) {
