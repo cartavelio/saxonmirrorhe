@@ -135,7 +135,7 @@ public class ParamKeywords {
         fnParamNames.put("format-date", "value|picture|language|calendar|place");
         fnParamNames.put("format-dateTime", "value|picture|language|calendar|place");
         fnParamNames.put("format-integer", "value|picture|language");
-        fnParamNames.put("format-number", "value|picture|format-name|format");
+        fnParamNames.put("format-number", "value|picture|options");
         fnParamNames.put("format-time", "value|picture|language|calendar|place");
         fnParamNames.put("function-arity", "function");
         fnParamNames.put("function-lookup", "name|arity");

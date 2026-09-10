@@ -62,9 +62,9 @@ public class DecimalSymbols {
         "NaN"
     };
 
-    private final int[] intValues = new int[propertyNames.length - 2];
-    private final int[] precedences = new int[propertyNames.length];
-    private final boolean[] inconsistent = new boolean[propertyNames.length];
+    private  int[] intValues = new int[propertyNames.length - 2];
+    private  int[] precedences = new int[propertyNames.length];
+    private  boolean[] inconsistent = new boolean[propertyNames.length];
 
     /**
      * Create a DecimalSymbols object with default values for all properties
@@ -84,6 +84,16 @@ public class DecimalSymbols {
         NaNValue = "NaN";
         Arrays.fill(precedences, Integer.MIN_VALUE);
         setHostLanguage(language, languageLevel);
+    }
+
+    public DecimalSymbols(DecimalSymbols input) {
+        intValues = Arrays.copyOf(input.intValues, input.intValues.length);
+        infinityValue = input.infinityValue;
+        NaNValue = input.NaNValue;
+        precedences = new int[input.precedences.length];
+        Arrays.fill(precedences, -1);
+        inconsistent = Arrays.copyOf(input.inconsistent, input.inconsistent.length);
+        errorCodes = input.errorCodes;
     }
 
     public void setHostLanguage(HostLanguage language, int languageLevel) {

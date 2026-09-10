@@ -8,6 +8,9 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.ma.map.KeyValuePair;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -52,17 +55,24 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
     @Override
     public Expression fixArguments(Expression... arguments) throws XPathException {
 
-        if (arguments[1] instanceof Literal && (arguments.length == 2 || arguments[2] instanceof StringLiteral)) {
+        if (arguments[1] instanceof Literal &&
+                (arguments.length == 2 ||
+                         arguments[2] instanceof StringLiteral ||
+                        Literal.isEmptySequence(arguments[2]))) {
             DecimalFormatManager dfm = getRetainedStaticContext().getDecimalFormatManager();
             assert dfm != null;
             picture = ((StringLiteral) arguments[1]).stringify();
-            if (arguments.length == 3 && !Literal.isEmptySequence(arguments[2])) {
-                try {
-                    String lexicalName = ((StringLiteral) arguments[2]).stringify();
-                    decimalFormatName = StructuredQName.fromLexicalQName(lexicalName, false,
-                                                                         true, getRetainedStaticContext());
-                } catch (XPathException e) {
-                    throw new XPathException("Invalid decimal format name. " + e.getMessage(), "FODF1280");
+            if (arguments.length == 3) {
+                if ((arguments[2] instanceof StringLiteral)) {
+                    try {
+                        String lexicalName = ((StringLiteral) arguments[2]).stringify();
+                        decimalFormatName = StructuredQName.fromLexicalQName(lexicalName, false,
+                                                                             true, getRetainedStaticContext());
+                    } catch (XPathException e) {
+                        throw new XPathException("Invalid decimal format name. " + e.getMessage(), "FODF1280");
+                    }
+                } else if (Literal.isEmptySequence(arguments[2])) {
+                    decimalFormatName = null;
                 }
             }
             if (decimalFormatName == null) {
@@ -892,6 +902,8 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                 Item arg2 = arguments[2].head();
                 if (arg2 == null) {
                     dfs = dfm.getDefaultDecimalFormat();
+                } else if (arg2 instanceof MapItem) {
+                    dfs = processOptions(dfm, (MapItem)arg2);
                 } else {
                     String lexicalName = arg2.getUnicodeStringValue().toString();
                     dfs = getNamedDecimalFormat(dfm, lexicalName);
@@ -903,6 +915,74 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         }
     }
 
+    /**
+     * XPath 4.0: process options map supplied in 3rd argument
+     * @param options the options argument
+     * @return the corresponding DecimalFormatSymbols object
+     */
+
+    public DecimalSymbols processOptions(DecimalFormatManager dfm, MapItem options) throws XPathException {
+        // TODO: use the option parameter machinery, e.g. to ensure coercions are applied
+        DecimalSymbols baseFormat = null;
+        GroundedValue format = options.get(new StringValue("format-name"));
+        if (format != null) {
+            if (format instanceof StringValue) {
+                baseFormat = getNamedDecimalFormat(dfm, format.getStringValue());
+            } else if (format instanceof QNameValue) {
+                baseFormat = getNamedDecimalFormat(dfm,((QNameValue)format).getStructuredQName());
+            }
+        }
+        if (baseFormat == null) {
+            baseFormat = dfm.getDefaultDecimalFormat();
+        }
+        baseFormat = new DecimalSymbols(baseFormat);
+        for (KeyValuePair kvp : options.keyValuePairs()) {
+            String key = kvp.key.getStringValue();
+            switch (key) {
+                case "decimal-separator":
+                    baseFormat.setDecimalSeparator(firstChar(kvp.value));
+                    break;
+                case "grouping-separator":
+                    baseFormat.setGroupingSeparator(firstChar(kvp.value));
+                    break;
+                case "digit":
+                    baseFormat.setDigit(firstChar(kvp.value));
+                    break;
+                case "minus-sign":
+                    baseFormat.setMinusSign(firstChar(kvp.value));
+                    break;
+                case "percent":
+                    baseFormat.setPercent(firstChar(kvp.value));
+                    break;
+                case "per-mille":
+                    baseFormat.setPerMille(firstChar(kvp.value));
+                    break;
+                case "zero-digit":
+                    baseFormat.setZeroDigit(firstChar(kvp.value));
+                    break;
+                case "exponent-separator":
+                    baseFormat.setExponentSeparator(firstChar(kvp.value));
+                    break;
+                case "pattern-separator":
+                    baseFormat.setPatternSeparator(firstChar(kvp.value));
+                    break;
+                default:
+                    // ignore it
+
+
+            }
+        }
+        try {
+            baseFormat.checkConsistency(null);
+        } catch (XPathException e) {
+            throw e.withErrorCode("FODF1290");
+        }
+        return baseFormat;
+    }
+
+    private String firstChar(GroundedValue value) throws XPathException {
+        return value.getStringValue();
+    }
     /**
      * Get a decimal format, given its lexical QName
      *
@@ -922,9 +1002,13 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             throw new XPathException("Invalid decimal format name. " + e.getMessage(), "FODF1280");
         }
 
-        dfs = dfm.getNamedDecimalFormat(qName);
+        return getNamedDecimalFormat(dfm, qName);
+    }
+
+    protected DecimalSymbols getNamedDecimalFormat(DecimalFormatManager dfm, StructuredQName qName) throws XPathException {
+        DecimalSymbols dfs = dfm.getNamedDecimalFormat(qName);
         if (dfs == null) {
-            throw new XPathException("format-number function: decimal-format '" + lexicalName + "' is not defined", "FODF1280");
+            throw new XPathException("format-number function: decimal-format '" + qName + "' is not defined", "FODF1280");
         }
         return dfs;
     }
