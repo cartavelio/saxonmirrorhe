@@ -217,6 +217,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("foot", 1, e -> e.populate(ArrayFoot::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
+            register("index-of", 2, 3, e -> e.populate(ArrayIndexOf::new, BuiltInAtomicType.INTEGER, STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR, null)
+                    .arg(2, BuiltInAtomicType.STRING, OPT, null));
+
             register("index-where", 2, e -> e.populate(ArrayIndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE | INS, null));
@@ -975,6 +980,49 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             return array.remove(len - 1);
         }
     }
+
+    /**
+     * Implementation of the function array:index-where(array, function) =&gt; xs:integer*
+     */
+    public static class ArrayIndexOf extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            List<Int64Value> result = new ArrayList<>();
+            ArrayItem array1 = (ArrayItem) arguments[0].head();
+            assert array1 != null;
+            GroundedValue search = arguments[1].materialize();
+            if (arguments.length > 2) {
+                Item collationItem = arguments[2].head();
+                if (collationItem != null) {
+                    String collation = collationItem.getStringValue();
+                }
+            }
+            for (int i = 0; i < array1.arrayLength(); i++) {
+                boolean ok = compare(array1.get(i), search);
+                if (ok) {
+                    result.add(new Int64Value(i + 1));
+                }
+            }
+            return SequenceExtent.makeSequenceExtent(result);
+        }
+
+        public boolean compare(GroundedValue a, GroundedValue b) {
+
+            if (a.getLength() != b.getLength()) {
+                return false;
+            }
+            for (int i=0; i<a.getLength(); i++) {
+                // TODO: this is a crude first cut comparison function
+                if (!a.itemAt(i).equals(b.itemAt(i))) {
+                    return false;
+                }
+            }
+            return true;
+
+        }
+    }
+
 
     /**
      * Implementation of the function array:index-where(array, function) =&gt; xs:integer*
