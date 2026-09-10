@@ -510,10 +510,8 @@ void setParameter(sxnc_parameter **parameters, int * parLen, int * parCap, const
 		free(parameters);
 		parameters = &temp;
 	}
-    printf("setPar cp1 \n");
 	int nameLen = strlen(name) + 7;
 	char *newName = malloc(sizeof(char)*nameLen);
-    printf("setPar cp2 \n");
     int namespaceLen = 0;
     char *newNamespace =  NULL;
     if(namespacei>0) {
@@ -521,14 +519,11 @@ void setParameter(sxnc_parameter **parameters, int * parLen, int * parCap, const
         newNamespace = malloc(sizeof(char)*namespaceLen);
         snprintf(newNamespace, namespaceLen, "%s", name);
     }
-    printf("setPar cp1:%i \n", namespaceLen);
 
-    printf("setPar cp3 \n");
+
 	snprintf(newName, nameLen, "%s%s", "param:", name);
-    printf("setPar cp4 \n");
 
 	(*parameters)[(*parLen) - 1].name = (char*)newName;
-    printf("setPar cp5 \n");
     if(namespacei>0) {
         (*parameters)[(*parLen) - 1].namespacei = (char *) newNamespace;
     }
