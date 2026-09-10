@@ -58,9 +58,8 @@ public class XQueryExecutable {
      */
 
     public ItemType getResultItemType() {
-        net.sf.saxon.type.ItemType it =
-                exp.getExpression().getItemType();
-        return new ConstructedItemType(it, processor);
+        net.sf.saxon.type.ItemType it = exp.getExpression().getItemType();
+        return new ConstructedItemType(it, processor.getUnderlyingConfiguration());
     }
 
     /**

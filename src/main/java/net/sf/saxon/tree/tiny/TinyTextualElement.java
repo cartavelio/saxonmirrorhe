@@ -256,6 +256,11 @@ public class TinyTextualElement extends TinyElementImpl {
                     getParent().equals(((TinyTextualElementText)other).getParent());
         }
 
+        @Override
+        public int hashCode() {
+            return getParent().hashCode() ^ 0x01010101;
+        }
+
         /**
          * Get a character string that uniquely identifies this node
          */

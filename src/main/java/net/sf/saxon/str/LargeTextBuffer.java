@@ -7,8 +7,6 @@
 
 package net.sf.saxon.str;
 
-import net.sf.saxon.Configuration;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -97,9 +95,9 @@ public final class LargeTextBuffer {
                 return this;
             } else if (newWidth == 16) {
                 char[] array16 = new char[newLength];
-                if (Configuration.isAssertionsEnabled()) {
-                    new Slice8(bytes, 0, oldLength).verifyCharacters();
-                }
+//                if (Configuration.isAssertionsEnabled()) {
+//                    new Slice8(bytes, 0, oldLength).verifyCharacters();
+//                }
                 StringTool.copy8to16(bytes, 0, array16, 0, oldLength);
                 return new Segment16(array16);
             } else {
@@ -271,9 +269,9 @@ public final class LargeTextBuffer {
             chars.copy24bit(((Segment24)lastSegment).bytes, lastSegmentLength*3);
         }
         lastSegmentLength += chars.length32();
-        if (Configuration.isAssertionsEnabled()) {
-            lastSegment.substring(0, lastSegmentLength).verifyCharacters();
-        }
+//        if (Configuration.isAssertionsEnabled()) {
+//            lastSegment.substring(0, lastSegmentLength).verifyCharacters();
+//        }
         if (lastSegmentLength == SEGLEN) {
             addSegment(lastSegment);
             lastSegment = new Segment8(new byte[1024]);

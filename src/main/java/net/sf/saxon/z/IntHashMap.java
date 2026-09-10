@@ -256,7 +256,7 @@ public class IntHashMap<T> {
      * @return an iterator over the integer keys in the map
      */
 
-    @CSharpReplaceBody(code="return new net.sf.saxon.z.IntHashMap<T>.IntHashMapKeyIterator<T>(this);")
+    @CSharpReplaceBody(code="return new Saxon.Hej.z.IntHashMap<T>.IntHashMapKeyIterator<T>(this);")
     public IntIterator keyIterator() {
         return new IntHashMapKeyIterator<T>(this);
     }
@@ -267,7 +267,7 @@ public class IntHashMap<T> {
      * @return an iterator over the values in the map
      */
 
-    @CSharpReplaceBody(code = "return new net.sf.saxon.z.IntHashMap<T>.IntHashMapValueIterator<T>(this);")
+    @CSharpReplaceBody(code = "return new Saxon.Hej.z.IntHashMap<T>.IntHashMapValueIterator<T>(this);")
     public Iterator<T> valueIterator() {
         return new IntHashMapValueIterator<T>(this);
     }
@@ -277,7 +277,7 @@ public class IntHashMap<T> {
      * @return the set of values as an iterable collection
      */
 
-    @CSharpReplaceBody(code = "return new net.sf.saxon.z.IntHashMap<T>.IntHashMapValueSet<T>(this);")
+    @CSharpReplaceBody(code = "return new Saxon.Hej.z.IntHashMap<T>.IntHashMapValueSet<T>(this);")
     public Iterable<T> valueSet() {
         return this::valueIterator;
     }
@@ -397,7 +397,7 @@ public class IntHashMap<T> {
      * @return the set of integer keys present in this IntHashSet
      */
 
-    @CSharpReplaceBody(code="return new net.sf.saxon.z.IntHashMap<T>.IntHashMapKeySet<T>(this);")
+    @CSharpReplaceBody(code="return new Saxon.Hej.z.IntHashMap<T>.IntHashMapKeySet<T>(this);")
     public IntSet keySet() {
         return new IntHashMapKeySet<T>(this);
     }
@@ -459,7 +459,7 @@ public class IntHashMap<T> {
         }
 
         @Override
-        @CSharpReplaceBody(code="return new net.sf.saxon.z.IntHashMap<U>.IntHashMapKeyIterator<U>(map);")
+        @CSharpReplaceBody(code="return new Saxon.Hej.z.IntHashMap<U>.IntHashMapKeyIterator<U>(map);")
         public IntIterator iterator() {
             return new IntHashMapKeyIterator<U>(map);
         }

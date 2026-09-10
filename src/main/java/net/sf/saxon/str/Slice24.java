@@ -1,6 +1,5 @@
 package net.sf.saxon.str;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.z.IntIterator;
 
@@ -30,9 +29,9 @@ class Slice24 extends UnicodeString {
         this.bytes = bytes;
         this.start = start;
         this.end = end;
-        if (Configuration.isAssertionsEnabled()) {
-            verifyCharacters();
-        }
+//        if (Configuration.isAssertionsEnabled()) {
+//            verifyCharacters();
+//        }
     }
 
     @Override

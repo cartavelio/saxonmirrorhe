@@ -191,7 +191,7 @@ public class DocumentBuilder {
      * Set the whitespace stripping policy applied when loading a document
      * using this <code>DocumentBuilder</code>.
      *
-     * <p>(New rule in 9.8:) If DTD or schema validation is applied, the only permitted setting
+     * <p>If DTD or schema validation is applied, the only permitted setting
      * is {@link WhitespaceStrippingPolicy#IGNORABLE}. Any other value results
      * in an exception from the {@link #build(File)} method</p>
      *

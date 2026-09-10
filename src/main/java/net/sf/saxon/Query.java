@@ -52,7 +52,7 @@ import java.util.Set;
 
 public class Query {
 
-    protected Processor processor;
+    private Processor processor;
     protected Configuration config;
     protected boolean showTime = false;
     protected int repeat = 1;
@@ -110,7 +110,7 @@ public class Query {
      * @param options the CommandLineOptions in which the recognized options are to be registered.
      */
 
-    public void setPermittedOptions(CommandLineOptions options) {
+    void setPermittedOptions(CommandLineOptions options) {
         options.addRecognizedOption("backup", CommandLineOptions.TYPE_BOOLEAN,
                                     "Save updated documents before overwriting");
         options.addRecognizedOption("catalog", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
@@ -406,11 +406,10 @@ public class Query {
             processSource(sourceInput, exp, evaluator);
 
             if (sourceJsonFileName != null) {
-                JsonBuilder builder = processor.newJsonBuilder();
                 try {
-                    XdmValue jsonTree = builder.parseJson(
-                            new BufferedReader(
-                                    new InputStreamReader(new FileInputStream(sourceJsonFileName), StandardCharsets.UTF_8)));
+                    Reader jsonReader = new BufferedReader(
+                                    new InputStreamReader(new FileInputStream(sourceJsonFileName), StandardCharsets.UTF_8));
+                    XdmValue jsonTree = parseJson(processor, jsonReader);
                     if (!jsonTree.isEmpty()) {
                         evaluator.setContextItem(jsonTree.itemAt(0));
                     }
@@ -505,6 +504,12 @@ public class Query {
         }
     }
 
+    @CSharpModifiers(code={"internal", "static"})
+    @CSharpReplaceBody(code="return new Saxon.Api.JsonBuilder(processor.getUnderlyingConfiguration()).parseJson(jsonReader);")
+    static XdmValue parseJson(Processor processor, Reader jsonReader) throws SaxonApiException {
+        return processor.newJsonBuilder().parseJson(jsonReader);
+    }
+
     /**
      * Customisation hook called immediately after the Configuration
      * object is instantiated. The intended purpose of this hook is to allow
@@ -529,7 +534,7 @@ public class Query {
      * @throws TransformerException if failures occur. Note, the method may also invoke System.exit().
      */
 
-    protected void parseOptions(CommandLineOptions options)
+    void parseOptions(CommandLineOptions options)
             throws TransformerException {
 
         // Apply those options which simply update the Configuration
@@ -757,6 +762,7 @@ public class Query {
      */
 
     @SuppressWarnings("EmptyMethod")
+    @CSharpModifiers(code={"internal"})
     protected void applyLocalOptions(CommandLineOptions options, Configuration config) {
         // no action: provided for subclasses to override
     }

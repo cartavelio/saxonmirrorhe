@@ -1,6 +1,7 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.Objects;
@@ -175,6 +176,7 @@ public class StringView extends UnicodeString {
     }
 
     @Override
+    @CSharpReplaceBody(code="return (baseUnicodeString != null) ? baseUnicodeString.GetHashCode() : base.GetHashCode();")
     public int hashCode() {
         return baseString.hashCode();
     }

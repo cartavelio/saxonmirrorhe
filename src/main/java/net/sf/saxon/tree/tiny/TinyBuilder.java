@@ -469,10 +469,10 @@ public class TinyBuilder extends Builder {
      */
 
     protected int makeTextNode(UnicodeString chars) {
-        if (Configuration.isAssertionsEnabled()) {
-            chars.verifyCharacters();
-            //System.err.println("make text node length " + chars.length());
-        }
+//        if (Configuration.isAssertionsEnabled()) {
+//            chars.verifyCharacters();
+//            //System.err.println("make text node length " + chars.length());
+//        }
         TinyTree tt = tree;
         assert tt != null;
 

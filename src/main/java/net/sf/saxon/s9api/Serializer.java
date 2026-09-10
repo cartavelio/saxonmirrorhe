@@ -78,7 +78,9 @@ public class Serializer extends AbstractDestination {
         //#if CSHARP==false
         final Property[] propertyValues = Property.values();
         //#endif
-        CSharp.emitCode("var propertyValues = net.sf.saxon.s9api.Serializer.Property.values();");
+        //#if CSHARP==true
+        CSharp.emitCode("var propertyValues = Saxon.Hej.s9api.Serializer.Property.values();");
+        //#endif
         for (Property p : propertyValues) {
             standardProperties.put(p.toString(), p);
         }
@@ -274,6 +276,7 @@ public class Serializer extends AbstractDestination {
          * @return the name of the serialization property as a QName in Clark notation, {uri}local
          */
 
+        @CSharpModifiers(code={"public", "override"})
         public String toString() {
             return name;
         }

@@ -152,12 +152,6 @@ public class BMPString extends UnicodeString {
         return baseString.hashCode();
     }
 
-
-    @Override
-    public UnicodeString economize() {
-        return this;
-    }
-
     @Override
     public String toString() {
         return baseString;

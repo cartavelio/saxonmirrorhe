@@ -83,6 +83,7 @@ public class PullSource implements ActiveSource {
         if (xInclude) {
             throw new XPathException("XInclude processing is not supported with a pull parser");
         }
+        // TODO: Sender has already put a validator on the pipeline...?
         receiver = Sender.makeValidator(receiver, getSystemId(), options);
 
         PullProvider provider = getPullProvider();

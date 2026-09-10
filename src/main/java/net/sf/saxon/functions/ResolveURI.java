@@ -173,32 +173,34 @@ public class ResolveURI extends SystemFunction {
 
     /*@NotNull*/
     public static String tryToExpand(/*@Nullable*/ String systemId) {
-        if (systemId == null) {
-            systemId = "";
+        if (systemId == null || systemId.isEmpty()) {
+            return resolveAgainstCurrentDirectory("");
         }
         try {
             new URL(systemId);
             return systemId;   // all is well
         } catch (MalformedURLException err) {
-            String dir;
-            try {
-                dir = System.getProperty("user.dir");
-            } catch (Exception geterr) {
-                // this doesn't work when running an applet
-                return systemId;
-            }
-            if (!(dir.endsWith("/") || systemId.startsWith("/"))) {
-                dir = dir + '/';
-            }
+            return resolveAgainstCurrentDirectory(systemId);
+        }
+    }
 
-            try {
-                URI currentDirectoryURI = new File(dir).toURI();
-                URI baseURI = currentDirectoryURI.resolve(systemId);
-                return baseURI.toString();
-            } catch (Exception e) {
-                return systemId;
-            }
-
+    private static String resolveAgainstCurrentDirectory(String systemId) {
+        String dir;
+        try {
+            dir = System.getProperty("user.dir");
+        } catch (Exception geterr) {
+            // this doesn't work when running an applet
+            return systemId;
+        }
+        if (!(dir.endsWith("/") || systemId.startsWith("/"))) {
+            dir = dir + '/';
+        }
+        try {
+            URI currentDirectoryURI = new File(dir).toURI();
+            URI baseURI = currentDirectoryURI.resolve(systemId);
+            return baseURI.toString();
+        } catch (Exception e) {
+            return systemId;
         }
     }
 

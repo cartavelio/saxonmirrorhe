@@ -213,7 +213,7 @@ public class QueryModule implements StaticContext {
      * Used also by saxon:import-query in XSLT.
      * <p>This method is intended for internal use only.</p>
      *
-     * @param baseURI      The base URI and location URI of the module
+     * @param baseURI      The base URI and location URI of the module. Must not be null.
      * @param executable   The Executable
      * @param importer     The importing query module (used to check for cycles). This is null
      *                     when loading a query module from XSLT.
@@ -227,6 +227,7 @@ public class QueryModule implements StaticContext {
     public static QueryModule makeQueryModule(
             String baseURI, /*@NotNull*/ Executable executable, /*@NotNull*/ QueryModule importer,
             String query, String namespaceURI) throws XPathException {
+        Objects.requireNonNull(baseURI, "Base URI of XQuery module must not be null");
         Configuration config = executable.getConfiguration();
         QueryModule module = new QueryModule(config, importer);
         try {
@@ -831,8 +832,24 @@ public class QueryModule implements StaticContext {
      * it includes both locally declared and imported variables. Blame history.
      */
 
-    public Iterable<GlobalVariable> getGlobalVariables() {
+    public Iterable<GlobalVariable> getImportedGlobalVariables() {
         return libraryVariables.values();
+    }
+
+    /**
+     * Get all global variables declared anywhere in the query
+     *
+     * @return a collection of global variables.
+     */
+
+    public Iterable<GlobalVariable> getAllGlobalVariables() {
+        if (isMainModule()) {
+            List<GlobalVariable> allVars = new ArrayList<>(libraryVariables.values());
+            allVars.addAll(variables.values());
+            return allVars;
+        } else {
+            return getTopLevelModule().getAllGlobalVariables();
+        }
     }
 
     /**

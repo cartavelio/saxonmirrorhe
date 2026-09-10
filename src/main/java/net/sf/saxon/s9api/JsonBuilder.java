@@ -1,5 +1,6 @@
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.UnparsedTextFunction;
@@ -25,11 +26,11 @@ import java.util.Map;
 
 public class JsonBuilder {
 
-    private Processor processor;
+    private Configuration config;
     private boolean liberal;
 
-    protected JsonBuilder(Processor processor) {
-        this.processor = processor;
+    protected JsonBuilder(Configuration config) {
+        this.config = config;
     }
 
     /**
@@ -80,7 +81,7 @@ public class JsonBuilder {
 
     public XdmValue parseJson(Reader jsonReader) throws SaxonApiException {
         try {
-            XPathContext context = new Controller(processor.getUnderlyingConfiguration()).newXPathContext();
+            XPathContext context = new Controller(config).newXPathContext();
             IntPredicateProxy checker = IntSetPredicate.ALWAYS_TRUE;
             UnicodeString content = UnparsedTextFunction.readFile(checker, jsonReader);
             Map<String, Sequence> options = new HashMap<>();

@@ -55,7 +55,8 @@ public final class EmptyUnicodeString extends UnicodeString {
         return other;
     }
 
-    public void copy8bit(byte[] target, int offset) {
+    @Override
+    void copy8bit(byte[] target, int offset) {
         // no action
     }
 

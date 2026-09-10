@@ -98,9 +98,8 @@ public class XPathExecutable {
      */
 
     public ItemType getResultItemType() {
-        net.sf.saxon.type.ItemType it =
-                exp.getInternalExpression().getItemType();
-        return new ConstructedItemType(it, processor);
+        net.sf.saxon.type.ItemType it = exp.getInternalExpression().getItemType();
+        return new ConstructedItemType(it, processor.getUnderlyingConfiguration());
     }
 
     /**
@@ -156,7 +155,7 @@ public class XPathExecutable {
         if (var == null) {
             return null;
         } else {
-            return new ConstructedItemType(var.getRequiredType().getPrimaryType(), processor);
+            return new ConstructedItemType(var.getRequiredType().getPrimaryType(), processor.getUnderlyingConfiguration());
         }
     }
 
