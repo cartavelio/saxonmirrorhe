@@ -44,6 +44,7 @@
 #include "XQueryProcessor.h"
 #include "Xslt30Processor.h"
 #include "XsltExecutable.h"
+#include "CythonUserFunctionHandler.h"
 //#include "com_saxonica_functions_extfn_PhpCall.h"
 //#include "com_saxonica_functions_extfn_PhpCall_PhpFunctionCall.h"
 //#define MEM_DEBUG
@@ -120,7 +121,7 @@ struct UserFunctionDescriptor{
 
 typedef XdmValue *(*sxnExtensionFunction)(int, XdmValue **);
 
-extern "C" void * c_nativeCall(char * functionName, void * func, int numOfArguments, void ** arguments);
+extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int numOfArguments, void ** arguments);
 
 
 
@@ -661,6 +662,8 @@ public:
 
   void registerUserFunction(const char * ns, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON);
 
+  void registerUserFunctionWithVoid(void * procPtr, const char * ns, const char * functionName, void * func, const char * signatureJSON);
+
   //! Add a native method.
   /**
    *
@@ -764,6 +767,8 @@ public:
     }
   }
 
+    static XdmValue *makeXdmValueFromRef(int64_t valueRef);
+
 
   //! Internal method for diagnostics
   void createHeapDump(bool live);
@@ -800,8 +805,6 @@ protected:
 
 
 
-
-
   SaxonApiException
       *exception; /*!< SaxonApiException object to capture exceptions thrown
                      from the underlying Java code via JNI */
@@ -825,8 +828,6 @@ private:
   createParameterJArray2(std::map<std::string, XdmValue *> parameters);
 
   static int64_t createJArray(XdmValue **values, int length);
-
-  static XdmValue *makeXdmValueFromRef(int64_t valueRef);
 
   static XdmItem *makeXdmItemFromRef(int64_t valueRef);
 

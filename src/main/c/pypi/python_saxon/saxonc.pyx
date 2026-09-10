@@ -183,6 +183,7 @@ cdef str make_py_str(const char * c_value, encoding='utf-8'):
 
 _proc_count = 0
 
+
 cdef class PySaxonProcessor:
     """A PySaxonProcessor acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
     This class is itself the context that needs to be managed (i.e. allocation & release)
@@ -475,6 +476,27 @@ cdef class PySaxonProcessor:
         """
         return PyXdmValue(self)
 
+    def __convert_c_obj(self,  value):
+        """
+        Method for internal use only. Used for passing a C++ Xdm object and converting it to a wrapped Python object
+        Args:
+              value ():   C++ Xdm object cast to Python object
+
+        Returns:
+            PyXdmValue: wrapped Xdm object in Python
+        """
+        cdef void *void_ptr = <void *> value
+        cdef  saxoncClasses.XdmValue *value_ptr = <saxoncClasses.XdmValue *> void_ptr
+
+
+        if value_ptr is NULL:
+            return None
+        if value_ptr.getType() == XdmType.XDM_VALUE:
+            return PyXdmValue(self)._wrap_value(value_ptr)
+        else:
+            return self.wrap_item(<saxoncClasses.XdmItem*>value_ptr)
+        
+
     cdef wrap_value(self, saxoncClasses.XdmValue *value_ptr):
         """
         Creates a new PyXdm* instance, wrapping the C++ XdmValue referenced by
@@ -585,6 +607,8 @@ cdef class PySaxonProcessor:
         atomic_value.derivedaptr = atomic_value.derivedptr = atomic_value.thisvptr = value_ptr
         value_ptr.incrementRefCount()
 
+        print("wrap_atomic_value called!!")
+
         return atomic_value
 
     def make_string_value(self, value, encoding = None):
@@ -682,6 +706,34 @@ cdef class PySaxonProcessor:
         py_value_string = str_.encode(encoding) if str_ is not None else None
         cdef char * c_str_ = py_value_string if str_ is not None else ""
         return self.wrap_atomic_value(self.thisptr.makeQNameValue(c_str_))
+
+    def register_user_function(self, ns, function_name, func, signatureJSON, encoding=None):
+
+        print("register user function!!")
+        '''PyObject_CallNoArgs(func)'''
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        cdef char * c_signatureJSON_str_ = NULL
+        cdef char * c_function_name_str_ = NULL
+        cdef char * c_ns_str_ = NULL
+        cdef void *ptr
+        cdef void *proc_ptr
+        py_function_name =  function_name.encode(encoding) if function_name is not None else None
+        py_signatureJSON_str = signatureJSON.encode(encoding) if signatureJSON is not None else None
+        py_ns_str = ns.encode(encoding) if ns is not None else None
+
+        if function_name is not None:
+            c_function_name_str_ = py_function_name
+
+        if signatureJSON is not None:
+            c_signatureJSON_str_ = py_signatureJSON_str
+
+        if ns is not None:
+            c_ns_str_ = py_ns_str
+
+        ptr = <void *>func
+        proc_ptr = <void *>self
+        self.thisptr.registerUserFunctionWithVoid(proc_ptr, c_ns_str_, c_function_name_str_, ptr, c_signatureJSON_str_)
 
     def make_atomic_value(self, value_type, value, encoding=None):
         """
@@ -3591,6 +3643,7 @@ cdef class PyXPathProcessor:
         """
         return make_py_str(self.thisxpptr.getErrorCode())
 
+
 cdef class PySchemaValidator:
     """A PySchemaValidator represents a factory for validating instance documents against a schema."""
 
@@ -4067,6 +4120,13 @@ cdef class PyXdmValue:
         """
         return self.thisvptr
 
+    def __get_underlying_int_value(self):
+        """
+        Return the underlying SaxonC Object Handle for this C++ object.
+        :return:
+        """
+        return self.thisvptr.getUnderlyingValue()
+    
     cdef saxoncClasses.XdmValue * _borrow_underlying_value(self):
         self.thisvptr.incrementRefCount()
         return self.thisvptr

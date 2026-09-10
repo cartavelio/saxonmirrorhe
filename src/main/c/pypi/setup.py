@@ -51,11 +51,13 @@ ext_modules = [Extension(
                             "@@location@@Saxon.C.API/XPathProcessor.cpp",
                             "@@location@@Saxon.C.API/SchemaValidator.cpp",
                             "@@location@@Saxon.C.API/CythonExceptionHandler.cpp",
+                            "@@location@@Saxon.C.API/CythonUserFunctionHandler.cpp",
                             "@@location@@Saxon.C.API/SaxonApiException.cpp",],
                         language="c++",
                         include_dirs = ['@@location@@Saxon.C.API/graalvm',],
                          extra_link_args = extra_link_args,
-                       libraries=['@@libpath@@saxon-@@edition@@c-@@VERSION@@']
+                       libraries=['@@libpath@@saxon-@@edition@@c-@@VERSION@@'],
+                        define_macros=[("PYTHON_SAXONC_API", None)],
                         ),
                 ]
 setup(

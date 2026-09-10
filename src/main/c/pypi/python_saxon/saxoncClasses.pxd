@@ -7,6 +7,9 @@ from libcpp.map cimport map
 cdef extern from "@@location@@Saxon.C.API/CythonExceptionHandler.h":
   cdef void raise_py_error()
 
+cdef extern from "@@location@@Saxon.C.API/CythonUserFunctionHandler.h":
+  cdef void userFunctionCall(object func)
+
 
 cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
@@ -24,7 +27,9 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void setcwd(char* cwd)
         const char* getcwd()
 
-        void registerUserFunction(const char * ns, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON)
+        void registerUserFunction(const char * ns, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON) except +raise_py_error
+
+        void registerUserFunctionWithVoid(void * proc_ptr, const char * ns, const char * functionName, void * func, const char * signatureJSON) except +raise_py_error
 
         void attachCurrentThread() except +raise_py_error
 
@@ -586,6 +591,8 @@ cdef extern from "@@location@@Saxon.C.API/XdmValue.h":
         XdmItem * itemAt(int)
 
         int size()
+
+        long getUnderlyingValue()
 
         const char * toString()  except +raise_py_error
 

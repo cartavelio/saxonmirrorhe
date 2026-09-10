@@ -76,8 +76,28 @@ void SaxonProcessor::getInfo() {
 
 #endif
 
-extern "C" void * c_nativeCall(char * functionName, void * func, int numOfArguments, void ** arguments) {
-    //fprintf(stdout, "We are in a c function\n");
+extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int numOfArguments, void ** arguments) {
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+        fprintf(stdout, "We are in a c function\n");
+    }
+
+    //void ** arguments1 = (void **)malloc(sizeof(void *) * 1);
+    XdmValue ** arguments1 = new XdmValue*[numOfArguments];
+    for(int i =0; i< numOfArguments; i++) {
+        arguments1[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)arguments[i]);
+        //new XdmValue((int64_t)arguments[i]);
+    }
+    if(func == nullptr) {
+        return nullptr;
+    }
+
+#if defined PYTHON_SAXONC_API
+    fprintf(stdout, "We are in a c function preprocessor directive\n");
+    fflush(stdout);
+    fflush(stdout);
+    return python_nativeFunctionCall(functionName, proc, func, numOfArguments, arguments1);
+#else
+
     fprintf(stdout, "We are in a c function name= %s\n", functionName);
 
     fprintf(stdout, "We are in a c function pointer= %p\n", func);
@@ -85,39 +105,15 @@ extern "C" void * c_nativeCall(char * functionName, void * func, int numOfArgume
 
     fflush(stdout);
 
-    //void ** arguments1 = (void **)malloc(sizeof(void *) * 1);
-    XdmValue ** arguments1 = new XdmValue*[numOfArguments];
-    for(int i =0; i< numOfArguments; i++) {
-        arguments1[i] = new XdmValue((int64_t)arguments[i]);
-    }
+
 
     XdmValue * result = func1(numOfArguments, arguments1);   // call of the user function
     return (void *)result->getUnderlyingValue();
-
-}
-
-void * c_nativeCall1(char * functionName, void * func, int numOfArguments, void ** arguments) {
-    //fprintf(stdout, "We are in a c function\n");
-    fprintf(stdout, "We are in a c function name= %s\n", functionName);
-
-    fprintf(stdout, "We are in a c function pointer= %p\n", func);
-    sxnExtensionFunction func1 = sxnExtensionFunction(func);
-
-    fflush(stdout);
-
-    //void ** arguments1 = (void **)malloc(sizeof(void *) * 1);
-    XdmValue ** arguments1 = new XdmValue*[numOfArguments];
-    for(int i =0; i< numOfArguments; i++) {
-        arguments1[i] = new XdmValue((int64_t)arguments[i]);
-    }
-
-    XdmValue * result = func1(numOfArguments, arguments1);   // call of the user function
-    return (void *)result->getUnderlyingValue();
+#endif
 
 }
 
 
-  // utility method  with input signature of the userFunction and the params pointer
 
 // jobject cpp;
 const char *failure;
@@ -399,25 +395,25 @@ SaxonProcessor::~SaxonProcessor() {
   // exceptionClear();
 }
 
-void SaxonProcessor::registerUserFunction(const char * ns1, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signature)
+void SaxonProcessor::registerUserFunctionWithVoid(void * python_procPtr, const char * ns1, const char * functionName, void * func, const char * signature)
 {
+ fprintf(stderr, "We are in a C++ registerUserFunctionForPython\n");
 
-    UserFunctionDescriptor * userFunctionDescriptor1 = new UserFunctionDescriptor;
-    userFunctionDescriptor1->functionName = functionName;
-    //userFunctionDescriptor1->func = func;
-    userFunctionDescriptor1->ns = ns1;
-//    userFunctionDescriptor1->returnType = returnType;
-    userFunctionDescriptor1->arguments = signature;
-    userFunctionDescriptor1->argumentTypes = nullptr;
+
+    fflush(stdout);
+
+//    c_userFunctionCall1(func);
 
     //func(nullptr);
+    if(func != nullptr) {
+        fprintf(stderr, "We are in a C++ registerUserFunction pointer= %p\n", func);
+        fprintf(stderr, "We are in a C++ registerUserFunction pointer= %p\n", (void *)func);
+    }
 
-    fprintf(stdout, "We are in a C++ registerUserFunction pointer= %p\n", func);
-    fprintf(stdout, "We are in a C++ registerUserFunction pointer= %p\n", (void *)func);
+    fflush(stdout);
 
 
-    userFunctionRegister[functionName] =userFunctionDescriptor1;
-
+    //userFunctionRegister[functionName] =userFunctionDescriptor1;
     XdmValue * signatureValue = parseJsonFromString(signature);
 
     if(signatureValue == nullptr) {
@@ -425,16 +421,23 @@ void SaxonProcessor::registerUserFunction(const char * ns1, const char * functio
         return;
     }
 
+    if(functionName == nullptr) {
+        throw new SaxonApiException("User Function name is NULL");
+        return;
+    }
+
     allocFn alloc = operator new;
 
-
     long status = j_registerFunctionDefinition(SaxonProcessor::sxn_environ->thread,(void *)procRef, (char *) ns1, (char *)functionName,
-                                               (void *)signatureValue->getUnderlyingValue(), (void *) func, (void *) alloc);
+                                               (void *)signatureValue->getUnderlyingValue(), (void *)python_procPtr, (void *) func, (void *) alloc);
+
 
     if (status == SXN_EXCEPTION) {
-
+              std::cerr<<"We are in a C++ registerUserFunction F"<<std::endl;
       throw SaxonApiException();
     }
+
+    std::cerr<<"We are in a C++ registerUserFunction cp1"<<std::endl;
 
     XdmValue * argValue = nullptr;
     XdmValue * returnValue = nullptr;
@@ -444,27 +447,49 @@ void SaxonProcessor::registerUserFunction(const char * ns1, const char * functio
         XdmMap *xdmMap = (XdmMap *) item;
         XdmValue *signatureMap = xdmMap->get(functionName);
 
+        if(signatureMap == nullptr) {
+              std::cerr<<"We are in a C++ registerUserFunction K"<<std::endl;
+              throw SaxonApiException();
+        }
+
 
         int64_t paramValues = j_getArgumentTypesFromSignature(SaxonProcessor::sxn_environ->thread,
                                                               (void *) signatureMap->getUnderlyingValue());
-
+           std::cerr<<"We are in a C++ registerUserFunction cp2"<<std::endl;
         argValue = new XdmArray(paramValues);
-        userFunctionDescriptor1->argumentTypes = argValue;
+      //  userFunctionDescriptor1->argumentTypes = argValue;
 
 
         int64_t returnIntValue = j_getReturnTypeFromSignature(SaxonProcessor::sxn_environ->thread,
                                                               (void *) signatureMap->getUnderlyingValue());
+
+    std::cerr<<"We are in a C++ registerUserFunction cp3"<<std::endl;
 
         if (returnIntValue == SXN_EXCEPTION) {
 
             throw SaxonApiException();
         } else {
             returnValue = new XdmValue(returnIntValue, false);
-            userFunctionDescriptor1->returnType = returnValue;
+           // userFunctionDescriptor1->returnType = returnValue;
 
         }
 
     }
+
+}
+
+void SaxonProcessor::registerUserFunction(const char * ns1, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signature)
+{
+
+    /*UserFunctionDescriptor * userFunctionDescriptor1 = new UserFunctionDescriptor;
+    userFunctionDescriptor1->functionName = functionName;
+    //userFunctionDescriptor1->func = func;
+    userFunctionDescriptor1->ns = ns1;
+//    userFunctionDescriptor1->returnType = returnType;
+    userFunctionDescriptor1->arguments = signature;
+    userFunctionDescriptor1->argumentTypes = nullptr; */
+
+    registerUserFunctionWithVoid(nullptr, ns1, functionName, (void *)func,signature);
 
 }
 
@@ -903,14 +928,17 @@ void SaxonProcessor::setCatalogFiles(const char **catalogFiles, int length) {
 
 XdmValue *SaxonProcessor::parseJsonFromString(const char *source,
                                               const char *encoding) {
-
+  std::cerr<<"We are in a C++ parseJsonFromString cp0"<<std::endl;
   if (source == nullptr) {
     throw SaxonApiException("JSON source string is null");
   }
 
   applyConfigurationProperties();
+  std::cerr<<"We are in a C++ parseJsonFromString cp1"<<std::endl;
   int64_t xdmValueRef = parseJsonString(sxn_environ->thread, (void *)procRef,
                                         (char *)source, (char *)encoding);
+
+    std::cerr<<"We are in a C++ parseJsonFromString cp2"<<std::endl;
   if (xdmValueRef >= 0) {
     XdmValue *value = new XdmValue(xdmValueRef);
 
@@ -1084,7 +1112,8 @@ XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str,
 XdmAtomicValue *SaxonProcessor::makeIntegerValue(int i) {
   SaxonProcessor::attachCurrentThread();
   // jobject obj = integerValue(*SaxonProcessor::sxn_environ, i);
-
+         fprintf(stderr, "In makeIntegerValue\n");
+             fflush(stdout);
   int64_t intValueRef = j_makeIntegerValue(sxn_environ->thread, i);
   XdmAtomicValue *value = new XdmAtomicValue(
       intValueRef, "Q{http://www.w3.org/2001/XMLSchema}integer");

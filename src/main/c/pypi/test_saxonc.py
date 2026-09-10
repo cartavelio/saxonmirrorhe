@@ -8,6 +8,7 @@ import sys
 '''pytest --data-dir=[path/data]  test_saxonc.py'''
 
 
+
 @pytest.fixture
 def saxonproc():
     return PySaxonProcessor()
@@ -1711,6 +1712,38 @@ def testMap2():
         avar = mmVar.get(3)
         assert avar is not None
         assert avar.head.integer_value == 4
+
+
+def user_function(value):
+    print("In python user function")
+    saxonproc = PySaxonProcessor()
+    print(value)
+    n_value  = value[0].head.integer_value + 2
+    return saxonproc.make_integer_value(n_value)
+
+
+def testUserFunction():
+    with PySaxonProcessor(license=True) as proc:
+        try:
+            proc.register_user_function("http://www.example.com", "myFunc", user_function, "{ \"myFunc\": {"
+                                                          "      \"as\": \"xs:integer?\","
+                                                          "      \"param\": ["
+                                                          "        \"xs:integer\""
+                                                          "      ],"
+                                                          "      \"arity\": [1]"
+                                                          "    }"
+                                                          "}")
+
+            xpath_processor = proc.new_xpath_processor()
+            xpath_processor.declare_namespace("dy", "http://www.example.com")
+            result = xpath_processor.evaluate_single("dy:myFunc(3)")
+
+            '''assert result is not None'''
+            assert result == 5
+        except Exception as err:
+            print(err)
+            assert False
+
 
 def testXdmArray(saxonproc):
 

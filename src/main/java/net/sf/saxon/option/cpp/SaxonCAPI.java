@@ -166,7 +166,7 @@ public class SaxonCAPI {
     }
 
     @CEntryPoint(name = "j_registerFunctionDefinition", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_registerFunctionDefinition(IsolateThread thread, ObjectHandle procRef, CCharPointer c_namespace, CCharPointer c_funcName, ObjectHandle signatureRef, CFunctionPointer func, AllocatorFn alloc) throws SaxonApiException {
+    public static long j_registerFunctionDefinition(IsolateThread thread, ObjectHandle procRef, CCharPointer c_namespace, CCharPointer c_funcName, ObjectHandle signatureRef, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc) throws SaxonApiException {
         if (SaxonCAPI.debug) {
             System.err.println("Java DEBUG en entered setLibrary!!");
         }
@@ -193,11 +193,11 @@ public class SaxonCAPI {
 
         }
 
-        return registerFunctionDefinition(processor, namespaceStr, funcName, signatureValue, func, alloc);
+        return registerFunctionDefinition(processor, namespaceStr, funcName, signatureValue, pythonProc, func, alloc);
 
     }
 
-    public static long registerFunctionDefinition(Processor processor, String namespaceStr, String funcName, XdmValue signatureValue, CFunctionPointer func, AllocatorFn alloc) throws SaxonApiException{
+    public static long registerFunctionDefinition(Processor processor, String namespaceStr, String funcName, XdmValue signatureValue, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc) throws SaxonApiException{
 
         QName funcQname = new QName(namespaceStr, funcName);
 
@@ -241,7 +241,7 @@ public class SaxonCAPI {
             }
         }
 
-        processor.registerExtensionFunction(new NativeCall(funcQname, sequenceTypes, returnSequenceType, func, alloc));
+        processor.registerExtensionFunction(new NativeCall(funcQname, sequenceTypes, returnSequenceType, pythonProc, func, alloc));
 
 //#endif
         return  SaxonCAPI.STATUS_OK;
@@ -1957,7 +1957,7 @@ public class SaxonCAPI {
 
 
         //#if EE==true || PE==true
-        SaxonCAPI.registerFunctionDefinition(processor, "http://www.example.com", "myFunc", signatureValue, null, null);
+        SaxonCAPI.registerFunctionDefinition(processor, "http://www.example.com", "myFunc", signatureValue, null, null, null);
         //#endif
         XPathCompiler xpath = processor.newXPathCompiler();
 
