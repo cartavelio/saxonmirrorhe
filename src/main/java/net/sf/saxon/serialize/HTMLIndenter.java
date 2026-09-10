@@ -201,17 +201,19 @@ public class HTMLIndenter extends ProxyReceiver {
 
     @Override
     public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
-        UnicodeString t = chars.tidy();
+        int withinSuppressed = level == 0 ? 0 : (propertyStack[level - 1] & IS_SUPPRESSED);
         if (inFormattedTag ||
+                withinSuppressed>0 ||
                 ReceiverOption.contains(properties, ReceiverOption.USE_NULL_MARKERS) ||
                 ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
             // don't split the text if in a tag such as <pre>, or if the text contains the result of
             // expanding a character map or was produced using disable-output-escaping
-            nextReceiver.characters(t, locationId, properties);
+            nextReceiver.characters(chars, locationId, properties);
         } else {
             // otherwise try to split long lines into multiple lines
+            UnicodeString t = chars.tidy();
             int lastNL = 0;
-            IntIterator iter = chars.codePoints();
+            IntIterator iter = t.codePoints();
             int i = 0;
             while (iter.hasNext()) {
                 int ch = iter.next();
