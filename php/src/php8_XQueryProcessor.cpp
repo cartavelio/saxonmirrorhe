@@ -215,7 +215,7 @@ PHP_METHOD(XQueryProcessor, setQueryFile) {
 }
 
 PHP_METHOD(XQueryProcessor, setQueryBaseURI) {
-  char *base;
+  char *base = nullptr;
   size_t len1;
   XQueryProcessor *xqueryProcessor;
 

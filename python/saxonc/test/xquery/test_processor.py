@@ -1,5 +1,6 @@
 import pytest
 import saxon_import
+import urllib.parse
 
 saxonc = saxon_import.import_star(globals())
 from pathlib import Path
@@ -21,16 +22,16 @@ class TestXQueryProcessor:
         return self.saxon_processor.new_xquery_processor()
 
     def test_static_base_uri_defaults_to_cwd(self, processor):
-        expected = "%s/" % Path.cwd().as_uri()
+        expected = urllib.parse.urlsplit("%s/" % Path.cwd().as_uri())
         processor.set_query_content("static-base-uri()")
-        actual = str(processor.run_query_to_value())
+        actual = urllib.parse.urlsplit(str(processor.run_query_to_value()))
         assert actual == expected
 
     def test_set_static_base_uri(self, processor, data_dir):
-        expected = Path(data_dir).joinpath("trax/xml").as_uri()
-        processor.set_query_base_uri(expected)
+        expected = urllib.parse.urlsplit(Path(data_dir).joinpath("trax/xml").as_uri())
+        processor.set_query_base_uri(Path(data_dir).joinpath("trax/xml").as_uri())
         processor.set_query_content("static-base-uri()")
-        actual = str(processor.run_query_to_value())
+        actual = urllib.parse.urlsplit(str(processor.run_query_to_value()))
         assert actual == expected
 
     def test_collection_resolves_against_base_uri(self, processor, data_dir):

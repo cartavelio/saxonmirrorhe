@@ -575,7 +575,7 @@ PHP_METHOD(XPathProcessor, setBaseURI) {
 
   XPathProcessor *xpathProcessor;
 
-  char *uriStr;
+  char *uriStr = nullptr;
   size_t len1;
 
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &uriStr, &len1) == FAILURE) {
@@ -587,11 +587,7 @@ PHP_METHOD(XPathProcessor, setBaseURI) {
                                 XtOffsetOf(xpathProcessor_object, std));
   xpathProcessor = obj->xpathProcessor;
   if (xpathProcessor != nullptr) {
-
-    if (uriStr != nullptr) {
-
-      xpathProcessor->setBaseURI(uriStr);
-    }
+    xpathProcessor->setBaseURI(uriStr);
   }
 }
 

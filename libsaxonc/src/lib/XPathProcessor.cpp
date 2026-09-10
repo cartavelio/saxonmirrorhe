@@ -331,7 +331,7 @@ void XPathProcessor::importSchemaNamespace(const char *uri) {
 void XPathProcessor::setBaseURI(const char *uriStr) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     saxon_error_t r = SAXON_ERROR_DEFAULT;
-    int64_t status = j_xp_setBaseURI(thread, (void *) cppXP,(char *) uriStr, &r);
+    j_xp_setBaseURI(thread, (void *) cppXP,(char *) uriStr, &r);
     if (xp_baseURI != nullptr) {
         operator delete(xp_baseURI);
         xp_baseURI = nullptr;

@@ -3470,9 +3470,12 @@ cdef class PyXQueryProcessor:
             base_uri (str): The static base URI; or None to indicate that no base URI is available
         """
         cdef const char * c_baseuri = NULL
-        py_base_string = base_uri.encode('UTF-8') if base_uri is not None else None
-        c_baseuri = py_base_string if base_uri is not None else ""
+        if base_uri is not None:
+            py_base_string = base_uri.encode("UTF-8")
+            c_baseuri = py_base_string
+
         self.thisxqptr.setQueryBaseURI(c_baseuri)
+
      @property
      def base_uri(self):
         """
@@ -3833,12 +3836,11 @@ cdef class PyXPathProcessor:
         Args:
             base_uri (str): the base output URI
         """
-        cdef char * c_uri
-        if base_uri is None:
-            c_uri = NULL
-        else:
+        cdef char * c_uri = NULL
+        if base_uri is not None:
             py_uri_string = base_uri.encode('UTF-8')
             c_uri = py_uri_string
+
         self.thisxpptr.setBaseURI(c_uri)
 
     @property

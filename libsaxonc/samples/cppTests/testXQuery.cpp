@@ -65,6 +65,56 @@ void testxQuery1(SaxonProcessor *processor, XQueryProcessor *queryProc,
   queryProc->clearProperties();
 }
 
+/*
+ * Test1:
+ */
+void testxQueryWithEmptyBaseURI(SaxonProcessor *processor, XQueryProcessor *queryProc,
+                 const std::string *const dataDir,
+                 sResultCount *sresult) {
+  cout << endl << "Test testxQueryWithEmptyBaseURI:" << endl;
+  queryProc->clearParameters();
+  queryProc->clearProperties();
+  queryProc->setProperty("s", CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
+  queryProc->setProperty("qs", "<out>{count(/out/person)}</out>");
+  queryProc->setQueryBaseURI(nullptr);
+
+  const char *result = nullptr;
+
+  try {
+    result = queryProc->runQueryToString();
+    cout << "Result :" << result << endl;
+    sresult->success++;
+    delete result;
+  } catch (SaxonApiException &e) {
+    sresult->failure++;
+    sresult->failureList.push_back("testxQueryWithEmptyBaseURI-1");
+    const char *emessage = e.getMessage();
+    if (emessage != nullptr) {
+      cerr << "Error: " << emessage << endl;
+    }
+  }
+
+  try {
+    queryProc->executeQueryToFile(nullptr, "catOutput.xml", nullptr);
+    if (CppTestUtils::exists("catOutput.xml")) {
+      cout << "The file catOutput.xml exists" << endl;
+      sresult->success++;
+      remove("catOutput.xml");
+    } else {
+      sresult->failure++;
+      sresult->failureList.push_back("testXQuery1-2");
+      cout << "The file catOutput.xml does not exist" << endl;
+    }
+  } catch (SaxonApiException &e) {
+    sresult->failure++;
+    sresult->failureList.push_back("testXQuery1-3");
+    cout << "Exception throw = " << e.what() << endl;
+  }
+
+  queryProc->clearParameters();
+  queryProc->clearProperties();
+}
+
 
 void testxQueryToString_OnEmptySequence(XQueryProcessor *queryProc,
                     sResultCount *sresult) {
@@ -513,6 +563,13 @@ int main(int argc, char *argv[]) {
        << "============================================================="
        << endl
        << endl;
+
+  testxQueryWithEmptyBaseURI(processor, query, &dataDir, sresult);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
 
   testxQueryError(query, sresult);
 

@@ -70,6 +70,7 @@ XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
   } else {
     cwdXQ = curr;
   }
+
 }
 
 XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
@@ -289,12 +290,22 @@ const char * XQueryProcessor::getcwd() {
   return cwdXQ.c_str();
 }
 
-void XQueryProcessor::setQueryBaseURI(const char *baseURI) {
-  setProperty("base", baseURI);
+void XQueryProcessor::setQueryBaseURI(const char *base) {
+
+  if (base == nullptr) {
+    baseURIState = BaseUriState::Null;
+    baseURI.clear();
+  } else {
+    baseURIState = BaseUriState::Value;
+    baseURI = base;
+  }
 }
 
 const char * XQueryProcessor::getQueryBaseURI() {
-  return getProperty("base");
+  if (baseURIState == BaseUriState::Unset || baseURIState == BaseUriState::Null) {
+    return nullptr;
+  }
+  return baseURI.c_str();
 }
 
 void XQueryProcessor::setUpdating(bool updating) {
@@ -320,6 +331,10 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
     addition += 1;
   }
 
+  if (baseURIState != BaseUriState::Unset) {
+    addition += 1;
+  }
+
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, addition);
 
@@ -327,6 +342,17 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
     std::string schemaOptionStr = "-use-schema:";
     addProcessorDataPair(thread, (void *)processorDataRef,
         (char *)schemaOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
+  }
+
+  if (baseURIState != BaseUriState::Unset) {
+
+    std::string baseStr = "base";
+    addProcessorPropertyPair(thread, (void *)processorDataRef,
+    (char *)baseStr.c_str(), ( baseURIState == BaseUriState::Null ? (char *)nullptr : (char *)baseURI.c_str()), &r);
 
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r);
@@ -361,6 +387,11 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
   if (schemaRef > SXN_UNSET) {
     addition += 1;
   }
+
+  if (baseURIState != BaseUriState::Unset) {
+    addition += 1;
+  }
+
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, addition);
@@ -374,6 +405,23 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r);
     }
+  }
+
+  if (baseURIState != BaseUriState::Unset) {
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "XQueryProcessor adding base to ProcessorData"  << std::endl;
+    }
+    std::string baseStr = "base";
+    addProcessorPropertyPair(thread, (void *)processorDataRef,
+        (char *)baseStr.c_str(), ( baseURIState == BaseUriState::Null ? (char *)nullptr : (char *)baseURI.c_str()), &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
+  }
+
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "XQueryProcessor cp0!!!"  << std::endl;
   }
 
   int64_t result = j_executeQueryToValue(thread, (void *)procRef,
@@ -408,6 +456,11 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
     addition += 1;
   }
 
+  if (baseURIState != BaseUriState::Unset) {
+    addition += 1;
+  }
+
+
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, addition);
@@ -417,6 +470,17 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
     std::string schemaOptionStr = "-use-schema:";
     addProcessorDataPair(thread, (void *)processorDataRef,
         (char *)schemaOptionStr.c_str(), (void *)schemaRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r);
+    }
+  }
+
+  if (baseURIState != BaseUriState::Unset) {
+
+    std::string baseStr = "base";
+    addProcessorPropertyPair(thread, (void *)processorDataRef,
+        (char *)baseStr.c_str(), ( baseURIState == BaseUriState::Null ? (char *)nullptr : (char *)baseURI.c_str()), &r);
 
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r);
