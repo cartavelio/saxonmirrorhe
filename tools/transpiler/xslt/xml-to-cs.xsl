@@ -264,6 +264,10 @@
          <xsl:text>#nullable {annotations/annotation[name/@identifier='CSharpNullable']//@value}{$NL}</xsl:text>
          <xsl:call-template name="indent"/>
       </xsl:if>
+      <xsl:if test="exists(annotations/annotation[name/@identifier='CSharpSuppressCompilerWarnings'])">
+         <xsl:text>#pragma warning disable {annotations/annotation[name/@identifier='CSharpSuppressCompilerWarnings']//@value}{$NL}</xsl:text>
+         <xsl:call-template name="indent"/>
+      </xsl:if>
       <xsl:if test="members/member[@nodeType='MethodDeclaration']/name/@identifier='computeHashCode'">
          <!-- Subclasses of Expression have a method computeHashCode(), called by hashCode() on the superclass,
               which computes the hash code and causes it to be cached. This means that the C# warning CS0659 indicating

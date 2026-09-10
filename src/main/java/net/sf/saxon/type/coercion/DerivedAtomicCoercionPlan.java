@@ -13,7 +13,11 @@ import net.sf.saxon.value.AtomicValue;
  */
 public class DerivedAtomicCoercionPlan extends AtomicCoercionPlan {
 
-    public static final DerivedAtomicCoercionPlan INSTANCE = new DerivedAtomicCoercionPlan();
+    private static final DerivedAtomicCoercionPlan INSTANCE = new DerivedAtomicCoercionPlan();
+
+    public static DerivedAtomicCoercionPlan getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {

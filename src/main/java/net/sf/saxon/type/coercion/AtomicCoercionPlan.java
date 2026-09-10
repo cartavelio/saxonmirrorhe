@@ -20,7 +20,11 @@ import net.sf.saxon.value.StringValue;
  */
 public class AtomicCoercionPlan extends CoercionPlan {
 
-    public final static AtomicCoercionPlan INSTANCE = new AtomicCoercionPlan();
+    private final static AtomicCoercionPlan INSTANCE = new AtomicCoercionPlan();
+
+    public static AtomicCoercionPlan getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * Apply the coercion rules (function conversion rules) to a value, given a required type.

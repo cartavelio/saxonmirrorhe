@@ -14,8 +14,11 @@ import net.sf.saxon.value.AtomicValue;
  */
 public final class QNameCoercionPlan extends AtomicCoercionPlan {
 
-    public final static QNameCoercionPlan INSTANCE = new QNameCoercionPlan();
+    private final static QNameCoercionPlan INSTANCE = new QNameCoercionPlan();
 
+    public static QNameCoercionPlan getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     protected ItemMappingFunction getUntypedAtomicPromoter(CoercionRequest request, UType atomizedtype) {

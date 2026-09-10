@@ -11,8 +11,11 @@ import net.sf.saxon.value.HexBinaryValue;
  */
 public class Base64BinaryCoercionPlan extends AtomicCoercionPlan {
 
-    public final static Base64BinaryCoercionPlan INSTANCE = new Base64BinaryCoercionPlan();
+    private final static Base64BinaryCoercionPlan INSTANCE = new Base64BinaryCoercionPlan();
 
+    public static Base64BinaryCoercionPlan getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {

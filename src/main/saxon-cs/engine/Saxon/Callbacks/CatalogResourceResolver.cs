@@ -52,16 +52,20 @@ namespace Saxon.Callbacks {
         /// <param name="request">Details of the required resource, including its URI</param>
         /// <returns>An <c>IResource</c> containing the content of the resource as a <c>Stream</c> or
         /// <c>TextReader</c>, together with a <c>SystemId</c> that identifies the base URI of the
-        /// resource.</returns>
-        public virtual Saxon.Ejavax.xml.transform.Source resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
+        /// resource; or null if the request cannot be resolved.</returns>
+        public virtual Saxon.Ejavax.xml.transform.Source? resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
             if (catalogBasedResolver != null) {
                 try
                 {
                     ResourceRequest? req = null;
                     if (request.uriIsNamespace) {
                         IResolverConfiguration catConfig = catalogBasedResolver.Config;
-                        CatalogManager catalog = (CatalogManager) catConfig.GetFeature(ResolverFeature.CATALOG_MANAGER);
-                        Uri attempt = catalog.LookupNamespaceUri(request.uri, request.nature, request.purpose);
+                        object? feature = catConfig.GetFeature(ResolverFeature.CATALOG_MANAGER);
+                        if (feature == null) {
+                            return null;
+                        }
+                        CatalogManager catalog = (CatalogManager)feature;
+                        Uri? attempt = catalog.LookupNamespaceUri(request.uri, request.nature, request.purpose);
                         if (attempt == null) {
                             return null;
                         }
@@ -133,7 +137,7 @@ namespace Saxon.Callbacks {
             return catalogBasedResolver?.Config.GetFeature(resolverFeature)!;
         }
 
-        public virtual XmlResolver.XmlResolver GetEntityResolver() {
+        public virtual XmlResolver.XmlResolver? GetEntityResolver() {
             return catalogBasedResolver;
         }
     }

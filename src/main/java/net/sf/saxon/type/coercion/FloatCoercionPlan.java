@@ -12,8 +12,11 @@ import net.sf.saxon.value.FloatValue;
  */
 public class FloatCoercionPlan extends AtomicCoercionPlan {
 
-    public final static FloatCoercionPlan INSTANCE = new FloatCoercionPlan();
+    private final static FloatCoercionPlan INSTANCE = new FloatCoercionPlan();
 
+    public static FloatCoercionPlan getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {

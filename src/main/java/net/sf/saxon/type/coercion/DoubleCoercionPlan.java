@@ -12,8 +12,11 @@ import net.sf.saxon.value.FloatValue;
  */
 public class DoubleCoercionPlan extends AtomicCoercionPlan {
 
-    public final static DoubleCoercionPlan INSTANCE = new DoubleCoercionPlan();
+    private final static DoubleCoercionPlan INSTANCE = new DoubleCoercionPlan();
 
+    public static DoubleCoercionPlan getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {

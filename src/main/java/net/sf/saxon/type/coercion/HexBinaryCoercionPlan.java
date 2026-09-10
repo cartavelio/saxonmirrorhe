@@ -11,7 +11,11 @@ import net.sf.saxon.value.HexBinaryValue;
  */
 public class HexBinaryCoercionPlan extends AtomicCoercionPlan {
 
-    public final static HexBinaryCoercionPlan INSTANCE = new HexBinaryCoercionPlan();
+    private final static HexBinaryCoercionPlan INSTANCE = new HexBinaryCoercionPlan();
+
+    public static HexBinaryCoercionPlan getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {

@@ -11,7 +11,12 @@ import net.sf.saxon.value.StringValue;
  */
 public class StringCoercionPlan extends AtomicCoercionPlan {
 
-    public static final StringCoercionPlan INSTANCE = new StringCoercionPlan();
+    private static final StringCoercionPlan INSTANCE = new StringCoercionPlan();
+
+    public static StringCoercionPlan getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {
         if (atomizedType.overlaps(UType.ANY_URI)) {

@@ -4201,12 +4201,13 @@ public class XPathParser {
                 for (int pm = 0; pm < placeMarkerArgs.size(); pm++) {
                     Object pmId = placeMarkerArgs.get(pm);
                     if (pmId instanceof StructuredQName) {
-                        Integer pos = paramNameMap.get((StructuredQName) pmId);
-                        if (pos == null) {
+                        boolean present = paramNameMap.containsKey((StructuredQName) pmId);
+                        if (!present) {
                             throw new XPathException("Keyword " + ((StructuredQName) pmId).getEQName()
                                                              + " does not identify any parameter in the function being partially applied",
                                                      "XPST9999");
                         }
+                        Integer pos = paramNameMap.get((StructuredQName) pmId);
                         args[pos] = new PlaceHolder(pm);
                     }
                 }
