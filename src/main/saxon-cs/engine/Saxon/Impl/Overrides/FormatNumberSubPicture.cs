@@ -47,7 +47,12 @@ namespace Saxon.Impl.Overrides {
 
                 intDigits = point;
                 if ((fsb.charAt((fsb.length() - 1)) == '.')) {
-                    fsb.setLength((fsb.length() - 1));
+                    if (minFractionPartSize > 0) {
+                        fsb.append('0');
+                    }
+                    else {
+                        fsb.setLength((fsb.length() - 1));
+                    }
                 }
             }
             else {
@@ -60,7 +65,7 @@ namespace Saxon.Impl.Overrides {
                 }
             }
 
-            if ((((minWholePartSize == 0) && (intDigits == 1)) && (fsb.charAt(0) == '0'))) {
+            if (minWholePartSize == 0 && intDigits == 1 && fsb.charAt(0) == '0') {
                 fsb.deleteCharAt(0);
             }
             else {

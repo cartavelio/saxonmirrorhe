@@ -1,4 +1,5 @@
 using System;
+using ICU4N.Text;
 using SysRegex = System.Text.RegularExpressions;
 using java.lang;
 
@@ -45,7 +46,7 @@ namespace java.util.regex {
         }
 
         public int start() {
-            throw new NotImplementedException();
+            return latestMatch.Index;
         }
         
         public int start(int i) {

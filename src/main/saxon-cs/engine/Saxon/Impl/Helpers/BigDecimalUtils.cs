@@ -44,8 +44,9 @@ namespace Saxon.Impl.Helpers {
                     // it is a "directed rounding" mode that also affects non-midpoint values
                     // Choose a positive shift that is (a) big enough to make the value positive, and 
                     // (b) a multiple of 10^N where N is ge -scale. Then add the shift, perform the
-                    // rounding away from zero, then subtract the shift.
-                    BigDecimal shift = -BigDecimal.Round(a) + (scale > 0 ? 100 : BigInteger.Pow(10, -scale));
+                    // rounding away from zero, and finally subtract the shift.
+                    int digits = BigDecimal.Round(a).Precision;
+                    BigDecimal shift = BigInteger.Pow(10, digits);
                     return BigDecimal.Round(a + shift, scale, MidpointRounding.AwayFromZero) - shift;
                 case 0:
                     return a;

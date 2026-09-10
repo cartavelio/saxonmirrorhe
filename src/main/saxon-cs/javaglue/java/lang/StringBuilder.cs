@@ -1,4 +1,5 @@
 using System;
+using net.sf.saxon.serialize.charcode;
 using net.sf.saxon.trans.packages;
 using SysText = System.Text;
 
@@ -59,7 +60,14 @@ namespace java.lang {
         }
 
         public StringBuilder appendCodePoint(int cp) {
-            this._builder.Append(Char.ConvertFromUtf32(cp));
+            if (cp >= UTF16CharacterSet.NONBMP_MIN) {
+                this._builder.Append(UTF16CharacterSet.highSurrogate(cp));
+                this._builder.Append(UTF16CharacterSet.lowSurrogate(cp));
+            }
+            else {
+                this._builder.Append((char) cp);
+            }
+
             return this;
         }
 

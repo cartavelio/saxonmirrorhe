@@ -1,16 +1,13 @@
+using System.Globalization;
 using System.Impl.Helpers;
 using System.IO;
-using System.Runtime.Versioning;
-using System.Text;
 using System.Xml;
 using java.lang;
 using javax.xml.transform;
 using javax.xml.transform.stream;
 using net.sf.saxon;
-using net.sf.saxon.dotnet;
 using net.sf.saxon.lib;
 using net.sf.saxon.pull;
-using Saxon.Api.Support;
 using Saxon.Callbacks;
 using SaxonCS3.Saxon.Impl.Helpers;
 
@@ -26,6 +23,31 @@ namespace Saxon.Impl.Helpers {
             config.setURIResolver(new StandardURIResolver(config, new StandardXmlResolver()));
             config.setCollectionFinder((cxt, uri) => 
                 new net.sf.saxon.resource.StandardCollectionFinder().findCollection(cxt, uri));
+        }
+        
+
+        public string getDefaultLanguage() {
+            CultureInfo culture = CultureInfo.CurrentCulture;
+            if (culture.Equals(CultureInfo.InvariantCulture)) {
+                // this seems to be the case on Mac with .NET Core. It seems there's no obvious
+                // way of picking up the settings from the operating system, so we default to English
+                return "en";
+            }
+            else {
+                return culture.Name;
+            }
+        }
+        
+        public string getDefaultCountry() {
+            CultureInfo culture = CultureInfo.CurrentCulture;
+            if (culture.Equals(CultureInfo.InvariantCulture) || culture.IsNeutralCulture) {
+                // this seems to be the case on Mac with .NET Core. It seems there's no obvious
+                // way of picking up the settings from the operating system, so we default to "US"
+                return "US";
+            }
+            else {
+                return new System.Globalization.RegionInfo(culture.LCID).TwoLetterISORegionName;
+            }
         }
 
         public bool isJava() {
@@ -49,7 +71,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public bool hasICUCollator() {
-            return false;
+            return true;
         }
 
         public bool hasICUNumberer() {
@@ -81,8 +103,8 @@ namespace Saxon.Impl.Helpers {
             var config = pipe.getConfiguration();
             var @is = input.getInputStream();
             if (@is != null) {
-                
                 XmlReader parser = new XmlTextReader(input.getSystemId(), @is);
+                ((XmlTextReader) parser).EntityHandling = EntityHandling.ExpandEntities;
                 ((XmlTextReader) parser).WhitespaceHandling = WhitespaceHandling.All;
                 ((XmlTextReader) parser).Normalization = true;
                 if (pipe.getURIResolver() is StandardURIResolver)
@@ -108,16 +130,19 @@ namespace Saxon.Impl.Helpers {
             var reader = input.getReader();
             if (reader != null) {
                 XmlReader parser = new XmlTextReader(input.getSystemId(), reader);
-                ((XmlTextReader) parser).Normalization = true;
+                ((XmlTextReader) parser).EntityHandling = EntityHandling.ExpandEntities;
                 ((XmlTextReader) parser).WhitespaceHandling = WhitespaceHandling.All;
+                ((XmlTextReader) parser).Normalization = true;
                 if (pipe.getURIResolver() is StandardURIResolver)
-                    ((XmlTextReader) parser).XmlResolver = ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
+                    ((XmlTextReader) parser).XmlResolver =
+                        ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
                 parser = new XmlValidatingReader(parser);
                 if (dtdValidation)
                     ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
                 else
                     ((XmlValidatingReader) parser).ValidationType = ValidationType.None;
-                var ps = new net.sf.saxon.pull.PullSource(new DotNetPullProvider(parser));
+                net.sf.saxon.pull.PullProvider provider = new DotNetPullProvider(parser);
+                var ps = new net.sf.saxon.pull.PullSource(provider);
                 ps.setSystemId(input.getSystemId());
                 if (validation == net.sf.saxon.lib.Validation.DEFAULT) {
                     return ps;
@@ -302,15 +327,44 @@ namespace Saxon.Impl.Helpers {
                 return activeSource;
             }
             if (source is StreamSource) {
+                
+                Stream inputStream = ((StreamSource) source).getInputStream();
+                string docTypeName = null;
+                // bool hasDTD = false;
+                // if (inputStream.CanSeek) {
+                //     byte[] buffer = new byte[256];
+                //     int size = inputStream.Read(buffer, 0, 256);
+                //     string content = Encoding.Latin1.GetString(buffer);
+                //     int docTypeStart = content.IndexOf("<!DOCTYPE");
+                //     hasDTD = content.Contains("<!DOCTYPE");
+                //     inputStream.Position = 0;
+                // }
+                //Console.WriteLine("Parsing " + source.getSystemId());
+                
                 XmlReaderSettings settings = new XmlReaderSettings();
-                settings.DtdProcessing = DtdProcessing.Ignore;
-                XmlParserContext parserContext = new XmlParserContext(null, null, null, XmlSpace.Preserve);
-                parserContext.SystemId = source.getSystemId();
-                parserContext.BaseURI = source.getSystemId();
+                settings.DtdProcessing = DtdProcessing.Parse;
+                settings.MaxCharactersFromEntities = 100000; // TODO: configurable entity expansion limit
+                if (source.getSystemId() != null) {
+                    settings.XmlResolver =
+                        new TracingXmlResolver(new Uri(source.getSystemId(), UriKind.RelativeOrAbsolute));
+                }
+
                 XmlReader xmlReader = null;
-                if (((StreamSource) source).getInputStream() != null) {
-                    xmlReader = XmlReader.Create(((StreamSource) source).getInputStream(),
-                         settings, parserContext);
+                if (inputStream != null) {
+                    xmlReader = XmlReader.Create(inputStream, settings);
+
+                    //if (hasDTD) {
+                        
+                    // }
+                    // else {
+                    //     xmlReader = XmlReader.Create(((StreamSource) source).getInputStream(),
+                    //         settings, (XmlParserContext) null);
+                    // }
+                    // xmlReader = new XmlTextReader(((StreamSource) source).getInputStream());
+                    // if (xmlReader is XmlTextReader textReader) {
+                    //     textReader.DtdProcessing = DtdProcessing.Parse;
+                    //     textReader.EntityHandling = EntityHandling.ExpandEntities;
+                    // }
                     // Console.Error.WriteLine("CONTENTS OF STREAM SOURCE");
                     // var reader = new StreamReader(((StreamSource) source).getInputStream(), Encoding.UTF8);
                     // System.Text.StringBuilder sb = new System.Text.StringBuilder();
@@ -328,8 +382,7 @@ namespace Saxon.Impl.Helpers {
                     //     settings, parserContext);
                 }
                 else if (((StreamSource) source).getReader() != null) {
-                    xmlReader = XmlReader.Create(((StreamSource) source).getReader(),
-                        settings, parserContext);
+                    xmlReader = XmlReader.Create(((StreamSource) source).getReader(), settings);
                 }
                 else {
                     string sysId = source.getSystemId();
@@ -343,7 +396,7 @@ namespace Saxon.Impl.Helpers {
                             XmlResolver xr = ((StandardURIResolver) ur).getXmlResolver();
                             object o = xr.GetEntity(uri, "xml", typeof(Stream));
                             if (o is Stream) {
-                                xmlReader = XmlReader.Create((Stream) o, settings, parserContext);
+                                xmlReader = XmlReader.Create((Stream) o, settings);
                             }
                         }
                     }
@@ -355,11 +408,32 @@ namespace Saxon.Impl.Helpers {
                 }
 
                 DotNetPullProvider provider = new DotNetPullProvider(xmlReader);
+                provider.setBaseURI(source.getSystemId());
                 PullSource pullSource = new PullSource(provider);
                 pullSource.setSystemId(source.getSystemId());
                 return pullSource;
             }
             return null;
+        }
+    }
+
+    public class TracingXmlResolver : XmlUrlResolver {
+        private readonly Uri baseUri;
+
+        public TracingXmlResolver(Uri baseURI) {
+            this.baseUri = baseURI;
+        }
+        public override object? GetEntity(Uri absoluteUri, string? role, Type? ofObjectToReturn) {
+            Console.Error.WriteLine("GetEntity " + absoluteUri);
+            return base.GetEntity(absoluteUri, role, ofObjectToReturn);
+        }
+
+        public override Uri ResolveUri(Uri? baseUri, string? relativeUri) {
+            Console.Error.WriteLine("Resolve " + baseUri + " .. " + relativeUri);
+            if (baseUri == null) {
+                baseUri = this.baseUri;
+            }
+            return base.ResolveUri(baseUri, relativeUri);
         }
     }
 }

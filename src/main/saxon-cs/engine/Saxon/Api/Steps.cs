@@ -178,8 +178,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="filter">The predicate to be applied</param>
         /// <returns>A <c>Step</c> that filters the nodes found on the attribute axis using the supplied predicate.</returns>
-        public static Step<XdmNode, XdmNode> Attribute(IPredicate<XdmNode> filter) {
-            return AxisStep(XdmAxis.Attribute).Where(filter);
+        public static Step<XdmNode, XdmNode> Attribute(Predicate<XdmNode> filter) {
+            return AxisStep(XdmAxis.Attribute).Where(filter.Invoke);
         }
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="filter">The predicate to be applied</param>
         /// <returns>A <c>Step</c> that filters the nodes found on the child axis using the supplied predicate.</returns>
-        public static Step<XdmNode, XdmNode> Child(IPredicate<XdmNode> filter) {
+        public static Step<XdmNode, XdmNode> Child(Predicate<XdmNode> filter) {
             return AxisStep(XdmAxis.Child).Where(filter);
         }
 
@@ -271,7 +271,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="filter">The predicate to be applied</param>
         /// <returns>A <c>Step</c> that filters the nodes found on the descendant axis using the supplied predicate.</returns>
-        public static Step<XdmNode, XdmNode> Descendant(IPredicate<XdmNode> filter) {
+        public static Step<XdmNode, XdmNode> Descendant(Predicate<XdmNode> filter) {
             return Descendant().Where(filter);
         }
 
@@ -320,7 +320,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="filter">The predicate to be applied</param>
         /// <returns>A <c>Step</c> that filters the nodes found on the descendant-or-self axis using the supplied predicate.</returns>
-        public static Step<XdmNode, XdmNode> DescendantOrSelf(IPredicate<XdmNode> filter) {
+        public static Step<XdmNode, XdmNode> DescendantOrSelf(Predicate<XdmNode> filter) {
             return DescendantOrSelf().Where(filter);
         }
 

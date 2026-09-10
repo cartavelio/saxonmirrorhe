@@ -27,13 +27,13 @@ namespace Saxon.Api {
         /// returns a <c>Step</c> whose effect is to select the text node children 
         /// of a supplied element or document node.</p>
         /// </summary>
-        /// <param name="predicate">The predicate is a <c>Func</c> delegate enapsulating the filter which will be applied to the results of this <c>Step</c></param>
+        /// <param name="predicate">The predicate is a <c>Func</c> delegate encapsulating the filter which will be applied to the results of this <c>Step</c></param>
         /// <returns>A new <c>Step</c> (that is, a wrapped delegate from one <c>Step</c> of items to another) that
         /// filters the results of this step by selecting only the items that satisfy the predicate.</returns>
-        public Step<TInput, TResult> Where(IPredicate<TResult> predicate) {
-            return new Step<TInput, TResult>(item => { return function.Invoke(item).Where(predicate.Func); });
-        }
 
+        public Step<TInput, TResult> Where(System.Predicate<TResult> predicate) {
+            return new Step<TInput, TResult>(item => function.Invoke(item).Where(predicate.Invoke));
+        }
 
         /// <summary>
         /// Obtain a <c>Step</c> that combines the results of this step with the results of another step.

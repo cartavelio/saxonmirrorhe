@@ -177,7 +177,7 @@ namespace Saxon.Api {
         /// Get the string value of the node.
         /// </summary>
 
-        public String StringValue => ((NodeInfo) value).getStringValue();
+        public string StringValue => ((NodeInfo) value).getStringValue();
 
         /// <summary>
         /// Get the parent of this node.
@@ -221,7 +221,7 @@ namespace Saxon.Api {
         /// attribute with the specified name.
         /// </remarks>
         /// <param name="name">The name of the attribute whose value is required</param>
-        public String GetAttributeValue(QName name) {
+        public string GetAttributeValue(QName name) {
             return ((NodeInfo) value).getAttributeValue(name.Uri, name.LocalName);
         }
 
@@ -234,7 +234,7 @@ namespace Saxon.Api {
         /// attribute with the specified name.
         /// </remarks>
         /// <param name="name">The name of the attribute whose value is required, interpreted as no-namespace name</param>
-        public String GetAttributeValue(String name) {
+        public string GetAttributeValue(string name) {
             return ((NodeInfo) value).getAttributeValue("", name);
         }
 
@@ -253,12 +253,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="filter">the predicate to be applied</param>
         /// <returns> an <c>Iterable</c> containing those nodes found on the child axis that satisfy the supplied predicate.</returns>
-        public IEnumerable<XdmNode> Children(IPredicate<XdmNode> filter) {
-            IEnumerable<XdmNode> enumerable = Children();
-            foreach (XdmNode node in enumerable)
-                if (filter.Func(node)) {
-                    yield return node;
-                }
+        public IEnumerable<XdmNode> Children(Predicate<XdmNode> filter) {
+            return Children().Where(filter.Invoke);
         }
 
         /// <summary>
