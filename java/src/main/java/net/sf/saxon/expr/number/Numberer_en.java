@@ -15,14 +15,14 @@ public class Numberer_en extends AbstractNumberer {
 
     // Separator between tens and units. Allows customisation: "twenty five", "twenty-five", "twentyfive",
     // or "thirty second", "thirty-second", "thirtysecond".
-    private String tensUnitsSeparatorCardinal = " ";
+    private String tensUnitsSeparatorCardinal = "-";
 
     // Separator between tens and units. Allows customisation: "thirty second", "thirty-second", "thirtysecond".
     private String tensUnitsSeparatorOrdinal = "-";
 
     /**
      * Set the separator to be used between tens and units for cardinal numbers. This allows customization
-     * of the output, for example "thirty six", "thirty-six", or "thirtysix". Default is a single space.
+     * of the output, for example "thirty six", "thirty-six", or "thirtysix". Default from Saxon 13 is a hyphen.
      * <p>Currently the only way of calling this is from a subclass, which can be nominated by setting
      * a {@link net.sf.saxon.lib.LocalizerFactory} on the {@link net.sf.saxon.Configuration}</p>
      *
