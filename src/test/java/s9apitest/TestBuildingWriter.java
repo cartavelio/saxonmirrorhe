@@ -11,7 +11,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -60,7 +60,7 @@ public class TestBuildingWriter {
                 String ref = "<ns0:out xmlns:ns0=\"http://outer/\" data=\"3\"><ns0:br/><ns1:br xmlns:ns1=\"http://inner/\" style=\"bold\"/></ns0:out>";
                 DocumentBuilder db = proc.newDocumentBuilder();
                 XdmNode expected = db.build(new StreamSource(new StringReader(ref)));
-                assertTrue(DeepEqual.deepEquals(
+                assertNull(DeepEqual.deepEquals(
                         actual.getUnderlyingNode(),
                         expected.getUnderlyingNode(),
                         CodepointCollatingComparer.getInstance(),
