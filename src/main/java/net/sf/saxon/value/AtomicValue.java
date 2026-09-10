@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -482,6 +482,7 @@ public abstract class AtomicValue
      * Display the value for diagnostics.  In general show() for an atomic value displays the value as it would be
      * written in XPath: that is, as a literal if available, or as a call on a constructor function
      * otherwise.
+     * @return a string representation of this value
      */
 
     public String show() {

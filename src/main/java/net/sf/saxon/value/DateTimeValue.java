@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -982,6 +982,7 @@ public final class DateTimeValue extends CalendarValue
     /**
      * Get a Java 8 {@link Instant} corresponding to this date and time. The value will respect the time zone
      * offset if present, or will assume UTC otherwise.
+     * @return an {@code Instant} representing this date and time
      */
 
     public Instant toJavaInstant() {

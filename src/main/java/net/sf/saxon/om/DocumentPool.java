@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -45,6 +45,7 @@ public final class DocumentPool {
      *
      * @param doc The DocumentInfo for the document in question
      * @param uri The document-uri property of the document.
+     * @throws XPathException if an error is detected
      */
 
     public synchronized void add(TreeInfo doc, /*@Nullable*/ String uri) throws XPathException {
@@ -58,6 +59,7 @@ public final class DocumentPool {
      *
      * @param doc The DocumentInfo for the document in question
      * @param uri The document-uri property of the document.
+     * @throws XPathException if an error is detected
      */
 
     public synchronized void add(TreeInfo doc, /*@Nullable*/ DocumentKey uri) throws XPathException {
@@ -175,6 +177,9 @@ public final class DocumentPool {
     /**
      * Ask whether a document URI is in the set of URIs known to be unavailable, because doc-available()
      * has been previously called and has returned false
+     *
+     * @param uri the document-uri property of the document
+     * @return true if the document is known to be unavailable, false otherwise
      */
 
     public boolean isMarkedUnavailable(DocumentKey uri) {

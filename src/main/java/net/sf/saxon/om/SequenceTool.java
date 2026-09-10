@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -180,6 +180,7 @@ public class SequenceTool {
      * @param iter   an iterator over the sequence in question (which is typically consumed)
      * @param length the supposed length
      * @return true if and only if the length of the sequence is the supposed length
+     * @throws XPathException if an error is detected
      */
 
     public static boolean hasLength(SequenceIterator iter, int length) throws XPathException {
@@ -206,6 +207,7 @@ public class SequenceTool {
      * @param a iterator over the first sequence
      * @param b iterator over the second sequence
      * @return true if the lengths of the two sequences are the same
+     * @throws XPathException if an error is detected
      */
 
     public static boolean sameLength(SequenceIterator a, SequenceIterator b) throws XPathException {
@@ -505,6 +507,7 @@ public class SequenceTool {
     /**
      * Make an array of general-purpose Sequence objects of a given length
      * @param length the length of the returned array
+     * @return the new array
      */
 
     public static Sequence[] makeSequenceArray(int length) {
@@ -513,6 +516,8 @@ public class SequenceTool {
 
     /**
      * Make an array of general-purpose Sequence objects with supplied contents
+     * @param items the contents for the array
+     * @return the new array
      */
 
     public static Sequence[] fromItems(Item... items) {
@@ -550,6 +555,8 @@ public class SequenceTool {
 
     /**
      * Helper method to convert an Item or null to a Sequence
+     * @param item the item to convert
+     * @return the converted sequence
      */
 
     public static GroundedValue itemOrEmpty(Item item) {

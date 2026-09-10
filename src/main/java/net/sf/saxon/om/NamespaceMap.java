@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -113,6 +113,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
      * Create a NamespaceMap that captures all the information in a given NamespaceResolver
      *
      * @param resolver the NamespaceResolver
+     * @return the new NamespaceMap
      */
 
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
@@ -262,6 +263,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
      * @param prefix the namespace prefix ("" for the default namespace)
      * @param uri the namespace URI to which the prefix is bound; or "" to indicate that an existing
      *            binding for the prefix is to be removed
+     * @return a new map with the entry added or removed as appropriate (or this map, unchanged, as appropriate).
      */
 
     public NamespaceMap bind(String prefix, String uri) {
@@ -486,6 +488,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
      *                          (binding the prefix to the dummy URI "") will be included
      *                          in the result. If false, namespace undeclarations are included
      *                          in the result only for the default namespace (prefix = "").
+     * @return the array of namespace declarations and undeclarations
      */
 
     public NamespaceBinding[] getDifferences(NamespaceMap other, boolean addUndeclarations) {

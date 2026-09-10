@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -124,6 +124,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      * node of this tree is then used as the context item for the query.</p>
      *
      * @param source the source document to act as the initial context item for the query.
+     * @throws SaxonApiException if an error is detected
      */
 
     public void setSource(Source source) throws SaxonApiException {

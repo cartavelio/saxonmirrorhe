@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -457,7 +457,9 @@ public class FloatingPointConverter {
     /**
      * Append a string representation of a double value to a string buffer
      *
-     * @param d the double to be formatted
+     * @param d                the double to be formatted
+     * @param forceExponential forces exponential notation if set (if not set, exponential notation
+     *                         is used only for values outside the range 1e-6 to 1e+6)
      * @return the original string buffer, now containing the string representation of the supplied double
      */
 
