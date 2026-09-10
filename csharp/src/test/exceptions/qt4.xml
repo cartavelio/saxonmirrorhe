@@ -152,6 +152,13 @@
       <created by="Michael Kay" on="2026-04-24"/>
       <reason>trusted="no" not yet implemented</reason>
    </exception>
+   
+   <exception test-set="fn-parse-xml" 
+      test-case="parse-xml-008b parse-xml-009b parse-xml-010b" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-05-13"/>
+      <reason>trusted="no" not yet implemented</reason>
+   </exception>
 
    
    <exception test-set="fn-serialize" 
@@ -237,7 +244,9 @@
       test-case=" Keywords-fn-scan-left-1
                   Keywords-fn-scan-right-1
                   Keywords-fn-system-properties-1
-                  Keywords-fn-invisible-xml-1                
+                  Keywords-fn-invisible-xml-1
+                  Keywords-fn-error-1
+                  Keywords-fn-matching-segments-1
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-05"/>
@@ -608,6 +617,24 @@
       <created by="Michael Kay" on="2026-04-12"/>
       <reason>The SaxonCS implementation of html-doc does not report HTML errors, and ignores the encoding option.</reason>
    </exception>
+   
+   <exception test-set="app-spec-examples" 
+               test-case="
+                     fo-test-fn-matching-segments-001
+                      fo-test-fn-matching-segments-002
+                      fo-test-fn-matching-segments-003
+                      fo-test-fn-matching-segments-004
+                      fo-test-fn-matching-segments-005
+                      fo-test-map-build-013
+                      fo-test-fn-parse-json-008
+               " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-05-13"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   
+
    
    <!--
    <exception test-set="fn-format-number" test-case="
