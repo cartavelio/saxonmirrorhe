@@ -345,7 +345,7 @@ val editionJavadoc = tasks.register<Exec>("editionJavadoc") {
     "-group", "s9api Interfaces", "net.sf.saxon.s9api:net.sf.saxon.s9api.push:net.sf.saxon.s9api.streams",
     "-group", "Other Interfaces", "com.saxonica.config:net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
     "-group", "External Interfaces", "javax.xml.xquery",
-    "-source", "1.8"
+    "-source", "17"
   )
 
   args("-classpath", editionSourceSet.compileClasspath.joinToString(":"))
