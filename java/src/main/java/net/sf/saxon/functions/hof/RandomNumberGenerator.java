@@ -37,7 +37,7 @@ import java.util.Random;
  */
 public class RandomNumberGenerator extends SystemFunction implements Callable {
 
-    public static ItemType RETURN_TYPE = RecordTest.nonExtensible(
+    public static ItemType RETURN_TYPE = RecordTest.extensible(
             new RecordTest.Field("number", SequenceType.SINGLE_DOUBLE, false),
             new RecordTest.Field("next",
                                  SequenceType.one(
