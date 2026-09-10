@@ -3118,50 +3118,6 @@ public class XPathParser {
                         setLocation(getExpr);
                         return getExpr;
                     }
-//                    case "type": {
-//                        notAllowedInPattern();
-//                        if (languageVersion < 40) {
-//                            return parseFunctionCall(name, null);
-//                        }
-//                        nextToken();
-//                        readToken(Token.LPAREN);
-//                        SequenceType type = parseSequenceType();
-//                        readToken(Token.RPAREN);
-//                        AxisExpression typeExpr = new AxisExpression(
-//                                AxisInfo.CHILD,
-//                                new SpecificJNodeType(type));
-//                        setLocation(typeExpr);
-//                        return typeExpr;
-//                    }
-//                    case "record": {
-//                        notAllowedInPattern();
-//                        if (languageVersion < 40) {
-//                            return parseFunctionCall(name, null);
-//                        }
-//                        ItemType type = parseRecordTest(this);
-//                        AxisExpression recordExpr = new AxisExpression(
-//                                AxisInfo.CHILD,
-//                                new SpecificJNodeType(SequenceType.one(type)
-//                                ));
-//                        setLocation(recordExpr);
-//                        return recordExpr;
-//                    }
-//                    case "array":
-//                    case "map":
-//                    case "enum":
-//                    case "item": {
-//                        notAllowedInPattern();
-//                        if (languageVersion < 40) {
-//                            return parseFunctionCall(name, null);
-//                        }
-//                        ItemType type = parseItemType();
-//                        AxisExpression axisExpr = new AxisExpression(
-//                                AxisInfo.CHILD,
-//                                new SpecificJNodeType(SequenceType.one(type)
-//                                ));
-//                        setLocation(axisExpr);
-//                        return axisExpr;
-//                    }
                     case "function":
                         notAllowedInPattern();
                         return parseInlineFunction(AnnotationList.EMPTY);
@@ -3387,7 +3343,13 @@ public class XPathParser {
         } else if (token instanceof Token.DirectCommentConstructor) {
             requireXQuery("A comment constructor");
             Comment instr = new Comment();
-            instr.setSelect(new StringLiteral(((Token.DirectCommentConstructor) token).getContent()));
+            UnicodeString content = StringTool.fromCharSequence(((Token.DirectCommentConstructor) token).getContent());
+            try {
+                Comment.checkContentXQuery(content);
+            } catch (XPathException e) {
+                grumble(e.getMessage());
+            }
+            instr.setSelect(new StringLiteral(content));
             setLocation(instr);
             nextToken();
             return makeTracer(instr, null);

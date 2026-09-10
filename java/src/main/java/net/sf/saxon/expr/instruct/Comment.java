@@ -175,7 +175,7 @@ public final class Comment extends SimpleNodeConstructor {
         if (comment.indexOf(TWO_HYPHENS, 0) >= 0) {
             return "Invalid characters (--) in comment";
         }
-        if (comment.length() > 0 && comment.codePointAt(comment.length() - 1) == '-') {
+        if (!comment.isEmpty() && comment.codePointAt(comment.length() - 1) == '-') {
             return "Comment cannot end in '-'";
         }
         return null;
