@@ -1,17 +1,16 @@
-using System;
-using ICU4N.Text;
 using SysRegex = System.Text.RegularExpressions;
-using Saxon.Ejava.lang;
+
 
 namespace Saxon.Ejava.util.regex {
     
-    /*
-     * Emulates the API of the Java regex engine by delegating all calls to the .NET regex engine
-     */
+    /// <summary>
+    /// Emulates the API of the Java regex engine by delegating all calls to the .NET regex engine
+    /// </summary>
     public class Matcher {
 
         private SysRegex.Regex regex;
         private SysRegex.Match latestMatch;
+        private int position = 0;
         private string input;
 
         public Matcher(SysRegex.Regex regex, string input) {
@@ -24,15 +23,13 @@ namespace Saxon.Ejava.util.regex {
         }
 
         public bool find() {
-            latestMatch = regex.Match(input);
+            latestMatch = regex.Match(input, position);
+            if (latestMatch.Success) {
+                position = latestMatch.Index + latestMatch.Length;
+            }
             return latestMatch.Success;
         }
-        
-        public bool find(int start) {
-            latestMatch = regex.Match(input, start);
-            return latestMatch.Success;
-        }
-        
+
         public string replaceAll(string str) {
             return regex.Replace(input, str) ;
         }
@@ -50,15 +47,15 @@ namespace Saxon.Ejava.util.regex {
         }
         
         public int start(int i) {
-            throw new NotImplementedException();
+            return latestMatch.Groups[i].Index;
         }
 
         public int end() {
-            throw new NotImplementedException();
+            return latestMatch.Index + latestMatch.Length;
         }
         
         public int end(int i) {
-            throw new NotImplementedException();
+            return latestMatch.Groups[i].Index + latestMatch.Groups[i].Length;
         }
     }
 }
