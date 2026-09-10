@@ -363,8 +363,8 @@ public class TestXsltTransformer {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             serializer.setOutputStream(os);
 
-            XdmSequenceIterator iter = node.axisIterator(Axis.DESCENDANT, new QName("e"));
-            XdmNode e = (XdmNode) iter.next();
+            XdmSequenceIterator<XdmNode> iter = node.axisIterator(Axis.DESCENDANT, new QName("e"));
+            XdmNode e = iter.next();
             trans.setInitialContextNode(e);
             trans.setInitialTemplate(new QName("main"));
             trans.setDestination(serializer);
