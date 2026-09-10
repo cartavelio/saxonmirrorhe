@@ -204,7 +204,7 @@ public class Doc extends SystemFunction implements Callable {
                     }
                 }
 
-                val = checkedOptions.get("xsi-schema-location");
+                val = checkedOptions.get("use-xsi-schema-location");
                 if (val != null) {
                     parseOptions = parseOptions.withUseXsiSchemaLocation(val.effectiveBooleanValue());
                 }

@@ -50,8 +50,8 @@ public class ParseXml extends SystemFunction implements Callable {
         parseOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseOptions.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.getInstance());
         parseOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        parseOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
-        parseOptions.addAllowedOption("xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseOptions.addAllowedOption("xinclude", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         return parseOptions;
     }
@@ -132,7 +132,7 @@ public class ParseXml extends SystemFunction implements Callable {
             } else {
                 throw new XPathException("Unknown xsd-validation option of fn:parse-xml: " + validationValue, "FODC0008");
             }
-            val = checkedOptions.get("xsi-schema-location");
+            val = checkedOptions.get("use-xsi-schema-location");
             if (val.effectiveBooleanValue()) {
                 parseOptions = parseOptions.withUseXsiSchemaLocation(true);
             }
