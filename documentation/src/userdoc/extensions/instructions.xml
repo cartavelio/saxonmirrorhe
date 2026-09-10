@@ -257,6 +257,10 @@
           expression, except that in the maps or arrays selected by the <code>select</code> expression, the 
           specified <code>action</code> has been applied.
         </p>
+        <p><b>In Saxon 13, the functionality of <code>saxon:deep-update</code> has not yet been revised to take
+        account of the introduction of JNodes, but this is likely to happen at some stage in the future. For the time
+        being, it operates directly on trees of maps and arrays, and not on JNode wrappers of such trees. Downward
+        selection in the tree should therefore use the lookup operator <code>?</code>, not the path operator <code>/</code>.</b></p>
         <p>More detailed rules:</p>
         <ul>
           <li><p>The <code>root</code> attribute is an XPath expression that selects a map or array (call this the root item). 
@@ -279,6 +283,7 @@
               <code>array:tail()</code></li>
               <li><code>map:find()</code></li>
             </ol>
+            <p>Note that this list does <b>not</b> include the path operator <code>/</code>, which works on JNodes.</p>
           </li>
           <li><p>The <code>action</code> attribute is an expression that is evaluated with each selected 
             (leaf) map or array as context item, and it returns a new value (usually, but not necessarily, an updated

@@ -6097,42 +6097,10 @@
         </proto>
       </signatures>
       <status>
-        <p>In Saxon 10, several vendor-defined options are recognized. These are QName-valued keys
-          in the Saxon namespace:</p>
-        <ul>
-          <li><code>saxon:on-duplicates as function($a, $b)</code>. The value of the option is a
-            user-defined function which is called when a duplicate key is encountered. The two
-            arguments are the existing value associated with the key, and the new value to be
-            associated with the key. The result of the function is the value that will be stored in
-            the result map. For example <code>map:merge(({"a":12}, {"a":17}),
-              map{QName("http://saxon.sf.net/", "on-duplicates"): function($a, $b){$a +
-              $b}})?a</code> returns 29: the value stored in the result map is the sum of all the
-            values associated with the key. Other possibilities that might be useful are to return
-            the string-join, the average, or the min or max, or to throw an error conditionally only
-            if the two values are different. Specifying <code>function($a, $b){$a}</code> emulates
-            the standard option <code>duplicates:use-first</code>, while <code>function($a,
-              $b){$b}</code> emulates <code>duplicates:use-last</code>, and <code>function($a,
-              $b){$a, $b}</code> emulates <code>duplicates:combine</code>.</li>
-          <li><code>saxon:duplicates-error-code</code>: defines an error code to be used when the
-              <code>duplicates:reject</code> option is in force (this is provided primarily for
-            Saxon internal use, since <code>map:merge</code> is used to underpin other functionality
-            such as the XSLT <code>xsl:map</code> instruction).</li>
-          <li><code>saxon:key-type</code>. The value should be the local name of a primitive type to
-            which all the keys are expected to conform. The only value treated specially is
-            "string": when all the key values are expected to be strings, Saxon uses an internal
-            data structure optimized for this purpose. This is purely an optimization hint; no error
-            occurs if a non-string value is encountered (but the map then has to be reorganized
-            internally, which is costly).</li>
-          <li><code>saxon:final</code>. The value is a boolean; the value <code>true</code> is an
-            optimization hint that indicates that the application does not intend to make any
-            further changes to the constructed map. This enables Saxon to use an internal data
-            structure that does not allow such modifications. This is purely an optimization hint;
-            no error occurs if subsequent <code>put</code> or <code>remove</code> operations are
-            performed (but the map then has to be reorganized internally, which is costly).</li>
-        </ul>
-
-        <p>For a history of changes in previous Saxon releases, see the Saxon 9.9 documentation.</p>
-
+        <p>From Saxon 10 thru 12, several vendor-defined options were recognized: <code>saxon:on-duplicates</code>,
+          <code>saxon:key-type</code>, <code>saxon:final</code>. In Saxon 13, only the options
+          defined in the QT4.0 specification are recognized: specifically, the <code>duplicates</code> option.</p>
+        
       </status>
       <saxon-edition>ALL_SINCE_9.7</saxon-edition>
     </function>
@@ -6167,6 +6135,8 @@
           against a required type (e.g. an <code>as="map(xs:integer, xs:string)"</code> attribute on
             <code>xsl:variable</code>). Saxon uses various techniques to avoid inspecting every
           entry in the map when this happens, but it cannot always be avoided.</p>
+        <p>The data structures used for maps in Saxon 13 have been changed completely to reflect the
+        fact that in QT 4.0, maps retain order information.</p>
       </status>
       <saxon-edition>ALL_SINCE_9.7</saxon-edition>
     </function>
@@ -7885,7 +7855,8 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.8.</p>
+        <p>Available since Saxon 9.8. Obsolescent since Saxon 13: use the standard QT4 function <code>fn:function-annotations</code>
+        in preference.</p>
       </status>
       <saxon-edition>PE/EE 9.8</saxon-edition>
       <details>
@@ -8237,8 +8208,10 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};</code></pre>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 8.3. Changed in Saxon 9.5 to take a function as the second
-          argument, and to return a map as the result; and the collation argument was dropped.</p>
+        <p>Introduced in Saxon 8.3. Changed in Saxon 9.5 to take a function as the second
+          argument, and to return a map as the result; and the collation argument was dropped.
+          The function is dropped in Saxon 13, replaced by the standard 4.0 function <code>map:build</code>.
+        </p>
       </status>
       <saxon-edition>PE/EE</saxon-edition>
       <details>
@@ -8917,9 +8890,10 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.9.</p>
+        <p>Available since Saxon 9.9. Reimplemented in Saxon 13 to use JNodes.</p>
       </status>
-      <saxon-edition>PE/EE 9.9</saxon-edition>&gt; <details>
+      <saxon-edition>PE/EE</saxon-edition>
+      <details>
         <div> <p>The function <code>saxon:map-search</code> is similar to <a class="bodylink code"
               href="/functions/map/find">map:find</a>, in that it searches recursively through
             nested maps and arrays, but is more versatile. It differs from <code>map:find</code> in
@@ -8928,7 +8902,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
                 <code>saxon:map-search</code> also takes a function that can be used to test the
               associated value. </li>
             <li>Whereas <code>map:find</code> returns the value associated with the specified key,
-                <code>saxon:map-search</code> returns much more information about where the match
+                <code>saxon:map-search</code> returns a JNode, which contains much more information about where the match
               was found.</li>
           </ol> <p>In more detail:</p> <p>The function <code>saxon:map-search</code> searches the
             sequence supplied as <code>$input</code> looking for map entries whose key is the same
@@ -8936,16 +8910,10 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             the supplied <code>$condition</code> function. If the <code>$condition</code> function
             returns true, or if there is no <code>$condition</code>, then an item is added to the
             returned value of the function: so the returned value is a sequence containing one item
-            for each search "hit". The actual item representing a hit is a map with the following
-            entries:</p> <ul>
-            <li><p>key: the actual key of the entry (this may differ in minor ways from the supplied
-                input <code>$key</code>, for example it may be a different numeric type)</p></li>
-            <li><p>value: the associated value of the entry</p></li>
-            <li><p>map: the map containing this entry. This map will have a pedigree, rooted at the
-                item in <code>$input</code> that was being searched. The pedigree can be used to
-                trace the search path up to the root, using the <a class="bodylink code"
-                  href="/functions/saxon/pedigree">saxon:pedigree()</a> function.</p></li>
-          </ul> <p>The search processes the <code>$input</code> sequence using the following
+            for each search "hit". The actual item representing a hit is a JNode, allowing use of 
+            axes such as the parent and ancestor axes to navigate from the returned JNode to related
+            nodes in the tree that was searched.
+          <p>The search processes the <code>$input</code> sequence using the following
             recursively-defined rules:</p>
           <ul>
             <li>To process a sequence, process each of its items in order.</li>
@@ -8964,8 +8932,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
               ignored).</li>
           </ul> </div>
       </details>
-      <see-also namespace="http://saxon.sf.net/" name="pedigree"/>
-      <see-also namespace="http://saxon.sf.net/" name="with-pedigree"/>
     </function>
 
 
@@ -9741,7 +9707,8 @@ StreamSource:new() =&gt; saxon:object-map() =&gt; map:keys() =&gt; sort()</code>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.2. Reimplemented in Saxon 12.</p>
+        <p>Available since Saxon 9.2. Reimplemented in Saxon 12. Dropped in Saxon 13 in favor of the 
+          standard 4.0 function <code>fn:parse-html</code>.</p>
       </status>
       <saxon-edition>PE/EE</saxon-edition>
       <details>
@@ -9809,74 +9776,7 @@ StreamSource:new() =&gt; saxon:object-map() =&gt; map:keys() =&gt; sort()</code>
     </function>
 
 
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">pedigree</name>
-      <description>
-        <p>Given a map or array that was obtained by downward selection within a tree of maps and
-          arrays (such as might be obtained by parsing JSON), and that was marked for tracking of
-          such selections using the <code>saxon:with-pedigree()</code> function, the
-            <code>saxon:pedigree()</code> function returns a map containing information about the
-          containing map or array in this tree, and the key or index used to select it within its
-          immediately containing map or array.</p>
-      </description>
-      <signatures>
-        <proto return-type="tuple(container: function(*), key: anyAtomicType?, index: xs:integer?)?">
-          <arg name="in" type="function(*)" desc="The input map or array"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since Saxon 9.9.</p>
-      </status>
-      <saxon-edition>PE/EE 9.9</saxon-edition>
-      <details>
-        <div>
-          <p>If the supplied value is a map or array that has pedigree information by virtue of the
-            fact that it was obtained by downward selection from a map or array that retains
-            pedigree information, the <code>pedigree()</code> function returns information about the
-            containing map or array from which it was selected.</p>
-          <p>The result of the function is a map. There is always an entry with the key
-              <code>"container"</code>, whose value is the containing map or array (or an empty
-            sequence, if we are at the root of the tree). If the container is a map, there will also
-            be an entry with key <code>"key"</code> whose value is the key of this map/array within
-            the containing map. If the container is an array, there will also be an entry with key
-              <code>"index"</code> whose value is the 1-based index of this map/array within the
-            containing array.</p>
-          <p>If the supplied argument has no pedigree information, the result is an empty
-            sequence.</p>
-          <p>For example, given the input:</p>
-          <pre><code class="language-xquery">let $M :=
-  map{ 
-    "roman": map{
-               "min":1,
-               "max":10,
-               "codes":map{"i":1, "ii":2, "iii":3, "iv":4, "v":5, "vi":6, "vii":7, 
-                         "viii":8, "ix":9, "x":10}
-               },
-    "alpha": map{
-               "min":1,
-               "max":26,
-               "codes":map{"a":1, "b":2, "c":3, "d":4, "e":5, "f":6, "g":7, "h":8, 
-                         "i":9, "j":10}
-               }
-    }
-let $augmentedMap := $M =&gt; saxon:with-pedigree()
-let $romanCodes := $augmentedMap?roman?codes
-return ....  
-</code></pre>
-          <p>Then <code>($romanCodes =&gt; saxon:pedigree())?container?max</code> returns 10.</p>
-          <p>The function is particularly useful when using <code>xsl:apply-templates</code> to
-            process JSON structures recursively. For example, it becomes possible to write a
-            template rule such as:</p>
-          <pre><code class="language-xml">&lt;xsl:template match=".[saxon:pedigree(.)?key='roman']"&gt;</code></pre>
-          <p>Which matches a map (or array) whose key value in its parent map is "roman".</p>
-          <p>See also the <a class="bodylink code" href="/extensions/instructions/deep-update"
-              >saxon:deep-update</a> extension instruction, which makes use of pedigree information
-            internally.</p>
-        </div>
-      </details>
-      <see-also namespace="http://saxon.sf.net/" name="with-pedigree"/>
-    </function>
-
+    
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">print-stack</name>
@@ -12006,61 +11906,7 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
     </function>
 
 
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">with-pedigree</name>
-      <description>
-        <p>Takes a map or array as input, and returns a new map or array with the same content,
-          whose implementation tracks downward selections within a JSON-like structure of maps or
-          arrays, so that it is possible to trace from a selected item to the route by which it was
-          selected.</p>
-      </description>
-      <signatures>
-        <proto return-type="function(*)">
-          <arg name="in" type="function(*)" desc="The input map or array"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since Saxon 9.9.</p>
-      </status>
-      <saxon-edition>PE/EE 9.9</saxon-edition>
-      <details>
-        <div>
-          <p>If the supplied value is a map or array, the <code>with-pedigree()</code> function
-            returns a new map or array with the same content, but having an internal implementation
-            that tracks downward selections within a tree of maps and arrays, such as might be
-            obtained by parsing JSON input.</p>
-          <p>If the supplied argument is a function that is not a map or array, it is returned
-            unchanged.</p>
-          <p>The functions and operators that constitute "downwards selection" include:</p>
-          <ol>
-            <li><code>map:get($M, $K)</code> and its equivalents <code>$M($K)</code> or
-                <code>$M?($K)</code></li>
-            <li><code>array:get($A, $I)</code> and its equivalents <code>$A($I)</code> or
-                <code>$A?($I)</code></li>
-            <li><code>$V?*</code> where $V is either a map or an array</li>
-            <li><code>array:subarray()</code>, <code>array:remove()</code>,
-                <code>array:head()</code>, <code>array:tail()</code></li>
-            <li>
-              <code>map:find()</code>
-            </li>
-          </ol>
-          <p>Any maps or arrays returned by these functions and operators (but not other values,
-            such as nodes and atomic items) will have a pedigree that can be obtained using the <a
-              class="bodylink code" href="/functions/saxon/pedigree">saxon:pedigree()</a> function.
-            The pedigree is represented as a map containing a number of entries: the
-              <code>"container"</code> entry holds the immediately containing map or array; the
-              <code>"key"</code> entry (where applicable) holds the key of the value within the
-            containing map; the <code>"index"</code> entry (where applicable) holds the 1-based
-            index of the value within the containing array. The container will itself have a
-            pedigree, so it is possible to navigate upwards through the tree back to the root.</p>
-          <aside>In the functional programming world, the structure created by this function is
-            known as a <em>zipper</em>.</aside>
-        </div>
-      </details>
-      <see-also namespace="http://saxon.sf.net/" name="pedigree"/>
-    </function>
-
-
+    
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">xquery</name>
       <description>

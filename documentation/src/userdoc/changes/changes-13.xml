@@ -754,6 +754,9 @@ TODO: rethink redefines and override
                 note that the specification for <code>fn:parse-html</code> has changed.</p></li>
             <li><p><code>saxon:array-member</code> is dropped. A call on <code>saxon:array-member(x)</code>
             can be replaced with the expression <code>{'value': x}</code>.</p></li>
+            <li><p><code>saxon:pedigree</code> and <code>saxon:with-pedigree</code> are dropped.
+            Applications using these functions should be rewritten to use JNodes, which build on the
+            same idea but provide much more flexibility.</p></li>
         </ul>
         
         <p>The <code>saxon:array</code> and <code>saxon:array-member</code> instructions are dropped
@@ -763,7 +766,9 @@ TODO: rethink redefines and override
             the <code>for-each</code> attribute.</p>
         
         <p>The <code>xsl:map/@saxon:on-duplicates</code> extension attribute is no longer supported, it is 
-        replaced by the regular XSLT 4.0 attribute <code>xsl:map/@duplicates.</code></p>
+        replaced by the regular XSLT 4.0 attribute <code>xsl:map/@duplicates.</code>
+        Similarly the <code>saxon:on-duplicates</code> option of the <code>map:merge</code>
+        function is replaced by the regular 4.0 option <code>duplicates</code>.</p>
         
         <p>The <code>xsl:accumulator-rule/@saxon:capture</code> extension attribute is deprecated;
             it is replaced by the regular XSLT 4.0 attribute <code>xsl:accumulator-rule/@capture.</code></p>
