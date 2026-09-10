@@ -3,7 +3,7 @@
 #include "XdmItem.h"
 
 XdmItem::XdmItem(): XdmValue(){
-	value = nullptr;
+	value = -1;
 }
 
     XdmItem::XdmItem(const XdmItem &other): XdmValue(other){
@@ -71,7 +71,7 @@ int64_t XdmItem::getUnderlyingValue(){
 #ifdef DEBUG
 	     std::cerr<<std::endl<<"XdmItem-getUnderlyingValue - nullptr:"<<std::endl;
 #endif
-		return nullptr;	
+		return -1;
 	}
 	return value;
 }
@@ -79,7 +79,7 @@ int64_t XdmItem::getUnderlyingValue(){
     const char * XdmItem:: getStringValue(){
         if(stringValue.empty()) {
 
-            const char * str = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread, value);
+            const char * str = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread, (void *)value);
             if(str == nullptr) {
                 return nullptr;
             }
@@ -94,7 +94,7 @@ int64_t XdmItem::getUnderlyingValue(){
 
 
 const char * XdmItem::toString(){
-  const char * str = xdmItemToString(SaxonProcessor::sxn_environ->thread, value);
+  const char * str = xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)value);
   if(str == nullptr) {
     return nullptr;
   }

@@ -25,7 +25,7 @@ int XdmArray::arrayLength()  {
 }
 
 XdmValue* XdmArray::get(int n){
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
+    /*jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
     static jmethodID tbmID = nullptr;
 
     if(n<0) {
@@ -51,12 +51,13 @@ XdmValue* XdmArray::get(int n){
     				return newValue;
     			}
     			return nullptr;
-    }
+    }*/
+    return nullptr;
 }
 
 
 const char * XdmArray::toString(){
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmArray");
+   /* jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmArray");
     jmethodID strbbMID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmArrayClass,
                                                                                    "toString",
                                                                                    "()Ljava/lang/String;");
@@ -72,12 +73,14 @@ const char * XdmArray::toString(){
             return str;
         }
         return nullptr;
-    }
+    }*/
+
+   return nullptr;
 
 }
 
 XdmArray* XdmArray::put(int n, XdmValue * valuei) {
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
+    /*jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
     static jmethodID tbpmID = nullptr;
 
     if(n<0) {
@@ -100,13 +103,13 @@ XdmArray* XdmArray::put(int n, XdmValue * valuei) {
     				return newValue;
     			}
     			return nullptr;
-    }
-
+    }*/
+    return nullptr;
 
 }
 
 XdmArray* XdmArray::addMember(XdmValue* valuei) {
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
+    /*jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
     static jmethodID tbamID = nullptr;
 
     if(tbamID) {
@@ -126,11 +129,12 @@ XdmArray* XdmArray::addMember(XdmValue* valuei) {
     				return newValue;
     			}
     			return nullptr;
-    }
+    }*/
+    return nullptr;
 }
 
 XdmArray* XdmArray::concat(XdmArray* valuei) {
-    jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
+   /* jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
     static jmethodID tbcaID = nullptr;
 
 
@@ -151,14 +155,15 @@ XdmArray* XdmArray::concat(XdmArray* valuei) {
     			}
     			std::cerr << "Error: Saxonc.XdmArray." << "concat" << " failed\n" << std::endl;
     			return nullptr;
-    }
+    }*/
+   return nullptr;
 
 }
 
 std::list<XdmValue *> XdmArray::asList() {
   std::list<XdmValue *> arr;
 
-	jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/option/cpp/XdmUtils;");
+	/*jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/option/cpp/XdmUtils;");
 	static jmethodID xmID = nullptr;
 
 
@@ -191,7 +196,9 @@ std::list<XdmValue *> XdmArray::asList() {
 
 	} else {
 	    return arr;
-	}
+	}*/
+
+	return arr;
 
 
 }
@@ -203,7 +210,7 @@ std::list<XdmValue *> XdmArray::asList() {
 XdmValue ** XdmArray::values() {
   XdmValue ** arr = nullptr;
 
-	jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/option/cpp/XdmUtils;");
+/*	jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/option/cpp/XdmUtils;");
 	static jmethodID xmID = nullptr;
 
 
@@ -282,7 +289,9 @@ XdmValue ** XdmArray::values() {
 
 	} else {
 	    return arr;
-	}
+	}*/
+
+return arr;
 
 
 }

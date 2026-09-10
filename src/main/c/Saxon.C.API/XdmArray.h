@@ -51,7 +51,7 @@ public:
     /**
      * @param obj - The internal Java object for the XdmArray is wrapped here in the C++ XdmArray
      */
-    XdmArray(jobject obj);
+    XdmArray(int64_t obj);
 
 
 
@@ -60,7 +60,7 @@ public:
      * @param obj - The internal Java object for the XdmArray is wrapped here in the C++ XdmArray
      * @param len - The length of the array if known
      */
-    XdmArray(jobject obj, int len);
+    XdmArray(int64_t obj, int len);
 
 
     //! Get the number of members in the array

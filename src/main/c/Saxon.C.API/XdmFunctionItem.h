@@ -35,7 +35,7 @@ public:
      * XdmFunctionItem constructor created from a JNI Java object. This is for internal use only
      * @param obj - The internal Java object for the XdmFunctionItem is wrapped here in the C++ XdmArray
      */
-    XdmFunctionItem(jobject obj);
+    XdmFunctionItem(int64_t obj);
 
     //! Copy constructor.
     /**

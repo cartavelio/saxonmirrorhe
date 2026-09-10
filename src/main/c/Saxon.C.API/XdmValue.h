@@ -191,7 +191,7 @@ protected:
 
     //! initialize this XdmValue with default values
    inline void initialize() {
-    jValues   = nullptr;
+    jValues   = -1;
     refCount  = 0;
     valueType = nullptr;
     xdmSize   = 0;

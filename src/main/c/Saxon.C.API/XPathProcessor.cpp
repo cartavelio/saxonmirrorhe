@@ -109,7 +109,7 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 
 	setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    long ** results = j_evaluate(SaxonProcessor::sxn_environ->thread, cppXP, xpathStr, processorDataRef);
+    long ** results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)cppXP, xpathStr, (void *)processorDataRef);
 
 	if(!results) {
 
@@ -124,7 +124,7 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 	//int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
 
 
-	if (sizex>0) {
+	//if (sizex>0) {
 
 	    //TODO get type from the array
 		/*jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
@@ -161,7 +161,7 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 
 		//return value;
 	
-}
+//}
 return nullptr;
 
 }
@@ -177,7 +177,7 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    int64_t results = j_evaluateSingle(SaxonProcessor::sxn_environ->thread, cppXP, xpathStr, processorDataRef);
+    int64_t results = j_evaluateSingle(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)xpathStr, (void *)processorDataRef);
 
 /*
 	if (result) {
@@ -245,7 +245,7 @@ void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
         if (uri == nullptr) {
 		return;
         }
-	j_declareNamespace(SaxonProcessor::sxn_environ->thread, cppXPP, prefix uri);
+	j_declareNamespace(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)prefix, (char *)uri);
 
 }
 
@@ -255,7 +255,7 @@ void XPathProcessor::declareVariable(const char * name){
     if (name == nullptr) {
 		return;
     }
-    j_declareVariable(SaxonProcessor::sxn_environ->thread, cppXPP, name);
+    j_declareVariable(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)name);
 
 }
 
@@ -291,7 +291,7 @@ void XPathProcessor::importSchemaNamespace(const char* uri){
 
 
 void XPathProcessor::setBaseURI(const char * uriStr) {
-    j_setBaseURI(SaxonProcessor::sxn_environ->thread, cppXPP, uriStr);
+    j_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)uriStr);
 
 
 }
@@ -300,11 +300,9 @@ bool XPathProcessor::effectiveBooleanValue(const char * xpathStr) {
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    int64_t results = j_evaluateSingle(SaxonProcessor::sxn_environ->thread, cppXP, xpathStr, processorDataRef);
-	return result;
+    bool resultsi = (bool)j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, xpathStr, (void *)processorDataRef);
+    return resultsi;
 }
-return false;
-}                                                 
 
 
 void XPathProcessor::setParameter(const char * name, XdmValue*value, bool withParam) {
@@ -388,7 +386,7 @@ std::map<std::string,std::string>& XPathProcessor::getProperties(){
 
 void XPathProcessor::exceptionClear(){
     SaxonProcessor::attachCurrentThread();
-    SaxonProcessor::sxn_environ->env->ExceptionClear();
+
     if(exception != nullptr) {
         delete exception;
         exception = nullptr;

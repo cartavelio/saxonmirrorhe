@@ -267,18 +267,21 @@ public class SaxonCAPI {
 
 
     @CEntryPoint(name = "j_applyToConfiguration")
-    public static synchronized void applyToConfiguration(IsolateThread thread, ObjectHandle processorRef, CCharPointer namesPointer, CCharPointer valuesPointer, int len) throws SaxonApiException {
+    public static synchronized void applyToConfiguration(IsolateThread thread, ObjectHandle processorRef, ObjectHandle processorDataRef) throws SaxonApiException {
 
         Processor processor = objectHandles.get(processorRef);
         if (debug) {
             System.err.println("New processor created, Processor: " + System.identityHashCode(processor));
         }
 
-
+        ProcessorDataAccumulator processorDataAccumulator = objectHandles.get(processorDataRef);
         Configuration config = processor.getUnderlyingConfiguration();
+        String [] names = processorDataAccumulator.getParameterNames();
+        Object [] values = processorDataAccumulator.getValues();
+        int len = processorDataAccumulator.size();
         for (int i = 0; i < len; i++) {
-            String name = CTypeConversion.toJavaString(namesPointer.addressOf(i));//names[i];
-            String value = CTypeConversion.toJavaString(valuesPointer.addressOf(i));//values[i];
+            String name = names[i];
+            String value = (String)values[i];
             if(debug) {
                 System.err.println("SaxonC DEBUG - applyConfiguration, name=" + name);
                 System.err.println("SaxonC DEBUG - applyConfiguration, value=" + value);

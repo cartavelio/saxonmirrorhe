@@ -4,9 +4,9 @@
 
 
 
-jobject xdmValueAsObj(sxnc_environment *environi, const char* type, const char* str){ 
+int64_t xdmValueAsObj(sxnc_environment *environi, const char* type, const char* str){
 	
-	jclass  saxoncClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/SaxonCAPI");
+	/*jclass  saxoncClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/SaxonCAPI");
 	 if(environi->env == NULL) {
 		printf("Error: Saxon-C env variable is NULL\n");
 		fflush (stdout);
@@ -27,8 +27,8 @@ jobject xdmValueAsObj(sxnc_environment *environi, const char* type, const char* 
    jobject resultObj = ((*(environi->env))->CallStaticObjectMethod(environi->env, saxoncClass, MID_xdmValueo, type, str));
    if(resultObj) {
 	return resultObj;
-   } 
-   return NULL;
+   } */
+   return -1;
 }
 
     /**
@@ -38,7 +38,7 @@ jobject xdmValueAsObj(sxnc_environment *environi, const char* type, const char* 
      */
 sxnc_value * xdmValue(sxnc_environment *environi, const char* type, const char* str){ 
 	
-	jclass  saxoncClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/SaxonCAPI");
+	/*jclass  saxoncClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/SaxonCAPI");
 	 if(environi->env == NULL) {
 		printf("Error: Saxon-C env variable is NULL\n");
 		fflush (stdout);
@@ -61,13 +61,13 @@ sxnc_value * xdmValue(sxnc_environment *environi, const char* type, const char* 
 	sxnc_value* result = (sxnc_value *)malloc(sizeof(sxnc_value));
          result->xdmvalue = resultObj; 
 	 return result; 
-   } 
+   } */
    return NULL;
 }
 
 sxnc_value * evaluate(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen){
 	
-	static jmethodID emID = NULL; //cache the methodID
+	/*static jmethodID emID = NULL; //cache the methodID
 	if(!proc){} // code to avoid warning of unused variable. TODO: Remove use of variable in next release
 	jclass cppClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/XPathProcessor");
 
@@ -124,7 +124,7 @@ sxnc_value * evaluate(sxnc_environment *environi, sxnc_processor ** proc, char *
 	return result;
      }
 
-    checkForException(environi);
+    checkForException(environi);*/
     return 0;
 
 }
@@ -132,7 +132,7 @@ sxnc_value * evaluate(sxnc_environment *environi, sxnc_processor ** proc, char *
 
 bool effectiveBooleanValue(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen){
 	
-	static jmethodID bmID = NULL; //cache the methodID
+	/*static jmethodID bmID = NULL; //cache the methodID
 	if(!proc){} // code to avoid warning of unused variable. TODO: Remove use of variable in next release
 	jclass cppClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/XPathProcessor");
 
@@ -190,17 +190,17 @@ bool effectiveBooleanValue(sxnc_environment *environi, sxnc_processor ** proc, c
 	return resultObj;
      }
 
-    checkForException(environi);
+    checkForException(environi);*/
     return 0; //false
 }
 
 const char * getStringValue(sxnc_environment *environi, sxnc_value value){
-	return stringValue(environi, value.xdmvalue);
+	return (const char *)j_getStringValue(environi->thread, (void *)value.xdmvalue);
 }
 
 int size(sxnc_environment *environi, sxnc_value val){
 	
-	jclass  xdmValueClass = lookForClass(environi->env, "net/sf/saxon/s9api/XdmValue");
+	/*jclass  xdmValueClass = lookForClass(environi->env, "net/sf/saxon/s9api/XdmValue");
 	 if(environi->env == NULL) {
 		printf("Error: Saxon-C env variable is NULL\n");
 		fflush (stdout);
@@ -221,12 +221,13 @@ int size(sxnc_environment *environi, sxnc_value val){
       jint result = (jint)(*(environi->env))->CallIntMethod(environi->env,val.xdmvalue, MID_xdmValue);
           
 	return result;
-    
+    */
+	return 0;
 }
 
 sxnc_value * itemAt(sxnc_environment *environi, sxnc_value val, int i){
 	
-	jclass  xdmValueClass = lookForClass(environi->env, "net/sf/saxon/s9api/XdmValue");
+	/*jclass  xdmValueClass = lookForClass(environi->env, "net/sf/saxon/s9api/XdmValue");
 	 if(environi->env == NULL) {
 		printf("Error: Saxon-C env variable is NULL\n");
 		fflush (stdout);
@@ -252,13 +253,13 @@ sxnc_value * itemAt(sxnc_environment *environi, sxnc_value val, int i){
 	//checkForException(environi, cppClass, cpp);     
 	return result;
      }
-
+*/
     return 0;
 }
 
 bool isAtomicvalue(sxnc_environment *environi, sxnc_value val){
 	
-jclass  xdmItemClass = lookForClass(environi->env, "net/sf/saxon/s9api/XdmItem");
+    /*jclass  xdmItemClass = lookForClass(environi->env, "net/sf/saxon/s9api/XdmItem");
 	 if(environi->env == NULL) {
 		printf("Error: Saxon-C env variable is NULL\n");
 		fflush (stdout);
@@ -277,94 +278,36 @@ jclass  xdmItemClass = lookForClass(environi->env, "net/sf/saxon/s9api/XdmItem")
           return 0;
       }
       jboolean result = (jboolean)(*(environi->env))->CallBooleanMethod(environi->env,val.xdmvalue, MID_xdmValue);
-     return (bool)result;
+     return (bool)result;*/
+    return false;
 }
 
 int getIntegerValue(sxnc_environment *environi, sxnc_value value,  int failureVal){
 	
-	const char * valueStr = getStringValue(environi, value);
-	if(valueStr != NULL) {
-		int value = atoi(valueStr);
-		if(value != 0) {
-			return value;
-		}
-	} 
-
-	if (strcmp(valueStr,"0") == 0) {
-		return 0;
-	} else {
-		return failureVal;	
-	}}
+	return (int)j_getLongValue(environi->thread, (void *)value.xdmvalue);
+}
 
 bool getBooleanValue(sxnc_environment *environi, sxnc_value value){
 	
-	jclass booleanClass = lookForClass(environi->env,"java/lang/Boolean");
-	static jmethodID strMID = NULL;
-	if(!strMID) {
-		strMID = (jmethodID)(*(environi->env))->GetMethodID(environi->env, booleanClass, "booleanValue", "()Z");
-		if(!strMID) {
-	 		 printf("\nError: Boolean %s() not found\n","booleanValue");
-  	 		 fflush (stdout);
-         		 return 0;//false
-		}
-        }
-	jboolean result = (jboolean)((*(environi->env))->CallBooleanMethod(environi->env, value.xdmvalue, strMID));
-	return (bool)result;
+
+	return (bool)j_getBooleanValue(environi->thread, (void *)value.xdmvalue);
 }
 
 long getLongValue(sxnc_environment *environi, sxnc_value value,  long failureVal){
 	
-	const char * valueStr = getStringValue(environi, value);
-	if(valueStr != NULL) {
-		long value = atol(valueStr);
-		if(value != 0) {
-			return value;
-		}
-	} 
-
-	if (strcmp(valueStr,"0") == 0) {
-		return 0;
-	} else {
-		return failureVal;	
-	}
+	return j_getLongValue(environi->thread, (void *)value.xdmvalue);
 }
 
 float getFloatValue(sxnc_environment *environi, sxnc_value value,  float failureVal){
 	
-	jclass floatClass = lookForClass(environi->env,"java/lang/Float");
-	static jmethodID strMID = NULL;
-	if(!strMID) {
-		strMID = (jmethodID)(*(environi->env))->GetMethodID(environi->env, floatClass, "floatValue", "()F");
-		if(!strMID) {
-	 		 printf("\nError: Float %s() not found\n","floatValue");
-  	 		 fflush (stdout);
-         		 return 0;
-		}
-        }
-	jfloat result = (jfloat)((*(environi->env))->CallFloatMethod(environi->env, value.xdmvalue, strMID));
-	if ((*(environi->env))->ExceptionCheck(environi->env)) {
-		return failureVal;
-	 }
-	return (float)result;
+	return (float)j_getDoubleValue(environi->thread, (void *)value.xdmvalue);
 
 
 }
 
 double getDoubleValue(sxnc_environment *environi, sxnc_value value, double failureVal){
-	
-	const char * valueStr = getStringValue(environi, value);
-	if(valueStr != NULL) {
-		double value = atof(valueStr);
-		if(value != 0) {
-			return value;
-		}
-	} 
 
-	if (strcmp(valueStr,"0") == 0) {
-		return 0;
-	} else {
-		return failureVal;	
-	}
+    return j_getDoubleValue(environi->thread, (void *)value.xdmvalue);
 
 }
 
