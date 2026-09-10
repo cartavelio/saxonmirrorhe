@@ -1042,6 +1042,7 @@ task compile_function_library(dependsOn: ["eejCompile", "processResources"]) {
     }
   }
 }
+compileTestJava.dependsOn compile_function_library
 
 // ============================================================
 
