@@ -385,24 +385,37 @@ namespace TestDriver {
             XsltExecutable sheet = env.xsltExecutable;
 
             XmlUrlResolver res = new XmlUrlResolver();
-            //string xsltLanguageVersion = specAtt.Contains("XSLT30") || specAtt.Contains("XSLT20+") ? "3.0" : "2.0";
             if (stylesheet != null) {
-                //env.processor.SetProperty(FeatureKeys.ALLOW_MULTITHREADING, "false");
                 XsltCompiler compiler = env.xsltCompiler;
                 compiler.ErrorReporter = err => {
-                    if (!expectStaticError) {
+                    if (err.IsWarning) {
                         string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
                         Location loc = err.Location;
                         try {
-                            Console.Error.WriteLine("*** STATIC ERROR: " + code + " at " + 
+                            Console.Error.WriteLine("*** WARNING: " + code + " at " + 
                                                     loc.SystemId + "#" + loc.LineNumber + 
                                                     "\n   " + err.Message);
                         }
-                        catch (Exception e) {
-                            //Console.Error.WriteLine("*** STATIC ERROR: " + err.Message);
+                        catch (Exception) {
+                            // No action
                         }
                     }
-                    outcome.ReportError(err.ErrorCode);
+                    else {
+                        if (!expectStaticError) {
+                            string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
+                            Location loc = err.Location;
+                            try {
+                                Console.Error.WriteLine("*** STATIC ERROR: " + code + " at " +
+                                                        loc.SystemId + "#" + loc.LineNumber +
+                                                        "\n   " + err.Message);
+                            }
+                            catch (Exception) {
+                                // No action
+                            }
+
+                            outcome.ReportError(err.ErrorCode);
+                        }
+                    }
                 };
                 Stream styleSource;
                 try {
@@ -593,7 +606,7 @@ namespace TestDriver {
 
 
                         Xslt30Transformer transformer = sheet.Load30();
-                        transformer.XmlResolver = env;
+                        transformer.XmlDocumentResolver = env.GetXmlDocumentResolver();
                         if (env.unparsedTextResolver != null) {
                             transformer.TextResolver = env.unparsedTextResolver;
                         }
