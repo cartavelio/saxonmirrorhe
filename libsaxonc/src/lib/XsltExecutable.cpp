@@ -61,6 +61,7 @@ XsltExecutable::~XsltExecutable() {
 }
 
 XsltExecutable::XsltExecutable(const XsltExecutable &other) {
+  SaxonProcessor::attachCurrentThread();
   executableRef = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.executableRef);
   if(executableRef == SXN_EXCEPTION) {
     throw SaxonApiException();
