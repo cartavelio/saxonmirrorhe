@@ -589,6 +589,16 @@ public:
    */
   static void detachCurrentThread();
 
+    /**
+ * Attaches a current thread to the Graalvm Isolate
+ */
+  static void attachCurrentThread(sxnc_environment * sxn);
+
+    /**
+     * Detach JVM from the current thread
+     */
+  static void detachCurrentThread(sxnc_environment * sxn);
+
   /**
    * Set the current working directory
    * @param cwd - current working directory
@@ -792,13 +802,9 @@ protected:
   // JNINativeMethod *nativeMethods; /*!< native methods variable used in
   // extension methods */ std::vector<JNINativeMethod> nativeMethodVect; /*!<
   // Vector of native methods defined by user */
-
-
-
   SaxonApiException
       *exception; /*!< SaxonApiException object to capture exceptions thrown
                      from the underlying Java code via JNI */
-
 
 private:
   // void createException(const char *message = nullptr);
@@ -809,24 +815,25 @@ private:
 
   // SaxonC method for internal use
   static int64_t
-  createParameterJArray(std::map<std::string, XdmValue *> parameters,
+    createParameterJArray(sxnc_environment *sxn_environ, std::map<std::string, XdmValue *> parameters,
                         std::map<std::string, std::string> properties,
                         int additions = 0);
 
   static int64_t
-  createParameterJArray2(std::map<std::string, XdmValue *> parameters);
+  createParameterJArray2(sxnc_environment *sxn_environ, std::map<std::string, XdmValue *> parameters);
 
   static int64_t createJArray(XdmValue **values, int length);
 
+  static XdmValue *makeXdmValueFromRef(int64_t valueRef, sxnc_environment *sxn_environ = nullptr);
 
-  static XdmItem *makeXdmItemFromRef(int64_t valueRef);
+  static XdmItem *makeXdmItemFromRef(int64_t valueRef, sxnc_environment *sxn_environ= nullptr);
 
   static const char *checkException();
 
  /**
  * Remove ObjectHandle from the pool. Free for the GC.
  */
-  static void destroyHandle(int64_t handleRef);
+  static void destroyHandle(sxnc_environment *sxn_environ, int64_t handleRef);
 
    /**
    * Get info on objects allocated and still in memory

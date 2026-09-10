@@ -541,6 +541,10 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans,
     delete executable;
     delete input;
     delete values;
+    delete a1;
+    delete a2;
+    delete a3;
+    delete a4;
   } catch (SaxonApiException &e) {
     const char *emessage = e.getMessage();
     const char *code = e.getErrorCode();
@@ -1322,7 +1326,6 @@ void exampleSimple3aError(SaxonProcessor *saxonProc, Xslt30Processor *proc,
   sresult->failure++;
   sresult->failureList.push_back("exampleSimple3aError");
   delete executable;
-  return;
 }
 
 void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc,
@@ -2229,7 +2232,8 @@ void testCallSystemFunction(SaxonProcessor *proc, sResultCount *sresult) {
 
   XdmValue **xdmValue = new XdmValue *[1];
   xdmValue[0] = new XdmValue();
-  xdmValue[0]->addXdmItem(proc->makeStringValue("[1,2,3]"));
+  XdmAtomicValue * aValue = proc->makeStringValue("[1,2,3]");
+  xdmValue[0]->addXdmItem(aValue);
   XdmValue *result = fi->call(proc, xdmValue, 1);
 
   if (result != nullptr) {
@@ -2274,6 +2278,7 @@ void testCallSystemFunction(SaxonProcessor *proc, sResultCount *sresult) {
 
         delete item;
         delete result;
+        delete aValue;
         delete xdmValue[0];
         delete[] xdmValue;
         delete fi;
@@ -2285,6 +2290,7 @@ void testCallSystemFunction(SaxonProcessor *proc, sResultCount *sresult) {
       sresult->failureList.push_back("testCallSystemFunction");
     }
   }
+  delete aValue;
   delete xdmValue[0];
   delete[] xdmValue;
   delete fi;
@@ -3020,6 +3026,10 @@ void testTunnelNonTunnelStylesheet(SaxonProcessor *proc, Xslt30Processor *trans,
   if (sresulti.compare("<out>xyz1, foo2, foo3, xyz4</out>") == 0) {
   sresult->success++;
   delete [] resultStr;
+  delete a1;
+  delete a2;
+  delete a3;
+  delete a4;
   delete resultValue;
   } else {
     sresult->failure++;
@@ -3102,7 +3112,7 @@ void RunThread(XsltExecutable *executable, int tid,
   att_arg.group = NULL;*/
 
   //SaxonProcessor::attachCurrentThread();
-  //cerr << endl << "RunThread cp0-0,  THEAD ID=" << tid << endl;
+  cerr << endl << "RunThread started,  THEAD ID=" << tid << endl;
   fflush(stderr);
   fflush(stdout);
 
@@ -3133,7 +3143,7 @@ void RunThread(XsltExecutable *executable, int tid,
   } else {
     cerr << "XsltExecutable is nullptr" << endl;
   }
-  SaxonProcessor::detachCurrentThread();
+  //SaxonProcessor::detachCurrentThread();
 }
 
 void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
@@ -3145,18 +3155,16 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
   std::vector<std::string> s = {CppTestUtils::concat(2, dataDir->c_str(), "/xmark100k.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str(),
                                 CppTestUtils::concat(2, dataDir->c_str(), "/example.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str()};
 
-  std::vector<std::string> stylesheets = {CppTestUtils::concat(2, dataDir->c_str(), "/q12_1.xsl").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/test.xsl").c_str(),
-                                CppTestUtils::concat(2, dataDir->c_str(), "/example.xsl").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/test2.xsl").c_str()};
+  /*std::vector<std::string> stylesheets = {CppTestUtils::concat(2, dataDir->c_str(), "/q12_1.xsl").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/test.xsl").c_str(),
+                                CppTestUtils::concat(2, dataDir->c_str(), "/example.xsl").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/test2.xsl").c_str()};*/
 
   std::vector<std::thread> threads;
-
+  XsltExecutable *executable = nullptr;
   int threadFailures = 0;
   try {
+    executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/q12_1.xsl").c_str());
     for (int i = 0; i < s.size(); i++) {
-      XsltExecutable *executable = trans->compileFromFile(stylesheets[i].c_str());
-      if (executable == nullptr) {
-        continue;
-      }
+
       XsltExecutable *copyExecutable = executable->clone();//new XsltExecutable(* executable);
       threads.push_back(std::thread(RunThread, copyExecutable, i, s[i], &threadFailures));
     }
@@ -3176,6 +3184,10 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
 
   for (auto &th : threads) {
     th.join();
+  }
+  if (executable != nullptr) {
+    delete executable;
+    executable = nullptr;
   }
   if (threadFailures == 0) {
     sresult->success++;

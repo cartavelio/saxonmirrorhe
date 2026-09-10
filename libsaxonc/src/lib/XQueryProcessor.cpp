@@ -252,7 +252,7 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
     setProperty("s", infilename);
   }
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
   int64_t status = j_executeQueryToFile(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)ofilename, (char *)encoding,
@@ -279,7 +279,7 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
   int64_t result = j_executeQueryToValue(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
@@ -309,7 +309,7 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
   }
   allocFn fn = operator new;
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
   char *result = j_executeQueryToString(
       SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)proc->procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,

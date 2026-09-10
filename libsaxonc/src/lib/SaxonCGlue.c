@@ -59,19 +59,26 @@ int create_graalvm_isolate(sxnc_environment *env) {
 int attach_graalvm_thread(sxnc_environment *env) {
   graal_isolatethread_t *newthread = graal_get_current_thread(((env)->isolate));
   if (newthread) {
-    /*fprintf(stdout, "Cur attach thread pointer same %p\n", (void *)newthread);
-    fflush(stdout);*/
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      fprintf(stdout, "Cur attach thread pointer same newthread= %p, thread=%p \n", (void *)newthread, (void *)env->thread);
+      fflush(stdout);
+    }
     (env)->thread = newthread;
     return 1;
   }
 
   if (graal_attach_thread(((env)->isolate), &newthread) != 0) {
-    /*fprintf(stdout, "graal_attach_thread error\n");
-    fflush(stdout);*/
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      fprintf(stdout, "Cur attach thread pointer thread= %p, newthread=%p \n", (void *)env->thread, (void *)newthread);
+      fprintf(stdout, "graal_attach_thread error\n");
+      fflush(stdout);
+    }
     return 1;
   }
-  /*fprintf(stdout, "graal_attach_thread pointer %p\n", (void *)newthread);
-  fflush(stdout);*/
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    fprintf(stdout, "graal_attach_thread pointer %p\n", (void *)newthread);
+    fflush(stdout);
+  }
   (env)->thread = newthread;
   return 0;
 }
@@ -86,8 +93,15 @@ int detach_graalvm_thread(sxnc_environment *env) {
     return 1;
   }
   if (getenv("SAXONC_DEBUG_FLAG")) {
-    fprintf(stdout, "detach: Cur thread pointer %p\n", (void *)curthread);
+    fprintf(stdout, "detach: Cur thread pointer %p main thread=%p\n", (void *)curthread, (void *)(env)->mainthread);
     fflush(stdout);
+  }
+  if (((void *)(env)->thread) == ((void *)(env)->mainthread)) {
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      fprintf(stdout, "graal_detach_thread error - already in main thread\n");
+      fflush(stdout);
+    }
+    return 1;
   }
   if (graal_detach_thread(curthread) != 0) {
     if (getenv("SAXONC_DEBUG_FLAG")) {

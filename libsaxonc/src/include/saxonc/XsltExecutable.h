@@ -574,6 +574,10 @@ public:
    */
   SaxonProcessor* getSaxonProcessor() { return proc; }
 
+  sxnc_environment * getEnvironment() {
+      return sxn_environ;
+  }
+
 private:
   /**
    * Default constructor.
@@ -597,6 +601,10 @@ private:
 
 
   void setParameter(const char *name, XdmValue *value, bool withParam);
+
+  sxnc_environment
+          *sxn_environ; /*!< Environment to capture the JNI, JVM and handler to the
+                           cross compiled SaxonC library. */
 
 
   SaxonProcessor *proc; /*! Pointer to the SaxonProcessor object which created this XsltExecutable */

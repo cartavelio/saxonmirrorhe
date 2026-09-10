@@ -349,6 +349,55 @@ void SaxonProcessor::detachCurrentThread() {
 #endif
 }
 
+
+void SaxonProcessor::attachCurrentThread(sxnc_environment * sxn) {
+#ifdef DEBUG
+  std::cerr << "detachCurrentThread called" << std::endl;
+  int result =
+#endif
+  attach_graalvm_thread(sxn);
+  if (!sxn->mainthread) {
+    sxn->mainthread = SaxonProcessor::sxn_environ->mainthread;
+  }
+  if (!sxn->thread) {
+    sxn->thread = SaxonProcessor::sxn_environ->thread;
+  }
+#ifdef DEBUG
+  if (result != 0) {
+    std::cerr << "attachCurrentThread failed or already in the current thread"
+              << std::endl;
+  }
+#endif
+
+}
+
+/**
+ * Detach JVM from the current thread
+ */
+void SaxonProcessor::detachCurrentThread(sxnc_environment * sxn) {
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    fprintf(stdout, "detach: Cur thread pointer %p main thread=%p\n", (void *)sxn->thread, (void *)sxn->mainthread);
+    fflush(stdout);
+  }
+  if (((void *)(sxn)->thread) == ((void *)(SaxonProcessor::sxn_environ)->mainthread)) {
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      fprintf(stdout, "graal_detach_thread error - already in main thread\n");
+      fflush(stdout);
+    }
+    return;
+  }
+  if (graal_detach_thread(sxn->thread) != 0) {
+    // if (getenv("SAXONC_DEBUG_FLAG")) {
+    fprintf(stdout, "graal_detach_thread error\n");
+    fflush(stdout);
+    //}
+
+  }
+
+}
+
+
+
 SaxonProcessor::SaxonProcessor(const char *configFile) {
   cwd = "";
 
@@ -500,10 +549,13 @@ void SaxonProcessor::applyConfigurationProperties() {
   }*/
 }
 
-XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
+XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results, sxnc_environment *sxn_environ) {
   if (results > 0) {
+    if (sxn_environ == nullptr) {
+      sxn_environ = SaxonProcessor::sxn_environ;
+    }
     XdmValue *value = nullptr;
-    int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
+    int typeRef = j_getXdmObjectType(sxn_environ->thread,
                                      (void *)results);
 #ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -538,7 +590,7 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
     } else if (typeRef == XDM_EMPTY) {
       // Empty Sequence detected.
       // TODO Maybe we should create an EmptySequence object
-      j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results);
+      j_handles_destroy(sxn_environ->thread, (void *)results);
       results = SXN_UNSET;
       return nullptr;
 
@@ -554,16 +606,19 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
   return nullptr;
 }
 
- void SaxonProcessor::destroyHandle(int64_t handleRef){
+ void SaxonProcessor::destroyHandle(sxnc_environment *sxn_environ, int64_t handleRef){
 
    //SaxonProcessor::attachCurrentThread();
-   j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+   j_handles_destroy(sxn_environ->thread,
                     (void *)handleRef);
  }
 
-XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results) {
+XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results, sxnc_environment *sxn_environ) {
   if (results > 0) {
-    int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
+    if (sxn_environ == nullptr) {
+      sxn_environ = SaxonProcessor::sxn_environ;
+    }
+    int typeRef = j_getXdmObjectType(sxn_environ->thread,
                                      (void *)results);
 
     XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
@@ -589,7 +644,7 @@ XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results) {
     } else if (xdm_type == XDM_EMPTY) {
       // Empty Sequence detected.
       // TODO Maybe we should create an EmptySequence object
-      j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results);
+      j_handles_destroy(sxn_environ->thread, (void *)results);
       results = SXN_UNSET;
       return nullptr;
 
@@ -625,10 +680,10 @@ int64_t SaxonProcessor::createJArray(XdmValue **values, int length) {
   }
 }
 
-int64_t SaxonProcessor::createParameterJArray(
+int64_t SaxonProcessor::createParameterJArray(sxnc_environment *sxn_environ,
     std::map<std::string, XdmValue *> parameters,
     std::map<std::string, std::string> properties, int additions) {
-  SaxonProcessor::attachCurrentThread();
+  //SaxonProcessor::attachCurrentThread();
   int size = (int) parameters.size() + properties.size() + additions;
 #ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -639,7 +694,7 @@ int64_t SaxonProcessor::createParameterJArray(
 
   if (size > 0) {
     int64_t processorDataRef = createProcessorDataWithCapacity(
-        SaxonProcessor::sxn_environ->thread, size);
+        sxn_environ->thread, size);
 
     int i = 0;
     for (std::map<std::string, XdmValue *>::iterator iter = parameters.begin();
@@ -674,7 +729,7 @@ int64_t SaxonProcessor::createParameterJArray(
         continue;
       }
 
-      addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+      addProcessorDataPair(sxn_environ->thread,
                            (void *)processorDataRef,
                            (char *)(iter->first).c_str(),
                            ((iter->second)->getUnderlyingValue() == SXN_UNSET ? (void *)nullptr : (void *)(iter->second)->getUnderlyingValue()));
@@ -683,7 +738,7 @@ int64_t SaxonProcessor::createParameterJArray(
     for (std::map<std::string, std::string>::iterator iter = properties.begin();
          iter != properties.end(); ++iter, i++) {
       addProcessorPropertyPair(
-          SaxonProcessor::sxn_environ->thread, (void *)processorDataRef,
+          sxn_environ->thread, (void *)processorDataRef,
           (char *)(iter->first).c_str(), (char *)(iter->second).c_str());
     }
 
@@ -694,12 +749,12 @@ int64_t SaxonProcessor::createParameterJArray(
   }
 }
 
-int64_t SaxonProcessor::createParameterJArray2(
+int64_t SaxonProcessor::createParameterJArray2(sxnc_environment *sxn_environ,
     std::map<std::string, XdmValue *> parameters) {
   //SaxonProcessor::attachCurrentThread();
   int size = (int) parameters.size();
   int64_t processorDataRef = createProcessorDataWithCapacity(
-      SaxonProcessor::sxn_environ->thread, size);
+      sxn_environ->thread, size);
 
 #ifdef DEBUG
   std::cerr << "Parameter size: " << parameters.size() << std::endl;
@@ -716,7 +771,7 @@ int64_t SaxonProcessor::createParameterJArray2(
 
 #endif
 
-      addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+      addProcessorDataPair(sxn_environ->thread,
                            (void *)processorDataRef,
                            (char *)(iter->first).c_str(),
                            (void *)(iter->second)->getUnderlyingValue());

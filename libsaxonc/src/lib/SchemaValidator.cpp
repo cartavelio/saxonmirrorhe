@@ -123,7 +123,7 @@ void SchemaValidator::registerSchemaFromNode(XdmNode *node) {
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
 
   int64_t status = j_registerSchemaNode(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
@@ -151,7 +151,7 @@ void SchemaValidator::registerSchemaFromFile(const char *sourceFile) {
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
 
   int64_t status = j_registerSchema(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
@@ -196,7 +196,7 @@ void SchemaValidator::registerSchemaFromString(const char *sourceStr,
     return;
   }
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
 
   int64_t status = j_registerSchemaString(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
@@ -227,7 +227,7 @@ void SchemaValidator::validate(const char *sourceFile) {
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
   int64_t status = j_validate(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)cppV,
       (char *)cwdV.c_str(), (char *)sourceFile, (char *)nullptr,
@@ -252,7 +252,7 @@ XdmNode *SchemaValidator::validateToNode(const char *sourceFile) {
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
   int64_t result = j_validateToNode(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)cppV,
       (char *)cwdV.c_str(), (char *)sourceFile,

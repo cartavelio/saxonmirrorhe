@@ -102,7 +102,7 @@ XdmValue *XPathProcessor::evaluate(const char *xpathStr, const char *encoding) {
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t processorDataRef =
-            SaxonProcessor::createParameterJArray(parameters, properties, 0);
+            SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties, 0);
     int64_t results = j_evaluate(
             SaxonProcessor::sxn_environ->thread, (void *) cppXP, (char *) cwdXP.c_str(),
             (char *) xpathStr, (char *) encoding,
@@ -132,7 +132,7 @@ XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr,
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t processorDataRef =
-            SaxonProcessor::createParameterJArray(parameters, properties);
+            SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
     int64_t result = j_evaluateSingle(
             SaxonProcessor::sxn_environ->thread, (void *) cppXP, (char *) cwdXP.c_str(),
             (char *) xpathStr, (char *) encoding,
@@ -305,7 +305,7 @@ bool XPathProcessor::effectiveBooleanValue(const char *xpathStr,
     SaxonProcessor::attachCurrentThread();
     setProperty("resources", proc->getResourcesDirectory());
     int64_t processorDataRef =
-            SaxonProcessor::createParameterJArray(parameters, properties);
+            SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
     int resultsi = j_effectiveBooleanValue(
             SaxonProcessor::sxn_environ->thread, (void *) cppXP, (char *) cwdXP.c_str(),
             (char *) xpathStr, (char *) encoding,
