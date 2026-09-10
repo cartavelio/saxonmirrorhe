@@ -1421,10 +1421,9 @@ public class XdmUtils {
 
     @CEntryPoint(name = "j_axisIterator")
     public static CLongPointer axisIterator(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle nodeRef, int axisNum) throws SaxonApiException {
-        int num = 0;
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         XdmSequenceIterator iter = XdmSequenceIterator.ofNodes(node.getUnderlyingNode().iterateAxis(axisNum));
-  
+
         long[] childRefs = null;
         if(iter.hasNext()) {
             childRefs = iter.stream().mapToLong(i -> {
