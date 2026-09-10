@@ -729,7 +729,7 @@ public class ExperimentalXPathCompiler {
             try {
                 List<GroundedValue> memberMaps = new ArrayList<>();
                 for (PlainType pt : ((UnionType) primary).getPlainMemberTypes()) {
-                    memberMaps.add(makeMap(SequenceType.makeSequenceType(pt, StaticProperty.EXACTLY_ONE)));
+                    memberMaps.add(makeMap(SequenceType.one(pt)));
                 }
                 result.initialPut("u", new SimpleArrayItem(memberMaps));
             } catch (MissingComponentException e) {
@@ -749,7 +749,7 @@ public class ExperimentalXPathCompiler {
             result.initialPut("c", new StringValue(annotation));
         } else if (primary instanceof DocumentNodeTest) {
             ItemType content = ((DocumentNodeTest) primary).getElementTest();
-            MapItem contentMap = makeMap(SequenceType.makeSequenceType(content, StaticProperty.EXACTLY_ONE));
+            MapItem contentMap = makeMap(SequenceType.one(content));
             result.initialPut("e", contentMap);
         } else if (primary instanceof FunctionItemType) {
             if (primary instanceof ArrayItemType) {

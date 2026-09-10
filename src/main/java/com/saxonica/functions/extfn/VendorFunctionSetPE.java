@@ -1,11 +1,13 @@
 package com.saxonica.functions.extfn;
 
-import com.saxonica.functions.qt4.*;
+import com.saxonica.functions.qt4.InScopeNamespacesFn;
+import com.saxonica.functions.qt4.ItemsEnding;
+import com.saxonica.functions.qt4.ItemsStarting;
+import com.saxonica.functions.qt4.ParcelFn;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.expr.Component;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.number.NamedTimeZone;
@@ -82,9 +84,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                           SequenceType.SINGLE_BOOLEAN,
                           SequenceType.SINGLE_BOOLEAN,
                           SequenceType.OPTIONAL_INTEGER,
-                          SequenceType.makeSequenceType(
-                                  new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_STRING),
-                                  StaticProperty.ALLOWS_ZERO_OR_ONE),
+                          SequenceType.optional(
+                                  new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_STRING)),
                           SequenceType.OPTIONAL_STRING,
                           SequenceType.OPTIONAL_STRING,
                           SequenceType.OPTIONAL_STRING,

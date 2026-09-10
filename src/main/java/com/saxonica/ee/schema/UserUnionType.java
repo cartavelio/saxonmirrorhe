@@ -2,7 +2,6 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
@@ -197,7 +196,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
     public SequenceType getResultTypeOfCast() {
         try {
             if (isPlainType()) {
-                return SequenceType.makeSequenceType(this, StaticProperty.ALLOWS_ZERO_OR_ONE);
+                return SequenceType.optional(this);
             } else if (containsListType()) {
                 // can do better than this
                 return SequenceType.ATOMIC_SEQUENCE;

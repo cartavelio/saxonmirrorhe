@@ -5,7 +5,6 @@ import com.saxonica.config.ProfessionalConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticContext;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.SystemFunction;
@@ -213,7 +212,7 @@ public class ObjectMap extends SystemFunction {
         SequenceType[] baseArgTypes = base.getArgumentTypes();
         SequenceType[] curriedArgTypes = Arrays.copyOfRange(baseArgTypes, 1, baseArgTypes.length);
         FunctionItemType curried = new SpecificFunctionType(curriedArgTypes, resultType);
-        return SequenceType.makeSequenceType(curried, StaticProperty.EXACTLY_ONE);
+        return SequenceType.one(curried);
     }
 
 

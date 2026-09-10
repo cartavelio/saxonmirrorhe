@@ -340,7 +340,7 @@ public class Parts extends SystemFunction implements Callable {
                 }
             }
             names.add("value");
-            types.add(SequenceType.makeSequenceType(entry.getKey(), StaticProperty.EXACTLY_ONE));
+            types.add(SequenceType.one(entry.getKey()));
             resultTypeMap.put(entry.getKey(), new RecordTest(names, types, optionalFields, false));
         }
     }

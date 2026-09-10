@@ -164,7 +164,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             synchronized(config) {
                 result = JavaExternalObjectType.of(theClass);
             }
-            SequenceType st = SequenceType.makeSequenceType(result, StaticProperty.EXACTLY_ONE);
+            SequenceType st = SequenceType.one(result);
             ItemType at = getArg(0).getItemType();
             if (at instanceof JavaExternalObjectType) {
                 Supplier<RoleDiagnostic> role =

@@ -459,14 +459,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         //)
         ItemType parseCsvResultType = RecordTest.nonExtensible(
                 new RecordTest.Field("columns", SequenceType.STRING_SEQUENCE, true),
-                new RecordTest.Field("columns-index", SequenceType.makeSequenceType(
-                        new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_INTEGER), StaticProperty.ALLOWS_ZERO_OR_ONE), true),
+                new RecordTest.Field("columns-index", SequenceType.optional(
+                        new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_INTEGER)), true),
                 new RecordTest.Field("rows", SequenceType.makeSequenceType(new ArrayItemType(SequenceType.SINGLE_STRING), StaticProperty.ALLOWS_ZERO_OR_MORE), true),
                 new RecordTest.Field("get", SequenceType.makeSequenceType(
                         new SpecificFunctionType(new SequenceType[]{
                                 BuiltInAtomicType.POSITIVE_INTEGER.one(),
-                                SequenceType.makeSequenceType(
-                                        LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER, BuiltInAtomicType.STRING), StaticProperty.EXACTLY_ONE)
+                                SequenceType.one(
+                                        LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER, BuiltInAtomicType.STRING))
                         }, SequenceType.OPTIONAL_STRING), StaticProperty.EXACTLY_ONE), true));
 
         register("parse-csv", 1, e -> e.populate(com.saxonica.functions.qt4.csv.ParseCsv::new, parseCsvResultType, OPT, LATE | NEW)
