@@ -12,7 +12,7 @@ import net.sf.saxon.option.axiom.AxiomObjectModel;
 import net.sf.saxon.option.dom4j.DOM4JObjectModel;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMObjectModel;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Tag;
@@ -36,7 +36,7 @@ public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
         NodeInfo documentElement = null;
         try {
             tree = config.buildDocumentTree(source, options);
-            documentElement = (NodeInfo)tree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
+            documentElement = (NodeInfo)tree.getRootNode().iterateChildAxis(NodeKindType.ELEMENT).next();
         } catch (XPathException e) {
             e.printStackTrace();
             fail(e.getMessage());

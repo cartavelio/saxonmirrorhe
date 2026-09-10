@@ -10,7 +10,7 @@ import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.str.StringView;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -590,8 +590,8 @@ public class TraxTest {
             System.err.println("Source document built OK");
             NodeInfo start = null;
             out:
-            for (NodeInfo child : doc.children(NodeKindTest.ELEMENT)) {
-                for (NodeInfo gc : child.children(NodeKindTest.ELEMENT)) {
+            for (NodeInfo child : doc.children(NodeKindType.ELEMENT)) {
+                for (NodeInfo gc : child.children(NodeKindType.ELEMENT)) {
                     start = gc;
                     break out;
                 }
@@ -898,7 +898,7 @@ public class TraxTest {
 
                 Configuration config = ((TransformerFactoryImpl) tfactory).getConfiguration();
                 NodeInfo saxonDoc = config.buildDocumentTree(new SAXSource(new InputSource(foo_xml))).getRootNode();
-                NodeInfo top = (NodeInfo)saxonDoc.iterateChildAxis(NodeKindTest.ELEMENT).next();
+                NodeInfo top = (NodeInfo)saxonDoc.iterateChildAxis(NodeKindType.ELEMENT).next();
 
                 Node imported = doc.importNode(NodeOverNodeInfo.wrap(top), true);
 

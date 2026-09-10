@@ -3,8 +3,8 @@ package s9apitest;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -225,7 +225,7 @@ public class TestTypes {
         ItemTypeFactory itf = new ItemTypeFactory(new Processor(false));
         ItemType t = itf.getNodeKindTest(XdmNodeKind.ELEMENT);
         NodeTest nt = ((NodeTest)t.getUnderlyingItemType());
-        assertTrue(nt instanceof NodeKindTest, "a1");
+        assertTrue(nt instanceof NodeKindType, "a1");
     }
 
     @Test

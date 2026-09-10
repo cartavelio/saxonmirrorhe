@@ -2,8 +2,8 @@ package nativetests;
 
 import jaxptest.ConfigTest;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.ItemType;
 import net.sf.saxon.s9api.ItemTypeFactory;
 import net.sf.saxon.s9api.Processor;
@@ -37,9 +37,9 @@ public class SubtypingTest {
     public void testNodeTypes() {
         Processor proc = new Processor(false);
         TypeHierarchy th = proc.getUnderlyingConfiguration().getTypeHierarchy();
-        assertEquals(Affinity.SAME_TYPE, th.relationship(NodeKindTest.ELEMENT, NodeKindTest.ELEMENT));
-        assertEquals(Affinity.SUBSUMED_BY, th.relationship(NodeKindTest.ELEMENT, AnyXNodeTest.getInstance()));
-        assertEquals(Affinity.DISJOINT, th.relationship(NodeKindTest.ELEMENT, NodeKindTest.ATTRIBUTE));
+        assertEquals(Affinity.SAME_TYPE, th.relationship(NodeKindType.ELEMENT, NodeKindType.ELEMENT));
+        assertEquals(Affinity.SUBSUMED_BY, th.relationship(NodeKindType.ELEMENT, AnyXNodeType.getInstance()));
+        assertEquals(Affinity.DISJOINT, th.relationship(NodeKindType.ELEMENT, NodeKindType.ATTRIBUTE));
     }
 
     @Test

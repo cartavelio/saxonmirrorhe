@@ -18,7 +18,7 @@ import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
@@ -1861,7 +1861,7 @@ public class DOMTest {
             boolean useDomino = true;
             if (useDomino) {
                 DominoTree domTree = DominoTree.makeTree(doc.getDocumentElement().getOwnerDocument(), pc, "systemID");
-                SequenceIterator next = domTree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT);
+                SequenceIterator next = domTree.getRootNode().iterateChildAxis(NodeKindType.ELEMENT);
                 GroundedValue gv = SequenceTool.toGroundedValue(next);
                 DominoNode elNode = (DominoNode) gv.itemAt(0);
 

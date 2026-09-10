@@ -12,9 +12,16 @@
    
  
 
-   
-
-
+   <exception test-set="misc-CombinedErrorCodes" test-case="
+      K-CombinedErrorCodes-2 
+      K-CombinedErrorCodes-3
+      K-CombinedErrorCodes-4
+      K-CombinedErrorCodes-5
+      K-CombinedErrorCodes-6"
+       run="false" report="notRun">
+      <created by="Michael Kay" on="2025-07-17"/>
+      <reason>Hangs trying to access http://example.com/.</reason>
+   </exception>
    
    <exception test-set="op-to" test-case="RangeExpr-408f
       RangeExpr-408g
