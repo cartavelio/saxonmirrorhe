@@ -1,5 +1,6 @@
 import com.saxonica.build.*
 import com.saxonica.build.java.JarFinder
+import java.util.UUID
 
 plugins {
   id("java-library")
@@ -719,6 +720,31 @@ tasks.register<Exec>("samples") {
                        "--edition", "ee",
                        "--platform", "csharp",
                        "--csexec", "build/${arch}/SaxonCS/bin/${rel}/net8.0/${plat}-${arch}/SaxonCS")
+}
+
+// ============================================================
+
+
+val templateName = project.findProperty("projectTemplateName") ?: "SaxonCS"
+
+tasks.register<JavaExec>("csproj-template") {
+  inputs.files(layout.projectDirectory.file("../tools/generateCSProjFiles.xsl"))
+  outputs.file(layout.projectDirectory.file("${templateName}.csproj"))
+  outputs.file(layout.projectDirectory.file("${templateName}.sln"))
+  classpath = preprocessorClasspath
+  mainClass = "net.sf.saxon.Transform"
+  args("-it",
+       "-xsl:${layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")}",
+       "-o:${layout.projectDirectory.file("${templateName}.sln")}",
+       "platform=${saxonCS.platform.get()}",
+       "arch=${saxonCS.arch.get()}",
+       "edition=${saxonCS.edition.get()}",
+       "framework=net${saxonBuild.dotnetversion.get()}",
+       "saxonVersion=${findProperty("saxonVersion")!!}",
+       "uuid1=${UUID.randomUUID()}",
+       "uuid2=${UUID.randomUUID()}",
+       "uuid3=${UUID.randomUUID()}",
+       "uuid4=${UUID.randomUUID()}")
 }
 
 // ============================================================
