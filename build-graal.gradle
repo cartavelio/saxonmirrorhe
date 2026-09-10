@@ -30,7 +30,23 @@ private String findGraalBin(String edition) {
     }
   }
 
-  return bin.toString()
+  return bin.toString().replace("\\", "/")
+}
+
+private String nativeImage(String edition) {
+  def bin = findGraalBin(edition)
+  if (bin == null) {
+    throw new GradleException("Cannot build SaxonC, cannot find Graal CE")
+  }
+  File image = new File("${bin}/native-image")
+  if (!image.exists()) {
+    // For Windows
+    image = new File("${bin}/native-image.cmd") 
+  }
+  if (!image.exists()) {
+    return null
+  }
+  return image.toString()
 }
 
 def graalCeBin = findGraalBin("ce")
@@ -39,11 +55,7 @@ def graalEeBin = findGraalBin("ee")
 task graal_ce_home(
 ) {
   doLast {
-    if (graalCeBin == null) {
-      throw new GradleException("Cannot build SaxonC, cannot find Graal CE")
-    }
-    File image = new File("${graalCeBin}/native-image")
-    if (!image.exists()) {
+    if (nativeImage("ce") == null) {
       throw new GradleException("Cannot build SaxonC, cannot find CE native-image")
     }
   }
@@ -52,11 +64,7 @@ task graal_ce_home(
 task graal_ee_home(
 ) {
   doLast {
-    if (graalEeBin == null) {
-      throw new GradleException("Cannot build SaxonC, cannot find Graal EE")
-    }
-    File image = new File("${graalEeBin}/native-image")
-    if (!image.exists()) {
+    if (nativeImage("ee") == null) {
       throw new GradleException("Cannot build SaxonC, cannot find EE native-image")
     }
   }
@@ -169,9 +177,9 @@ task buildCWrappers (
                            include: "libsaxon-${edition}c-${saxonVersion}.*")
 
     doLast {
-      def bin = graalEdition == "ce" ? graalCeBin : graalEeBin
+      def image = nativeImage(graalEdition)
       exec {
-        commandLine "${bin}/native-image",
+        commandLine image,
           "-cp", "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar",
           "-o","${buildDir}/c/libsaxon-${edition}c-${saxonVersion}",
           "--no-fallback", "-H:Path=${buildDir}/c",
@@ -193,8 +201,8 @@ task buildCWrappers (
     dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home"],
     description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
   ) {
-    def bin = graalEdition == "ce" ? graalCeBin : graalEeBin
-    commandLine "${bin}/native-image",
+    def image = nativeImage(graalEdition)
+    commandLine image,
       "-cp", "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar",
       "net.sf.saxon.Transform", "-o","${buildDir}/c/saxon-${edition}c-${saxonVersion}",
       "--no-fallback", "-H:Path=${buildDir}/c",
