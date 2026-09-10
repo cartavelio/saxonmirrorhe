@@ -7,11 +7,11 @@
 
 package net.sf.saxon.regex;
 
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-
-import java.util.function.BiFunction;
 
 /**
  * This interface represents a compiled regular expression. There are different
@@ -75,14 +75,15 @@ public interface RegularExpression {
      * Replace all substrings of a supplied input string that match the regular expression
      * with a replacement string.
      *
-     * @param input       the input string on which replacements are to be performed
-     * @param replacement a function that is called once for each matching substring, and
-     *                    that returns a replacement for that substring
+     * @param input   the input string on which replacements are to be performed
+     * @param action  a function that is called once for each matching substring, and
+     *                that returns a replacement for that substring
+     * @param context dynamic XPath context (needed for invoking the user function)
      * @return the result of performing the replacement
-     * @throws XPathException if the replacement string is invalid
+     * @throws XPathException if the replacement action throws an exception
      */
 
-    UnicodeString replaceWith(UnicodeString input, BiFunction<UnicodeString, UnicodeString[], UnicodeString> replacement) throws XPathException;
+    UnicodeString replaceWith(UnicodeString input, FunctionItem action, XPathContext context) throws XPathException;
 
     /**
      * Get the flags used at the time the regular expression was compiled.

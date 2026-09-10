@@ -28,9 +28,10 @@ public interface RegexMatchHandler {
      * Method to be called when the start of a captured group is encountered
      *
      * @param groupNumber the group number of the captured group
+     * @param groupName the group name, if there is one; otherwise null
      */
 
-    void onGroupStart(int groupNumber) throws XPathException;
+    void onGroupStart(int groupNumber, UnicodeString groupName) throws XPathException;
 
     /**
      * Method to be called when the end of a captured group is encountered

@@ -13,16 +13,13 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.regex.RECompiler;
+import net.sf.saxon.regex.RESyntaxException;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.StringValue;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -103,54 +100,27 @@ public class Replace extends RegexFunction  {
         RegularExpression re = getRegularExpression(arguments, 1, 3);
 
         Item replacementArg = arguments[2].head();
-        UnicodeString replacement = null;
-        java.util.function.BiFunction<UnicodeString, UnicodeString[], UnicodeString> action = null;
+        UnicodeString replacementString = null;
+        FunctionItem replacementAction = null;
 
         if (replacementArg instanceof StringValue) {
-            replacement = replacementArg.getUnicodeStringValue();
-        } else if (replacementArg instanceof FunctionItem) {
-            FunctionItem actionFn = (FunctionItem) replacementArg;
-            action = (in, groups) -> {
-                try {
-                    // cast to UnicodeString[] is needed for the transpiler
-                    List<Item> groupItems = new ArrayList<>(((UnicodeString[])groups).length);
-                    for (UnicodeString group : groups) {
-                        groupItems.add(new StringValue(group, BuiltInAtomicType.UNTYPED_ATOMIC));
-                    }
-                    Sequence result = actionFn.call(context,
-                                                    new Sequence[]{new StringValue(in, BuiltInAtomicType.UNTYPED_ATOMIC),
-                                                            SequenceExtent.makeSequenceExtent(groupItems)});
-                    Item resultItem = result.head();
-                    if (resultItem == null) {
-                        return EmptyUnicodeString.getInstance();
-                    } else {
-                        return resultItem.getUnicodeStringValue();
-                    }
-                } catch (XPathException e) {
-                    throw new AssertionError(e);
-                }
-            };
-
-//            RegularExpression re = getRegularExpression(arguments, 1, 3);
-//            return new StringValue(re.replaceWith(input.getUnicodeStringValue(), fn));
+            replacementString = replacementArg.getUnicodeStringValue();
+        } else if (replacementArg instanceof FunctionItem actionFn) {
+            replacementAction = actionFn;
         }
 
-//        if (replacement != null && action != null) {
-//            throw new XPathException("Cannot supply both a replacement string and a replacement action", "FORX0005");
-//        }
-
-        if (replacement != null && !replacementChecked && !re.getFlags().contains("q") && !re.isPlatformNative()) {
+        if (replacementString != null && !replacementChecked && !re.getFlags().contains("q") && !re.isPlatformNative()) {
             // if it is a string literal, the check was done at compile time
-            String msg = checkReplacement(replacement);
+            String msg = checkReplacement(replacementString);
             if (msg != null) {
                 throw new XPathException(msg, "FORX0004", context);
             }
         }
 
-        if (replacement != null) {
-            return new StringValue(re.replace(input, replacement));
-        } else if (action != null) {
-            return new StringValue(re.replaceWith(input, action));
+        if (replacementString != null) {
+            return new StringValue(re.replace(input, replacementString));
+        } else if (replacementAction != null) {
+            return new StringValue(re.replaceWith(input, replacementAction, context));
         } else {
             return new StringValue(re.replace(input, EmptyUnicodeString.getInstance()));
         }
@@ -170,7 +140,14 @@ public class Replace extends RegexFunction  {
                 if (i + 1 < rep.length()) {
                     int index = ++i;
                     int next = rep.codePointAt(index);
-                    if (next < '0' || next > '9') {
+                    if (next == '<') {
+                        try {
+                            UnicodeString name = RECompiler.readGroupName(rep, i+1);
+                            i += name.length32() + 1;
+                        } catch (RESyntaxException e) {
+                            return e.getMessage();
+                        }
+                    } else if (next < '0' || next > '9') {
                         return "Invalid replacement string in replace(): $ sign must be followed by digit 0-9";
                     }
                 } else {
@@ -190,6 +167,7 @@ public class Replace extends RegexFunction  {
         }
         return null;
     }
+
 
 }
 

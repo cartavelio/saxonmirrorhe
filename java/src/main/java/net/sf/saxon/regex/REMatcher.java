@@ -31,12 +31,20 @@
 package net.sf.saxon.regex;
 
 
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.ma.map.GeneralMapBuilder;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.*;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.*;
-import java.util.function.BiFunction;
 
 
 /**
@@ -193,7 +201,7 @@ public class REMatcher {
      */
 
     public UnicodeString getGroupName(int which) {
-        return program.groupNames.get(which);
+        return program.groupNamesByIndex.get(which);
     }
 
     /**
@@ -406,7 +414,7 @@ public class REMatcher {
      * string. This happens when the very first character of input string is
      * matched by the pattern.</p>
      *
-     * @param s String to split on this regular exression
+     * @param s String to split on this regular expression
      * @return A list of strings
      */
     public List<UnicodeString> split(UnicodeString s) {
@@ -447,22 +455,11 @@ public class REMatcher {
 
     /**
      * Substitutes a string for this regular expression in another string.
-     * This method works like the Perl function of the same name.
-     * Given a regular expression of "a*b", a String to substituteIn of
-     * "aaaabfooaaabgarplyaaabwackyb" and the substitution String "-", the
-     * resulting String returned by subst would be "-foo-garply-wacky-".
-     * <p>It is also possible to reference the contents of a parenthesized expression
-     * with $0, $1, ... $9. A regular expression of "http://[\\.\\w\\-\\?/~_@&amp;=%]+",
-     * a String to substituteIn of "visit us: http://www.apache.org!" and the
-     * substitution String "&lt;a href=\"$0\"&gt;$0&lt;/a&gt;", the resulting String
-     * returned by subst would be
-     * "visit us: &lt;a href=\"http://www.apache.org\"&gt;http://www.apache.org&lt;/a&gt;!".</p>
-     * <p><i>Note:</i> $0 represents the whole match.</p>
      *
      * @param in          String to substitute within
-     * @param replacement String to substitute for matches of this regular expression
-     * @return The string substituteIn with zero or more occurrences of the current
-     *         regular expression replaced with the substitution String (if this regular
+     * @param replacement String to substitute for matches of this regular expression, following
+     *                    the rules of the XPath fn:replace function
+     * @return The string replaced with the substitution String (if this regular
      *         expression object doesn't match at any position, the original String is returned
      *         unchanged).
      */
@@ -507,40 +504,53 @@ public class REMatcher {
                         simpleReplacement = false;
                         int index = ++i;
                         ch = replacement.codePointAt(index);
-                        if (!(ch >= '0' && ch <= '9')) {
-                            throw new RESyntaxException("$ in replacement string must be followed by a digit");
-                        }
-                        int n = ch - '0';
-                        if (maxCapture <= 9) {
-                            if (maxCapture >= n) {
+                        if (ch >= '0' && ch <= '9') {
+                            int n = ch - '0';
+                            if (maxCapture <= 9) {
+                                if (maxCapture >= n) {
+                                    UnicodeString captured = getParen(n);
+                                    if (captured != null) {
+                                        result = result.concat(captured);
+                                    }
+                                }
+                            } else {
+                                while (true) {
+                                    if (++i >= replacement.length()) {
+                                        break;
+                                    }
+                                    ch = replacement.codePointAt(i);
+                                    if (ch >= '0' && ch <= '9') {
+                                        int m = n * 10 + (ch - '0');
+                                        if (m > maxCapture) {
+                                            i--;
+                                            break;
+                                        } else {
+                                            n = m;
+                                        }
+                                    } else {
+                                        i--;
+                                        break;
+                                    }
+                                }
                                 UnicodeString captured = getParen(n);
                                 if (captured != null) {
                                     result = result.concat(captured);
                                 }
                             }
-                        } else {
-                            while (true) {
-                                if (++i >= replacement.length()) {
-                                    break;
-                                }
-                                ch = replacement.codePointAt(i);
-                                if (ch >= '0' && ch <= '9') {
-                                    int m = n * 10 + (ch - '0');
-                                    if (m > maxCapture) {
-                                        i--;
-                                        break;
-                                    } else {
-                                        n = m;
-                                    }
-                                } else {
-                                    i--;
-                                    break;
-                                }
+                        } else if (ch == '<') {
+                            // QT4 allows $<group-name>
+                            UnicodeString groupName = RECompiler.readGroupName(replacement, index + 1);
+                            Integer groupNr = program.groupsByName.get(groupName);
+                            if (groupNr == null) {
+                                throw new RESyntaxException("Unknown group name '" + groupName + "'");
                             }
-                            UnicodeString captured = getParen(n);
+                            UnicodeString captured = getParen(groupNr);
                             if (captured != null) {
                                 result = result.concat(captured);
                             }
+                            i += groupName.length32() + 1;
+                        } else {
+                            throw new RESyntaxException("$ in replacement string must be followed by a digit or a group name");
                         }
                     } else {
                         result = result.concat(new UnicodeChar(ch));
@@ -583,27 +593,13 @@ public class REMatcher {
     }
 
     /**
-     * Substitutes a string for this regular expression in another string.
-     * This method works like the Perl function of the same name.
-     * Given a regular expression of "a*b", a String to substituteIn of
-     * "aaaabfooaaabgarplyaaabwackyb" and the substitution String "-", the
-     * resulting String returned by subst would be "-foo-garply-wacky-".
-     * <p>It is also possible to reference the contents of a parenthesized expression
-     * with $0, $1, ... $9. A regular expression of "http://[\\.\\w\\-\\?/~_@&amp;=%]+",
-     * a String to substituteIn of "visit us: http://www.apache.org!" and the
-     * substitution String "&lt;a href=\"$0\"&gt;$0&lt;/a&gt;", the resulting String
-     * returned by subst would be
-     * "visit us: &lt;a href=\"http://www.apache.org\"&gt;http://www.apache.org&lt;/a&gt;!".</p>
-     * <p><i>Note:</i> $0 represents the whole match.</p>
-     *
+     * Substitutes a string for this regular expression in another string,
+     * replacing all matching segments with the result of calling a supplied function
      * @param in          String to substitute within
      * @param replacer    Function to process each matching substring and return a replacement
-     * @return The string substituteIn with zero or more occurrences of the current
-     * regular expression replaced with the substitution String (if this regular
-     * expression object doesn't match at any position, the original String is returned
-     * unchanged).
+     * @return The result string
      */
-    public UnicodeString replaceWith(UnicodeString in, BiFunction<UnicodeString, UnicodeString[], UnicodeString> replacer) {
+    public UnicodeString replaceWith(UnicodeString in, FunctionItem replacer, XPathContext context) throws XPathException {
         // String to return
         UnicodeBuilder sb = new UnicodeBuilder();
 
@@ -618,18 +614,42 @@ public class REMatcher {
                 sb.append(in.codePointAt(i));
             }
             UnicodeString matchingSubstring = in.substring(getParenStart(0), getParenEnd(0));
-            int nrOfGroups = program.maxParens - 1;
-            UnicodeString[] groups = new UnicodeString[nrOfGroups];
-            for (int i=0; i<nrOfGroups; i++) {
-                groups[i] = getParen(i+1);
-                if (groups[i] == null) {
-                    groups[i] = EmptyUnicodeString.getInstance();
+            if (replacer.getArity() == 0) {
+                Sequence result = replacer.call(context, new Sequence[0]);
+                Item first = result.head();
+                if (first != null) {
+                    sb.append(first.getStringValue());
                 }
-            }
-            UnicodeString replacement = replacer.apply(matchingSubstring, groups);
-            IntIterator iter = replacement.codePoints();
-            while (iter.hasNext()) {
-                sb.append(iter.next());
+            } else if (replacer.getArity() == 1) {
+                Sequence[] args = new Sequence[]{StringValue.makeUntypedAtomic(matchingSubstring)};
+                Sequence result = replacer.call(context, args);
+                Item first = result.head();
+                if (first != null) {
+                    sb.append(first.getStringValue());
+                }
+            } else if (replacer.getArity() == 2) {
+                GeneralMapBuilder builder = new GeneralMapBuilder(40);
+                int nrOfGroups = program.maxParens - 1;
+                for (int i = 1; i <= nrOfGroups; i++) {
+                    UnicodeString group = getParen(i);
+                    if (group != null) {
+                        UnicodeString groupName = getGroupName(i);
+                        if (groupName == null) {
+                            builder.put(Int64Value.makeIntegerValue(i), StringValue.makeUntypedAtomic(group));
+                        } else {
+                            builder.put(new StringValue(groupName), StringValue.makeUntypedAtomic(group));
+                        }
+                    }
+                }
+                MapItem groupMap = builder.getCompletedMapConfidently();
+                Sequence[] args = new Sequence[]{StringValue.makeUntypedAtomic(matchingSubstring), groupMap};
+                Sequence result = replacer.call(context, args);
+                Item first = result.head();
+                if (first != null) {
+                    sb.append(first.getStringValue());
+                }
+            } else if (replacer.getArity() > 2) {
+                throw new XPathException("Replacement callback has wrong number of arguments");
             }
 
             // Move forward, skipping past match

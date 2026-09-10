@@ -277,7 +277,8 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                             s = new ArrayList<>(4);
                             actions.put(start, s);
                         }
-                        s.add(new GroupAction(groupNr, () -> handler.onGroupStart(groupNr)));
+                        UnicodeString groupName = _matcher.getGroupName(groupNr);
+                        s.add(new GroupAction(groupNr, () -> handler.onGroupStart(groupNr, groupName)));
                         // Add the end action before all other actions on the list for the same position
                         List<GroupAction> e = actions.get(end);
                         if (e == null) {
@@ -297,10 +298,11 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                         // insert the start and end events immediately before the end event for the parent group,
                         // if present; otherwise after all existing events for this position
                         List<GroupAction> s = actions.get(start);
+                        UnicodeString groupName = _matcher.getGroupName(groupNr);
                         if (s == null) {
                             s = new ArrayList<>(4);
                             actions.put(start, s);
-                            s.add(new GroupAction(groupNr, () -> handler.onGroupStart(groupNr)));
+                            s.add(new GroupAction(groupNr, () -> handler.onGroupStart(groupNr, groupName)));
                             s.add(new GroupAction(groupNr, () -> handler.onGroupEnd(groupNr)));
                         } else {
                             int pos = s.size();
@@ -311,7 +313,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                                 }
                             }
                             s.add(pos, new GroupAction(groupNr, () -> handler.onGroupEnd(groupNr)));
-                            s.add(pos, new GroupAction(groupNr, () -> handler.onGroupStart(groupNr)));
+                            s.add(pos, new GroupAction(groupNr, () -> handler.onGroupStart(groupNr, groupName)));
                         }
 
                     }

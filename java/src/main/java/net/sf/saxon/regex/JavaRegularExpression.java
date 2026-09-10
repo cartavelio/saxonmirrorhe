@@ -10,13 +10,14 @@ package net.sf.saxon.regex;
 //import net.sf.saxon.expr.regexj.Matcher;
 //import net.sf.saxon.expr.regexj.Pattern;
 
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.EmptyAtomicIterator;
 
-import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -134,15 +135,16 @@ public class JavaRegularExpression implements RegularExpression {
      * Replace all substrings of a supplied input string that match the regular expression
      * with a replacement string.
      *
-     * @param input       the input string on which replacements are to be performed
-     * @param replacement a function that is called once for each matching substring, and
-     *                    that returns a replacement for that substring
+     * @param input   the input string on which replacements are to be performed
+     * @param action  a function that is called once for each matching substring, and
+     *                that returns a replacement for that substring
+     * @param context
      * @return the result of performing the replacement
      * @throws XPathException if the replacement string is invalid
      */
     @Override
-    public UnicodeString replaceWith(UnicodeString input, BiFunction<UnicodeString, UnicodeString[], UnicodeString> replacement) throws XPathException {
-        throw new XPathException("fn:replace#5 is not supported with the Java regex engine");
+    public UnicodeString replaceWith(UnicodeString input, FunctionItem action, XPathContext context) throws XPathException {
+        throw new XPathException("fn:replace with callback function is not supported with the Java regex engine");
     }
 
     /**

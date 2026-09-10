@@ -8,14 +8,15 @@
 package net.sf.saxon.regex;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 
 import java.util.List;
-import java.util.function.BiFunction;
 
 /**
  * Glue class to interface the Jakarta regex engine to Saxon
@@ -172,16 +173,17 @@ public class ARegularExpression implements RegularExpression {
      * Replace all substrings of a supplied input string that match the regular expression
      * with a replacement string.
      *
-     * @param input       the input string on which replacements are to be performed
-     * @param replacer    the replacement string in the format of the XPath replace() function
+     * @param input   the input string on which replacements are to be performed
+     * @param action  a user-supplied function to be used to process the supplied match
+     * @param context
      * @return the result of performing the replacement
      * @throws net.sf.saxon.trans.XPathException if the replacement string is invalid
      */
     @Override
-    public UnicodeString replaceWith(UnicodeString input, BiFunction<UnicodeString, UnicodeString[], UnicodeString> replacer) throws XPathException {
+    public UnicodeString replaceWith(UnicodeString input, FunctionItem action, XPathContext context) throws XPathException {
         REMatcher matcher = new REMatcher(regex);
         try {
-            return matcher.replaceWith(input.tidy(), replacer);
+            return matcher.replaceWith(input.tidy(), action, context);
         } catch (RESyntaxException err) {
             throw new XPathException(err.getMessage(), "FORX0004");
         }

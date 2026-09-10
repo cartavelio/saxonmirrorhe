@@ -252,7 +252,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
                     }
                     for (int group : events) {
                         if (group > 0) {
-                            action.onGroupStart(group);
+                            action.onGroupStart(group, null);
                         } else {
                             action.onGroupEnd(-group);
                         }

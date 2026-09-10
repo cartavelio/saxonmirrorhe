@@ -1365,10 +1365,25 @@ public class RECompiler {
      */
 
     private UnicodeString readGroupName(int idx) throws RESyntaxException {
+        return readGroupName(pattern, idx);
+    }
+
+    /**
+     * Read a group name enclosed in angle brackets
+     * @param pattern either the regular expression, or the replacement string supplied to fn:replace
+     * @param idx the position within the regex or the replacement string of the first character of the group
+     *            name
+     * @return the group name
+     * @throws RESyntaxException if the group name is invalid or if no terminating
+     *                           right angle bracket is found
+     */
+
+    public static UnicodeString readGroupName(UnicodeString pattern, int idx) throws RESyntaxException {
         TwineBuilder builder = TwineBuilder.make(16);
+        int len = pattern.length32();
         int ch = idx < len ? pattern.codePointAt(idx++) : -1;
         if (!isAsciiLetter(ch)) {
-            syntaxError("First character of group name must be an ASCII letter");
+            throw new RESyntaxException("First character of group name must be an ASCII letter", idx);
         }
         builder.append(ch);
         while (idx < len) {
@@ -1380,11 +1395,10 @@ public class RECompiler {
             } else if (isAsciiLetter(ch) || isAsciiDigit(ch)) {
                 builder.append(ch);
             } else {
-                syntaxError("Invalid character in captured group name " + ch);
+                throw new RESyntaxException("Invalid character in captured group name " + ch, idx);
             }
         }
-        syntaxError("Missing '>' after captured group name " + builder);
-        return EmptyUnicodeString.getInstance(); // to keep the compiler happy
+        throw new RESyntaxException("Missing '>' after captured group name " + builder, idx);
     }
 
     private static Operation makeSequence(Operation o1, Operation o2) {

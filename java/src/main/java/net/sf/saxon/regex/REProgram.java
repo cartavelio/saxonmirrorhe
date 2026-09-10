@@ -32,9 +32,12 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.z.IntHashMap;
+import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntPredicateProxy;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A class that holds compiled regular expressions. These are created using the
@@ -55,7 +58,8 @@ public class REProgram {
     protected int optimizationFlags;      // Optimization flags (REProgram.OPT_*)
     protected int maxParens;
     protected int backtrackingLimit = -1;
-    protected final IntHashMap<UnicodeString> groupNames;
+    protected final IntHashMap<UnicodeString> groupNamesByIndex;
+    protected final Map<UnicodeString, Integer> groupsByName;
 
     /**
      * Constructs a program object
@@ -63,11 +67,17 @@ public class REProgram {
      * @param parens       Count of capturing parens in the program.
      * @param flags the regular expression flags
      */
-    public REProgram(Operation operation, int parens, IntHashMap<UnicodeString> groupNames,REFlags flags) {
+    public REProgram(Operation operation, int parens, IntHashMap<UnicodeString> groupNamesByIndex, REFlags flags) {
         this.flags = flags;
         setOperation(operation);
         this.maxParens = parens;
-        this.groupNames = groupNames;
+        this.groupNamesByIndex = groupNamesByIndex;
+        this.groupsByName = new HashMap<>();
+        IntIterator it = groupNamesByIndex.keyIterator();
+        while (it.hasNext()) {
+            int groupNr = it.next();
+            groupsByName.put(groupNamesByIndex.get(groupNr), groupNr);
+        }
     }
 
     /**

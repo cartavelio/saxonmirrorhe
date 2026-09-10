@@ -37,6 +37,7 @@ public class AnalyzeStringFn extends RegexFunction {
         public NodeName groupName;
         public NodeName lookaheadGroupName;
         public NodeName groupNrName;
+        public NodeName groupNameName;
         public NodeName positionName;
         public NodeName valueName;
         public SchemaType resultType = Untyped.INSTANCE;
@@ -45,6 +46,7 @@ public class AnalyzeStringFn extends RegexFunction {
         public SchemaType groupType = Untyped.INSTANCE;
         public SchemaType lookaheadGroupType = Untyped.INSTANCE;
         public SimpleType groupNrType = BuiltInAtomicType.UNTYPED_ATOMIC;
+        public SimpleType groupNameType = BuiltInAtomicType.UNTYPED_ATOMIC;
         public SimpleType positionType = BuiltInAtomicType.UNTYPED_ATOMIC;
         public SimpleType valueType = BuiltInAtomicType.UNTYPED_ATOMIC;
     }
@@ -63,6 +65,7 @@ public class AnalyzeStringFn extends RegexFunction {
         vocab.groupName = new FingerprintedQName("", NamespaceUri.FN, "group");
         vocab.lookaheadGroupName = new FingerprintedQName("", NamespaceUri.FN, "lookahead-group");
         vocab.groupNrName = new NoNamespaceName("nr");
+        vocab.groupNameName = new NoNamespaceName("name");
         vocab.positionName = new NoNamespaceName("position");
         vocab.valueName = new NoNamespaceName("value");
 
@@ -74,6 +77,7 @@ public class AnalyzeStringFn extends RegexFunction {
             vocab.groupType = schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "group-type"));
             vocab.lookaheadGroupType = schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "lookahead-group-type"));
             vocab.groupNrType = BuiltInAtomicType.POSITIVE_INTEGER;
+            vocab.groupNameType = BuiltInAtomicType.NCNAME;
             vocab.positionType = BuiltInAtomicType.POSITIVE_INTEGER;
             vocab.valueType = BuiltInAtomicType.STRING;
             if (vocab.resultType == null || vocab.matchType == null || vocab.groupType == null) {
@@ -168,11 +172,15 @@ public class AnalyzeStringFn extends RegexFunction {
         }
 
         @Override
-        public void onGroupStart(int groupNumber) throws XPathException {
+        public void onGroupStart(int groupNumber, UnicodeString groupName) throws XPathException {
             out.startElement(vocab.groupName, vocab.groupType,
                              Loc.NONE, ReceiverOption.NONE);
             out.attribute(vocab.groupNrName, vocab.groupNrType, "" + groupNumber,
                           Loc.NONE, ReceiverOption.NONE);
+            if (groupName != null) {
+                out.attribute(vocab.groupNameName, vocab.groupNameType, groupName.toString(),
+                              Loc.NONE, ReceiverOption.NONE);
+            }
             out.startContent();
         }
 
