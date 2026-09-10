@@ -75,7 +75,7 @@ public class Trace extends SystemFunction implements Traceable {
         return e;
     }
 
-    public static void traceItem(/*@Nullable*/ Item val, String label, Logger out) {
+    public static void traceItem(Item val, String label, Logger out) {
         if (val == null) {
             out.info(label);
         } else {
