@@ -11,6 +11,7 @@ import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
@@ -68,7 +69,7 @@ public class TestXQueryUpdate {
             NamespaceUri fooBar = NamespaceUri.of("http://foo.bar/");
             NodeName name = new FingerprintedQName("a", fooBar, "x");
             NamespaceBinding nsCode = new NamespaceBinding("a", fooBar);
-            MutableNodeInfo elem = (MutableNodeInfo)doc.iterateChildAxis(null).next();
+            MutableNodeInfo elem = (MutableNodeInfo)doc.iterateChildAxis(AnyGNode.TEST)).next();
             elem.addAttribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, "xxxx", ReceiverOption.NONE, true);
             elem.addNamespace(nsCode, true);
             String s = QueryResult.serialize(elem).trim();

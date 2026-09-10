@@ -9,6 +9,7 @@ import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -39,7 +40,7 @@ public class TinyTreeTest {
             DocumentBuilder builder = new Processor(false).newDocumentBuilder();
             XdmNode d = builder.build(source);
             TinyDocumentImpl doc = (TinyDocumentImpl)d.getUnderlyingNode();
-            SequenceIterator iter = doc.iterateDescendantOrSelfAxis(null);
+            SequenceIterator iter = doc.iterateDescendantOrSelfAxis(AnyGNode.TEST));
             while (true) {
                 TinyNodeImpl desc = (TinyNodeImpl)iter.next();
                 if (desc == null) break;
