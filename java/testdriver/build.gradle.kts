@@ -20,6 +20,8 @@ val inputSqlJar = configurations.resolvable("inputSqlJar") {
   extendsFrom(inputSqlJarBucket)
 }
 
+val testDriverClasses by configurations.consumable("testDriverClasses")
+
 dependencies {
   inputSaxonJarBucket(project(":java", "saxonJarArtifact"))
   inputSqlJarBucket(project(":java", "sqlMavenJarArtifact"))
@@ -32,6 +34,10 @@ configurations {
 
 val downloadJarNames = mapOf("ee" to "saxon-ee", "he" to "saxon-he", "pe" to "saxon-pe")
 val mavenJarNames = mapOf("ee" to "Saxon-EE", "he" to "Saxon-HE", "pe" to "Saxon-PE")
+
+testDriverClasses.outgoing.artifacts(tasks.named<JavaCompile>("compileJava").map
+                                     { it.outputs.files.filter { 
+                                         it.name != "previous-compilation-data.bin" }}) { builtBy("compileJava") }
 
 fun registerJarTasksAndArtifacts(prefix: String, outputDir: Provider<Directory>, jarNames: Map<String, String>) {
     val parts = saxonBuild.version.get().split('.')
