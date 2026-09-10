@@ -55,6 +55,20 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE)
                 .arg(1, predicate, ONE, null));
 
+        register("all-equal", 1, e -> e.populate(UniformFn::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
+
+        register("all-equal", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE | UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+
+        register("all-different", 1, e -> e.populate(UniqueFn::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
+
+        register("all-different", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE | UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+
         register("characters", 1, e -> e.populate( CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
@@ -155,19 +169,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(1, predicate, ONE, null));
 
-        register("uniform", 1, e -> e.populate(UniformFn::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
-
-        register("uniform", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE | UO)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null));
-
-        register("unique", 1, e -> e.populate(UniqueFn::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
-
-        register("unique", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE | UO)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
         register("unparcel", 1, e -> e.populate( UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, Parcel.TYPE, ONE, null));

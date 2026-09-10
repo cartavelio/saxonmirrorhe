@@ -221,7 +221,7 @@
                 to <code>use-last</code>. If a singleton map does not match any template rule, then it is effectively skipped.</li>
         </ul>
         
-       <p>The proposed 4.0 functions fn:uniform(), fn:unique(), and fn:replicate() are implemented.</p>
+       <p>The proposed 4.0 functions fn:all-equal(), fn:all-different(), and fn:replicate() are implemented.</p>
         
         <p>The attributes <code>@array</code> and <code>@map</code> attributes of <code>xsl:for-each</code>, 
             <code>xsl:for-each-group</code>, and <code>xsl:iterate</code> are dropped. In their place, use
