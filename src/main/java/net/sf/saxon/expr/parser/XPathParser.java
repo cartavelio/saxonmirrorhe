@@ -3090,7 +3090,7 @@ public class XPathParser {
                     nodeName = t.currentTokenValue;
                     fp = makeFingerprint(t.currentTokenValue, primaryType == Type.ELEMENT);
                     nextToken();
-                } else if ((t.currentToken == Token.PREFIX || t.currentToken == Token.SUFFIX) && allowSaxonExtensions) {
+                } else if ((t.currentToken == Token.PREFIX || t.currentToken == Token.SUFFIX) && allowXPath40Syntax) {
                     nodeTest = parseNodeTest((short)primaryType);
                 } else {
                     grumble("Unexpected " + Token.tokens[t.currentToken] + " after '(' in SequenceType");
