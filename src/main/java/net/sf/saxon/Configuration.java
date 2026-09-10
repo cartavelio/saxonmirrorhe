@@ -3838,11 +3838,20 @@ public class Configuration implements SourceResolver, NotationSet {
             }
         }
         //#endif
+        NodeInfo suppliedNode = null;
+        //#if CSHARP==false
         if (source instanceof NodeInfo) {
-            if (!((NodeInfo) source).getConfiguration().isCompatible(this)) {
+            suppliedNode = (NodeInfo)source;
+        }
+        //#endif
+        if (source instanceof NodeSource) {
+            suppliedNode = ((NodeSource)source).getNode();
+        }
+        if (suppliedNode != null) {
+            if (!suppliedNode.getConfiguration().isCompatible(this)) {
                 throw new IllegalArgumentException("Externally supplied NodeInfo belongs to the wrong Configuration");
             }
-            return (NodeInfo) source;
+            return suppliedNode;
         }
 
         throw new IllegalArgumentException("A source of class " +

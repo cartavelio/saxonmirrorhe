@@ -8,7 +8,6 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.ActiveSource;
 
 import java.util.Iterator;
 
@@ -30,7 +29,7 @@ import java.util.Iterator;
  * than a document node.
  */
 
-public interface TreeInfo extends ActiveSource {
+public interface TreeInfo {
 
     /**
      * Get the NodeInfo object representing the node at the root of the tree, which will often

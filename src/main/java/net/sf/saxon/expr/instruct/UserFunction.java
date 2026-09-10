@@ -541,8 +541,8 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      * @param mode the evaluation mode
      */
 
-    public void setEvaluationMode(EvaluationMode mode) {
-        evaluator = mode.getEvaluator();
+    public void setEvaluator(Evaluator mode) {
+        evaluator = mode;
     }
 
     /**
@@ -737,7 +737,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
             presenter.emitAttribute("name", getFunctionName());
             presenter.emitAttribute("line", getLineNumber() + "");
             presenter.emitAttribute("module", getSystemId());
-            presenter.emitAttribute("eval", getEvaluator().getEvaluationMode().getCode() + "");
+            presenter.emitAttribute("eval", getEvaluator().getCode() + "");
         }
         String flags = "";
         if (determinism == Determinism.PROACTIVE) {

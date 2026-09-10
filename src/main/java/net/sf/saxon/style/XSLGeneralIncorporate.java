@@ -117,7 +117,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
                 incModule.setImporter(importer);
 
                 // check for recursion
-                if (checkForRecursion(importer, incModule.getRootElement())) {
+                if (checkForRecursion(importer, incModule.getRootElement().asActiveSource())) {
                     return null;
                 }
 

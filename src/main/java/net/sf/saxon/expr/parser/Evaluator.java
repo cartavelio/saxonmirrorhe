@@ -22,7 +22,25 @@ import net.sf.saxon.value.*;
  * An Evaluator evaluates an expression to return a sequence
  */
 public abstract class Evaluator {
-    
+
+    private int code;
+
+    /**
+     * Set the integer code for an Evaluator. Internal use
+     */
+
+    void setCode(int code) {
+        this.code = code;
+    }
+
+    /**
+     * Get the integer code for the evaluator
+     */
+
+    public int getCode() {
+        return code;
+    }
+
     /**
      * Evaluate an expression to return a sequence
      * @param expr the expression to be evaluated
@@ -34,64 +52,38 @@ public abstract class Evaluator {
     public abstract Sequence evaluate(Expression expr, XPathContext context) throws XPathException;
 
     /**
-     * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-     * to be compatible with argument evaluation modes in earlier releases in the interests of
-     * SEF compatibility.
-     */
-
-    public abstract EvaluationMode getEvaluationMode();
-
-    /**
      * An evaluator that always returns the empty sequence
      */
 
-    public final static class EMPTY_SEQUENCE extends Evaluator {
-        public final static EMPTY_SEQUENCE INSTANCE = new EMPTY_SEQUENCE();
+    public final static class EmptySequence extends Evaluator {
+        public final static EmptySequence INSTANCE = new EmptySequence();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) {
-            return EmptySequence.getInstance();
+            return net.sf.saxon.value.EmptySequence.getInstance();
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.RETURN_EMPTY_SEQUENCE;
-        }
     };
 
     /**
      * An evaluator for arguments supplied as a literal
      */
 
-    public final static class LITERAL extends Evaluator {
+    public final static class Literal extends Evaluator {
 
-        public static LITERAL INSTANCE = new LITERAL();
+        public static Literal INSTANCE = new Literal();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) {
-            return ((Literal)expr).getGroundedValue();
+            return ((net.sf.saxon.expr.Literal)expr).getGroundedValue();
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.EVALUATE_LITERAL;
-        }
     };
 
     /**
      * An evaluator for arguments supplied as a variable reference
      */
 
-    public final static class VARIABLE extends Evaluator {
-        public static VARIABLE INSTANCE = new VARIABLE();
+    public final static class Variable extends Evaluator {
+        public static Variable INSTANCE = new Variable();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             try {
@@ -100,27 +92,18 @@ public abstract class Evaluator {
                 // should not happen
                 assert false;
                 // but if it does...
-                return LAZY_SEQUENCE.INSTANCE.evaluate(expr, context);
+                return LazySequence.INSTANCE.evaluate(expr, context);
             }
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.EVALUATE_AND_MATERIALIZE_VARIABLE;
-        }
     };
 
     /**
      * An evaluator for a reference to an external parameter value
      */
 
-    public final static class SUPPLIED_PARAMETER extends Evaluator {
-        public final static SUPPLIED_PARAMETER INSTANCE = new SUPPLIED_PARAMETER();
+    public final static class SuppliedParameter extends Evaluator {
+        public final static SuppliedParameter INSTANCE = new SuppliedParameter();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             try {
@@ -129,19 +112,10 @@ public abstract class Evaluator {
                 // should not happen
                 assert false;
                 // but if it does...
-                return LAZY_SEQUENCE.INSTANCE.evaluate(expr, context);
+                return LazySequence.INSTANCE.evaluate(expr, context);
             }
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.EVALUATE_SUPPLIED_PARAMETER;
-        }
     };
 
     /**
@@ -149,22 +123,13 @@ public abstract class Evaluator {
      * singleton item
      */
 
-    public final static class SINGLE_ITEM extends Evaluator {
-        public final static SINGLE_ITEM INSTANCE = new SINGLE_ITEM();
+    public final static class SingleItem extends Evaluator {
+        public final static SingleItem INSTANCE = new SingleItem();
         @Override
         public Item evaluate(Expression expr, XPathContext context) throws XPathException {
             return expr.evaluateItem(context);
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.CALL_EVALUATE_SINGLE_ITEM;
-        }
     };
 
     /**
@@ -172,27 +137,18 @@ public abstract class Evaluator {
      * singleton item, or an empty sequence
      */
 
-    public final static class OPTIONAL_ITEM extends Evaluator {
-        public final static OPTIONAL_ITEM INSTANCE = new OPTIONAL_ITEM();
+    public final static class OptionalItem extends Evaluator {
+        public final static OptionalItem INSTANCE = new OptionalItem();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             Item item = expr.evaluateItem(context);
             if (item == null) {
-                return EmptySequence.getInstance();
+                return net.sf.saxon.value.EmptySequence.getInstance();
             } else {
                 return item;
             }
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.CALL_EVALUATE_OPTIONAL_ITEM;
-        }
     };
 
     /**
@@ -203,23 +159,14 @@ public abstract class Evaluator {
      * once only.
      */
 
-    public final static class LAZY_SEQUENCE extends Evaluator {
-        public final static LAZY_SEQUENCE INSTANCE = new LAZY_SEQUENCE();
+    public final static class LazySequence extends Evaluator {
+        public final static LazySequence INSTANCE = new LazySequence();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             SequenceIterator iter = expr.iterate(context);
-            return new LazySequence(iter);
+            return new net.sf.saxon.om.LazySequence(iter);
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.MAKE_CLOSURE;
-        }
     };
 
     /**
@@ -227,23 +174,14 @@ public abstract class Evaluator {
      * lazily on first use, and where the value might be needed more than once.
      */
 
-    public final static class MEMO_SEQUENCE extends Evaluator {
-        public final static MEMO_SEQUENCE INSTANCE = new MEMO_SEQUENCE();
+    public final static class MemoSequence extends Evaluator {
+        public final static MemoSequence INSTANCE = new MemoSequence();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             SequenceIterator iter = expr.iterate(context);
-            return new MemoSequence(iter);
+            return new net.sf.saxon.om.MemoSequence(iter);
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.MAKE_MEMO_CLOSURE;
-        }
     };
 
     /**
@@ -251,22 +189,13 @@ public abstract class Evaluator {
      * lazily on first use, and where the value might be needed more than once.
      */
 
-    public final static class MEMO_CLOSURE extends Evaluator {
-        public final static MEMO_CLOSURE INSTANCE = new MEMO_CLOSURE();
+    public final static class MemoClosure extends Evaluator {
+        public final static MemoClosure INSTANCE = new MemoClosure();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
-            return new MemoClosure(expr, context);
+            return new net.sf.saxon.value.MemoClosure(expr, context);
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.MAKE_MEMO_CLOSURE;
-        }
     };
 
     /**
@@ -274,22 +203,13 @@ public abstract class Evaluator {
      * lazily on first use, and where the value might be needed more than once.
      */
 
-    public final static class SINGLETON_CLOSURE extends Evaluator {
-        public final static SINGLETON_CLOSURE INSTANCE = new SINGLETON_CLOSURE();
+    public final static class SingletonClosure extends Evaluator {
+        public final static SingletonClosure INSTANCE = new SingletonClosure();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
-            return new SingletonClosure(expr, context);
+            return new net.sf.saxon.value.SingletonClosure(expr, context);
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.MAKE_SINGLETON_CLOSURE;
-        }
     };
 
     /**
@@ -298,9 +218,9 @@ public abstract class Evaluator {
      * or when it will use it more than once.
      */
 
-    public final static class EAGER_SEQUENCE extends Evaluator {
+    public final static class EagerSequence extends Evaluator {
 
-        public static EAGER_SEQUENCE INSTANCE = new EAGER_SEQUENCE();
+        public static EagerSequence INSTANCE = new EagerSequence();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             try {
@@ -311,15 +231,6 @@ public abstract class Evaluator {
             }
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.ITERATE_AND_MATERIALIZE;
-        }
     };
 
     /**
@@ -327,8 +238,8 @@ public abstract class Evaluator {
      * is a block potentially containing a recursive call.
      */
 
-    public final static class SHARED_APPEND extends Evaluator {
-        public final static SHARED_APPEND INSTANCE = new SHARED_APPEND();
+    public final static class SharedAppend extends Evaluator {
+        public final static SharedAppend INSTANCE = new SharedAppend();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             try {
@@ -357,67 +268,40 @@ public abstract class Evaluator {
             }
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.SHARED_APPEND_EXPRESSION;
-        }
     };
 
     /**
      * An evaluator for the first (streamed) argument of a streamable function call.
      */
 
-    public final static class STREAMING_ARGUMENT extends Evaluator {
-        public final static STREAMING_ARGUMENT INSTANCE = new STREAMING_ARGUMENT();
+    public final static class StreamingArgument extends Evaluator {
+        public final static StreamingArgument INSTANCE = new StreamingArgument();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return context.getConfiguration().obtainOptimizer().evaluateStreamingArgument(expr, context);
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.STREAMING_ARGUMENT;
-        }
     };
 
     /**
      * An evaluator for an expression that makes use of an indexed variable
      */
 
-    public final static class MAKE_INDEXED_VARIABLE extends Evaluator {
-        public final static MAKE_INDEXED_VARIABLE INSTANCE = new MAKE_INDEXED_VARIABLE();
+    public final static class MakeIndexedVariable extends Evaluator {
+        public final static MakeIndexedVariable INSTANCE = new MakeIndexedVariable();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return context.getConfiguration().obtainOptimizer().makeIndexedValue(expr.iterate(context));
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.MAKE_INDEXED_VARIABLE;
-        }
     };
 
     /**
      * A push-mode evaluator for an expression
      */
 
-    public final static class PROCESS extends Evaluator {
-        public final static PROCESS INSTANCE = new PROCESS();
+    public final static class Process extends Evaluator {
+        public final static Process INSTANCE = new Process();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             Controller controller = context.getController();
@@ -431,15 +315,6 @@ public abstract class Evaluator {
             return val;
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.PROCESS;
-        }
     };
 
     /**
@@ -450,14 +325,14 @@ public abstract class Evaluator {
      * once only.
      */
 
-    public final static class LAZY_TAIL extends Evaluator {
-        public final static LAZY_TAIL INSTANCE = new LAZY_TAIL();
+    public final static class LazyTail extends Evaluator {
+        public final static LazyTail INSTANCE = new LazyTail();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             TailExpression tail = (TailExpression) expr;
             VariableReference vr = (VariableReference) tail.getBaseExpression();
-            Sequence base = Evaluator.VARIABLE.INSTANCE.evaluate(vr, context);
-            if (base instanceof MemoClosure) {
+            Sequence base = Variable.INSTANCE.evaluate(vr, context);
+            if (base instanceof net.sf.saxon.value.MemoClosure) {
                 SequenceIterator it = base.iterate();
                 base = SequenceTool.toGroundedValue(it);
             }
@@ -468,7 +343,7 @@ public abstract class Evaluator {
                 if (start == end) {
                     return Int64Value.makeIntegerValue(end);
                 } else if (start > end) {
-                    return EmptySequence.getInstance();
+                    return net.sf.saxon.value.EmptySequence.getInstance();
                 } else {
                     return new IntegerRange(start, step, end);
                 }
@@ -478,18 +353,9 @@ public abstract class Evaluator {
                 return baseSeq.subsequence(tail.getStart() - 1, baseSeq.getLength() - tail.getStart() + 1);
             }
 
-            return new MemoClosure(tail, context);
+            return new net.sf.saxon.value.MemoClosure(tail, context);
         }
 
-        /**
-         * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
-         * to be compatible with argument evaluation modes in earlier releases in the interests of
-         * SEF compatibility.
-         */
-        @Override
-        public EvaluationMode getEvaluationMode() {
-            return EvaluationMode.LAZY_TAIL_EXPRESSION;
-        }
     };
 
 

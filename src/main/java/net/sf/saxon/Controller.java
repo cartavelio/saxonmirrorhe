@@ -606,7 +606,7 @@ public class Controller implements ContextOriginator {
             if (contextItem instanceof NodeInfo) {
                 // In XSLT, apply strip-space and strip-type-annotations options
                 NodeInfo node = (NodeInfo) contextItem;
-                contextItem = prepareInputTree(node);
+                contextItem = prepareInputTree(node.asActiveSource());
                 if (node.getNodeKind() == Type.DOCUMENT && node.getSystemId() != null) {
                     DocumentKey key = new DocumentKey(node.getSystemId());
                     if (getDocumentPool().find(key) == null) {
@@ -1309,14 +1309,17 @@ public class Controller implements ContextOriginator {
      */
 
     public NodeInfo makeSourceTree(Source source, int validationMode) throws XPathException {
-
-        if (source instanceof SAXSource && config.getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
+        if (source instanceof NodeSource) {
+            return ((NodeSource) source).getNode();
+        //#if CSHARP==false
+        } else if (source instanceof NodeInfo) {
+            return ((NodeInfo)source);
+        } else if (source instanceof SAXSource && config.getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
             // This option is provided to allow the parser set by applications such as Ant to be overridden by
             // the parser requested using FeatureKeys.SOURCE_PARSER
-            //#if CSHARP==false
             ((SAXSource) source).setXMLReader(null);
-            //#endif
-        } else if (source instanceof StreamSource && ((StreamSource)source).getSystemId() != null &&
+        //#endif
+        } else if (source instanceof StreamSource && source.getSystemId() != null &&
                 ((StreamSource) source).getInputStream() == null && ((StreamSource) source).getReader() == null) {
             // Check to see if the document is already in the document pool. This can happen when a Transformer
             // is reused to perform multiple transformations on the same source document. Bug 4837.
@@ -1368,7 +1371,7 @@ public class Controller implements ContextOriginator {
      * if the stylesheet strips input type annotations.
      * <p>This method is intended for internal use.</p>
      *
-     * @param source the input tree. Must be either a DOMSource or a NodeInfo
+     * @param source the input tree. Must be either a DOMSource or a NodeSource
      * @return the NodeInfo representing the input node, suitably wrapped. Exceptionally,
      * the the source is a whitespace text node that is itself stripped, return null.
      */

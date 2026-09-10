@@ -194,7 +194,7 @@ public abstract class SequenceExtent implements GroundedValue {
 
         @Override
         @CSharpModifiers(code = {"public", "override"})
-        public T itemAt(int n) {
+        public Item itemAt(int n) {
             if (n >= 0 && n < items.size()) {
                 return items.get(n);
             } else {
@@ -204,7 +204,7 @@ public abstract class SequenceExtent implements GroundedValue {
 
         @Override
         @CSharpModifiers(code = {"public", "override"})
-        public T head() {
+        public Item head() {
             if (items.isEmpty()) {
                 return null;
             } else {

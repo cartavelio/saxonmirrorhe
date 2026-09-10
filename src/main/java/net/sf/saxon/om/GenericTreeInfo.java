@@ -8,12 +8,12 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * A generic (model-independent) implementation of the TreeInfo interface, suitable for use with all
@@ -100,7 +100,6 @@ public class GenericTreeInfo implements TreeInfo {
      * @param systemId the system ID
      */
 
-    @Override
     public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
@@ -110,7 +109,6 @@ public class GenericTreeInfo implements TreeInfo {
      * @return the system ID
      */
 
-    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -125,18 +123,18 @@ public class GenericTreeInfo implements TreeInfo {
         return null;
     }
 
-    /**
-     * Deliver the content of the source to a supplied Receiver
-     *
-     * @param receiver the receiver to which events representing the parsed XML document will be sent
-     * @param options  options for parsing the source
-     * @throws XPathException if parsing fails for any reason. The detailed diagnostics will
-     *                        have been sent to the error reporter.
-     */
-    @Override
-    public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
-        getRootNode().deliver(receiver, options);
-    }
+//    /**
+//     * Deliver the content of the source to a supplied Receiver
+//     *
+//     * @param receiver the receiver to which events representing the parsed XML document will be sent
+//     * @param options  options for parsing the source
+//     * @throws XPathException if parsing fails for any reason. The detailed diagnostics will
+//     *                        have been sent to the error reporter.
+//     */
+//
+//    public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+//        getRootNode().deliver(receiver, options);
+//    }
 
     /**
      * Get the document number, which identifies this tree uniquely within a Configuration

@@ -873,7 +873,7 @@ public class Gizmo {
             Transformer transformer = templates.newTransformer();
             Builder result = new LinkedTreeBuilder(config.makePipelineConfiguration());
             result.open();
-            transformer.transform(currentDoc, result);
+            transformer.transform(currentDoc.asActiveSource(), result);
             result.close();
             currentDoc = (DocumentImpl)result.getCurrentRoot();
         } catch (TransformerException e) {

@@ -93,8 +93,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      *        not implement the correct semantics. It is safer to use isSameNodeInfo() for this reason.
      *        The equals() method has been defined because it is useful in contexts such as a Java Set or HashMap.
      */
-
-    @CSharpModifiers(code={"public", "override"})
+    
     public boolean equals(Object other) {
         if (!(other instanceof AbstractNodeWrapper)) {
             return false;
@@ -127,7 +126,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @Override
     public String getSystemId() {
         if (treeInfo instanceof GenericTreeInfo) {
-            return treeInfo.getSystemId();
+            return treeInfo.getRootNode().getSystemId();
         } else {
             throw new UnsupportedOperationException();
             // must implement in subclass
@@ -141,12 +140,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
 
     @Override
     public void setSystemId(String uri) {
-        if (treeInfo instanceof GenericTreeInfo) {
-            treeInfo.setSystemId(uri);
-        } else {
-            throw new UnsupportedOperationException();
-            // must implement in subclass
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**

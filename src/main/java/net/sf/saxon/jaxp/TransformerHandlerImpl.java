@@ -173,15 +173,16 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
     public void endDocument() throws SAXException {
         super.endDocument();
         NodeInfo doc = builder.getCurrentRoot();
-        doc.getTreeInfo().setSpaceStrippingRule(
-                transformer.getUnderlyingXsltTransformer().getUnderlyingController().getSpaceStrippingRule());
-        builder.reset();
         if (doc == null) {
             throw new SAXException("No source document has been built");
         }
+        doc.getTreeInfo().setSpaceStrippingRule(
+                transformer.getUnderlyingXsltTransformer().getUnderlyingController().getSpaceStrippingRule());
+        builder.reset();
+
 
         try {
-            transformer.transform(doc, result);
+            transformer.transform(doc.asActiveSource(), result);
         } catch (TransformerException err) {
             throw new SAXException(err);
         }

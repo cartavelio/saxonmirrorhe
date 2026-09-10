@@ -9,7 +9,6 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.transpile.CSharpInjectMembers;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.TypeHierarchy;
 
 import java.util.Objects;
@@ -52,7 +51,6 @@ class ConstructedItemType extends ItemType {
      */
 
     @Override
-    @CSharpModifiers(code = "public")
     public ConversionRules getConversionRules() {
         return processor.getUnderlyingConfiguration().getConversionRules();
     }
@@ -68,7 +66,6 @@ class ConstructedItemType extends ItemType {
      */
 
     @Override
-    @CSharpModifiers(code="public")
     public boolean matches(XdmItem item) {
         TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
         return underlyingType.matches(item.getUnderlyingValue(), th);
@@ -86,7 +83,6 @@ class ConstructedItemType extends ItemType {
      */
 
     @Override
-    @CSharpModifiers(code = "public")
     public boolean subsumes(ItemType other) {
         TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
         return th.isSubType(other.getUnderlyingItemType(), underlyingType);
@@ -100,7 +96,6 @@ class ConstructedItemType extends ItemType {
      */
 
     @Override
-    @CSharpModifiers(code = "public")
     public net.sf.saxon.type.ItemType getUnderlyingItemType() {
         return underlyingType;
     }

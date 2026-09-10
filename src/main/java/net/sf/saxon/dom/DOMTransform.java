@@ -50,7 +50,7 @@ public class DOMTransform extends Transform {
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 Document doc = builder.parse(ins);
                 DocumentWrapper dom = new DocumentWrapper(doc, src.getSystemId(), getConfiguration());
-                domSources.add(dom.getRootNode());
+                domSources.add(dom.getRootNode().asActiveSource());
             }
             return domSources;
         } catch (ParserConfigurationException | IOException | SAXException e) {
@@ -59,7 +59,7 @@ public class DOMTransform extends Transform {
     }
 
     public static void main(String[] args) {
-        new DOMTransform().doTransform(args, "DOMTransform");
+        new DOMTransform().doTransform(args);
     }
 }
 

@@ -54,7 +54,7 @@ public class JDOM2Transform extends Transform {
                 org.jdom2.Document doc = builder.build(is);
                 doc.setBaseURI(is.getSystemId());
                 JDOM2DocumentWrapper jdom = new JDOM2DocumentWrapper(doc, getConfiguration());
-                jdomSources.add(jdom);
+                jdomSources.add(jdom.getRootNode().asActiveSource());
             }
             return jdomSources;
         } catch (JDOMException | IOException e) {
@@ -63,7 +63,7 @@ public class JDOM2Transform extends Transform {
     }
 
     public static void main(String[] args) {
-        new JDOM2Transform().doTransform(args, "JDOM2Transform");
+        new JDOM2Transform().doTransform(args);
     }
 }
 

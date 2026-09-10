@@ -15,6 +15,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.Type;
 
 import java.net.URI;
@@ -34,6 +35,7 @@ public class Put extends SystemFunction {
             }
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public boolean isUpdatingExpression() {
                 return true;
             }

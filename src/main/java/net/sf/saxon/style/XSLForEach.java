@@ -92,7 +92,7 @@ public class XSLForEach extends StyleElement {
                 requireXslt40("map");
                 select = mapToSequence(makeExpression(value, att));
             } else if (f.equals("separator")) {
-                requireSyntaxExtensions("separator");
+                requireXslt40("separator");
                 separator = makeAttributeValueTemplate(value, att);
             } else if (attName.getLocalPart().equals("threads") && attName.hasURI(NamespaceConstant.SAXON)) {
                 threads = makeAttributeValueTemplate(Whitespace.trim(value), att);

@@ -233,7 +233,9 @@ public class LoopLifter {
         ExpressionTool.copyLocationInfo(child, let);
         let.setSequence(child);
         let.setNeedsLazyEvaluation(true);
-        let.setEvaluationMode(Cardinality.allowsMany(child.getCardinality()) ? EvaluationMode.MAKE_MEMO_CLOSURE : EvaluationMode.MAKE_SINGLETON_CLOSURE);
+        let.setEvaluator(Cardinality.allowsMany(child.getCardinality())
+                                 ? Evaluator.MemoClosure.INSTANCE
+                                 : Evaluator.SingletonClosure.INSTANCE);
         let.setAction(newAction);
         let.adoptChildExpression(newAction);
 //        if (indexed) {

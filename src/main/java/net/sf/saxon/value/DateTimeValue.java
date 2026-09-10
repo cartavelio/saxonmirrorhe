@@ -57,6 +57,10 @@ import java.util.*;
         + "    net.sf.saxon.value.DateTimeValue dtv = new (dt.Year, (byte)dt.Month, (byte)dt.Day, (byte)dt.Hour, (byte)dt.Minute, (byte)dt.Second, dt.Millisecond * 1000000, 0);"
         + "    return (net.sf.saxon.value.DateTimeValue)dtv.copyAsSubType(net.sf.saxon.type.BuiltInAtomicType.DATE_TIME_STAMP);"
         + "}"
+        + " public static net.sf.saxon.value.DateTimeValue fromDateTimeOffset(System.DateTimeOffset dt) {"
+        + "    net.sf.saxon.value.DateTimeValue dtv = new (dt.Year, (byte)dt.Month, (byte)dt.Day, (byte)dt.Hour, (byte)dt.Minute, (byte)dt.Second, dt.Millisecond * 1000000, (int)dt.Offset.TotalMinutes);"
+        + "    return (net.sf.saxon.value.DateTimeValue)dtv.copyAsSubType(net.sf.saxon.type.BuiltInAtomicType.DATE_TIME_STAMP);"
+        + "}"
 })
 
 public final class DateTimeValue extends CalendarValue
@@ -110,7 +114,7 @@ public final class DateTimeValue extends CalendarValue
      * @return the current dateTime, in the local timezone for the platform.
      */
 
-    @CSharpReplaceBody(code="return net.sf.saxon.value.DateTimeValue.fromDateTime(System.DateTime.Now);")
+    @CSharpReplaceBody(code="return net.sf.saxon.value.DateTimeValue.fromDateTimeOffset(System.DateTimeOffset.Now);")
     public static DateTimeValue now() {
         return DateTimeValue.fromZonedDateTime(ZonedDateTime.now());
     }

@@ -4,6 +4,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -15,18 +17,41 @@ import net.sf.saxon.trans.XPathException;
 
 public class XSLArray extends XSLSequence {
 
+    private boolean composite;
+
+    @Override
+    protected void prepareAttributes() {
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getDisplayName();
+            if (f.equals("select")) {
+                setSelectExpression(makeExpression(value, att));
+            } else if (f.equals("composite")) {
+                composite = processBooleanAttribute("composite", value);
+            } else {
+                checkUnknownAttribute(attName);
+            }
+        }
+
+    }
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (getSelectExpression() == null) {
             setSelectExpression(compileSequenceConstructor(exec, decl, false));
         }
-        SystemFunction sf = ArrayFunctionSet.getInstance().makeFunction("_from-sequence", 1);
-        Expression result = sf.makeFunctionCall(getSelectExpression());
-//        ArrayFromSequence defn = new ArrayFromSequence();
-//        Expression result = IntegratedFunctionLibrary.makeFunctionCall(defn, new Expression[]{getSelectExpression()});
-        ExpressionTool.copyLocationInfo(getSelectExpression(), result);
-        return result;
+
+        Expression functionCall;
+        if (composite) {
+            SystemFunction arrayOf = ArrayFunctionSet.getInstance().makeFunction("of", 1);
+            functionCall = arrayOf.makeFunctionCall(getSelectExpression());
+        } else {
+            SystemFunction arrayFromSeq = ArrayFunctionSet.getInstance().makeFunction("_from-sequence", 1);
+            functionCall = arrayFromSeq.makeFunctionCall(getSelectExpression());
+        }
+        ExpressionTool.copyLocationInfo(getSelectExpression(), functionCall);
+        return functionCall;
     }
 
 }

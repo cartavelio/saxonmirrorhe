@@ -481,7 +481,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     @Override
-    @CSharpReplaceBody(code = "return new BigDecimalValue(Singulink.Numerics.BigDecimal.Round(value, scale, System.MidpointRounding.ToEven));")
+    @CSharpReplaceBody(code = "return new BigDecimalValue(Singulink.Numerics.BigDecimal.Round(value, scale, Singulink.Numerics.RoundingMode.MidpointToEven));")
     public NumericValue roundHalfToEven(int scale) {
         if (scale >= value.scale()) {
             return this;

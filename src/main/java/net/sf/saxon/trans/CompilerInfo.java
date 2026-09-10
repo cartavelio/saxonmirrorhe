@@ -623,6 +623,7 @@ public class CompilerInfo {
      */
 
     public void setXsltVersion(int version) {
+        this.languageVersion = version;
     }
 
     /**
@@ -635,7 +636,7 @@ public class CompilerInfo {
      */
 
     public int getXsltVersion() {
-        return 30;
+        return languageVersion;
     }
 
     public String getDefaultElementNamespace() {

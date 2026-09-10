@@ -13,6 +13,7 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -233,10 +234,15 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
             if (v2.signum() == 0) {
                 throw new XPathException("Divide by zero (durations)", "FOAR0001");
             }
-            return new BigDecimalValue(v1.divide(v2, 20, RoundingMode.HALF_EVEN));
+            return new BigDecimalValue(divideBigDecimal(v1, v2));
         } else {
             throw new XPathException("Cannot divide two durations of different type", "XPTY0004");
         }
+    }
+
+    @CSharpReplaceBody(code="return Singulink.Numerics.BigDecimal.Divide(v1, v2, 20, Singulink.Numerics.RoundingMode.MidpointToEven);")
+    private BigDecimal divideBigDecimal(BigDecimal v1, BigDecimal v2) {
+        return v1.divide(v2, 20, RoundingMode.HALF_EVEN);
     }
 
     /**

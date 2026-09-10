@@ -82,7 +82,7 @@ public class Transform {
 
     public static void main(String[] args) {
         // the real work is delegated to another routine so that it can be used in a subclass
-        new Transform().doTransform(args, "java net.sf.saxon.Transform");
+        new Transform().doTransform(args);
     }
 
     /**
@@ -153,9 +153,10 @@ public class Transform {
         options.setPermittedValues("outval", new String[]{"recover", "fatal"}, null);
         options.addRecognizedOption("p", CommandLineOptions.TYPE_BOOLEAN,
                                     "Recognize query parameters in URI passed to doc()");
-
+        //#if CSHARP==false
         options.addRecognizedOption("quit", CommandLineOptions.TYPE_BOOLEAN | CommandLineOptions.VALUE_REQUIRED,
                                     "Quit JVM if transformation fails");
+        //#endif
         options.addRecognizedOption("r", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named URIResolver class");
         options.addRecognizedOption("relocate", CommandLineOptions.TYPE_BOOLEAN,
@@ -178,10 +179,12 @@ public class Transform {
         options.setPermittedValues("target", new String[]{"EE", "PE", "HE", "JS"}, null);
         options.addRecognizedOption("T", CommandLineOptions.TYPE_CLASSNAME,
                                     "Use named TraceListener class, or standard TraceListener");
+        //#if CSHARP==false
         options.addRecognizedOption("TB", CommandLineOptions.TYPE_FILENAME,
                                     "Trace hotspot bytecode generation to specified XML file");
         options.addRecognizedOption("TJ", CommandLineOptions.TYPE_BOOLEAN,
                                     "Debug binding and execution of extension functions");
+        //#endif
         options.setPermittedValues("TJ", new String[]{"on", "off"}, "on");
         options.addRecognizedOption("Tlevel", CommandLineOptions.TYPE_STRING,
                                     "Level of detail for trace listener output");
@@ -191,9 +194,9 @@ public class Transform {
         //#if CSHARP==false
         options.addRecognizedOption("TP", CommandLineOptions.TYPE_FILENAME,
                                     "Use profiling trace listener, with specified output file");
-        //#endif
         options.addRecognizedOption("threads", CommandLineOptions.TYPE_INTEGER | CommandLineOptions.VALUE_REQUIRED,
                                     "Run stylesheet on directory of files divided in N threads");
+        //#endif
         options.addRecognizedOption("tree", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified tree model for source documents");
         options.setPermittedValues("tree", new String[]{"linked", "tiny", "tinyc"}, null);
@@ -205,11 +208,13 @@ public class Transform {
         options.addRecognizedOption("val", CommandLineOptions.TYPE_ENUMERATION,
                                     "Apply validation to source documents");
         options.setPermittedValues("val", new String[]{"strict", "lax"}, "strict");
+        //#if CSHARP==false
         options.addRecognizedOption("versionmsg", CommandLineOptions.TYPE_BOOLEAN,
                                     "No longer used");
         options.addRecognizedOption("warnings", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                                     "No longer used");
         options.setPermittedValues("warnings", new String[]{"silent", "recover", "fatal"}, null);
+
         options.addRecognizedOption("x", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named XMLReader class for parsing source documents");
         options.addRecognizedOption("xi", CommandLineOptions.TYPE_BOOLEAN,
@@ -217,6 +222,7 @@ public class Transform {
         options.addRecognizedOption("xmlversion", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                                     "Indicate whether XML 1.1 is supported");
         options.setPermittedValues("xmlversion", new String[]{"1.0", "1.1"}, null);
+        //#endif
         options.addRecognizedOption("xsd", CommandLineOptions.TYPE_FILENAME_LIST | CommandLineOptions.VALUE_REQUIRED,
                                     "List of schema documents to be preloaded");
         options.addRecognizedOption("xsdversion", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
@@ -226,8 +232,10 @@ public class Transform {
                                     "Load schemas named in xsi:schemaLocation (default on)");
         options.addRecognizedOption("xsl", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Main stylesheet file");
+        //#if CSHARP==false
         options.addRecognizedOption("y", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named XMLReader class for parsing stylesheet and schema documents");
+        //#endif
         options.addRecognizedOption("?", CommandLineOptions.VALUE_PROHIBITED,
                                     "Display command line help text");
 
@@ -275,7 +283,7 @@ public class Transform {
      * @param command the form of the command as written by the user. Not used, retained for backwards compatibility
      */
 
-    public void doTransform(String[] args, String command) {
+    public void doTransform(String[] args) {
 
         Configuration config;
         String sourceXmlFileName = null;
@@ -1424,7 +1432,7 @@ public class Transform {
         }
     }
 
-    @CSharpReplaceBody(code="return node.Implementation;")
+    @CSharpReplaceBody(code="return node.Implementation.asActiveSource();")
     private Source xdmNodeAsSource(XdmNode node) {
         return node.asSource();
     }
@@ -1465,13 +1473,7 @@ public class Transform {
         }
     }
     
-    private String getCommandName() {
-        String s = getClass().getName();
-        if (s.equals("cli.Saxon.Cmd.DotNetTransform")) {
-            s = "Transform";
-        }
-        return s;
-    }
+
 
 
 }

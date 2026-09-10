@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.StringToDouble11;
 
 /**
@@ -23,7 +22,6 @@ public class NumericComparer11 extends NumericComparer {
     private static final NumericComparer11 THE_INSTANCE = new NumericComparer11();
 
     /*@NotNull*/
-    @CSharpModifiers(code = {"public", "static", "new"})
     public static NumericComparer getInstance() {
         return THE_INSTANCE;
     }
