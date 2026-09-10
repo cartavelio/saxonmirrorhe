@@ -304,8 +304,16 @@ testSuites {
 
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XQ31")
+
 testSuites.configure("xslt30", "XT30")
+
 testSuites.configure("xslt30extra", "XT30")
+
+testSuites.configure("qt4", "XQ31")
+testSuites.configure("qt4", "XQ40")
+testSuites.configure("qt4", "XP40")
+
+testSuites.configure("xslt40", "XT40")
 
 tasks.named<Sync>("signingDownloadJars") {
   into(layout.buildDirectory.dir("signing/download"))
