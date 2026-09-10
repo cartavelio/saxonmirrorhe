@@ -4,6 +4,7 @@ using Saxon.Hej.lib;
 using Saxon.Hej.om;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
+using Saxon.Impl.Helpers;
 using Singulink.Numerics;
 
 namespace Saxon.Api {
@@ -109,26 +110,30 @@ namespace Saxon.Api {
             switch (dt) {
                 case {Kind: DateTimeKind.Local}: {
                     int offsetMinutes = (int)TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).TotalMinutes;
-                    return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
-                        Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
-                        Convert.ToByte(dt.Second), ticksToNanoseconds(dt.Ticks),
+                    return new Saxon.Hej.value.DateTimeValue(dt.Year, dt.Month,
+                        dt.Day, dt.Hour, dt.Minute,
+                        makeSeconds(dt.Second, ticksToNanoseconds(dt.Ticks)),
                         offsetMinutes);
                 }
                 case {Kind: DateTimeKind.Utc}: {
                     return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
                         Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
-                        Convert.ToByte(dt.Second), ticksToNanoseconds(dt.Ticks),
+                        makeSeconds(dt.Second, ticksToNanoseconds(dt.Ticks)),
                         0);
                 }
                 case {Kind: DateTimeKind.Unspecified}: {
-                    return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
-                        Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
-                        Convert.ToByte(dt.Second), ticksToNanoseconds(dt.Ticks),
+                    return new Saxon.Hej.value.DateTimeValue(dt.Year, dt.Month,
+                        dt.Day, dt.Hour, dt.Minute,
+                        makeSeconds(dt.Second, ticksToNanoseconds(dt.Ticks)),
                         Saxon.Hej.value.CalendarValue.NO_TIMEZONE);
                 }
                 default:
                     return null;
             }
+        }
+
+        private static BigDecimal makeSeconds(int wholeSeconds, int nanoseconds) {
+            return BigDecimalUtils.ValueOf(wholeSeconds) + BigDecimalUtils.ValueOf(nanoseconds) / 1_000_000_000;
         }
 
         /// <summary>
@@ -140,9 +145,10 @@ namespace Saxon.Api {
 
         private static DateTimeValue _initOffset(DateTimeOffset offset) {
             DateTime dt = offset.DateTime;
-            return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month), Convert.ToByte(dt.Day),
-                Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute), Convert.ToByte(dt.Second),
-                ticksToNanoseconds(dt.Ticks), (int)offset.Offset.TotalMinutes);
+            return new Saxon.Hej.value.DateTimeValue(dt.Year, dt.Month, dt.Day,
+                dt.Hour, dt.Minute, 
+                makeSeconds(dt.Second, ticksToNanoseconds(dt.Ticks)), 
+                (int)offset.Offset.TotalMinutes);
 
         }
 

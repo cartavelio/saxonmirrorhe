@@ -1,6 +1,5 @@
 package internaltests;
 
-import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ValidationException;
@@ -14,7 +13,36 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 
-import static java.time.temporal.ChronoField.*;
+import static java.time.temporal.ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH;
+import static java.time.temporal.ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR;
+import static java.time.temporal.ChronoField.ALIGNED_WEEK_OF_MONTH;
+import static java.time.temporal.ChronoField.ALIGNED_WEEK_OF_YEAR;
+import static java.time.temporal.ChronoField.AMPM_OF_DAY;
+import static java.time.temporal.ChronoField.CLOCK_HOUR_OF_AMPM;
+import static java.time.temporal.ChronoField.CLOCK_HOUR_OF_DAY;
+import static java.time.temporal.ChronoField.DAY_OF_MONTH;
+import static java.time.temporal.ChronoField.DAY_OF_WEEK;
+import static java.time.temporal.ChronoField.DAY_OF_YEAR;
+import static java.time.temporal.ChronoField.EPOCH_DAY;
+import static java.time.temporal.ChronoField.ERA;
+import static java.time.temporal.ChronoField.HOUR_OF_AMPM;
+import static java.time.temporal.ChronoField.HOUR_OF_DAY;
+import static java.time.temporal.ChronoField.INSTANT_SECONDS;
+import static java.time.temporal.ChronoField.MICRO_OF_DAY;
+import static java.time.temporal.ChronoField.MICRO_OF_SECOND;
+import static java.time.temporal.ChronoField.MILLI_OF_DAY;
+import static java.time.temporal.ChronoField.MILLI_OF_SECOND;
+import static java.time.temporal.ChronoField.MINUTE_OF_DAY;
+import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
+import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
+import static java.time.temporal.ChronoField.NANO_OF_DAY;
+import static java.time.temporal.ChronoField.NANO_OF_SECOND;
+import static java.time.temporal.ChronoField.OFFSET_SECONDS;
+import static java.time.temporal.ChronoField.PROLEPTIC_MONTH;
+import static java.time.temporal.ChronoField.SECOND_OF_DAY;
+import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
+import static java.time.temporal.ChronoField.YEAR;
+import static java.time.temporal.ChronoField.YEAR_OF_ERA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -85,7 +113,7 @@ public class DateTimeTests {
     public void testJulianDayNumber() {
         // test Julian day number across the year zero divide
         try {
-            DateValue start = (DateValue)DateValue.makeDateValue(StringView.wrap("0002-01-01"), ConversionRules.DEFAULT).asAtomic();
+            DateValue start = DateValue.parseDate("0002-01-01");
             int j = start.getJulianDayNumber();
             for (int i=j; i>j-1000; i--) {
                 DateValue d = DateValue.dateFromJulianDayNumber(i);
@@ -97,6 +125,7 @@ public class DateTimeTests {
         }
     }
 
+    @Test
     public void testZonedDateTime() {
         try {
             DateTimeValue val = DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00+10:15"));
@@ -113,6 +142,7 @@ public class DateTimeTests {
         }
     }
 
+    @Test
     public void testLocalDateTime() {
         try {
             DateTimeValue val = DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00"));
@@ -129,13 +159,14 @@ public class DateTimeTests {
         }
     }
 
+    @Test
     public void testNanosecondPrecision() {
         try {
             DateTimeValue val = DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00.123456789"));
             DateTimeValue val2 = val.add((DurationValue)DayTimeDurationValue.makeDayTimeDurationValue(StringView.wrap("PT0.000000001S")).asAtomic());
             assertEquals(DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00.12345679")), val2, "val2");
             DateTimeValue val3 = val2.add(DayTimeDurationValue.fromNanoseconds(-1));
-            assertEquals("val3", "2012-02-29T14:00:00.123456789", val3.getStringValue());
+            assertEquals("2012-02-29T14:00:00.123456789", val3.getStringValue(), "val3");
             assertEquals(DayTimeDurationValue.fromNanoseconds(1_000_000_000),
                          DayTimeDurationValue.makeDayTimeDurationValue(StringView.wrap("PT1S")),
                          "dtd");
@@ -145,6 +176,7 @@ public class DateTimeTests {
         }
     }
 
+    @Test
     public void testWeekNumber() {
 
         assertEquals(1, DateValue.getWeekNumber(2018, 12, 31));
