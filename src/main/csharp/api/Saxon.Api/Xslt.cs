@@ -140,8 +140,8 @@ namespace Saxon.Api
         /// The name of the default collation used by stylesheets compiled using this <c>XsltCompiler</c>.
         /// This must be the name of a collation that is known to the <c>Processor</c>.
         /// </summary>
-        
-		public String DefaultCollationName
+
+        public String DefaultCollationName
         {
             get { return xsltCompiler.getDefaultCollation(); }
             set { xsltCompiler.declareDefaultCollation(value); }
@@ -150,8 +150,8 @@ namespace Saxon.Api
         /// <summary>
         /// The <c>Processor</c> from which this <c>XsltCompiler</c> was constructed
         /// </summary>
-        
-		public Processor Processor
+
+        public Processor Processor
         {
             get { return processor; }
         }
@@ -260,7 +260,7 @@ namespace Saxon.Api
                 return "3.0";
             }
             set
-            {}
+            { }
         }
 
         /// <summary>
@@ -276,12 +276,35 @@ namespace Saxon.Api
         /// executed frequently enough to justify it. It does not force immediate (eager) byte code generation.
         /// </para>
         /// </remarks>
-		/// <returns>true if bytecode is to be generated, false if not</returns>
-        
-		public bool ByteCodeEnabled {
-            
-            get{ return xsltCompiler.getUnderlyingCompilerInfo().isGenerateByteCode(); }
+        /// <returns>true if bytecode is to be generated, false if not</returns>
+
+        public bool ByteCodeEnabled {
+
+            get { return xsltCompiler.getUnderlyingCompilerInfo().isGenerateByteCode(); }
             set { xsltCompiler.getUnderlyingCompilerInfo().setGenerateByteCode(value); }
+        }
+
+
+
+        /// <summary>
+        /// Property to say whether just-in-time compilation of template rules should be used.
+        /// jit true if just-in-time compilation is to be enabled. With this option enabled,
+        /// static analysis of a template rule is deferred until the first time that the
+        /// template is matched.This can improve performance when many template
+        /// rules are rarely used during the course of a particular transformation; however,
+        /// it means that static errors in the stylesheet will not necessarily cause the
+        /// <code>Compile(Source)</code> method to throw an exception (errors in code that is
+        ///  actually executed will still be notified to the registered <code>ErrorList</code>
+        ///  or <code>ErrorList</code>, but this may happen after the {
+        /// <c>Compile(Source)</c>
+        ///  method returns). This option is enabled by default in Saxon - EE, and is not available
+        ///  in Saxon - HE or Saxon-PE.
+        ///  <p><b> Recommendation:</b> disable this option unless you are confident that the
+        ///  stylesheet you are compiling is error - free.</p>
+        /// </summary>
+        public bool JustInTimeCompilation {
+            get { return xsltCompiler.isJustInTimeCompilation(); }
+            set { xsltCompiler.setJustInTimeCompilation(value); }
         }
 
 
@@ -645,6 +668,17 @@ namespace Saxon.Api
         public JCompilerInfo GetUnderlyingCompilerInfo()
         {
             return xsltCompiler.getUnderlyingCompilerInfo();
+        }
+
+
+
+        /// <summary>
+        /// Escape hatch to the underlying Java implementation of the <c>XsltCompiler</c>
+        /// </summary>
+
+        public JXsltCompiler Implementation
+        {
+            get { return xsltCompiler; }
         }
 
 
@@ -1582,6 +1616,15 @@ namespace Saxon.Api
 
         public JDestination GetUnderlyingDestination() {
             return transformer;
+        }
+
+        public JXsltTransformer Implemmentation
+        {
+            get
+            {
+                return transformer;
+
+            }
         }
 
 
