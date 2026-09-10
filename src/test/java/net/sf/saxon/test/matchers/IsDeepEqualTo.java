@@ -14,10 +14,10 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
-public class DeepEquals extends TypeSafeDiagnosingMatcher<GroundedValue> {
+public class IsDeepEqualTo extends TypeSafeDiagnosingMatcher<GroundedValue> {
     private GroundedValue expected;
 
-    DeepEquals(GroundedValue expected) {
+    IsDeepEqualTo(GroundedValue expected) {
         this.expected = expected;
     }
 
@@ -26,7 +26,7 @@ public class DeepEquals extends TypeSafeDiagnosingMatcher<GroundedValue> {
         try {
             boolean ok = check(actual);
             if (!ok) {
-                mismatchDescription.appendValue(actual);
+                mismatchDescription.appendText("was ").appendValue(actual);
             }
             return ok;
         } catch (XPathException ex) {
@@ -37,7 +37,7 @@ public class DeepEquals extends TypeSafeDiagnosingMatcher<GroundedValue> {
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("fn:deep-equal() to return true()");
+        description.appendText("XDM value ").appendValue(expected);
     }
 
     private boolean check(GroundedValue actual) throws XPathException {
@@ -48,6 +48,6 @@ public class DeepEquals extends TypeSafeDiagnosingMatcher<GroundedValue> {
     }
 
     public static Matcher<GroundedValue> deepEquals(GroundedValue expected) {
-        return new DeepEquals(expected);
+        return new IsDeepEqualTo(expected);
     }
 }

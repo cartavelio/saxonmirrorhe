@@ -24,7 +24,7 @@ public class ArrayBuilder implements BuilderDsl {
     }
 
     public ArrayBuilder append(String... strings) {
-        return append(Arrays.stream(strings).map(StringValue::new));
+        return append(AtomicValueBuilder.strings(strings));
     }
 
     public ArrayBuilder append(GroundedValue... values) {
