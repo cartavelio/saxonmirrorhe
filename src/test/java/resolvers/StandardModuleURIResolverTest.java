@@ -18,7 +18,7 @@ public class StandardModuleURIResolverTest {
 
     @Before
     public void before() {
-        cwd = System.getProperty("user.dir").replaceAll("\\\\", "/"); // Windows
+        cwd = System.getProperty("user.dir").replace("\\", "/"); // Windows
         if (!cwd.endsWith("/")) {
             cwd += "/";
         }

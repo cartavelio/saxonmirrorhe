@@ -15,7 +15,7 @@ public class StandardURIResolverTest {
     public void noConfigurationOk() {
         StandardURIResolver resolver = new StandardURIResolver();
 
-        String cwd = System.getProperty("user.dir").replaceAll("\\\\", "/"); // Windows
+        String cwd = System.getProperty("user.dir").replace("\\", "/"); // Windows
         if (!cwd.endsWith("/")) {
             cwd += "/";
         }
@@ -33,7 +33,7 @@ public class StandardURIResolverTest {
         Configuration config = new Configuration();
         StandardURIResolver resolver = new StandardURIResolver(config);
 
-        String cwd = System.getProperty("user.dir").replaceAll("\\\\", "/"); // Windows
+        String cwd = System.getProperty("user.dir").replace("\\", "/"); // Windows
         if (!cwd.endsWith("/")) {
             cwd += "/";
         }
@@ -51,7 +51,7 @@ public class StandardURIResolverTest {
         Configuration config = new Configuration();
         StandardURIResolver resolver = new StandardURIResolver(config);
 
-        String cwd = System.getProperty("user.dir").replaceAll("\\\\", "/"); // Windows
+        String cwd = System.getProperty("user.dir").replace("\\", "/"); // Windows
         if (!cwd.endsWith("/")) {
             cwd += "/";
         }
