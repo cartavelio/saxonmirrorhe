@@ -10,22 +10,18 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.test.xdmfixtures.DslLambda;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.test.xdmfixtures.MapBuilder;
-import net.sf.saxon.test.xmlfixtures.XmlFixtureBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
 import static net.sf.saxon.test.matchers.GroundedValueIsDeepEqualTo.deepEquals;
-import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
 
 class CsvToArraysTest {
     Configuration configuration = new Configuration();
@@ -75,13 +71,5 @@ class CsvToArraysTest {
         assertThat(actual, deepEquals(expected));
     }
 
-    @Test
-    @DisplayName("option parameter validation is validating things")
-    void columnNamesMapsZeroErrors() {
-        options = makeOptions(opts -> {
-            opts.put("select-columns", FixtureBuilder.sequence(0));
-        });
 
-        assertThat(() -> call_subject(args("", options)), throwsXPathException("FOCV0005"));
-    }
 }

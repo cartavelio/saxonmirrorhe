@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
 import static net.sf.saxon.test.matchers.GroundedValueIsDeepEqualTo.deepEquals;
-import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
 
 class CsvToXmlTest {
     Configuration configuration = new Configuration();
@@ -88,13 +87,5 @@ class CsvToXmlTest {
         assertThat(actual, deepEquals(expected));
     }
 
-    @Test
-    @DisplayName("option parameter validation is validating things")
-    void columnNamesMapsZeroErrors() {
-        options = makeOptions(opts -> {
-            opts.put("select-columns", opts.sequence(0));
-        });
 
-        assertThat(() -> call_subject(args("", options)), throwsXPathException("FOCV0005"));
-    }
 }

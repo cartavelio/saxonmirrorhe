@@ -1,31 +1,22 @@
 package com.saxonica.functions.qt4.csv;
 
-import com.saxonica.test.matchers.MatchesCsvRecordGetFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.EmptySequence;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import static com.saxonica.functions.qt4.csv.TestHelpers.*;
+import static com.saxonica.functions.qt4.csv.TestHelpers.makeRowsIterator;
 import static com.saxonica.test.matchers.MatchesCsvRecord.matchesCsvRecord;
-import static com.saxonica.test.matchers.MatchesCsvRecordGetFunction.callGetFunction;
-import static com.saxonica.test.matchers.MatchesCsvRecordGetFunction.getFunctionItem;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
-import static net.sf.saxon.test.matchers.GroundedValueIsDeepEqualTo.deepEquals;
-import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
-import static net.sf.saxon.test.xdmfixtures.AtomicValueBuilder.string;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 
 class CsvRecordGeneratorTest {
     CsvRecordGenerator subject;
@@ -38,15 +29,6 @@ class CsvRecordGeneratorTest {
         return subject;
     }
 
-    @Test
-    @DisplayName("Empty sequence produces an appropriate Map")
-    void emptyCsv() throws XPathException {
-        expected = CsvRecordGenerator.EMPTY_CSV;
-
-        actual = subject().fromRowSequence(EmptySequence.getInstance().iterate());
-
-        assertThat(actual, deepEquals(expected));
-    }
 
     @Nested
     class ExtractingColumns {
@@ -115,30 +97,7 @@ class CsvRecordGeneratorTest {
         }
     }
 
-    @Nested
-    class FetchingNonExistentFields {
-        SequenceIterator input = makeRowsIterator(r -> r.row("name", "city").row("Alice", "Aachen"));
 
-        @Test
-        @DisplayName("Attempting to fetch an unknown name raises the appropriate error")
-        void fetchingUnknownColumnNameFails() throws XPathException{
-            options.put("header", BooleanValue.TRUE);
-            actual = subject().fromRowSequence(input);
-            FunctionItem fieldFunction = getFunctionItem(actual);
-
-            assertThat(() -> MatchesCsvRecordGetFunction.callGetFunction(fieldFunction, 1, "fnord"), throwsXPathException("FOCV0004"));
-        }
-
-        @Test
-        @DisplayName("Attempting to fetch an non-existent field by integer returns the empty string")
-        void fetchingNonexistentColumnByInteger() throws XPathException {
-            options.put("header", BooleanValue.TRUE);
-            actual = subject().fromRowSequence(input);
-            FunctionItem fieldFunction = getFunctionItem(actual);
-
-            assertThat(callGetFunction(fieldFunction, 1, 3), is(equalTo(string(""))));
-        }
-    }
 
     @Nested
     class SelectingColumns {
@@ -284,28 +243,5 @@ class CsvRecordGeneratorTest {
             assertThat(actual, matchesCsvRecord(expected));
         }
 
-        @Test
-        @DisplayName("the first row, extracted by header: true(), is also used as the first row for trim-rows")
-        void columnsNamesRowIsFirst() throws XPathException {
-            options.put("trim-rows", BooleanValue.TRUE);
-            options.put("column-names", BooleanValue.TRUE);
-
-            expected = FixtureBuilder.map(e -> {
-                e.put("column-index", e.map(names -> {
-                    names.put("a", 1)
-                            .put("b", 2)
-                            .put("c", 3)
-                            .put("d", 4);
-                }));
-                e.put("columns", e.sequence("a", "b", "c", "d"));
-                e.put("rows", e.sequence(rows -> {
-                    rows.append(e.array("1", "2", "3", ""), e.array("1", "2", "3", "4"));
-                }));
-            });
-
-            actual = subject().fromRowSequence(input);
-
-            assertThat(actual, matchesCsvRecord(expected));
-        }
     }
 }

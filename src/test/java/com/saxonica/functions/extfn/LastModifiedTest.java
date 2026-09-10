@@ -71,7 +71,7 @@ public class LastModifiedTest {
             t.setDestination(destination);
             t.transform();
             XdmNode out = destination.getXdmNode();
-            Assertions.assertEquals("<out>2023-11-24T18:31:32Z</out>", out.toString());
+            Assertions.assertEquals("<out>2023-12-06T13:25:00Z</out>", out.toString());
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());

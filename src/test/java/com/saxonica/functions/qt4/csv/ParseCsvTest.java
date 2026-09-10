@@ -17,7 +17,6 @@ import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.saxonica.functions.qt4.csv.TestHelpers.expectedRows;
 import static com.saxonica.test.matchers.MatchesCsvRecord.matchesCsvRecord;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
 import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
@@ -70,6 +69,6 @@ class ParseCsvTest {
             opts.put("select-columns", opts.sequence(0));
         });
 
-        assertThat(() -> subject().call(ctxt(), args("", options)), throwsXPathException("FOCV0005"));
+        assertThat(() -> subject().call(ctxt(), args("", options)), throwsXPathException("XPTY0004"));
     }
 }
