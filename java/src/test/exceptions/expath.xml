@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <exceptions>
-    
+  <exception test-set="expath-binary" run="false" report="notRun">
+    <created by="Norm Tovey-Walsh" on="2026-04-10"/>
+    <reason>Correct tests are now in the QT4 test suite</reason>
+  </exception>
+
+  <exception test-set="expath-binary2" run="false" report="notRun">
+    <created by="Norm Tovey-Walsh" on="2026-04-10"/>
+    <reason>Correct tests are now in the QT4 test suite</reason>
+  </exception>
+
+  <exception test-set="expath-file" run="false" report="notRun">
+    <created by="Norm Tovey-Walsh" on="2026-04-10"/>
+    <reason>Correct tests are now in the QT4 test suite</reason>
+  </exception>
 </exceptions>
