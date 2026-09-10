@@ -12,3 +12,5 @@ gcc  -m64 -fPIC -I../Saxon.C.API/graalvm Query.c -o query -ldl -lc SaxonCGlue.o 
 
 gcc  -m64 -fPIC -I../Saxon.C.API/graalvm Validate.c -o validate -ldl -lc SaxonCGlue.o -L$library_dir -lsaxon-@@edition@@c-@@VERSION@@ $2
 
+gcc  -m64 -fPIC -I../Saxon.C.API/graalvm Gizmo.c -o gizmo -ldl -lc SaxonCGlue.o -L$library_dir -lsaxon-@@edition@@c-@@VERSION@@ $2
+

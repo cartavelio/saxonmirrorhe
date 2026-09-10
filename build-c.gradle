@@ -11,6 +11,19 @@ task unjar_ICU4jJar(
   into "${buildDir}/icu"
 }
 
+
+// Tasks to rejar jLine
+
+task unjar_JLineJar(
+  type: Copy,
+  description: "Unjar JLine"
+) {
+  inputs.file(jlineJar)
+  outputs.files(fileTree("${buildDir}/jLine"))
+  from zipTree(file(jlineJar))
+  into "${buildDir}/jLine"
+}
+
 // ============================================================
 // Tasks to rejar Xerces and XML Resolver
 
