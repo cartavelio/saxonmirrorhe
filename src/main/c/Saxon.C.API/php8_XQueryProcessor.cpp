@@ -76,6 +76,51 @@ PHP_METHOD(XQueryProcessor, runQueryToValue) {
   RETURN_NULL();
 }
 
+PHP_METHOD(XQueryProcessor, setcwd) {
+  XQueryProcessor *xqueryProcessor;
+  char *cwdStr;
+  size_t len;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &cwdStr, &len) == FAILURE) {
+    RETURN_NULL();
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xqueryProcessor_object *obj =
+      (xqueryProcessor_object *)((char *)pobj -
+                                 XtOffsetOf(xqueryProcessor_object, std));
+  xqueryProcessor = obj->xqueryProcessor;
+  if (xqueryProcessor != nullptr) {
+
+    if (cwdStr != nullptr) {
+      xqueryProcessor->setcwd(cwdStr);
+    }
+  }
+}
+
+PHP_METHOD(XQueryProcessor, getcwd) {
+  XQueryProcessor *xqueryProcessor;
+
+  if (ZEND_NUM_ARGS() > 0) {
+    WRONG_PARAM_COUNT;
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xqueryProcessor_object *obj =
+      (xqueryProcessor_object *)((char *)pobj -
+                                 XtOffsetOf(xqueryProcessor_object, std));
+  xqueryProcessor = obj->xqueryProcessor;
+  if (xqueryProcessor != nullptr) {
+
+    const char * cwdStr = xqueryProcessor->getcwd();
+    if(cwdStr != nullptr) {
+      RETURN_STRING(cwdStr);
+    } else {
+      RETURN_NULL();
+    }
+  }
+}
+
 PHP_METHOD(XQueryProcessor, runQueryToString) {
   XQueryProcessor *xqueryProcessor;
 
@@ -571,18 +616,12 @@ zend_function_entry XQueryProcessor_methods[] = {
             ZEND_ACC_PUBLIC) PHP_ME(XQueryProcessor, setContextItem,
                                     arginfo_saxonc_XQueryProcessor_setContextItem,
                                     ZEND_ACC_PUBLIC)
-            PHP_ME(
-                XQueryProcessor, setContextItemFromFile,
-                arginfo_saxonc_XQueryProcessor_setContextItemFromFile,
-                ZEND_ACC_PUBLIC) PHP_ME(XQueryProcessor, setParameter,
-                                        arginfo_saxonc_XQueryProcessor_setParameter,
-                                        ZEND_ACC_PUBLIC)
-                PHP_ME(
-                    XQueryProcessor, setProperty,
-                    arginfo_saxonc_XQueryProcessor_setProperty,
-                    ZEND_ACC_PUBLIC) PHP_ME(XQueryProcessor, clearParameters,
-                                            arginfo_saxonc_XQueryProcessor_clearParameters,
-                                            ZEND_ACC_PUBLIC)
+            PHP_ME(XQueryProcessor, setContextItemFromFile,arginfo_saxonc_XQueryProcessor_setContextItemFromFile,ZEND_ACC_PUBLIC)
+            PHP_ME(XQueryProcessor, setParameter,arginfo_saxonc_XQueryProcessor_setParameter,ZEND_ACC_PUBLIC)
+            PHP_ME(XQueryProcessor, setProperty,arginfo_saxonc_XQueryProcessor_setProperty,ZEND_ACC_PUBLIC)
+            PHP_ME(XQueryProcessor, clearParameters,arginfo_saxonc_XQueryProcessor_clearParameters, ZEND_ACC_PUBLIC)
+            PHP_ME(XQueryProcessor,setcwd,arginfo_saxonc_XQueryProcessor_setcwd,ZEND_ACC_PUBLIC)
+            PHP_ME(XQueryProcessor,getcwd,arginfo_saxonc_XQueryProcessor_getcwd,ZEND_ACC_PUBLIC)
                     PHP_ME(
                         XQueryProcessor, clearProperties,
                         arginfo_saxonc_XQueryProcessor_clearProperties,

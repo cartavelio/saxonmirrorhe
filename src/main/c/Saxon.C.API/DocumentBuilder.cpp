@@ -10,8 +10,8 @@ DocumentBuilder::DocumentBuilder() {
   proc = new SaxonProcessor(false);
   docBuilderObject = createDocumentBuilder(SaxonProcessor::sxn_environ->thread,
                                            (void *)proc->procRef);
-  lineNumbering = -1;
-  dtdVal = -1;
+  lineNumbering = false;
+  dtdVal = false;
 }
 
 DocumentBuilder::DocumentBuilder(SaxonProcessor *p, int64_t docObject,

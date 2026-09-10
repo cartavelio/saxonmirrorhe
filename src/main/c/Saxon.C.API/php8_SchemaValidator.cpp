@@ -180,6 +180,51 @@ PHP_METHOD(SchemaValidator, validateToNode) {
   RETURN_NULL();
 }
 
+PHP_METHOD(XPathProcessor, setcwd) {
+  XPathProcessor *schemaValidator;
+  char *cwdStr;
+  size_t len;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &cwdStr, &len) == FAILURE) {
+    RETURN_NULL();
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  schemaValidator_object *obj =
+      (schemaValidator_object *)((char *)pobj -
+                                 XtOffsetOf(schemaValidator_object, std));
+  schemaValidator = obj->schemaValidator;
+  if (schemaValidator != nullptr) {
+
+    if (cwdStr != nullptr) {
+      schemaValidator->setcwd(cwdStr);
+    }
+  }
+}
+
+PHP_METHOD(SchemaValidator, getcwd) {
+  SchemaValidator *schemaValidator;
+
+    if (ZEND_NUM_ARGS() > 0) {
+      WRONG_PARAM_COUNT;
+    }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  schemaValidator_object *obj =
+      (schemaValidator_object *)((char *)pobj -
+                                 XtOffsetOf(schemaValidator_object, std));
+  schemaValidator = obj->schemaValidator;
+  if (schemaValidator != nullptr) {
+
+    const char * cwdStr = schemaValidator->getcwd();
+    if(cwdStr != nullptr) {
+      RETURN_STRING(cwdStr);
+    } else {
+      RETURN_NULL();
+    }
+  }
+}
+
 PHP_METHOD(SchemaValidator, setLax) {
 
   SchemaValidator *schemaValidator;
@@ -527,17 +572,13 @@ zend_function_entry SchemaValidator_methods[] = {
                        ZEND_ACC_PUBLIC) PHP_ME(SchemaValidator, setLax,
                                                arginfo_saxonc_sval_setLax,
                                                ZEND_ACC_PUBLIC)
-                    PHP_ME(
-                        SchemaValidator, registerSchemaFromNode,
-                        arginfo_saxonc_sval_registerSchemaFromNode,
-                        ZEND_ACC_PUBLIC) PHP_ME(SchemaValidator, setParameter,
-                                                arginfo_saxonc_sval_setParameter,
-                                                ZEND_ACC_PUBLIC)
-                        PHP_ME(SchemaValidator, setProperty,
-                               arginfo_saxonc_sval_setProperty, ZEND_ACC_PUBLIC)
-                            PHP_ME(SchemaValidator, clearParameters,
-                                   arginfo_saxonc_sval_clearParameters,
-                                   ZEND_ACC_PUBLIC)
+                    PHP_ME(SchemaValidator, registerSchemaFromNode,arginfo_saxonc_sval_registerSchemaFromNode,ZEND_ACC_PUBLIC)
+                    PHP_ME(SchemaValidator, setParameter,arginfo_saxonc_sval_setParameter,ZEND_ACC_PUBLIC)
+                    PHP_ME(SchemaValidator, setProperty,arginfo_saxonc_sval_setProperty, ZEND_ACC_PUBLIC)
+                    PHP_ME(SchemaValidator, clearParameters,arginfo_saxonc_sval_clearParameters,ZEND_ACC_PUBLIC)
+
+                    PHP_ME(SchemaValidator, setcwd,arginfo_saxonc_sval_setcwd, ZEND_ACC_PUBLIC)
+                    PHP_ME(SchemaValidator, getcwd,arginfo_saxonc_sval_getcwd,ZEND_ACC_PUBLIC)
                                 PHP_ME(SchemaValidator, clearProperties,
                                        arginfo_saxonc_sval_clearProperties,
                                        ZEND_ACC_PUBLIC)

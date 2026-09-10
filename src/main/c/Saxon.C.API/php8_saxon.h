@@ -214,6 +214,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromUri);    // increment refCount
 PHP_METHOD(SaxonProcessor, parseJsonFromString); // increment refCount
 PHP_METHOD(SaxonProcessor, parseJsonFromFile);   // increment refCount
 PHP_METHOD(SaxonProcessor, setcwd);
+PHP_METHOD(SaxonProcessor, getcwd);
 PHP_METHOD(SaxonProcessor, attachCurrentThread);
 PHP_METHOD(SaxonProcessor, detachCurrentThread);
 
@@ -278,6 +279,7 @@ PHP_METHOD(Xslt30Processor, exceptionClear);
 PHP_METHOD(Xslt30Processor, exceptionOccurred);
 PHP_METHOD(Xslt30Processor, getErrorCode);
 PHP_METHOD(Xslt30Processor, setcwd);
+PHP_METHOD(Xslt30Processor, getcwd);
 
 PHP_METHOD(XsltExecutable, __destruct);
 PHP_METHOD(XsltExecutable, callFunctionReturningValue);  // increment refCount, arguments does not need refcounting
@@ -307,6 +309,7 @@ PHP_METHOD(XsltExecutable, setInitialMatchSelectionAsFile);  // checks for old v
 PHP_METHOD(XsltExecutable, setGlobalContextItem);   // checks for old values, then add new one, increment refCount
 PHP_METHOD(XsltExecutable, setGlobalContextFromFile);  // checks for old values and remove, decrement refCount
 PHP_METHOD(XsltExecutable, setcwd);
+PHP_METHOD(XsltExecutable, getcwd);
 PHP_METHOD(XsltExecutable, setProperty);
 PHP_METHOD(XsltExecutable, clearParameters);   // do decrementing of values and delete if refCount == 0
 PHP_METHOD(XsltExecutable, clearProperties);
@@ -329,6 +332,8 @@ PHP_METHOD(XQueryProcessor, setContextItem);  // checks for old values, then add
 PHP_METHOD(XQueryProcessor, setContextItemFromFile);
 PHP_METHOD(XQueryProcessor, setParameter);     // checks for old values, then add new one, increment refCount
 PHP_METHOD(XQueryProcessor, setProperty);
+PHP_METHOD(XQueryProcessor, setcwd);
+PHP_METHOD(XQueryProcessor, getcwd);
 PHP_METHOD(XQueryProcessor, setLanguageVersion);
 PHP_METHOD(XQueryProcessor, setStreaming);
 PHP_METHOD(XQueryProcessor, isStreaming);
@@ -369,6 +374,9 @@ PHP_METHOD(XPathProcessor, exceptionClear);
 PHP_METHOD(XPathProcessor, exceptionOccurred);
 PHP_METHOD(XPathProcessor, getErrorCode);
 PHP_METHOD(XPathProcessor, getErrorMessage);
+PHP_METHOD(XPathProcessor, setcwd);
+PHP_METHOD(XPathProcessor, getcwd);
+
 
 // PHP_METHOD(SchemaValidator,  __construct);
 PHP_METHOD(SchemaValidator, __destruct);
@@ -390,6 +398,8 @@ PHP_METHOD(SchemaValidator, exceptionClear);
 PHP_METHOD(SchemaValidator, exceptionOccurred);
 PHP_METHOD(SchemaValidator, getErrorCode);
 PHP_METHOD(SchemaValidator, getErrorMessage);
+PHP_METHOD(SchemaValidator, setcwd);
+PHP_METHOD(SchemaValidator, getcwd);
 
 /*     ============== PHP Interface of   XdmValue =============== */
 

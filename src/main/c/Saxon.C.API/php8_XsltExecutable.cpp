@@ -216,6 +216,27 @@ PHP_METHOD(XsltExecutable, setcwd) {
   }
 }
 
+PHP_METHOD(XsltExecutable, getcwd) {
+  XsltExecutable *xsltExecutable;
+  if (ZEND_NUM_ARGS() > 0) {
+    WRONG_PARAM_COUNT;
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xsltExecutable_object *obj =
+      (xsltExecutable_object *)((char *)pobj -
+                                XtOffsetOf(xsltExecutable_object, std));
+  xsltExecutable = obj->xsltExecutable;
+  if (xsltExecutable != nullptr) {
+    const char * cwdStr = xsltExecutable->getcwd();
+    if(cwdStr != nullptr) {
+      RETURN_STRING(cwdStr);
+    } else {
+      RETURN_NULL();
+    }
+  }
+}
+
 PHP_METHOD(XsltExecutable, setBaseOutputURI) {
   XsltExecutable *xsltExecutable;
   char *baseOutputURI = nullptr;
@@ -1856,18 +1877,10 @@ zend_function_entry XsltExecutable_methods[] = {
                                                                                        setProperty,
                                                                                        arginfo_saxonc_xe_setProperty,
                                                                                        ZEND_ACC_PUBLIC)
-                                                            PHP_ME(
-                                                                XsltExecutable,
-                                                                setcwd,
-                                                                arginfo_saxonc_xe_setcwd,
-                                                                ZEND_ACC_PUBLIC)
-                                                                PHP_ME(XsltExecutable,
-                                                                       clearParameters,
-                                                                       arginfo_saxonc_xe_clearParameters,
-                                                                       ZEND_ACC_PUBLIC) PHP_ME(XsltExecutable,
-                                                                                               clearProperties,
-                                                                                               arginfo_saxonc_xe_clearProperties,
-                                                                                               ZEND_ACC_PUBLIC)
+    PHP_ME(XsltExecutable,setcwd,arginfo_saxonc_xe_setcwd,ZEND_ACC_PUBLIC)
+  PHP_ME(XsltExecutable,getcwd,arginfo_saxonc_xe_getcwd,ZEND_ACC_PUBLIC)
+    PHP_ME(XsltExecutable,clearParameters,arginfo_saxonc_xe_clearParameters,ZEND_ACC_PUBLIC)
+    PHP_ME(XsltExecutable,clearProperties,arginfo_saxonc_xe_clearProperties,ZEND_ACC_PUBLIC)
                             PHP_ME(XsltExecutable,setSaveXslMessage,arginfo_saxonc_xe_setSaveXslMessage,ZEND_ACC_PUBLIC)
                             PHP_ME(XsltExecutable,exceptionOccurred, arginfo_saxonc_xe_exceptionOccurred,ZEND_ACC_PUBLIC)
 

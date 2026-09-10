@@ -282,6 +282,12 @@ public:
    */
   void setcwd(const char *cwd);
 
+ /**
+  * Get the current working directory set on the XQueryProcessor
+  * @return const char * - cwd set on this XQueryProcessor
+  */
+ const char * cwd getcwd()
+
   //! Check for exception thrown.
   /**
    * @return char*. Returns the main exception message if thrown otherwise

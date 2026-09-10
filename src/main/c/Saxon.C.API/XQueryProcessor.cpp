@@ -223,6 +223,10 @@ void XQueryProcessor::setcwd(const char *dir) {
   }
 }
 
+const char * XQueryProcessor::getcwd() {
+  return cwdXQ.c_str();
+}
+
 void XQueryProcessor::setQueryBaseURI(const char *baseURI) {
   setProperty("base", baseURI);
 }
