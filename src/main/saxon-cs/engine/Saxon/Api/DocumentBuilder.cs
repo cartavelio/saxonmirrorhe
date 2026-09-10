@@ -4,14 +4,10 @@ using System.IO;
 using System.Xml;
 using Saxon.Ejava.lang;
 using Saxon.Ejavax.xml.transform;
-using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
 using Saxon.Hej.lib;
-using Saxon.Hej.om;
 using Saxon.Hej.pull;
-using Saxon.Hej.s9api;
 using Saxon.Hej.trans;
-using Saxon.Callbacks;
 using Saxon.Impl.Dom;
 
 namespace Saxon.Api {
@@ -24,12 +20,12 @@ namespace Saxon.Api {
     public class DocumentBuilder {
         private Processor processor;
         private Configuration config;
-        private XmlResolver xmlResolver;
         private SchemaValidationMode validation;
         private SchemaValidator schemaValidator;
         private Uri baseUri;
         private QName topLevelElement;
         private XQueryExecutable projectionQuery;
+        private ResourceResolver resourceResolver;
 
         private Saxon.Hej.s9api.DocumentBuilder s9Builder;
         
@@ -37,27 +33,30 @@ namespace Saxon.Api {
             this.processor = processor;
             this.s9Builder = processor.JProcessor.newDocumentBuilder();
             this.config = processor.Implementation;
-            this.xmlResolver = config.getCommonResourceResolver();
+            this.resourceResolver = config.getCommonResourceResolver().DereferenceLocation;
 
+        }
+        
+        /// <summary>
+        /// An XmlDocumentResolver used to resolve any URI passed to the <c>Build</c> method.
+        /// </summary>
+        
+        public ResourceResolver XmlDocumentResolver {
+            get => resourceResolver;
+            set => resourceResolver = value;
         }
 
         /// <summary>
-        /// An <c>XmlResolver</c>, which will be used to resolve URIs of documents being loaded
-        /// and of references to external entities within those documents (including any external DTD).
+        /// An <c>XmlResolver</c>, which will be used to resolve references to external entities
+        /// within XML documents being loaded (including any external DTD) when the <c>DocumentBuilder</c>
+        /// allocates an <c>XmlReader</c>.
         /// </summary>
         /// <remarks>
-        /// <para>By default a <c>StandardXmlResolver</c> is used.</para>
-        /// <para>When Saxon invokes a user-written <c>XmlResolver</c>, the <c>GetEntity</c> method
-        /// may return any of: a <c>System.IO.Stream</c>; a <c>System.IO.TextReader</c>; or a
-        /// <c>Saxon.Ejava.xml.transform.Source</c>. However, if the <c>XmlResolver</c> is called
-        /// by the XML parser to resolve external entity references, then it must return an 
-        /// instance of <c>System.IO.Stream</c>.</para>
+        /// <para>In Saxon releases prior to 11.1, an <c>XmlResolver</c> was also used to
+        /// resolve the URI passed to the <c>DocumentBuilder.Build()</c> method.</para>
         /// </remarks>
 
-        public XmlResolver XmlResolver {
-            get => xmlResolver;
-            set => xmlResolver = value;
-        }
+        public XmlResolver EntityResolver { get; set; }
 
         /// <summary>
         /// Determines whether line numbering is enabled for documents loaded using this
@@ -249,18 +248,37 @@ namespace Saxon.Api {
         /// in-memory document.
         /// </returns>
         public XdmNode Build(Uri uri) {
-            Object obj = XmlResolver.GetEntity(uri, "application/xml", System.Type.GetType("System.IO.Stream"));
-            if (obj is Stream stream) {
-                try {
-                    return Build(stream, uri);
-                }
-                finally {
-                    stream.Close();
+            ResourceRequest request = new () {
+                Uri = uri,
+                Nature = ResourceRequest.XML_NATURE
+            };
+            IResource resource = XmlDocumentResolver.Invoke(request) 
+                                 ?? processor.Implementation.getCommonResourceResolver().DereferenceLocation(request);
+
+            if (resource == null) {
+                throw new SaxonApiException("Unable to resolve URI " + uri);
+            }
+            switch (resource) {
+                case TextResource text when text.hasReader():
+                    return Build(text.TextReader, resource.ResourceUri);
+                case TextResource text when text.hasStream():
+                    return Build(text.InputStream, resource.ResourceUri);
+                case TextResource text:
+                    return Build(new StringReader(text.Content), resource.ResourceUri);
+                case XmlReaderResource xrr:
+                    return Build(xrr.XmlReader);
+                default: {
+                    XdmItem item = resource.GetXdmItem();
+                    if (item is XdmNode node) {
+                        return node;
+                    }
+
+                    break;
                 }
             }
-            else {
-                throw new ArgumentException("Invalid type of result from XmlResolver.GetEntity: " + obj);
-            }
+
+            throw new ArgumentException("Invalid type of result from ResourceResolver");
+
         }
 
         /// <summary>
@@ -295,8 +313,8 @@ namespace Saxon.Api {
                 DtdProcessing = DtdProcessing.Parse // must expand entity references
             };
 
-            if (xmlResolver != null) {
-                settings.XmlResolver = xmlResolver;
+            if (EntityResolver != null) {
+                settings.XmlResolver = EntityResolver;
             }
 
             settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);
@@ -349,8 +367,8 @@ namespace Saxon.Api {
                 DtdProcessing = DtdProcessing.Parse // must expand entity references
             };
 
-            if (xmlResolver != null) {
-                settings.XmlResolver = xmlResolver;
+            if (EntityResolver != null) {
+                settings.XmlResolver = EntityResolver;
             }
 
             settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);

@@ -12,6 +12,7 @@ using Saxon.Hej.pull;
 using Saxon.Callbacks;
 using System;
 using System.Collections.Generic;
+using Org.XmlResolver.Features;
 
 
 namespace Saxon.Impl.Helpers {

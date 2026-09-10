@@ -49,25 +49,33 @@ namespace Saxon.Callbacks {
             }
             
             if (resolver != null) {
-                StreamSource ss = resolver.DereferenceLocation(absoluteURI, absoluteURI.ToString(), null, null);
-                if (ss != null) {
-                    if (ss.getReader() != null) {
-                        return ss.getReader();
-                    }
-
-                    try {
-                        Stream stream = ss.getInputStream();
-                        if (encoding == null) {
-                            encoding = inferEncoding(stream);
-                        }
-                        if (encoding == "iso-646") {
-                            encoding = "us-ascii";
-                        }
-                        return new StreamReader(stream, Encoding.GetEncoding(encoding));
-                    }
-                    catch (Exception e) {
-                        throw new Hej.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
-                    }
+                ResourceRequest request = new () {
+                    Uri = absoluteURI,
+                    Nature = ResourceRequest.TEXT_NATURE
+                };
+                if (encoding != null) {
+                    request.Encoding = Encoding.GetEncoding(encoding);
+                }
+                IResource ss = resolver.DereferenceLocation(request);
+                if (ss is TextResource text) {
+                    return text.TextReader;
+                    // if (text.TextReader != null) {
+                    //     return ss.getReader();
+                    // }
+                    //
+                    // try {
+                    //     Stream stream = ss.getInputStream();
+                    //     if (encoding == null) {
+                    //         encoding = inferEncoding(stream);
+                    //     }
+                    //     if (encoding == "iso-646") {
+                    //         encoding = "us-ascii";
+                    //     }
+                    //     return new StreamReader(stream, Encoding.GetEncoding(encoding));
+                    // }
+                    // catch (Exception e) {
+                    //     throw new Hej.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
+                    // }
                 }
             }
             if (absoluteURI.Scheme == "http" || absoluteURI.Scheme == "https") {

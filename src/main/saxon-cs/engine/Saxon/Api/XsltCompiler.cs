@@ -36,7 +36,7 @@ namespace Saxon.Api {
         private Uri baseUri;
         private IDictionary<QName, XdmValue> variableList = new Dictionary<QName, XdmValue>();
         private JXsltCompiler jXsltCompiler;
-        private XmlResolver xmlResolver;
+        private ResourceResolver resourceResolver;
         private ErrorReporter _errorReporter;
 
         // internal constructor: the public interface is a factory method
@@ -45,8 +45,8 @@ namespace Saxon.Api {
         internal XsltCompiler(Processor processor) {
             this.processor = processor;
             jXsltCompiler = processor.JProcessor.newXsltCompiler();
-            //jXsltCompiler.setURIResolver(processor.Implementation.getURIResolver());
             jXsltCompiler.getUnderlyingCompilerInfo().setCommonResourceResolver(processor.Implementation.getCommonResourceResolver());
+            resourceResolver = request => processor.Implementation.getCommonResourceResolver().DereferenceLocation(request);
         }
 
         /// <summary>
@@ -100,29 +100,11 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
 
-        public XmlResolver XmlResolver {
-            get {
-                if (xmlResolver == null) {
-                    Saxon.Ejavax.xml.transform.URIResolver resolver =
-                        jXsltCompiler.getUnderlyingCompilerInfo().getURIResolver();
-                    if (resolver is StandardURIResolver standardUriResolver) {
-                        return standardUriResolver.getXmlResolver();
-                    }
-                    else {
-                        xmlResolver = new StandardXmlResolver(processor.Implementation);
-                        return xmlResolver;
-                    }
-                }
-                else {
-                    return xmlResolver;
-                }
-            }
+        public ResourceResolver StylesheetModuleResolver {
+            get => resourceResolver;
             set {
-                xmlResolver = value;
-                jXsltCompiler.getUnderlyingCompilerInfo().setURIResolver(
-                    new StandardURIResolver(
-                        jXsltCompiler.getProcessor().getUnderlyingConfiguration(),
-                        xmlResolver));
+                resourceResolver = value;
+                jXsltCompiler.setURIResolver(new UriResolverWrappingDocumentResolver(value));
             }
         }
 
@@ -609,7 +591,8 @@ namespace Saxon.Api {
         /// <c>Compiler</c> is ignored.
         /// </remarks>
         /// <param name="uri">The URI identifying the location where the stylesheet document can be
-        /// found</param>
+        /// found. If a <c>StylesheetModuleResolver</c> has been defined, it will be used to resolve
+        /// the supplied URI.</param>
         /// <returns>An <c>XsltExecutable</c> which represents the compiled stylesheet object.
         /// The <c>XsltExecutable</c> may be run as many times as required, in the same or a different
         /// thread. The <c>XsltExecutable</c> is not affected by any changes made to the <c>XsltCompiler</c>
@@ -620,15 +603,35 @@ namespace Saxon.Api {
         /// error stream. The exception that is returned from this method is merely a summary indicating the
         /// status, and is not useful for diagnosing the actual error.</exception> 
         public XsltExecutable Compile(Uri uri) {
-            object obj = XmlResolver.GetEntity(uri, "application/xml", Type.GetType("System.IO.Stream"));
-            if (obj is Stream stream) {
-                // See bug issue #2306
-                XsltExecutable executable = Compile(stream, uri.ToString(), true);
-                executable.InternalProcessor = processor;
-                return executable;
+            XsltExecutable executable;
+            ResourceRequest request = new () {
+                Uri = uri,
+                Nature = ResourceRequest.XSLT_NATURE
+            };
+            IResource resource = resourceResolver.Invoke(request);
+            if (resource is TextResource text) {
+                if (text.hasStream()) {
+                    executable = Compile(text.InputStream, uri.ToString(), true);
+                }
+                else {
+                    executable = Compile(text.TextReader);
+                }
+            } else if (resource is XmlReaderResource xrr) {
+                executable = Compile(xrr.XmlReader);
+            } else {
+                XdmItem item = resource.GetXdmItem();
+                if (item is XdmNode node) {
+                    executable = Compile(node);
+                }
+                else {
+                    throw new ArgumentException("Invalid type of result from URI resolver");
+                }
             }
-            throw new ArgumentException("Invalid type of result from XmlResolver.GetEntity: " + obj);
+            executable.InternalProcessor = processor;
+            return executable;
         }
+        
+
 
         /// <summary>
         /// Compile a stylesheet, delivered using an <c>XmlReader</c>.
@@ -736,20 +739,21 @@ namespace Saxon.Api {
         /// error stream. The exception that is returned from this method is merely a summary indicating the
         /// status, and is not useful for diagnosing the actual error.</exception>
         
-        public XsltExecutable CompileAssociatedStylesheet(Uri uri, String media) {
-            object obj = XmlResolver.GetEntity(uri, media ?? "application/xml",
-                Type.GetType("System.IO.Stream"));
-            if (obj is Stream stream) {
-                StreamSource ss = new (stream, uri.OriginalString);
-                // See bug issue #2306
-                XsltExecutable executable =
-                    new(jXsltCompiler.compile(jXsltCompiler.getAssociatedStylesheet(ss, media, null, null))) {
-                        InternalProcessor = processor
-                    };
-                return executable;
-                
-            }
-            throw new ArgumentException("Invalid type of result from XmlResolver.GetEntity: " + obj);
+        public XsltExecutable CompileAssociatedStylesheet(Uri uri, string media) {
+            // TODO: reinstate
+            // object obj = XmlResolver.GetEntity(uri, media ?? "application/xml",
+            //     Type.GetType("System.IO.Stream"));
+            // if (obj is Stream stream) {
+            //     StreamSource ss = new (stream, uri.OriginalString);
+            //     // See bug issue #2306
+            //     XsltExecutable executable =
+            //         new(jXsltCompiler.compile(jXsltCompiler.getAssociatedStylesheet(ss, media, null, null))) {
+            //             InternalProcessor = processor
+            //         };
+            //     return executable;
+            //     
+            // }
+            throw new ArgumentException("Invalid type of result from XmlResolver.GetEntity: ");
         }
 
         /// <summary>Locate and compile a stylesheet identified by an <c>&lt;?xml-stylesheet?&gt;</c>

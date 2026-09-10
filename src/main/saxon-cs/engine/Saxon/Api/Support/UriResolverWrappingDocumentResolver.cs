@@ -13,13 +13,26 @@ namespace Saxon.Api.Support {
             this.resolver = resolver;
         }
         public Source resolve(string relativeUri, string baseUri) {
-            Uri baseUriUri = new Uri(baseUri);
-            Uri abs = new Uri(baseUriUri, (string)relativeUri);
-            ResourceProperties properties = new() {
-                BaseUri = baseUriUri,
-                RelativeUri = relativeUri
-            };
-            IResource resource = resolver.Invoke(abs, properties);
+            IResource resource = null;
+            if (baseUri == null) {
+                Uri href = new Uri(relativeUri, UriKind.RelativeOrAbsolute);
+                ResourceRequest request = new() {
+                    Uri = href,
+                    RelativeUri = relativeUri
+                };
+                resource = resolver.Invoke(request);
+            }
+            else {
+                Uri baseUriUri = new Uri(baseUri);
+                Uri abs = new Uri(baseUriUri, (string)relativeUri);
+                ResourceRequest request = new() {
+                    Uri = abs,
+                    BaseUri = baseUriUri,
+                    RelativeUri = relativeUri
+                };
+                resource = resolver.Invoke(request);
+            }
+
             if (resource is null) {
                 return null;
             }

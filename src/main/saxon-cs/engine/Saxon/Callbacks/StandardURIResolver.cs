@@ -1,14 +1,18 @@
 using System;
+using System.Impl.Helpers;
 using System.Xml;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Xml.XPath;
+using Saxon.Api;
 using Saxon.Ejava.lang;
+using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.sax;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
 using Saxon.Hej.lib;
+using Saxon.Hej.pull;
 using Saxon.Hej.resource;
 
 namespace Saxon.Callbacks {
@@ -91,14 +95,14 @@ namespace Saxon.Callbacks {
             }
         }
 
-        public Saxon.Ejavax.xml.transform.Source resolve(string href, string @base) {
-            return dereference(makeAbsolute(href, @base));
+        public Saxon.Ejavax.xml.transform.Source dereference(string uri) {
+            return resolve(uri, uri);
         }
 
-        public Saxon.Ejavax.xml.transform.Source dereference(string uri) {
+        public Saxon.Ejavax.xml.transform.Source resolve(string href, string @base) {
             try {
 
-                Uri abs = new Uri(uri);
+                Uri abs = @base == null ? new Uri(href, UriKind.RelativeOrAbsolute) : new Uri(new Uri(@base), href);
 
                 // Handle a URI using the data: URI scheme
                 if (abs.Scheme == "data") {
@@ -121,17 +125,50 @@ namespace Saxon.Callbacks {
                     }
                 }
                 else {
-
-                    StreamSource result = resolver.DereferenceLocation(abs, uri, null, null);
+                    ResourceRequest request = new() {
+                        Uri = abs,
+                        RelativeUri = href,
+                        Nature = ResourceRequest.XML_NATURE
+                    };
+                    if (@base != null) {
+                        request.BaseUri = new Uri(@base);
+                    }
+                    IResource result = resolver.DereferenceLocation(request);
                     if (result != null) {
-                        return result;
+                        if (result is TextResource text) {
+                            XmlReaderSettings settings = new () {
+                                DtdProcessing = DtdProcessing.Parse, // must expand entity references
+                                XmlResolver = config.getCommonResourceResolver()
+                            };
+                            XmlReader parser;
+                            if (text.hasReader()) {
+                                parser = XmlReader.Create(text.TextReader, settings, abs.ToString());
+                            } else if (text.hasStream()) {
+                                parser = XmlReader.Create(text.InputStream, settings, abs.ToString());
+                            } else {
+                                parser = XmlReader.Create(new StringReader(text.Content), settings, abs.ToString());
+                            }
+                            DotNetPullProvider provider = new DotNetPullProvider(parser);
+                            provider.setBaseURI(text.ResourceUri.ToString());
+                            return new PullSource(provider);    
+                               
+                        } else if (result is NodeResource nr) {
+                            return ((XdmNode)nr.GetXdmItem()).Implementation.asActiveSource();
+                        } else if (result is XmlReaderResource xrr) {
+                            DotNetPullProvider provider = new DotNetPullProvider(xrr.XmlReader);
+                            provider.setBaseURI(xrr.ResourceUri.ToString());
+                            return new PullSource(provider);
+                        }
+                        else {
+                            return null;
+                        }
                     }
                     else {
                         XmlUrlResolver resolver = new XmlUrlResolver();
                         resolver.Credentials = CredentialCache.DefaultCredentials;
                         object entity = resolver.GetEntity(abs, null, typeof(Stream));
                         if (entity is Stream stream) {
-                            return new StreamSource(stream, uri);
+                            return new StreamSource(stream, abs.ToString());
                         }
 
                         return null;

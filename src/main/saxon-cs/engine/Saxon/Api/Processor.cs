@@ -224,7 +224,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A new <c>DocumentBuilder</c></returns>
         public DocumentBuilder NewDocumentBuilder() {
-            return new DocumentBuilder(this) {XmlResolver = XmlResolver};
+            return new DocumentBuilder(this) {EntityResolver = XmlResolver};
         }
         
         /// <summary>
