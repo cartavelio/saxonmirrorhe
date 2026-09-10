@@ -9,6 +9,54 @@
              body of a function -->
     </environment>
 
+   <environment name="auction">
+      <namespace prefix="ma" uri="http://www.example.com/AuctionWatch"/>
+      <namespace prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
+      <namespace prefix="anyzone" uri="http://www.example.com/auctioneers#anyzone"/>
+      <namespace prefix="eachbay" uri="http://www.example.com/auctioneers#eachbay"/>
+      <namespace prefix="yabadoo" uri="http://www.example.com/auctioneers#yabadoo"/>
+      <namespace prefix="map" uri="http://www.w3.org/2005/xpath-functions/map"/>
+      <source role="." file="../../../../submodules/qt3/docs/auction.xml">
+         <description>Data for the the XML Query NS use cases: version for XPath tests</description>
+         <created by="XQuery WG" on="2005-02-11"/>
+      </source>
+   </environment>
+
+    <environment name="atomic">
+        <namespace prefix="atomic" uri="http://www.w3.org/XQueryTest"/> 
+        <schema uri="http://www.w3.org/XQueryTest" file="../../../../submodules/qt3/docs/atomic.xsd">
+            <description>A Schema for atomic.xml</description>
+            <created by="Carmelo Montanez" on="2005-03-08"/>
+        </schema>        
+        <source role="." file="../../../../submodules/qt3/docs/atomic.xml" validation="strict" uri="http://www.w3.org/fots/docs/atomic.xml">
+            <description>A Schema validated xml file, that contains values for data types. Can be used by any test.</description>
+            <created by="Carmelo Montanez" on="2005-03-08"/>
+        </source>
+   </environment>
+
+   <environment name="qname">
+      <schema uri="http://www.example.com/QNameXSD" file="docs/QName-schema.xsd">
+          <description>A Schema for QName-source.xml</description>
+          <created by="XQuery WG" on="2005-03-08"/>
+      </schema>
+      <source role="." file="../../../../submodules/qt3/docs/QName-source.xml" validation="strict">
+          <description>Data containing QNames in content</description>
+          <created by="XQuery WG" on="2005-02-11"/>
+      </source>
+      <namespace prefix="" uri="http://www.example.com/QNameXSD"/>
+   </environment>
+   
+   <environment name="works-mod">
+      <source role="." file="../../../../submodules/qt3/docs/works-mod.xml">
+         <description>Data for various NIST tests (abbreviated, unabbreviated syntax)</description>
+         <created by="Carmelo Montanez" on="2005-03-04"/>
+      </source>
+   </environment>
+
+    <environment name="array">
+        <namespace prefix="array" uri="http://www.w3.org/2005/xpath-functions/array"/>
+    </environment>
+
     <test-set name="fn-local-name"                      file="fn/local-name.xml"/>
     <test-set name="fn-local-name-from-QName"           file="fn/local-name-from-QName.xml"/>
 
