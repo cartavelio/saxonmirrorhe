@@ -21,6 +21,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
@@ -195,10 +196,18 @@ public class ParseXml extends SystemFunction implements Callable {
 
             Sender.send(pullSource, s, options);
 
-            TinyDocumentImpl node = (TinyDocumentImpl) b.getCurrentRoot();
-            node.setBaseURI(baseURI);
+            NodeInfo root = b.getCurrentRoot();
+            if (root instanceof TinyDocumentImpl) {
+                TinyDocumentImpl node = (TinyDocumentImpl) root;
+                node.setBaseURI(baseURI);
+                node.getTreeInfo().setUserData("saxon:document-uri", "");
+            } else if (root instanceof DocumentImpl) {
+                DocumentImpl node = (DocumentImpl) root;
+                node.setBaseURI(baseURI);
+                node.getTreeInfo().setUserData("saxon:document-uri", "");
+            }
             b.reset();
-            return node;
+            return root;
         } catch (XPathException err) {
             XPathException xe = new XPathException("First argument to parse-xml() is not a well-formed and namespace-well-formed XML document. XML parser reported: " +
                                                            err.getMessage(), "FODC0006");
