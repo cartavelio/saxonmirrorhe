@@ -149,7 +149,7 @@
         <p>In the class <code cs="Saxon.Api.XdmMap">XdmMap</code> we have changed the parameter for the methods
             <code>Get</code> and <code>ContainsKey</code> to receive <code>XdmAtomicValue</code> instead of object.</p>
         
-        <p>In the class <code cs="Saxon.Api.XdmNode">XdmNode</code> we now use generics for the method <code>EnurateAxis</code>, which
+        <p>In the class <code cs="Saxon.Api.XdmNode">XdmNode</code> we now use generics for the method <code>EnumerateAxis</code>, which
         now returns an <code>IEnumerator&lt;XdmNode&gt;</code> object.</p>
 
         <p>In the class <code cs="Saxon.Api.XdmAtomicValue">XdmAtomicValue</code> we have added the constructor
