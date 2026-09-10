@@ -48,7 +48,7 @@ public interface GroupIterator extends SequenceIterator {
     //#if EE==true
 
     /**
-     * Get a sequence which is a snapshot of this sequence at the current position
+     * Get a pseudo-iterator which represents a snapshot of this sequence at the current position
      *
      * @param context the XPath context
      * @return the snapshot sequence

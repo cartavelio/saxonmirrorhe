@@ -19,7 +19,8 @@ import java.util.function.Supplier;
 
 /**
  * ManualIterator: a pseudo-iterator used while streaming. It has a current node and a current position
- * which are set manually. Calling last() is an error. Calling next() always returns null.
+ * which are set manually, and accepts a function callback which can be invoked to get
+ * the value of last(). Calling next() always returns null.
  */
 
 public class ManualIterator implements FocusIterator, SequenceIterator,
@@ -63,21 +64,45 @@ public class ManualIterator implements FocusIterator, SequenceIterator,
         this.lengthFinder = () -> 1;
     }
 
+    /**
+     * Set (or reset) the context item
+     * @param value the context item
+     */
     public void setContextItem(Item value) {
         this.item = value;
     }
+
+    /**
+     * Set a callback function that can be invoked to get the value of last()
+     * @param finder the callback
+     */
 
     public void setLengthFinder(Supplier<Integer> finder) {
         this.lengthFinder = finder;
     }
 
+    /**
+     * Advance the current position by one.
+     */
+
     public void incrementPosition() {
         _position++;
     }
 
+    /**
+     * Set the current position to a specific value
+     * @param position the new current position
+     */
+
     public void setPosition(int position) {
         this._position = position;
     }
+
+    /**
+     * Ask whether the iterator supports lookahead.
+     * @return true (calling hasNext() is allowed, returns true if the value of position() is less
+     * than the value of length())
+     */
 
     @Override
     public boolean supportsHasNext() {
@@ -126,13 +151,24 @@ public class ManualIterator implements FocusIterator, SequenceIterator,
      * and not in others
      *
      * @return true if the {@link #getLength()} method can be called to determine the length
-     * of the underlying sequence.
+     * of the underlying sequence. This implementation always returns true (despite the fact that when
+     * streaming, a call to getLength() will actually fail)
      */
     @Override
     public boolean supportsGetLength() {
         return true;
     }
 
+    /**
+     * Get the last position (that is, the number of items in the sequence). This method is
+     * non-destructive: it does not change the state of the iterator. The method calls the
+     * function supplied using {@link #setLengthFinder(Supplier)} if available; otherwise
+     * it throws an {@link UncheckedXPathException}.
+     *
+     * @return the number of items in the sequence
+     * @throws UncheckedXPathException if no length finder function is available (or if it is available.
+     * but throws an exception)
+     */
     @Override
     public int getLength() {
         if (lengthFinder == null) {
