@@ -12,6 +12,7 @@ import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
@@ -24,6 +25,18 @@ import net.sf.saxon.value.*;
  * Implementation of the fn:sum function
  */
 public class Sum extends FoldingFunction {
+
+    @Override
+    public Expression makeFunctionCall(Expression... arguments) {
+        Expression[] newArgs = new Expression[2];
+        newArgs[0] = arguments[0];
+        if (arguments.length < 2 || arguments[1] instanceof DefaultedArgumentExpression) {
+            newArgs[1] = FunctionLiteral.makeLiteral(Int64Value.ZERO);
+        } else {
+            newArgs[1] = arguments[1];
+        }
+        return super.makeFunctionCall(newArgs);
+    }
 
     /*@NotNull*/
     @Override
@@ -214,9 +227,10 @@ public class Sum extends FoldingFunction {
         public ItemEvaluator elaborateForItem() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             PullEvaluator puller = fnc.getArg(0).makeElaborator().elaborateForPull();
-            ItemEvaluator zero = fnc.getArity() == 2
-                    ? fnc.getArg(1).makeElaborator().elaborateForItem()
-                    : context -> Int64Value.ZERO;
+            boolean defaultSecondArg = fnc.getArity() < 2 || fnc.getArg(1) instanceof DefaultedArgumentExpression;
+            ItemEvaluator zero = defaultSecondArg
+                    ? context -> Int64Value.ZERO
+                    : fnc.getArg(1).makeElaborator().elaborateForItem();
             return context -> {
                 SumFold fold = new SumFold(context, (AtomicValue)zero.eval(context));
                 SequenceIterator iter = puller.iterate(context);

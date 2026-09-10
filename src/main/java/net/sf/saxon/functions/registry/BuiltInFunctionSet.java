@@ -598,11 +598,11 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          */
 
         public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry arg(int a, ItemType type, int options, Sequence resultIfEmpty) {
-            return arg(a, type, options, resultIfEmpty, null);
-        }
-
-        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry arg(
-                int a, ItemType type, int options, Sequence resultIfEmpty, Expression defaultValue) {
+//            return arg(a, type, options, resultIfEmpty, null);
+//        }
+//
+//        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry arg(
+//                int a, ItemType type, int options, Sequence resultIfEmpty, Expression defaultValue) {
             int cardinality = options & StaticProperty.CARDINALITY_MASK;
             OperandUsage usage = OperandUsage.NAVIGATION;
             if ((options & ABS) != 0) {
@@ -618,23 +618,23 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                 this.paramTypes[a] = SequenceType.makeSequenceType(type, cardinality);
                 this.resultIfEmpty[a] = resultIfEmpty;
                 this.usage[a] = usage;
-                if (defaultValue != null) {
-                    withDefault(a, defaultValue);
-                }
+//                if (defaultValue != null) {
+//                    withDefault(a, defaultValue);
+//                }
             } catch (ArrayIndexOutOfBoundsException err) {
                 System.err.println("Internal Saxon error: Can't set argument " + a + " of " + name);
             }
             return this;
         }
 
-        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry withDefault(int arg, Expression defaultValue) {
-            if (this.defaultValueExpressions == null) {
-                this.defaultValueExpressions = new IntHashMap<>(getNumberOfParameters());
-            }
-            this.defaultValueExpressions.put(arg, defaultValue);
-            // if argument N can be defaulted, then register a variant of the function with arity N-1
-            return this;
-        }
+//        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry withDefault(int arg, Expression defaultValue) {
+//            if (this.defaultValueExpressions == null) {
+//                this.defaultValueExpressions = new IntHashMap<>(getNumberOfParameters());
+//            }
+//            this.defaultValueExpressions.put(arg, defaultValue);
+//            // if argument N can be defaulted, then register a variant of the function with arity N-1
+//            return this;
+//        }
 
         /**
          * Add details for options parameters (only applies to one argument, the function is expected to know which)

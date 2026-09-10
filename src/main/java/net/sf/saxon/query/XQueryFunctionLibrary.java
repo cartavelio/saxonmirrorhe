@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
@@ -278,6 +279,9 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             } else {
                 Expression[] expandedArgs = UserFunction.makeExpandedArgumentArray(arguments, keywords, fd);
                 ufc.setArguments(expandedArgs);
+                for (Expression e : expandedArgs) {
+                    ufc.adoptChildExpression(e);
+                }
             }
             ufc.setStaticType(fd.getResultType());
             UserFunction fn = fd.getUserFunction();
@@ -362,7 +366,8 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                 }
                 for (int a = 0; a < maxArity; a++) {
                     if (expandedArgs[a] == null) {
-                        expandedArgs[a] = fd.getParameterDefinitions()[a].getDefaultValueExpression();
+                        Expression expr = fd.getParameterDefinitions()[a].getDefaultValueExpression();
+                        expandedArgs[a] = expr.copy(new RebindingMap());
                     }
                 }
                 ufc.setArguments(expandedArgs);

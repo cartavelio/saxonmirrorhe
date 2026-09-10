@@ -7,11 +7,8 @@
 
 package net.sf.saxon.functions.registry;
 
-import net.sf.saxon.expr.DefaultedArgumentExpression;
-import net.sf.saxon.expr.Literal;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
-import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -154,9 +151,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(0, Type.ITEM_TYPE, STAR | ABS, null)
                 .arg(1, Type.ITEM_TYPE, STAR | ABS, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT | ABS, null)
-                .withDefault(2, new DefaultedArgumentExpression.DefaultCollationArgument()) // TODO: should be default collation
-                .arg(3, MapType.ANY_MAP_TYPE, OPT | ABS, null))
-                .withDefault(3, Literal.makeLiteral(new DictionaryMap()));
+                .arg(3, MapType.ANY_MAP_TYPE, OPT | ABS, null));
 
         register("default-collation", 0, e -> e.populate(() -> new StaticContextAccessor.DefaultCollation(), BuiltInAtomicType.STRING, ONE, DCOLL));
 
@@ -527,12 +522,12 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
-//        register("sum", 1, e -> e.populate(Sum::new, BuiltInAtomicType.ANY_ATOMIC, ONE, UO)
-//                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
+        register("sum", 1, e -> e.populate(Sum::new, BuiltInAtomicType.ANY_ATOMIC, ONE, UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
 
         register("sum", 1, 2, e -> e.populate(Sum::new, BuiltInAtomicType.ANY_ATOMIC, OPT, UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, OPT, null, Literal.makeLiteral(Int64Value.ZERO)));
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, OPT, null));
 
         register("timezone-from-date", 1, e -> e.populate(() -> new AccessorFn.TimezoneFromDate(), BuiltInAtomicType.DAY_TIME_DURATION, OPT, 0)
                 .arg(0, BuiltInAtomicType.DATE, OPT, EMPTY));

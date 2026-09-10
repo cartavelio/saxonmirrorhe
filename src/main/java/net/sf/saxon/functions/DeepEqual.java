@@ -7,10 +7,11 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.SameNameTest;
 import net.sf.saxon.str.StringTool;
@@ -107,6 +108,26 @@ public class DeepEqual extends CollatingFunctionFixed {
 
     public static final int EXCLUDE_VARIETY = 1 << 10;
 
+    @Override
+    public Expression makeFunctionCall(Expression... arguments) {
+        if (arguments.length == 4) {
+            return super.makeFunctionCall(arguments);
+        }
+        Expression[] newArgs = new Expression[4];
+        newArgs[0] = arguments[0];
+        newArgs[1] = arguments[1];
+        if (arguments.length < 3 || arguments[2] instanceof DefaultedArgumentExpression) {
+            newArgs[2] = new StringLiteral(getRetainedStaticContext().getDefaultCollationName());
+        } else {
+            newArgs[2] = arguments[2];
+        }
+        if (arguments.length < 4 || arguments[3] instanceof DefaultedArgumentExpression) {
+            newArgs[3] = Literal.makeLiteral(new DictionaryMap());
+        } else {
+            newArgs[2] = arguments[2];
+        }
+        return super.makeFunctionCall(newArgs);
+    }
 
     /**
      * Determine when two sequences are deep-equal

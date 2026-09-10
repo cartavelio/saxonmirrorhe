@@ -259,6 +259,7 @@ public abstract class FunctionCall extends Expression {
                                                      "XPST0141");
                         }
                         arg = defaultValue.copy(new RebindingMap());
+                        adoptChildExpression(arg);
                     }
                 }
                 if (arg != null && !(arg instanceof DefaultedArgumentExpression)) {
