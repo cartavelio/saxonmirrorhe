@@ -210,7 +210,9 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     private UnicodeString getActivePart() {
-        if ((bits & 0xff0000) != 0) {
+        if (used == 0) {
+            return EmptyUnicodeString.getInstance();
+        } else if ((bits & 0xff0000) != 0) {
             // use 24-bit codes
             return new Twine24(codepoints, used);
         } else if ((bits & 0xff00) != 0) {
@@ -399,11 +401,6 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     @Override
     public void write(String chars) throws IOException {
         append(chars);
-    }
-
-    public void trimToSize() {
-        // used from bytecode
-        codepoints = Arrays.copyOf(codepoints, used);
     }
 
     /**

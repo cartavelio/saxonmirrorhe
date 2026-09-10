@@ -18,7 +18,7 @@ import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.PublicStylesheetFunctionLibrary;
@@ -526,7 +526,7 @@ public final class EvaluateInstr extends Expression {
 //                    if (version == 30) {
 //                        version = 31;
 //                    }
-                    MapItem options = (optionsEval == null ? new HashTrieMap() : (MapItem) optionsEval.eval(context));
+                    MapItem options = (optionsEval == null ? EmptyMap.getInstance() : (MapItem) optionsEval.eval(context));
 
                     IndependentContext env = new IndependentContext(config);
                     env.setWarningHandler((str, loc) -> {

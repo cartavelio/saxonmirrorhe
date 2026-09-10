@@ -1,223 +1,130 @@
 package com.saxonica.functions.qt4.csv;
 
+import net.sf.saxon.expr.ItemMapper;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.om.*;
+import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public abstract class CsvRepresentationGenerator {
     protected final Map<String, GroundedValue> options;
-    protected final boolean _shouldExtractColumns;
-    protected final boolean _shouldFilterColumns;
-    protected final NumberOfColumns _numberOfColumnsMode;
-    protected List<Integer> columnIndexes;
-    protected int numberOfColumns = -1;
+    protected boolean extractHeaderRow = false;
+    protected final boolean trimRows;
+
+    protected GroundedValue explicitColumnNames = null;
+
+    protected ItemMapper.Lambda rowAdjuster;
 
     public CsvRepresentationGenerator(Map<String, GroundedValue> options) throws XPathException {
         this.options = options;
-        _shouldFilterColumns = (options.getOrDefault("filter-columns", EmptySequence.getInstance())).getLength() > 0;
-        _numberOfColumnsMode = numberOfColumnsMode();
-        _shouldExtractColumns = shouldExtractColumns();
-    }
-
-    private boolean shouldExtractColumns() throws XPathException {
-        Item opt = getColumnNamesOpt();
-        if (opt.getGenre() == Genre.MAP) return true;
-        return opt.effectiveBooleanValue();
-    }
-
-    private Optional<Item> getNumberOfColumnsOpt() throws XPathException {
-        return Optional.ofNullable(options.getOrDefault("number-of-columns", EmptySequence.getInstance()).head());
-    }
-
-    private int getNumberOfColumns() throws XPathException {
-        AtomicValue number = getNumberOfColumnsOpt().get().atomize().head();
-        return ((IntegerValue) number).asSubscript();
-    }
-
-    protected int specifiedNumberOfColumns() throws XPathException {
-        if (numberOfColumns == -1) {
-            numberOfColumns = getNumberOfColumns();
+        GroundedValue selectColumns = options.get("select-columns");
+        if (selectColumns != null && selectColumns.head() != null) {
+            rowAdjuster = makeRowAdjuster(selectColumns);
         }
-        return numberOfColumns;
-    }
-
-    protected NumberOfColumns numberOfColumnsMode() throws XPathException {
-        Optional<Item> opt = getNumberOfColumnsOpt();
-        if (!opt.isPresent()) {
-            return NumberOfColumns.ALL;
-        }
-        AtomicValue value = opt.get().atomize().head();
-        if (value.getPrimitiveType() == BuiltInAtomicType.INTEGER) {
-            return NumberOfColumns.SPECIFIED;
-        } else if (value.getStringValue().equals("first-row")) {
-            return NumberOfColumns.FIRST_ROW;
-        }
-        return NumberOfColumns.ALL;
-    }
-
-    protected Item getColumnNamesOpt() {
-        return options.getOrDefault("column-names", BooleanValue.FALSE).head();
-    }
-
-    private List<Integer> getColumnFilter() {
-        ArrayList<Integer> columnFilter = new ArrayList<>();
-        SequenceTool.supply(options.getOrDefault("filter-columns", EmptySequence.getInstance()).iterate(), columnIndex -> {
-            columnFilter.add(((IntegerValue) columnIndex).asSubscript());
-        });
-        return columnFilter;
-    }
-
-    protected List<Integer> getColumnIndexes(ArrayItem rowArray) throws XPathException {
-        if (columnIndexes != null) {
-            return columnIndexes;
-        }
-        if (_shouldFilterColumns) {
-            columnIndexes = getColumnFilter();
-        } else {
-            int numberOfColumns;
-            switch (_numberOfColumnsMode) {
-                case SPECIFIED:
-                    numberOfColumns = specifiedNumberOfColumns();
-                    break;
-                case FIRST_ROW:
-                    numberOfColumns = firstRowNumberOfColumns(rowArray);
-                    break;
-                default:
-                    numberOfColumns = rowArray.arrayLength();
-                    break;
-            }
-            columnIndexes = new ArrayList<>();
-            for (int i = 1; i <= numberOfColumns; i++) {
-                columnIndexes.add(i);
-            }
-        }
-        return columnIndexes;
-    }
-
-    protected int firstRowNumberOfColumns(ArrayItem row) {
-        if (numberOfColumns == -1) {
-            numberOfColumns = row.arrayLength();
-        }
-        return numberOfColumns;
-    }
-
-    protected Iterable<GroundedValue> filteredRow(ArrayItem row) throws XPathException {
-        Iterable<GroundedValue> filteredRow;
-        if (_shouldFilterColumns) {
-            List<GroundedValue> filteredRowList = new ArrayList<>();
-            IterationUtils.forEach(getColumnIndexes(row), oneBasedIndex -> {
-                filteredRowList.add(oneBasedIndex <= row.arrayLength()
-                                            ? row.get(oneBasedIndex - 1)
-                                            : StringValue.EMPTY_STRING);
-            });
-            filteredRow = filteredRowList;
-        } else {
-            switch (_numberOfColumnsMode) {
-                case SPECIFIED:
-                    filteredRow = new BoundedRow(row, specifiedNumberOfColumns());
-                    break;
-                case FIRST_ROW:
-                    filteredRow = new BoundedRow(row, firstRowNumberOfColumns(row));
-                    break;
-                default:
-                    filteredRow = row.members();
-                    break;
-            }
-        }
-        return filteredRow;
-    }
-
-    public abstract Item fromRowSequence(Sequence rows) throws XPathException;
-
-    protected GroundedValue rowAsSequence(Iterable<GroundedValue> row) {
-        ArrayList<Item> members = new ArrayList<>();
-        for (GroundedValue item : row) {
-            members.add((Item) item);
-        }
-        return SequenceExtent.makeSequenceExtent(members);
-    }
-
-    /**
-     * Represents how the number of columns will be calculated.
-     */
-    public enum NumberOfColumns {
-        /**
-         * All columns should be included. (The number of columns may vary by row.)
-         */
-        ALL,
-        /**
-         * Number of columns is taken from the first row. (The number of columns will not vary)
-         */
-        FIRST_ROW,
-        /**
-         * Number of columns is explicitly specified by the caller. (The number of columns will not vary)
-         */
-        SPECIFIED
-    }
-
-    /**
-     * Allows iteration via an Iterator over an underlying ArrayItem, but with the size of the resulting iterator fixed.
-     * If the ArrayItem is bigger, the BoundedRowIterator will effectively truncate it, and if it's smaller, it will be
-     * padded with empty string values up to the correct length.
-     */
-    static class BoundedRowIterator implements Iterator<GroundedValue> {
-        private final Iterator<GroundedValue> rowIterator;
-        private final int size;
-        private int idx = 0;
-
-        /**
-         * Create an iterator of given size over the specified ArrayItem
-         *
-         * @param row  the ArrayItem to iterator over
-         * @param size the size of the iterator
-         */
-        BoundedRowIterator(ArrayItem row, int size) {
-            this.rowIterator = row.members().iterator();
-            this.size = size;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return idx < size;
-        }
-
-        @Override
-        public GroundedValue next() {
-            idx++;
-            if (rowIterator.hasNext()) {
-                return rowIterator.next();
+        GroundedValue headerOption = options.get("header");
+        if (headerOption != null) {
+            if (headerOption instanceof BooleanValue) {
+                extractHeaderRow = ((BooleanValue)headerOption).getBooleanValue();
             } else {
-                return StringValue.EMPTY_STRING;
+                explicitColumnNames = headerOption;
+                extractHeaderRow = false;
             }
+        }
+        trimRows = getTrimRowsOption();
+    }
+
+    /**
+     * Make a mapping function that rearranges the fields of a row as required
+     * by the {@code select-columns} option
+     * @param selectColumns the value of the select-columns option: a sequence of integer
+     *                      values. The Nth integer indicates the column number (1-based)
+     *                      that maps to the Nth column (also 1-based) in the result
+     * @return a mapping function that rearranges the fields in a row
+     * @throws XPathException if any integer in the select-columns value is out of range
+     */
+
+    private ItemMapper.Lambda makeRowAdjuster(GroundedValue selectColumns)
+            throws XPathException {
+        if (selectColumns instanceof IntegerRange && ((IntegerRange)selectColumns).getStart() == 1) {
+            // Optimization for a case like select-columns: 1 to 5
+            int width = (int)((IntegerRange)selectColumns).getEnd();
+            return makeRowTrimmer(width);
+        } else {
+            int[] selection = new int[selectColumns.getLength()];
+            for (int i=0; i<selection.length; i++) {
+                selection[i] = (int)((IntegerValue)selectColumns.itemAt(i)).longValue() - 1;
+            }
+            return item -> {
+                ArrayItem row = (ArrayItem)item;
+                List<GroundedValue> resultList = new ArrayList<>(selection.length);
+                for (int i : selection) {
+                    resultList.add(i < row.arrayLength()
+                                           ? row.get(i)
+                                           : StringValue.EMPTY_STRING);
+                }
+                return new SimpleArrayItem(resultList);
+            };
         }
     }
 
     /**
-     * Represents a single row in the CSV that has been explicitly bounded at a certain size (number of columns), that
-     * can be iterated over as with any Iterable.
+     * Make a mapping function that adjusts an array item representing
+     * one CSV row by truncating excess fields or adding empty fields
+     * as required
+     * @param width the required number of fields in each row
+     * @return a mapping function that can be used to adjust the rows as required
      */
-    static class BoundedRow implements Iterable<GroundedValue> {
-        private final ArrayItem row;
-        private final int size;
-
-        /**
-         * Create the row
-         *
-         * @param row  The underlying source ArrayItem
-         * @param size the size (in columns) to constrain the row to
-         */
-        BoundedRow(ArrayItem row, int size) {
-            this.row = row;
-            this.size = size;
-        }
-
-        @Override
-        public Iterator<GroundedValue> iterator() {
-            return new BoundedRowIterator(row, size);
-        }
+    protected ItemMapper.Lambda makeRowTrimmer(int width) {
+        return item -> {
+            ArrayItem row = (ArrayItem)item;
+            if (width == row.arrayLength()) {
+                return row;
+            } else if (width > row.arrayLength()) {
+                while (width > row.arrayLength()) {
+                    row = row.append(StringValue.EMPTY_STRING);
+                }
+                return row;
+            } else {
+                return row.subArray(0, width);
+            }
+        };
     }
+
+    private boolean getTrimRowsOption() {
+        BooleanValue value = (BooleanValue)options.getOrDefault("trim-rows", BooleanValue.FALSE).head();
+        return value.getBooleanValue();
+    }
+
+    /**
+     * Generate the item to be delivered as the function result, given the sequence
+     * of rows returned by the CSV parser
+     * @param rows the rows returned by the CSV parser, as a sequence of XDM arrays of XDM strings
+     * @return the data as appropriate to each subclass
+     * @throws XPathException if anything goes wrong
+     */
+    public abstract Item fromRowSequence(SequenceIterator rows) throws XPathException;
+
+    /**
+     * Extract the list of column names from an array item holding the contents of the
+     * first row, selecting and reordering the names if required
+     *
+     * @param firstRow the first row of the data, containing column names
+     * @return a list of column names in the order that the columns appear in the output
+     */
+    protected List<String> generateColumnNames(ArrayItem firstRow) {
+        List<String> result = new ArrayList<>(firstRow.arrayLength());
+        for (GroundedValue value : firstRow.members()) {
+            result.add(((StringValue) value).getStringValue());
+        }
+        return result;
+    }
+
+
 }

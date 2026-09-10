@@ -1,10 +1,9 @@
 package com.saxonica.functions.registry;
 
 import com.saxonica.functions.qt4.*;
-import com.saxonica.functions.qt4.csv.CsvToXml;
-import com.saxonica.functions.qt4.csv.CsvFetchFieldByColumn;
-import com.saxonica.functions.qt4.csv.CsvToXdm;
 import com.saxonica.functions.qt4.csv.CsvToArrays;
+import com.saxonica.functions.qt4.csv.CsvToXml;
+import com.saxonica.functions.qt4.csv.ParseCsv;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.FilterFn;
@@ -13,7 +12,6 @@ import net.sf.saxon.functions.hof.ForEachPairFn;
 import net.sf.saxon.functions.hof.LoadXqueryModule;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
-import net.sf.saxon.ma.pin.LabelFn;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.json.JsonDoc;
@@ -21,6 +19,7 @@ import net.sf.saxon.ma.json.JsonToXMLFn;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.pin.LabelFn;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.transpile.CSharp;
@@ -147,23 +146,23 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
         //#if EE==true || PE==true
-        register("csv-to-xdm", 1, e -> e.populate(CsvToXdm::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .setOptionDetails(CsvToXdm.OPTION_DETAILS));
+        register("csv-to-arrays", 1, e -> e.populate(CsvToArrays::new, new ArrayItemType(SequenceType.SINGLE_STRING), STAR, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .setOptionDetails(CsvToArrays.OPTION_DETAILS));
 
-        register("csv-to-xdm", 2, e -> e.populate(CsvToXdm::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+        register("csv-to-arrays", 2, e -> e.populate(CsvToArrays::new, new ArrayItemType(SequenceType.SINGLE_STRING), STAR, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(CsvToXdm.OPTION_DETAILS));
+                .setOptionDetails(CsvToArrays.OPTION_DETAILS));
 
-        register("csv-fetch-field-by-column", 3, e -> e.populate(CsvFetchFieldByColumn::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, STAR, null)
-                .arg(2, new LocalUnionType(BuiltInAtomicType.STRING, BuiltInAtomicType.INTEGER), ONE, null)
-                .setOptionDetails(CsvToXdm.OPTION_DETAILS));
+//        register("csv-fetch-field-by-column", 3, e -> e.populate(CsvFetchFieldByColumn::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+//                .arg(0, MapType.ANY_MAP_TYPE, ONE, null)
+//                .arg(1, BuiltInAtomicType.STRING, STAR, null)
+//                .arg(2, new LocalUnionType(BuiltInAtomicType.STRING, BuiltInAtomicType.INTEGER), ONE, null)
+//                .setOptionDetails(CsvToXdm.OPTION_DETAILS));
 
         register("csv-to-xml", 1, e -> e.populate(CsvToXml::new, AnyItemType.getInstance(), ONE, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .setOptionDetails(CsvToXml.OPTION_DETAILS));
 
         register("csv-to-xml", 2, e -> e.populate(CsvToXml::new, AnyItemType.getInstance(), ONE, LATE | NEW)
@@ -363,16 +362,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("parcel", 1, e -> e.populate(ParcelFn::new, Parcel.TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        //#if EE==true || PE==true
-        register("csv-to-arrays", 1, e -> e.populate(CsvToArrays::new, new ArrayItemType(SequenceType.SINGLE_STRING), STAR, LATE | NEW)
+        register("parse-csv", 1, e -> e.populate(com.saxonica.functions.qt4.csv.ParseCsv::new, MapType.ANY_MAP_TYPE, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .setOptionDetails(CsvToArrays.OPTION_DETAILS));
+                .setOptionDetails(ParseCsv.OPTION_DETAILS));
 
-        register("csv-to-arrays", 2, e -> e.populate(CsvToArrays::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+        register("parse-csv", 2, e -> e.populate(com.saxonica.functions.qt4.csv.ParseCsv::new, MapType.ANY_MAP_TYPE, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(CsvToArrays.OPTION_DETAILS));
-        //#endif
+                .setOptionDetails(ParseCsv.OPTION_DETAILS));
 
         //#if EE==true || PE==true
         register("parse-html", 1, e -> e.populate(ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)

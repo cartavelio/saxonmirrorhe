@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
@@ -40,7 +41,7 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public XdmMap() {
-        this(new HashTrieMap());
+        this(EmptyMap.getInstance());
     }
 
     /**

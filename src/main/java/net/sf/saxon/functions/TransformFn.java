@@ -944,7 +944,6 @@ public class TransformFn extends SystemFunction implements Callable {
         protected String principalResultKey;
         protected FunctionItem postProcessor;
         protected XPathContext context;
-        protected HashTrieMap resultMap = new HashTrieMap();
 
         /**
          * Factory method to construct a Deliverer for the chosen delivery format

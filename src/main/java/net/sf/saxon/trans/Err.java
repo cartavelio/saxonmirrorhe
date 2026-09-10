@@ -123,7 +123,7 @@ public class Err {
         } else if (valueType == EQNAME) {
             s = abbreviateEQName(sb.toString());
         } else {
-            s = len > 30 ? sb.toString().substring(0, 30) + "..." : sb.toString();
+            s = len > 30 ? sb.substring(0, 30) + "..." : sb.toString();
         }
         switch (valueType) {
             case ELEMENT:
@@ -232,7 +232,7 @@ public class Err {
                 sb.append(", ");
             }
             if (count > max) {
-                sb.append("... [" + actual + "])");
+                sb.append("... [").append(actual).append("])");
                 return sb.toString();
             }
 

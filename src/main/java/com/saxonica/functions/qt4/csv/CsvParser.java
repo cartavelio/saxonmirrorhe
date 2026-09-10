@@ -1,14 +1,20 @@
 package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.StringTool;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.z.IntLookaheadIterator;
 
 import java.util.Map;
 
+/**
+ * Parser for CSV files, used by functions csv-to-arrays, parse-csv, and csv-to-xml.
+ */
 public class CsvParser {
     /**
      * Parse an input string containing CSV data into a sequence of ArrayItems (the rows) containing StringValues (the
@@ -17,10 +23,10 @@ public class CsvParser {
      *
      * @param input      the CSV data.
      * @param csvOptions the processed options specified by the caller.
-     * @return the CSV data represents as a sequence of arrays (<code>array(xs:string)*</code>).
-     * @throws XPathException
+     * @return the CSV data represented as a sequence of arrays (<code>array(xs:string)*</code>).
+     * @throws XPathException if parsing fails
      */
-    public static Sequence parse(StringValue input, Map<String, GroundedValue> csvOptions) throws XPathException{
+    public static SequenceIterator parse(StringValue input, Map<String, GroundedValue> csvOptions) throws XPathException{
         return parse(input, csvOptions, new CsvContentHandler(csvOptions));
     }
 
@@ -33,168 +39,28 @@ public class CsvParser {
      * @param csvOptions the processed options specified by the caller.
      * @param handler    the content handler to receive CSV parsing events.
      * @return the CSV data represents as a sequence of arrays (<code>array(xs:string)*</code>).
-     * @throws XPathException
+     * @throws XPathException if parsing fails
      */
-    public static Sequence parse(StringValue input, Map<String, GroundedValue> csvOptions, CsvContentHandler handler) throws XPathException{
+    public static SequenceIterator parse(StringValue input, Map<String, GroundedValue> csvOptions, CsvContentHandler handler) throws XPathException{
+        if (input.isEmpty()) {
+            // Special case: a zero-length string represents zero rows, not a single blank row.
+            return EmptyIterator.getInstance();
+        }
         CsvParser parser = new CsvParser(input, csvOptions, handler);
         return parser.parseInput();
-    }
-
-    /**
-     * Primarily for handling the CRLF/CR/LF problem. The assumption in the code is that the delimiters array is ordered
-     * in descending order of length.
-     */
-    private class RowDelimiters {
-        private final RowDelimiter[] delimiters;
-
-        public RowDelimiters(GroundedValue delimiters) {
-            this.delimiters = new RowDelimiter[delimiters.getLength()];
-            for (int i = 0; i < delimiters.getLength(); i++) {
-                this.delimiters[i] = new RowDelimiter(StringTool.expand(delimiters.itemAt(i).getUnicodeStringValue()));
-            }
-        }
-
-        public RowDelimiter[] toArray() {
-            return delimiters;
-        }
-    }
-
-    private static class RowDelimiter {
-        private final int[] delimiter;
-        private final boolean singleCodepoint;
-
-        public RowDelimiter(int[] delimiter) {
-            this.delimiter = delimiter;
-            singleCodepoint = delimiter.length == 1;
-        }
-
-        public int[] getDelimiter() {
-            return delimiter;
-        }
-
-        public boolean isSingleCodepoint() {
-            return singleCodepoint;
-        }
-
-        public boolean matchFirst(int codePoint) {
-            return codePoint == delimiter[0];
-        }
-
-        public boolean matchLast(int codePoint) {
-            return codePoint == delimiter[1];
-        }
-    }
-
-    /**
-     * We are parsing through the CSV data one codepoint at a time. This class permits backtracking when a potentially
-     * multi-character token is encountered (like a quote-within-a-quoted-field). It acts mostly like an IntIterator,
-     * but provides a method to access the current codepoint without incrementing the cursor's position within the
-     * string.
-     */
-    private static class CodepointsRewindableIterator {
-        private final IntIterator codepoints;
-        private static final int bufferCapacity = 8;
-        private final int[] buffer = new int[bufferCapacity];
-        private final int bufferEndPosition = bufferCapacity - 1;
-        private boolean bufferFilled = false;
-
-        private int readPosition = -1;
-        private int writtenPosition = -1;
-        private int writePosition = 0;
-
-        CodepointsRewindableIterator(IntIterator codepoints) {
-            this.codepoints = codepoints;
-        }
-
-        /**
-         * Does the iterator contain more unread data?
-         * @return whether it does or not.
-         */
-        public boolean hasNext() {
-            if (readPosition == writtenPosition) {
-                return codepoints.hasNext();
-            } else if (bufferFilled && writtenPosition == 0) {
-                return readPosition > writtenPosition;
-            }
-            return readPosition < writtenPosition;
-        }
-
-        private boolean readIsBehind() {
-            if (writtenPosition == 0) return readPosition > writtenPosition;
-            return readPosition < writtenPosition;
-        }
-
-        private void incrementReadPosition() {
-            if (readPosition == bufferEndPosition) {
-                readPosition = 0;
-            } else {
-                readPosition++;
-            }
-        }
-
-        private void incrementWrittenPositions() {
-            if (writePosition == 0) {
-                writePosition++;
-                writtenPosition = 0;
-            } else if (writePosition == bufferEndPosition) {
-                if (!bufferFilled) bufferFilled = true;
-                writePosition = 0;
-                writtenPosition++;
-            } else {
-                writePosition++;
-                writtenPosition++;
-            }
-        }
-
-        /**
-         * @return the codepoint at the current read position within the string
-         */
-        public int cursor() {
-            return buffer[readPosition];
-        }
-
-        /**
-         * Read the next character from the string, and increment the position of the cursor.
-         *
-         * @return the next character
-         */
-        public int next() {
-            if (readIsBehind()) {
-                incrementReadPosition();
-                return buffer[readPosition];
-            } else {
-                int codepoint = codepoints.next();
-                buffer[writePosition] = codepoint;
-                incrementWrittenPositions();
-                incrementReadPosition();
-                return codepoint;
-            }
-        }
-
-        /**
-         * Move the cursor back within the string to the previous codepoint.
-         */
-        public void back() {
-            if (readPosition == 0) {
-                readPosition = bufferEndPosition;
-            } else {
-                readPosition--;
-            }
-        }
     }
 
     private static final String ERR_QUOTING = "FOCV0001";
 
     private final CsvContentHandler handler;
-    private final int[] fieldDelimiter;
-    private final RowDelimiters rowDelimiters;
+    private final int fieldDelimiter;
+    private final int rowDelimiter;
+    private final boolean normalizeNewlines;
     private final int quoteCharacter;
-    private final CodepointsRewindableIterator codepoints;
-    private final StringBuilder currentField = new StringBuilder();
-    private boolean needNewRow = false;
-    private boolean processingField = false;
-    private boolean inQuotedField = false;
-    private boolean atFieldStart = true;
+    private final boolean trimWhitespace;
+    private final IntLookaheadIterator codepoints;
+    private int lineNumber = 1;
+    private int columnNumber = 0;
 
     /**
      * Create a new CSV parser
@@ -203,11 +69,13 @@ public class CsvParser {
      * @param handler the content handler to receive parsing events.
      */
     public CsvParser(StringValue input, Map<String, GroundedValue> csvOptions, CsvContentHandler handler) {
-        this.codepoints = new CodepointsRewindableIterator(input.codePoints());
+        this.codepoints = new IntLookaheadIterator(input.codePoints());
         this.handler = handler;
-        this.fieldDelimiter = StringTool.expand(((StringValue)csvOptions.get("field-delimiter")).getUnicodeStringValue());
-        this.rowDelimiters = new RowDelimiters(csvOptions.get("row-delimiter"));
+        this.fieldDelimiter = ((StringValue)csvOptions.get("field-delimiter")).getUnicodeStringValue().codePointAt(0);
+        this.rowDelimiter = ((StringValue) csvOptions.get("row-delimiter")).getUnicodeStringValue().codePointAt(0);
         this.quoteCharacter = ((StringValue)csvOptions.get("quote-character")).getUnicodeStringValue().codePointAt(0);
+        this.trimWhitespace = ((BooleanValue)csvOptions.get("trim-whitespace")).getBooleanValue();
+        this.normalizeNewlines = ((BooleanValue) csvOptions.get("normalize-newlines")).getBooleanValue();
     }
 
     /**
@@ -223,110 +91,149 @@ public class CsvParser {
 
     /**
      * Parse the input into a sequence of arrays and return them
-     * @return the parsed input as <code>array(xs:string)*</code>
-     * @throws XPathException
+     * @return the parsed input as an <code>array(xs:string)*</code>
+     * @throws XPathException if parsing fails
      */
-    public Sequence parseInput() throws XPathException {
-        while (codepoints.hasNext()) {
-            codepoints.next();
-            checkStartOfQuotedField();
-            if (endOfField()) {
-                finishField();
-            } else if (endOfRow()) {
-                finishRow();
+    public SequenceIterator parseInput() throws XPathException {
+        while (true) {
+            int cp = codepoints.hasNext() ? codepoints.next() : -1;
+            if (cp == '\r' && normalizeNewlines) {
+                int cp2 = codepoints.peekAhead();
+                if (cp2 == '\n') {
+                    codepoints.next();
+                }
+                cp = '\n';
+            }
+            if (cp == '\n') {
+                lineNumber++;
+                columnNumber = 0;
             } else {
-                addToCurrentField();
+                columnNumber++;
             }
-        }
-        finishUnfinishedField();
-        return handler.getSequence();
-    }
-
-    private void checkStartOfQuotedField() {
-        if (atFieldStart && codepoints.cursor() == quoteCharacter) {
-            this.inQuotedField = true;
-            codepoints.next();
-        }
-    }
-
-    private void addToCurrentField() throws XPathException {
-        if (!processingField) processingField = true;
-        if (atFieldStart) atFieldStart = false;
-
-        if (inQuotedField) {
-            if (codepoints.cursor() == quoteCharacter) {
-                codepoints.next();
-                if (codepoints.cursor() != quoteCharacter) {
-                    error("Illegal CSV quoting", ERR_QUOTING);
+            if ((cp == rowDelimiter || cp == -1) && handler.getCurrentRowSize() == 0) {
+                handler.blankRow();
+                if (cp == rowDelimiter && codepoints.peekAhead() != -1) {
+                    continue;
+                } else {
+                    return handler.getSequenceOfRows();
                 }
             }
-        }
-
-        currentField.appendCodePoint(codepoints.cursor());
-    }
-
-
-    private boolean endOfField() {
-        if (inQuotedField) {
-            if (codepoints.cursor() == quoteCharacter && codepoints.hasNext()) {
-                codepoints.next();
-                if (codepoints.cursor() == fieldDelimiter[0]) return true;
-                codepoints.back();
+            if (cp == quoteCharacter) {
+                readQuotedField();
+                cp = codepoints.current();
+            } else {
+                cp = readUnquotedField(cp);
             }
-            return false;
-        } else {
-            return codepoints.cursor() == fieldDelimiter[0];
-        }
-    }
-
-    private boolean checkEndOfRow() {
-        for (RowDelimiter rowDelimiter : rowDelimiters.toArray()) {
-            if (rowDelimiter.matchFirst(codepoints.cursor())) {
-                if (rowDelimiter.isSingleCodepoint()) return true;
-                if (!codepoints.hasNext()) continue;
-                codepoints.next();
-                if (rowDelimiter.matchLast(codepoints.cursor())) {
-                    return true;
+            if (cp == rowDelimiter || cp == -1) {
+                handler.finishRow(cp);
+                if (cp == rowDelimiter) {
+                    while (codepoints.peekAhead() == rowDelimiter) {
+                        cp = codepoints.next();
+                        handler.blankRow();
+                    }
                 }
-                codepoints.back();
+            }
+            if (cp == -1 || (cp == rowDelimiter && codepoints.peekAhead() == -1)) {
+                return handler.getSequenceOfRows();
             }
         }
-        return false;
     }
 
-    private boolean endOfRow() {
-        if (inQuotedField) {
-            if (codepoints.cursor() == quoteCharacter) {
-                if (!codepoints.hasNext()) return true;
-                codepoints.next();
-                if (checkEndOfRow()) {
-                    return true;
+    /**
+     * Read a field delimited by quotation marks. On completion the field will have been
+     * added to the {@link CsvContentHandler}, and the input stream is positioned at the
+     * first character after the closing quotes.
+     * @throws XPathException if mismatched quotes are found
+     */
+    private void readQuotedField() throws XPathException {
+        UnicodeBuilder field = new UnicodeBuilder();
+        int startLine = lineNumber;
+        int startColumn = columnNumber;
+        int cp = codepoints.next(); // the first character after the quote
+        while (true) {
+            if (cp == '\n') {
+                lineNumber++;
+                columnNumber = 0;
+            } else {
+                columnNumber++;
+            }
+            if (cp == quoteCharacter) {
+                int nextCp = codepoints.peekAhead();
+                if (nextCp == quoteCharacter) {
+                    // doubled quotes, just skip one of them
+                    cp = codepoints.next();
+                } else {
+                    // end of quoted field
+                    if (!(nextCp == fieldDelimiter || nextCp == rowDelimiter || nextCp == -1)) {
+                        String message = String.format(
+                                "Invalid CSV data. Quote character on line %1$d column %2$d is not at end of field",
+                                startLine, startColumn);
+                        error(message, ERR_QUOTING);
+                    }
+                    handler.appendField(field.toUnicodeString());
+                    cp = codepoints.next();
+                    break;
                 }
-                codepoints.back();
             }
-            return false;
+            if (cp == -1) {
+                String message = String.format(
+                        "Invalid CSV data. Quoted field starting on line %1$d column %2$d is not closed",
+                        startLine, startColumn);
+                error(message, ERR_QUOTING);
+                break;
+            }
+            field.append(cp);
+            cp = codepoints.next();
         }
-        return checkEndOfRow();
     }
 
-    private void finishField() {
-        if (needNewRow) {
-            handler.startNewRow();
-            needNewRow = false;
+    /**
+     * Read a field having no quotation marks
+     * @param cp The first character of the field, that is the character immediately
+     *           after a comma, newline, etc. Note that in the case of an empty field
+     *           this may be a delimiter. On completion the field will have been
+     *           added to the {@link CsvContentHandler}.
+     * @return the delimiter that caused the end of the field to be recognized.
+     * @throws XPathException if the field contains a quotation mark
+     */
+    private int readUnquotedField(int cp) throws XPathException {
+        UnicodeBuilder field = new UnicodeBuilder();
+        boolean started = false;
+        while (true) {
+            if (cp == '\r' && normalizeNewlines) {
+                int cp2 = codepoints.peekAhead();
+                if (cp2 == '\n') {
+                    codepoints.next();
+                }
+                cp = '\n';
+            }
+            if (cp == '\n') {
+                lineNumber++;
+                columnNumber = 0;
+            } else {
+                columnNumber++;
+            }
+
+            if (cp == quoteCharacter) {
+                String message = String.format("Invalid CSV data: quote character appears in unquoted field at line %1$d column %2$d", lineNumber, columnNumber);
+                error(message, ERR_QUOTING);
+            }
+            if (cp == fieldDelimiter || cp == rowDelimiter || cp == -1) {
+                handler.appendField(field.toUnicodeString());
+                break;
+            } else {
+                if (trimWhitespace && !started && Whitespace.isWhite(cp)) {
+                    cp = codepoints.next();
+                    continue;
+                }
+                started = true;
+                field.append(cp);
+                cp = codepoints.next();
+            }
         }
-        handler.appendField(currentField.toString());
-        currentField.setLength(0);
-        processingField = false;
-        inQuotedField = false;
-        atFieldStart = true;
+        return cp;
+
     }
 
-    private void finishRow() {
-        finishField();
-        needNewRow = true;
-    }
 
-    private void finishUnfinishedField() {
-        if (processingField) finishField();
-    }
 }

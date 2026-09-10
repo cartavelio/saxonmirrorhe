@@ -1,0 +1,222 @@
+package com.saxonica.functions.qt4.csv;
+
+import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
+import net.sf.saxon.expr.ItemMappingIterator;
+import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.map.*;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.Twine8;
+import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.PrependSequenceIterator;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.FunctionItemType;
+import net.sf.saxon.type.LocalUnionType;
+import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.value.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Handles generating a <code>parsed-csv-record-structure</code> from a sequence of array items
+ * (<code>array(xs:string)*</code>).
+ */
+public class CsvRecordGenerator extends CsvRepresentationGenerator {
+
+    private static final Shape RESULT_RECORD_SHAPE = new Shape(
+            new Twine8("columns"),
+            new Twine8("column-index"),
+            new Twine8("rows"),
+            new Twine8("get"));
+
+    /**
+     * Represents an entirely empty CSV - no column information, and no rows of data.
+     */
+    public static MapItem EMPTY_CSV =
+            new ShapedMap(RESULT_RECORD_SHAPE,
+                    EmptySequence.getInstance(),
+                    EmptyMap.getInstance(),
+                    EmptySequence.getInstance(),
+                    makeGetterFunction(EmptySequence.getInstance(), null)); // "get" function
+
+    /**
+     * Construct an instance using the passed in options Map.
+     *
+     * @param options options for the conversion as a map of String : Sequence pairs
+     * @throws XPathException if there's a problem getting values from the options
+     */
+
+    public CsvRecordGenerator(Map<String, GroundedValue> options) throws XPathException {
+        super(options);
+    }
+
+    /**
+     * Generate a <code>parsed-csv-structure-record</code> from the provided sequence of rows
+     * (<code>array(xs:string)*</code>.
+     *
+     * @param rows  the sequence of rows (ArrayItems)
+     * @return the <code>parsed-csv-structure-record</code> MapItem
+     * @throws XPathException  if it fails
+     */
+    @Override
+    public MapItem fromRowSequence(SequenceIterator rows) throws XPathException {
+
+        ArrayItem firstRow = (ArrayItem)rows.next();
+        if (firstRow == null) {
+            return EMPTY_CSV;
+        }
+        if (rowAdjuster == null) {
+            if (trimRows) {
+                rowAdjuster = makeRowTrimmer(firstRow.arrayLength());
+            } else {
+                rowAdjuster = row -> row;
+            }
+        }
+        if (extractHeaderRow) {
+            GroundedValue returnedRows = generateRows(rows);
+            firstRow = (ArrayItem)rowAdjuster.map(firstRow);
+            List<String> columnNames = generateColumnNames(firstRow);
+            MapItem columnIndex = makeColumnIndex(columnNames);
+
+            return new ShapedMap(RESULT_RECORD_SHAPE,
+                                 flattenArray(firstRow),
+                                 columnIndex,
+                                 returnedRows,
+                                 makeGetterFunction(returnedRows, columnIndex));
+        } else {
+            GroundedValue returnedRows = generateRows(new PrependSequenceIterator(firstRow, rows));
+            GroundedValue columnNames = explicitColumnNames;
+
+            if (explicitColumnNames == null) {
+//                for (int i=0; i<explicitColumnNames.getLength(); i++) {
+//                    columnIndex.initialPut(explicitColumnNames.itemAt(i).getStringValue(),
+//                                                       Int64Value.makeIntegerValue(i+1));
+//                }
+//            } else {
+                columnNames = EmptySequence.getInstance();
+            }
+            MapItem columnIndex = makeColumnIndex(columnNames);
+            return new ShapedMap(RESULT_RECORD_SHAPE,
+                                 columnNames,
+                                 columnIndex,
+                                 returnedRows,
+                                 makeGetterFunction(returnedRows, columnIndex));
+        }
+    }
+
+    /**
+     * Turn an array of strings into a sequence of strings
+     * @param array an array whose members must be xs:string instances
+     * @return the equivalent sequence of strings
+     */
+    private static GroundedValue flattenArray(ArrayItem array) {
+        List<StringValue> names = new ArrayList<>(array.arrayLength());
+        for (GroundedValue value : array.members()) {
+            names.add((StringValue)value);
+        }
+        return SequenceExtent.makeSequenceExtent(names);
+    }
+
+
+    /**
+     * Make a column index (map from strings to integers) from a list
+     * of column names supplied as a Java List
+     * @param names the list of column names
+     * @return the corresponding column index
+     */
+
+    private MapItem makeColumnIndex(List<String> names) {
+        DictionaryMap index = new DictionaryMap(names.size());
+        int pos = 1;
+        for (String name : names) {
+            if (!name.isEmpty() && !index.contains(name)) {
+                index.initialPut(name, Int64Value.makeIntegerValue(pos));
+            }
+            pos++;
+        }
+        return index;
+    }
+
+    /**
+     * Make a column index (map from strings to integers) from a list
+     * of column names supplied as an XDM sequence of xs:string values
+     *
+     * @param names the list of column names
+     * @return the corresponding column index
+     */
+
+    private MapItem makeColumnIndex(GroundedValue names) {
+        DictionaryMap index = new DictionaryMap(names.getLength());
+        int pos = 1;
+        for (Item item : names.asIterable()) {
+            String name = item.getStringValue();
+            if (!name.isEmpty() && !index.contains(name)) {
+                index.initialPut(name, Int64Value.makeIntegerValue(pos));
+            }
+            pos++;
+        }
+        return index;
+    }
+
+    /**
+     * Convert the sequence of rows delivered by the CSV parser to the sequence of
+     * rows to be returned in the result; this typically involves adjusting each row
+     * to change the order of fields, or to truncate or pad to a fixed size.
+     * @param rows the rows as delivered by the CSV parser
+     * @return a sequence of rows, suitably adjusted
+     * @throws XPathException
+     */
+    private GroundedValue generateRows(SequenceIterator rows) throws XPathException {
+        try {
+            return SequenceExtent.from(ItemMappingIterator.map(rows, rowAdjuster));
+        } catch (UncheckedXPathException ex) {
+            throw ex.getXPathException();
+        }
+    }
+
+
+    private final static FunctionItemType GETTER_TYPE =
+            new SpecificFunctionType(new SequenceType[]{
+                    new SequenceType(BuiltInAtomicType.POSITIVE_INTEGER, StaticProperty.EXACTLY_ONE),
+                    new SequenceType(new LocalUnionType(BuiltInAtomicType.POSITIVE_INTEGER,
+                                                        BuiltInAtomicType.STRING),
+                                     StaticProperty.EXACTLY_ONE)},
+                                     SequenceType.SINGLE_STRING);
+
+    /**
+     * Make the "get" function item to be delivered in the result
+     * @param rows the rows of data, after conversion
+     * @param columnIndex the column index (map from strings to integer positions), as it
+     *                    will be delivered
+     * @return the function item returned in the "get" field
+     */
+    private static FunctionItem makeGetterFunction(GroundedValue rows, MapItem columnIndex) {
+        Callable callable = new CallableDelegate(
+                (context, args) -> {
+                    int rowNum = ((IntegerValue)args[0].head()).asSubscript();
+                    ArrayItem row = (ArrayItem)rows.itemAt(rowNum - 1);
+                    if (row == null) {
+                        return StringValue.EMPTY_STRING;
+                    }
+                    AtomicValue col = (AtomicValue)args[1].head();
+                    int colNum;
+                    if (col instanceof StringValue) {
+                        colNum = ((IntegerValue)columnIndex.get(col)).asSubscript();
+                    } else {
+                        colNum = ((IntegerValue)col).asSubscript();
+                    }
+                    return row.get(colNum - 1);
+                });
+        return new CallableFunction(2, callable, GETTER_TYPE);
+    }
+
+    // Temporary to make unit tests compile
+    public final static MapItem EMPTY_COLUMNS_RECORD = null;
+
+
+}

@@ -31,8 +31,8 @@ public class ImmutableArrayItem extends AbstractArrayItem {
      * @param other the supplied <code>SimpleArrayItem</code>
      */
 
-    public ImmutableArrayItem(SimpleArrayItem other) {
-        this.vector = new ZenoChain<GroundedValue>().addAll(other.getMembers());
+    public ImmutableArrayItem(ArrayItem other) {
+        this.vector = new ZenoChain<GroundedValue>().addAll(other.members());
     }
 
     /**
@@ -178,7 +178,7 @@ public class ImmutableArrayItem extends AbstractArrayItem {
         if (other instanceof ImmutableArrayItem) {
             otherChain = ((ImmutableArrayItem) other).vector;
         } else {
-            otherChain = new ImmutableArrayItem((SimpleArrayItem) other).vector;
+            otherChain = new ImmutableArrayItem(other).vector;
         }
         ZenoChain<GroundedValue> v2 = vector.addAll(otherChain);
         return new ImmutableArrayItem(v2);

@@ -56,28 +56,31 @@ class CsvOptionsParameterValidator {
     }
 
     private boolean ensureMutuallyExclusiveOptionsOk() throws XPathException {
-        if (nonEmpty("filter-columns") && nonEmpty("number-of-columns")) {
-            throw new XPathException("Cannot specify both number-of-columns and filter-columns as options for fn:csv-to-xdm", "FOCV0006");
-        }
+//        if (nonEmpty("filter-columns") && nonEmpty("number-of-columns")) {
+//            throw new XPathException("CSV options: Cannot specify both number-of-columns and filter-columns as options for fn:csv-to-xdm", "FOCV0006");
+//        }
         return true;
     }
 
     private boolean ensureDelimitersValid() throws XPathException {
-        if (((StringValue)options.get("field-delimiter")).getUnicodeStringValue().length() != 1) {
-            throw new XPathException("CSV field delimiter must be a single character", "FOCV0002");
+        StringValue fieldDelimiter = (StringValue) options.get("field-delimiter");
+        StringValue rowDelimiter = (StringValue) options.get("row-delimiter");
+        StringValue quoteCharacter = (StringValue) options.get("quote-character");
+        if (fieldDelimiter.getUnicodeStringValue().length() != 1) {
+            throw new XPathException("CSV options: field-delimiter must be a single character", "FOCV0002");
         }
-        if (((StringValue) options.get("quote-character")).getUnicodeStringValue().length() != 1) {
-            throw new XPathException("CSV quote character must be a single character", "FOCV0002");
+        if (quoteCharacter.getUnicodeStringValue().length() != 1) {
+            throw new XPathException("CSV options: quote-character must be a single character", "FOCV0002");
         }
-        Set<UnicodeString> delimiters = new HashSet<>();
-        delimiters.add(((StringValue) options.get("field-delimiter")).getUnicodeStringValue());
-        boolean allAdded = delimiters.add(((StringValue) options.get("quote-character")).getUnicodeStringValue());
-        GroundedValue rowDelimiters = options.get("row-delimiter");
-        for (Item item : rowDelimiters.asIterable()) {
-            allAdded = allAdded && delimiters.add(item.getUnicodeStringValue());
+        if (rowDelimiter.getUnicodeStringValue().length() != 1) {
+            throw new XPathException("CSV options: row-delimiter must be a single character", "FOCV0002");
         }
-        if (!allAdded) {
-            throw new XPathException("The same delimiter is used in multiple roles", "FOCV0003");
+        Set<UnicodeString> delimiters = new HashSet<>(3);
+        delimiters.add(fieldDelimiter.getUnicodeStringValue());
+        delimiters.add(rowDelimiter.getUnicodeStringValue());
+        delimiters.add(quoteCharacter.getUnicodeStringValue());
+        if (delimiters.size() != 3) {
+            throw new XPathException("CSV options: The same delimiter is used in multiple roles", "FOCV0003");
         }
         return true;
     }

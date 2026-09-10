@@ -3882,7 +3882,7 @@ public class XPathParser {
         Expression result;
         switch (entries.size()) {
             case 0:
-                result = Literal.makeLiteral(new HashTrieMap());
+                result = Literal.makeLiteral(EmptyMap.getInstance());
                 break;
             case 1:
                 result = entries.get(0);

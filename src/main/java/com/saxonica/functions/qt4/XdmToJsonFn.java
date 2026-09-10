@@ -9,10 +9,7 @@ import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.serialize.JSONEmitter;
@@ -47,7 +44,7 @@ public class XdmToJsonFn extends SystemFunction {
         parseJsonOptions.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("uniform", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("escape-solidus", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        parseJsonOptions.addAllowedOption("layouts", layoutMapType, new HashTrieMap());
+        parseJsonOptions.addAllowedOption("layouts", layoutMapType, EmptyMap.getInstance());
         OPTION_DETAILS = parseJsonOptions;
     }
 

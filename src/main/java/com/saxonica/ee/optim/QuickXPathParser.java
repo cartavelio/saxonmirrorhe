@@ -5,7 +5,7 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
@@ -262,7 +262,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                 (values, env) -> {
                     String name = values.get(0);
                     if (name.equals("map")) {
-                        return Literal.makeLiteral(new HashTrieMap());
+                        return Literal.makeLiteral(EmptyMap.getInstance());
                     } else if (name.equals("array")) {
                         return Literal.makeLiteral(SimpleArrayItem.EMPTY_ARRAY);
                     } else {

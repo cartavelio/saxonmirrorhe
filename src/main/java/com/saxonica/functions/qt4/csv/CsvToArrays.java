@@ -4,10 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.EmptyAtomicSequence;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 
@@ -19,7 +16,7 @@ import java.util.Map;
  */
 public class CsvToArrays extends CsvFunction {
     public static OptionsParameter OPTION_DETAILS = coreOptions();
-    private static Sequence EMPTY_CSV = EmptyAtomicSequence.getInstance();
+    private static final Sequence EMPTY_CSV = EmptyAtomicSequence.getInstance();
 
     /**
      * Execute a dynamic call to the function
@@ -45,7 +42,7 @@ public class CsvToArrays extends CsvFunction {
         final Map<String, GroundedValue> csvOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
         CsvOptionsParameterValidator.validate(csvOptions);
 
-        return CsvParser.parse(input, csvOptions);
+        return new LazySequence(CsvParser.parse(input, csvOptions));
     }
 
 }

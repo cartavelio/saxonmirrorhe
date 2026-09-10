@@ -23,8 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A key and a corresponding value to be held in a Map. A key-value pair also acts as a singleton
- * map in its own right.
+ * A map comprising a single key-value pair.
  */
 
 public class SingleEntryMap extends MapItem {

@@ -391,7 +391,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
      */
     public static class ArrayFlatten extends SystemFunction {
 
-        private void flatten(Sequence arg, List<Item> out) {
+        private static void flatten(Sequence arg, List<Item> out) {
             SequenceTool.supply(arg.iterate(), (ItemConsumer<? super Item>) item -> {
                 if (item instanceof ArrayItem) {
                     for (GroundedValue member : ((ArrayItem) item).members()) {
