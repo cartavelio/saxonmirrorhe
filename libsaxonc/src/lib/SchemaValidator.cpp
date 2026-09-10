@@ -186,7 +186,7 @@ void SchemaValidator::exportSchema(const char *fileName) {
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t status =
-      j_exportSchema(thread, (void *)proc->procRef,
+      j_exportSchema(thread, (void *)procRef,
                      (char *)cwdV.c_str(), (char *)fileName);
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -204,7 +204,7 @@ void SchemaValidator::registerSchemaFromString(const char *sourceStr,
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
 
-  int64_t status = j_registerSchemaString(thread, (void *)proc->procRef,
+  int64_t status = j_registerSchemaString(thread, (void *)procRef,
       (char *)(systemID == nullptr ? cwdV.c_str() : systemID),
       (char *)sourceStr,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
