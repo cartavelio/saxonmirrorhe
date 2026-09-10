@@ -4706,7 +4706,7 @@ PHP_MINIT_FUNCTION(saxon) {
 PHP_MINFO_FUNCTION(saxon) {
   php_info_print_table_start();
   php_info_print_table_header(2, "saxonc", "enabled");
-  php_info_print_table_row(2, "SaxonC API version", "@@VERSION@@");
+  php_info_print_table_row(2, "SaxonC API version", "@version@");
   php_info_print_table_end();
   DISPLAY_INI_ENTRIES();
 }
