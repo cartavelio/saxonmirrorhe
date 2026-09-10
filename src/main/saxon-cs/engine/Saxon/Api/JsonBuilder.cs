@@ -30,7 +30,7 @@ namespace Saxon.Api {
         /// input text. If the JSON comprises a single token, the returned value may be an <c>XdmAtomicValue</c>
         /// containing a string, number, or boolean; or an empty sequence representing JSON null.</returns>
         /// <exception cref="SaxonApiException">If the JSON input is invalid</exception>
-        public XdmValue parseJson(System.IO.TextReader jsonReader) {
+        public XdmValue ParseJson(System.IO.TextReader jsonReader) {
             try {
                 Saxon.Hej.expr.XPathContext context = new Saxon.Hej.Controller(config).newXPathContext();
                 Saxon.Hej.z.IntPredicateProxy checker = Saxon.Hej.z.IntSetPredicate.ALWAYS_TRUE;
@@ -46,6 +46,19 @@ namespace Saxon.Api {
         }
         
         /// <summary>
+        /// Obsolete synonym of <c>ParseJson</c>.
+        /// </summary>
+        /// <param name="jsonReader">Delivers the JSON input text</param>
+        /// <returns>Typically an <c>XdmMap</c> or <c>XdmArray</c> containing the parsed representation of the JSON
+        /// input text. If the JSON comprises a single token, the returned value may be an <c>XdmAtomicValue</c>
+        /// containing a string, number, or boolean; or an empty sequence representing JSON null.</returns>
+        /// <exception cref="SaxonApiException">If the JSON input is invalid</exception>
+        [Obsolete]
+        public XdmValue parseJson(System.IO.TextReader jsonReader) {
+            return ParseJson(jsonReader);
+        }
+        
+        /// <summary>
         /// Parse a JSON document supplied as a <c>string</c>
         /// </summary>
         /// <param name="json">Contains the JSON input text</param>
@@ -53,8 +66,20 @@ namespace Saxon.Api {
         /// input text. If the JSON comprises a single token, the returned value may be an <c>XdmAtomicValue</c>
         /// containing a string, number, or boolean; or an empty sequence representing JSON null.</returns>
         /// <exception cref="SaxonApiException">If the JSON input is invalid</exception>
+        public Saxon.Api.XdmValue ParseJson(string json) {
+            return ParseJson(new System.IO.StringReader(json));
+        }
+        
+        /// <summary>
+        /// Obsolete synonym of <c>ParseJson</c>
+        /// </summary>
+        /// <param name="json">Contains the JSON input text</param>
+        /// <returns>Typically an <c>XdmMap</c> or <c>XdmArray</c> containing the parsed representation of the JSON
+        /// input text. If the JSON comprises a single token, the returned value may be an <c>XdmAtomicValue</c>
+        /// containing a string, number, or boolean; or an empty sequence representing JSON null.</returns>
+        /// <exception cref="SaxonApiException">If the JSON input is invalid</exception>
         public Saxon.Api.XdmValue parseJson(string json) {
-            return parseJson(new System.IO.StringReader(json));
+            return ParseJson(new System.IO.StringReader(json));
         }
 
     }
