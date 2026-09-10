@@ -393,12 +393,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 				SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
                 return value;
-			
-			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
-                xdmItem = new XdmFunctionItem(result);
-                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                value->addXdmItem(xdmItem);
-                return value;
+
 			 } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapItemClass) == JNI_TRUE) {
                 xdmItem = new XdmMap(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
@@ -406,6 +401,11 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
                 return value;
             } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayItemClass) == JNI_TRUE) {
                 xdmItem = new XdmArray(result);
+                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                value->addXdmItem(xdmItem);
+                return value;
+            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
+                xdmItem = new XdmFunctionItem(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
                 return value;

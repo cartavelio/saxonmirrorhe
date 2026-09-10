@@ -3255,6 +3255,21 @@ cdef class PyXdmValue:
             xdmItem.incrementRefCount()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmItem
             return nval
+        elif type_ == 5:
+             fval = PyXdmFunctionItem()
+             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmItem
+             fval.thisvptr.incrementRefCount()
+             return fval
+        elif type_ == 6:
+             mval = PyXdmMap()
+             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmItem
+             mval.thisvptr.incrementRefCount()
+             return mval
+        elif type_ == 7:
+             aaval = PyXdmArray()
+             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmItem
+             aaval.thisvptr.incrementRefCount()
+             return aaval
         else:
             val = PyXdmItem()
             val.derivedptr = val.thisvptr = xdmItem
@@ -3816,7 +3831,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          return func
 
 
-     def call(self, list args):
+     def call(self, PySaxonProcessor proc, list args):
          """
          call(self, list args)
          Call the function
@@ -3826,23 +3841,56 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          """
          cdef int _len = len(args)
          cdef saxoncClasses.XdmValue ** argumentV = self.derivedfptr.createXdmValueArray(_len)
-         cdef PyXdmValue value_
+         cdef PyXdmValue ivalue_
          for x in range(_len):
            if isinstance(args[x], PyXdmValue):
-             value_ = args[x]
-             argumentV[x] = value_.thisvptr
+             ivalue_ = args[x]
+             argumentV[x] = ivalue_.thisvptr
            else:
              raise Exception("Argument value at position ",x," is not an PyXdmValue")
          '''c_functionName = make_c_str(function_name)'''
-         cdef saxoncClasses.XdmValue * xdmValue = NULL
-         cdef PyXdmValue val = None
-         xdmValue = self.derivedfptr.call(argumentV, _len)
-         if xdmValue is not NULL:
-             val = PyXdmValue()
-             val.thisvptr = xdmValue
-             return val
+         cdef saxoncClasses.XdmValue * c_xdmValue = NULL
+         cdef PyXdmAtomicValue avalue_
+         cdef PyXdmValue value_
+         cdef PyXdmAtomicValue aval = None
+         cdef PyXdmNode nval = None
+         cdef PyXdmFunctionItem fval = None
+         cdef PyXdmMap mval = None
+         cdef PyXdmArray aaval = None
+         c_xdmValue = self.derivedfptr.call(proc.thisptr, argumentV, _len)
+         type_ = c_xdmValue.getType()
+         if type_== 1:
+              value_ = PyXdmValue()
+              value_.thisvptr = c_xdmValue
+              value_.thisvptr.incrementRefCount()
+              return value_
+         if type_== 4:
+              aval = PyXdmAtomicValue()
+              aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>c_xdmValue
+              aval.thisvptr.incrementRefCount()
+              return aval
+         elif type_ == 3:
+              nval = PyXdmNode()
+              nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>c_xdmValue
+              nval.thisvptr.incrementRefCount()
+              return nval
+         elif type_ == 5:
+              fval = PyXdmFunctionItem()
+              fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>c_xdmValue
+              fval.thisvptr.incrementRefCount()
+              return fval
+         elif type_ == 6:
+              mval = PyXdmMap()
+              mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>c_xdmValue
+              mval.thisvptr.incrementRefCount()
+              return mval
+         elif type_ == 7:
+              aaval = PyXdmArray()
+              aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>c_xdmValue
+              aaval.thisvptr.incrementRefCount()
+              return aaval
          else:
-             return None
+              return None
 
 cdef class PyXdmMap(PyXdmFunctionItem):
      """

@@ -64,7 +64,7 @@ public:
      *                  type when necessary.
      * @return the result of calling the function
      */
-    XdmValue * call(XdmValue ** arguments, int argument_length);
+    XdmValue * call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length);
     
     bool isAtomic(){
         return false;
@@ -76,11 +76,12 @@ public:
 	XDM_TYPE getType() {
 		return XDM_FUNCTION_ITEM;
 	}
+
+
     
     
 private:
 
-    SaxonProcessor * cpp_processor;
     std::string fname;
     int arity;
 
