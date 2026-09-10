@@ -486,8 +486,8 @@ $ext)"/>
                     <li id="{@id}">
                         <xsl:attribute name="class"
                             select="if ($onpath and $contains) then 'open'
-else if ($contains) then 'closed'
-else 'empty'"/>
+                                else if ($contains) then 'closed'
+                                else 'empty'"/>
                         <!--
 <span class="{if ($onpath and count($ids) - $index = 1) then 'hot'
 else 'item'}"><xsl:value-of select="@title"/></span>
@@ -495,17 +495,12 @@ else 'item'}"><xsl:value-of select="@title"/></span>
                         <xsl:variable name="ext" select="if ($contains) then '' else '.html'"
                             as="xs:string"/>
                         <a
-                            class="{if ($onpath and count($ids) - $index = 1) then 'hot'
-else 'item'}"
-                            href="{
-concat(
-$hash-path,
-string-join(
-insert-before(@id, 1, (for $sc in 1 to $index return $ids[$sc])),
-'/'),
-$ext)
-}">
-
+                            class="{if ($onpath and count($ids) - $index = 1) then 'hot' else 'item'}"
+                            href="{f:index-fix(
+                                concat($hash-path, 
+                                    string-join(insert-before(@id, 1, (for $sc in 1 to $index return $ids[$sc])),'/'), 
+                                    $ext)
+                                )}">
                             <xsl:value-of select="@title"/>
                         </a>
 
