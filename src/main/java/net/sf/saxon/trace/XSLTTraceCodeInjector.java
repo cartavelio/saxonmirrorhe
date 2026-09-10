@@ -7,7 +7,9 @@
 
 package net.sf.saxon.trace;
 
+import net.sf.saxon.expr.CardinalityChecker;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.ItemChecker;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.XPathParser;
@@ -51,6 +53,9 @@ public class XSLTTraceCodeInjector extends TraceCodeInjector {
         if (exp.isCallOn(TransformFn.class)) {
             return true;
         }
+        if (exp.isInstruction()) {
+            return true;
+        }
         if (parent != null && parent.getLocation() instanceof XPathParser.NestedLocation) {
             return false;
         }
@@ -66,9 +71,15 @@ public class XSLTTraceCodeInjector extends TraceCodeInjector {
         }
         // Otherwise trace the expression if it has a known location which differs from the parent expression
         // except in the case where the parent expression is a sequence constructor (`Block`)
+        // or where it is a type-checking instruction
         return loc != null
                 && loc.getLineNumber() != -1
-                && !(parent != null && loc == parent.getLocation() && !(parent instanceof Block || parent instanceof ComponentTracer));
+                && !(parent != null && loc == parent.getLocation()
+                             && !(parent instanceof Block
+                                          || parent instanceof ComponentTracer
+                                          || parent instanceof ItemChecker
+                                          || parent instanceof CardinalityChecker
+        ));
     }
    
 }

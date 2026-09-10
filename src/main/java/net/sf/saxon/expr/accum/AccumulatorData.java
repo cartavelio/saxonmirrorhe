@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -73,7 +74,11 @@ public class AccumulatorData implements IAccumulatorData {
             c2.setCurrentIterator(new ManualIterator(doc));
             Sequence val = SequenceTool.toGroundedValue(initialValue.iterate(c2));
             values.add(new DataPoint(new Visit(doc, false), val));
-            val = visit(doc, val, c2);
+            TraceListener listener = null;
+            if (context.getController().isTracing()) {
+                listener = context.getController().getTraceListener();
+            }
+            val = visit(doc, val, c2, listener);
             values.add(new DataPoint(new Visit(doc, true), val));
             ((ArrayList<DataPoint>) values).trimToSize();
             building = false;
@@ -105,8 +110,11 @@ public class AccumulatorData implements IAccumulatorData {
      */
 
     @SuppressWarnings({"InfiniteRecursion"}) //Spurious warning from IntelliJ
-    private Sequence visit(NodeInfo node, Sequence value, XPathContext context) throws XPathException {
+    private Sequence visit(NodeInfo node, Sequence value, XPathContext context, TraceListener listener) throws XPathException {
         try {
+            if (listener != null) {
+                listener.startCurrentItem(node);
+            }
             ((ManualIterator)context.getCurrentIterator()).setContextItem(node);
             Rule rule = accumulator.getPreDescentRules().getRule(node, context);
             if (rule != null) {
@@ -114,13 +122,16 @@ public class AccumulatorData implements IAccumulatorData {
                 logChange(node, value, context, " BEFORE ");
             }
             for (NodeInfo kid : node.children()) {
-                value = visit(kid, value, context);
+                value = visit(kid, value, context, listener);
             }
             ((ManualIterator) context.getCurrentIterator()).setContextItem(node);
             rule = accumulator.getPostDescentRules().getRule(node, context);
             if (rule != null) {
                 value = processRule(rule, node, true, value, context);
                 logChange(node, value, context, " AFTER ");
+            }
+            if (listener != null) {
+                listener.endCurrentItem(node);
             }
             return value;
         } catch (StackOverflowError e) {

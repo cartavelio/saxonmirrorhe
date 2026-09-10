@@ -269,6 +269,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
      */
 
     protected static String spaces(int n) {
+        n = Math.max(n, 0);
         while (spaceBuffer.length() < n) {
             spaceBuffer.append(AbstractTraceListener.spaceBuffer);
         }

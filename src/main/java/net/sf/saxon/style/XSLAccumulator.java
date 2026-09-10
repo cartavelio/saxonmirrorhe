@@ -212,6 +212,8 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
             boolean isPreDescent = !rule.isPostDescent();
             SimpleMode mode = isPreDescent ? accumulator.getPreDescentRules() : accumulator.getPostDescentRules();
             AccumulatorRule action = new AccumulatorRule(newValueExp, slotManager, rule.isPostDescent());
+            action.setLocation(rule.saveLocation());
+            action.setAccumulatorName(((XSLAccumulator) rule.getParent()).getObjectName());
             mode.addRule(pattern, action, decl.getModule(), decl.getModule().getPrecedence(), 1, position++, 0);
 
             checkRuleStreamability(rule, pattern, newValueExp);
@@ -231,6 +233,10 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
 
             accumulator.addChildExpression(newValueExp);
             accumulator.addChildExpression(pattern);
+
+            if (getCompilation().getCompilerInfo().getCodeInjector() != null) {
+                getCompilation().getCompilerInfo().getCodeInjector().process(action);
+            }
         }
 
         accumulator.getPreDescentRules().allocateAllPatternSlots();
