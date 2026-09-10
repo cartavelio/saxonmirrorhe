@@ -526,7 +526,7 @@ namespace SaxonCS_NUnit {
         public void testDirectFunctionInLibraryModule() {
             try {
                 Processor processor = new Processor(true);
-                processor.SetProperty(Feature<int>.OPTIMIZATION_LEVEL, "0");
+                processor.SetProperty(Feature.OPTIMIZATION_LEVEL, "0");
                 XQueryCompiler qc = processor.NewXQueryCompiler();
                 qc.BaseUri = new Uri(Environment.CurrentDirectory);
                 qc.CompileLibrary(

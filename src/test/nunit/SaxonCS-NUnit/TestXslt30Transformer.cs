@@ -1397,6 +1397,7 @@ namespace SaxonCS_NUnit {
                 Assert.AreEqual("file://tmp/out.xml", xformed.BaseUri.ToString(), "output base uri");
             }
             catch (Exception e) {
+                Console.WriteLine(e.StackTrace);
                 Console.WriteLine(e.Message);
                 Assert.Fail();
             }

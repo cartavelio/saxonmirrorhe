@@ -162,7 +162,7 @@ namespace SaxonCS_NUnit {
                 new Saxon.Ejava.io.File(ConfigTest.SANDPIT_DIR + "temp/first.xml").delete();
                 new Saxon.Ejava.io.File(ConfigTest.SANDPIT_DIR + "temp/second.xml").delete();
                 Processor proc = new Processor();
-                proc.SetProperty(Saxon.Api.Feature<bool>.TIMING, true);
+                proc.SetProperty(Saxon.Api.Feature.TIMING, true);
                 StringReader sr = new StringReader("<doc><e>text</e></doc>");
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 XdmNode node = builder.Build(sr);
