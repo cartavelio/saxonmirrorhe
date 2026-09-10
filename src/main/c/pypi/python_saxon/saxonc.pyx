@@ -809,16 +809,21 @@ cdef class PySaxonProcessor:
         parse_xml(self, **kwds)
         Parse a source XML document supplied as a lexical representation, source file or uri, and return it as an XDM node
         Args:
-            **kwds: Possible keyword arguments: must be one of the following (xml_file_name|xml_text|xml_uri).
-            Also accept the keyword 'encoding' (str) to specify the encoding of the xml_text string. If not specified then the platform default encoding is used.
+            **kwds: Possible keyword arguments: one of the following (xml_file_name|xml_text|xml_uri) is required.
+            The keyword 'encoding' (str) can be used to specify the encoding used to decode the xml_text string
+            (if not specified then the platform default encoding is used).
         Returns:
             PyXdmNode: The XDM node representation of the XML document
         Raises:
-            Exception: Error if the keyword argument is not one of xml_file_name|xml_text|xml_uri.
+            Exception: Error if invalid use of keywords
         """
         py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
-        if len(kwds) > 2:
-          raise Exception(py_error_message)
+        if kwds.keys() >= {"xml_file_name", "xml_text"}:
+            raise Exception(py_error_message)
+        if kwds.keys() >= {"xml_file_name", "xml_uri"}:
+            raise Exception(py_error_message)
+        if kwds.keys() >= {"xml_text", "xml_uri"}:
+            raise Exception(py_error_message)
         cdef PyXdmNode val = None
         cdef str py_value = None
         cdef char * c_xml_string = NULL
@@ -878,20 +883,21 @@ cdef class PySaxonProcessor:
 
     def parse_json(self, **kwds):
         """
-        parse_xml(self, **kwds)
-        Parse a source JSON document supplied as a lexical representation, source file or uri, and return it as an XDM value
+        parse_json(self, **kwds)
+        Parse a source JSON document supplied as a lexical representation or source file, and return it as an XDM value
         Args:
-            **kwds: Possible keyword arguments: must be one of the following (json_file_name|json_text).
-            Also accept the keyword 'encoding' (str) to specify the encoding of the json_text string. If not specified then the platform default encoding is used.
+            **kwds: Possible keyword arguments: one of the following (json_file_name|json_text) is required.
+            The keyword 'encoding' (str) can be used to specify the encoding used to decode the json_text string
+            (if not specified then the platform default encoding is used).
 
         Returns:
             PyXdmValue: The XDM value representation of the JSON document
         Raises:
-            Exception: Error if the keyword argument is not one of json_file_name|xml_text|xml_uri.
+            Exception: Error if invalid use of keywords
         """
         py_error_message = "Error: parse_json should only contain one of the following keyword arguments: (json_file_name|json_text)"
-        if len(kwds) != 1:
-          raise Exception(py_error_message)
+        if kwds.keys() >= {"json_file_name", "json_text"}:
+            raise Exception(py_error_message)
         cdef PyXdmNode val = None
         cdef str py_value = None
         cdef char * c_json_string = NULL
@@ -1080,17 +1086,22 @@ cdef class PyDocumentBuilder:
         parse_xml(self, **kwds)
         Parse a source document supplied as a lexical representation, source file or uri, and return it as XDM node
         Args:
-            **kwds: Possible keyword arguments: must be one of the following (xml_file_name|xml_text|xml_uri).
-            Also accept the keyword 'encoding' (str) to specify the encoding of the string. If not specified then the platform default encoding is used.
+            **kwds: Possible keyword arguments: one of the following (xml_file_name|xml_text|xml_uri) is required.
+            The keyword 'encoding' (str) can be used to specify the encoding used to decode the xml_text string
+            (if not specified then the platform default encoding is used).
         Returns:
             PyXdmNode: The XDM node representation of the XML document
         Raises:
-            Exception: Error if the keyword argument is not one of xml_file_name|xml_text|xml_uri.
+            Exception: Error if invalid use of keywords.
             PySaxonApiError: Error if failure to parse XML file or XML text
         """
-        py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri) and also accept 'encoding'"
-        if len(kwds) > 2:
-          raise Exception(py_error_message)
+        py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
+        if kwds.keys() >= {"xml_file_name", "xml_text"}:
+            raise Exception(py_error_message)
+        if kwds.keys() >= {"xml_file_name", "xml_uri"}:
+            raise Exception(py_error_message)
+        if kwds.keys() >= {"xml_text", "xml_uri"}:
+            raise Exception(py_error_message)
         cdef PyXdmNode val = None
         cdef py_value = None
         cdef char * c_xml_string = NULL
@@ -1283,11 +1294,11 @@ cdef class PyXslt30Processor:
                 to save the exported stylesheet (SEF) to file; lang (str) can be used to set the XSLT (and XPath)
                 language level to be supported by the processor (possible values: '3.0' and '4.0');
                 fast_compile (bool) which requests fast compilation.
-                The following additional keywords can be used with `save`: target (str) which sets the target edition
+                The following additional keywords can be used with 'save': target (str) which sets the target edition
                 under which the compiled stylesheet will be executed; and relocate (bool) which says whether the
                 compiled stylesheet can be deployed to a different location, with a different base URI.
-                Also accept the keyword 'encoding' (str) to specify the encoding of the stylesheet_text string.
-                If not specified then the platform default encoding is used.
+                The keyword 'encoding' (str) can be used with stylesheet_text to specify the encoding used to decode
+                the string (if not specified then the platform default encoding is used).
         Returns:
             PyXsltExecutable: which represents the compiled stylesheet. The PyXsltExecutable is immutable
             and thread-safe; it may be used to run multiple transformations, in series or concurrently.
@@ -1304,7 +1315,7 @@ cdef class PyXslt30Processor:
             2) executable = xsltproc.compile_stylesheet(stylesheet_file="test1.xsl", save=True, output_file="test1.sef", target="HE")
             3) executable = xsltproc.compile_stylesheet(associated_file="foo.xml")
         """
-        py_error_message = "Error: compile_stylesheet should only contain one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node) (with optional additional arguments: save, output_file, target)"
+        py_error_message = "Error: compile_stylesheet should only contain one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node)"
         cdef char * c_outputfile
         cdef char * c_stylesheet
         cdef char * c_encoding_string = NULL
@@ -1318,9 +1329,15 @@ cdef class PyXslt30Processor:
         cdef PyXdmNode py_xdmNode = None
         encoding = None
 
+        if kwds.keys() >= {"associated_file", "stylesheet_text"}:
+            raise Exception(py_error_message)
+        if kwds.keys() >= {"associated_file", "stylesheet_file"}:
+            raise Exception(py_error_message)
+        if kwds.keys() >= {"associated_file", "stylesheet_node"}:
+            raise Exception(py_error_message)
         if kwds.keys() >= {"stylesheet_text", "stylesheet_file"}:
           raise Exception(py_error_message)
-        if kwds.keys() >= {"stylesheet_text", "stylesheet _node"}:
+        if kwds.keys() >= {"stylesheet_text", "stylesheet_node"}:
           raise Exception(py_error_message)
         if kwds.keys() >= {"stylesheet_node", "stylesheet_file"}:
           raise Exception(py_error_message)
@@ -2121,8 +2138,8 @@ cdef class PyXsltExecutable:
         transform_to_string(self, **kwds)
         Execute a transformation and return the result as a string.
         Args:
-            **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode);
-                and base_output_uri (str) which is used for resolving relative URIs
+            **kwds: Possible keyword arguments: one of source_file (str) or xdm_node (PyXdmNode);
+                base_output_uri (str) which is used for resolving relative URIs
                 in the href attribute of the xsl:result-document instruction.
                 Also accept the keyword 'encoding' (str) to specify the encoding of the output string. This must
                 match the encoding specified by xsl:output in the stylesheet, or as specified using set_property()
@@ -2144,8 +2161,8 @@ cdef class PyXsltExecutable:
         cdef const char * c_base_output_uri = NULL
         cdef PyXdmNode xdm_node = None
         cdef saxoncClasses.XdmNode * derivednptr = NULL
-        if len(kwds) > 1:
-          raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, base_output_uri)")
+        if kwds.keys() >= {"source_file", "xdm_node"}:
+            raise Warning("Warning: transform_to_string should only contain one of the following keyword arguments: (source_file|xdm_node)")
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -3666,7 +3683,7 @@ cdef class PyXPathProcessor:
          """
          set_unprefixed_element_matching_policy(self, int policy)
          Set the policy for matching unprefixed element names in XPath expressions.
-         Possible int values: DEFAULT_NAMESPACE = 0, ANY_NAMESPACE = 1 or DEFAULT_NAMESPACE_OR_NONE = 3
+         Possible int values: DEFAULT_NAMESPACE = 0, ANY_NAMESPACE = 1 or DEFAULT_NAMESPACE_OR_NONE = 2
          Args:
          policy (int): The policy to be used
          """
