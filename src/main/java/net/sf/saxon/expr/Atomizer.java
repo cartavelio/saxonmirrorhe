@@ -204,16 +204,45 @@ public final class Atomizer extends UnaryExpression {
             if (!singleValued) {
                 ItemType nodeType = getBaseExpression().getItemType();
                 if (nodeType instanceof NodeTest) {
-                    SchemaType st = ((NodeTest) nodeType).getContentType();
-                    if (st == Untyped.getInstance() || st.isAtomicType() || (st.isComplexType() && st != AnyType.getInstance())) {
-                        singleValued = true;
-                    }
                     if (!nodeType.getUType().overlaps(UType.ELEMENT.union(UType.ATTRIBUTE))) {
                         singleValued = true;
+                    } else {
+                        SchemaType st = ((NodeTest) nodeType).getContentType();
+                        if (isSingleValuedSchemaType(st)) {  // Bug 5803
+                            singleValued = true;
+                        }
                     }
+
                 }
             }
         }
+    }
+
+    private boolean isSingleValuedSchemaType(SchemaType st) {
+        if (st == Untyped.getInstance()) {
+            return true;
+        }
+        if (st.isSimpleType()) {
+            SimpleType sim = (SimpleType)st;
+            if (sim.isAtomicType()) {
+                return true;
+            } else if (sim.isListType()) {
+                return false;
+            } else if (sim.isUnionType()) {
+                return ((UnionType)sim).isPlainType();
+            } else {
+                return false; // can't happen? - fail safe
+            }
+        }
+        if (st.isComplexType()) {
+            if (st == AnyType.getInstance()) {
+                return false;
+            }
+            if (((ComplexType)st).isSimpleContent()) {
+                return isSingleValuedSchemaType(((ComplexType)st).getSimpleContentType());
+            }
+        }
+        return false; // play safe
     }
 
     /**
