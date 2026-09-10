@@ -8,6 +8,7 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.query.InputStreamMarker;
 import net.sf.saxon.resource.EncodingDetector;
 import net.sf.saxon.resource.TypedStreamSource;
 import net.sf.saxon.trans.XPathException;
@@ -84,6 +85,8 @@ public class StandardUnparsedTextResolver
             Source resolved = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
             if (resolved instanceof StreamSource) {
                 InputStream inputStream = ((StreamSource) resolved).getInputStream();
+                // We're going to want to peek at the encoding, so make sure the marker will work.
+                inputStream = InputStreamMarker.ensureMarkSupported(inputStream);
 
                 if (inputStream == null) {
                     if (((StreamSource) resolved).getReader() != null) {
