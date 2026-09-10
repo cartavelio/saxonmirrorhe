@@ -304,22 +304,19 @@ int main(int argc, char* argv[])
     cout<<"Test: SchemaValidator with Saxon version="<<processor->version()<<endl<<endl;
 
     char * cwd = nullptr;
-    if(argc > 0) {
+    if(argc > 1) {
         cwd = argv[1];
     }
-    char buff[FILENAME_MAX]; //create string buffer to hold path
-    GetCurrentDir( buff, FILENAME_MAX );
-    cout<<"CWD = "<< buff<<endl;
-    if(cwd == nullptr) {
-        cwd = (char *)malloc(strlen(buff)+1);
-        strcpy(cwd, buff);
+    if(cwd != nullptr) {
+   	 processor->setcwd(cwd);
+    } else {
+        char buff[FILENAME_MAX]; //create string buffer to hold path
+        GetCurrentDir( buff, FILENAME_MAX );
+        processor->setcwd(buff);
+        cwd = (const char *)buff;
     }
 
-    if(cwd != nullptr) {
-        processor->setcwd(cwd); //set to the current working directory
-    } else {
-        processor->setcwd(buff);
-    }
+    cout<<"CWD = "<< cwd<<endl;
 
 	//processor->setConfigurationProperty("xsdversion", "1.1");
 	
