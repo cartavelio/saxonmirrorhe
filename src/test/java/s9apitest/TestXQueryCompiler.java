@@ -251,6 +251,27 @@ public class TestXQueryCompiler {
     }
 
     @Test
+    public void testSeparateCompilationMemory() {  // Bug 6395
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            StringBuilder sb = new StringBuilder("module namespace m='http://www.example.com/module-one'; \n");
+            for (int i=0; i<1000; i++) {
+                sb.append("declare function m:f").append(i).append("() { return ").append(i).append("};\n");
+            }
+            comp.compileLibrary(sb.toString());
+            String q1 = "import module namespace m='http://www.example.com/module-two'; m:f22()";
+            XQueryEvaluator ev = comp.compile(q1).load();
+            assertEquals("22", ev.evaluate().toString());
+            String q1 = "import module namespace m='http://www.example.com/module-two'; m:f55()";
+            ev = comp.compile(q1).load();
+            assertEquals("55", ev.evaluate().toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
     public void testSeparateCompilationNested() {
         try {
             Processor proc = new Processor(true);
