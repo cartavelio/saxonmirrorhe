@@ -37,6 +37,9 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
@@ -70,7 +73,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
     protected static void usage() {
         System.err.println("java com.saxonica.testdriver.Xslt30TestSuiteDriver[HE] testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
                 " [-t:testNamePattern] [-export] [-tree] [-lang] [-save] [-streaming:off|std|ext]" +
-                " [-xt30:on] [-jit] [-T] [-js] [-XX:compiler-location]");
+                " [-lang:XT40] [-threads:N] [-jit] [-T] [-js] [-XX:compiler-location]");
     }
 
     @Override
@@ -518,7 +521,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         }
 
         if (sheet != null && !runWithJS) {
-            XdmItem contextItem = env.contextItem;
 
             Optional<String> outputUri = testInput.select(path("output", "@file")).asOptionalString();
             URI baseOut = new File(resultsDir + "/results/output.xml").toURI();
@@ -534,37 +536,61 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 baseOutputURI = baseOut.resolve(outputUri.get()).toString();
             }
             outcome.setBaseOutputUri(baseOutputURI);
-            
-            boolean failure;
-            try {
-                if (useXslt30Transformer) {
-                    InitialTransformDetails ini = new InitialTransformDetails();
-                    ini.xsltLanguageVersion = xsltLanguageVersion;
-                    ini.contextItem = contextItem;
-                    ini.initialMode = initialMode.orElse(null);
-                    ini.initialFunction = initialFunction.orElse(null);
-                    ini.initialTemplate = initialTemplate.orElse(null);
-                    ini.initialModeName = initialModeName;
-                    ini.initialMatchSelection = initialMatchSelection;
-                    if (initialMatchSelection == null && contextItem != null) {
-                        ini.initialMatchSelection = contextItem;
-                    }
-                    ini.initialTemplateName = initialTemplateName;
-                    ini.baseOutputUri = baseOutputURI;
 
-                    failure = runWithXslt30Transformer(testCase, xpath, outcome, testName,
-                                                       testSetName, env, testInput, sheet, collector, ini);
-                } else {
-                    failure = runWithXsltTransformer(xpath, outcome, testName, testSetName, env, testInput,
-                                                     sheet, collector, contextItem, initialMode.orElse(null), initialModeName,
-                                                     initialTemplateName, baseOutputURI);
-                }
+            InitialTransformDetails ini = new InitialTransformDetails();
+            ini.xsltLanguageVersion = xsltLanguageVersion;
+            ini.contextItem = env.contextItem;
+            ini.initialMode = initialMode.orElse(null);
+            ini.initialFunction = initialFunction.orElse(null);
+            ini.initialTemplate = initialTemplate.orElse(null);
+            ini.initialModeName = initialModeName;
+            ini.initialMatchSelection = initialMatchSelection;
+            if (initialMatchSelection == null && env.contextItem != null) {
+                ini.initialMatchSelection = env.contextItem;
+            }
+            ini.initialTemplateName = initialTemplateName;
+            ini.baseOutputUri = baseOutputURI;
+
+            if (threads == 1) {
+                boolean failure = executeStylesheet(testCase, xpath, env, testInput, outcome,
+                                                    ini, sheet, collector);
                 if (failure) {
                     return;
                 }
-            } catch (Throwable e) {
-                e.printStackTrace();
-                // and continue
+            } else {
+                ExecutorService executor = Executors.newFixedThreadPool(threads);
+                boolean[] threadFailures = new boolean[threads];
+                XsltExecutable exec = sheet;
+                for (int i = 0; i < threads; i++) {
+                    int thread = i;
+                    TestOutcome thisOutcome = i==0 ? outcome : new TestOutcome(this);
+                    executor.submit(() -> {
+                        threadFailures[thread] = executeStylesheet(testCase, xpath, env, testInput, thisOutcome,
+                                          ini, exec, collector);
+                    });
+                }
+                executor.shutdown();
+                try {
+                    executor.awaitTermination(60, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                int passed = 0, failed = 0;
+                for (int i = 0; i < threads; i++) {
+                    if (threadFailures[i]) {
+                        failed++;
+                    } else {
+                        passed++;
+                    }
+                }
+                if (passed == 0) {
+                    return;
+                }
+                if (failed != 0) {
+                    System.err.println("THREADS: Failed " + failed + " " + "Passed " + passed);
+                    resultsDoc.writeTestcaseElement(testName, "bug", "Inconsistent threading results");
+                    noteFailure(testSetName, testName);
+                }
             }
         }
 
@@ -626,6 +652,43 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 resultsDoc.writeTestcaseElement(testName, "fail", outcome.getComment());
             }
         }
+    }
+
+    /**
+     * Execute a compiled stylesheet and compare against the expected results
+     * @param testCase
+     * @param xpath
+     * @param env
+     * @param testInput
+     * @param outcome
+     * @param ini
+     * @param sheet
+     * @param collector
+     * @return true if the test failed, false if it succeeded
+     */
+    private boolean executeStylesheet(XdmNode testCase, XPathCompiler xpath, Environment env, XdmNode testInput, TestOutcome outcome,
+                                      InitialTransformDetails ini, XsltExecutable sheet, ErrorCollector collector) {
+        XdmItem contextItem = env.contextItem;
+        String testName = testCase.attribute("name");
+        String testSetName = testCase.getParent().attribute("name");
+        boolean failure;
+        try {
+            if (useXslt30Transformer) {
+                failure = runWithXslt30Transformer(testCase, xpath, outcome, testName,
+                                                   testSetName, env, testInput, sheet, collector, ini);
+            } else {
+                failure = runWithXsltTransformer(xpath, outcome, testName, testSetName, env, testInput,
+                                                 sheet, collector, contextItem, ini.initialMode, ini.initialModeName,
+                                                 ini.initialTemplateName, ini.baseOutputUri);
+            }
+            if (failure) {
+                return true;
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+            // and continue
+        }
+        return false;
     }
 
     public void runJSTransform(Environment env, TestOutcome outcome, QName initialTemplateName,

@@ -78,6 +78,7 @@ public abstract class TestDriver {
     protected Set<String> laxTests = new HashSet<>();
     protected Set<String> exceptionPredicates = new HashSet<>();
     protected boolean pushPolarity;
+    protected int threads = 1;
 
     static Set<String> unsharedEnvironments = new HashSet<>();
     static {
@@ -138,6 +139,9 @@ public abstract class TestDriver {
             }
             if (args[i].startsWith("-debug")) {
                 debug = true;
+            }
+            if (args[i].startsWith("-threads:")) {
+                threads = Integer.parseInt(argValue);
             }
             if (args[i].startsWith("-strict")) {
                 strict = true;
