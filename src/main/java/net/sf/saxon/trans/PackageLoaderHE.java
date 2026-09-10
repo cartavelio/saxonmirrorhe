@@ -2303,7 +2303,6 @@ public class PackageLoaderHE implements IPackageLoader {
             }
 
             if (e instanceof SystemFunctionCall) {
-                ((SystemFunctionCall) e).allocateArgumentEvaluators(args);
                 final SystemFunction fn = ((SystemFunctionCall) e).getTargetFunction();
                 fn.setRetainedStaticContext(rsc);
                 SequenceIterator iter = element.iterateAxis(AxisInfo.ATTRIBUTE);
@@ -2313,6 +2312,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     props.setProperty(att.getLocalPart(), att.getStringValue());
                 }
                 fn.importAttributes(props);
+                loader.addCompletionAction(() -> ((SystemFunctionCall) e).allocateArgumentEvaluators(args));
                 loader.addCompletionAction(() -> fn.fixArguments(args));
             }
             loader.contextStack.pop();
