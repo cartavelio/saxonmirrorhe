@@ -93,7 +93,7 @@
    <xsl:template match="name | *[@nodeType='Name']">
       <xsl:value-of select="f:renameMethod(@identifier, ..)"/>
    </xsl:template>
-   
+
    <xsl:template match="scope">
       <xsl:apply-templates select="*"/>
    </xsl:template>

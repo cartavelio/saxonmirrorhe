@@ -203,7 +203,7 @@
       (:'net.sf.saxon.s9api.XmlProcessingError': 'Saxon.Api.XmlProcessingError':)
       'net.sf.saxon.tree.util.ProcInstParser': 'Saxon.Impl.Helpers.ProcInstParser',
       'net.sf.saxon.tree.jiter.MappingJavaIterator': 'Saxon.Impl.Overrides.MappingEnumerator',
-      'org.xmlresolver.ResolverFeature': 'XmlResolver.Features',
+      'org.xmlresolver.ResolverFeature': 'XmlResolver.Features.ResolverFeature',
       'net.sf.saxon.lib.DigestMaker': 'Saxon.Impl.Helpers.DigestMaker',
       'net.sf.saxon.s9api.XdmNodeKind': 'Saxon.Api.XdmNodeKind'
       }"/>

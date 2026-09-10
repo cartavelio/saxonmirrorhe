@@ -1299,6 +1299,14 @@
          '*':           '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
+
+   <xsl:template match="*[f:targetType(.) = 'org.xmlresolver.ResolverFeature']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'byName#1':      'XmlResolver.Features.ResolverFeature.ByName(%args%)',
+         '*':           '%scope%.%Name%(%args%)'
+         })"/>
+   </xsl:template>
    
    <!--<xsl:template match="*[@RESOLVED_TYPE = 'net.sf.saxon.lib.ExtensionFunctionDefinition']" 
       priority="20" mode="methods">
