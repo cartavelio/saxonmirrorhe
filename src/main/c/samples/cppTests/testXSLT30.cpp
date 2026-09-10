@@ -1425,7 +1425,7 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *
     XdmValue *value = executable->callTemplateReturningValue("go");
 
 
-    if (value== nullptr) {
+    if (value== nullptr || executable->exceptionOccurred()) {
         if (executable->exceptionOccurred()) {
             SaxonApiException *exception = executable->getException();
             cerr << "Error: " << exception->getMessage() << endl;
@@ -1434,13 +1434,21 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *
         sresult->failure++;
         sresult->failureList.push_back("testResolveUri");
     } else {
-
-        const char *svalue = value->itemAt(0)->getStringValue();
+        XdmItem * item1 = value->itemAt(0);
+        if(item1 != nullptr) {
+        const char *svalue = item1->getStringValue();
         if(svalue != nullptr) {
-        cout << "testResolveUri = " << svalue << endl;
-        delete svalue;
+            cout << "testResolveUri = " << svalue << endl;
+            delete svalue;
+            sresult->success++;
+
         }
-        sresult->success++;
+        } else {
+            cout << "Error: testResolveUri item is nullptr " << endl;
+            sresult->failure++;
+            sresult->failureList.push_back("testResolveUri");
+        }
+
 
         delete value;
     }
