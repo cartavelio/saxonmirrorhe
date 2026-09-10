@@ -141,6 +141,12 @@ public class Xslt30Processor extends SaxonCAPI {
         if(ccwd != WordFactory.nullPointer()) {
             cwd = CTypeConversion.toJavaString(ccwd);
         }
+        if(xsl == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XSL filename is NULL");
+        }
+        if(outFilename == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Output filename is NULL");
+        }
         Source source = resolveFileToSource(processor, cwd, CTypeConversion.toJavaString(xsl), ResourceRequest.XSLT_NATURE);
         XsltPackage pack = compiler.compilePackage(source);
         File file = resolveFile(processor, cwd, CTypeConversion.toJavaString(outFilename), ResourceRequest.XSLT_NATURE);
@@ -161,6 +167,9 @@ public class Xslt30Processor extends SaxonCAPI {
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
             cwd =   CTypeConversion.toJavaString(ccwd);
+        }
+        if(filename == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XSL filename is NULL");
         }
         XsltExecutable executable = objectHandles.get(executableRef);
         File file = SaxonCAPI.resolveFile(executable.getProcessor(), cwd, CTypeConversion.toJavaString(filename), null);
@@ -271,6 +280,9 @@ public class Xslt30Processor extends SaxonCAPI {
             if(ccwd != WordFactory.nullPointer()) {
                 cwd =   CTypeConversion.toJavaString(ccwd);
             }
+            if(filename == WordFactory.nullPointer()) {
+                throw new SaxonApiException("XSL filename is NULL");
+            }
             XsltExecutable executable = null;
             /*if (packagesToLoad.size() > 0) {
                 compilePackages(compiler);
@@ -315,6 +327,9 @@ public class Xslt30Processor extends SaxonCAPI {
         if(ccwd != WordFactory.nullPointer()) {
             cwd =   CTypeConversion.toJavaString(ccwd);
         }
+        if(cfilename == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XSL filename is NULL");
+        }
         Source source = resolveFileToSource(processor, cwd, CTypeConversion.toJavaString(cfilename), ResourceRequest.XSLT_NATURE);
 
         //compiler.setErrorListener(errorListener);
@@ -354,6 +369,9 @@ public class Xslt30Processor extends SaxonCAPI {
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
             cwd =   CTypeConversion.toJavaString(ccwd);
+        }
+        if(stylesheet == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XSL filename is NULL");
         }
         StringReader reader = new StringReader(CTypeConversion.toJavaString(stylesheet));
         compiler.setSchemaAware(xslt30Processor.schemaAware);
@@ -559,7 +577,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
             transformer.applyTemplates(valueSeq, xdmResult);
         } else {
-            throw new SaxonApiException("Source object is neither a String value of an XdmValue");
+            throw new SaxonApiException("Source object is neither a String value or an XdmValue object");
         }
 
 

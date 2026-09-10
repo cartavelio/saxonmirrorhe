@@ -10,6 +10,8 @@
 
 #include <iostream>
 #include <exception>
+#include "SaxonProcessor.h"
+
 
 
 
@@ -61,10 +63,19 @@ public:
      * A destructor.
      */
 	virtual ~SaxonApiException() throw() {
-	          message.clear();
-              errorCode.clear();
-              systemId.clear();
-	
+        std::cerr<<"~SaxonApiException cp0"<<std::endl;
+	    if(message != nullptr) {
+            delete message;
+        }
+        std::cerr<<"~SaxonApiException cp1"<<std::endl;
+	    if(errorCode != nullptr) {
+            delete errorCode;
+        }
+        std::cerr<<"~SaxonApiException cp2"<<std::endl;
+	    if(systemId != nullptr) {
+            delete systemId;
+        }
+        std::cerr<<"~SaxonApiException cp3"<<std::endl;
 	}
 
 
@@ -90,12 +101,6 @@ public:
      */
 	const char * getMessage();
 
-    /**
-     * Returns the detail message string of the throwable, if there is one
-     * @return the detail message string of this <tt>Throwable</tt> instance
-     *         (which may be <tt>null</tt>).
-     */
-	std::string getMessageStr();
 
 	/**
 	* Get the URI of the module associated with the exception, if known.
@@ -106,10 +111,11 @@ public:
 
 
 private:
-	std::string message;
+	char * message;
 	int lineNumber;
-	std::string errorCode;
-	std::string systemId;
+	char * errorCode;
+	char * systemId;
+	bool cppException;
 };
 
 #endif /* SAXON_API_EXCEPTION_H */

@@ -262,7 +262,10 @@ return this;}
             }
             allocFn fn = operator new;
             long long * childNodes = j_getChildren(SaxonProcessor::sxn_environ->thread, (void*) fn, (void *)value);
-
+            if(childNodes == nullptr) {
+                std::cerr<<"childNodes is null - possible error/bug"<<std::endl;
+                return nullptr;
+            }
 
         XdmNode ** childreni =   new XdmNode*[childCount];
 		for (int p=0; p < childCount; ++p){

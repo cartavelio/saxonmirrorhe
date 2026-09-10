@@ -9,14 +9,15 @@
 #endif
 
   const char * SaxonApiException::what () {
-        return message.c_str();
+        return message;
   }
 
   SaxonApiException::SaxonApiException(){
-	    message = "";
+	    message = nullptr;
 	    lineNumber = -1;
-	    errorCode = "";
-	    systemId = "";
+	    errorCode = nullptr;
+	    systemId = nullptr;
+	    cppException = false;
     }
 
 
@@ -25,45 +26,50 @@
 		lineNumber = ex.lineNumber;
 		errorCode = ex.errorCode;
 		systemId = ex.systemId;
+        cppException = ex.cppException;
 	}
 
 
 SaxonApiException::SaxonApiException(const char * m){
     if(m != nullptr) {
-        message = std::string(m);
+        //message = (char *)m;
+        size_t destination_size = sizeof (m);
+
+        snprintf(message, destination_size, "%s", m);
     } else {
-        message = "";
+        message = nullptr;
     }
 
     lineNumber = -1;
-    errorCode = "";
-    systemId = "";
-
+    errorCode = nullptr;
+    systemId = nullptr;
+    cppException = true;
 }
 
 
 	SaxonApiException::SaxonApiException(const char * m, const char * ec, const char * sysId, int linenumber){
 		if(m != nullptr) {
-		    message = std::string(m);
+		    message = (char *)m;
 		} else {
-		    message = "";
+		    message = nullptr;
 		}
 
         lineNumber = linenumber;
 
         if (ec != nullptr) {
-            errorCode = std::string(ec);
+            errorCode = (char *)ec;
             //std::cerr<<"SaxonApiException =======: errorCode = "<<errorCode<<std::endl;
         } else {
-            errorCode = "";
+            errorCode = nullptr;
             //std::cerr<<"SaxonApiException =======: errorCode is empty string "<<std::endl;
         }
 
         if(sysId != nullptr) {
-            systemId = sysId;
+            systemId = (char *)sysId;
         } else {
-            systemId = "";
+            systemId = nullptr;
         }
+        cppException = true;
 	}
 
 
@@ -75,24 +81,38 @@ SaxonApiException::SaxonApiException(const char * m){
      * @return the associated error code, or nullptr if no error code is available
      */
 	const char * SaxonApiException::getErrorCode(){
-		return errorCode.c_str();
+	    if(errorCode == nullptr && !cppException) {
+            allocFn fn = operator new;
+            errorCode = j_getErrorCode(SaxonProcessor::sxn_environ->thread, (void *)fn);
+
+        }
+		return errorCode;
 	}
 
 
 	int SaxonApiException::getLineNumber(){
+	    if(lineNumber == -1 && !cppException) {
+            lineNumber = j_getLineNumber(SaxonProcessor::sxn_environ->thread);
+        }
         return lineNumber;
 	}
 
 
     const char * SaxonApiException::getSystemId() {
-        return systemId.c_str();
+        if(systemId== nullptr && !cppException) {
+            allocFn fn = operator new;
+            systemId = j_getSystemId(SaxonProcessor::sxn_environ->thread, (void *)fn);
+        }
+        return systemId;
     }
 
 	const char * SaxonApiException::getMessage(){
-	    return message.c_str();
-
-	}
-
-	std::string SaxonApiException::getMessageStr(){
+	    if(message == nullptr && !cppException) {
+            allocFn fn = operator new;
+            message = j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
+	    }
 	    return message;
+
 	}
+
+

@@ -36,6 +36,7 @@ XsltExecutable::XsltExecutable(int64_t procRefi, int64_t exRef, std::string curr
     procRef = procRefi;
     cwdXE = curr;
     resources_dir = resources;
+    exceptionFound = false;
 }
 
 XsltExecutable::~XsltExecutable() {
@@ -61,6 +62,7 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
     selectionRef = other.selectionRef;
     tunnel = other.tunnel;
     rawResultsFlag = other.rawResultsFlag;
+    exceptionFound = other.exceptionFound;
 
     std::map<std::string, XdmValue *>::const_iterator paramIter = other.parameters.begin();
     while (paramIter != other.parameters.end()) {
@@ -84,7 +86,7 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
 
 
 bool XsltExecutable::exceptionOccurred() {
-    return false; //return SaxonProcessor::sxn_environ->env->ExceptionCheck();
+    return exceptionFound; //return SaxonProcessor::sxn_environ->env->ExceptionCheck();
 }
 
 
@@ -120,7 +122,9 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
 
     if (filename != nullptr) {
         selectionRef = j_createStringObject(SaxonProcessor::sxn_environ->thread, (char *)filename);
-
+        if(selectionRef == -2) {
+            exceptionFound = true;
+        }
     }   else {
        selectionRef = -1;
     }
@@ -414,7 +418,10 @@ void XsltExecutable::setcwd(const char *dir) {
 void XsltExecutable::exportStylesheet(const char *filename) {
     SaxonProcessor::attachCurrentThread();
 
-    j_save(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)filename);
+    long status = j_save(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)filename);
+    if(status == -2) {
+        exceptionFound = true;
+    }
 
 }
 
@@ -453,8 +460,11 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
 
-        j_applyTemplatesReturningFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (void *)selectionRef, (char *)output_filename, (void *)processorDataRef);
+    long status = j_applyTemplatesReturningFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (void *)selectionRef, (char *)output_filename, (void *)processorDataRef);
 
+    if(status == -2) {
+        exceptionFound = true;
+    }
 
     return;
 
@@ -496,7 +506,9 @@ const char *XsltExecutable::applyTemplatesReturningString() {
     }
     allocFn fn = operator new;
     char * result = j_applyTemplatesReturningString(SaxonProcessor::sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(), (void *)executableRef, (void *)selectionRef, (void *)processorDataRef);
-
+    if(result == nullptr) {
+        exceptionFound = true;
+    }
     return result;
 
 }
@@ -528,11 +540,9 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
     }
 
     int64_t result = j_applyTemplatesReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (void *)selectionRef, (void *)processorDataRef);
-    std::cerr << "testInitialTemplate cp = "<<(int)result << std::endl;
     if (result > -1) {
 
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
-        std::cerr << "testInitialTemplate cp = "<<(int)typeRef<< std::endl;
         XdmValue * value = new XdmValue();
         XdmItem * xdmItem = nullptr;
 
@@ -565,8 +575,8 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
         value = new XdmValue(result, false);
         return value;
     }else if(result==-2){
-        std::cerr<<"Exception thrown in Java code - cp0: "<<j_getErrorMessage(SaxonProcessor::sxn_environ->thread)<<std::endl;
-       // createException();
+        exceptionFound = true;
+
 
 
     }
@@ -1116,14 +1126,15 @@ void XsltExecutable::transformToFile(XdmNode *source) {
 
 SaxonApiException *XsltExecutable::getException() {
     SaxonProcessor::attachCurrentThread();
-    return nullptr;//SaxonProcessor::checkForExceptionCPP(SaxonProcessor::sxn_environ->env, cppClass, nullptr);
+    SaxonApiException * exception = new SaxonApiException();
+    return exception;
 }
 
 
 const char * XsltExecutable::getErrorMessage() {
     SaxonApiException * exception = getException();
     if(exception != nullptr) {
-        std::string str = exception->getMessageStr();
+        std::string str = std::string(exception->getMessage());
         if(str.length() > 0) {
             char * cstr = new char [str.length()+1];
             strcpy (cstr, str.c_str());

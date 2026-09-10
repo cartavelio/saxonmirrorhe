@@ -58,11 +58,13 @@ typedef char* (*getTypeName_fn_t)(graal_isolatethread_t*, char*);
 
 typedef char* (*j_getStringValue_fn_t)(graal_isolatethread_t*, void *);
 
-typedef char* (*j_getErrorMessage_fn_t)(graal_isolatethread_t*);
+typedef char* (*j_getErrorMessage_fn_t)(graal_isolatethread_t*, void *);
 
 typedef int (*j_getLineNumber_fn_t)(graal_isolatethread_t*);
 
-typedef char* (*j_getErroCode_fn_t)(graal_isolatethread_t*);
+typedef char* (*j_getErrorCode_fn_t)(graal_isolatethread_t*, void *);
+
+typedef char* (*j_getSystemId_fn_t)(graal_isolatethread_t*, void *);
 
 typedef void (*j_clearException_fn_t)(graal_isolatethread_t*);
 
