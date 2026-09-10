@@ -4654,7 +4654,19 @@ public class XPathParser {
                                           placeMarkerArgs,
                                           keywordArgs);
         } else {
-            StructuredQName functionName = resolveFunctionName(fname);
+            StructuredQName functionName;
+            if (NameChecker.isValidNCName(fname) && isAllowXPath40Syntax()) {
+                // First try for a no-namespace name, otherwise a name in the default function namespace
+                StructuredQName noNamespaceName = new StructuredQName("", NamespaceUri.NULL, fname);
+                FunctionItem fit = env.getFunctionLibrary().getFunctionItem(new SymbolicName.F(noNamespaceName, arguments.length), env);
+                if (fit != null) {
+                    functionName = noNamespaceName;
+                } else {
+                    functionName = resolveFunctionName(fname);
+                }
+            } else {
+                functionName = resolveFunctionName(fname);
+            }
             if (env.getConfiguration().isDisabledFunction(functionName)) {
                 grumble("Function " + functionName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017", offset);
             }
@@ -5045,16 +5057,28 @@ public class XPathParser {
 
         StructuredQName functionName = null;
 
-        try {
-            functionName = getQNameParser().parse(fname, env.getDefaultFunctionNamespace());
-            if (functionName.getPrefix().equals("")) {
-                if (XPathParser.isReservedFunctionName(functionName.getLocalPart(), languageVersion)) {
-                    grumble("The unprefixed function name '" + functionName.getLocalPart() + "' is reserved");
-                }
+        if (isAllowXPath40Syntax() && NameChecker.isValidNCName(fname)) {
+            // In 4.0, try first for a reference to a no-namespace function, then
+            // for a reference to a function in the default function namespace
+            SymbolicName.F symbolicName = new SymbolicName.F(
+                    new StructuredQName("", NamespaceUri.NULL, fname), arity);
+            if (env.getFunctionLibrary().getFunctionItem(symbolicName, env) != null) {
+                functionName = symbolicName.getComponentName();
             }
-        } catch (XPathException e) {
-            grumble(e.getMessage(), e.getErrorCodeQName());
-            assert functionName != null;
+        }
+
+        if (functionName == null) {
+            try {
+                functionName = getQNameParser().parse(fname, env.getDefaultFunctionNamespace());
+                if (functionName.getPrefix().isEmpty()) {
+                    if (XPathParser.isReservedFunctionName(functionName.getLocalPart(), languageVersion)) {
+                        grumble("The unprefixed function name '" + functionName.getLocalPart() + "' is reserved");
+                    }
+                }
+            } catch (XPathException e) {
+                grumble(e.getMessage(), e.getErrorCodeQName());
+                assert functionName != null;
+            }
         }
 
         if (env.getConfiguration().isDisabledFunction(functionName)) {

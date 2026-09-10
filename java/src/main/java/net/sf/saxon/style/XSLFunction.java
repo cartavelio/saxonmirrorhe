@@ -103,10 +103,6 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                         nameAtt = Whitespace.trim(att.getValue());
                         assert nameAtt != null;
                         StructuredQName functionName = makeQName(nameAtt, null, "name");
-                        if (functionName.hasURI(NamespaceUri.NULL)) {
-                            functionName = new StructuredQName("saxon", NamespaceUri.SAXON, functionName.getLocalPart());
-                            compileError("Function name must be in a namespace", "XTSE0740");
-                        }
                         setObjectName(functionName);
                         break;
                     case "as":
@@ -405,6 +401,14 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             if (type instanceof PlainType) {
                 compileError("Stylesheet function clashes with constructor function for an imported atomic type", "XTSE0770");
             }
+        }
+
+        if (getObjectName().hasURI(NamespaceUri.NULL)
+                && (getCompilation().getCompilerInfo().getXsltVersion() < 40 || getVisibility() != Visibility.PRIVATE)) {
+            String reason = getCompilation().getCompilerInfo().getXsltVersion() < 40
+                    ? "(XSLT 4.0 extensions are not enabled)"
+                    : "(No-namespace functions must be private)";
+            compileError("Function name must be in a namespace. " + reason, "XTSE0740");
         }
 
     }
