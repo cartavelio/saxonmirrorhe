@@ -531,7 +531,8 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 recurse = ((BooleanValue)arguments[1].head()).getBooleanValue();
             }
             if (!recurse) {
-                if (file.isDirectory() && Objects.requireNonNull(file.list()).length != 0) {
+                //noinspection ConstantConditions
+                if (file.isDirectory() && file.list().length != 0) {
                     throw error("Cannot delete non-empty directory " + file.getAbsolutePath(), ERROR_PATH_IS_DIRECTORY);
                 }
                 boolean result = file.delete();
@@ -613,7 +614,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             if (arguments.length > 2) {
                 filter = URIQueryParameters.makeGlobFilter(arguments[2].head().getStringValue());
             } else {
-                filter = (dir, name) -> true;
+                filter = null;  // means all files are accepted
             }
             gatherDirectoryContents(file, "", recursive, filter, result);
             return SequenceExtent.makeSequenceExtent(result);
