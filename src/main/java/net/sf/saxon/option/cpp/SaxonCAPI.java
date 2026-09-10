@@ -39,8 +39,16 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
+
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 
 
 /**
@@ -102,8 +110,11 @@ public class SaxonCAPI {
     }
 
     @CEntryPoint(name = "createSaxonProcessor")
-    public static long createSaxonProcessor(IsolateThread thread, boolean license) throws SaxonApiException {
-        ObjectHandle handle = objectHandles.create(new Processor(license));
+    public static long createSaxonProcessor(IsolateThread thread, int license) throws SaxonApiException {
+           /*Properties systemProperties = System.getProperties();
+           systemProperties.put ("xml.catalog.defaultLoggerLogLevel", "debug");
+           System.setProperties (systemProperties); */
+        ObjectHandle handle = objectHandles.create(new Processor(CTypeConversion.toBoolean(license)));
         return handle.rawValue();
     }
 
@@ -113,7 +124,8 @@ public class SaxonCAPI {
      *
      * @param cconfigFile - name of the configuration file
      */
-    public static long createSaxonProcessor(CCharPointer cconfigFile) throws SaxonApiException {
+    @CEntryPoint(name = "createSaxonProcessorWithConfigurationFile")
+    public static long createSaxonProcessorWithConfigurationFile(IsolateThread thread, CCharPointer cconfigFile) throws SaxonApiException {
         Configuration config = null;
         String configFile = CTypeConversion.toJavaString(cconfigFile);
         try {
@@ -487,12 +499,10 @@ public class SaxonCAPI {
     }
 
     @CEntryPoint(name = "parseXmlFileWithValidator")
-    public static long parseXmlFile(CCharPointer cwd, ObjectHandle processorRef, ObjectHandle validatorRef, CCharPointer filename) throws SaxonApiException {
+    public static long parseXmlFileWithValidator(IsolateThread thread, CCharPointer cwd, ObjectHandle processorRef, ObjectHandle validatorRef, CCharPointer filename) throws SaxonApiException {
         Processor proc = objectHandles.get(processorRef);
-        SchemaValidator validator = null;
-        if(validatorRef != null ) {
-            objectHandles.get(validatorRef);
-        }
+        SchemaValidator validator= objectHandles.get(validatorRef);
+
         XdmNode node = parseXmlFile(CTypeConversion.toJavaString(cwd), null, proc, validator, CTypeConversion.toJavaString(filename));
         ObjectHandle handle = objectHandles.create(node);
         return handle.rawValue();
@@ -645,7 +655,7 @@ public class SaxonCAPI {
      * @return
      */
     @CEntryPoint(name = "getTypeName")
-    public static CCharPointer getTypeName(CCharPointer ctypeStr) {
+    public static CCharPointer getTypeName(IsolateThread thread, CCharPointer ctypeStr) {
         String typeStr = CTypeConversion.toJavaString(ctypeStr);
         int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
 
@@ -664,7 +674,7 @@ public class SaxonCAPI {
      * @return  CCharPointer object
      */
     @CEntryPoint(name = "getStringValue")
-    public static CCharPointer getStringValue(ObjectHandle xdmvalueRef) {
+    public static CCharPointer getStringValue(IsolateThread thread, ObjectHandle xdmvalueRef) {
         XdmValue value = objectHandles.get(xdmvalueRef);
         final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(value.toString());
         return holder.get();
@@ -730,6 +740,7 @@ public class SaxonCAPI {
     public static Source resolveFileToSource(Processor processor, String cwd, String filename, String nature) throws SaxonApiException {
 
         Source source = null;
+        
         Configuration configuration = processor.getUnderlyingConfiguration();
         ResourceResolver resolver = configuration.getResourceResolver();
         ResourceRequest request = new ResourceRequest();
@@ -739,12 +750,124 @@ public class SaxonCAPI {
 
         try {
             source = resolver.resolve(request);
+
+            if(source == null) {
+                source = resolveFileToSource_fallback(cwd, filename);
+
+            }
+
             return source;
         } catch(XPathException exception) {
             throw new SaxonApiException(exception);
         }
 
     }
+
+    public static Source resolveFileToSource_fallback(String cwd, String filename) throws SaxonApiException {
+
+            Source source = null;
+            File file = null;
+
+            if (cwd != null && cwd.length() > 0) {
+                if (!cwd.endsWith("/")) {
+                    cwd = cwd.concat("/");
+                }
+
+                try {
+                    if (filename.startsWith("http:")) {
+                        URI fileURI = null;
+                        fileURI = new URI(filename);
+                        URL url = fileURI.toURL();
+                        InputStream in = url.openStream();
+                        source = new StreamSource(in);
+                        source.setSystemId(filename);
+
+                    } else {
+
+                        file = absoluteFile(cwd, filename);
+                        source = new StreamSource(file);
+                        source.setSystemId(file.getAbsolutePath());
+                    }
+                } catch (Exception e) {
+                    URL url = null;
+                    try {
+                        URI fileURI = null;
+                        fileURI = new URI(filename);
+                        url = fileURI.toURL();
+                        InputStream in = url.openStream();
+                        source = new StreamSource(in);
+                        source.setSystemId(filename);
+                    } catch (MalformedURLException e1) {
+                        throw new SaxonApiException(e);
+                    } catch (IOException e1) {
+                        throw new SaxonApiException(e);
+                    } catch (URISyntaxException e1) {
+                        throw new SaxonApiException(e1);
+                    }
+
+                }
+
+
+                return source;
+            } else {
+                if (filename == null) {
+                    throw new SaxonApiException("Null string found for the filename");
+                }
+                file = new File(filename);
+                StreamSource stream = new StreamSource(file);
+                stream.setSystemId(filename);
+                source = stream;
+                return source;
+            }
+        }
+
+
+
+    /**
+      * Create a File object given the filename and the cwd used fix-up the location of the file.
+      *
+      * @param cwd      - Supply the current working directory which the filename will be resolved against
+      * @param filename
+      * @return file object
+      */
+     public static File absoluteFile(String cwd, String filename) throws SaxonApiException{
+         if(filename == null) {
+              throw new SaxonApiException("Failed to create file - File name is null");
+         }
+         if(cwd == null) {
+             try {
+                 return new File(filename);
+             }catch(NullPointerException ex) {
+                 throw new SaxonApiException("Failed to create file");
+             }
+         };
+         char separatorChar = '/';
+         if (File.separatorChar != '/') {
+             filename.replace(separatorChar, File.separatorChar);
+             cwd.replace(separatorChar, File.separatorChar);
+             separatorChar = '\\';
+         }
+         if (cwd!= null && !cwd.endsWith(String.valueOf(separatorChar))) {
+             cwd = cwd.concat(String.valueOf(separatorChar));
+         }
+         File absFile = null;
+         try {
+             absFile = new File(filename);
+         }catch(NullPointerException ex) {
+             throw new SaxonApiException("Failed to create file");
+         }
+         String fullpath;
+         if (!absFile.isAbsolute()) {
+             fullpath = cwd + filename;
+         } else {
+             fullpath = filename;
+         }
+         try {
+             return new File(fullpath);
+         }catch(NullPointerException ex) {
+             throw new SaxonApiException("Failed to create file - File name is null");
+         }
+     }
 
     /**
      * Resolve the output file and wrap it into a Serializer for use in XQuery and XSLT processors

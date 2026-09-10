@@ -18,6 +18,11 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.value.AtomicValue;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
@@ -37,7 +42,7 @@ import java.util.*;
  */
 public class XsltProcessor extends SaxonCAPI {
 
-    private XsltExecutable executable = null;
+    //private XsltExecutable executable = null;
     private final List<XdmNode> xslMessages = new ArrayList<XdmNode>();
     private final Set<File> packagesToLoad = new HashSet<File>();
 
@@ -208,7 +213,7 @@ public class XsltProcessor extends SaxonCAPI {
     public XsltExecutable createStylesheetFromFile(String cwd, String filename) throws SaxonApiException {
 
             XsltCompiler compiler = processor.newXsltCompiler();
-            executable = null;
+            XsltExecutable executable = null;
             if(packagesToLoad.size()>0) {
                 compilePackages(compiler);
             }
@@ -231,7 +236,7 @@ public class XsltProcessor extends SaxonCAPI {
 
         XsltCompiler compiler = processor.newXsltCompiler();
         Source source;
-        executable = null;
+        XsltExecutable executable = null;
 
         StringReader reader = new StringReader(str);
         compiler.setSchemaAware(schemaAware);
@@ -266,7 +271,7 @@ public class XsltProcessor extends SaxonCAPI {
      * @return XsltExecutable
      */
     public XsltExecutable createStylesheetFromXdmNode(String cwd, Object obj) throws SaxonApiException {
-        executable = null;
+        XsltExecutable executable = null;
         XsltCompiler compiler = processor.newXsltCompiler();
 
 
@@ -317,30 +322,45 @@ public class XsltProcessor extends SaxonCAPI {
      * @param params         - parameters and property names given as an array of stings
      * @param values         - the values of the paramaters and properties. given as a array of Java objects
      */
-    public void transformToFile(String cwd, String sourceFilename, String stylesheet, String outFilename, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "xsltSaveResultToFile")
+    public static void transformToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename /*, String[] params, Object[] values*/) throws SaxonApiException {
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        String sourceFilename = CTypeConversion.toJavaString(csourceFilename);
+        String stylesheet = CTypeConversion.toJavaString(cstylesheet);
+        String outFilename = CTypeConversion.toJavaString(coutFilename);
+
+        Processor processor = objectHandles.get(processorRef);
+
+        if(processor == null) {
+            throw new SaxonApiException("Processor object no found");
+        }
+
+        String[] params = null;
+        Object[] values = null;
+        XsltExecutable executable = null;
+        Serializer serializer = null;
+        Source source;
+        XsltTransformer transformer = null;
+        if (stylesheet == null && executable != null) {
+            transformer = executable.load();
+        } else {
+            XsltCompiler compiler = processor.newXsltCompiler();
+            source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
+                //compiler.setSchemaAware(schemaAware); TODO remove comment
 
 
-            Serializer serializer = null;
-            Source source;
-            XsltTransformer transformer = null;
-            if (stylesheet == null && executable != null) {
-                transformer = executable.load();
-            } else {
-                XsltCompiler compiler = processor.newXsltCompiler();
-                source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
-                compiler.setSchemaAware(schemaAware);
+                    /* TODO remove comment
+                        if(packagesToLoad.size()>0) {
 
-
-                    if(packagesToLoad.size()>0) {
                         compilePackages(compiler);
-                    }
+                    }   */
                     transformer = compiler.compile(source).load();
 
             }
             if (outFilename != null) {
                 serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
             }
-            applyXsltTransformerProperties(this, cwd, processor, transformer, params, values);
+            //applyXsltTransformerProperties(this, cwd, processor, transformer, params, values); TODO remove comment
             /*if (sourceFilename == null && doc != null) {
                 transformer.setInitialContextNode(doc);
             } else */ if (sourceFilename != null) {
@@ -349,7 +369,7 @@ public class XsltProcessor extends SaxonCAPI {
                 transformer.setSource(source);
             }
             if (serializer == null) {
-                SaxonCException ex = new SaxonCException("Output file not set for this transformation");
+                throw new SaxonApiException("Output file not set for this transformation");
             }
             transformer.setDestination(serializer);
             transformer.transform();
@@ -592,7 +612,7 @@ public class XsltProcessor extends SaxonCAPI {
      */
     public XdmNode transformToNode(String cwd, String sourceFile, String stylesheet, String[] params, Object[] values) throws SaxonApiException {
         Source source;
-
+        XsltExecutable executable = null;
         XsltTransformer transformer = null;
         try {
             if (stylesheet == null && executable != null) {
@@ -601,9 +621,11 @@ public class XsltProcessor extends SaxonCAPI {
                 XsltCompiler compiler = processor.newXsltCompiler();
                 source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
 
+                /*
+                Remove comment
                 if(packagesToLoad.size()>0) {
                     compilePackages(compiler);
-                }
+                } */
                 transformer = compiler.compile(source).load();
 
             }
@@ -644,13 +666,30 @@ public class XsltProcessor extends SaxonCAPI {
      * @param values     - the values of the paramaters and properties. given as a array of Java objects
      * @return result as a string representation
      */
-    public String transformToString(String cwd, String sourceFile, String stylesheet, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "xsltApplyStylesheet")
+    public static CCharPointer transformToString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFile, CCharPointer cstylesheet /*, String[] params, Object[] values*/) throws SaxonApiException {
+
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        String sourceFile = CTypeConversion.toJavaString(csourceFile);
+        String stylesheet = CTypeConversion.toJavaString(cstylesheet);
+
+        Processor processor = objectHandles.get(processorRef);
+
+        if(processor == null) {
+            throw new SaxonApiException("Processor object no found");
+        }
+
+        XsltExecutable executable = null;
+
+        String[] params = null; //TODO remove variable
+        Object[] values = null; //TODO remove variable
+
         if (debug) {
             System.err.println("xsltApplyStylesheet, Processor: " + System.identityHashCode(processor));
         }
 
             Source source;
-
+        System.err.println("Java: cp0");
             XsltTransformer transformer = null;
             if (stylesheet == null && executable != null) {
                 transformer = executable.load();
@@ -659,12 +698,17 @@ public class XsltProcessor extends SaxonCAPI {
 
                 throw ex;
             } else {
+                System.err.println("Java: cp1");
                 XsltCompiler compiler = processor.newXsltCompiler();
                 source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
-
+                if(source == null) {
+                    throw new SaxonApiException("source is null");
+                }
+                /*
+                Remove comment
                 if(packagesToLoad.size()>0) {
                     compilePackages(compiler);
-                }
+                } */
                 XsltExecutable tempExecutable =   compiler.compile(source);
                 tempExecutable.getUnderlyingCompiledStylesheet();
                 transformer = tempExecutable.load();
@@ -675,7 +719,7 @@ public class XsltProcessor extends SaxonCAPI {
             serializer = processor.newSerializer(sw);
             transformer.setDestination(serializer);
 
-            applyXsltTransformerProperties(this, cwd, processor, transformer, params, values);
+            //applyXsltTransformerProperties(this, cwd, processor, transformer, params, values); TODO remove comment
 
             /*if (sourceFile == null && doc != null) {
                 transformer.setInitialContextNode(doc);
@@ -686,7 +730,10 @@ public class XsltProcessor extends SaxonCAPI {
             //transformer.setErrorListener(errorListener);
             transformer.transform();
             serializer = null;
-            return sw.toString();
+            final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(sw.toString());
+            return holder.get();
+
+
 
     }
 
@@ -777,7 +824,7 @@ public class XsltProcessor extends SaxonCAPI {
                 transformer.setDestination(serializer);
             }
 
-            applyXsltTransformerProperties(this, null, processor, transformer, params, values);
+            //applyXsltTransformerProperties(this, null, processor, transformer, params, values); TODO remove comment
             if (sourceFile != null) {
                 source = resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE);
                 DocumentBuilder builder = processor.newDocumentBuilder();
@@ -803,7 +850,7 @@ public class XsltProcessor extends SaxonCAPI {
             cwd = args[0];
         }      */
 
-        String sourcefile1 = "/Users/ond1/work/development/tests/jeroen/xml/kamervragen.xml";//"sinsello.xml";//"saxon_php3/xmark64.xml";
+        /*String sourcefile1 = "/Users/ond1/work/development/tests/jeroen/xml/kamervragen.xml";//"sinsello.xml";//"saxon_php3/xmark64.xml";
         String stylesheet12 = "xslt/overzicht-resultaten.xslt";//"cadenaoriginal_3_2.xslt";//""saxon_php3/q8.xsl";//"test.xsl";
         String outfile = "outfile.html";
         Processor processor = new Processor(true);
@@ -819,7 +866,7 @@ public class XsltProcessor extends SaxonCAPI {
         String [] params0 = {"it"};
         Object [] values0 = {null};
         String resultStr3 = cpp.transformToString(cwd2, null, "xsl/foo4.xsl",params0, values0);
-                System.out.println("Using initial-template: " + resultStr3);
+                System.out.println("Using initial-template: " + resultStr3);      */
 
         /*XdmNode node2 = cpp.parseXmlFile("/Users/ond1/work/development/campos", "ORP0301177AA__EE__30954_sinsello.xml");
         String[] paramsx = {"node"};

@@ -6,7 +6,7 @@
  */
 const char * version(sxnc_environment *environi) {
 
-
+/*
     jmethodID MID_version;
     jclass  versionClass;
      versionClass = lookForClass(environi->env, "net/sf/saxon/Version");
@@ -22,7 +22,9 @@ const char * version(sxnc_environment *environi) {
    const char * str = (*(environi->env))->GetStringUTFChars(environi->env, jstr, NULL);
   
     //(*(environi->env))->ReleaseStringUTFChars(environi->env, jstr,str);
-    return str;
+    return str;*/
+
+    return 0;
 }
 
 
@@ -31,7 +33,7 @@ const char * version(sxnc_environment *environi) {
  */
 const char * getProductVariantAndVersion(sxnc_environment * environi) {
 
-
+/*
     jmethodID MID_version;
     jclass  versionClass;
      versionClass = lookForClass(environi->env, "net/sf/saxon/Version");
@@ -48,6 +50,8 @@ const char * getProductVariantAndVersion(sxnc_environment * environi) {
   
     (*(environi->env))->ReleaseStringUTFChars(environi->env, jstr,str);
     return str;
+    */
+    return 0;
 }
 
 void initSaxonc(sxnc_environment ** environi, sxnc_processor ** proc, sxnc_parameter **param, sxnc_property ** prop, int cap, int propCap){
@@ -67,7 +71,7 @@ void freeSaxonc(sxnc_environment ** environi, sxnc_processor ** proc, sxnc_param
 }
 
 void xsltSaveResultToFile(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char * source, char* stylesheet, char* outputfile, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen) {
-	jclass cppClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/XsltProcessor");
+	/*jclass cppClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/XsltProcessor");
 	static jmethodID xsltFileID = NULL; //cache the methodID
  	
 	if(!cpp) {
@@ -127,11 +131,16 @@ void xsltSaveResultToFile(sxnc_environment *environi, sxnc_processor ** proc, ch
 #ifdef DEBUG
 	checkForException( (environi));
 #endif
-  
+  */
 }
 
-const char * xsltApplyStylesheet(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, const char * source, const char* stylesheet, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen) {
-	static jmethodID mID = NULL; //cache the methodID
+const char * xsltApplyStylesheet1(sxnc_environment *environi, int64_t proc, char * cwd, char * source, char* stylesheet, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen) {
+
+    printf("%s", source);
+    printf("%s", stylesheet);
+
+    return xsltApplyStylesheet(environi->thread, proc, cwd, source, stylesheet);
+    /*static jmethodID mID = NULL; //cache the methodID
 
 	jclass cppClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/XsltProcessor");
 
@@ -188,13 +197,13 @@ const char * xsltApplyStylesheet(sxnc_environment *environi, sxnc_processor ** p
 	return str;
      }
 
-    checkForException( (environi));
-    return 0;
+    checkForException( (environi));*/
+   // return 0;
 }
 
 
 void executeQueryToFile(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char* outputfile, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen){
-	static jmethodID queryFileID = NULL; //cache the methodID
+	/*static jmethodID queryFileID = NULL; //cache the methodID
 	jclass cppClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/XQueryEngine");
  	
 	if(!cpp) {
@@ -244,12 +253,12 @@ void executeQueryToFile(sxnc_environment *environi, sxnc_processor ** proc, char
 	}
       (*(environi->env))->CallVoidMethod(environi->env,cpp, queryFileID, (cwd== NULL ? (*(environi->env))->NewStringUTF(environi->env, "") : (*(environi->env))->NewStringUTF(environi->env, cwd)), (*(environi->env))->NewStringUTF(environi->env, outputfile), stringArray, objectArray );
 	  (*(environi->env))->DeleteLocalRef(environi->env, objectArray);
-	  (*(environi->env))->DeleteLocalRef(environi->env, stringArray);
+	  (*(environi->env))->DeleteLocalRef(environi->env, stringArray);*/
 
 }
 
 const char * executeQueryToString(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen){
-	static jmethodID queryStrID = NULL; //cache the methodID
+	/*static jmethodID queryStrID = NULL; //cache the methodID
 	jclass cppClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/XQueryEngine");
 
 	if(!cpp) {
@@ -319,7 +328,7 @@ const char * executeQueryToString(sxnc_environment *environi, sxnc_processor ** 
 
      }
 
-    checkForException( (environi));
+    checkForException( (environi));*/
     return 0;
 
 }
