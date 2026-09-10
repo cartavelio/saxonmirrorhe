@@ -3,7 +3,6 @@ package com.saxonica.config;
 import com.saxonica.ee.bytecode.ByteCodeMonitor;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.config.*;
-import com.saxonica.ee.elab.gen.OperandElaborator;
 import com.saxonica.ee.extfn.VendorFunctionSetEE;
 import com.saxonica.ee.extfn.js.IXSLElementFactory;
 import com.saxonica.ee.optim.*;
@@ -37,7 +36,6 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.instruct.*;
-import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
@@ -1916,13 +1914,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return resultDocumentThreadsLimit;
     }
 
-    public OperandEvaluator obtainOperandEvaluator(Expression expression) {
-        if (isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION) && getOptimizerOptions().isSet(OptimizerOptions.ELABORATION)) {
-            return new OperandElaborator(expression);
-        } else {
-            return super.obtainOperandEvaluator(expression);
-        }
-    }
 
     //#if CSHARP==false
     /**

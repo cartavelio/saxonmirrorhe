@@ -2,9 +2,8 @@
 package com.saxonica.ee.optim;
 
 import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.ee.elab.eval.PullEvaluator;
-import com.saxonica.ee.elab.eval.PushEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.watch.StreamWatch;
 import com.saxonica.ee.stream.watch.Watch;
@@ -26,7 +25,6 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.om.MutableNodeInfo;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.QueryModule;
@@ -152,18 +150,10 @@ public class XQueryExpressionEE extends XQueryExpression {
         isUpdating = isUpdatingExpression;
     }
 
-    PullEvaluator puller = null;
-
-    @Override
-    protected SequenceIterator getExpressionIterator(XPathContext context) throws XPathException {
-        if (getConfiguration().getOptimizerOptions().isSet(OptimizerOptions.ELABORATION)) {
-            if (puller == null) {
-                puller = Elaborator.makeElaborator(expression).elaborateForPull();
-            }
-            return puller.eval(context);
-        }
-        return super.getExpressionIterator(context);
-    }
+//    @Override
+//    protected SequenceIterator getExpressionIterator(XPathContext context) throws XPathException {
+//        return super.getExpressionIterator(context);
+//    }
 
     PushEvaluator pusher = null;
     

@@ -1,10 +1,10 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.ee.elab.eval.BooleanEvaluator;
-import com.saxonica.ee.elab.eval.ItemEvaluator;
-import com.saxonica.ee.elab.eval.PullEvaluator;
-import com.saxonica.ee.elab.eval.PushEvaluator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
