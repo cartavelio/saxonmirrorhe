@@ -7,6 +7,7 @@
 
 package net.sf.saxon.type;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -721,7 +722,8 @@ public class AlphaCode {
      */
 
     private static SequenceType sequenceTypeFromTree(AlphaCodeTree tree, Schema schema) {
-        NamePool namePool = schema.getConfiguration().getNamePool();
+        Configuration config = schema.getConfiguration();
+        NamePool namePool = config.getNamePool();
         String principal = tree.principal;
         ItemType itemType = null;
         if (principal.isEmpty()) {
@@ -759,13 +761,12 @@ public class AlphaCode {
             boolean nillable = tree.nillable;
             if (contentName != null) {
                 contentQName = StructuredQName.fromEQName(contentName);
-                SchemaType contentType = schema.getSchemaType(contentQName);
+                contentType = schema.getSchemaType(contentQName);
                 if (contentType == null) {
                     throw new IllegalArgumentException("Unknown type " + contentName);
                 }
-                contentTest = new ContentTypeTest(principal.equals("NE") ? Type.ELEMENT : Type.ATTRIBUTE,
-                                                  contentType, schema.getConfiguration(), nillable);
-
+//                contentTest = new ContentTypeTest(principal.equals("NE") ? Type.ELEMENT : Type.ATTRIBUTE,
+//                                                  AnyNodeTest.getInstance(), contentType, nillable, config);
             }
             if (tree.vennOperands != null) {
                 if (tree.vennOperands.length == 2) {
@@ -983,7 +984,7 @@ public class AlphaCode {
             List<ItemType> members = new ArrayList<>();
             boolean allAtomic = true;
             for (AlphaCodeTree m : tree.members) {
-                SequenceType st = sequenceTypeFromTree(m, config);
+                SequenceType st = sequenceTypeFromTree(m, schema);
                 if (st.getPrimaryType().isAtomicType()) {
                     final ItemType primaryType = st.getPrimaryType();
                     members.add(primaryType);
@@ -1016,7 +1017,7 @@ public class AlphaCode {
         int cardinality = Cardinality.fromOccurrenceIndicator(indicator);
         return SequenceType.makeSequenceType(itemType, cardinality);
     }
-
+    
     private static AlphaCodeTree makeTree(SequenceType sequenceType) {
         AlphaCodeTree tree = makeTree(sequenceType.getPrimaryType());
         if (sequenceType.getCardinality() != StaticProperty.EXACTLY_ONE) {

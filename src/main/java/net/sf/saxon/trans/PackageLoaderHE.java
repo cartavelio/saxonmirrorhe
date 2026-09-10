@@ -773,7 +773,7 @@ public class PackageLoaderHE implements IPackageLoader {
         BuiltInRuleSet base;
         if (onNoMatch != null) {
             String asAtt = modeElement.getAttributeValue(NamespaceUri.NULL, "as");
-            SequenceType requiredType = asAtt == null ? SequenceType.ANY_SEQUENCE : AlphaCode.toSequenceType(asAtt, config);
+            SequenceType requiredType = asAtt == null ? SequenceType.ANY_SEQUENCE : AlphaCode.toSequenceType(asAtt, pack.getImportedSchema());
             base = mode.getBuiltInRuleSetForCode(onNoMatch, requiredType);
             mode.setBuiltInRuleSet(base);
         }
@@ -2697,7 +2697,8 @@ public class PackageLoaderHE implements IPackageLoader {
             SequenceType type = SequenceType.ANY_SEQUENCE;
             String typeAtt = element.getAttributeValue(NamespaceUri.NULL, "type");
             if (typeAtt != null) {
-                type = AlphaCode.toSequenceType(typeAtt, loader.getConfiguration());
+                final StylesheetPackage pack = loader.getPackStack().peek();
+                type = AlphaCode.toSequenceType(typeAtt, pack.getImportedSchema());
             }
             return new LookupAllExpression(select);  // TODO: add modifier and type
         });
