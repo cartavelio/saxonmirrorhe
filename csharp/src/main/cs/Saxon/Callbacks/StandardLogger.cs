@@ -5,7 +5,7 @@ using Saxon.Ejava.lang;
 namespace Saxon.Callbacks {
     public abstract class StandardLogger : Saxon.Hej.lib.Logger {
         private int threshold = Saxon.Hej.lib.Logger.INFO;
-        private readonly bool mustClose = false;
+        
         public static Saxon.Hej.lib.Logger makeLogger() {
             return new TextWriterLogger(Console.Error);
         }
@@ -47,9 +47,7 @@ namespace Saxon.Callbacks {
                 }
             }
             public override void close() {
-                if (mustClose) {
-                    stream.close();
-                }
+                stream.close();
             }
             
             public override Saxon.Ejavax.xml.transform.stream.StreamResult asStreamResult() {
@@ -72,9 +70,7 @@ namespace Saxon.Callbacks {
                 }
             }
             public override void close() {
-                if (mustClose) {
-                    writer.Close();
-                }
+                writer.Close();
             }
             
             public override Saxon.Ejavax.xml.transform.stream.StreamResult asStreamResult() {
