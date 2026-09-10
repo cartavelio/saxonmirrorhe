@@ -886,7 +886,6 @@ public class TestValidator {
         Serializer dest = null;
         StringWriter sw = new StringWriter();
         try {
-            String valid_xml = "<?xml version='1.0'?><request><a/><!--comment--><b/></request>";
             String invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
             String sch1 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
                     "\t<xs:element name=\"request\">\n" +
@@ -899,23 +898,6 @@ public class TestValidator {
                     "\t\t</xs:complexType>\n" +
                     "\t</xs:element>\n" +
                     "</xs:schema>";
-
-            String doc1 = "<Family xmlns=\"http://myexample/family\">\n" +
-                    "  <Parent>John</Parent>\n" +
-                    "  <Child>Alice</Child>\n" +
-                    "</Family>";
-
-            String sch2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<schema targetNamespace=\"http://myexample/family_ext\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
-                    "  <import namespace=\"http://myexample/family\" schemaLocation=\"http://www.valid.nl/taxo3/family.xsd\"/>\n" +
-                    "  <element name=\"Cousin\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
-                    "</schema>";
-
-            String doc2 = "<Family xmlns=\"http://myexample/family\" xmlns:fam2=\"http://myexample/family_ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://myexample/family_ext http://www.valid.nl/taxo3/family_ext.xsd\" >\n" +
-                    "  <Parent>John</Parent>\n" +
-                    "  <Child>Alice</Child>\n" +
-                    "  <fam2:Cousin>Pete</fam2:Cousin>\n" +
-                    "</Family>";
 
             Processor proc = new Processor(true);
             SchemaManager sm = proc.getSchemaManager();
@@ -930,15 +912,17 @@ public class TestValidator {
             StreamSource source1 = new StreamSource(new StringReader(invalid_xml));
             source1.setSystemId("http://doc1");
             validator.validate(source1);
-            System.err.println("Doc 1 OK");
+            fail("unexpected success");
 
 
         } catch (SaxonApiException sapie) {
-            System.err.println(sapie.getMessage());
+            assertEquals("XQDY0027", sapie.getErrorCode().getLocalName());
+            assertTrue(sapie.getMessage().contains("Two validation errors"));
+            //System.err.println(sapie.getMessage());
 
         } finally {
             if (dest != null) {
-                System.out.println(sw);
+                //System.out.println(sw);
                 assertTrue(true, sw.toString());
 
             }
@@ -1032,7 +1016,6 @@ public class TestValidator {
         Serializer dest = null;
         StringWriter sw = new StringWriter();
         try {
-            String valid_xml = "<?xml version='1.0'?><request><a/><!--comment--><b/></request>";
             String invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
             String sch1 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
                     "\t<xs:element name=\"request\">\n" +
@@ -1051,17 +1034,6 @@ public class TestValidator {
                     "  <Child>Alice</Child>\n" +
                     "</Family>";
 
-            String sch2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<schema targetNamespace=\"http://myexample/family_ext\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
-                    "  <import namespace=\"http://myexample/family\" schemaLocation=\"http://www.valid.nl/taxo3/family.xsd\"/>\n" +
-                    "  <element name=\"Cousin\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
-                    "</schema>";
-
-            String doc2 = "<Family xmlns=\"http://myexample/family\" xmlns:fam2=\"http://myexample/family_ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://myexample/family_ext http://www.valid.nl/taxo3/family_ext.xsd\" >\n" +
-                    "  <Parent>John</Parent>\n" +
-                    "  <Child>Alice</Child>\n" +
-                    "  <fam2:Cousin>Pete</fam2:Cousin>\n" +
-                    "</Family>";
 
             Processor proc = new Processor(true);
             SchemaManager sm = proc.getSchemaManager();
@@ -1078,11 +1050,11 @@ public class TestValidator {
             sources.add(new StreamSource(new StringReader(invalid_xml)));
             sources.add(new StreamSource(new StringReader(doc1)));
             validator.validateMultiple(sources);
-            System.err.println("Doc 1 OK");
+            System.err.println("Validation completed OK");
 
 
         } catch (SaxonApiException sapie) {
-            System.err.println(sapie.getMessage());
+            fail(sapie); // Should not throw an exception on invalidity
 
         } finally {
             if (dest != null) {
