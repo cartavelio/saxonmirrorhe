@@ -7,7 +7,6 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.functions.FormatNumber;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -96,11 +95,16 @@ public abstract class IntegerValue extends DecimalValue {
             return err;
         }
         if (value > Long.MAX_VALUE || value < Long.MIN_VALUE) {
-            if (value == Math.floor(value)) {
-                return new BigIntegerValue(FormatNumber.adjustToDecimal(value, 2).toBigInteger());
-            } else {
-                return new BigIntegerValue(BigDecimal.valueOf(value).toBigInteger());
+            // Assertion: if the double is outside the range of a long, then there is no fractional part
+            long bits = Double.doubleToLongBits(value);
+            long mantissa = (bits & 0x000fffffffffffffL) | 0x0010000000000000L;
+            int unbiasedExponent = (int)((bits & 0x7ff0000000000000L) >> 52) - 1023;
+
+            BigInteger result = BigInteger.valueOf(mantissa).shiftLeft(unbiasedExponent - 52);
+            if (value < 0) {
+                result = result.negate();
             }
+            return new BigIntegerValue(result);
         }
         return Int64Value.makeIntegerValue((long) value);
     }

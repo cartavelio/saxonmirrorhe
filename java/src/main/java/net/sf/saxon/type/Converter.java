@@ -7,14 +7,18 @@
 
 package net.sf.saxon.type;
 
+import net.sf.saxon.functions.Round;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * A converter implements conversions from one atomic type to another - that is, it implements the casting
@@ -480,8 +484,30 @@ public abstract class Converter {
     public static class FloatToInteger extends Converter {
         public final static FloatToInteger INSTANCE = new FloatToInteger();
         @Override
-        public ConversionResult convert(AtomicValue input) {
-            return IntegerValue.fromDouble(((FloatValue) input).getDoubleValue());
+        public ConversionResult convert(AtomicValue input) { // bug 7070
+            float value = ((FloatValue) input).getFloatValue();
+            if (Float.isNaN(value) || Float.isInfinite(value)) {
+                return new ValidationFailure("Cannot convert " + value + " to integer", "FOCA0002");
+            }
+            if (value >= Long.MIN_VALUE && value <= Long.MAX_VALUE) {
+                try {
+                    long trunc = ((FloatValue) input).round(0, Round.RoundingRule.TOWARD_ZERO).longValue();
+                    return new Int64Value(trunc);
+                } catch (XPathException e) {
+                    throw new UncheckedXPathException(e); // can't happen...?
+                }
+            } else {
+                // Assertion: if the float is outside the range of a long, then there is no fractional part
+                int bits = Float.floatToIntBits(value);
+                int mantissa = (bits & 0x007fffff) | 0x800000;
+                int unbiasedExponent = ((bits & 0x7f800000) >> 23) - 127;
+
+                BigInteger result = BigInteger.valueOf(mantissa).shiftLeft(unbiasedExponent - 23);
+                if (value < 0) {
+                    result = result.negate();
+                }
+                return new BigIntegerValue(result);
+            }
         }
     }
 
@@ -513,10 +539,10 @@ public abstract class Converter {
             try {
                 if (in instanceof IntegerValue) {
                     return in;
-                } else if (in instanceof DoubleValue) {
-                    return IntegerValue.fromDouble(in.getDoubleValue());
-                } else if (in instanceof FloatValue) {
-                    return IntegerValue.fromDouble(in.getDoubleValue());
+                } else if (in instanceof DoubleValue d) {
+                    return DoubleToInteger.INSTANCE.convert(d);
+                } else if (in instanceof FloatValue f) {
+                    return FloatToInteger.INSTANCE.convert(f);
                 } else {
                     return BigIntegerValue.makeIntegerValue(in.getDecimalValue().toBigInteger());
                 }
