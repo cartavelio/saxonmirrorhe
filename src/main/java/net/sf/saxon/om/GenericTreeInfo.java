@@ -193,6 +193,9 @@ public class GenericTreeInfo implements TreeInfo
         return durability;
     }
 
+    public boolean isMutable() {
+        return durability == Durability.MUTABLE;
+    }
 
     /**
      * Get the list of unparsed entities defined in this document

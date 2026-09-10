@@ -456,6 +456,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         // push top-level attribute nodes down the pipeline
         if (level < 0) {
             Orphan orphan = new Orphan(getConfiguration());
+            ((GenericTreeInfo)orphan.getTreeInfo()).setDurability(Durability.MUTABLE);
             orphan.setNodeKind(Type.ATTRIBUTE);
             orphan.setNodeName(attName);
             orphan.setTypeAnnotation(typeCode);

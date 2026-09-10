@@ -24,6 +24,7 @@ import net.sf.saxon.value.MemoClosure;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -798,18 +799,7 @@ public class LetExpression extends Assignation
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        // minimize stack consumption by evaluating nested LET expressions iteratively
-        LetExpression let = this;
-        while (true) {
-            Sequence val = let.eval(context);
-            context.setLocalVariable(let.getLocalSlotNumber(), val);
-            if (let.getAction() instanceof LetExpression) {
-                let = (LetExpression) let.getAction();
-            } else {
-                break;
-            }
-        }
-        let.getAction().evaluatePendingUpdates(context, pul);
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
 
@@ -889,7 +879,103 @@ public class LetExpression extends Assignation
 
     public static class LetExprElaborator extends PullElaborator {
 
-        // TODO: evaluate nested let expressions in a loop to reduce stack consumption
+        private Expression finalAction;
+
+        private boolean repeatable(LetExpression let) {
+            return let.getNominalReferenceCount() > 1;
+        }
+
+        /**
+         * Return a function that evaluates the local variable in this let expression, and in all
+         * immediately-nested let expressions. This is done to reduce Java stack usage and the number
+         * of method/function calls
+         * <p>Calling this method also results in {@code finalAction} being set to the "return"
+         * expression that follows the nested local variables.</p>
+         * @param start the initial let expression
+         * @return a function to evaluate all the variables. This is returned as an {@code ItemEvaluator} for
+         * convenience, but it is executed for its side-effects (setting variable values in the context
+         * stack frame) and always returns null.
+         */
+        private ItemEvaluator setAllVariables(LetExpression start) {
+            List<LetExpression> setters = new ArrayList<>();
+            setters.add(start);
+            Expression next = start.getAction();
+            while (next instanceof LetExpression) {
+                setters.add((LetExpression)next);
+                next = ((LetExpression)next).getAction();
+            }
+            finalAction = next;
+            switch (setters.size()) {
+                // for a small number of local variables, unroll the loop
+                case 1: {
+                    LetExpression let = setters.get(0);
+                    SequenceEvaluator evaluator = let.getSequence().makeElaborator().lazily(repeatable(let));
+                    int slot = setters.get(0).slotNumber;
+                    return context -> {
+                        context.setLocalVariable(slot, evaluator.evaluate(context));
+                        return null;
+                    };
+                }
+                case 2: {
+                    SequenceEvaluator evaluator0 = setters.get(0).getSequence().makeElaborator().lazily(repeatable(setters.get(0)));
+                    int slot0 = setters.get(0).slotNumber;
+                    SequenceEvaluator evaluator1 = setters.get(1).getSequence().makeElaborator().lazily(repeatable(setters.get(1)));
+                    int slot1 = setters.get(1).slotNumber;
+                    return context -> {
+                        context.setLocalVariable(slot0, evaluator0.evaluate(context));
+                        context.setLocalVariable(slot1, evaluator1.evaluate(context));
+                        return null;
+                    };
+                }
+                case 3: {
+                    SequenceEvaluator evaluator0 = setters.get(0).getSequence().makeElaborator().lazily(repeatable(setters.get(0)));
+                    int slot0 = setters.get(0).slotNumber;
+                    SequenceEvaluator evaluator1 = setters.get(1).getSequence().makeElaborator().lazily(repeatable(setters.get(1)));
+                    int slot1 = setters.get(1).slotNumber;
+                    SequenceEvaluator evaluator2 = setters.get(2).getSequence().makeElaborator().lazily(repeatable(setters.get(2)));
+                    int slot2 = setters.get(2).slotNumber;
+                    return context -> {
+                        context.setLocalVariable(slot0, evaluator0.evaluate(context));
+                        context.setLocalVariable(slot1, evaluator1.evaluate(context));
+                        context.setLocalVariable(slot2, evaluator2.evaluate(context));
+                        return null;
+                    };
+                }
+                case 4: {
+                    SequenceEvaluator evaluator0 = setters.get(0).getSequence().makeElaborator().lazily(repeatable(setters.get(0)));
+                    int slot0 = setters.get(0).slotNumber;
+                    SequenceEvaluator evaluator1 = setters.get(1).getSequence().makeElaborator().lazily(repeatable(setters.get(1)));
+                    int slot1 = setters.get(1).slotNumber;
+                    SequenceEvaluator evaluator2 = setters.get(2).getSequence().makeElaborator().lazily(repeatable(setters.get(2)));
+                    int slot2 = setters.get(2).slotNumber;
+                    SequenceEvaluator evaluator3 = setters.get(3).getSequence().makeElaborator().lazily(repeatable(setters.get(3)));
+                    int slot3 = setters.get(3).slotNumber;
+                    return context -> {
+                        context.setLocalVariable(slot0, evaluator0.evaluate(context));
+                        context.setLocalVariable(slot1, evaluator1.evaluate(context));
+                        context.setLocalVariable(slot2, evaluator2.evaluate(context));
+                        context.setLocalVariable(slot3, evaluator3.evaluate(context));
+                        return null;
+                    };
+                }
+                default: {
+                    SequenceEvaluator[] evaluators = new SequenceEvaluator[setters.size()];
+                    int[] slots = new int[setters.size()];
+                    for (int i = 0; i < setters.size(); i++) {
+                        evaluators[i] = setters.get(i).getSequence().makeElaborator().lazily(repeatable(setters.get(i)));
+                        slots[i] = setters.get(i).slotNumber;
+                    }
+                    return context -> {
+                        for (int i = 0; i < slots.length; i++) {
+                            context.setLocalVariable(slots[i], evaluators[i].evaluate(context));
+                        }
+                        return null;
+                    };
+                }
+
+            }
+
+        }
 
         @Override
         public EagerEvaluator eagerly() {
@@ -910,14 +996,12 @@ public class LetExpression extends Assignation
         @Override
         public PullEvaluator elaborateForPull() {
             final LetExpression expr = (LetExpression) getExpression();
-            final SequenceEvaluator selectEval = expr.getSequence().makeElaborator().lazily(true);
-            final PullEvaluator actionPull = expr.getAction().makeElaborator().elaborateForPull();
-            final int slot = expr.getLocalSlotNumber();
+            final ItemEvaluator setter = setAllVariables(expr);
+            final PullEvaluator actionPull = finalAction.makeElaborator().elaborateForPull();
             return context -> {
                 int savedOutputState = context.getTemporaryOutputState();
                 context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
-                Sequence value = selectEval.evaluate(context);
-                context.setLocalVariable(slot, value);
+                setter.eval(context);
                 context.setTemporaryOutputState(savedOutputState);
                 return actionPull.iterate(context);
             };
@@ -926,14 +1010,12 @@ public class LetExpression extends Assignation
         @Override
         public PushEvaluator elaborateForPush() {
             final LetExpression expr = (LetExpression) getExpression();
-            final SequenceEvaluator selectEval = expr.getSequence().makeElaborator().lazily(true);
-            final PushEvaluator actionPush = expr.getAction().makeElaborator().elaborateForPush();
-            final int slot = expr.getLocalSlotNumber();
+            final ItemEvaluator setter = setAllVariables(expr);
+            final PushEvaluator actionPush = finalAction.makeElaborator().elaborateForPush();
             return (out, context) -> {
                 int savedOutputState = context.getTemporaryOutputState();
                 context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
-                Sequence value = selectEval.evaluate(context);
-                context.setLocalVariable(slot, value);
+                setter.eval(context);
                 context.setTemporaryOutputState(savedOutputState);
                 return actionPush.processLeavingTail(out, context);
             };
@@ -942,18 +1024,31 @@ public class LetExpression extends Assignation
         @Override
         public ItemEvaluator elaborateForItem() {
             final LetExpression expr = (LetExpression) getExpression();
-            final SequenceEvaluator selectEval = expr.getSequence().makeElaborator().lazily(true);
-            final ItemEvaluator actionEval = expr.getAction().makeElaborator().elaborateForItem();
-            final int slot = expr.getLocalSlotNumber();
+            final ItemEvaluator setter = setAllVariables(expr);
+            final ItemEvaluator actionEval = finalAction.makeElaborator().elaborateForItem();
             return context -> {
                 int savedOutputState = context.getTemporaryOutputState();
                 context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
-                Sequence value = selectEval.evaluate(context);
-                context.setLocalVariable(slot, value);
+                setter.eval(context);
                 context.setTemporaryOutputState(savedOutputState);
                 return actionEval.eval(context);
             };
         }
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            final LetExpression expr = (LetExpression) getExpression();
+            final ItemEvaluator setter = setAllVariables(expr);
+            final UpdateEvaluator actionEval = finalAction.makeElaborator().elaborateForUpdate();
+            return (context, pul) -> {
+                int savedOutputState = context.getTemporaryOutputState();
+                context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
+                setter.eval(context);
+                context.setTemporaryOutputState(savedOutputState);
+                actionEval.registerUpdates(context, pul);
+            };
+        }
+        
     }
 }
 

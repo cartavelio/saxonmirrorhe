@@ -69,6 +69,11 @@ public class LinkedTreeBuilder extends Builder
         // System.err.println("new TreeBuilder " + this);
     }
 
+    public void setDurability(Durability durability) {
+        if (this.durability != Durability.MUTABLE) {
+            this.durability = durability;   // TODO: mutability and durability should be orthogonal
+        }
+    }
 
     /**
      * Get the current root node. This will normally be a document node, but if the root of the tree

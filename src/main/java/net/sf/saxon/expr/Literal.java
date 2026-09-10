@@ -414,11 +414,7 @@ public class Literal extends Expression {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        if (value.getLength() == 0) {
-            // do nothing
-        } else {
-            super.evaluatePendingUpdates(context, pul);
-        }
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     /**
@@ -921,6 +917,14 @@ public class Literal extends Expression {
             }
         }
 
-
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            GroundedValue value = ((Literal) getExpression()).getGroundedValue();
+            if (value.getLength() == 0) {
+                return (context, pul) -> {};
+            } else {
+                return super.elaborateForUpdate();
+            }
+        }
     }
 }

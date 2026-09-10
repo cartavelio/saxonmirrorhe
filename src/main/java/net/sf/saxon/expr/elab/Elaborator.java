@@ -253,5 +253,9 @@ public abstract class Elaborator {
         }
     }
 
+    public UpdateEvaluator elaborateForUpdate() {
+        throw new UnsupportedOperationException("Update not supported");
+    }
+
 }
 

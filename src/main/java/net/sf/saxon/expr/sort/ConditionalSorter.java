@@ -278,12 +278,7 @@ public class ConditionalSorter extends Expression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        boolean b = getCondition().effectiveBooleanValue(context);
-        if (b) {
-            return getDocumentSorter().iterate(context);
-        } else {
-            return getDocumentSorter().getBaseExpression().iterate(context);
-        }
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**

@@ -11,6 +11,7 @@ import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -35,6 +36,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
 
     Operand basePatternOp;
     Operand predicateOp;
+    BooleanEvaluator predicateEvaluator;
 
     public BasePatternWithPredicate(Pattern basePattern, Expression predicate) {
         basePatternOp = new Operand(this, basePattern, OperandRole.ATOMIC_SEQUENCE);
@@ -123,12 +125,15 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
     }
 
     private boolean matchesPredicate(Item item, XPathContext context) throws XPathException {
+        if (predicateEvaluator == null)  {
+            predicateEvaluator = getPredicate().makeElaborator().elaborateForBoolean();
+        }
         XPathContext c2 = context.newMinorContext();
         ManualIterator si = new ManualIterator(item);
         c2.setCurrentIterator(si);
         c2.setCurrentOutputUri(null);
         try {
-            return getPredicate().effectiveBooleanValue(c2);
+            return predicateEvaluator.eval(c2);
         } catch (XPathException.Circularity | XPathException.StackOverflow e) {
             throw e;
         } catch (XPathException ex) {

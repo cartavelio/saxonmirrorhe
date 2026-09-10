@@ -7,10 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -595,12 +592,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        XPathContextMinor c2 = context.newMinorContext();
-        c2.trackFocus(getSelect().iterate(context));
-        SequenceIterator iter = c2.getCurrentIterator();
-        while (iter.next() != null) {
-            getAction().evaluatePendingUpdates(c2, pul);
-        }
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     /**
@@ -708,6 +700,21 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
                 return tc;
             };
 
+        }
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            ForEach forEach = (ForEach) getExpression();
+            PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
+            UpdateEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForUpdate();
+            return (context, pul) -> {
+                XPathContextMinor c2 = context.newMinorContext();
+                c2.trackFocus(select.iterate(context));
+                SequenceIterator iter = c2.getCurrentIterator();
+                while (iter.next() != null) {
+                    action.registerUpdates(c2, pul);
+                }
+            };
         }
     }
 }

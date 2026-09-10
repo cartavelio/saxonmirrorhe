@@ -9,10 +9,7 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.SequenceIterator;
@@ -853,13 +850,7 @@ public class FLWORExpression extends Expression {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        TuplePull stream = new SingularityPull();
-        for (Clause c : clauses) {
-            stream = c.getPullStream(stream, context);
-        }
-        while (stream.nextTuple(context)) {
-            getReturnClause().evaluatePendingUpdates(context, pul);
-        }
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     /**
@@ -1009,6 +1000,21 @@ public class FLWORExpression extends Expression {
                 destination.processTuple(context);
                 destination.close();
                 return null;
+            };
+        }
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            FLWORExpression expr = (FLWORExpression) getExpression();
+            UpdateEvaluator returnAction = expr.getReturnClause().makeElaborator().elaborateForUpdate();
+            return (context, pul) -> {
+                TuplePull stream = new SingularityPull();
+                for (Clause c : expr.clauses) {
+                    stream = c.getPullStream(stream, context);
+                }
+                while (stream.nextTuple(context)) {
+                    returnAction.registerUpdates(context, pul);
+                }
             };
         }
     }

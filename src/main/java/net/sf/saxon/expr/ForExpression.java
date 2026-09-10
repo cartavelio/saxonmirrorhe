@@ -7,13 +7,9 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.flwor.OuterForExpression;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.instruct.TailCall;
@@ -425,15 +421,7 @@ public class ForExpression extends Assignation {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        try {
-            int slot = getLocalSlotNumber();
-            SequenceTool.supply(getSequence().iterate(context), (ItemConsumer<? super Item>) item -> {
-                context.setLocalVariable(slot, item);
-                getAction().evaluatePendingUpdates(context, pul);
-            });
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
-        }
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     /**
@@ -623,6 +611,24 @@ public class ForExpression extends Assignation {
                     dispatchTailCall(tc);
                 }
                 return null;
+            };
+        }
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            final ForExpression expr = (ForExpression) getExpression();
+            final PullEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForPull();
+            final UpdateEvaluator actionEval = expr.getAction().makeElaborator().elaborateForUpdate();
+            final int slot = expr.getLocalSlotNumber();
+            return (context, pul) -> {
+                try {
+                    SequenceTool.supply(selectEval.iterate(context), (ItemConsumer<? super Item>) item -> {
+                        context.setLocalVariable(slot, item);
+                        actionEval.registerUpdates(context, pul);
+                    });
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             };
         }
     }

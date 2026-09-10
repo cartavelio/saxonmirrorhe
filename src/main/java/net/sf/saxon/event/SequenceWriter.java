@@ -172,6 +172,9 @@ public abstract class SequenceWriter extends SequenceReceiver {
     public void characters(UnicodeString s, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             Orphan o = new Orphan(getConfiguration());
+            if (treeModel != null && treeModel.isMutable()) {
+                ((GenericTreeInfo) o.getTreeInfo()).setDurability(Durability.MUTABLE);
+            }
             o.setNodeKind(Type.TEXT);
             o.setStringValue(s.tidy());
             write(o);
@@ -187,6 +190,9 @@ public abstract class SequenceWriter extends SequenceReceiver {
     public void comment(UnicodeString comment, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             Orphan o = new Orphan(getConfiguration());
+            if (treeModel != null && treeModel.isMutable()) {
+                ((GenericTreeInfo) o.getTreeInfo()).setDurability(Durability.MUTABLE);
+            }
             o.setNodeKind(Type.COMMENT);
             o.setStringValue(comment.tidy());
             write(o);
@@ -200,6 +206,9 @@ public abstract class SequenceWriter extends SequenceReceiver {
     public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             Orphan o = new Orphan(getConfiguration());
+            if (treeModel != null && treeModel.isMutable()) {
+                ((GenericTreeInfo) o.getTreeInfo()).setDurability(Durability.MUTABLE);
+            }
             o.setNodeName(new NoNamespaceName(target));
             o.setNodeKind(Type.PROCESSING_INSTRUCTION);
             o.setStringValue(data.tidy());
