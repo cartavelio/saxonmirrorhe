@@ -2970,6 +2970,7 @@ public class XPathParser {
                         if (!allowXPath30Syntax) {
                             return parseFunctionCall(name, null);
                         };
+                        testPermittedAxis(AxisInfo.NAMESPACE, "XQST0134");
                         CSharp.emitCode("goto case \"node\";");
                     case "node":
                     case "schema-element":
@@ -2979,7 +2980,8 @@ public class XPathParser {
                     case "element":
                     case "text":
                         NodeTest nodeTest = parseNodeTest(Type.ELEMENT);
-                        AxisExpression ae = new AxisExpression(AxisInfo.CHILD, nodeTest);
+                        int defaultAxis = (firstInPattern && name.equals("document-node")) ? AxisInfo.SELF : AxisInfo.CHILD;
+                        AxisExpression ae = new AxisExpression(defaultAxis, nodeTest);
                         setLocation(ae);
                         return ae;
                     case "attribute":
