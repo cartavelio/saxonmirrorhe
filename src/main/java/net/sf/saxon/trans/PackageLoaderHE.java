@@ -473,7 +473,6 @@ public class PackageLoaderHE implements IPackageLoader {
                         break;
                     case "globalVariable":
                         cc = readGlobalVariable(grandchild);
-                        codeGen = true;
                         break;
                     case "globalParam":
                         cc = readGlobalParam(grandchild);
@@ -2625,7 +2624,6 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression select = loader.getFirstChildExpression(element);
 
             int slot = loader.getIntegerAttribute(element, "slot");
-            //int evalMode = loader.getIntegerAttribute(element, "eval");
             StructuredQName name = loader.getQNameAttribute(element, "var");
             SequenceType requiredType = loader.parseAlphaCode(element, "as");
             LetExpression let = new LetExpression();
@@ -2633,7 +2631,11 @@ public class PackageLoaderHE implements IPackageLoader {
             let.setRequiredType(requiredType);
             let.setSlotNumber(slot);
             let.setVariableQName(name);
-            //let.setEvaluator(Evaluators.getEvaluator(evalMode));
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
+            if (flags != null) {
+                let.setNeedsEagerEvaluation(flags.contains("e"));
+                let.setNeedsLazyEvaluation(flags.contains("l"));
+            }
 
             loader.localBindings.push(let);
             Expression action = loader.getSecondChildExpression(element);

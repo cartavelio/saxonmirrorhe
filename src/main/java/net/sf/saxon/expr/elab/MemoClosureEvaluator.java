@@ -2,7 +2,6 @@ package net.sf.saxon.expr.elab;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Evaluators;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -40,12 +39,4 @@ public class MemoClosureEvaluator implements SequenceEvaluator {
         }
     }
 
-    /**
-     * Get a code identifying the evaluator. Note that the codes are held in SEF files
-     * so they should be stable.
-     */
-    @Override
-    public int getEvaluationMethodCode() {
-        return Evaluators.MAKE_MEMO_CLOSURE;
-    }
 }

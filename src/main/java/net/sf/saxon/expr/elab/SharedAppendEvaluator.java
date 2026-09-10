@@ -4,7 +4,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.VariableReference;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Block;
-import net.sf.saxon.expr.parser.Evaluators;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -52,12 +51,4 @@ public class SharedAppendEvaluator implements SequenceEvaluator {
         return chain;
     }
 
-    /**
-     * Get a code identifying the evaluator. Note that the codes are held in SEF files
-     * so they should be stable.
-     */
-    @Override
-    public int getEvaluationMethodCode() {
-        return Evaluators.SHARED_APPEND_EXPRESSION;
-    }
 }
