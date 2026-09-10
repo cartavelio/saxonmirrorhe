@@ -446,13 +446,18 @@
         in place of <code>&lt;</code> and <code>&gt;</code> to represent the less-than and greater-than
             operators; these characters can also be used in place of <code>&lt;</code> and <code>&gt;</code>
             in the compound tokens <code>&lt;=</code>, <code>>=</code>, <code>&lt;&lt;</code>,
-        <code>&gt;&gt;</code>, <code>=&gt;</code>, and <code>-&gt;</code>.</p>
+        <code>&gt;&gt;</code>, <code>=&gt;</code>, <code>-&gt;</code>, and <code>=!&gt;</code>.</p>
         
         <p>From 12.3, the mapping arrow operator <code>=!></code>is implemented. This is similar to the XPath 3.1 arrow operator
         (for example <code>$x => abs()</code>), but it applies the function on the right-hand side to each item delivered
         by the left-hand side individually. For example <code>(-2 to +2) =!> abs()</code> returns <code>(2, 1, 0, 1, 2)</code>.
         The effect is similar to writing <code>(-2 to +2) ! abs(.)</code>, but the operator precedences make it
         easier to construct a pipeline of operations without parentheses.</p>
+        
+        <p>From 12.3, an inline function following the arrow operator no longer needs to be parenthesized:
+        the expression <code>$in => (function($x){$x+1})()</code> can now be written 
+        <code>$in => function($x){$x+1}()</code>. It is also possible to use a focus functions:
+            <code>$in => function{.+1}()</code></p>
         
         <p>From 12.3, the function coercion rules are extended to allow a supplied function item to have lower arity
         than that implied by the signature of the required type. For example, <code>map:for-each</code> expects a function with
