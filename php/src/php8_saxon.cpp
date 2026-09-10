@@ -1719,6 +1719,8 @@ zval makePHPValue(void * value){
 
 void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
 
+       //graal_isolatethread_t *thread1 = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+
        if(retval == nullptr || Z_TYPE_P(retval) ==0){
             //zend_error(E_ERROR, "Function returned null");
             zend_throw_exception(zend_ce_exception, "Function returned null", 0);
@@ -1948,7 +1950,7 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
 }
 
 
-void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  void ** argumentsi)
+void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, int useProc, int useNativeTypes, int numOfArguments,  void ** argumentsi)
 {
     if(functionName == NULL) {
         if (getenv("SAXONC_DEBUG_FLAG")) {

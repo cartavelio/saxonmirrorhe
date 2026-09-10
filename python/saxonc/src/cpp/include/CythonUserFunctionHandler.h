@@ -61,6 +61,101 @@ std::map<std::string, saxonTypeEnum> typeMap = {
 
 };
 
+void * makeXdmValueFromPythonObject(PyObject * result){
+    graal_isolatethread_t *thread1 = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+
+    PyTypeObject * typeObj = Py_TYPE(result);
+
+    if(typeObj != nullptr) {
+
+        if (PyLong_Check(result)) {
+            long valueL = PyLong_AsLong(result);
+            int64_t longValueRef = j_makeLongValue(thread1, valueL);
+            return (void *)longValueRef;
+        } else if (PyFloat_Check(result)) {
+            double valueD = PyFloat_AsDouble(result);
+            int64_t doubleValueRef = j_makeDoubleValue(thread1, valueD);
+            return (void *)doubleValueRef;
+        } else if(PyBool_Check(result)) {
+            int truth = PyObject_IsTrue(result);
+            if (truth < 0) {
+                return nullptr;
+            }
+            int64_t boolValueRef = j_makeBooleanValue(thread1, truth);
+            return (void *)boolValueRef;
+
+        } else if(PyUnicode_Check(result)) {
+
+            const char* ss = PyUnicode_AsUTF8(result);
+            if (ss == NULL) {
+                return nullptr;
+            }
+            int64_t stringValueRef = j_makeStringValue(thread1, (char *)ss, nullptr);
+
+            return (void *)stringValueRef;
+
+        } else if(PyList_Check(result)) {
+            Py_ssize_t sizeL = PyList_Size(result);
+
+            if (sizeL > INT_MAX || sizeL < INT_MIN) {
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                    fprintf(stderr, "OVerflow error for the size of the list\n");
+                    fflush(stdout);
+                }
+                return nullptr;
+            }
+
+            int rv_arr_length = (int) sizeL;
+
+            //TODO create XdmArray
+            void * accumulatorValue = (void *)createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, rv_arr_length);
+
+
+
+            for(Py_ssize_t j = 0; j < sizeL; j++) {
+                PyObject* item = PyList_GetItem(result, j);
+
+                void * rawItemValue = makeXdmValueFromPythonObject(item);
+                addProcessorValue(SaxonProcessor::sxn_environ->thread, accumulatorValue, rawItemValue);
+                j_handles_destroy(SaxonProcessor::sxn_environ->thread, rawItemValue);
+            }
+
+            void * arrayValue = (void *) j_makeXdmArray(thread1, (void *)accumulatorValue);
+            j_handles_destroy(thread1, (void *)accumulatorValue);
+            return arrayValue;
+
+        }
+
+        //TODO handle other python types - e.g Set, Dict, list
+
+
+
+        //PyObject * typeObji = PyType_GetName(typeObj);
+        const char* c_typeObjStr = typeObj->tp_name; //PyUnicode_AsUTF8(typeObji);
+
+        std::string typeObjStr = std::string(c_typeObjStr);
+
+        std::string prefix("PyXdm");
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+            fprintf(stderr, "We are in a CythonUserFunctionHandler type= %s\n", c_typeObjStr);
+            fflush(stdout);
+        }
+
+        if(typeObjStr.find(prefix) == std::string::npos) {
+            //TODO try to handle Python primitive types
+            return nullptr;
+        }
+
+    }
+
+    long resulti = PyLong_AsLong(PyObject_CallMethodNoArgs(result, PyUnicode_FromString("_get_underlying_int_value")));
+
+
+    return (void *)resulti;
+
+
+
+}
 
 PyObject *makePythonValue(void * value){
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
@@ -254,6 +349,15 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int u
 
     allocFn fn = operator new;
 
+    if(func == nullptr || ((PyObject *)func) == Py_None){
+        return nullptr;
+    }
+
+    /*if (!PyCallable_Check(func)) {
+        PyErr_SetString(PyExc_TypeError, "The function object is not callable");
+        return NULL;
+    } */
+
 
     if (getenv("SAXONC_DEBUG_FLAG")) {
           fprintf(stdout, "We are in a **Cython** function. calling Python logic \n");
@@ -262,7 +366,17 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int u
           }
         std::cerr << "arguments count="<< numOfArguments << std::endl;
         fprintf(stdout, "user function python proc pointer= %p func=%p\n", (void *)proc, (void *)func);
+
+        fprintf(stdout, "Num of arguments= %i \n", numOfArguments);
     }
+
+    PyObject* kwargs = PyDict_New();
+    if (!kwargs) return NULL;
+    Py_INCREF((PyObject *) proc);
+    // Add key-value pairs
+    PyDict_SetItemString(kwargs, "processor", (PyObject *) proc);
+
+    args = PyTuple_New(numOfArguments);   // n = number of arguments
 
 
     if(numOfArguments>0) {
@@ -270,12 +384,6 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int u
         graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
         //argsList = PyList_New(numOfArguments);
-
-        if(useProc) {
-            numOfArguments++;
-        }
-
-        args = PyTuple_New(numOfArguments);   // n = number of arguments
 
         PyObject * argi = nullptr;
 
@@ -288,31 +396,31 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int u
         } */
 
         XdmValue * tempValue = nullptr;
-        Py_ssize_t i = 0;
 
-        if(useProc) {
+
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+
+        fprintf(stdout, "Num of arguments now= %i \n", numOfArguments);
+    }
+
+
+
+        for(Py_ssize_t i = 0; i < numOfArguments; i++) {
             if (getenv("SAXONC_DEBUG_FLAG")) {
-                fprintf(stdout, "proc found !!!!.\n");
-            }
-            Py_INCREF((PyObject *) proc);
-            PyTuple_SET_ITEM(args, i, (PyObject *) proc);
-            i++;
-        }
-
-
-        for(Py_ssize_t j = 0; i < numOfArguments; i++, j++) {
-            if (getenv("SAXONC_DEBUG_FLAG")) {
-                fprintf(stdout, "Making XdmValue ref=%ld.\n", (long)argumentsi[j]);
+                fprintf(stdout, "Making XdmValue ref=%ld.\n", (long)argumentsi[i]);
             }
 
-            long argxi = (long)argumentsi[j];//j_copy_handles(thread, (void *)argumentsi[i]);
-            //arguments[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)argxi);//, (void *)argumentsi[i]));
+            long argxi = (long)argumentsi[i]; //TODO we may need to copy arguments: j_copy_handles(thread, (void *)argumentsi[i]);
 
             if(useNativeTypes) {
-                argi = makePythonValue(argumentsi[j]);
+                argi = makePythonValue(argumentsi[i]);
             } else {
-                //TODO how to we handle a emptySequence??
+                //TODO how to we handle an emptySequence??
                 argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("convert_c_obj"), PyLong_FromLong(argxi));
+            }
+
+            if (getenv("SAXONC_DEBUG_FLAG")) {
+                fprintf(stdout, "cython user function checkpoint 0\n");
             }
 
             if(argi == Py_None ||  argi == nullptr) {
@@ -329,91 +437,71 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int u
 
     }
     //PyErr_Print();
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+        fprintf(stdout, "cython user function checkpoint 1\n");
+    }
 
-    PyObject* result = PyObject_Call((PyObject *)func, args, NULL); //PyObject_CallMethodObjArgs((PyObject *)func, (PyObject *) proc, args, NULL);
-    //PyErr_Print();
+    /*
+    if (PyFunction_Check(obj)) {
+        PyObject* name_obj = PyObject_GetAttrString(obj, "__name__");
+        if (name_obj && PyUnicode_Check(name_obj)) {
+            const char* name = PyUnicode_AsUTF8(name_obj);
+            // use name
+        }
+        Py_XDECREF(name_obj);
+    }
+    */
+
+    if (!PyCallable_Check((PyObject *)func)) {
+        PyErr_SetString(PyExc_TypeError, "The function object is not callable");
+        return NULL;
+    }
+
+    if (!PyTuple_Check(args)) {
+        PyErr_SetString(PyExc_TypeError, "arguments to the function not defined correctly");
+        return NULL;
+    }
+
+
+    PyObject* result = PyObject_Call((PyObject *)func, args, kwargs);
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+        if(result != nullptr) {
+            PyErr_Print();
+            fprintf(stdout, "user function in c code python returned a value\n");
+        }
+    }
 
     if(args != nullptr){
         //TODO decrement ref counts
         Py_DECREF(args);
     }
 
-    if(func != nullptr) {
-        Py_DECREF((PyObject *)func);
-    }
+    Py_DECREF(kwargs);
 
-    if(result == Py_None ||  result == nullptr) {
+    if(result == nullptr) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
             fprintf(stdout, "user function result is NULL\n");
         }
+        //PyErr_SetString(PyExc_TypeError, "The call to the function object  failed");
+        //TODO We have entered this path because we have an error in calling the function.
+        //TODO we should not raise a python error here, but create a Java exception which
+        //TODO should be picked up later by the caller we hope
+        /*PyObject *type, *value, *traceback;
+        PyErr_Fetch(&type, &value, &traceback);
+        PyErr_NormalizeException(&type, &value, &traceback);
+        const char *msg = PyUnicode_AsUTF8(PyObject_Str(value)); */
+        //Py_DECREF(type);
+        //Py_DECREF(value);
+        //Py_DECREF(traceback);
+        // fprintf(stdout, msg);
         return nullptr;
     }
 
-    PyTypeObject * typeObj = Py_TYPE(result);
-
-    graal_isolatethread_t *thread1 = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-
-    if(typeObj != nullptr) {
-
-        if (PyLong_Check(result)) {
-            long valueL = PyLong_AsLong(result);
-            int64_t longValueRef = j_makeLongValue(thread1, valueL);
-            return (void *)longValueRef;
-        } else if (PyFloat_Check(result)) {
-            double valueD = PyFloat_AsDouble(result);
-            int64_t doubleValueRef = j_makeDoubleValue(thread1, valueD);
-            return (void *)doubleValueRef;
-        } else if(PyBool_Check(result)) {
-            int truth = PyObject_IsTrue(result);
-            if (truth < 0) {
-                return nullptr;
-            }
-            int64_t boolValueRef = j_makeBooleanValue(thread1, truth);
-            return (void *)boolValueRef;
-
-        } else if(PyUnicode_Check(result)) {
-
-            const char* ss = PyUnicode_AsUTF8(result);
-            if (ss == NULL) {
-                return nullptr;
-            }
-            int64_t stringValueRef = j_makeStringValue(thread1, (char *)ss, nullptr);
-
-            return (void *)stringValueRef;
-
-        }
-
-        //TODO handle other python types - e.g Set, Dict, list
-
-
-
-        //PyObject * typeObji = PyType_GetName(typeObj);
-        const char* c_typeObjStr = Py_TYPE(result)->tp_name; //PyUnicode_AsUTF8(typeObji);
-
-        std::string typeObjStr = std::string(c_typeObjStr);
-
-        std::string prefix("PyXdm");
-        if (getenv("SAXONC_DEBUG_FLAG")) {
-            fprintf(stderr, "We are in a CythonUserFunctionHandler type= %s\n", c_typeObjStr);
-            fflush(stdout);
-        }
-
-        if(typeObjStr.find(prefix) == std::string::npos) {
-            //TODO try to handle Python primitive types
-            return nullptr;
-        }
-
-    }
-
-    long resulti = PyLong_AsLong(PyObject_CallMethodNoArgs(result, PyUnicode_FromString("_get_underlying_int_value")));
-
-    /*if(result != nullptr){
-        Py_DECREF(result);
-    }*/
-
-    if(resulti < 0) {
+    if(result == Py_None ) {
         return nullptr;
     }
+
+    void * resulti = makeXdmValueFromPythonObject(result);
 
     return  (void *)resulti;
 }

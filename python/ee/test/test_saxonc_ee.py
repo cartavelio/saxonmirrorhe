@@ -104,10 +104,11 @@ def testXquery_40_functions_error(saxonproc):
 
 
 
-def user_function(saxonproc, values):
+def user_function(values, **kwargs):
     ''' values: PyXdmValue '''
     print("In python user function")
-    #saxonproc = PySaxonProcessor()
+
+    saxonproc = kwargs['processor']
     print(values)
     n_value  = values[0].head.integer_value + 2
     print(n_value)
@@ -120,6 +121,22 @@ def user_function(saxonproc, values):
         print(err)
         return None
 
+def float_value_test(value, **kwargs):
+
+    try:
+        saxonproc = kwargs['processor']
+        valuex= saxonproc.make_float_value(value/100)
+        print('print Value=', valuex)
+        return valuex
+    except Exception as err:
+        print(err)
+        return None
+
+
+def list_example(value_str, **kwargs):
+    fruits = ["apple", "banana", "cherry"]
+    fruits.insert(1, str(value_str))
+    return fruits
 
 def testUserFunction():
     proc = saxoncee.PySaxonProcessor(license=True)
@@ -131,7 +148,7 @@ def testUserFunction():
                                                                              "      ],"
                                                                              "      \"arity\": [1]"
                                                                              "    }"
-                                                                             "}", use_python_types=False, pass_processor=True)
+                                                                             "}", use_python_types=False)
         #add flag to prevent auto converted values
 
         xpath_processor = proc.new_xpath_processor()
@@ -141,6 +158,57 @@ def testUserFunction():
 
         assert result is not None
         assert result == 5
+    except Exception as err:
+        print(err)
+        assert False
+
+def testUserFunctionWithFloat():
+    proc = saxoncee.PySaxonProcessor(license=True)
+    try:
+        proc.register_user_function("http://www.float.com", float_value_test, "{ \"float_value_test\": {"
+                                                                            "      \"as\": \"xs:float\","
+                                                                            "      \"param\": ["
+                                                                            "        \"xs:float\""
+                                                                            "      ],"
+                                                                            "      \"arity\": [1]"
+                                                                            "    }"
+                                                                            "}", use_python_types=True)
+        #add flag to prevent auto converted values
+
+        xpath_processor = proc.new_xpath_processor()
+        xpath_processor.declare_namespace("fr", "http://www.float.com")
+
+        result = xpath_processor.evaluate_single("fr:float_value_test(55.2)")
+
+        assert result is not None
+        print(result.head.double_value)
+        assert result.head.double_value == 0.5519999861717224
+    except saxoncee.PySaxonApiError as err:
+        print(err.args)
+        raise err
+
+
+def testUserFunctionWithLists():
+    proc = saxoncee.PySaxonProcessor(license=True)
+    try:
+        proc.register_user_function("http://www.fruits.com", list_example, "{ \"list_example\": {"
+                                                                             "      \"as\": \"xs:string\","
+                                                                             "      \"param\": ["
+                                                                             "        \"xs:string\""
+                                                                             "      ],"
+                                                                             "      \"arity\": [1]"
+                                                                             "    }"
+                                                                             "}", use_python_types=False)
+
+        xpath_processor = proc.new_xpath_processor()
+        xpath_processor.declare_namespace("fr", "http://www.fruits.com")
+
+        result = xpath_processor.evaluate_single("fr:list_example('strawberry')")
+
+        assert result is not None
+        assert result.is_array
+        assert result.get_array_value().as_list()[0] == 'apple'
+        assert result.get_array_value().as_list()[1] == 'strawberry'
     except Exception as err:
         print(err)
         assert False
