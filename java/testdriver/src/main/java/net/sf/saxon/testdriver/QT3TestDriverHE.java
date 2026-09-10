@@ -292,6 +292,8 @@ public class QT3TestDriverHE extends TestDriver {
                 return inverse;
             } else if ("directory-as-collection-uri".equals(value)) {
                 return !inverse;
+            } else if ("expath-file".equals(value)) {
+                return !inverse;
             } else if ("higherOrderFunctions".equals(value)) {
                 return !inverse;
             } else if ("olson-timezone".equals(value)) {
