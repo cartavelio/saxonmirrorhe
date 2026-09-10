@@ -9,11 +9,13 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -68,6 +70,13 @@ public class CollatingFunctionFree extends SystemFunction {
                 visitor.getStaticContext().issueWarning(
                         "Cannot resolve relative collation URI " + coll, SaxonErrorCode.SXWN9034, c.getLocation());
             }
+            CollatingFunctionFixed fn = bindCollation(coll);
+            Expression[] newArgs = new Expression[arguments.length - 1];
+            System.arraycopy(arguments, 0, newArgs, 0, newArgs.length);
+            return fn.makeFunctionCall(newArgs);
+        } else if (Literal.isEmptySequence(c)) {
+            // allowed in 4.0
+            String coll = visitor.getStaticContext().getDefaultCollationName();
             CollatingFunctionFixed fn = bindCollation(coll);
             Expression[] newArgs = new Expression[arguments.length - 1];
             System.arraycopy(arguments, 0, newArgs, 0, newArgs.length);
@@ -132,7 +141,14 @@ public class CollatingFunctionFree extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
         int c = getCollationArgument();
-        String collation = args[c].head().getStringValue();
+        Item collArg = args[c].head();
+        String collation;
+        if (collArg == null) {
+            // allowed in 4.0
+            collation = getRetainedStaticContext().getDefaultCollationName();
+        } else {
+            collation = collArg.getStringValue();
+        }
         collation = expandCollationURI(collation, getRetainedStaticContext().getStaticBaseUri());
         CollatingFunctionFixed fixed = bindCollation(collation);
         Sequence[] retainedArgs = new Sequence[args.length - 1];
