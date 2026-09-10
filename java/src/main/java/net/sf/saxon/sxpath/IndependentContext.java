@@ -200,7 +200,7 @@ public class IndependentContext extends AbstractStaticContext
     }
 
     /**
-     * Declares all the namespaces that are in-scope for a given node, removing all previous
+     * Declares all the namespaces that are in-scope for a supplied node, removing all previous
      * namespace declarations.
      * In addition, the standard namespaces (xml, xslt, saxon) are declared. This method also
      * sets the default element namespace to be the same as the default namespace for this node.
@@ -211,6 +211,7 @@ public class IndependentContext extends AbstractStaticContext
 
     public void setNamespaces(NodeInfo node) {
         namespaces.clear();
+        externalResolver = null;
         int kind = node.getNodeKind();
         if (kind == Type.ATTRIBUTE || kind == Type.TEXT ||
                 kind == Type.COMMENT || kind == Type.PROCESSING_INSTRUCTION ||
