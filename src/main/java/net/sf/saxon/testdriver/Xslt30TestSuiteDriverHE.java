@@ -1427,12 +1427,17 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             case "unicode-version":
                 return value.equals("6.0"); // Avoid running Unicode 9.0 tests - they are slow!
 
-            case "default_html_version": {
+            case "default_html_version":
                 return value.equals("5");
-            }
+                
+            case "platform":  // saxon:platform
+                if ("J".equals(value)) {
+                    return !inverse;
+                }
+                return inverse;
 
             default:
-                println("**** dependency not recognized for HE: " + type);
+                println("**** dependency not recognized for HE: " + dependency.getNodeName().getEQName());
                 return false;
         }
     }
