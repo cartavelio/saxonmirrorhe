@@ -161,19 +161,15 @@
 	
 	
 	<xsl:template match="datatype/name" mode="xref" priority="150">		
-		<a href="#{int:format-datatype-id(parent::datatype/@id)}" class="bodylink{if (int:is-new(parent::datatype) = true()) then ' qt4' else ()}"><xsl:next-match /></a>
+		<a href="#{int:format-datatype-id(parent::datatype/@id)}" class="bodylink"><xsl:next-match /></a>
 	</xsl:template>
 	
-	
-	<xsl:template match="datatype/name" mode="#default" priority="50">
-		<xsl:if test="int:is-new(parent::datatype) = true()">
-			<xsl:attribute name="class" select="'qt4'" />
-		</xsl:if>
-		<xsl:next-match />
-	</xsl:template>
 	
 	<xsl:template match="datatype/name" mode="#all">
-		<code><xsl:apply-templates /></code>
+		<code><xsl:if test="int:is-new(parent::datatype) = true()">
+				<xsl:attribute name="class" select="'qt4'" />
+			</xsl:if>
+			<xsl:apply-templates /></code>
 	</xsl:template>
 	
 	
@@ -222,7 +218,9 @@
 	
 	<xsl:template match="node()">
 		<xsl:copy>
-			<xsl:apply-templates select="@*, node()" />
+			<xsl:if test="not(self::attribute())">
+				<xsl:apply-templates select="@*, node()" />
+			</xsl:if>
 		</xsl:copy>
 	</xsl:template>
 	

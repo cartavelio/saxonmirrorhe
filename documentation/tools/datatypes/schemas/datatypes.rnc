@@ -51,7 +51,7 @@ att.category-name = attribute name {
 	enum.categories.xpath.colloquial
 } 
 
-enum.categories.xsd.top-level = ("Schema (XSD)" | "Schema (XDM)" | "Special (XSD)"  | "Special (XPath)" | "Primitive" | "Ordinary" | "Item" | "XDM")
+enum.categories.xsd.top-level = ("Schema (XSD)" | "Schema (XDM)" | "Special (XSD)"  | "Special (XPath)" | "Primitive" | "Ordinary" | "Item (XPath)" | "XDM")
 enum.categories.xsd.atomicity = ("Generalized Atomic (XPath)" | "Atomic" | "List" | "Union")
 enum.categories.xpath.colloquial = ("date/time" | "Numeric" | "Abstract (XSD)" | "Abstract (XPath)" | "Namespace-sensitive (XPath)")
 

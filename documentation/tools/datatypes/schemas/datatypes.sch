@@ -68,11 +68,11 @@
 	<sch:pattern>
 		<sch:title>Comparison family</sch:title>
 		
-		<sch:rule context="datatype[category/type/@name = 'Item'][not(category/type/@name[starts-with(., 'Abstract')])]/comparison-family">
+		<sch:rule context="datatype[category/type/@name = 'Item (XPath)'][not(category/type/@name[starts-with(., 'Abstract')])]/comparison-family">
 			<sch:assert role="warning" test=". != ''">Missing comparison family for <sch:value-of select="parent::*/name"/></sch:assert>			
 		</sch:rule>
 		
-		<sch:rule context="datatype[not(category/type/@name = 'Item') or (category/type/@name = 'Item' and category/type/@name[starts-with(., 'Abstract')])]/comparison-family[. != '']">
+		<sch:rule context="datatype[not(category/type/@name = 'Item (XPath)') or (category/type/@name = 'Item (XPath)' and category/type/@name[starts-with(., 'Abstract')])]/comparison-family[. != '']">
 			<sch:assert role="error" test=". != ''">Unexpected comparison family for <sch:value-of select="parent::*/name"/></sch:assert>			
 		</sch:rule>
 	</sch:pattern>
@@ -196,7 +196,7 @@
 	<sch:pattern is-a="list-membership">
 		<sch:title>Item</sch:title>
 		
-		<sch:param name="list-name" value="'Item'" />
+		<sch:param name="list-name" value="'Item (XPath)'" />
 		<sch:param name="list-members" value="($xpath-item-types)" />
 		<sch:param name="source-id" value="'xpath-40-matching-item'" />
 		
