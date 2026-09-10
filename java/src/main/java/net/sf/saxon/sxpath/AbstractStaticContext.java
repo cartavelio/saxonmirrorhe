@@ -172,23 +172,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      */
    // @Override
     public void declarePrologNamespace(String prefix, NamespaceUri uri) throws XPathException {
-        if (prefix == null) {
-            throw new NullPointerException("Null prefix supplied to declarePrologNamespace()");
-        }
-        if (uri == null) {
-            throw new NullPointerException("Null namespace URI supplied to declarePrologNamespace()");
-        }
-        if (prefix.equals("xml") != uri.equals(NamespaceUri.XML)) {
-            throw new XPathException("Invalid declaration of the XML namespace", "XQST0070");
-        }
-        if (prologNamespaces.getNamespaceUri(prefix) != null) {
-            throw new XPathException("Duplicate declaration of namespace prefix \"" + prefix + '"', "XQST0033");
-        } else {
-            prologNamespaces = prologNamespaces.put(prefix, uri);
-        }
-        if (prefix.isEmpty()) {
-            defaultElementNamespace = uri;
-        }
+        throw new UnsupportedOperationException("Cannot declare prolog namespaces on an immutable static context");
     }
 
     /**

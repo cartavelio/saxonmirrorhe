@@ -26,7 +26,12 @@ import net.sf.saxon.value.SequenceType;
 
 /**
  * A StaticContext contains the information needed while an expression or pattern
- * is being parsed. The information is also sometimes needed at run-time.
+ * is being parsed. The information is also sometimes needed at run-time. The StaticContext
+ * object can be used to parse multiple expressions, so in general it must be immutable.
+ * The XPath 4.0 "declare namespace" mechanism, which modifies the static context for
+ * a single XPath expression is handled by an implementation {@link StaticContextOverlay}
+ * which handles the mutable parts of the static context and delegates everything else
+ * to an immutable implementation.
  */
 
 public interface StaticContext {

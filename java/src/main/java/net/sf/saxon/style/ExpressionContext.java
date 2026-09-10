@@ -43,7 +43,6 @@ public class ExpressionContext implements StaticContext {
     private final StructuredQName attributeName;
     private Location containingLocation = null;
     private RetainedStaticContext retainedStaticContext = null;
-    private NamespaceMap prologNamespaces = NamespaceMap.emptyMap();
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy = UnprefixedElementMatchingPolicy.UNSPECIFIED;
 
     /**
@@ -80,13 +79,7 @@ public class ExpressionContext implements StaticContext {
      */
     @Override
     public void declarePrologNamespace(String prefix, NamespaceUri uri) throws XPathException {
-        if (prefix.equals("xml") != (uri==NamespaceUri.XML)) {
-            throw new XPathException("Incorrect declaration of XML namespace", "XQST0070");
-        }
-        if (prologNamespaces.getNamespaceUri(prefix) != null) {
-            throw new XPathException("Duplicate namespace declaration", "XQST0033");
-        }
-        prologNamespaces = prologNamespaces.put(prefix, uri);
+        throw new UnsupportedOperationException("Cannot declare prolog namespaces on an immutable static context");
     }
 
     /**
@@ -214,9 +207,6 @@ public class ExpressionContext implements StaticContext {
     public NamespaceResolver getNamespaceResolver() {
         NamespaceMap map = element.getModuleRoot().getFixedNamespaces();
         map = map == null ? element.getAllNamespaces() : map;
-        if (!prologNamespaces.isEmpty()) {
-            map = map.putAll(prologNamespaces);
-        }
         return map;
     }
 
@@ -375,12 +365,6 @@ public class ExpressionContext implements StaticContext {
 
     @Override
     public NamespaceUri getDefaultElementNamespace() {
-        if (!prologNamespaces.isEmpty()) {
-            NamespaceUri uri = prologNamespaces.getNamespaceUri("");
-            if (uri != null) {
-                return uri;
-            }
-        }
         return element.getDefaultXPathNamespace();
     }
 
