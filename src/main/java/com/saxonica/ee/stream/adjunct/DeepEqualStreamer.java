@@ -7,11 +7,12 @@ import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.functions.CollatingFunctionFree;
-import net.sf.saxon.functions.DeepEqual;
+import net.sf.saxon.functions.DeepEqual40;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -74,6 +75,7 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
         AtomicComparer comparer;
         boolean done;
         boolean closed;
+        DeepEqual40.DeepEqualOptions options;
 
         public GroundedDeepEqualFeed(WatchManager watchManager, SystemFunctionCall exp,
                                      ItemFeed result, XPathContext context, int consumingArg) throws XPathException {
@@ -82,21 +84,33 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
             other = exp.getArg(1 - consumingArg).iterate(context);
             this.consumingArg = consumingArg;
             SystemFunctionCall call = (SystemFunctionCall) getExpression();
-            DeepEqual function;
-            if (call.isCallOn(CollatingFunctionFree.class)) {
-                CollatingFunctionFree fn = (CollatingFunctionFree)call.getTargetFunction();
-                String collation = call.getArg(2).evaluateAsString(context).toString();
-                try {
-                    function = (DeepEqual)fn.bindCollation(collation);
-                } catch (XPathException e) {
-                    dynamicError(e);
-                    done = true;
-                    return;
-                }
-            } else {
-                function = (DeepEqual) call.getTargetFunction();
+//            DeepEqual40 function;
+//            if (call.isCallOn(CollatingFunctionFree.class)) {
+//                CollatingFunctionFree fn = (CollatingFunctionFree)call.getTargetFunction();
+//                String collation = call.getArg(2).evaluateAsString(context).toString();
+//                try {
+//                    function = (DeepEqual40)fn.bindCollation(collation);
+//                } catch (XPathException e) {
+//                    dynamicError(e);
+//                    done = true;
+//                    return;
+//                }
+//            } else {
+//                function = (DeepEqual40) call.getTargetFunction();
+//            }
+            Expression collationArg = exp.getArg(2);
+            Item collationVal = collationArg.evaluateItem(context);
+            String collationName = collationVal == null
+                    ? call.getRetainedStaticContext().getDefaultCollationName()
+                    : collationVal.getStringValue();
+            Expression optionsArg = exp.getArg(3);
+            MapItem suppliedOptions = (MapItem)optionsArg.evaluateItem(context);
+            try {
+                options = new DeepEqual40.DeepEqualOptions(suppliedOptions, collationName, context);
+            } catch (XPathException e) {
+                dynamicError(e);
             }
-            comparer = function.getAtomicComparer(getContext());
+            //comparer = function.getAtomicComparer(getContext());
         }
 
         /**
@@ -110,20 +124,24 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
          */
         @Override
         public void append(Item item) throws XPathException {
-            if (!done) {
+            if (!done && !hasFailed()) {
                 Item otherItem = other.next();
-                if (otherItem == null ||
-                        !DeepEqual.deepEqual(
-                            SingletonIterator.makeIterator(item),
-                            SingletonIterator.makeIterator(otherItem),
-                            comparer, getContext(), 0)) {
-                    getNextOutputter().append(BooleanValue.FALSE);
-                    done = true;
-                    if (watchManager.allowsEarlyExit()) {
-                        closed = true;
-                        getNextOutputter().close();
-                        getTerminator().terminate();
+                try {
+                    if (otherItem == null ||
+                            !DeepEqual40.deepEqual(
+                                SingletonIterator.makeIterator(item),
+                                SingletonIterator.makeIterator(otherItem),
+                                getContext(), options)) {
+                        getNextOutputter().append(BooleanValue.FALSE);
+                        done = true;
+                        if (watchManager.allowsEarlyExit()) {
+                            closed = true;
+                            getNextOutputter().close();
+                            getTerminator().terminate();
+                        }
                     }
+                } catch (XPathException e) {
+                    dynamicError(e);
                 }
             }
         }
