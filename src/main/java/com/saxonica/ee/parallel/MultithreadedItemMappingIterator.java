@@ -121,6 +121,9 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
                 } else {
                     return out;
                 }
+            } catch (UncheckedXPathException e) {
+                service.shutdown();
+                throw e.getXPathException();
             } catch (XPathException e) {
                 service.shutdown();
                 throw e;

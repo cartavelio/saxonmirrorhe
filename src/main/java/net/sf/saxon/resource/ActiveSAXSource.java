@@ -12,6 +12,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceivingContentHandler;
 import net.sf.saxon.expr.number.Numberer_en;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -68,6 +69,7 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
 
     @Override
     public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+        ErrorHandler errorHandler = null;
         try {
             Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
             XMLReader parser = getXMLReader();
@@ -82,7 +84,7 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
             parser.setDTDHandler(rch);
             parser.setProperty("http://xml.org/sax/properties/lexical-handler", rch);
 
-            ErrorHandler errorHandler = parser.getErrorHandler();
+            errorHandler = parser.getErrorHandler();
             if (errorHandler == null) {
                 errorHandler = options.getErrorHandler();
                 if (errorHandler == null) {
@@ -213,13 +215,28 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
         } catch (XPathException xpe) {
             throw xpe;
         } catch (UncheckedXPathException uxpe) {
-            throw new XPathException(uxpe);
+            throw uxpe.getXPathException();
         } catch (SAXException err) {
             Exception nested = err.getException();
             if (nested instanceof XPathException) {
                 throw (XPathException) nested;
             } else if (nested instanceof RuntimeException) {
                 throw (RuntimeException) nested;
+            } else if (errorHandler instanceof StandardErrorHandler) {
+                // Bug 6257. The information notified by the XML parser to the ErrorHandler
+                // is much more usable than what we can get by wrapping the SAXException that
+                // is thrown on completion of a failed parse, so we use the former if available
+                StandardErrorHandler seh = (StandardErrorHandler) errorHandler;
+                ErrorReporter er = seh.getErrorReporter();
+                if (er instanceof StandardErrorReporter) {
+                    StandardErrorReporter ser = (StandardErrorReporter) er;
+                    XmlProcessingError latestError = ser.getLatestError();
+                    throw new XPathException(ser.getExpandedMessage(latestError)).withErrorCode(SaxonErrorCode.SXXP0003);
+                } else {
+                    XPathException de = new XPathException(err).withErrorCode(SaxonErrorCode.SXXP0003);
+                    de.setHasBeenReported(true);
+                    throw de;
+                }
             } else {
                 XPathException de = new XPathException(err).withErrorCode(SaxonErrorCode.SXXP0003);
                 de.setHasBeenReported(true);

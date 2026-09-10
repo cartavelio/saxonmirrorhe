@@ -136,5 +136,9 @@ public class StandardErrorHandler implements org.xml.sax.ErrorHandler {
     public int getFatalErrorCount() {
         return fatalErrorCount;
     }
+
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
+    }
 }
 

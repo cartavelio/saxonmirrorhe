@@ -31,6 +31,7 @@ import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.sxpath.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -39,7 +40,6 @@ import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
@@ -70,7 +70,6 @@ public class Gizmo {
     private boolean typed = false;
     private final List<DocumentImpl> undoBuffer = new LinkedList<>();
     private PrintStream sysOut = System.out;
-    private Schema currentSchema = null;
 
     private static class SubCommand {
         String name;
@@ -379,7 +378,11 @@ public class Gizmo {
                         throw new XPathException("\"Unknown command \" + cmd + \"");
                     }
                 } else {
-                    cmd.action.perform(new StringBuilder(remainder));
+                    try {
+                        cmd.action.perform(new StringBuilder(remainder));
+                    } catch (UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                 }
 
             } catch (XPathException e) {
@@ -847,7 +850,7 @@ public class Gizmo {
         }
         String fileName = buffer.toString();
         fileName = fileName.replaceFirst("^~", System.getProperty("user.home"));
-        currentSchema = config.loadSchema(new File(fileName).getAbsoluteFile().toURI().toString());
+        config.loadSchema(new File(fileName).getAbsoluteFile().toURI().toString());
     }
 
     private void set(StringBuilder buffer) throws XPathException {
@@ -894,16 +897,13 @@ public class Gizmo {
         if (!config.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION)) {
             throw new XPathException("Schema processing is not supported in this Saxon configuration");
         }
-        if (currentSchema == null) {
-            currentSchema = config.emptySchema();
-        }
         needCurrentDoc();
         saveCurrentDoc();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         Builder builder = new LinkedTreeBuilder(pipe, Durability.MUTABLE);
         builder.open();
         ParseOptions options = new ParseOptions().withSchemaValidationMode(Validation.STRICT);
-        Receiver val = currentSchema.getDocumentValidator(builder, currentDoc.getSystemId(), options, Loc.NONE);
+        Receiver val = config.getDocumentValidator(builder, currentDoc.getSystemId(), options, Loc.NONE);
         currentDoc.copy(val, CopyOptions.ALL_NAMESPACES, Loc.NONE);
         builder.close();
         currentDoc = (DocumentImpl)builder.getCurrentRoot();
