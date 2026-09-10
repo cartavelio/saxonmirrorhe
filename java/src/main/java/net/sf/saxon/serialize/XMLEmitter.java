@@ -99,7 +99,7 @@ public class XMLEmitter extends Emitter {
         specialInAtt['\n'] = true;
         specialInAtt['\t'] = true;
         specialInAtt['<'] = true;
-        specialInAtt['>'] = true;
+        //specialInAtt['>'] = true;
         specialInAtt['&'] = true;
         specialInAtt['\"'] = true;
 
@@ -483,14 +483,17 @@ public class XMLEmitter extends Emitter {
                 if (canonical) {
                     // Perversely, the namespace need not be a valid URI, but if it is a valid
                     // URI, it must not be relative
-                    try {
-                        URI uri = new URI(ns.getNamespaceUri().toString());
-                        if (!uri.isAbsolute()) {
-                            throw new XPathException("Canonical XML does not allow namespace URIs to be relative: "
-                                                             + ns.getNamespaceUri(), "SERE0024");
+                    String nsUri = ns.getNamespaceUri().toString();
+                    if (!nsUri.isEmpty()) {
+                        try {
+                            URI uri = new URI(nsUri);
+                            if (!uri.isAbsolute()) {
+                                throw new XPathException("Canonical XML does not allow namespace URIs to be relative: "
+                                                                 + nsUri, "SERE0024");
+                            }
+                        } catch (URISyntaxException err) {
+                            // no action
                         }
-                    } catch (URISyntaxException err) {
-                        // no action
                     }
                 }
                 namespace(ns.getPrefix(), ns.getNamespaceUri(), isFirst);

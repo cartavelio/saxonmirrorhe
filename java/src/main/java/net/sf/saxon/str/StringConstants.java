@@ -53,7 +53,7 @@ public class StringConstants {
     public static final byte[] ESCAPE_NL = bytes("&#xA;");
     public static final byte[] ESCAPE_CR = bytes("&#xD;");
     public static final byte[] ESCAPE_TAB = bytes("&#x9;");
-    public static final byte[] ESCAPE_QUOT = bytes("&#34;");
+    public static final byte[] ESCAPE_QUOT = bytes("&quot;");
     public static final byte[] ESCAPE_APOS = bytes("&#39;");
     public static final byte[] ESCAPE_NBSP = bytes("&nbsp;");
 

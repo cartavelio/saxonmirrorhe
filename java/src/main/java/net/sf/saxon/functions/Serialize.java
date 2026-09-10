@@ -18,6 +18,7 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.*;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -26,13 +27,10 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 
 import javax.xml.transform.OutputKeys;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -48,17 +46,14 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption("byte-order-mark", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("cdata-section-elements", listOfQNames, EmptySequence.INSTANCE);
         //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
-        op.addAllowedOption("canonical", SequenceType.SINGLE_BOOLEAN);
         op.addAllowedOption("doctype-public", SequenceType.SINGLE_STRING); //doctype-public-param-type pubid-char-string-type
         op.addAllowedOption("doctype-system", SequenceType.SINGLE_STRING); //doctype-system-param-type system-id-string-type
         op.addAllowedOption("encoding", SequenceType.SINGLE_STRING); //encoding-param-type encoding-string-type
-        op.addAllowedOption("escape-solidus", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("escape-uri-attributes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("html-version", SequenceType.SINGLE_DECIMAL); //decimal-param-type
         op.addAllowedOption("include-content-type", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        op.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+        op.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN);//yes-no-param-type
         op.addAllowedOption("item-separator", SequenceType.SINGLE_STRING); //string-param-type
-        op.addAllowedOption("json-lines", SequenceType.SINGLE_BOOLEAN);
         op.addAllowedOption("json-node-output-method", SequenceType.SINGLE_STRING);
         //json-node-output-method-param-type  json-node-output-method-type - xs:string or xs:QName
         op.addAllowedOption("media-type", SequenceType.SINGLE_STRING); //string-param-type
@@ -71,7 +66,7 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption("suppress-indentation", listOfQNames);
         //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
         op.addAllowedOption("undeclare-prefixes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        op.addAllowedOption("use-character-maps", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("use-character-maps", SequenceType.one(new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_STRING)));
         //use-character-maps-param-type
         op.addAllowedOption("version", SequenceType.SINGLE_STRING);
 
@@ -94,6 +89,15 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption(sx("spec-version"), SequenceType.SINGLE_STRING);
         op.addAllowedOption(sx("supply-source-locator"), SequenceType.SINGLE_BOOLEAN); //boolean
         op.addAllowedOption(sx("suppress-indentation"), listOfQNames); //boolean
+
+        if (version >= 40) {
+            op.addAllowedOption("canonical", SequenceType.SINGLE_BOOLEAN);
+            op.addAllowedOption("escape-solidus", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+            op.addAllowedOption("indent-attributes", SequenceType.SINGLE_BOOLEAN);//yes-no-param-type
+            op.addAllowedOption("indent-unit", SequenceType.SINGLE_STRING);
+            op.addAllowedOption("json-lines", SequenceType.SINGLE_BOOLEAN);
+            op.addAllowedOption("line-ending", SequenceType.SINGLE_STRING);
+        }
         return op;
     }
     
@@ -101,62 +105,62 @@ public class Serialize extends SystemFunction implements Callable {
         return "Q{" + NamespaceConstant.SAXON + "}" + s;
     }
 
-    private final static Map<String, SequenceType> requiredTypes = new HashMap<>(40);
+//    private final static Map<String, SequenceType> requiredTypes = new HashMap<>(40);
+//
+//    static {
+//        requiredTypes.put("allow-duplicate-names", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+//        requiredTypes.put("byte-order-mark", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+//        requiredTypes.put("cdata-section-elements", BuiltInAtomicType.QNAME.zeroOrMore());
+//        //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
+//        requiredTypes.put("canonical", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+//        requiredTypes.put("doctype-public", SequenceType.SINGLE_STRING); //doctype-public-param-type pubid-char-string-type
+//        requiredTypes.put("doctype-system", SequenceType.SINGLE_STRING); //doctype-system-param-type system-id-string-type
+//        requiredTypes.put("encoding", SequenceType.SINGLE_STRING); //encoding-param-type encoding-string-type
+//        requiredTypes.put("escape-solidus", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+//        requiredTypes.put("escape-uri-attributes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+//        requiredTypes.put("html-version", SequenceType.SINGLE_DECIMAL); //decimal-param-type
+//        requiredTypes.put("include-content-type", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+//        requiredTypes.put("indent", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+//        requiredTypes.put("item-separator", SequenceType.SINGLE_STRING); //string-param-type
+//        requiredTypes.put("json-lines", SequenceType.SINGLE_BOOLEAN);
+//        requiredTypes.put("json-node-output-method", SequenceType.SINGLE_STRING);
+//        //json-node-output-method-param-type  json-node-output-method-type - xs:string or xs:QName
+//        requiredTypes.put("media-type", SequenceType.SINGLE_STRING); //string-param-type
+//        requiredTypes.put("method", SequenceType.SINGLE_STRING);
+//        //method-param-type method-type - xs:string or xs:QName
+//        requiredTypes.put("normalization-form", SequenceType.SINGLE_STRING);
+//        //NMTOKEN-param-type  BuiltInAtomicType.NMTOKEN
+//        requiredTypes.put("omit-xml-declaration", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+//        requiredTypes.put("standalone", SequenceType.OPTIONAL_BOOLEAN); //yes-no-omit-type
+//        requiredTypes.put("suppress-indentation", BuiltInAtomicType.QNAME.zeroOrMore());
+//        //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
+//        requiredTypes.put("undeclare-prefixes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
+//        requiredTypes.put("use-character-maps", SequenceType.one(new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_STRING)));
+//        //use-character-maps-param-type
+//        requiredTypes.put("version", SequenceType.SINGLE_STRING); //string-param-type
+//    }
 
-    static {
-        requiredTypes.put("allow-duplicate-names", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("byte-order-mark", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("cdata-section-elements", BuiltInAtomicType.QNAME.zeroOrMore());
-        //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
-        requiredTypes.put("canonical", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("doctype-public", SequenceType.SINGLE_STRING); //doctype-public-param-type pubid-char-string-type
-        requiredTypes.put("doctype-system", SequenceType.SINGLE_STRING); //doctype-system-param-type system-id-string-type
-        requiredTypes.put("encoding", SequenceType.SINGLE_STRING); //encoding-param-type encoding-string-type
-        requiredTypes.put("escape-solidus", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("escape-uri-attributes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("html-version", SequenceType.SINGLE_DECIMAL); //decimal-param-type
-        requiredTypes.put("include-content-type", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("indent", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("item-separator", SequenceType.SINGLE_STRING); //string-param-type
-        requiredTypes.put("json-lines", SequenceType.SINGLE_BOOLEAN);
-        requiredTypes.put("json-node-output-method", SequenceType.SINGLE_STRING);
-        //json-node-output-method-param-type  json-node-output-method-type - xs:string or xs:QName
-        requiredTypes.put("media-type", SequenceType.SINGLE_STRING); //string-param-type
-        requiredTypes.put("method", SequenceType.SINGLE_STRING);
-        //method-param-type method-type - xs:string or xs:QName
-        requiredTypes.put("normalization-form", SequenceType.SINGLE_STRING);
-        //NMTOKEN-param-type  BuiltInAtomicType.NMTOKEN
-        requiredTypes.put("omit-xml-declaration", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("standalone", SequenceType.OPTIONAL_BOOLEAN); //yes-no-omit-type
-        requiredTypes.put("suppress-indentation", BuiltInAtomicType.QNAME.zeroOrMore());
-        //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
-        requiredTypes.put("undeclare-prefixes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("use-character-maps", SequenceType.SINGLE_MAP);
-        //use-character-maps-param-type
-        requiredTypes.put("version", SequenceType.SINGLE_STRING); //string-param-type
-    }
-
-    private final static Map<String, SequenceType> requiredTypesSaxon = new HashMap<>(20);
-
-    static {
-        requiredTypesSaxon.put("attribute-order", BuiltInAtomicType.QNAME.zeroOrMore());
-        requiredTypesSaxon.put("canonical", SequenceType.SINGLE_BOOLEAN);
-        //eqnames
-        requiredTypesSaxon.put("character-representation", SequenceType.SINGLE_STRING); //string
-        requiredTypesSaxon.put("double-space", BuiltInAtomicType.QNAME.zeroOrMore());
-        //eqnames
-        requiredTypesSaxon.put("indent-spaces", SequenceType.SINGLE_INTEGER); //integer
-        requiredTypesSaxon.put("line-length", SequenceType.SINGLE_INTEGER); //integer
-        requiredTypesSaxon.put("newline", SequenceType.SINGLE_STRING);
-        //requiredTypes.put("next-in-chain", SequenceType.SINGLE_STRING); //uri
-        requiredTypesSaxon.put("recognize-binary", SequenceType.SINGLE_BOOLEAN); //boolean
-        requiredTypesSaxon.put("require-well-formed", SequenceType.SINGLE_BOOLEAN); //boolean
-        requiredTypesSaxon.put("single-quotes", SequenceType.SINGLE_BOOLEAN);
-        requiredTypesSaxon.put("spec-version", SequenceType.SINGLE_STRING);//boolean
-        requiredTypesSaxon.put("supply-source-locator", SequenceType.SINGLE_BOOLEAN); //boolean
-        requiredTypesSaxon.put("suppress-indentation", BuiltInAtomicType.QNAME.zeroOrMore());
-        //eqnames
-    }
+//    private final static Map<String, SequenceType> requiredTypesSaxon = new HashMap<>(20);
+//
+//    static {
+//        requiredTypesSaxon.put("attribute-order", BuiltInAtomicType.QNAME.zeroOrMore());
+//        requiredTypesSaxon.put("canonical", SequenceType.SINGLE_BOOLEAN);
+//        //eqnames
+//        requiredTypesSaxon.put("character-representation", SequenceType.SINGLE_STRING); //string
+//        requiredTypesSaxon.put("double-space", BuiltInAtomicType.QNAME.zeroOrMore());
+//        //eqnames
+//        requiredTypesSaxon.put("indent-spaces", SequenceType.SINGLE_INTEGER); //integer
+//        requiredTypesSaxon.put("line-length", SequenceType.SINGLE_INTEGER); //integer
+//        requiredTypesSaxon.put("newline", SequenceType.SINGLE_STRING);
+//        //requiredTypes.put("next-in-chain", SequenceType.SINGLE_STRING); //uri
+//        requiredTypesSaxon.put("recognize-binary", SequenceType.SINGLE_BOOLEAN); //boolean
+//        requiredTypesSaxon.put("require-well-formed", SequenceType.SINGLE_BOOLEAN); //boolean
+//        requiredTypesSaxon.put("single-quotes", SequenceType.SINGLE_BOOLEAN);
+//        requiredTypesSaxon.put("spec-version", SequenceType.SINGLE_STRING);//boolean
+//        requiredTypesSaxon.put("supply-source-locator", SequenceType.SINGLE_BOOLEAN); //boolean
+//        requiredTypesSaxon.put("suppress-indentation", BuiltInAtomicType.QNAME.zeroOrMore());
+//        //eqnames
+//    }
 
 
     // Convert a boolean value to a yes-no-type string.
@@ -192,8 +196,7 @@ public class Serialize extends SystemFunction implements Callable {
         Item item;
         StringBuilder stringVal = new StringBuilder();
         while ((item = iterator.next()) != null) {
-            if (item instanceof QNameValue) {
-                QNameValue qNameValue = (QNameValue) item;
+            if (item instanceof QNameValue qNameValue) {
                 stringVal.append(" Q{")
                         .append(qNameValue.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue())
                         .append('}')
@@ -241,7 +244,6 @@ public class Serialize extends SystemFunction implements Callable {
      */
 
     private static MapItem checkCharacterMapOptions(MapItem map, XPathContext context) throws XPathException {
-        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         for (KeyValuePair pair : map.keyValuePairs()) {
             AtomicValue key = pair.key();
             if (!(key instanceof StringValue)) {
@@ -342,7 +344,7 @@ public class Serialize extends SystemFunction implements Callable {
         if ((seqVal = map.get("json-node-output-method")) != null) {
             props.setProperty("json-node-output-method", toMethodTypeString(seqVal));
         }
-        if ((seqVal = map.get(sx("line-ending"))) != null) {
+        if ((seqVal = map.get("line-ending")) != null) {
             props.setProperty("line-ending", seqVal.head().getStringValue());
         }
         if ((seqVal = map.get("media-type")) != null) {
@@ -416,6 +418,12 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if ((seqVal = map.get(sx("supply-source-locator"))) != null) {
             props.setProperty(SaxonOutputKeys.SUPPLY_SOURCE_LOCATOR, toYesNoTypeString(seqVal));
+        }
+        // TODO: some of this validation is redundant
+        SerializerFactory sf = context.getConfiguration().getSerializerFactory();
+        for (String key : props.stringPropertyNames()) {
+            String value = props.getProperty(key);
+            sf.checkOutputProperty(key, value);
         }
         return new SerializationProperties(props, charMapIndex);
     }

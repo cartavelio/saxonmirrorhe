@@ -213,8 +213,6 @@ public class XSLOutput extends StyleElement {
      * @param props          the list of properties to be updated
      * @param precedences    the import precedence of each property
      * @param thisPrecedence the import precedence of the declaration containing this value
-     * @throws net.sf.saxon.trans.XPathException
-     *          if an error occurs
      */
 
     private void checkAndPut(SerializerFactory sf, String property, String value, Properties props,

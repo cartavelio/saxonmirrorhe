@@ -32,8 +32,8 @@ import java.util.function.Supplier;
 public class CoercionRules {
 
 
-    private Configuration config;
-    private int version;
+    private final Configuration config;
+    private final int version;
 
 
 

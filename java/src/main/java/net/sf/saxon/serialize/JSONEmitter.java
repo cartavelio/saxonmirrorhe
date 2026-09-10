@@ -52,8 +52,7 @@ public class JSONEmitter {
     private boolean isJsonLines;
     private Twine8 endOfLine = Twine8.NEWLINE;
     private int indentCharCount = 2;
-    private char indentChar = 2;
-    private int maxLineLength;
+    private char indentChar = ' ';
     private boolean first = true;
     private boolean afterKey = false;
     private int level;
@@ -117,14 +116,14 @@ public class JSONEmitter {
         canonicalEscapeOptions = new JsonReceiver.EscapeOptions(
                 false, true, false, IntPredicateLambda.of(c -> c < 31));
 
-        String max = details.getProperty(SaxonOutputKeys.LINE_LENGTH);
-        if (max != null) {
-            try {
-                maxLineLength = Integer.parseInt(max);
-            } catch (NumberFormatException err) {
-                // ignore the error.
-            }
-        }
+//        String max = details.getProperty(SaxonOutputKeys.LINE_LENGTH);
+//        if (max != null) {
+//            try {
+//                maxLineLength = Integer.parseInt(max);
+//            } catch (NumberFormatException err) {
+//                // ignore the error.
+//            }
+//        }
         String spaces = details.getProperty(SaxonOutputKeys.INDENT_SPACES);
         if (spaces != null) {
             try {
@@ -387,7 +386,7 @@ public class JSONEmitter {
         emit(endOfLine);
     }
 
-    private UnicodeString escape(UnicodeString cs) throws XPathException {
+    private UnicodeString escape(UnicodeString cs) {
         Function<UnicodeString, UnicodeString> escaper =
                 canonical ? this::canonicalEscape : this::simpleEscape;
         if (characterMap != null) {
