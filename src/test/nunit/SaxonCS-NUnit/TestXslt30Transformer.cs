@@ -2334,5 +2334,6 @@ namespace SaxonCS_NUnit {
             Assert.AreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?>10:00", sw.ToString());
         }
         
+        
     }
 }
