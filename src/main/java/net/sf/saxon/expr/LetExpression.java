@@ -117,7 +117,7 @@ public class LetExpression extends Assignation
 
     public void supplyFeedback(MemoClosure.MemoClosureStatistics statistics) {
         // Note, does thread-unsafe updates to the statistics
-        if (evaluator.getCode() == Evaluators.MAKE_MEMO_CLOSURE) {
+        if (evaluator.getCode() == Evaluators.MAKE_MEMO_CLOSURE && !needsLazyEvaluation) {
             if (statistics.allRead) {
                 completed++;
             } else {

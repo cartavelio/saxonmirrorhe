@@ -17,10 +17,7 @@ import net.sf.saxon.trans.*;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -224,10 +221,10 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     // If the argument contains calls to position(), last(), regex-group(), current-group(),
                     // current-merge-group(), etc, then in general we can't save the values in a Closure
                     // so we need to evaluate the argument eagerly. (Tests position-0103, merge-096).
-                    argumentEvaluators[i] = new Evaluator.EagerSequence();
+                    argumentEvaluators[i] = Evaluator.EagerSequence.INSTANCE;
                 } else if (!Cardinality.allowsMany(arg.getCardinality()) && arg.getCost() < 20) {
                     // the argument is cheap to evaluate and doesn't use much memory...
-                    argumentEvaluators[i] = new Evaluator.EagerSequence();
+                    argumentEvaluators[i] = Evaluator.EagerSequence.INSTANCE;
                 } else if (cardinality == StaticProperty.ALLOWS_ZERO_OR_ONE) {
                     argumentEvaluators[i] = Evaluator.OptionalItem.INSTANCE;
                 } else if (arg instanceof Block && ((Block) arg).isCandidateForSharedAppend()) {
@@ -240,7 +237,8 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     // appending to the sequence.
                     argumentEvaluators[i] = Evaluator.SharedAppend.INSTANCE;
                 } else {
-                    argumentEvaluators[i] = Evaluator.MemoClosureEvaluator.INSTANCE;
+                    argumentEvaluators[i] = new Evaluator.MemoClosureEvaluator(
+                            new ArgumentEvaluationModeAdjuster(this, i));
                 }
             }
             i++;
@@ -249,6 +247,35 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
 
     public Evaluator[] getArgumentEvaluators() {
         return argumentEvaluators;
+    }
+
+    public static class ArgumentEvaluationModeAdjuster implements MemoClosure.MemoClosureStatisticsGatherer {
+
+        private final UserFunctionCall functionCall;
+        private final int argument;
+        private int completed;
+        private int abandoned;
+
+        public ArgumentEvaluationModeAdjuster(UserFunctionCall functionCall, int argument) {
+            this.functionCall = functionCall;
+            this.argument = argument;
+        }
+
+        @Override
+        public void supplyFeedback(MemoClosure.MemoClosureStatistics statistics) {
+            if (functionCall.argumentEvaluators[argument].getCode() == Evaluators.MAKE_MEMO_CLOSURE) {
+                if (statistics.allRead) {
+                    completed++;
+                } else {
+                    abandoned++;
+                }
+                if (completed > 10 && abandoned == 0) {
+                    //System.err.println("Argument evaluator set to eager");
+                    functionCall.argumentEvaluators[argument] = Evaluator.EagerSequence.INSTANCE;
+                }
+            }
+        }
+
     }
 
 
@@ -655,9 +682,11 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 eval = Evaluator.EagerSequence.INSTANCE;
             }
             actualArgs[i] = eval.evaluate(getArg(i), c);
-
             if (actualArgs[i] == null) {
                 actualArgs[i] = EmptySequence.getInstance();
+            }
+            if (eval instanceof Evaluator.MemoClosureEvaluator && actualArgs[i] instanceof MemoClosure) {
+                ((MemoClosure)actualArgs[i]).setBindingExpression(((Evaluator.MemoClosureEvaluator)eval).statisticsGatherer);
             }
         }
         return actualArgs;

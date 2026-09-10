@@ -288,7 +288,12 @@ public abstract class Evaluator {
     public final static class MemoClosureEvaluator extends Evaluator {
         public final static MemoClosureEvaluator INSTANCE = new MemoClosureEvaluator();
 
+        public MemoClosure.MemoClosureStatisticsGatherer statisticsGatherer = null;
         public MemoClosureEvaluator() {
+        }
+
+        public MemoClosureEvaluator(MemoClosure.MemoClosureStatisticsGatherer statisticsGatherer) {
+            this.statisticsGatherer = statisticsGatherer;
         }
 
         @Override

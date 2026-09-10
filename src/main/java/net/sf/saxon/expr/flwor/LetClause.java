@@ -55,7 +55,7 @@ public class LetClause extends Clause implements MemoClosure.MemoClosureStatisti
                 abandoned++;
             }
             if (completed > 10 && abandoned == 0) {
-                System.err.println("LetClause set to eager");
+                //System.err.println("LetClause set to eager");
                 evaluator = Evaluator.EagerSequence.INSTANCE;
                 variableEvaluator = evaluator.elaborate(getSequence());
             }

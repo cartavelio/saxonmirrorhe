@@ -17,6 +17,7 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.trans.rules.Rule;
@@ -276,6 +277,9 @@ public class XPathContextMajor extends XPathContextMinor {
 
     public void setOrigin(ContextOriginator expr) {
         origin = expr;
+        if (expr != null) {
+            Instrumentation.count(expr.getClass().getName());
+        }
     }
 
     /**
