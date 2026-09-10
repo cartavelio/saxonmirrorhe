@@ -753,11 +753,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
                     if environment.context_item is not None:
                         testxqc.set_context(xdm_item=environment.context_item)
-                    print(exp)
                     result = testxqc.run_query_to_value(query_text=exp)
-
-                    print(result)
-                    exit(0)
                 else:
                     test_report.write_test_case_element(str(test_name), "notRun", None)
                     not_run += 1

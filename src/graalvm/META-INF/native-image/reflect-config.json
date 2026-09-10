@@ -23,6 +23,14 @@
   "name":"com.saxonica.config.ProfessionalConfiguration",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
+ {
+    "name":"com.ibm.icu.text.RuleBasedCollator",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+     "name":"com.ibm.icu.text.RuleBasedNumberFormat",
+     "methods":[{"name":"<init>","parameterTypes":[] }]
+   },
 {
   "name":"net.sf.saxon.Configuration",
   "methods":[{"name":"<init>","parameterTypes":[] }]

@@ -3,40 +3,10 @@
   "includes":[
     {
       "pattern":"\\Qcom/ibm/icu/ICUConfig.properties\\E"
-    }, 
+    },
     {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/curr/en.res\\E"
-    }, 
-    {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/curr/pool.res\\E"
-    }, 
-    {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/curr/root.res\\E"
-    }, 
-    {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/curr/supplementalData.res\\E"
-    }, 
-    {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/en.res\\E"
-    }, 
-    {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/numberingSystems.res\\E"
-    }, 
-    {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/plurals.res\\E"
-    }, 
-    {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/pool.res\\E"
-    }, 
-    {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/rbnf/en.res\\E"
-    }, 
-    {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/rbnf/root.res\\E"
-    }, 
-    {
-      "pattern":"\\Qcom/ibm/icu/impl/data/icudt59b/root.res\\E"
-    }, 
+      "pattern": "com/ibm/icu/.*/*.*res$"
+    },
     {
       "pattern":"\\Qnet/sf/saxon/data/categories.xml\\E"
     },
