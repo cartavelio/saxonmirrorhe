@@ -26,14 +26,14 @@ import java.util.Map;
 import java.util.zip.CRC32;
 
 /**
- * This class implements the function fn:sort-with#2, introduced in XPath 4.0
+ * This class implements the function fn:hash(), introduced in XPath 4.0
  */
 
 public class HashFn extends SystemFunction {
 
     public static OptionsParameter getOptionDetails() {
         OptionsParameter details = new OptionsParameter(40);
-        details.addAllowedOption("algorithm", SequenceType.SINGLE_STRING, StringValue.bmp("MD5"));
+        //details.addAllowedOption("algorithm", SequenceType.SINGLE_STRING, StringValue.bmp("MD5"));
         return details;
     }
 
@@ -59,16 +59,23 @@ public class HashFn extends SystemFunction {
             } else {
                 binaryInput = ((BinaryValue)input).getBinaryValue();
             }
-            MapItem options = null;
+            String algorithm = "MD5";
             if (arguments.length > 1) {
-                options = (MapItem)arguments[1].head();
+                StringValue algorithmArg = (StringValue)arguments[1].head();
+                if (algorithmArg != null) {
+                    algorithm = algorithmArg.getStringValue();
+                }
+            }
+            MapItem options = null;
+            if (arguments.length > 2) {
+                options = (MapItem)arguments[2].head();
             }
             if (options == null) {
                 options = new DictionaryMap();
             }
             Map<String, GroundedValue> checkedOptions =
                     getDetails().optionDetails.processSuppliedOptions(options, context);
-            String algorithm = checkedOptions.get("algorithm").getStringValue().trim().toUpperCase();
+            //String algorithm = checkedOptions.get("algorithm").getStringValue().trim().toUpperCase();
             if (algorithm.equals("CRC-32")) {
                 return crc32(binaryInput);
             }
