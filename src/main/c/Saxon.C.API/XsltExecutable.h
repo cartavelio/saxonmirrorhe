@@ -377,7 +377,7 @@ public:
     */
     const char* callTemplateReturningString(const char* templateName=nullptr);
 
-    //! Invoke a transformation by calling a named template and return result as a XdmValue.
+    //! Invoke a transformation by calling a named template and return result as an XdmValue.
     /** The results of calling the template are wrapped in a document node, which is then returned as an XdmValue.
     * If setInitialTemplateParameters(std::Map, boolean) has been
     * called, then the parameters supplied are made available to the called template (no error
