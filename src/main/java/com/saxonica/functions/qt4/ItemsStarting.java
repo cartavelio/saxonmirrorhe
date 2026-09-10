@@ -6,6 +6,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.Int64Value;
 
 /**
  * This class supports the two extension functions saxon:items-from and saxon:items-after,
@@ -68,23 +69,40 @@ public abstract class ItemsStarting extends SystemFunction {
         private final boolean inclusive;
         private final XPathContext context;
         private boolean started;
+        private int position;
+        private int arity;
 
         StartingIterator(SequenceIterator in, FunctionItem start, boolean inclusive, XPathContext context) {
             this.baseIterator = in;
             this.start = start;
             this.inclusive = inclusive;
             this.context = context;
+            this.position = 0;
+            arity = start.getArity();
         }
 
         @Override
         public Item next() {
             Item item;
             while ((item = baseIterator.next()) != null) {
+                position++;
                 if (started) {
                     return item;
                 }
                 try {
-                    BooleanValue matches = (BooleanValue) start.call(context, SequenceTool.fromItems(item)).head();
+                    BooleanValue matches;
+                    switch (arity) {
+                        case 0:
+                            matches = (BooleanValue) start.call(context, new Sequence[]{}).head();
+                            break;
+                        case 1:
+                            matches = (BooleanValue) start.call(context, new Sequence[]{item}).head();
+                            break;
+                        case 2:
+                        default:
+                            matches = (BooleanValue) start.call(context, new Sequence[]{item, new Int64Value(position)}).head();
+                            break;
+                    }
                     if (matches.getBooleanValue()) {
                         started = true;
                         if (inclusive) {

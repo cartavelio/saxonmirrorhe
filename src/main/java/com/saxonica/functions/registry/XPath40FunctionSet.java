@@ -232,7 +232,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("items-after", 2, e -> e.populate(ItemsStarting.ItemsAfter::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null));
+                .arg(1, predicate2, ONE, null));
 
         register("items-at", 2, e -> e.populate(ItemsAt::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance())
@@ -240,15 +240,15 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("items-before", 2, e -> e.populate(ItemsEnding.ItemsBefore::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null));
+                .arg(1, predicate2, ONE, null));
 
         register("items-ending-where", 2, e -> e.populate(ItemsEnding.ItemsUntil::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null));
+                .arg(1, predicate2, ONE, null));
 
         register("items-starting-where", 2, e -> e.populate(ItemsStarting.ItemsFrom::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null));
+                .arg(1, predicate2, ONE, null));
 
         SpecificFunctionType valuePredicate = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
