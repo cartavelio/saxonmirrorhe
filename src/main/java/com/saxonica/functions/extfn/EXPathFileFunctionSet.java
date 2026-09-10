@@ -1,5 +1,6 @@
 package com.saxonica.functions.extfn;
 
+import net.sf.saxon.Query;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
@@ -1239,6 +1240,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     @CSharpReplaceBody(code="System.IO.File.Copy(sourceFile.getPath(), destFile.getPath(), true);")
     private static void copyFile(File sourceFile, File destFile) throws XPathException {
         try {
+            Query.createFileIfNecessary(destFile);
             Files.copy(sourceFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
         } catch (IOException e) {
             handleIOError(e);
