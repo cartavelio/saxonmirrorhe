@@ -362,6 +362,83 @@ public class TestXsltTracing {
         }
     }
 
+    @Test
+    public void testTraceRecover() {   // bug 6889
+
+        String xsl = "<xsl:stylesheet\n"
+                + "        xmlns:xsl   = \"http://www.w3.org/1999/XSL/Transform\"\n"
+                + "        xmlns:xs    = \"http://www.w3.org/2001/XMLSchema\"\n"
+                + "        xmlns:err   = \"http://www.w3.org/2005/xqt-errors\"\n"
+                + "\n"
+                + "        xmlns:l     = \"local:functions\"\n"
+                + "\n"
+                + "        expand-text = \"yes\"\n"
+                + "        exclude-result-prefixes = \"#all\"\n"
+                + "\n"
+                + "        version=\"3.0\" >\n"
+                + "\n"
+                + "    <xsl:template name=\"xsl:initial-template\" >\n"
+                + "        <out>\n"
+                + "            <xsl:try>\n"
+                + "                <xsl:call-template name=\"create-error\" />\n"
+                + "                <xsl:catch>\n"
+                + "                    <outer_caught>\n"
+                + "                        <xsl:sequence select=\"$err:description\" />\n"
+                + "                    </outer_caught>\n"
+                + "                </xsl:catch>\n"
+                + "            </xsl:try>\n"
+                + "        </out>\n"
+                + "    </xsl:template>\n"
+                + "\n"
+                + "    <xsl:template name=\"create-error\" as=\"element()\">\n"
+                + "        <xsl:try>\n"
+                + "            <error-attempt>\n"
+                + "                <xsl:sequence select=\"for $f in [ l:takesAnInt#1 ],\n"
+                + "                                      $a in (1 , 2, 3, 4, 5, 6, '7', '8', '9' )\n"
+                + "                                  return $f(1)($a)\" />\n"
+                + "            </error-attempt>\n"
+                + "            <xsl:catch>\n"
+                + "                <inner_caught>\n"
+                + "                    <xsl:sequence select=\"$err:description\" />\n"
+                + "                </inner_caught>\n"
+                + "            </xsl:catch>\n"
+                + "        </xsl:try>\n"
+                + "    </xsl:template>\n"
+                + "\n"
+                + "    <xsl:variable name=\"innerTakesAnInt\" as=\"function(*)\" select=\"l:innerTakesAnInt#1\" />\n"
+                + "\n"
+                + "    <xsl:function name=\"l:takesAnInt\" as=\"xs:boolean\" >\n"
+                + "        <xsl:param name=\"anInt\" as=\"item()\" />\n"
+                + "\n"
+                + "        <xsl:sequence select=\"$innerTakesAnInt($anInt)\" />\n"
+                + "    </xsl:function>\n"
+                + "\n"
+                + "    <xsl:function name=\"l:innerTakesAnInt\" as=\"xs:boolean\" >\n"
+                + "        <xsl:param name=\"anInt\" as=\"xs:integer\" />\n"
+                + "\n"
+                + "        <xsl:sequence select=\"$anInt instance of xs:integer\" />\n"
+                + "    </xsl:function>\n"
+                + "\n"
+                + "</xsl:stylesheet>";
+
+        try {
+            final Processor processor = new Processor(true);
+
+            processor.getUnderlyingConfiguration().setCompileWithTracing(true);
+            processor.getUnderlyingConfiguration().setTraceListener(new XSLTTraceListener());
+
+            final XsltExecutable xsltExecutable = processor.newXsltCompiler().compile(
+                    new StreamSource(new StringReader(xsl)));
+            final Xslt30Transformer xslt = xsltExecutable.load30();
+
+            final XdmValue output = xslt.callTemplate(null);
+
+            System.out.println(output.toString());
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
 
 }
 
