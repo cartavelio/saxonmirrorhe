@@ -28,12 +28,7 @@ import java.util.Stack;
  *
  */
 
-public class LinkedTreeBuilder extends Builder
-
-{
-//    private static AttributeCollectionImpl emptyAttributeCollection =
-//    				new AttributeCollectionImpl((Configuration)null);
-
+public class LinkedTreeBuilder extends Builder {
     /*@Nullable*/ private ParentNodeImpl currentNode;
     private NodeFactory nodeFactory;
     /*@NotNull*/ private int[] size = new int[100];          // stack of number of children for each open node
@@ -52,7 +47,6 @@ public class LinkedTreeBuilder extends Builder
     public LinkedTreeBuilder(PipelineConfiguration pipe) {
         super(pipe);
         nodeFactory = DefaultNodeFactory.THE_INSTANCE;
-        // System.err.println("new TreeBuilder " + this);
     }
 
     /**
@@ -66,7 +60,6 @@ public class LinkedTreeBuilder extends Builder
         super(pipe);
         this.durability = durability;
         nodeFactory = DefaultNodeFactory.THE_INSTANCE;
-        // System.err.println("new TreeBuilder " + this);
     }
 
     public void setDurability(Durability durability) {
@@ -137,7 +130,7 @@ public class LinkedTreeBuilder extends Builder
         depth = 0;
         size[depth] = 0;
         if (arrays == null) {
-            arrays = new ArrayList<NodeImpl[]>(20);
+            arrays = new ArrayList<>(20);
         }
         if (useEventLocation) {
             Object copier = getPipelineConfiguration().getComponent(CopyInformee.class.getName());
@@ -181,7 +174,6 @@ public class LinkedTreeBuilder extends Builder
 
     @Override
     public void endDocument() throws XPathException {
-        //System.err.println("End document depth=" + depth);
         currentNode.compact(size[depth]);
     }
 
@@ -191,7 +183,6 @@ public class LinkedTreeBuilder extends Builder
 
     @Override
     public void close() throws XPathException {
-        // System.err.println("TreeBuilder: " + this + " End document");
         if (currentNode == null) {
             return;    // can be called twice on an error path
         }
@@ -233,6 +224,11 @@ public class LinkedTreeBuilder extends Builder
         if (xmlId != null && Whitespace.containsWhitespace(StringTool.codePoints(xmlId.getValue()))) {
             suppliedAttributes = suppliedAttributes.put(new AttributeInfo(
                     xmlId.getNodeName(), xmlId.getType(), Whitespace.trim(xmlId.getValue()), xmlId.getLocation(), xmlId.getProperties()));
+        }
+
+        if (location.getSystemId() == null) {
+            // Bug 5800
+            location = new Loc(getSystemId(), location.getLineNumber(), location.getColumnNumber());
         }
 
         ElementImpl elem = nodeFactory.makeElementNode(
