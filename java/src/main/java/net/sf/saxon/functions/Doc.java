@@ -263,7 +263,7 @@ public class Doc extends SystemFunction implements Callable {
         parseOptions = parseOptions.withUseXsiSchemaLocation(checkedOptions.asBoolean("use-xsi-schema-location", false));
 
 
-        val = checkedOptions.get("xsd-validation");
+        GroundedValue val = checkedOptions.get("xsd-validation");
         boolean xsdValidating;
         if (val == null) {
             // In 3.1 we defaulted from the configuration values, in 4.0 it has to be explicit
