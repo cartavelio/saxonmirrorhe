@@ -1,12 +1,7 @@
-<<<<<<< HEAD
 <xsl:transform
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   version="3.0"
   expand-text="yes">
-=======
-<xsl:transform xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-               version="2.0">
->>>>>>> 3a2ab35f5 (Add tests for correct sample output; run samples with saxonc)
   
   <!-- This style sheet displays the books.xml file.  -->
   <!-- Rewritten in 2025 to use xsl:key instead of id()
