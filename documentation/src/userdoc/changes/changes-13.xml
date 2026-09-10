@@ -248,6 +248,14 @@ TODO: rethink redefines and override
     
     <category name="extensions">
         
+        <p>In the case of comparison operations for maps (for example, the change in 4.0 allowing
+        types <code>xs:base64Binary</code> and <code>xs:hexBinary</code> to be mutually compariable),
+        the 4.0 behavior is enabled by setting the static variable <code>Version.MAP_SPEC_VERSION = 40</code>.
+        It is not possible to configure this for an individual XQuery or XSLT compilation, or even
+        for a <code>Configuration</code>, because maps are designed to be fully interoperable between different XQuery
+        and XSLT tasks, and indeed across Configurations. The flag <code>Version.MAP_SPEC_VERSION</code>
+        should not be modified while there are maps in existence that were created with a different setting.</p>
+        
         <h2>New features from the 4.0 specifications</h2>
         
         <p><emph>References of the form </emph>PR nnnn <emph>refer to pull requests against the
