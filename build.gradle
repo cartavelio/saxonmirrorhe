@@ -1222,8 +1222,6 @@ def jarClasses(String release) {
         include "com/saxonica/**/*.class"
         include "javax/xml/xquery/*.class"
         exclude "**/sql"
-        exclude "com/saxonica/CompileStylesheet.class"
-        exclude "com/saxonica/CompileStylesheet\$TracingObjectOutputStream.class"
         exclude "com/saxonica/Validate.class"
         exclude "com/saxonica/config/EnterpriseConfiguration.class"
         exclude "com/saxonica/config/EnterpriseConfiguration\$SurrogateSchema.class"
