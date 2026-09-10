@@ -10,10 +10,10 @@ import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 
 /**
- * This class implements the function fn:iterate-while(), which is a proposed function for XPath 4.0
+ * This class implements the function fn:do-until(), which is a proposed function for XPath 4.0
  */
 
-public class WhileDoFn extends SystemFunction {
+public class DoUntilFn extends SystemFunction {
 
     /**
      * Evaluate the expression
@@ -28,17 +28,26 @@ public class WhileDoFn extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         GroundedValue input = arguments[0].materialize();
 
-        FunctionItem predicate = (FunctionItem) arguments[1].head();
+
+        FunctionItem action = (FunctionItem) arguments[1].head();
+        int actionArity = action.getArity();
+        Sequence[] actionParams = new Sequence[actionArity];
+
+        FunctionItem predicate = (FunctionItem) arguments[2].head();
         int predicateArity = predicate.getArity();
         Sequence[] predicateParams = new Sequence[predicateArity];
 
-        FunctionItem action = (FunctionItem) arguments[2].head();
-        int actionArity = action.getArity();
-        Sequence[] actionParams = new Sequence[actionArity];
 
         int pos = 0;
         while (true) {
             pos++;
+            if (actionArity > 0) {
+                actionParams[0] = input;
+                if (actionArity > 1) {
+                    actionParams[1] = new Int64Value(pos);
+                }
+            }
+            input = dynamicCall(action, context, actionParams).materialize();
             if (predicateArity > 0) {
                 predicateParams[0] = input;
                 if (predicateArity > 1) {
@@ -47,14 +56,6 @@ public class WhileDoFn extends SystemFunction {
             }
             boolean condition = ((BooleanValue) dynamicCall(predicate, context, predicateParams).head()).getBooleanValue();
             if (condition) {
-                if (actionArity > 0) {
-                    actionParams[0] = input;
-                    if (actionArity > 1) {
-                        actionParams[1] = new Int64Value(pos);
-                    }
-                }
-                input = dynamicCall(action, context, actionParams).materialize();
-            } else {
                 return input;
             }
         }

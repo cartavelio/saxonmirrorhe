@@ -140,6 +140,18 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
         //#endif
 
+        SpecificFunctionType valuePredicate = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
+        SpecificFunctionType valueAction = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
+
+        register("do-until", 3, e -> e.populate(DoUntilFn::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, valueAction, ONE, null)
+                .arg(2, valuePredicate, ONE, null));
+
         register("distinct-values", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.ANY_ATOMIC, STAR, BASE | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
@@ -258,18 +270,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate2, ONE, null));
 
-        SpecificFunctionType valuePredicate = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
-                SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
-        SpecificFunctionType valueAction = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
-                SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
-
-        register("iterate-while", 3, e -> e.populate(IterateWhileFn::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, valuePredicate, ONE, null)
-                .arg(2, valueAction, ONE, null));
-
         register("lowest", 1, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
@@ -359,6 +359,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
+        register("seconds", 1, e -> e.populate(SecondsFn::new, BuiltInAtomicType.DAY_TIME_DURATION, OPT, 0)
+                .arg(0, BuiltInAtomicType.DECIMAL, OPT, null));
+
         register("slice", 1, 4, e -> e.populate(Slice::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.INTEGER, OPT, null)
@@ -445,6 +448,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         // Result type of void() is deliberately mis-declared to prevent unwanted optimisations
         register("void", 1, e -> e.populate(VoidFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
+
+        register("while-do", 3, e -> e.populate(WhileDoFn::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, valuePredicate, ONE, null)
+                .arg(2, valueAction, ONE, null));
 
         register("xdm-to-json", 1, e -> e.populate(XdmToJsonFn::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));

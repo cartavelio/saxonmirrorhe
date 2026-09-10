@@ -13,7 +13,7 @@ import net.sf.saxon.value.Int64Value;
  * This class implements the function fn:iterate-while(), which is a proposed function for XPath 4.0
  */
 
-public class IterateWhileFn extends SystemFunction {
+public class WhileDoFn extends SystemFunction {
 
     /**
      * Evaluate the expression

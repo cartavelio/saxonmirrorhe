@@ -109,6 +109,11 @@
             <code>xs:double</code> and <code>xs:decimal</code> are compared by converting both values to
             decimals, not to doubles.</p>
         
+        <p>The functions <code>fn:seconds</code>, <code>fn:subsequence-where</code> are implemented.</p>
+        
+        <p>The function <code>fn:iterate-while</code> is renamed <code>fn:while-do</code>, and the function
+        <code>fn:do-until</code> is implemented.</p>
+        
         <p>The function <code>map:values</code> is implemented.</p>
         
         <p>The deep-lookup operator <code>??</code> is implemented.</p>
