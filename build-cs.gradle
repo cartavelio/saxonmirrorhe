@@ -228,7 +228,7 @@ task eecs_preprocess(
   main = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/eecs", "/o:${buildDir}/preprocess/eecs",
-    "/p:EE=true", "/p:PE=false", "/p:DOTNET=true",
+    "/p:EE=true", "/p:PE=false",
     "/p:SAXONC=false", "/p:BYTECODE=false", "/p:HOF=true",
     "/p:STREAM=true", "/p:SCHEMA=true", "/p:CSHARP=true"
   doFirst {

@@ -411,7 +411,7 @@ task hec_preprocess(
   main = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/hec", "/o:${buildDir}/preprocess/hec",
-    "/p:EE=false", "/p:PE=false", "/p:DOTNET=false", "/p:CSHARP=false",
+    "/p:EE=false", "/p:PE=false", "/p:CSHARP=false",
     "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false"
   doFirst {
     mkdir "${buildDir}/preprocess/hec"
@@ -429,7 +429,7 @@ task pec_preprocess(
   main = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/pec", "/o:${buildDir}/preprocess/pec",
-    "/p:EE=false", "/p:PE=true", "/p:DOTNET=false", "/p:CSHARP=false",
+    "/p:EE=false", "/p:PE=true", "/p:CSHARP=false",
     "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false",
     "/p:HOF=true"
   doFirst {
@@ -448,7 +448,7 @@ task eec_preprocess(
   main = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/eec", "/o:${buildDir}/preprocess/eec",
-    "/p:EE=true", "/p:PE=false", "/p:DOTNET=false", "/p:CSHARP=false",
+    "/p:EE=true", "/p:PE=false", "/p:CSHARP=false",
     "/p:SAXONC=true", "/p:BYTECODE=false", "/p:HOF=true",
     "/p:STREAM=true", "/p:SCHEMA=true", "/p:PACKAGES=true",
     "/p:OPT=false"

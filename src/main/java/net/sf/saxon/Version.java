@@ -175,15 +175,15 @@ public final class Version {
         CSharp.emitCode("  platform = new Saxon.Impl.Helpers.DotNetPlatform();");
 
 //#else
-      //#if PE!=true && EE!=true && DOTNET != true && SAXONC == true
+      //#if PE!=true && EE!=true && SAXONC == true
             platform = new net.sf.saxon.option.cpp.NativePlatform();
        //#else
             platform = new net.sf.saxon.java.JavaPlatform();
         //#endif
-        //#if PE==true && DOTNET != true && SAXONC == true
+        //#if PE==true && SAXONC == true
                 platform = new com.saxonica.config.NativePlatformPE();
         //#endif
-        //#if EE==true && DOTNET != true && SAXONC==true
+        //#if EE==true && SAXONC==true
                 platform = new com.saxonica.config.NativePlatformPE();
         //#endif
         //#if PE==true && SAXONC != true
