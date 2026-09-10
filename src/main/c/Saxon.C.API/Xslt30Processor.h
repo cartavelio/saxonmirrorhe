@@ -249,7 +249,8 @@ public:
    *
    * @param sourcefile - The file name of the source document
    * @param stylesheetfile - The file name of the stylesheet document.
-   * @return char array - result of the transformation.
+   * @return char array - result string of the transformation as a char pointer array.
+   *  A zero length string is returned if the executed query is an Empty Sequence.
    * The caller is responsible for memory deallocation. Must use `operator delete`
    * @throws SaxonApiException if the transformation fails
    */

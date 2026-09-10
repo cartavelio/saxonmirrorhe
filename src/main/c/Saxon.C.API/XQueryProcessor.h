@@ -184,7 +184,9 @@ public:
    * @param query - The query as string representation
    * @param encoding -  the encoding of the query string. If not specified then
    * the platform default encoding is used.
-   * @return char array - result of as a string. The caller is responsible for memory deallocation using `operator delete`
+   * @return char array - result string as a char pointer array. A zero length string is returned if
+   * the executed query is an Empty Sequence.
+   * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    */
   const char *executeQueryToString(const char *infilename, const char *query,
@@ -202,7 +204,8 @@ public:
   /**
    * Execute the Query cached.
    * The use of the context item would have had to be set in advance
-   * @return Result as a string (i.e. pointer array of char).
+   * @return char array - result string as a char pointer array. A zero length string is returned if
+   * the executed query is an Empty Sequence.
    * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    *

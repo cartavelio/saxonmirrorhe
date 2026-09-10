@@ -650,6 +650,22 @@ public:
   //! Clear configuration properties specific to the processor in use.
   void clearConfigurationProperties();
 
+ //!
+ /**
+ *
+*/
+ bool isLicensed();
+
+ //!Get the short name of the Saxon product edition.
+ /**
+ *
+ * For example "EE". This represents the kind of configuration
+ * that has been created, rather than the software that has been installed; for example it is possible to
+ * instantiate an "HE" configuration even when using the "PE" or "EE" software.
+ * @return the Saxon edition code: "EE", "PE", or "HE". Memory management is handled internally
+*/
+ const char * getSaxonEdition();
+
   //! Get the Saxon version
   /**
    *
