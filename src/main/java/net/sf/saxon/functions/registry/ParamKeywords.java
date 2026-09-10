@@ -47,6 +47,7 @@ public class ParamKeywords {
         arrayParamNames.put("index-of", "array|target|collation");
         arrayParamNames.put("index-where", "array|predicate");
         arrayParamNames.put("insert-before", "array|position|member");
+        arrayParamNames.put("items", "array");
         arrayParamNames.put("join", "arrays|separator");
         arrayParamNames.put("members", "array");
         arrayParamNames.put("of-members", "input");
@@ -62,7 +63,6 @@ public class ParamKeywords {
         arrayParamNames.put("subarray", "array|start|length");
         arrayParamNames.put("tail", "array");
         arrayParamNames.put("trunk", "array");
-        arrayParamNames.put("values", "array");
         fnParamNames.put("QName", "uri|qname");
         fnParamNames.put("abs", "value");
         fnParamNames.put("adjust-date-to-timezone", "value|timezone");
@@ -112,6 +112,7 @@ public class ParamKeywords {
         fnParamNames.put("default-language", "");
         fnParamNames.put("distinct-ordered-nodes", "nodes");
         fnParamNames.put("distinct-values", "values|collation");
+        fnParamNames.put("divide-decimals", "value|divisor|precision");
         fnParamNames.put("do-until", "input|action|predicate");
         fnParamNames.put("doc", "source");
         fnParamNames.put("doc-available", "source");
@@ -244,6 +245,7 @@ public class ParamKeywords {
         fnParamNames.put("seconds-from-time", "value");
         fnParamNames.put("sequence-join", "input|separator");
         fnParamNames.put("serialize", "input|options");
+        fnParamNames.put("siblings", "node");
         fnParamNames.put("slice", "input|start|end|step");
         fnParamNames.put("some", "input|predicate");
         fnParamNames.put("sort", "input|collation|key");
@@ -274,6 +276,7 @@ public class ParamKeywords {
         fnParamNames.put("translate", "value|replace|with");
         fnParamNames.put("true", "");
         fnParamNames.put("trunk", "input");
+        fnParamNames.put("type-of", "value");
         fnParamNames.put("void", "input");
         fnParamNames.put("unix-dateTime", "value");
         fnParamNames.put("unordered", "input");
@@ -298,6 +301,7 @@ public class ParamKeywords {
         mapParamNames.put("for-each", "map|action");
         mapParamNames.put("get", "map|key|fallback");
         mapParamNames.put("group-by", "input|key");
+        mapParamNames.put("items", "map");
         mapParamNames.put("keys", "map");
         mapParamNames.put("keys-where", "map|predicate");
         mapParamNames.put("merge", "maps|options");
@@ -309,7 +313,6 @@ public class ParamKeywords {
         mapParamNames.put("replace", "map|key|action");
         mapParamNames.put("size", "map");
         mapParamNames.put("substitute", "map|action");
-        mapParamNames.put("values", "map");
         mathParamNames.put("acos", "value");
         mathParamNames.put("asin", "value");
         mathParamNames.put("atan", "value");
