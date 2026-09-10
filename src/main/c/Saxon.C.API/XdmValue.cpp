@@ -124,7 +124,7 @@ XdmValue::~XdmValue() {
             if (values[i] != nullptr && values[i]->getRefCount()<1) {
                 delete values[i];
             } else {
-                std::cerr<<"XdmValue destructor called values not deleted thought !!!!!!!!! ref="<<values[i]->getRefCount()<<std::endl;
+               // std::cerr<<"XdmValue destructor called values not deleted thought !!!!!!!!! ref="<<values[i]->getRefCount()<<std::endl;
             }
         }
         values.clear();
