@@ -29,10 +29,6 @@ gradlePlugin {
 //      id = "com.saxonica.build.saxon-build"
 //      implementationClass = "com.saxonica.build.SaxonBuildPlugin"
 //    }
-    create("jar-signer") {
-      id = "com.saxonica.build.jar-signer"
-      implementationClass = "com.saxonica.build.JarSignPlugin"
-    }
     create("saxoncs") {
       id = "com.saxonica.build.saxoncs"
       implementationClass = "com.saxonica.build.SaxonCSPlugin"
