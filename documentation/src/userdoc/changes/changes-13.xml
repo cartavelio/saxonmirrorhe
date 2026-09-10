@@ -618,6 +618,12 @@ TODO: rethink redefines and override
             <li><p>TODO: is that still the case?</p></li>
         </ul>
         
+        <h3>XPath 4.0 features not yet implemented</h3>
+        
+        <ul>
+           <li><p>PR2541 - JNodes in a map constructor</p></li> <
+        </ul>
+        
         
         
     </category>
@@ -827,7 +833,7 @@ TODO: rethink redefines and override
             
         </ul>
         
-        <h2>4.0 Features not yet implemented</h2>
+        <h2>4.0 Functions not yet (fully) implemented</h2>
         
         <p>Here is a list of some of the features in the 4.0 specifications that have NOT yet been implemented.
             Please check the QT4 GitHub project (https://github.com/qt4cg/qtspecs) for the latest status: 
