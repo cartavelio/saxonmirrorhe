@@ -147,41 +147,24 @@ namespace SaxonCS_NUnit
              *          if a dynamic error occurs during evaluation of the function.
              */
 
-            public override IEnumerator<XdmItem> Call(IEnumerator<XdmItem>[] arguments, DynamicContext context)
+            public override XdmValue Call(XdmValue[] arguments, DynamicContext context)
             {
-                double val = 123.4e0;
-                Saxon.Api.XdmAtomicValue result = new (val);
-                return result.GetEnumerator();
+                return new Saxon.Api.XdmAtomicValue(123.4e0);
             }
         }
 
         public class Sqrt : ExtensionFunctionDefinition
         {
 
-            public override QName FunctionName
-            {
-                get { return new QName("http://math.com/", "sqrt"); }
-            }
+            public override QName FunctionName => new QName("http://math.com/", "sqrt");
 
-            public override int MinimumNumberOfArguments
-            {
-                get { return 1; }
-            }
+            public override int MinimumNumberOfArguments => 1;
 
-            public override int MaximumNumberOfArguments
-            {
-                get { return 1; }
-            }
+            public override int MaximumNumberOfArguments => 1;
 
-            public override XdmSequenceType[] ArgumentTypes
-            {
-                get
-                {
-                    return new XdmSequenceType[] {
-                            new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?')
+            public override XdmSequenceType[] ArgumentTypes => new XdmSequenceType[] {
+                            new(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?')
                           };
-                }
-            }
 
             public override XdmSequenceType ResultType(XdmSequenceType[] ArgumentTypes)
             {
@@ -199,21 +182,16 @@ namespace SaxonCS_NUnit
         public class SqrtCall : ExtensionFunctionCall
         {
 
-            public override IEnumerator<XdmItem> Call(IEnumerator<XdmItem>[] arguments, DynamicContext context)
+            public override XdmValue Call(XdmValue[] arguments, DynamicContext context)
             {
-                Boolean exists = arguments[0].MoveNext();
-                if (exists)
-                {
-                    XdmAtomicValue arg = (XdmAtomicValue)arguments[0].Current;
+                bool exists = arguments[0].Any();
+                if (exists) {
+                    XdmAtomicValue arg = (XdmAtomicValue)arguments[0][0];
                     double val = (double)arg.Value;
                     double sqrt = System.Math.Sqrt(val);
-                    XdmAtomicValue result = new XdmAtomicValue(sqrt);
-                    return result.GetEnumerator();
+                    return new XdmAtomicValue(sqrt);
                 }
-                else
-                {
-                    return (IEnumerator<XdmItem>)EmptyEnumerator<XdmItem>.INSTANCE;
-                }
+                return XdmEmptySequence.Instance;
             }
         }
 
@@ -345,25 +323,24 @@ namespace SaxonCS_NUnit
                 ((InscopePrefixFunctionCall)destination).staticContext = staticContext;
             }
 
-            public override IEnumerator<XdmItem> Call(IEnumerator<XdmItem>[] arguments, DynamicContext context)
+            public override XdmValue Call(XdmValue[] arguments, DynamicContext context)
             {
                 String val = null;
-                if (arguments[0].MoveNext())
-                {
-                    val = arguments[0].Current.ToString();
+                if (arguments[0].Any()) {
+                    val = arguments[0][0].StringValue;
                 }
 
                 if (val == null)
                 {
-                    return  Enumerable.Empty<XdmAtomicValue>().GetEnumerator();
+                    return XdmEmptySequence.Instance;
                 }
-                String ns = this.staticContext.GetNamespaceForPrefix(val);
+                string ns = staticContext.GetNamespaceForPrefix(val);
                 if (ns == null)
                 {
-                    return Enumerable.Empty<XdmAtomicValue>().GetEnumerator();
+                    return XdmEmptySequence.Instance;
                 }
                 XdmAtomicValue result = new (ns);
-                return result.GetEnumerator();
+                return result;
             }
         }
 
