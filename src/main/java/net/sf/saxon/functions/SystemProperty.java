@@ -113,10 +113,11 @@ public class SystemProperty extends SystemFunction implements Callable {
     public static String getProperty(String uri, String local, RetainedStaticContext rsc) {
         Configuration config = rsc.getConfiguration();
         String edition = rsc.getPackageData().getTargetEdition();
+        boolean is40 = rsc.getPackageData().getHostLanguageVersion() == 40;
         if (uri.equals(NamespaceConstant.XSLT)) {
             switch (local) {
                 case "version":
-                    return "3.0";
+                    return is40 ? "4.0" : "3.0";
                 case "vendor":
                     return Version.getProductVendor();
                 case "vendor-url":
@@ -144,7 +145,7 @@ public class SystemProperty extends SystemFunction implements Callable {
                 case "supports-higher-order-functions":
                     return "yes";
                 case "xpath-version":
-                    return "3.1";
+                    return is40 ? "4.0" : "3.1";
                 case "xsd-version":
                     return rsc.getConfiguration().getXsdVersion() == Configuration.XSD10 ? "1.0" : "1.1";
             }
