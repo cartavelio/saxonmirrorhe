@@ -62,9 +62,7 @@ namespace Saxon.Impl.Overrides {
             "-----END PUBLIC KEY-----";
         
         // The public ED25519 key
-        // To convert the hexbinary form in Java to the PEM form needed here:
-        // $ echo 302A...6030 | xxd -r -p - | openssl ec -inform der -pubin -pubout
-        private static string ed25519Pem = "MCowBQYDK2VwAyEA0o9qpFUZdj2CigQ0ybybWmZl7lYwPBA+0qSZ6EynYDA=";
+        private static string ed25519Pem = "MCowBQYDK2VwAyEAgn4Eh/0cFzMMaJj4yAB6/vlanZz57XmNuP5NiTMUg7M=";
         
         // Take the signature as it appears in the license file, and convert it to the
         // form expected by the .NET verification API. We first convert from hex to binary.
