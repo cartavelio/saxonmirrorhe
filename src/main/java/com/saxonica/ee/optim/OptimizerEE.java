@@ -1754,9 +1754,11 @@ public class OptimizerEE extends Optimizer {
             // semantics will already have been converted to a GeneralComparison20.
             return 0;
         }
-        if (filter instanceof ValueComparison && ((ValueComparison) filter).getResultWhenEmpty().getBooleanValue()) {
-            // See bug 6581
-            return 0;
+        if (filter instanceof ValueComparison)  {
+            BooleanValue resultWhenEmpty = ((ValueComparison) filter).getResultWhenEmpty();
+            if (resultWhenEmpty != null && resultWhenEmpty.getBooleanValue()) {
+                return 0;
+            }
         }
         Expression op0 = filter.getLhsExpression();
         Expression op1 = filter.getRhsExpression();

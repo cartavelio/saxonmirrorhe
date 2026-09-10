@@ -219,7 +219,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
-        register("distinct-ordered-nodes", 0, 1, e -> e.populate(DistinctOrderedNodes::new, AnyNodeTest.getInstance(), STAR, UO | SEQV)
+        register("distinct-ordered-nodes", 0, 1, e -> e.populate(DistinctOrderedNodes::new, AnyNodeTest.getInstance(), STAR, UO)
                 .arg(0, AnyNodeTest.getInstance(), STAR, EMPTY));
 
         register("distinct-values", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.ANY_ATOMIC, STAR, BASE | UO)
@@ -237,11 +237,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("duplicate-values", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.ANY_ATOMIC, STAR, BASE | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
-
-        register("element-number", 0, 3, e -> e.populate(ElementNumber::new, BuiltInAtomicType.INTEGER, ONE, BASE)
-                .arg(0, NodeKindTest.ELEMENT, OPT, null)
-                .arg(1, ChoiceItemType.of(NodeKindTest.DOCUMENT, NodeKindTest.ELEMENT), OPT, null)
-                .arg(2, predicate2, OPT, null));
 
         register("ends-with", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
