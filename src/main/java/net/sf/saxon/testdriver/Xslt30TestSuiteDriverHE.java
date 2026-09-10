@@ -530,11 +530,19 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             boolean failure;
             try {
                 if (useXslt30Transformer) {
+                    InitialTransformDetails ini = new InitialTransformDetails();
+                    ini.xsltLanguageVersion = xsltLanguageVersion;
+                    ini.contextItem = contextItem;
+                    ini.initialMode = initialMode.orElse(null);
+                    ini.initialFunction = initialFunction.orElse(null);
+                    ini.initialTemplate = initialTemplate.orElse(null);
+                    ini.initialModeName = initialModeName;
+                    ini.initialMatchSelection = initialMatchSelection;
+                    ini.initialTemplateName = initialTemplateName;
+                    ini.baseOutputUri = baseOutputURI;
+
                     failure = runWithXslt30Transformer(testCase, xpath, outcome, testName,
-                                                       testSetName, env, testInput, sheet, collector,
-                                                       xsltLanguageVersion, contextItem, initialMode.orElse(null),
-                                                       initialFunction.orElse(null), initialTemplate.orElse(null), initialModeName,
-                                                       initialMatchSelection, initialTemplateName, baseOutputURI);
+                                                       testSetName, env, testInput, sheet, collector, ini);
                 } else {
                     failure = runWithXsltTransformer(xpath, outcome, testName, testSetName, env, testInput,
                                                      sheet, collector, contextItem, initialMode.orElse(null), initialModeName,
@@ -747,13 +755,22 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         // For overriding in Javascript driver
     }
 
+    private static class InitialTransformDetails {
+        public String xsltLanguageVersion;
+        public XdmItem contextItem;
+        public XdmNode initialMode;
+        public XdmNode initialFunction;
+        public XdmNode initialTemplate;
+        public QName initialModeName;
+        public XdmValue initialMatchSelection;
+        public QName initialTemplateName;
+        public String baseOutputUri;
+    }
+
     protected boolean runWithXslt30Transformer(XdmNode testCase, XPathCompiler xpath, final TestOutcome outcome,
                                                String testName, String testSetName, Environment env,
                                                XdmNode testInput, XsltExecutable sheet, ErrorCollector collector,
-                                               String xsltLanguageVersion, XdmItem contextItem, XdmNode initialMode,
-                                               XdmNode initialFunction,
-                                               XdmNode initialTemplate, QName initialModeName, XdmValue initialMatchSelection,
-                                               QName initialTemplateName, String baseOutputURI) {
+                                               InitialTransformDetails ini) {
         try {
             boolean assertsSerial =
                 testCase.select(path(child("result"),
@@ -800,13 +817,13 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             globalParams.putAll(caseGlobalParams);  // has to be this way to ensure test-local overrides global
             transformer.setStylesheetParameters(globalParams);
 
-            if (contextItem != null) {
-                transformer.setGlobalContextItem(contextItem);
+            if (ini.contextItem != null) {
+                transformer.setGlobalContextItem(ini.contextItem);
             }
 
             transformer.setErrorReporter(collector);
 
-            transformer.setBaseOutputURI(baseOutputURI);
+            transformer.setBaseOutputURI(ini.baseOutputUri);
 
             transformer.setMessageListener((content, errorCode, terminate, locator) -> {
                 outcome.addXslMessage(content);
@@ -824,17 +841,17 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             XsltController controller = transformer.getUnderlyingController();
 
             Destination dest = null;
-            if (baseOutputURI != null) {
+            if (ini.baseOutputUri != null) {
                 if (resultAsTree && !resultSerialized) {
                     // If we want non-serialized, we need to accumulate any result documents as trees too
                     // But we can't do both, so serializing takes precedence.
                     transformer.setResultDocumentHandler(
-                            new ResultDocHandler(env.processor, outcome, baseOutputURI, false));
+                            new ResultDocHandler(env.processor, outcome, ini.baseOutputUri, false));
                     dest = new XdmDestination();
                     ((XdmDestination)dest).setTreeModel(treeModel);
                 } else {
                     transformer.setResultDocumentHandler(
-                            new ResultDocHandler(env.processor, outcome, baseOutputURI, true));
+                            new ResultDocHandler(env.processor, outcome, ini.baseOutputUri, true));
                 }
             }
             if (resultSerialized) {
@@ -846,8 +863,8 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 src = new StreamSource(env.streamedFile);
             } else if (env.streamedContent != null) {
                 src = new StreamSource(new StringReader(env.streamedContent), "inlineDoc");
-            } else if (initialTemplate == null && contextItem != null) {
-                src = ((XdmNode) contextItem).getUnderlyingNode();
+            } else if (ini.initialTemplate == null && ini.contextItem != null) {
+                src = ((XdmNode) ini.contextItem).getUnderlyingNode();
             }
             if (src != null && !"skip".equals(env.streamedInputValidation)) {
                 Processor processor = sheet.getProcessor();
@@ -855,13 +872,13 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 src = validator.asSource(src);
             }
 
-            if (src == null && initialFunction == null && initialTemplateName == null && initialModeName == null) {
-                initialTemplateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
+            if (src == null && ini.initialFunction == null && ini.initialTemplateName == null && ini.initialModeName == null) {
+                ini.initialTemplateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
             }
 
             try {
-                if (initialModeName != null) {
-                    transformer.setInitialMode(initialModeName);
+                if (ini.initialModeName != null) {
+                    transformer.setInitialMode(ini.initialModeName);
                 } else {
                     controller.getInitialMode();   /// has the side effect of setting to the unnamed
                 }
@@ -874,11 +891,11 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 }
             }
 
-            if (initialMode != null || initialTemplate != null) {
-                XdmNode init = initialMode == null ? initialTemplate : initialMode;
+            if (ini.initialMode != null || ini.initialTemplate != null) {
+                XdmNode init = ini.initialMode == null ? ini.initialTemplate : ini.initialMode;
                 Map<QName, XdmValue> params = getNamedParameters(xpath, init, false, false);
                 Map<QName, XdmValue> tunnelledParams = getNamedParameters(xpath, init, false, true);
-                if (xsltLanguageVersion.equals("2.0")) {
+                if (ini.xsltLanguageVersion.equals("2.0")) {
                     if (!(params.isEmpty() && tunnelledParams.isEmpty())) {
                         System.err.println("*** Initial template parameters ignored for XSLT 2.0");
                     }
@@ -888,26 +905,26 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 }
             }
 
-            if (initialTemplateName != null) {
-                transformer.setGlobalContextItem(contextItem);
+            if (ini.initialTemplateName != null) {
+                transformer.setGlobalContextItem(ini.contextItem);
                 if (dest == null) {
-                    result = transformer.callTemplate(initialTemplateName);
+                    result = transformer.callTemplate(ini.initialTemplateName);
                 } else {
-                    transformer.callTemplate(initialTemplateName, dest);
+                    transformer.callTemplate(ini.initialTemplateName, dest);
                 }
-            } else if (initialFunction != null) {
-                QName name = getQNameAttribute(xpath, initialFunction, attribute("name"));
-                XdmValue[] params = getParameters(xpath, initialFunction);
+            } else if (ini.initialFunction != null) {
+                QName name = getQNameAttribute(xpath, ini.initialFunction, attribute("name"));
+                XdmValue[] params = getParameters(xpath, ini.initialFunction);
                 if (dest == null) {
                     result = transformer.callFunction(name, params);
                 } else {
                     transformer.callFunction(name, params, dest);
                 }
-            } else if (initialMatchSelection != null) {
+            } else if (ini.initialMatchSelection != null) {
                 if (dest == null) {
-                    result = transformer.applyTemplates(initialMatchSelection);
+                    result = transformer.applyTemplates(ini.initialMatchSelection);
                 } else {
-                    transformer.applyTemplates(initialMatchSelection, dest);
+                    transformer.applyTemplates(ini.initialMatchSelection, dest);
                 }
             } else {
                 if (dest == null) {
