@@ -18,6 +18,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.ValidationParams;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -292,6 +293,16 @@ public abstract class SchemaValidator extends AbstractDestination {
      */
 
     public abstract XdmValue getParameter(QName name);
+
+
+    /**
+     * Get all the supplied validation parameters
+     *
+     * @return a collection of all the parameters supplied using {@link #setParameter(QName, XdmValue)}
+     * @throws SaxonApiException if any supplied parameter cannot be converted to its required type
+     */
+
+    public abstract ValidationParams getValidationParameters() throws SaxonApiException;
 
 
     /**

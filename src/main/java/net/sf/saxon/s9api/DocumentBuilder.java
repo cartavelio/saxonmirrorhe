@@ -146,12 +146,30 @@ public class DocumentBuilder {
     }
 
     /**
-     * Set the schemaValidator to be used. This determines whether schema validation is applied to an input
+     * Set options for schema validation. This determines whether schema validation is applied to an input
      * document and whether type annotations in a supplied document are retained. If no schemaValidator
      * is supplied, then schema validation does not take place.
      * <p>This option requires the schema-aware version of the Saxon product (Saxon-EE).</p>
-     * <p>Since a <code>SchemaValidator</code> is serially reusable but not thread-safe, using this
-     * method is not appropriate when the <code>DocumentBuilder</code> is shared between threads.</p>
+     * <p>The supplied <code>SchemaValidator</code> is not actually used directly when a document is built
+     * using {@link #parse(File, Destination){ or {@link #parse(Source, Destination)}}
+     * (the {@link SchemaValidator#validate(Source)}
+     * method is never called). Rather, some of the properties of the <code>SchemaValidator</code> are used to control
+     * how schema validation is performed by the <code>DocumentBuilder</code>. The particular properties
+     * that take effect include:</p>
+     * <ul>
+     *     <li>The validation mode (strict or lax)</li>
+     *     <li>The required top-level element declaration (see {@link SchemaValidator#setDocumentElementName(QName)}</li>
+     *     <li>The required type of the top-level element (see {@link SchemaValidator#setDocumentElementTypeName(QName)}</li>
+     *     <li>The option {@link SchemaValidator#isUseXsiSchemaLocation()}</li>
+     *     <li>The option {@link SchemaValidator#isExpandAttributeDefaults()}</li>
+     *     <li>Validation parameters set using {@link SchemaValidator#setParameter}</li>
+     * </ul>
+     * <p>Properties that currently do NOT have any effect include:</p>
+     * <ul>
+     *     <li>The {@link net.sf.saxon.lib.InvalidityHandler}</li>
+
+     *     <li>The option {@link SchemaValidator#isCollectStatistics()}</li>
+     * </ul>
      *
      * @param validator the SchemaValidator to be used
      */
@@ -344,6 +362,9 @@ public class DocumentBuilder {
             if (schemaValidator.getDocumentElementType() != null) {
                 options.setTopLevelType(schemaValidator.getDocumentElementType());
             }
+            options.setExpandAttributeDefaults(schemaValidator.isExpandAttributeDefaults());
+            options.setUseXsiSchemaLocation(schemaValidator.isUseXsiSchemaLocation());
+            options.setValidationParams(schemaValidator.getValidationParameters());
         }
 
         if (treeModel != null) {
