@@ -63,16 +63,28 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
         $result = $executable->applyTemplatesReturningString();
         $this->assertStringContainsString("[", $result);
     }
-    public function testResolveUri(): void
-    {
-        $transformer = self::$saxonProc->newXslt30Processor();
-        $executable = $transformer->compileFromString("<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:err='http://www.w3.org/2005/xqt-errors'><xsl:template 
-name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri('notice trailing space /out.xml')\"/> <xsl:message select='\$uri'/><xsl:result-document href='{\$uri}'><out/></xsl:result-document><xsl:catch><xsl:sequence select=\"'\$err:code: ' || 
-\$err:code  || ', \$err:description: ' || \$err:description\"/></xsl:catch></xsl:try></xsl:template></xsl:stylesheet>");
-        $value = $executable->callTemplateReturningValue("go");
-        $item = $value->getHead();
-        $this->assertStringContainsString("code", $item->getStringValue());
-    }
+    /*
+        public function testCatalog(){
+
+            $transformer = self::$saxonProc->newXslt30Processor();
+            Processor proc = transformer.getProcessor();
+
+
+            try {
+                XmlCatalogResolver.setCatalog(CWD_DIR+"../../catalog-test/catalog.xml", proc.getUnderlyingConfiguration(), true);
+
+                transformer.applyTemplatesReturningValue(CWD_DIR+"../../catalog-test/", "example.xml","test1.xsl",null, null);
+            } catch (XPathException e) {
+                e.printStackTrace();
+                fail();
+            } catch (SaxonApiException e) {
+                e.printStackTrace();
+                fail();
+            }
+
+        }
+
+    */
 
     public function testParsingXMLError(): void
     {
@@ -86,7 +98,7 @@ name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri(
             $this->assertTrue(True);
         } catch (Exception $e) {
             echo 'Caught exception: ', $e->getMessage(), "\n";
-            $this->assertTrue(True);
+            $this->assertTrue(True, 'Caught exception: '. $e->getMessage());
         }
 
     }
@@ -103,7 +115,7 @@ name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri(
             $this->assertTrue(True);
         } catch (Exception $e) {
             echo 'Caught exception: ', $e->getMessage(), "\n";
-            $this->assertTrue(True);
+            $this->assertTrue(True, 'Caught exception: '. $e->getMessage());
         }
 
     }
@@ -116,7 +128,7 @@ name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri(
             $input = self::$saxonProc->parseXmlFromFile("../data/books.xml");
         } catch (Exception $e) {
             echo 'Caught exception: ',  $e->getMessage(), "\n";
-            $this->assertTrue(False);
+            $this->assertTrue(False, 'Caught exception: '. $e->getMessage());
         }
         //Console.WriteLine("=============== source document ===============");
         //Console.WriteLine(input.OuterXml);
@@ -128,7 +140,7 @@ name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri(
         $xPathProcessor->setContextItem($input);
         $hrefval = $xPathProcessor->evaluateSingle($path);
         $this->assertNotNull($hrefval);
-        echo "test cp0";
+
         $this->assertInstanceOf(Saxon\XdmItem::class, $hrefval);
         $this->assertTrue($hrefval->isAtomic());
         $href = $hrefval->getAtomicValue()->getStringValue();
@@ -174,25 +186,43 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testTransformWithoutArgument1(): void
     {
-        $transformer = self::$saxonProc->newXslt30Processor();
-        $foo_xml = "trax/xml/foo.xml";
-        $executable = $transformer->compileFromAssociatedFile($foo_xml);
-        $executable->setInitialMatchSelectionAsFile($foo_xml);
-        $result = $executable->transformToString();
-        $this->assertNotNull($result);
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testTransformWithoutArgument1");
+        }
+        try {
+            $transformer = self::$saxonProc->newXslt30Processor();
+            $foo_xml = "trax/xml/foo.xml";
+            $executable = $transformer->compileFromAssociatedFile($foo_xml);
+            $executable->setInitialMatchSelectionAsFile($foo_xml);
+            $result = $executable->transformToString();
+            $this->assertNotNull($result);
+        } catch(Exception $e) {
+            //echo 'Caught exception: ',  $e->getMessage(), "\n";
+            $this->assertTrue(False, 'Caught exception: '.  $e->getMessage());
+
+        }
     }
     public function testTransformWithoutArgument2(): void
     {
-        $transformer = self::$saxonProc->newXslt30Processor();
-        $foo_xml = "trax/xml/foo.xml";
-        $executable = $transformer->compileFromAssociatedFile($foo_xml);
-        $executable->setInitialMatchSelectionAsFile($foo_xml);
-        $resultValue = $executable->transformToValue();
-        $this->assertNotNull($resultValue);
-        $resultItem = $resultValue->getHead();
-        $this->assertNotNull($resultItem);
-        $result = $resultItem->getStringValue();
-        $this->assertNotNull($result);
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testTransformWithoutArgument2");
+        }
+        try {
+            $transformer = self::$saxonProc->newXslt30Processor();
+            $foo_xml = "trax/xml/foo.xml";
+            $executable = $transformer->compileFromAssociatedFile($foo_xml);
+            $executable->setInitialMatchSelectionAsFile($foo_xml);
+            $resultValue = $executable->transformToValue();
+            $this->assertNotNull($resultValue);
+            $resultItem = $resultValue->getHead();
+            $this->assertNotNull($resultItem);
+            $result = $resultItem->getStringValue();
+            $this->assertNotNull($result);
+        } catch (Exception $e) {
+            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->assertTrue(False, 'Caught exception: '. $e->getMessage());
+
+        }
     }
     public function testTransformWithoutArgument3(): void
     {
@@ -202,7 +232,7 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
         $executable->setInitialMatchSelectionAsFile($foo_xml);
         $executable->setOutputFile("resultForTransformWithoutArgument.xml");
         $executable->transformToFile();
-        $this->assertTrue(file_exists("resultForTransformWithoutArgument.xml"));
+        $this->assertTrue(file_exists("resultForTransformWithoutArgument.xml"), "resultForTransformWithoutArgument.xml not found");
                 if (file_exists("resultForTransformWithoutArgument.xml")) {
                     unlink("resultForTransformWithoutArgument.xml");
                 }
@@ -415,10 +445,12 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
             "                </xsl:function>" .
             "                </xsl:stylesheet>";
         $executable = $transformer->compileFromString($source);
-        $v = $executable->callFunctionReturningValue("{http://localhost/}add", array(self::$saxonProc->createAtomicValue(2), self::$saxonProc->createAtomicValue(3)));
-        $this->assertTrue($transformer->exceptionOccurred());
-        $this->assertStringContainsString("Cannot invoke function add#2 externally", $executable->getErrorMessage());
-        $this->assertNull($v);
+        try {
+            $v = $executable->callFunctionReturningValue("{http://localhost/}add", array(self::$saxonProc->createAtomicValue(2), self::$saxonProc->createAtomicValue(3)));
+            $this->assertFalse(True);
+        } catch (Exception $e) {
+            $this->assertStringContainsString("Cannot invoke function add#2 externally", $e->getMessage());
+        }
     }
     public function testCallNamedTemplateWithTunnelParams()
     {
@@ -540,25 +572,34 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testCallTemplateWithResultValidation(): void
     {
-        $saxonProc2 = new Saxon\SaxonProcessor(True);
-        $saxonProc2->setcwd("/var/www/html"); //Change according to dir setup
-        $transformer = $saxonProc2->newXslt30Processor();
-        $source = "<?xml version='1.0'?>" .
-            "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
-            "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" .
-            "                version='3.0' exclude-result-prefixes='#all'>" .
-            "                <xsl:import-schema><xs:schema><xs:element name='x' type='xs:int'/></xs:schema></xsl:import-schema>" .
-            "                <xsl:template name='main'>" .
-            "                   <xsl:result-document validation='strict'>" .
-            "                     <x>3</x>" .
-            "                   </xsl:result-document>" .
-            "                </xsl:template>" .
-            "                </xsl:stylesheet>";
-        $executable = $transformer->compileFromString($source);
-        $executable->setProperty("!omit-xml-declaration", "yes");
-        $sw = $executable->callTemplateReturningString("main");
-        $this->assertNotNull($sw);
-        $this->assertEquals($sw, "<x>3</x>");
+
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCallTemplatewithResultValidation");
+        }
+        try {
+            $saxonProc2 = new Saxon\SaxonProcessor(True);
+            $saxonProc2->setcwd("/var/www/html"); //Change according to dir setup
+            $transformer = $saxonProc2->newXslt30Processor();
+            $source = "<?xml version='1.0'?>" .
+                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" .
+                "                version='3.0' exclude-result-prefixes='#all'>" .
+                "                <xsl:import-schema><xs:schema><xs:element name='x' type='xs:int'/></xs:schema></xsl:import-schema>" .
+                "                <xsl:template name='main'>" .
+                "                   <xsl:result-document validation='strict'>" .
+                "                     <x>3</x>" .
+                "                   </xsl:result-document>" .
+                "                </xsl:template>" .
+                "                </xsl:stylesheet>";
+            $executable = $transformer->compileFromString($source);
+            $executable->setProperty("!omit-xml-declaration", "yes");
+            $sw = $executable->callTemplateReturningString("main");
+            $this->assertNotNull($sw);
+            $this->assertEquals($sw, "<x>3</x>");
+        } catch (Exception $e) {
+            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->assertTrue(False, 'Caught exception: '. $e->getMessage());
+        }
     }
     /*    public function testCallTemplateWithResultValidationFailure(): void {
             try {

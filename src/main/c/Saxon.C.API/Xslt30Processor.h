@@ -293,7 +293,7 @@ public:
   //! Get the stylesheet associated
   /* via the xml-stylesheet processing instruction (see
    * http://www.w3.org/TR/xml-stylesheet/) with the document
-   * document specified in the source parameter, and that match
+   * specified in the source parameter, and that match
    * the given criteria.  If there are several suitable xml-stylesheet
    * processing instructions, then the returned Source will identify
    * a synthesized stylesheet module that imports all the referenced

@@ -51,7 +51,7 @@ int XdmItem::size() { return 1; }
 
 int64_t XdmItem::getUnderlyingValue() {
   if (!value) {
-    return -1;
+    return SXN_UNSET;
   }
   return value;
 }
