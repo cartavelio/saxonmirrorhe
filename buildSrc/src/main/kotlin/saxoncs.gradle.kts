@@ -378,9 +378,9 @@ fun csZipArtifactTasks(configuration: CSReleaseConfiguration, publishTask: TaskP
       dirver = dirver.substring(0, dirver.length - 2)
     }
 
-    archiveFileName = "SaxonCS-${zipver}-${zipname}-${ziparch}.zip"
+    archiveFileName = "SaxonCS-${extension.edition.get().uppercase()}-${zipver}-${zipname}-${ziparch}.zip"
     from(stageZip)
-    into("/SaxonCS-${dirver}/")
+    into("/SaxonCS-${extension.edition.get().uppercase()}-${dirver}/")
   }
 }
 
