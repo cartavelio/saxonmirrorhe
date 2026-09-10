@@ -197,6 +197,11 @@ TODO: rethink redefines and override
         <code>makeMessageReceiver()</code>, <code>setMessageEmitter()</code>,
         <code>getMessageEmitter()</code>. </p>
         
+        <p>When <code>xsl:message</code> is evaluated with <code>terminate="yes"</code>, the final
+        <code>TerminationException</code> that is thrown now includes the content of that final
+        message as a <code>Message</code> object. The <code>TerminationException</code> is available
+        using <code>SaxonApiException.getCause()</code>.</p>
+        
         <p>The <code>Configuration</code> class now provides a method <code>disableFunction()</code>
         that allows use of any function name to be disabled. This can be a core function, a Saxon-supplied
         extension function, a user-registered extension function, a constructor function: anything. The

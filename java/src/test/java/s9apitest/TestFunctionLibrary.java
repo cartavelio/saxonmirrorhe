@@ -2,6 +2,8 @@ package s9apitest;
 
 import com.saxonica.config.ProfessionalConfiguration;
 import net.sf.saxon.functions.FunctionLibrary;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
@@ -12,9 +14,11 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -123,5 +127,62 @@ public class TestFunctionLibrary {
             ex.printStackTrace();
             fail();
         }
+    }
+
+    public void testDisableFunction(StructuredQName fnName, String arg) {
+        Processor proc = new Processor(true);
+        proc.getUnderlyingConfiguration().disableFunction(fnName);
+        XPathCompiler xpc = proc.newXPathCompiler();
+        xpc.setLanguageVersion("4.0");
+        try {
+            XPathExecutable exec = xpc.compile(fnName.getEQName() + "#1");
+            fail("XPath ref should not succeed");
+        } catch (SaxonApiException err) {
+            Assertions.assertEquals(NamespaceUri.ERR.qName("XPST0017"), err.getErrorCode().getStructuredQName());
+        }
+        try {
+            XPathExecutable exec = xpc.compile(fnName.getEQName() + "(" + arg + ")");
+            fail("XPath call should not succeed");
+        } catch (SaxonApiException err) {
+            Assertions.assertEquals(NamespaceUri.ERR.qName("XPST0017"), err.getErrorCode().getStructuredQName());
+        }
+        try {
+            boolean available = xpc.compile("function-lookup(#" + fnName.getEQName() + ", 1)").load().effectiveBooleanValue();
+            Assertions.assertFalse(available);
+        } catch (SaxonApiException err) {
+            fail();
+        }
+        try {
+            XQueryExecutable exec = proc.newXQueryCompiler().compile(fnName.getEQName() + "#1");
+            fail("XQuery should not succeed");
+        } catch (SaxonApiException err) {
+            Assertions.assertEquals(NamespaceUri.ERR.qName("XPST0017"), err.getErrorCode().getStructuredQName());
+        }
+        try {
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setJustInTimeCompilation(false);
+            XsltExecutable exec = comp.compile(
+                    new StreamSource(new StringReader(
+                            "<a xsl:version='4.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' att='{" + fnName.getEQName() + "#1}'/>")));
+            fail("XSLT should not succeed");
+        } catch (SaxonApiException err) {
+            // OK
+        }
+
+    }
+
+    @Test
+    public void testDisableCoreFunction() {
+        testDisableFunction(NamespaceUri.FN.qName("environment-variable"), "'x'");
+    }
+
+    @Test
+    public void testDisableEXPathFunction() {
+        testDisableFunction(NamespaceUri.EXPATH_FILE.qName("exists"), "'x'");
+    }
+
+    @Test
+    public void testDisableSaxonFunction() {
+        testDisableFunction(NamespaceUri.SAXON.qName("read-binary-resource"), "'x'");
     }
 }

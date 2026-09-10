@@ -4457,6 +4457,9 @@ public class XPathParser {
             StructuredQName name, Expression[] args,
             List<Object> placeMarkerArgs) throws XPathException {
         StaticContext env = parser.getStaticContext();
+        if (env.getConfiguration().isDisabledFunction(name)) {
+            grumble("Function " + name + " has been disabled", "XPST0018");
+        }
         FunctionLibrary lib = env.getFunctionLibrary();
         SymbolicName.F sn = new SymbolicName.F(name, args.length);
         FunctionItem target = lib.getFunctionItem(sn, env);

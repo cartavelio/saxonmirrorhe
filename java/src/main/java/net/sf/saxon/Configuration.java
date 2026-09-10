@@ -1602,11 +1602,15 @@ public class Configuration implements SourceResolver {
      * @param name  the name of the required function
      * @param arity the arity of the required function
      * @return the requested function, or null if there is no such function. Note that some functions
-     * (those with particular context dependencies) may be unsuitable for dynamic calling.
+     * (those with particular context dependencies) may be unsuitable for dynamic calling. The method
+     * returns null if the function name has been disabled using {@link #disableFunction(StructuredQName)}.
      */
 
     public FunctionItem getSystemFunction(StructuredQName name, int arity)  {
         try {
+            if (isDisabledFunction(name)) {
+                return null;
+            }
             if (staticContextForSystemFunctions == null) {
                 staticContextForSystemFunctions = new IndependentContext(this);
             }
