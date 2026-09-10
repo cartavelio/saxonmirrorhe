@@ -41,7 +41,6 @@ function exampleSimple2($proc, $xpathEngine, $xmlfile)
 
         }
     }
-    $xpathEngine->exceptionClear();
     $xpathEngine->clearParameters();
     $xpathEngine->clearProperties();
 }
@@ -58,7 +57,7 @@ function exampleSimple3($proc, $xpathEngine)
     }
     $xpathEngine->setContextItem($sourceNode);
 
-    //$xpathEngine->setContextFile("tempdoc.xml");
+
     $resultValue = $xpathEngine->evaluateSingle("(//person)[1]");
 
     if ($resultValue != null) {
@@ -126,9 +125,7 @@ function exampleSimple5($proc, $xpathEngine)
         echo "SourceNode is NULL<br />";
     }
     $xpathEngine->setContextItem($sourceNode);
-    echo "before evalSingle\n";
     $resultValue = $xpathEngine->evaluateSingle("(/out)");
-    echo "after evalSingle\n";
 
     if ($resultValue != null) {
         if ($resultValue->isNode()) {
@@ -139,11 +136,11 @@ function exampleSimple5($proc, $xpathEngine)
 
             $childCount = $nodeValue->getChildCount();
             for ($i = 0; $i < $childCount; $i++) {
-                /*$nodei = $nodeValue->getChildNode($i);
+                $nodei = $nodeValue->getChildNode($i);
                 if($nodei != null) {
                     $namei = $nodei->getNodeName();
                     echo ' Node name=' . $namei;
-                }*/
+                }
 
             }
         } else if ($resultValue->isAtomic()) {
@@ -182,7 +179,7 @@ function exampleSimple6($proc, $xpathEngine)
                     }
 
                     if ($childNode == NULL) {
-                        echo "child node is null XXXX <br/>";
+                        echo "child node is null <br/>";
                     }
                     $strValue = $childNode->getStringValue();
                     if ($childNode->isAtomic()) {
