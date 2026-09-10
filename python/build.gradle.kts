@@ -2,13 +2,15 @@ import com.saxonica.build.AwsReleaseStagingResources
 import com.saxonica.build.CheckStagedReleaseArtifactsPresent
 import com.saxonica.build.TargetHost
 import com.saxonica.build.python.PyenvExe
-import com.saxonica.build.python.PyenvPythonVersion
+import com.saxonica.build.python.PyenvPythonVersionTask
 import com.saxonica.build.python.PythonVersions
 import com.saxonica.build.python.PythonVersion
 import com.saxonica.build.AsInput
 import com.saxonica.build.GatherReleaseArtifacts
 import com.saxonica.build.UploadReleaseArtifactsToStagingBucket
 import com.saxonica.build.python.PythonReleaseWheels
+import com.saxonica.build.python.PythonVersionTask
+import com.saxonica.build.python.WinPythonVersionTask
 import org.gradle.kotlin.dsl.register
 import kotlin.collections.joinToString
 
@@ -20,42 +22,52 @@ plugins {
 val _targetHost = TargetHost.current()
 val pythonVersion: String by project
 val saxonBuild = the<SaxonBuildExtension>()
-val extension = project.extensions.create<PyenvExtension>("pyenv")
+val extension = project.extensions.create<PythonVersionsExtension>("pythonVersions")
 val pythonVersions = PythonVersions(layout.projectDirectory.file("python-versions.json").asFile)
+val devVersion = pythonVersions.findSupported(pythonVersion)
 
-extension.devVersion = AsInput.from<PythonVersion>(pythonVersions.findSupported(pythonVersion))
+extension.devVersion = AsInput.from<PythonVersion>(devVersion)
 extension.pythonVersions = pythonVersions
 extension.debugVariant = "valgrind"
 extension.definitionsDir = layout.projectDirectory.dir("pyenv")
-extension.pyenvRoot = layout.projectDirectory.dir(".pyenv")
+extension.installRoot = layout.projectDirectory.dir(".python-versions")
 
-val pyenvExeTask = tasks.register<PyenvExe>("pyenv_exe")
+inline fun <reified T : PythonVersionTask> createPythonVersionTask(name: String, py: PythonVersion, th: TargetHost, publish: ConsumableConfiguration, action: Action<T>) {
+  val versionTask = tasks.register<T>(name) {
+    targetHost = th
+    pythonVersionsRoot = extension.installRoot
+    this.pythonVersion = AsInput.from<PythonVersion>(py)
+    action(this)
+  }
 
-val pyenvDevValgrindPythonTask = tasks.register<PyenvPythonVersion>("pyenv_dev_valgrind_python") {
-  targetHost = _targetHost
-  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
-  pyenvRoot = extension.pyenvRoot.map { it.asFile.toString() }
-  pythonVersion = extension.devVersion
-  pythonBuildDefinitionsDir = extension.definitionsDir
-  debugVariant = extension.debugVariant
+  publish.outgoing.artifact(versionTask) { builtBy(versionTask) }
+}
+
+inline fun <reified T : PythonVersionTask> createPythonVersionTasks(th: TargetHost,  action: Action<T>) {
+  extension.pythonVersions.get().supported.forEach { python ->
+    val v = python.version
+    val versionConfig = configurations.consumable("python${v}").get()
+
+    createPythonVersionTask("pyenv_python_${v}", python, th, versionConfig, action)
+  }
 }
 
 val devDebugVersionConfig by configurations.consumable("debugPython")
-devDebugVersionConfig.outgoing.artifact(pyenvDevValgrindPythonTask) { builtBy(pyenvDevValgrindPythonTask) }
 
-extension.pythonVersions.get().supported.forEach { python ->
-  val v = python.version
-  val versionConfig = configurations.consumable("python${v}").get()
-
-  val versionTask = tasks.register<PyenvPythonVersion>("pyenv_python_${v}") {
-    targetHost = _targetHost
+if (!_targetHost.isWindows) {
+  val pyenvExeTask = tasks.register<PyenvExe>("pyenv_exe")
+  createPythonVersionTasks<PyenvPythonVersionTask>(_targetHost) {
     pyenvExe = pyenvExeTask.map { it.pyenv.get() }
-    pyenvRoot = extension.pyenvRoot.map { it.asFile.toString() }
-    pythonVersion = AsInput.from<PythonVersion>(python)
     pythonBuildDefinitionsDir = extension.definitionsDir
   }
 
-  versionConfig.outgoing.artifact(versionTask) { builtBy(versionTask) }
+  createPythonVersionTask<PyenvPythonVersionTask>("pyenv_dev_valgrind_python", devVersion, _targetHost, devDebugVersionConfig) {
+    pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+    pythonBuildDefinitionsDir = extension.definitionsDir
+    debugVariant = extension.debugVariant
+  }
+} else {
+  createPythonVersionTasks<WinPythonVersionTask>(_targetHost) {}
 }
 
 val heReleaseWheelsBucket by configurations.dependencyScope("heReleaseWheelsBucket")

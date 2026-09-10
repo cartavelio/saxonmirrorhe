@@ -111,7 +111,8 @@ val supportedPythonExes = mapOf<String, Provider<RegularFile>>(*extension.suppor
     dependencies {
         pythonBucket(project(path = ":python", configuration = "python${v}"))
     }
-    v to pythonExe.elements.map { layout.buildDirectory.file(it.single().asFile.readText()).get() }
+
+    v to pythonExe.elements.map { layout.buildDirectory.file(it.single().asFile.readText().trim()).get() }
 }.toTypedArray())
 
 extension.supportedPythonVersions.get().forEach { pythonVersion ->
@@ -122,7 +123,7 @@ extension.supportedPythonVersions.get().forEach { pythonVersion ->
         pythonEnv = extension
         branch = manageBranches.currentBranch
         suffix = "${v}-release"
-        pyenvPythonExe = supportedPythonExes.get(v)!!
+        pythonVersionExe = supportedPythonExes.get(v)!!
         buildSystemBootstrap = pyprojectToml
     }
 
@@ -200,14 +201,14 @@ val devPyRelease = extension.version.map { pythonVersions.findSupported(it) }
 val devPythonExe = supportedPythonExes.get(extension.version.get())!! // configurations.named<ResolvableConfiguration>(pythonVersions[extension.version.get()]!!)
 
 val venv = tasks.register<PythonVenv>("venv") {
-    pyenvPythonExe = devPythonExe
+    pythonVersionExe = devPythonExe
     pythonEnv = extension
     branch = manageBranches.currentBranch
     buildSystemBootstrap = pyprojectToml
 }
 
 val debugVenv = tasks.register<PythonVenv>("debug_venv") {
-    pyenvPythonExe = devDebugPythonExe.elements.map { project.file(it.single().asFile.readText()) }
+    pythonVersionExe = devDebugPythonExe.elements.map { project.file(it.single().asFile.readText()) }
     pythonEnv = extension
     branch = manageBranches.currentBranch
     buildSystemBootstrap = pyprojectToml

@@ -4,6 +4,7 @@
 .DS_Store
 ._.DS_Store
 python/.pyenv/
+python/.python-versions/
 .project
 .settings/
 .classpath

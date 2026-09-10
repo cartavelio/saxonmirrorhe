@@ -3,11 +3,15 @@ package com.saxonica.build.python
 import com.saxonica.build.TargetHost
 import com.saxonica.build.AsInput
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
@@ -15,16 +19,18 @@ import org.gradle.process.ExecSpec
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
-abstract class PyenvExe @Inject constructor(private val ex: ExecOperations) : DefaultTask() {
+
+/**
+ * Only needed for macOS / Linux - Windows uses the system-installed Python Install Manager pymanager
+ */
+abstract class PyenvExe @Inject constructor(private val ex: ExecOperations, private val layout: ProjectLayout, private val providers: ProviderFactory) : DefaultTask() {
     @get:Optional
     @get:Input
     abstract val pyenvExePath: Property<String>
 
     @OutputFile
-    val pyenv: Provider<RegularFile> = pyenvExePath.orElse(findPyenvExePath()).flatMap {
-        val fileProp = project.objects.fileProperty()
-        fileProp.set(project.file(it))
-        fileProp
+    val pyenv: Provider<RegularFile> = pyenvExePath.orElse(findPyenvExePath()).map {
+        layout.projectDirectory.file(it)
     }
 
     fun execString(exe: String , arguments: List<String>, env: Map<String, String> = mapOf()): String {
@@ -39,17 +45,20 @@ abstract class PyenvExe @Inject constructor(private val ex: ExecOperations) : De
         }
     }
 
-    // Needs something done to it for Windows
     fun findPyenvExePath(): Provider<String> {
-        return project.providers.provider {
-            val systemOs = OperatingSystem.current()
-            val whichIsh = if (systemOs.isWindows()) "where.exe" else "which"
-            execString(whichIsh, listOf("pyenv")).lines().last().trim()
+        return providers.provider {
+            execString("which", listOf("pyenv")).lines().last().trim()
         }
     }
 }
 
-abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperations): DefaultTask() {
+abstract class PythonVersionTask: DefaultTask() {
+    @get:Inject
+    abstract val ex: ExecOperations
+
+    @get:Inject
+    abstract val layout: ProjectLayout
+
     @get:Internal
     abstract val targetHost: Property<TargetHost>
 
@@ -59,33 +68,30 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
     @get:Internal
     val _pythonVersion = pythonVersion.map { it.get<PythonVersion>() }
 
-    @get:InputFile
-    abstract val pyenvExe: RegularFileProperty
+    @get:OutputFile
+    val pythonExe = _pythonVersion.map { layout.buildDirectory.file("python-${it.version}").get() }
+
+    @get:Internal
+    abstract val pythonVersionsRoot: DirectoryProperty
 
     @get:Input
-    abstract val pyenvRoot: Property<String>
-
-    @get:InputDirectory
-    abstract val pythonBuildDefinitionsDir: DirectoryProperty
+    val _pythonVersionsRoot = pythonVersionsRoot.map { it.asFile.toString() }
 
     @get:Optional
     @get:Input
     abstract val debugVariant: Property<String>
+}
 
-    @get:OutputFile
-    val pythonExe = _pythonVersion.map { project.layout.buildDirectory.file("python-${it.version}").get() }
+abstract class PyenvPythonVersionTask : PythonVersionTask() {
+    @get:InputFile
+    abstract val pyenvExe: RegularFileProperty
+
+    @get:InputDirectory
+    abstract val pythonBuildDefinitionsDir: DirectoryProperty
 
     @Internal
     val pyenvVersionName: Provider<String> = _pythonVersion.map {
         "${it.buildName}${if (debugVariant.isPresent()) "-${debugVariant.get()}" else "" }"
-    }
-
-    private fun pythonExePath(pyenv: RegularFile): String {
-        return if (targetHost.get().isWindows) {
-            windowsExePath(pyenv)
-        } else {
-            nonWindowsExePath(pyenv)
-        }
     }
 
     private fun execToString(action: ExecSpec.() -> Unit): String {
@@ -98,42 +104,30 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
         }
     }
 
-    private fun nonWindowsExePath(pyenv: RegularFile): String {
+    private fun pythonExePath(pyenv: RegularFile): String {
         return execToString {
             environment("PYENV_VERSION", pyenvVersionName.get())
-            environment("PYENV_ROOT", pyenvRoot.get())
+            environment("PYENV_ROOT", _pythonVersionsRoot.get())
             executable(pyenv)
             args("which", "python")
-        }
-    }
-
-    private fun windowsExePath(pyenv: RegularFile): String {
-        val latestInstalledOfMajorVersion = execToString {
-            executable(pyenv)
-            args("latest", pyenvVersionName.get())
-        }
-        return execToString {
-            executable("cmd.exe")
-            args("/c")
-            args("${pyenv.asFile} shell ${latestInstalledOfMajorVersion} &&  ${pyenv.asFile} which python")
         }
     }
 
     @TaskAction
     fun execute() {
         // version
-        // if not in pyenv versions
         //   if version in python/
         //      pyenv install /path/to/python/version
         //   else
         //      pyenv install version
         val _targetHost = targetHost.get()
+        if (_targetHost.isWindows) {
+            throw GradleException("pyenv tasks cannot run on Windows")
+        }
         val pyenv = pyenvExe.get()
         var pythonBuildVersionName = pyenvVersionName.get()
         val execResult = ex.exec {
-            if (!_targetHost.isWindows) {
-                environment("PYENV_ROOT", pyenvRoot.get())
-            }
+            environment("PYENV_ROOT", _pythonVersionsRoot.get())
             executable(pyenv)
             args("latest", pythonBuildVersionName)
             setIgnoreExitValue(true)
@@ -146,9 +140,7 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
                 pythonBuildVersionName = definitionFile.asFile.toString()
             }
             ex.exec {
-                if (!_targetHost.isWindows) {
-                    environment("PYENV_ROOT", pyenvRoot.get())
-                }
+                environment("PYENV_ROOT", _pythonVersionsRoot.get())
                 executable(pyenv)
                 if (_targetHost.isMacOS) {
                     environment("MACOSX_DEPLOYMENT_TARGET", _pythonVersion.get().macOsMinVersion(_targetHost))

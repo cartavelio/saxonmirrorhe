@@ -16,7 +16,6 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.ProjectLayout
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.jvm.JvmTestSuite
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
@@ -316,12 +315,12 @@ interface SaxonCPhpExtension {
     val makeExe: Property<File>
 }
 
-interface PyenvExtension {
+interface PythonVersionsExtension {
     val devVersion: Property<AsInput<PythonVersion>>
     val pythonVersions: Property<PythonVersions>
     val debugVariant: Property<String>
     val definitionsDir: DirectoryProperty
-    val pyenvRoot: DirectoryProperty
+    val installRoot: DirectoryProperty
 }
 
 interface SaxonCSExtension {
