@@ -516,7 +516,9 @@ public class Serialize extends SystemFunction implements Callable {
                         paramMap = paramMap.put(new StringValue(s), kvp.value);
                     }
                 }
-                Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(paramMap, context);
+                int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+                Map<String, GroundedValue> checkedOptions =
+                        getDetails().optionDetails.processSuppliedOptions(paramMap, context, version);
                 params = serializationParamsFromMap(checkedOptions, context);
             } else {
                 throw new XPathException("Second argument to fn:serialize() must either be an element named {"

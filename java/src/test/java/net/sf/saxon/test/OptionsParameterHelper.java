@@ -24,7 +24,7 @@ public class OptionsParameterHelper {
      */
     public static Map<String, GroundedValue> defaultOptionParameters(OptionsParameter params) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
-        return params.processSuppliedOptions(EmptyMap.getInstance(), ctxt);
+        return params.processSuppliedOptions(EmptyMap.getInstance(), ctxt, 40);
     }
 
     /**
@@ -36,7 +36,7 @@ public class OptionsParameterHelper {
      */
     public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, Map<String, GroundedValue> options) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
-        return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt);
+        return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt, 40);
     }
 
     /**
@@ -48,7 +48,7 @@ public class OptionsParameterHelper {
      */
     public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, MapItem options) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
-        return params.processSuppliedOptions(options, ctxt);
+        return params.processSuppliedOptions(options, ctxt, 40);
     }
 
     /**
@@ -60,7 +60,7 @@ public class OptionsParameterHelper {
      * @throws XPathException
      */
     public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, Map<String, GroundedValue> options, XPathContext ctxt) throws XPathException {
-        return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt);
+        return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt, 40);
     }
 
     /**
@@ -72,7 +72,7 @@ public class OptionsParameterHelper {
      * @throws XPathException
      */
     public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, MapItem options, XPathContext ctxt) throws XPathException {
-        return params.processSuppliedOptions(options, ctxt);
+        return params.processSuppliedOptions(options, ctxt, 40);
     }
 
     public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, DslLambda<TestMapBuilder> definition) throws XPathException {

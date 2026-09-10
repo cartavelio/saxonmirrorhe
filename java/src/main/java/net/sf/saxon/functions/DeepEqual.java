@@ -161,7 +161,7 @@ public class DeepEqual extends CollatingFunctionFixed {
 
 
         public DeepEqualOptions(MapItem map, XPathContext context, int version) throws XPathException {
-            Map<String, GroundedValue> values = OPTION_DETAILS.processSuppliedOptions(map, context);
+            Map<String, GroundedValue> values = OPTION_DETAILS.processSuppliedOptions(map, context, 40);
             for (String option : DeepEqualOptions.booleanOptions) {
                 setBooleanOption(values, option);
             }

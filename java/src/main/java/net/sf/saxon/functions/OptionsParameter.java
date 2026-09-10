@@ -106,13 +106,15 @@ public class OptionsParameter {
      * Process an XPath map containing the supplied values. Options that are recognized are copied
      * into the result map, after validation and expansion of defaults. Unrecognized options are
      * ignored, in accordance with the option parameter conventions
+     *
      * @param supplied the supplied options as an XPath map object
-     * @param context the dynamic evaluation context
+     * @param context  the dynamic evaluation context
+     * @param version the XPath language version (times 10)
      * @return the validated options as a Java map
      * @throws XPathException if any supplied options are invalid
      */
 
-    public Map<String, GroundedValue> processSuppliedOptions(MapItem supplied, XPathContext context) throws XPathException {
+    public Map<String, GroundedValue> processSuppliedOptions(MapItem supplied, XPathContext context, int version) throws XPathException {
         Map<String, GroundedValue> result = new HashMap<>();
         Configuration config = context.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
@@ -124,11 +126,13 @@ public class OptionsParameter {
             }
         }
 
-        // A 4.0 rule which we're applying unconditionally: reject mis-spelt option names
-        for (KeyValuePair kvp : supplied.keyValuePairs()) {
-            if (!(kvp.key instanceof StringValue && allowedOptions.containsKey(kvp.key.getStringValue())) &&
-                    !(kvp.key instanceof QNameValue && !((QNameValue)kvp.key).getNamespaceURI().isEmpty())) {
-                throw new XPathException("Unrecognized option: " + Err.depict(kvp.key), "XPTY0004").asTypeError();
+        // A 4.0 rule: reject mis-spelt option names
+        if (version >= 40) {
+            for (KeyValuePair kvp : supplied.keyValuePairs()) {
+                if (!(kvp.key instanceof StringValue && allowedOptions.containsKey(kvp.key.getStringValue())) &&
+                        !(kvp.key instanceof QNameValue && !((QNameValue) kvp.key).getNamespaceURI().isEmpty())) {
+                    throw new XPathException("Unrecognized option: " + Err.depict(kvp.key), "XPTY0004").asTypeError();
+                }
             }
         }
 

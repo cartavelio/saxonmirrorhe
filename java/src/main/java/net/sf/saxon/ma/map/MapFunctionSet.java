@@ -628,7 +628,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             FunctionItem valueFunction = (FunctionItem) arguments[2].head();
             MapItem options = (MapItem)arguments[3].head();
             if (options != null) {
-                getDetails().optionDetails.processSuppliedOptions(options, context);
+                int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+                getDetails().optionDetails.processSuppliedOptions(options, context, version);
             } else {
                 options = EmptyMap.getInstance();
             }
@@ -708,6 +709,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapMerge extends SystemFunction {
 
+        public MapMerge() {
+            super();
+        }
+
 
         private final String duplicatesErrorCode = "FOJS0003";
 
@@ -742,7 +747,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 if (arguments.length > 1) {
                     MapItem options = (MapItem) arguments[1].head();
                     if (options != null && !options.isEmpty()) {
-                        Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(options, context);
+                        int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+                        Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(options, context, version);
                         action = getDuplicatesCombiner(options, "use-first", duplicatesErrorCode);
                     }
                 }

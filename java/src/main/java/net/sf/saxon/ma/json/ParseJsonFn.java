@@ -61,7 +61,8 @@ public class ParseJsonFn extends JsonToXMLFn {
     protected Item eval(UnicodeString input, MapItem options, XPathContext context) throws XPathException {
         Map<String, GroundedValue> checkedOptions = null;
         if (options != null) {
-            checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+            int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+            checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, version);
         }
         return parse(input.codePoints(), checkedOptions, context);
     }

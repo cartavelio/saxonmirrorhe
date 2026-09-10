@@ -178,7 +178,7 @@ public class Doc extends SystemFunction implements Callable {
             // to ensure we get the default JDK parser implementation, rather than picking a parser
             // off the classpath.
 
-            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
             parseOptions = processOptions(checkedOptions, getRetainedStaticContext());
 
         } else {

@@ -92,7 +92,7 @@ public class Path_1 extends SystemFunction {
             MapItem options = (MapItem)arguments[1].head();
             Map<String, GroundedValue> checkedOptions = null;
             if (options != null) {
-                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
                 if (checkedOptions.containsKey("indexes")) {
                     withIndexes = checkedOptions.get("indexes").effectiveBooleanValue();
                 }

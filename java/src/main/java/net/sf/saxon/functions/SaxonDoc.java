@@ -155,7 +155,7 @@ public class SaxonDoc extends SystemFunction implements Callable {
         String href = hrefVal.getStringValue();
         Item param = arguments[1].head();
         Map<String, GroundedValue> checkedOptions =
-                getDetails().optionDetails.processSuppliedOptions((MapItem) param, context);
+                getDetails().optionDetails.processSuppliedOptions((MapItem) param, context, 40);
         ParseOptions parseOptions = setParseOptions(getRetainedStaticContext(), checkedOptions, context);
 
         NodeInfo item = fetch(href, parseOptions, context).getRootNode();

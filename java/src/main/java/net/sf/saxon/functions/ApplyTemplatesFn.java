@@ -75,7 +75,7 @@ public class ApplyTemplatesFn extends SystemFunction {
         if (getArity() >= 2) {
             MapItem options = (MapItem) arguments[1].head();
             if (options != null) {
-                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
             }
         }
         AtomicValue modeVal = (AtomicValue) checkedOptions.get("mode");

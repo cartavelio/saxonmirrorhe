@@ -82,16 +82,16 @@ public class JsonDoc extends SystemFunction  {
 //        }
 
         Map<String, GroundedValue> checkedOptions;
+        int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         if (getArity() == 2) {
             MapItem options = (MapItem) arguments[1].head();
             if (options == null) {
                 checkedOptions = new HashMap<>();
             } else {
-                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, version);
             }
         } else {
-            checkedOptions = ParseJsonFn.makeOptionsParameter(
-                    getRetainedStaticContext().getPackageData().getHostLanguageVersion())
+            checkedOptions = ParseJsonFn.makeOptionsParameter(version)
                     .getDefaultOptions();
         }
         Item result = ParseJsonFn.parse(content, checkedOptions, context);

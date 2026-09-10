@@ -545,7 +545,9 @@ public class TransformFn extends SystemFunction implements Callable {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Map<String, GroundedValue> options = getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[0].head(), context);
+        int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+        Map<String, GroundedValue> options =
+                getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[0].head(), context, version);
 
         Sequence vendorOptionsValue = options.get("vendor-options");
         MapItem vendorOptions = vendorOptionsValue == null ? null : (MapItem) vendorOptionsValue.head();

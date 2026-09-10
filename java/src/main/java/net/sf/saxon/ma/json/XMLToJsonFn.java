@@ -74,7 +74,9 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
             if (suppliedOptions == null) {
                 suppliedOptions = EmptyMap.getInstance();
             }
-            Map<String, GroundedValue> options = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
+            int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+            Map<String, GroundedValue> options =
+                    getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context, version);
             o.indent = ((BooleanValue) options.get("indent").head()).getBooleanValue();
             o.escapeSolidus = ((BooleanValue) options.get("escape-solidus").head()).getBooleanValue();
             return o;

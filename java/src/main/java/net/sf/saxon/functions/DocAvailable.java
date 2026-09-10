@@ -47,7 +47,7 @@ public class DocAvailable extends SystemFunction  {
                 options = (MapItem) arguments[1].head();
             }
             if (options != null && !options.isEmpty()) {
-                Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+                Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
                 parseOptions = Doc.processOptions(checkedOptions, getRetainedStaticContext());
 
             } else {

@@ -4413,6 +4413,7 @@ public class XPathParser {
                     MapItem optionsMap = optionsBuilder.getCompletedMap();
                     result = MapFunctionSet.getInstance(version).makeFunction("merge", 2)
                             .makeFunctionCall(operands.get(0), Literal.makeLiteral(optionsMap));
+                    result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }
 
                 break;

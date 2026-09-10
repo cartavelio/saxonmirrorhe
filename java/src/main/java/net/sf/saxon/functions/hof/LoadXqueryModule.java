@@ -89,7 +89,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             if (suppliedOptions == null) {
                 suppliedOptions = EmptyMap.getInstance();
             }
-            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
+            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context, 40);
             xqueryVersionOption = checkedOptions.get("xquery-version");
             if (xqueryVersionOption != null) {
                 double vn = ((DecimalValue) xqueryVersionOption.head()).getDoubleValue();

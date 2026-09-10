@@ -52,7 +52,7 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
             if (arg1 instanceof StringValue) {
                 encoding = arg1.getStringValue();
             } else if (arg1 instanceof MapItem) {
-                Map<String, GroundedValue> options = OPTION_DETAILS.processSuppliedOptions(((MapItem) arg1), context);
+                Map<String, GroundedValue> options = OPTION_DETAILS.processSuppliedOptions(((MapItem) arg1), context, 40);
                 GroundedValue encodingOption = options.get("encoding");
                 if (encodingOption != null) {
                     encoding = encodingOption.getStringValue();
