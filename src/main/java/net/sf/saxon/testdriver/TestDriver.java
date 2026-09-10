@@ -79,9 +79,7 @@ public abstract class TestDriver {
     protected Map<String, Integer> failSummary = new TreeMap<>();
     protected boolean quiet = false;
     protected boolean strict = false;
-    protected String xxCompilerLocation;
-    protected XsltExecutable xxCompiler;
-    protected Set<String> laxTests = new HashSet<String>();
+    protected Set<String> laxTests = new HashSet<>();
 
     static Set<String> unsharedEnvironments = new HashSet<>();
     static {
@@ -226,11 +224,6 @@ public abstract class TestDriver {
             // Set optimization flags
             if (args[i].startsWith("-opt:")) {
                 optimizerFlags = argValue;
-            }
-            // Use the XSLT-in-XSLT compiler for generating export files. The option
-            // gives the location of the compiler stylesheet
-            if (args[i].startsWith("-XX:")) {
-                xxCompilerLocation = argValue;
             }
         }
 //        System.err.println("SAXON_LICENSE_DIR=" + System.getenv("SAXON_LICENSE_DIR"));
