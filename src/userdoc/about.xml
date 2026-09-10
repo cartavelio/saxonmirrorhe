@@ -257,7 +257,7 @@
                   For details, see <a class="bodylink" href="https://dotnet.microsoft.com/en-us/download/dotnet/6.0">https://dotnet.microsoft.com/en-us/download/dotnet/6.0</a>.
                There's a bewildering variety of options. Choose the latest version of the SDK (for example, SDK 6.0.403)
                corresponding to your chosen operating system (Windows, MacOS, or Linux) and CPU 
-               architecture (for example Arm64, x64, or x86).</p>
+               architecture (for example AArch64, x64, or x86).</p>
                
                <aside>At the time of writing, SaxonCS has not been tested on .NET 7. You're welcome to try it;
                please share your experiences. We'll try to fix any problems you report.</aside>
@@ -1071,7 +1071,7 @@ any version number.</p>
      platform: Linux, Windows, or MacOS from
      <a class="bodylink" href="https://www.saxonica.com/download/dotnet.xml">https://www.saxonica.com/download/dotnet.xml</a>.
      The MacOS application is a universal binary
-     that will work with either Intel or AMD64 versions of Mac hardware.</p>
+     that will work with either Intel or AArch64 versions of Mac hardware.</p>
       
       <ul>
          <li><p><b>Installing on Linux or Windows</b></p>
