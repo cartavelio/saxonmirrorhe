@@ -16,6 +16,7 @@ import net.sf.saxon.expr.elab.StringEvaluator;
 import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.ToLower;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -62,7 +63,7 @@ public class LowerCase extends ScalarSystemFunction {
             return context -> {
                 UnicodeString s0 = argEval.eval(context);
                 if (s0 == null) {
-                    return handleNullUnicodeString(zeroLengthWhenAbsent);
+                    return EmptyUnicodeString.getInstance();
                 }
                 return ToLower.toLower(s0);
             };
@@ -76,7 +77,7 @@ public class LowerCase extends ScalarSystemFunction {
             return context -> {
                 String s0 = argEval.eval(context);
                 if (s0 == null) {
-                    return handleNullString(zeroLengthWhenAbsent);
+                    return "";
                 }
                 return s0.toLowerCase();
             };
@@ -90,7 +91,7 @@ public class LowerCase extends ScalarSystemFunction {
             return context -> {
                 UnicodeString s0 = argEval.eval(context);
                 if (s0 == null) {
-                    return zeroLengthWhenAbsent ? "" : null;
+                    return "";
                 }
                 return ToLower.toLower(s0).toString();
             };
