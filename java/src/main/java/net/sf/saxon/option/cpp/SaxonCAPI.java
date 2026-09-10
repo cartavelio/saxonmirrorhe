@@ -165,6 +165,22 @@ public class SaxonCAPI {
         return SaxonCAPI.STATUS_FAIL;
     }
 
+    @CEntryPoint(name = "j_setPHPNative", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_setPHPNative(IsolateThread thread) throws SaxonApiException {
+//#if EE==true || PE==true
+        NativeCall.setPHPNative();
+//#endif
+        return SaxonCAPI.STATUS_OK;
+    }
+
+    @CEntryPoint(name = "j_setIndirectFunctionForNativeCall", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_setIndirectFunctionForNativeCall(IsolateThread thread, NativeCall.NativeFunctionPointer nativeFunctionPointer) throws SaxonApiException {
+//#if EE==true || PE==true
+        NativeCall.setIndirectFunctionForNativeCall(nativeFunctionPointer);
+//#endif
+        return SaxonCAPI.STATUS_OK;
+    }
+
 
     @CEntryPoint(name = "j_registerFunctionDefinition", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_registerFunctionDefinition(IsolateThread thread, ObjectHandle procRef, CCharPointer c_namespace, ObjectHandle signatureRef, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc, int c_useNativeTypes) throws SaxonApiException {

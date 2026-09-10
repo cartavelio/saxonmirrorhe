@@ -77,61 +77,59 @@ void SaxonProcessor::getInfo() {
 
 #endif
 
-extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments) {
+extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, void * func, int phpFlag, int useNativeTypes, int numOfArguments, void ** arguments) {
     if (getenv("SAXONC_DEBUG_FLAG")) {
-        fprintf(stdout, "We are in a c function. calling function name %s=\n", functionName);
+        fprintf(stdout, "We are in a c function. calling function name= %s\n", functionName);
     }
 
   void * userFuncResult = nullptr;
-  XdmValue * result = nullptr;
-  XdmValue ** arguments1 = new XdmValue*[numOfArguments];
-  for(int i =0; i< numOfArguments; i++) {
+
+  if (phpFlag == 1) {
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      fprintf(stdout, "We are in a c function. calling PHP logic ");
+    }
+    phpExtensionFunction func1 = phpExtensionFunction(func);
+
+    userFuncResult = func1(functionName, proc, func, useNativeTypes, numOfArguments, arguments);   // call of the user function
+
+    for(int i =0; i< numOfArguments; i++) {
+      j_handles_destroy((graal_isolatethread_t *)thread, arguments[i]);
+    }
+
+    operator delete(arguments);
+
+
+
+  } else {
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      fprintf(stdout, "We are in a c function. calling C++ logic ");
+    }
+    XdmValue ** arguments1 = new XdmValue*[numOfArguments];
+    for(int i =0; i< numOfArguments; i++) {
       if (getenv("SAXONC_DEBUG_FLAG")) {
         fprintf(stdout, "Making XdmValue YYYIII ref=%ld.\n", (long)arguments[i]);
       }
-        arguments1[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)arguments[i]);
-  }
+      arguments1[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)arguments[i]);
+    }
+    userFuncResult  = userFunctionNativeCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
 
-  userFuncResult  = userFunctionNativeCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
+    for(int i =0; i< numOfArguments; i++) {
+
+        delete arguments1[i];
+    }
+
+    //delete [] arguments; // TODO check where allocation is deleted.
+    //arguments = nullptr;
+    operator delete(arguments1);
+    arguments1 = nullptr;
+  }
 
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr<<"after user function call - c_nativeCall ref="<<((long)userFuncResult)<<std::endl;
   }
 
-  //destroy arguments
-  /*if(useNativeTypes) {
-    for(int i =0; i< numOfArguments; i++) {
-      //delete arguments1[i];
-      arguments1[i]->resetValue(SXN_UNSET);
-      delete arguments1[i];
-    }
-  }*/
-  delete [] arguments;
-  arguments = nullptr;
-  delete [] arguments1;
-  arguments1 = nullptr;
-
-  /*if(result != nullptr) {
-    result->decrementRefCount();
-    if(result->getRefCount() < 1) {
-      result->resetValue(SXN_UNSET);
-      delete result;
-      result = nullptr;
-    }
-  } */
-
   return userFuncResult;
 }
-
-extern "C" void * c_nativeCallX(void *thread, char * functionName) {
-  fprintf(stdout, "We are in the C++ c_nativeCallX function\n");
-  // loop through the values
-  fflush(stdout);
-  int64_t longValueRef = j_makeLongValue(SaxonProcessor::sxn_environ->thread, 5);
-  return (void *)longValueRef;
-}
-
-
 
 // jobject cpp;
 const char *failure;
@@ -312,6 +310,9 @@ void SaxonProcessor::initialize(bool l) {
      * InitializeGraalvm run-time.
      */
     create_graalvm_isolate(SaxonProcessor::sxn_environ);
+
+    nativeFn fn1 = c_nativeCall;
+    j_setIndirectFunctionForNativeCall(SaxonProcessor::sxn_environ->thread, (void *)fn1);
 #ifdef DEBUG
     setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
 #endif
@@ -498,10 +499,8 @@ const char * SaxonProcessor::getSaxonEdition() {
 }
 
 void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, void * func, const char * signature, bool useNativeTypes) {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   XdmValue * signatureValue = parseJsonFromString(signature);
-nativeFn fn1 = c_nativeCall;
-
-  j_testIndirectFunction(SaxonProcessor::sxn_environ->thread, (void *)fn1);
 
   if(signatureValue == nullptr) {
     throw new SaxonApiException("Failed to create function signature from JSON");
@@ -515,7 +514,7 @@ nativeFn fn1 = c_nativeCall;
   }
 
 
-  long status = j_registerFunctionDefinition(SaxonProcessor::sxn_environ->thread,(void *)procRef, (char *) ns1,
+  long status = j_registerFunctionDefinition(thread,(void *)procRef, (char *) ns1,
                                              (void *)signatureValue->getUnderlyingValue(), (void *)python_procPtr, (void *) func, (void *) alloc, (int)useNativeTypes);
 
 

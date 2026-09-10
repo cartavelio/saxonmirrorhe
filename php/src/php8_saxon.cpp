@@ -1380,37 +1380,6 @@ PHP_METHOD(SaxonProcessor, clearConfigurationProperties) {
   }
 }
 
-PHP_METHOD(SaxonProcessor, registerUserFunction)
-{
-
-    SaxonProcessor *saxonProcessor;
-    char * namespacei = nullptr;
-    char * signature = nullptr;
-    bool useNativeTypes = true;
-    size_t len1, len2;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "ssb", &namespacei, &len1, &signature, &len2, &useNativeTypes) ==
-FAILURE) { RETURN_NULL();
-    }
-
-    zend_object* pobj = Z_OBJ_P(getThis());
-    saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj -
-XtOffsetOf(saxonProcessor_object, std));
-
-  if(signature == nullptr) {
-       zend_throw_exception(zend_ce_exception, "Method signature is null", 0);
-   }
-
-    saxonProcessor = obj->saxonProcessor;
-                 try {
-
-                    saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, (void *)nullptr, (const char *)signature, useNativeTypes);
-                } catch (SaxonApiException &e) {
-                    zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-                 }
-
-}
-
 typedef enum saxonTypeEnum {
   enumNode,
   enumString,
@@ -1421,25 +1390,25 @@ typedef enum saxonTypeEnum {
   enumArrXdmValue
 } PRIMITIVE_TYPE;
 
-zval makePHPValue(XdmValue * value){
+zval makePHPValue(void * value){
 
   zval retval;
-
-    std::map<std::string, saxonTypeEnum> typeMap;
-    typeMap["node"] = enumNode;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}string"] = enumString;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}duration"] = enumString;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}dateTime"] = enumString;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}date"] = enumString;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}gYearMonth"] = enumString;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}gYear"] = enumString;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}gMonthDay"] = enumString;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}time"] = enumString;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}integer"] = enumInteger;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}double"] = enumDouble;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}decimal"] = enumDouble;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}float"] = enumFloat;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}boolean"] = enumBool;
+//TODO move this hashmap somewhere else to prevent repeatable construction
+  std::map<std::string, saxonTypeEnum> typeMap;
+  typeMap["node"] = enumNode;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}string"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}duration"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}dateTime"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}date"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}gYearMonth"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}gYear"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}gMonthDay"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}time"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}integer"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}double"] = enumDouble;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}decimal"] = enumDouble;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}float"] = enumFloat;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}boolean"] = enumBool;
 
   typeMap["Q{http://www.w3.org/2001/XMLSchema}gDay"] = enumString;
   typeMap["Q{http://www.w3.org/2001/XMLSchema}gMonth"] = enumString;
@@ -1466,11 +1435,11 @@ zval makePHPValue(XdmValue * value){
   typeMap["Q{http://www.w3.org/2001/XMLSchema}anyType"] = enumString;
   typeMap["Q{http://www.w3.org/2001/XMLSchema}anySimpleType"] = enumString;
 
-    typeMap["[xdmvalue"] = enumArrXdmValue;
+  typeMap["[xdmvalue"] = enumArrXdmValue;
 
-  int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)value->getUnderlyingValue());
+  int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, value);
 
-
+  allocFn fn = operator new;
 
   XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
 
@@ -1487,14 +1456,25 @@ zval makePHPValue(XdmValue * value){
 
   if (xdm_type == XDM_ATOMIC_VALUE) {
 
-    XdmAtomicValue * aitem = (XdmAtomicValue *) (value->getHead());
-    const char * primType = aitem->getPrimitiveTypeName();
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    char * primType = j_getPrimitiveTypeName(thread,(void *)fn, (void *)value);
+
+    //XdmAtomicValue * aitem = (XdmAtomicValue *) (value->getHead());
+    //const char * primType = aitem->getPrimitiveTypeName();
 
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr<<"Primitive type = "<< primType<<std::endl;
     }
 
-    saxonTypeEnum typeValue = typeMap[primType];
+    saxonTypeEnum typeValue;
+
+    if(primType == NULL) {
+        typeValue = typeMap["Q{http://www.w3.org/2001/XMLSchema}anySimpleType"];
+    } else {
+        typeValue = typeMap[primType];
+        operator delete(primType);
+    }
+
     bool bvalue;
     long lnumber;
     double dvalue;
@@ -1502,20 +1482,20 @@ zval makePHPValue(XdmValue * value){
 
     switch (typeValue) {
       case saxonTypeEnum::enumBool:
-      bvalue = aitem->getBooleanValue();
+      bvalue = j_getBooleanValue(thread, (void *)value) != 0;//aitem->getBooleanValue();
       ZVAL_BOOL(&retval, bvalue);
       break;
       case saxonTypeEnum::enumInteger:
-      lnumber = aitem->getLongValue();
+      lnumber = j_getLongValue(thread, (void *)value);//aitem->getLongValue();
       ZVAL_LONG(&retval, lnumber);
       break;
       case saxonTypeEnum::enumString:
-        astri = aitem->getStringValue();
+        astri = (const char *)getStringValueForXdmItem(thread,(void *)fn, (void *)value, NULL);//aitem->getStringValue();
       ZVAL_STRING(&retval, astri);
       break;
       case saxonTypeEnum::enumDouble:
       case saxonTypeEnum::enumFloat:
-        dvalue = aitem->getDoubleValue();
+        dvalue = j_getDoubleValue(thread, (void *)value);//aitem->getDoubleValue();
       ZVAL_DOUBLE(&retval, dvalue);
       break;
 
@@ -1523,7 +1503,7 @@ zval makePHPValue(XdmValue * value){
         if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr<<"PHP internal: type not found"<< std::endl;
         }
-        astri = aitem->getStringValue();
+        astri = (const char *)getStringValueForXdmItem(thread,(void *)fn, (void *)value, NULL);//aitem->getStringValue();
         ZVAL_STRING(&retval, astri);
         break;
 
@@ -1532,11 +1512,13 @@ zval makePHPValue(XdmValue * value){
     /*if(value->getType() == XDM_VALUE) {
   		delete value;
     }*/
-    value->resetRelinquishedItems();
-    delete value;
+    //value->resetRelinquishedItems();
+    //delete value;
   	return retval;
 } else if (xdm_type == XDM_NODE) {
-  XdmNode * nxdmItem = (XdmNode *)(value->getHead());
+  int64_t copiedValue = (int64_t)j_copy_handles(SaxonProcessor::sxn_environ->thread, value);
+  XdmNode * nxdmItem = new XdmNode(copiedValue);
+  //XdmNode * nxdmItem = (XdmNode *)(value->getHead());
   if (object_init_ex(&retval, xdmNode_ce) != SUCCESS) {
     //error
 
@@ -1552,15 +1534,16 @@ zval makePHPValue(XdmValue * value){
   assert (vobj != NULL);
 
   vobj->xdmNode = nxdmItem;
-  nxdmItem->incrementRefCount();
+  nxdmItem->incrementRefCount(); //TODO maybe we should be copying values
   //delete value;
   return retval;
 
 
 }  else if (xdm_type == XDM_MAP) {
-  XdmMap * mitem = (XdmMap *) (value->getHead());
 
-  int count = mitem->mapSize();
+   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int count = j_xdmMap_size(thread, (void *)value);
+  //int count = mitem->mapSize();
 
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr<<"PHPValue: XDMMap size="<<count<<std::endl;
@@ -1569,35 +1552,52 @@ zval makePHPValue(XdmValue * value){
   ///// creating PHP array
   zend_array *ret = zend_new_array(count);
   zend_ulong idx = 0;
-  XdmAtomicValue ** aKeys = mitem->keys();
+  //XdmAtomicValue ** aKeys = mitem->keys();
+
+  //graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  long long *rawKeys = j_xdmMap_keys(thread,(void *)fn, (void *)value);
+
+  long long * rawMapValues = j_xdmMap_values(thread,(void *)fn, (void *)value);
+
+  char * ss = nullptr;
+
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr<<"PHPValue: XDMMap before loop call"<<std::endl;
+    }
 
   for (int j = 0; j < count; j++) {
-    XdmValue * avaluej =mitem->get(aKeys[j]);
-
-
-    const char * ss = aKeys[j]->getStringValue();
-
+    //XdmValue * avaluej =mitem->get(aKeys[j]);
+    //todo add encoding instead of NULL
+    ss = getStringValueForXdmItem(thread,(void *)fn, (void *)rawKeys[j], NULL);
+    //const char * ss = aKeys[j]->getStringValue();
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr<<"PHPValue: XDMMap key str="<<ss<<std::endl;
+  }
     zend_string * keyzvalj = zend_string_init(ss, strlen(ss), 0);
 
 
-    zval retvalj = makePHPValue(avaluej);
+    zval retvalj = makePHPValue((void *)rawMapValues[j]);
 
     zend_hash_add(ret, keyzvalj, &retvalj);
     //delete avaluej;
+
+    operator delete(ss);
 
   }
   //delete [] aKeys;
   ZVAL_ARR(&retval, ret);
 
   for(int j = 0; j < count; j++) {
-    delete aKeys[j];
+    j_handles_destroy(thread, (void *)rawKeys[j]);
+    j_handles_destroy(thread, (void *)rawMapValues[j]);
   }
-  delete [] aKeys;
+  operator delete(rawKeys);
+  operator delete(rawMapValues);
   /*delete mitem;
   delete value;*/
 
-  value->resetRelinquishedItems();
-  delete value;
+  //value->resetRelinquishedItems();
+  //delete value;
 
   //TODO XdmMap objectHandle pool not getting cleared.. Clear Keys and values
 
@@ -1605,11 +1605,8 @@ zval makePHPValue(XdmValue * value){
 
   } else if (xdm_type == XDM_ARRAY) {
 
-
-
-  XdmArray * aitem = (XdmArray *) (value->getHead());
-
-  int count = aitem->arrayLength();
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int count = j_xdmArray_arrayLength(thread,(void *)value);
 
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr<<"PHPValue: XDMarray size="<<count<<std::endl;
@@ -1618,25 +1615,31 @@ zval makePHPValue(XdmValue * value){
   ///// creating PHP array
   zend_array *ret = zend_new_array(count);
   zend_ulong idx = 0;
-
+  int64_t avaluej =-1;
   for (int j = 0; j < count; j++) {
-    XdmValue * avaluej =aitem->get(j);
+
+    avaluej =
+        j_xdmArray_get(thread, (void *)value, j);
+    //XdmValue * avaluej =aitem->get(j);
     //itemi->incrementRefCount();
 
-    zval retvali = makePHPValue(avaluej);
+    zval retvali = makePHPValue((void *)avaluej);
+
+    j_handles_destroy(thread, (void *)avaluej);
 
     zend_hash_index_add(ret, idx, &retvali);
 
     idx++;
   }
   ZVAL_ARR(&retval, ret);
-  value->resetRelinquishedItems();
-  delete value;
+  //value->resetRelinquishedItems();
+  //delete value;
   return retval;
 
 
 } else if (xdm_type == XDM_FUNCTION_ITEM) {
-	XdmFunctionItem * funcxdmItem = (XdmFunctionItem *)(value->getHead());
+    int64_t copiedValue = (int64_t)j_copy_handles(SaxonProcessor::sxn_environ->thread, value);
+	XdmFunctionItem * funcxdmItem = new XdmFunctionItem((int64_t)copiedValue);
 
           struct xdmFunctionItem_object* aavobj;
           zend_object* zend_avobj;
@@ -1658,22 +1661,23 @@ zval makePHPValue(XdmValue * value){
   //delete value;
 }else if (xdm_type == XDM_VALUE) {
 
-  int count = value->size();
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  long long *rawValues = makeArrayFromXdmValue2(thread, (void *)fn, (void *)value);
+
+  int count = (int) rawValues[0];
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr<<"PHPValue: XDMValue size="<<count<<std::endl;
   }
-
-
 
   ///// creating PHP array
   zend_array *ret = zend_new_array(count);
   zend_ulong idx = 0;
 
-  for (int j = 0; j < count; j++) {
-    XdmItem *itemi = value->itemAt(j);
+  for (int j = 1; j <= count; j++) {
+    //XdmItem *itemi = value->itemAt(j);
     //itemi->incrementRefCount();
 
-    zval retvali = makePHPValue(itemi);
+    zval retvali = makePHPValue((void *) rawValues[j]);
 
     zend_hash_index_add(ret, idx, &retvali);
 
@@ -1682,7 +1686,16 @@ zval makePHPValue(XdmValue * value){
 
   zval arrval;
   ZVAL_ARR(&arrval, ret);
-  delete value;
+
+    for(int j = 1; j <= count; j++) {
+      j_handles_destroy(thread, (void *)rawValues[j]);
+
+    }
+
+    operator delete(rawValues);
+
+
+  //delete value;
     ///// create PHP ArrayIterator
   if (object_init_ex(&retval,spl_ce_ArrayIterator) != SUCCESS) {
 
@@ -1700,8 +1713,6 @@ zval makePHPValue(XdmValue * value){
 
 }
   zend_throw_exception(zend_ce_exception, "Internal Error: Cannot convert XdmValue to PHP value", 0);
-
-
 
 }
 
@@ -1791,7 +1802,7 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
               ZEND_HASH_FOREACH_END();
               //return SaxonProcessor::makeInternalArray(arrItems, rv_arr_length);
               valuei = (void *) j_makeXdmArray(SaxonProcessor::sxn_environ->thread, (void *)resultVoidValue);
-              j_handles_destroy(SaxonProcessor::sxn_environ->thread, resultVoidValue);
+              j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)resultVoidValue);
               return valuei;
 
             case IS_OBJECT:
@@ -1928,20 +1939,17 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
       }
 
       resultVoidValue = (void *)resultValue->getUnderlyingValue();
+      int64_t resultCopiedVoidValue = j_copy_handles(SaxonProcessor::sxn_environ->thread, resultVoidValue);
       //TODO check for memory leak - if we need to delete the resultValue.
-      //resultValue->resetValue(SXN_UNSET);
+      //delete resultValue;
 
 
-      return resultVoidValue;
+      return (void *)resultCopiedVoidValue;
 }
 
 
-
-void * userFunctionNativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
+void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  void ** argumentsi)
 {
-
-    //JNIEnv *senv = SaxonProcessor::sxn_environ->env;
-    //char *nativeString = functionName;
     if(functionName == NULL) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr<<"Error: phpNativeCall - functionName is null"<<std::endl;
@@ -1956,9 +1964,9 @@ void * userFunctionNativeCall(char * functionName, void * proc, void * func, int
 
     int argLength = 0;
     zval  *  params;
-    if(arguments != NULL) {
+    if(argumentsi != NULL) {
         argLength = numOfArguments;
-        //(*params) = (zval**)malloc(sizeof(zval*) * argLength);
+
         params =  new zval[argLength];
     } else {
         params = NULL;
@@ -1967,25 +1975,29 @@ void * userFunctionNativeCall(char * functionName, void * proc, void * func, int
     sxnc_value* sresult = (sxnc_value *)malloc(sizeof(sxnc_value));
 
 
-    SaxonProcessor * nprocessor = nullptr;
-
-    if(proc == nullptr) {
-         nprocessor = new SaxonProcessor(true); //processor object created for XdmNode
-    }  else {
-        nprocessor = (SaxonProcessor*) proc;
-
-    }
-
-
     if(useNativeTypes) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr<<"DEBUG: phpNativeCall - useNativeTypes"<<std::endl;
         }
         for(int i=0; i<argLength;i++){
-          params[i] = makePHPValue(arguments[i]);
+          params[i] = makePHPValue(argumentsi[i]);
         }
 
     } else {
+
+        XdmValue ** arguments = NULL;
+        int64_t argument = NULL;
+        if(numOfArguments > 0) {
+            arguments = new XdmValue*[numOfArguments];
+            for(int i =0; i< numOfArguments; i++) {
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                    fprintf(stdout, "Making XdmValue YYYIII ref=%ld.\n", (long)argumentsi[i]);
+                }
+                argument = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)argumentsi[i]);
+                arguments[i] = SaxonProcessor::makeXdmValueFromRef(argument);
+            }
+        }
+
       if (getenv("SAXONC_DEBUG_FLAG")) {
         std::cerr<<"DEBUG: phpNativeCall - using Xdmtypes"<<std::endl;
       }
@@ -2018,7 +2030,7 @@ void * userFunctionNativeCall(char * functionName, void * proc, void * func, int
                                         XtOffsetOf(xdmAtomicValue_object, std));
 
           assert(avobj != nullptr);
-          avobj->xdmAtomicValue = axdmItem;
+                                                                                                                                                                                                                                                                                                                                              avobj->xdmAtomicValue = axdmItem;
 
           continue;
 
@@ -2126,7 +2138,21 @@ void * userFunctionNativeCall(char * functionName, void * proc, void * func, int
       }
 
 
+     /*for(int i =0; i< numOfArguments; i++) {
+            delete arguments1[i];
+     } */
+     delete [] arguments;
+     arguments = nullptr;
     }
+
+    SaxonProcessor * nprocessor = nullptr;
+
+    if(proc == nullptr) {
+        nprocessor = new SaxonProcessor(true); //processor object created for XdmNode
+    }  else {
+        nprocessor = (SaxonProcessor*) proc;
+    }
+
     zval* callOnObj = NULL;
 
     ZVAL_STRING(&function_name, nativeString2.c_str());
@@ -2141,12 +2167,48 @@ void * userFunctionNativeCall(char * functionName, void * proc, void * func, int
 
     void * resultValue = makeXdmValueFromPHPZVal(nprocessor, &retval);
 
-
     if(resultValue == nullptr){
       return nullptr;
     }
+    //void* resultPointer = j_copy_handles(SaxonProcessor::sxn_environ->thread, resultValue);
+
     return resultValue;
 }
+
+
+PHP_METHOD(SaxonProcessor, registerUserFunction)
+{
+
+    SaxonProcessor *saxonProcessor;
+    char * namespacei = nullptr;
+    char * signature = nullptr;
+    bool useNativeTypes = true;
+    size_t len1, len2;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "ssb", &namespacei, &len1, &signature, &len2, &useNativeTypes) ==
+FAILURE) { RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj -
+XtOffsetOf(saxonProcessor_object, std));
+
+  if(signature == nullptr) {
+       zend_throw_exception(zend_ce_exception, "Method signature is null", 0);
+   }
+
+    saxonProcessor = obj->saxonProcessor;
+    try {
+        j_setPHPNative(SaxonProcessor::sxn_environ->thread); //TODO move this method call to avoid repeated calls
+        nativePHPFn fn1 = userFunctionPHPNativeCall;
+        saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, (void *)fn1, (const char *)signature, useNativeTypes);
+    } catch (SaxonApiException &e) {
+        zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+    }
+
+}
+
+
 
 /*     ============== PHP Interface of   XdmValue =============== */
 void xdmValue_free_storage(zend_object *object) {
@@ -4379,17 +4441,6 @@ PHP_METHOD(XdmArray, arrayLength) {
 
 /*PHP_ME(XdmArray,  values,      nullptr, ZEND_ACC_PUBLIC) */
 
-/*void php_saxonc_initialize(void){
-   if(SaxonProcessor::jvmCreatedCPP == 0){
-        SaxonProcessor::jvmCreatedCPP=1;
-        SaxonProcessor::sxn_environ= (sxnc_environment
-*)malloc(sizeof(sxnc_environment));
-
-    SaxonProcessor::sxn_environ->myDllHandle = loadDefaultDll ();
-
-    initDefaultJavaRT (SaxonProcessor::sxn_environ);
-    }
-} */
 
 // =============================================================
 
@@ -4559,9 +4610,6 @@ zend_function_entry xdmArray_methods[] = {
                ZEND_ACC_PUBLIC){nullptr, nullptr, nullptr}};
 
 PHP_MINIT_FUNCTION(saxon) {
-
-  // php_saxonc_initialize(); - commented out code which causes PHP to hang see
-  // bug issue #4371
 
   zend_class_entry ce;
   INIT_CLASS_ENTRY(ce, "Saxon\\SaxonProcessor", SaxonProcessor_methods);
