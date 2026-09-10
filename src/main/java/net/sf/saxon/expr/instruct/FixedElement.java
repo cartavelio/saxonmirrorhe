@@ -430,17 +430,18 @@ public class FixedElement extends ElementCreator {
         }
 
         // Check that a sequence consisting of this element alone is valid against the content model
+        Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
         if (whole) {
             Expression parent = getParentExpression();
             Block block = new Block(new Expression[]{this});
-            parentType.analyzeContentExpression(block, Type.ELEMENT, getRetainedStaticContext().getPackageData().getImportedSchema());
+            parentType.analyzeContentExpression(block, Type.ELEMENT, schema);
             setParentExpression(parent);
         }
 
         SchemaType type;
         try {
             int fp = elementName.obtainFingerprint(getConfiguration().getNamePool());
-            type = ((ComplexType) parentType).getElementParticleType(fp, null, true);
+            type = ((ComplexType) parentType).getElementParticleType(fp, schema, true);
         } catch (MissingComponentException e) {
             throw new XPathException(e);
         }

@@ -514,7 +514,11 @@ public class StandardErrorReporter
      */
 
     public String getExpandedMessage(XmlProcessingError err) {
-        String message = formatErrorCode(err) + " " + err.getMessage();
+        String preamble = formatErrorCode(err);
+        if (!preamble.isEmpty()) {
+            preamble += " ";
+        }
+        String message = preamble + err.getMessage();
         message = formatNestedMessages(err, message);
         return message;
     }

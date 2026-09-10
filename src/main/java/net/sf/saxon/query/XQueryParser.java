@@ -7,6 +7,7 @@
 
 package net.sf.saxon.query;
 
+import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
@@ -1274,6 +1275,12 @@ public class XQueryParser extends XPathParser {
         Configuration config = env.getConfiguration();
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized(config) {
+            PackageData pack = env.getPackageData();
+            if (pack.getImportedSchema().includesTargetNamespace(sImport.namespaceURI)) {
+                // Schema was preloaded
+                ((QueryModule) env).addImportedSchema(sImport.namespaceURI, env.getStaticBaseURI(), sImport.locationURIs);
+                return;
+            }
             if (!config.isSchemaAvailable(sImport.namespaceURI)) {
                 if (!sImport.locationURIs.isEmpty()) {
                     try {
@@ -1286,7 +1293,10 @@ public class XQueryParser extends XPathParser {
                 } else if (sImport.namespaceURI.equals(NamespaceUri.XML) ||
                         sImport.namespaceURI.equals(NamespaceUri.FN) ||
                         sImport.namespaceURI.equals(NamespaceUri.SCHEMA_INSTANCE)) {
-                    config.getSchemaForBuiltInNamespace(sImport.namespaceURI);
+                    Schema schema = config.getSchemaForBuiltInNamespace(sImport.namespaceURI);
+                    if (schema != null) {
+                        ((PreparedSchema)schema).copyTo(pack.getImportedSchema(),);
+                    }
                 } else {
                     grumble("Unable to locate requested schema " + sImport.namespaceURI, "XQST0059", sImport.offset);
                 }

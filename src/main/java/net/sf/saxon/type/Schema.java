@@ -3,6 +3,7 @@ package net.sf.saxon.type;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
@@ -26,6 +27,7 @@ public interface Schema {
 
     Configuration getConfiguration();
 
+    boolean includesTargetNamespace(NamespaceUri target);
     /**
      * Get a global attribute declaration by fingerprint
      *

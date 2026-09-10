@@ -829,6 +829,9 @@ public class QT3TestDriverHE extends TestDriver {
             assertXpc.declareNamespace("bin", NamespaceUri.EXPATH_BINARY.toString());
             assertXpc.declareVariable(new QName("result"));
             assertXpc.setBaseURI(assertion.getBaseURI());
+            if (env.schemaAware) {
+                assertXpc.setSchemaAware(true);
+            }
 
             copySchemaNamespaces(env, assertXpc);  // ensure environment has schema namespaces
 

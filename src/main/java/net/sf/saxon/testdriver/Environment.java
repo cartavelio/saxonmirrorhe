@@ -77,11 +77,11 @@ public class Environment implements ResourceResolver {
     public StringBuilder paramDecimalDeclarations = new StringBuilder(256);
     public UnparsedTextURIResolver unparsedTextResolver;
     public List<ResetAction> resetActions = new ArrayList<>();
-    public boolean schemaAvailable = false;
     public boolean outputTree = true;
     public boolean outputSerialize = false;
     public Map<String, CatalogResource> catalogResources = new HashMap<>();
     public Map<String, List<String>> jsCollections;
+    public boolean schemaAware = false;
 
 
     /**
@@ -409,6 +409,7 @@ public class Environment implements ResourceResolver {
         boolean validateSources = false;
         List<Source> sourceList = new ArrayList<>();
         for (XdmNode schema : env.children("schema")) {
+            environment.schemaAware = true;
             String role = schema.attribute("role");
             String xsdVersion = schema.attribute("xsd-version");
             if (manager == null) {

@@ -3055,8 +3055,7 @@ public class Configuration implements SourceResolver {
      * @return an empty schema containing only the built-in components.
      */
     public Schema emptySchema() {
-        needEnterpriseEdition();
-        return null;
+        return new MinimalSchema(this);
     }
 
     /**
