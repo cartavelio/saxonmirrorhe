@@ -7,13 +7,16 @@
 
 package net.sf.saxon.type;
 
+import com.saxonica.functions.qt4.SchemaTypeFn;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.OperatorSymbol;
+import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
+import net.sf.saxon.ma.jnode.SpecificJNodeType;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
@@ -23,8 +26,10 @@ import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.qname.*;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeChar;
 import net.sf.saxon.type.gnode.*;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -108,7 +113,7 @@ import java.util.Set;
  * <li>AX: xs:hexBinary  </li>
  * <li>AZ: xs:untypedAtomic </li>
  *
- * <li>N: node() </li>
+ * <li>N: node() (=xnode)</li>
  * <li>NE: element(*) </li>
  * <li>NA: attribute(*) </li>
  * <li>NT: text() </li>
@@ -119,7 +124,10 @@ import java.util.Set;
  *
  * <li>F: function(*) </li>
  * <li>FM: map(*) -- including record types</li>
+ * <li>FMR: named record type</li>
  * <li>FA: array(*) </li>
+ *
+ * <li>J: jnode(). Parameters k for the key type (defaulting to string), s for the key value (as a string), c for the content type</li>
  *
  * <li>E: xs:error </li>
  *
@@ -148,6 +156,8 @@ import java.util.Set;
  * the namespace part will always be "Q{}"). Note that strictly speaking, the forms *:name and name:* can appear
  * in a NameTest, but never in a SequenceType. However, they can be represented in alphacodes using the syntax
  * "n*:name" and "nQ{uri}*" respectively. The syntax "~localname" is used for a name in the XSD namespace.</p>
+ *
+ * <p>n - also used for named record types (primary code FMR)</p>
  *
  * <ul>
  *
@@ -295,15 +305,15 @@ public class AlphaCode {
 
         @Override
         public void setMultiStringProperty(AlphaCodeTree tree, String key, List<String> value) {
-            if (key.equals("f")) { // fields in tuple type
-                tree.fieldNames = value;
-            } else if (key.equals("s")) {
-                tree.enumValues = value;
-            } else if (key.equals("optionalFields")) {
-                tree.optionalFieldNames = new HashSet<>();
-                tree.optionalFieldNames.addAll(value);
-            } else {
-                throw new IllegalArgumentException("Bad alphacode component " + key);
+            switch (key) {
+                case "f" ->  // fields in tuple type
+                        tree.fieldNames = value;
+                case "s" -> tree.enumValues = value;
+                case "optionalFields" -> {
+                    tree.optionalFieldNames = new HashSet<>();
+                    tree.optionalFieldNames.addAll(value);
+                }
+                default -> throw new IllegalArgumentException("Bad alphacode component " + key);
             }
         }
 
@@ -900,8 +910,24 @@ public class AlphaCode {
             }
         } else if (principal.startsWith("G")) {
             itemType = AnyGNodeType.getInstance();
-        } else if (principal.startsWith("J")) {
-            itemType = AnyJNodeType.getInstance();
+        } else if (principal.equals("J")) {
+            SequenceType valueType = tree.valueType != null ? sequenceTypeFromTree(tree.valueType, schema) : null;
+            AtomicValue keyValue = null;
+            if (valueType == null) {
+                itemType = AnyJNodeType.getInstance();
+            } else if (tree.keyType != null) {
+                AtomicType keyItemType = (AtomicType)sequenceTypeFromTree(tree.keyType, schema).getPrimaryType();
+                String lexicalKey = tree.content;
+                try {
+                    keyValue = (AtomicValue)keyItemType.getTypedValue(StringView.of(lexicalKey), null, ConversionRules.DEFAULT);
+                } catch (ValidationException e) {
+                    throw new AssertionError(e);
+                }
+                itemType = new SpecificJNodeType(keyValue, valueType);
+            } else {
+                itemType = new SpecificJNodeType(valueType);
+            }
+            //itemType = AnyJNodeType.getInstance();
         } else if (principal.startsWith("F")) {
             if (principal.equals("FA")) {
                 AlphaCodeTree valueType = tree.valueType;
@@ -911,6 +937,18 @@ public class AlphaCode {
                     itemType = new ArrayItemType(sequenceTypeFromTree(valueType, schema));
                 }
             } else if (principal.equals("FM")) {
+                if (tree.name != null) {
+                    StructuredQName qName = StructuredQName.fromEQName40(tree.name);
+                    if (qName.hasURI(NamespaceUri.FN)) {
+                        if (qName.getLocalPart().equals("node-type-annotation")) {
+                            return SequenceType.one(SchemaTypeFn.schemaTypeRecord);
+                        } else {
+                            throw new IllegalArgumentException("Unknown record type name " + tree.name);
+                        }
+                    } else {
+                        throw new IllegalArgumentException("Named record type not in FN namespace");
+                    }
+                }
                 if (tree.fieldNames == null) {
                     AlphaCodeTree keyType = tree.keyType;
                     AlphaCodeTree valueType = tree.valueType;
@@ -1050,16 +1088,20 @@ public class AlphaCode {
                 if (memberType != SequenceType.ANY_SEQUENCE) {
                     result.valueType = makeTree(memberType);
                 }
-            } else if (primary instanceof RecordType) {
-                result.optionalFieldNames = new HashSet<>();
-                result.fieldNames = new ArrayList<>();
-                result.argTypes = new ArrayList<>();
-                for (String s : ((RecordType) primary).getFieldNames()) {
-                    result.fieldNames.add(s);
-                    SequenceType fieldType = ((RecordType) primary).getFieldType(s);
-                    result.argTypes.add(makeTree(fieldType));
-                    if (((RecordType) primary).isOptionalField(s)) {
-                        result.optionalFieldNames.add(s);
+            } else if (primary instanceof RecordType rec) {
+                if (rec.getName() != null) {
+                    result.name = rec.getName().getEQName();
+                } else {
+                    result.optionalFieldNames = new HashSet<>();
+                    result.fieldNames = new ArrayList<>();
+                    result.argTypes = new ArrayList<>();
+                    for (String s : rec.getFieldNames()) {
+                        result.fieldNames.add(s);
+                        SequenceType fieldType = rec.getFieldType(s);
+                        result.argTypes.add(makeTree(fieldType));
+                        if (rec.isOptionalField(s)) {
+                            result.optionalFieldNames.add(s);
+                        }
                     }
                 }
             } else if (primary instanceof MapType) {
@@ -1085,6 +1127,14 @@ public class AlphaCode {
                     result.argTypes = argMaps;
                 }
             }
+        } else if (primary instanceof SpecificJNodeType jt) {
+            if (jt.getValueType() != null) {
+                result.valueType = makeTree(jt.getValueType());
+            }
+            if (jt.getSelector() != null) {
+                result.keyType = makeTree(jt.getSelector().getItemType());
+                result.content = jt.getSelector().getStringValue();
+            }
         } else if (primary instanceof ExternalObjectType) {
             result.name = ((ExternalObjectType) primary).getName();
         }
@@ -1106,8 +1156,8 @@ public class AlphaCode {
         sb.append(tree.principal);
 
         if (tree.principal.equals("ASE")) {
-            sb.append(" s{");
             // enumeration type
+            sb.append(" s{");
             boolean first = true;
             for (String s : tree.enumValues) {
                 if (first) {

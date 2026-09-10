@@ -522,6 +522,10 @@ public class ForExpression extends Assignation {
             out.emitAttribute("as", AlphaCode.fromItemType(varType));
         }
         out.emitAttribute("slot", "" + getLocalSlotNumber());
+        if (positionVariable != null) {
+            out.emitAttribute("pos", positionVariable.getVariableQName());
+            out.emitAttribute("posSlot", "" + positionVariable.getLocalSlotNumber());
+        }
         out.setChildRole("in");
         getSequence().export(out);
         out.setChildRole("return");

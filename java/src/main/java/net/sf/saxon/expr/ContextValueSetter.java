@@ -204,7 +204,7 @@ public class ContextValueSetter extends BinaryExpression
 
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
-        destination.startElement("setCxt", this);
+        destination.startElement("pipe", this);
         getLhsExpression().export(destination);
         getRhsExpression().export(destination);
         destination.endElement();

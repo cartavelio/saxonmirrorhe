@@ -400,7 +400,7 @@ public class RecordType implements FunctionItemType {
      */
     @Override
     public String getBasicAlphaCode() {
-        return "FM";
+       return  name == null ? "FM" : "FMR";
     }
 
     /**

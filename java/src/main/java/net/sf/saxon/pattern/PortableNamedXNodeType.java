@@ -130,7 +130,7 @@ public class PortableNamedXNodeType extends XNodeType {
      */
     @Override
     public String getBasicAlphaCode() {
-        throw new UnsupportedOperationException();
+        return nodeKind == Type.ELEMENT ? "NE" : "NA";
     }
 
 

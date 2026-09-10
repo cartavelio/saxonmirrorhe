@@ -108,7 +108,8 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
     @Override
     @CSharpModifiers(code={"public", "override"})
     public Expression makeFunctionCall(Expression[] arguments) {
-        Expression arg = new ContextValueExpression();
+        boolean is40 = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
+        Expression arg = is40 ? new ContextValueExpression() : new ContextItemExpression();
         if (getFunctionName().hasURI(NamespaceUri.SAXON)) {
             BuiltInFunctionSet.Entry entry = getDetails();
             try {
@@ -189,20 +190,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
 
     }
 
-    /**
-     * Given an arity-1 function of the form name#1, construct an arity-0 function
-     * of the form name#0, that invokes name#1 with the first argument bound to
-     * the value of the context item.
-     * @param fi
-     * @param context
-     * @return
-     */
 
-    public static FunctionItem bindContextItem(FunctionItem fi, XPathContext context) throws XPathException {
-        Item item = context.getContextItem();
-        GroundedValue gv = fi.call(context, new Sequence[]{item}).materialize();
-        return new ConstantFunction(fi.getFunctionName(), gv, fi.getFunctionItemType().getResultType());
-    }
 
 
 }

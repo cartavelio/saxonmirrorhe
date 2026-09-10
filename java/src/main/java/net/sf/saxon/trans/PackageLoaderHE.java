@@ -1334,6 +1334,22 @@ public class PackageLoaderHE implements IPackageLoader {
         }
     }
 
+    public long getLongAttribute(NodeInfo element, String localName) throws XPathException {
+        String val = element.getAttributeValue(NamespaceUri.NULL, localName);
+        if (val == null) {
+            return Long.MIN_VALUE;
+        }
+        try {
+            return Long.parseLong(val);
+        } catch (NumberFormatException e) {
+            throw new XPathException("Expected long integer value for " +
+                                             element.getDisplayName() + "/" + localName +
+                                             ", found '" + val + "'", SaxonErrorCode.SXPK0002);
+        }
+    }
+
+
+
     public String getInheritedAttribute(NodeInfo element, String localName) {
         while (element != null) {
             String val = element.getAttributeValue(NamespaceUri.NULL, localName);
@@ -1861,6 +1877,13 @@ public class PackageLoaderHE implements IPackageLoader {
             return new AxisExpression(axis, nt);
         });
 
+        eMap.put("axisGet", (loader, element) -> {
+            String axisName = element.getAttributeValue(NamespaceUri.NULL, "name");
+            int axis = AxisInfo.getAxisNumber(axisName);
+            Expression selector = loader.getFirstChildExpression(element);
+            return new AxisGetExpression(axis, selector);
+        });
+
         eMap.put("break", (loader, element) -> new BreakInstr());
 
         eMap.put("callT", (loader, element) -> {
@@ -2287,6 +2310,20 @@ public class PackageLoaderHE implements IPackageLoader {
             return cie;
         });
 
+        eMap.put("dott", (loader, element) -> {
+            ContextValueExpression cie = new ContextValueExpression();
+            /*SequenceType st = loader.parseAlphaCode(element, "type");
+            ItemType type = st.getPrimaryType();
+            boolean maybeAbsent = "a".equals(element.getAttributeValue(NamespaceUri.NULL, "flags"));
+            ContextItemStaticInfo info = loader.getConfiguration()
+                    .makeContextItemStaticInfo(type, maybeAbsent ? Optionality.OPTIONAL : Optionality.REQUIRED);
+            if (maybeAbsent) {
+                info = info.withStatusUnknown();
+            }
+            cie.setStaticInfo(info);*/
+            return cie;
+        });
+
         eMap.put("dynCall", (loader, element) -> {
             List<Expression> children = getChildExpressionList(loader, element);
             return new DynamicFunctionCall(children.get(0), children.subList(1, children.size()));
@@ -2450,6 +2487,13 @@ public class PackageLoaderHE implements IPackageLoader {
             return fe;
         });
 
+        eMap.put("filterAM", (loader, element) -> {
+            Expression lhs = loader.getFirstChildExpression(element);
+            Expression rhs = loader.getSecondChildExpression(element);
+            FilterExpressionAM fe = new FilterExpressionAM(lhs, rhs);
+            return fe;
+        });
+
         eMap.put("first", (loader, element) -> {
             Expression base = loader.getFirstChildExpression(element);
             return FirstItemExpression.makeFirstItemExpression(base);
@@ -2560,8 +2604,21 @@ public class PackageLoaderHE implements IPackageLoader {
             forEx.setVariableQName(name);
 
             loader.localBindings.push(forEx);
+
+            StructuredQName posName = loader.getQNameAttribute(element, "pos");
+            if (posName != null) {
+                LocalVariableBinding posVar = new LocalVariableBinding(posName, SequenceType.SINGLE_INTEGER);
+                posVar.setSlotNumber(loader.getIntegerAttribute(element, "posSlot"));
+                forEx.setPositionVariable(posVar);
+                loader.localBindings.push(posVar);
+            }
+
+
             Expression action = loader.getSecondChildExpression(element);
             loader.localBindings.pop();
+            if (posName != null) {
+                loader.localBindings.pop();
+            }
             forEx.setAction(action);
 
             return forEx;
@@ -2708,9 +2765,10 @@ public class PackageLoaderHE implements IPackageLoader {
                 SequenceType type = loader.parseAlphaCode(element, "type");
                 IndependentContext ic = new IndependentContext(loader.config);
                 RetainedStaticContext rsc = loader.makeRetainedStaticContext(element);
+                int vn = loader.getTopLevelPackage().getHostLanguageVersion();
                 ic.setBaseURI(rsc.getStaticBaseUriString());
                 ic.setPackageData(rsc.getPackageData());
-                ic.setXPathLanguageLevel(31);
+                ic.setXPathLanguageLevel(vn);
                 ic.setDefaultElementNamespace(rsc.getDefaultElementNamespace());
                 ic.setNamespaceResolver(rsc);
                 ic.setBackwardsCompatibilityMode(rsc.isBackwardsCompatibility());
@@ -2719,7 +2777,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 List<String> reasons = new ArrayList<>();
                 exp = loader.config.getIntegratedFunctionLibrary().bind(sName, args, null, ic, reasons);
                 if (exp == null) {
-                    exp = loader.config.getBuiltInExtensionLibraryList(31).bind(sName, args, null, ic, reasons);
+                    exp = loader.config.getBuiltInExtensionLibraryList(vn).bind(sName, args, null, ic, reasons);
                 }
                 if (exp instanceof SystemFunctionCall) {
                     SystemFunction fn = ((SystemFunctionCall) exp).getTargetFunction();
@@ -2743,6 +2801,8 @@ public class PackageLoaderHE implements IPackageLoader {
                     ((IntegratedFunctionCall) exp).getFunction().supplyStaticContext(ic, -1, args);
                     ((IntegratedFunctionCall) exp).setResultType(type);
                 }
+            } else {
+                exp.setRetainedStaticContext(loader.makeRetainedStaticContext(element));
             }
             return exp;
         });
@@ -2982,6 +3042,12 @@ public class PackageLoaderHE implements IPackageLoader {
             return new NegateExpression(body);
         });
 
+        eMap.put("multiSubscript", (loader, element) -> {
+            Expression lhs = loader.getFirstChildExpression(element);
+            Expression rhs = loader.getSecondChildExpression(element);
+            return new MultiSubscriptExpression(lhs, rhs);
+        });
+
         eMap.put("namespace", (loader, element) -> {
             Expression name = loader.getFirstChildExpression(element);
             Expression select = loader.getSecondChildExpression(element);
@@ -3207,6 +3273,12 @@ public class PackageLoaderHE implements IPackageLoader {
             return new DynamicPartialApply(base, args);
         });
 
+        eMap.put("pipe", (loader, element) -> {
+            Expression lhs = loader.getFirstChildExpression(element);
+            Expression rhs = loader.getSecondChildExpression(element);
+            return new ContextValueSetter(lhs, rhs);
+        });
+
         eMap.put("precedes", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
@@ -3245,8 +3317,8 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         eMap.put("range", (loader, element) -> {
-            int from = loader.getIntegerAttribute(element, "from");
-            int to = loader.getIntegerAttribute(element, "to");
+            long from = loader.getLongAttribute(element, "from");
+            long to = loader.getLongAttribute(element, "to");
             return Literal.makeLiteral(new IntegerRange(from, 1, to));
         });
 

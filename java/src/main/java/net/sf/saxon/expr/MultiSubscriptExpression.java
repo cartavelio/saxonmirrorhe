@@ -26,7 +26,7 @@ import net.sf.saxon.z.IntHashSet;
 import java.util.function.BiConsumer;
 
 /**
- * A SubscriptExpression represents a FilterExpression of the form EXPR[n]
+ * A MultiSubscriptExpression represents a FilterExpression of the form EXPR[n]
  * where n is known to be of type xs:numeric* and to be independent of the focus;
  * it does not need to be constant. Used in 4.0 which allows the filter to
  * be a sequence of numbers.
@@ -36,7 +36,7 @@ public class MultiSubscriptExpression extends UnaryExpression {
     private final Operand subscriptOp;
 
     /**
-     * Construct a SubscriptExpression
+     * Construct a MultiSubscriptExpression
      *
      * @param base      the expression to be filtered
      * @param subscript the positional subscript filter
