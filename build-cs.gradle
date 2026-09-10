@@ -10,10 +10,90 @@ def csharpCompiler = null
   }
 }
 
-//def additionalIkvmOptions = []
-//if (hasProperty("ikvmDebug")) {
-//  additionalIkvmOptions += ["-debug"]
-//}
+task build_transpiler(
+  type: JavaCompile,
+  dependsOn: ["hecs_featureKeys", "hejJar"],
+  description: "Compile the ToXml transpiler}"
+) {
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/src")
+  outputs.files fileTree(dir: "${buildDir}/transpiler")
+  source("${projectDir}/tools/transpiler/src/ToXml.java")
+  source("${projectDir}/tools/transpiler/src/XmlPrinterMHK.java")
+  classpath = configurations.transpiler
+  destinationDirectory = new File("${buildDir}/transpiler")
+  doFirst {
+    mkdir("build")
+  }
+}
+
+task transpile_to_xml(
+  type: JavaExec,
+  dependsOn: ["hecs_preprocess", "build_transpiler"],
+  description: "Transpile the Java to XML"
+) {
+  inputs.files fileTree(dir: "${buildDir}/preprocess/hecs")
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
+  outputs.files fileTree(dir: "${buildDir}/xmlout")
+  classpath = configurations.transpiler
+  main = "ToXml"
+  args "-j:${buildDir}/preprocess/hecs",
+    "-xml:${buildDir}/xmlout",
+    "-src:${projectDir}/src/main/java"
+  doFirst {
+    mkdir("${buildDir}/xmlout")
+  }
+}
+
+task xml_digest(
+  type: JavaExec,
+  dependsOn: ["transpile_to_xml"],
+  description: "Make a digest of the transpiled XML"
+) {
+  inputs.files fileTree(dir: "${buildDir}/xmlout")
+  inputs.file "${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl"
+  outputs.files "${buildDir}/digest.xml"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "-it",
+    "-xsl:${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl",
+    "-o:${buildDir}/digest.xml",
+    "xmlDir=${buildDir}/xmlout"
+}
+
+task refine_digest(
+  type: JavaExec,
+  dependsOn: ["xml_digest"],
+  description: "Refine the digest of the transpiled XML"
+) {
+  inputs.file "${buildDir}/digest.xml"
+  inputs.file "${projectDir}/tools/transpiler/xslt/refine-digest.xsl"
+  outputs.files "${buildDir}/refined-digest.xml"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "-xsl:${projectDir}/tools/transpiler/xslt/refine-digest.xsl",
+    "-s:${buildDir}/digest.xml",
+    "-o:${buildDir}/refined-digest.xml",
+    "xmlDir=${buildDir}/xmlout"
+}
+
+task generateCSharp(
+  type: JavaExec,
+  dependsOn: ["refine_digest"],
+  description: "Create the CS files"
+) {
+  inputs.file "${buildDir}/refined-digest.xml"
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
+  outputs.files fileTree(dir: "${buildDir}/cs")
+  classpath = configurations.transpiler
+  main = "ToXml"
+  args "-cs:${buildDir}/cs",
+    "-xml:${buildDir}/xmlout",
+    "-digest:${buildDir}/refined-digest.xml",
+    "-debug"
+  doFirst {
+    mkdir("${buildDir}/cs")
+  }
+}
 
 task hecs_featureKeys(
   type: JavaExec,

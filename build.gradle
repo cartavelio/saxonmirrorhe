@@ -29,6 +29,15 @@ configurations {
   ikvm.extendsFrom(implementation)
   compileDotNet.extendsFrom(implementation)
   asmDotNet.extendsFrom(implementation)
+  transpiler.extendsFrom(implementation)
+}
+
+sourceSets {
+  main
+  transpiler {
+    compileClasspath += main.output
+    runtimeClasspath += main.output
+  }
 }
 
 // Set saxonLicenseDir in gradle.properties, or from the
@@ -69,6 +78,8 @@ dependencies {
     [group: 'com.ibm.icu', name: 'icu4j', version: icu4jVersion ],
     [group: 'jline', name: 'jline', version: '2.14.6' ],
     [group: 'org.jetbrains', name: 'annotations', version: '20.1.0' ],
+    [group: 'com.github.javaparser', name: 'javaparser-symbol-solver-core', version: '3.17.0'],
+    [group: 'com.github.javaparser', name: 'javaparser-core', version: '3.17.0'],
     // PE and EE
     [group: 'javax.mail', name: 'javax.mail-api', version: mailVersion ],
     [group: 'com.sun.mail', name: 'javax.mail', version: mailVersion ],
@@ -108,6 +119,10 @@ dependencies {
     [group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '5.4.2'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
     files("${buildDir}/classes/${saxonEdition}j")
+  )
+  transpiler (
+    [group: 'net.sf.saxon', name: 'Saxon-HE', version: '10.3'],
+    files("${buildDir}/transpiler")
   )
 }
 
@@ -742,12 +757,12 @@ task record_branch(
   commandLine "git", "rev-parse", "--abbrev-ref", "HEAD"
   standardOutput = recordBranch
   doLast {
-    def output = new FileWriter(new File("${buildDir}/built-branch"))
+    def output = new FileWriter(new File("build/built-branch"))
     output.write(recordBranch.toString("utf-8"))
     output.close()
   }
   doFirst {
-    mkdir(buildDir)
+    mkdir("build")
   }
 }
 
@@ -1288,5 +1303,8 @@ runXslt30TestSuiteDriver.dependsOn "${saxonEdition}j_runXslt30TestSuiteDriver"
 task helloWorld() {
   doLast {
     println("Hello, world.")
+    configurations.transpiler.each { p ->
+      println(p)
+    }
   }
 }
