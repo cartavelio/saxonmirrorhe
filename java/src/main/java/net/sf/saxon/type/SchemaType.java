@@ -169,7 +169,7 @@ public interface SchemaType extends SchemaComponent {
      * @param expression the expression that delivers the content
      * @param kind       the node kind whose content is being delivered: {@link Type#ELEMENT},
      *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
-     * @param schema
+     * @param schema     the schema to which this schema type belongs
      * @throws XPathException if the expression will never deliver a value of the correct type
      */
 
