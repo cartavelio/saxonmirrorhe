@@ -124,30 +124,6 @@ interface SaxonBuildExtension {
             throw GradleException("Cannot find GraalVM native image compiler")
         }
     }
-}
-
-interface SaxonJExtension {
-    abstract val edition: Property<String>
-    abstract val version: Property<String>
-    abstract val metaInfServices: MapProperty<String, String>
-    abstract val manifestMainClass: Property<String>
-    abstract val sourceRoot: DirectoryProperty
-    abstract val jarManifestClasspath: ListProperty<String>
-    abstract val jarManifestClasspathDefaults: ListProperty<String>
-    abstract val editionJarInclusions: ListProperty<String>
-    abstract val editionJarExclusions: ListProperty<String>
-
-    fun jarClasspath(vararg entries: String): List<String> {
-        return jarManifestClasspathDefaults.get().plus(entries)
-    }
-
-    fun jarTaskBuilder(project: Project): (String, JarTaskBuilder.() -> Unit) -> SaxonJarTasks {
-        return JarTaskBuilder.createBuilder(project, this)
-    }
-
-    fun editionJarTasks(project: Project, configuration: JarTaskBuilder.() -> Unit): SaxonJarTasks {
-        return JarTaskBuilder.createEditionBuilder(project, this).invoke(configuration)
-    }
 
     fun patchReleaseInfo(src: File, saxonVersion: String, majorDate: String) {
         val (saxonMajor, saxonMinor, saxonPatch) = saxonVersion.split(".")
@@ -227,6 +203,30 @@ interface SaxonJExtension {
                 stream.println(line)
             }
         }
+    }
+}
+
+interface SaxonJExtension {
+    abstract val edition: Property<String>
+    abstract val version: Property<String>
+    abstract val metaInfServices: MapProperty<String, String>
+    abstract val manifestMainClass: Property<String>
+    abstract val sourceRoot: DirectoryProperty
+    abstract val jarManifestClasspath: ListProperty<String>
+    abstract val jarManifestClasspathDefaults: ListProperty<String>
+    abstract val editionJarInclusions: ListProperty<String>
+    abstract val editionJarExclusions: ListProperty<String>
+
+    fun jarClasspath(vararg entries: String): List<String> {
+        return jarManifestClasspathDefaults.get().plus(entries)
+    }
+
+    fun jarTaskBuilder(project: Project): (String, JarTaskBuilder.() -> Unit) -> SaxonJarTasks {
+        return JarTaskBuilder.createBuilder(project, this)
+    }
+
+    fun editionJarTasks(project: Project, configuration: JarTaskBuilder.() -> Unit): SaxonJarTasks {
+        return JarTaskBuilder.createEditionBuilder(project, this).invoke(configuration)
     }
 }
 
