@@ -6,10 +6,10 @@ import net.sf.saxon.expr.UnionIterator;
 import net.sf.saxon.expr.sort.LocalOrderComparer;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.type.gnode.AnyXNodeType;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -38,8 +38,8 @@ public class UnionIteratorTest {
             for (int i = 0; i < 10; i++) {
                 listOfLists.add(new ArrayList<>());
             }
-            SequenceIterator top = root.iterateChildAxis(AnyGNode.TEST));
-            SequenceIterator children = ((NodeInfo)top.next()).iterateChildAxis(AnyGNode.TEST));
+            SequenceIterator top = root.iterateChildAxis(AnyGNode.TEST);
+            SequenceIterator children = ((NodeInfo)top.next()).iterateChildAxis(AnyGNode.TEST);
             NodeInfo node;
             while ((node = (NodeInfo)children.next()) != null) {
                 switch (node.getLocalPart()) {

@@ -1,6 +1,6 @@
 package internaltests;
 
-import net.sf.saxon.ma.trie.ImmutableIntSet;
+import net.sf.saxon.ma.map.ImmutableIntSet;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

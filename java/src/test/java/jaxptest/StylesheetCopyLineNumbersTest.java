@@ -3,10 +3,10 @@ package jaxptest;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StandardErrorListener;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
-import net.sf.saxon.type.gnode.AnyXNodeType;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -59,7 +59,7 @@ public class StylesheetCopyLineNumbersTest {
         Source cachedTree = docBuilder.build(sourceToCache2).asSource();
 
         // Show that tree has line numbers.
-        TinyNodeImpl rootElement = (TinyNodeImpl)((TinyDocumentImpl)cachedTree).iterateChildAxis(AnyGNode.TEST)).next();
+        TinyNodeImpl rootElement = (TinyNodeImpl)((TinyDocumentImpl)cachedTree).iterateChildAxis(AnyGNode.TEST).next();
         assertEquals("xsl:stylesheet",  rootElement.getDisplayName(), "name ok?");
         assertEquals(5, rootElement.getLineNumber(), "line ok?");
         //System.err.println("Line num: " + rootElement.getLineNumber());
