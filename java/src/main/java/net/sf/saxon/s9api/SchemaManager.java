@@ -37,7 +37,9 @@ import java.io.File;
  * <code>import schema</code> declarations in XQuery, and <code>xsi:schemaLocation</code> attributes in source
  * documents undergoing validation. This is no longer the case. The schema built using this class is not implicitly
  * available to queries and stylesheets compiled under this {@link Processor}, and it is not modified when
- * queries and stylesheets import additional schema documents.</p>
+ * queries and stylesheets import additional schema documents. To make the schema available to stylesheets
+ * and queries, extract the schema using {@link #getXsdSchema} and pass it to a method such as
+ * {@link XsltCompiler#useSchema(XsdSchema)} or {@link XQueryCompiler#useSchema(XsdSchema)}.</p>
  *
  * <p>The {@code SchemaManager} is obtained using the call {@link Processor#getSaxonEdition()}. Repeated calls
  * deliver the same {@code SchemaManager} each time. The {@code SchemaManager} is not thread-safe; in particular,
@@ -122,16 +124,17 @@ public abstract class SchemaManager {
     public abstract SchemaURIResolver getSchemaURIResolver();
 
     /**
-     * Load a schema document from a given Source. The schema components derived from this schema
+     * Load a schema document from a given {@code Source}, or from a number of sources. The schema components derived from this schema
      * document are retained by this SchemaManager as the current schema, and are also returned
      * by the method as an {@link XsdSchema} object.
      *
      * <p>This method can only be called once on a given {@code SchemaManager} object.</p>
      *
-     * @param source the document containing the schema. The getSystemId() method applied to this Source
+     * @param source the document(s) containing the schema(s). The getSystemId() method applied to this Source
      *               must return a base URI suitable for resolving <code>xs:include</code> and <code>xs:import</code>
-     *               directives. The document may be either a schema document in source XSD format, or a compiled
-     *               schema in Saxon-defined SCM format (as produced using the -export option)
+     *               directives. Each document may be either a schema document in source XSD format, or a compiled
+     *               schema in Saxon-defined SCM format (as produced using the -export option). If no schema
+     *               documents are supplied, an empty schema is loaded.
      * @return the resulting schema.
      * @throws SaxonApiException if the schema document is not valid.
      * @since 9.1. From Saxon 12.3, the method can only be called once; to load from multiple schema documents,
@@ -145,6 +148,8 @@ public abstract class SchemaManager {
      * Load a schema document from a given File. The schema components derived from this schema
      * document are retained by this SchemaManager as the current schema, and are also returned
      * by the method as an {@link XsdSchema} object.
+     *
+     * <p>This method can only be called once on a given {@code SchemaManager} object.</p>
      *
      * @param file the document containing the schema. The getSystemId() method applied to this Source
      *               must return a base URI suitable for resolving <code>xs:include</code> and <code>xs:import</code>
@@ -175,7 +180,7 @@ public abstract class SchemaManager {
      * @throws SaxonApiException if a failure occurs loading the schema from the supplied source
      */
 
-    public abstract XsdSchema importComponents(Source source) throws SaxonApiException;
+    public abstract void importComponents(Source source) throws SaxonApiException;
 
     /**
      * Export a precompiled Schema Component Model containing all the components (except built-in components)
@@ -196,6 +201,9 @@ public abstract class SchemaManager {
      * <code>schemaManager.getXsdSchema().newSchemaValidator()</code>.</p>
      *
      * @return a new SchemaValidator
+     * @throws IllegalStateException if no schema has been loaded (using either {@link #load(Source...)}
+     * or {@link #importComponents(Source)}). To validate against an empty schema,
+     * first call {{@link #load(Source...)}} supplying no arguments.
      */
 
     public abstract SchemaValidator newSchemaValidator();
