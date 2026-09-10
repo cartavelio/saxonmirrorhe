@@ -266,6 +266,27 @@ public abstract class TestDriver {
         processCatalog(new File(catalog));
         System.err.println("Finished in " + ((System.nanoTime() - startTime)/1_000_000_000L) + "s" );
         printResults(resultsDir + "/results" + Version.getProductVersion() + ".xml");
+
+        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+        System.err.println("Wrapping up. Looking for dangling threads.");
+        Thread mainThread = null;
+        for (Thread t: threadSet) {
+            if ("system".equals(t.getThreadGroup().getName())) {
+                System.err.println("System thread: " + t);
+            } else {
+                if ("main".equals(t.getName())) {
+                    if (mainThread == null) {
+                        System.err.println("Main thread: " + t);
+                        mainThread = t;
+                    } else {
+                        System.err.println("UNEXPECTED main thread: " + t);
+                    }
+                } else{
+                    System.err.println("Unexpected thread: " + t);
+                }
+            }
+        }
+        System.exit(0);
     }
 
     public boolean isDebugByteCode(){
