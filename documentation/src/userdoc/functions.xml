@@ -2422,6 +2422,8 @@
       <description>
         <p>Reads an external resource containing HTML, and returns the result of parsing the
           resource as HTML.</p>
+        <p>The HTML parsing uses the same logic as the <code>parse-html</code> function: see
+        the description of that function for constraints applicable to SaxonJ and SaxonCS.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -9791,6 +9793,9 @@ StreamSource:new() =&gt; saxon:object-map() =&gt; map:keys() =&gt; sort()</code>
           <p>Because different parsers are used, there are minor differences depending on the
             platform, but these generally occur only in edge cases, such as use of element or
             attribute names containing characters disallowed in XML.</p>
+          
+          <p class="csonly">In SaxonCS, (a) the <code>fail-on-error</code> and <code>encoding</code> options
+            are ignored, and (b) the HTML <code>template</code> element is not expanded.</p>
         </div>
       </details>
     </function>
