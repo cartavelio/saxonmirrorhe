@@ -1,5 +1,6 @@
 #include "../../Saxon.C.API/SaxonProcessor.h"
 #include "../../Saxon.C.API/XdmItem.h"
+#include "../../Saxon.C.API/XdmAtomicValue.h"
 #include "../../Saxon.C.API/XdmNode.h"
 #include "../../Saxon.C.API/XdmValue.h"
 #include "CppTestUtils.h"
@@ -26,9 +27,7 @@ extern "C" void * c_nativeCall(char * functionName, void * func, int numOfArgume
 
   XdmValue * result = func1(numOfArguments, arguments1);   // call of the user function
   return (void *)result->getUnderlyingValue();
-  //XdmValue * result = func1(arguments);   // call of the user function
 
-  //return result->getUnderlyingValue();
 }
 XdmValue * myFunc(int length, XdmValue ** values) {
 
@@ -37,13 +36,27 @@ XdmValue * myFunc(int length, XdmValue ** values) {
         fflush(stdout);
         int64_t longValueRef = j_makeLongValue(SaxonProcessor::sxn_environ->thread, 5);
 
-        ////
-           // SaxonProcessor
+        SaxonProcessor * processor1 = new SaxonProcessor();
+
+    XdmValue * myValue = values[0];
+
+    if(values[0]->getHead()->isAtomic()) {
+        fprintf(stdout, "In C++ myFunc function atomic\n");
+        fflush(stdout);
+       XdmAtomicValue * item = (XdmAtomicValue *)(values[0]->getHead());
+       long valuei = item->getLongValue() + 5;
+
+       XdmAtomicValue * resultValue = processor1->makeLongValue(valuei);
+
+        return (XdmValue *)resultValue;
 
 
+    } else {
+        fprintf(stdout, "In C++ myFunc function is not atomic\n");
+        fflush(stdout);
+    }
 
 
-        ////
 
 
     if(values != NULL) {
