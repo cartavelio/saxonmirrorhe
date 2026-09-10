@@ -97,6 +97,8 @@ extension.releaseVersions.get().forEach { v ->
 
     pythonVersions[v] = "python${v}"
 
+    val buildDirectory = layout.buildDirectory.dir(v)
+
     val venv = tasks.register<PythonVenv>("release_venv_${v}") {
         pythonEnv = extension
         branch = manageBranches.currentBranch
@@ -115,9 +117,44 @@ extension.releaseVersions.get().forEach { v ->
         prefix = "${v}_release"
         sourceDir = pythonSrcDir
         venvTask = venv
-        buildDir = layout.buildDirectory.dir("${v}_release")
+        buildDir = buildDirectory.map { it.dir("release") }
         platformTagTask = releaseWheelPlatformTagTask
         libsaxoncDir = libsaxoncReleaseArtifactsDir.elements
+    }
+
+    val installDevWheel = tasks.register<InstallLocalWheel>("install_${v}_release_wheel") {
+        group = LifecycleBasePlugin.BUILD_GROUP
+        description = "Install the release wheel into the branch's VENV"
+        pipExe = venv.map { it.pipExe.get() }
+        wheel = repairDevWheel.map { it.repairedWheel.get() }
+    }
+
+    val pytestCopy = tasks.register<Copy>("${v}_pytest_copy") {
+        from(pythonSrcDir.map { it.dir("test") })
+        into(buildDirectory.map { it.dir("pytest") })
+    }
+    val pytestCopyDir = pytestCopy.map { it.destinationDir }
+
+    val pipInstall = project.tasks.register<PipInstall>("${v}_pip_install") {
+        pipExe = venv.map { it.pipExe.get() }
+        requirements = pythonSrcDir.map { it.file("requirements.txt") }
+    }
+
+    val pyTest = tasks.register<PytestRunner>("${v}_pytest") {
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
+        description = "Run unit tests with pytest"
+        inputs.files(pyTestSamples)
+        inputs.dir(pytestCopyDir)
+        dependsOn(installDevWheel)
+        dependsOn(pipInstall)
+
+        pytest = venv.map { it.venvBinHostedExe("pytest").get() }
+
+        workingDir = pythonSrcDir
+        environment("SAXONC_HOME" to saxonBuild.saxonLicenseDir, "SAXONC_EDITION" to extension.edition)
+
+        baseArgs("--import-mode=importlib", "--data-dir", pyTestData)
+        tests("test")//, "tests")
     }
 
     releaseWheels {
