@@ -194,8 +194,12 @@ public abstract class BinaryExpression extends Expression {
 
     @Override
     public void setFlattened(boolean flattened) {
-        getLhsExpression().setFlattened(flattened);
-        getRhsExpression().setFlattened(flattened);
+        if (getOperandRole(0).getUsage() == OperandUsage.ABSORPTION) {
+            getLhsExpression().setFlattened(flattened);
+        }
+        if (getOperandRole(1).getUsage() == OperandUsage.ABSORPTION) {
+            getRhsExpression().setFlattened(flattened);
+        }
     }
 
     /**
