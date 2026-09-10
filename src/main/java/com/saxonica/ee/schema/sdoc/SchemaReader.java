@@ -222,7 +222,7 @@ public abstract class SchemaReader {
             if (!base.equals(source.getSystemId())) {
                 schemaBuilder.setSystemId(base);
             }
-            LocationCopier copier = new LocationCopier(((NodeInfo) source).getNodeKind() == Type.DOCUMENT);
+            LocationCopier copier = new LocationCopier(((NodeInfo) source).getNodeKind() == Type.DOCUMENT, base);
             //noinspection Convert2MethodRef
             pipe.setCopyInformee(element -> copier.notifyElementNode(element));
         }

@@ -1227,7 +1227,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
             DocumentValidator dv = new DocumentValidator(pathMaintainer, hostLanguage == HostLanguage.XSLT ? "XTTE1550" : "XQDY0061");
 
-            LocationCopier copier = new LocationCopier(true);
+            LocationCopier copier = new LocationCopier(true, systemId);
             //noinspection Convert2MethodRef
             pipe.setCopyInformee((element) -> copier.notifyElementNode(element));
 
