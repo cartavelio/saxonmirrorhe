@@ -210,7 +210,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                     argTypes[i] = fd.getArgumentTypes()[i];
                 }
                 SpecificFunctionType functionType = new SpecificFunctionType(argTypes, fd.getResultType());
-                return new CallableFunction(functionName, callable, functionType);
+                return new CallableFunction(functionName, callable::call, functionType);
             }
         } else {
             return null;
@@ -279,10 +279,6 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         public int getArity() {
             return symbolicName.getArity();
         }
-
-        //public void setFunctionItem(CallableFunctionItem fi) {
-        //    this.functionItem = fi;
-        //}
 
         /**
          * Evaluate the expression

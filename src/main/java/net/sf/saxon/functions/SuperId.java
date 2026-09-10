@@ -143,18 +143,15 @@ public abstract class SuperId extends SystemFunction implements IContextAccessor
         if (getArity() == 2) {
             return this;
         }
-        Callable body;
+        CallableDelegate.Lambda body;
         try {
             NodeInfo target = getContextNode(context);
-            body = new CallableDelegate(
-                    (cxt, args) -> call(cxt, new Sequence[]{args[0], target}));
+            body = (cxt, args) -> call(cxt, new Sequence[]{args[0], target});
         } catch (XPathException e) {
             // Test function-lookup-350. Don't throw the error unless and until the function is called.
-            body = new CallableDelegate(
-                    (cxt, args) -> {
+            body = (cxt, args) -> {
                         throw new UncheckedXPathException(e);
-                    }
-            );
+                    };
         }
         return new CallableFunction(
                 new SymbolicName.F(getFunctionName(), 1),

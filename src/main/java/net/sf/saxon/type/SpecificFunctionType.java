@@ -45,7 +45,7 @@ public class SpecificFunctionType extends AnyFunctionType {
     private boolean acceptReducedArity;
 
 
-    public final static FunctionItemType COMPONENT_FUNCTION_TYPE =
+    public final static SpecificFunctionType COMPONENT_FUNCTION_TYPE =
             new SpecificFunctionType(SequenceType.SINGLE_STRING, SequenceType.ANY_SEQUENCE);
 
 

@@ -59,11 +59,12 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
         } catch (final XPathException e) {
             // This happens when we do a dynamic lookup of position() or last() when there is no context item
             SymbolicName.F name = new SymbolicName.F(getFunctionName(), getArity());
-            CallableDelegate callable = new CallableDelegate((context1, arguments) -> {
-                throw e;
-            });
-            callable.setDescription(getDescription());
-            return new CallableFunction(name, callable, getFunctionItemType());
+//            CallableDelegate callable = new CallableDelegate((context1, arguments) -> {
+//                throw e;
+//            });
+//            callable.setDescription(getDescription());
+            return new CallableFunction(name, (cxt, args) -> { throw e; }, getFunctionItemType())
+                    .withDescription(getDescription());
         }
         return new ConstantFunction(getFunctionName(), value, SequenceType.SINGLE_INTEGER);
     }

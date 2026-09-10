@@ -129,7 +129,7 @@ public class XPathFunctionLibrary implements FunctionLibrary {
         SequenceType[] argTypes = new SequenceType[arity];
         Arrays.fill(argTypes, SequenceType.ANY_SEQUENCE);
         FunctionItemType functionType = new SpecificFunctionType(argTypes, SequenceType.ANY_SEQUENCE);
-        return new CallableFunction(symbolicName, functionCall, functionType);
+        return new CallableFunction(symbolicName, functionCall::call, functionType);
     }
 
     /**

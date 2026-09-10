@@ -7,23 +7,17 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
-import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.SequenceType;
-
-import java.util.Arrays;
 
 /**
  * A function item that wraps a Callable
@@ -31,33 +25,27 @@ import java.util.Arrays;
 
 public class CallableFunction extends AbstractFunction {
 
-    private Callable callable;
+    private final CallableDelegate.Lambda callable;
     private final SymbolicName.F name;
     private FunctionItemType type;
     private AnnotationList annotations;
+    private String description;
 
-    public CallableFunction(SymbolicName.F name, Callable callable, FunctionItemType type) {
+    public CallableFunction(SymbolicName.F name, CallableDelegate.Lambda callable, FunctionItemType type) {
         this.name = name;
         this.callable = callable;
         this.type = type;
     }
 
-    public CallableFunction(int arity, Callable callable, FunctionItemType type) {
-        this.name = new SymbolicName.F(NamespaceUri.ANONYMOUS.qName("anon"), arity);
+    public CallableFunction(CallableDelegate.Lambda callable, SpecificFunctionType type) {
+        this.name = new SymbolicName.F(NamespaceUri.ANONYMOUS.qName("anon"), type.getArity());
         this.callable = callable;
         this.type = type;
     }
 
-    public Callable getCallable() {
-        return callable;
-    }
-
-    public void setCallable(Callable callable) {
-        this.callable = callable;
-    }
-
-    public void setType(FunctionItemType type) {
-        this.type = type;
+    public CallableFunction withDescription(String decription) {
+        this.description = decription;
+        return this;
     }
 
     /**
@@ -67,21 +55,21 @@ public class CallableFunction extends AbstractFunction {
      */
     @Override
     public FunctionItemType getFunctionItemType() {
-        if (type == AnyFunctionType.getInstance() && callable instanceof XQueryFunctionLibrary.UnresolvedCallable) {
-            UserFunction uf = ((XQueryFunctionLibrary.UnresolvedCallable) callable).getFunction();
-            if (uf != null) {
-                // the previously unresolved function reference is now resolved
-                if (uf.isVariadic()) {
-                    SequenceType[] argTypes = new SequenceType[getArity()];
-                    int last = uf.getArity() - 1;
-                    System.arraycopy(uf.getFunctionItemType().getArgumentTypes(), 0, argTypes, 0, last);
-                    SequenceType lastArgType = uf.getFunctionItemType().getArgumentTypes()[last];
-                    Arrays.fill(argTypes, last, argTypes.length, lastArgType);
-                    return new SpecificFunctionType(argTypes, uf.getResultType());
-                }
-                type = uf.getFunctionItemType();
-            }
-        }
+//        if (type == AnyFunctionType.getInstance() && callable instanceof XQueryFunctionLibrary.UnresolvedCallable) {
+//            UserFunction uf = ((XQueryFunctionLibrary.UnresolvedCallable) callable).getFunction();
+//            if (uf != null) {
+//                // the previously unresolved function reference is now resolved
+//                if (uf.isVariadic()) {
+//                    SequenceType[] argTypes = new SequenceType[getArity()];
+//                    int last = uf.getArity() - 1;
+//                    System.arraycopy(uf.getFunctionItemType().getArgumentTypes(), 0, argTypes, 0, last);
+//                    SequenceType lastArgType = uf.getFunctionItemType().getArgumentTypes()[last];
+//                    Arrays.fill(argTypes, last, argTypes.length, lastArgType);
+//                    return new SpecificFunctionType(argTypes, uf.getResultType());
+//                }
+//                type = uf.getFunctionItemType();
+//            }
+//        }
         return type;
     }
 
@@ -104,7 +92,13 @@ public class CallableFunction extends AbstractFunction {
      */
     @Override
     public String getDescription() {
-        return callable.toString();
+        if (description != null) {
+            return description;
+        }
+        if (getFunctionName() != null) {
+            return "function " + getFunctionName();
+        }
+        return "anonymous function of type " + getFunctionItemType();
     }
 
     /**

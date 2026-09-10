@@ -7,7 +7,6 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
@@ -94,18 +93,15 @@ public class Lang extends SystemFunction implements IContextAccessorFunction {
         if (getArity() == 2) {
             return this;
         }
-        Callable body;
+        CallableDelegate.Lambda body;
         try {
             NodeInfo target = getAndCheckContextItem(context);
-            body = new CallableDelegate(
-                    (cxt, args) -> BooleanValue.get(isLang(args[0].head().getStringValue(), target)));
+            body = (cxt, args) -> BooleanValue.get(isLang(args[0].head().getStringValue(), target));
         } catch (XPathException e) {
             // Test function-lookup-275. Don't throw the error unless and until the function is called.
-            body = new CallableDelegate(
-                    (cxt, args) -> {
+            body = (cxt, args) -> {
                         throw new UncheckedXPathException(e);
-                    }
-            );
+                    };
         }
         return new CallableFunction(
                 new SymbolicName.F(getFunctionName(), 1),

@@ -109,7 +109,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
         unboundFunctionReferences.add(uc);
         containingQueryModule.add((QueryModule)staticContext);
         correspondingReasons.add(new ArrayList<>());
-        CallableFunction fi = new CallableFunction(functionName, uc, AnyFunctionType.getInstance());
+        CallableFunction fi = new CallableFunction(functionName, uc::call, AnyFunctionType.getInstance());
         //uc.setFunctionItem(fi);
         return fi;
     }
