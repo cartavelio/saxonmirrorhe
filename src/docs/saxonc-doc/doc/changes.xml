@@ -4,7 +4,7 @@
       <cat name="all" title="ALL"/>
       <cat name="main" title="Main new features"/>
       <cat name="api" title="API"/>
-      <cat name="installation" title="Packaging, installation, and licensing changes"/>      
+      <cat name="installation" title="Packaging and installation"/>      
    </categories>
 
    <release number="12" date="2023-01-12">
@@ -129,8 +129,6 @@
    
    
       <category name="installation">
-         <h3 class="subtitle">Naming and numbering</h3>
-         
          <ul>
             <li>SaxonC 11 introduces a change to the version numbering policy, to align with the numbering
                used for the corresponding SaxonJ (Java) product (where the change was introduced with
@@ -153,7 +151,8 @@
                was previously known as Saxon/C. The different editions of the SaxonC product are now
                called SaxonC-HE, SaxonC-PE, and SaxonC-EE (rather than Saxon-HE/C, Saxon-PE/C, and
                Saxon-EE/C, as previously).</li>
-         </ul></category>
+         </ul>
+      </category>
    </release>
 
 
