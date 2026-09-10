@@ -2110,57 +2110,59 @@ public class XPathParser {
         List<SequenceType> fieldTypes = new ArrayList<>(6);
         boolean extensible = false;
         RecordTest recordTest = new RecordTest();
-        while (true) {
-            String name;
-            if (t.currentToken == Token.STAR) {
-                extensible = true;
-                p.nextToken();
-                p.expect(Token.RPAREN);
-                break;
-            }
-            if (t.currentToken instanceof Token.NameToken) {
-                name = t.currentName();
-                if (!NameChecker.isValidNCName(name)) {
-                    p.grumble(Err.wrap(name) + " is not a valid NCName");
-                }
-            } else if (t.currentToken instanceof Token.StringLiteral) {
-                name = expectStringLiteral();
-            } else {
-                p.grumble("Name of field in tuple must be either an NCName or a quoted string literal");
-                name = "dummy";
-            }
-            if (fieldNames.contains(name)) {
-                p.grumble("Duplicate field name (" + name + ")");
-                name = "dummy";
-            }
-            fieldNames.add(name);
-            p.nextToken();
-            if (t.currentToken == Token.QMARK) {
-                optionalFieldNames.add(name);
-                p.nextToken();
-            }
-            SequenceType arg = SequenceType.ANY_SEQUENCE;
-            if (tryKeyword("as")) {
-                if (t.currentToken == Token.DOT_DOT) {
-                    // self-reference
+        if (t.currentToken != Token.RPAREN) {
+            while (true) {
+                String name;
+                if (t.currentToken == Token.STAR) {
+                    extensible = true;
                     p.nextToken();
-                    int occ = parseOccurrenceIndicator();
-                    arg = SequenceType.makeSequenceType(new SelfReferenceRecordTest(recordTest), occ);
-                    if (!Cardinality.allowsZero(occ) && !optionalFieldNames.contains(name)) {
-                        throw new XPathException("A self-referencing field in a record type must be emptiable or optional", "XPST0140");
-                    }
-                } else {
-                    arg = p.parseSequenceType();
+                    p.expect(Token.RPAREN);
+                    break;
                 }
-            }
-            fieldTypes.add(arg);
-            if (t.currentToken == Token.RPAREN) {
-                break;
-            } else if (t.currentToken == Token.COMMA) {
+                if (t.currentToken instanceof Token.NameToken) {
+                    name = t.currentName();
+                    if (!NameChecker.isValidNCName(name)) {
+                        p.grumble(Err.wrap(name) + " is not a valid NCName");
+                    }
+                } else if (t.currentToken instanceof Token.StringLiteral) {
+                    name = expectStringLiteral();
+                } else {
+                    p.grumble("Name of field in tuple must be either an NCName or a quoted string literal");
+                    name = "dummy";
+                }
+                if (fieldNames.contains(name)) {
+                    p.grumble("Duplicate field name (" + name + ")");
+                    name = "dummy";
+                }
+                fieldNames.add(name);
                 p.nextToken();
-            } else {
-                p.grumble("Expected ',' or ')' after field in RecordTest, found '" +
-                                  t.currentToken + '\'');
+                if (t.currentToken == Token.QMARK) {
+                    optionalFieldNames.add(name);
+                    p.nextToken();
+                }
+                SequenceType arg = SequenceType.ANY_SEQUENCE;
+                if (tryKeyword("as")) {
+                    if (t.currentToken == Token.DOT_DOT) {
+                        // self-reference
+                        p.nextToken();
+                        int occ = parseOccurrenceIndicator();
+                        arg = SequenceType.makeSequenceType(new SelfReferenceRecordTest(recordTest), occ);
+                        if (!Cardinality.allowsZero(occ) && !optionalFieldNames.contains(name)) {
+                            throw new XPathException("A self-referencing field in a record type must be emptiable or optional", "XPST0140");
+                        }
+                    } else {
+                        arg = p.parseSequenceType();
+                    }
+                }
+                fieldTypes.add(arg);
+                if (t.currentToken == Token.RPAREN) {
+                    break;
+                } else if (t.currentToken == Token.COMMA) {
+                    p.nextToken();
+                } else {
+                    p.grumble("Expected ',' or ')' after field in RecordTest, found '" +
+                                      t.currentToken + '\'');
+                }
             }
         }
         p.nextToken();
