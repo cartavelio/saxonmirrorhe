@@ -39,11 +39,11 @@ public class NoOpenStartTagException extends XPathException {
         String errorCode;
         if (parentIsDocument) {
             String kind = nodeKind == Type.ATTRIBUTE ? "an attribute" : "a namespace";
-            message = "Cannot create " + kind + " node (" + name + ") whose parent is a document node";
+            message = "Cannot output " + kind + " node (" + name + ") whose parent is a document node";
             errorCode = hostLanguage == HostLanguage.XSLT ? "XTDE0420" : "XPTY0004";
         } else {
             String kind = nodeKind == Type.ATTRIBUTE ? "An attribute" : "A namespace";
-            message = kind + " node (" + name + ") cannot be created after a child of the containing element";
+            message = kind + " node (" + name + ") cannot be output after a child of the containing element";
             errorCode = hostLanguage == HostLanguage.XSLT ? "XTDE0410" : "XQTY0024";
         }
         if (startElementLocationId != null && startElementLocationId.getLineNumber() != -1) {

@@ -3765,15 +3765,16 @@ public class XPathParser {
                         readToken(Token.RPAREN);
                         return new DocumentNodeTest(inner);
                     } else if (allowXPath40Syntax) {
-                        List<NodeTest> tests = parseNameTestUnion(Type.ELEMENT);
+                        List<NodeTest> testList = parseNameTestUnion(Type.ELEMENT);
                         readToken(Token.RPAREN);
-                        if (tests.size() == 1) {
-                            return new DocumentNodeTest(tests.get(0));
+                        if (testList.size() == 1) {
+                            return new DocumentNodeTest(testList.get(0));
                         } else {
-                            return new DocumentNodeTest(NameTestUnion.of(tests));
+                            return new DocumentNodeTest(NameTestUnion.of(testList));
                         }
                     } else {
                         grumble("After 'document-node('", " expected 'element' or 'schema-element'");
+                        return null;
                     }
                 }
 
@@ -3892,12 +3893,7 @@ public class XPathParser {
                             }
                             nextToken();
                         }
-//<<<<<<< HEAD
-                        if ((nodeKind == Type.ATTRIBUTE && schemaType == AnyType.getInstance() && nillable) ||
-//=======
-//                        if ((schemaType == AnyType.getInstance() && nillable) ||
-//>>>>>>> main
-                                (nodeKind == Type.ATTRIBUTE && schemaType == AnySimpleType.getInstance())) {
+                        if ((nodeKind == Type.ATTRIBUTE && schemaType == AnySimpleType.getInstance())) {
                             result = nodeTest;
                         } else {
                             result = new ContentTypeTest(

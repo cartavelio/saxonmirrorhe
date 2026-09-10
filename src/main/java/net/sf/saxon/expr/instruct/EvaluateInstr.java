@@ -19,6 +19,7 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.EmptyMap;
+import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.PublicStylesheetFunctionLibrary;
@@ -28,7 +29,6 @@ import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -666,13 +666,12 @@ public final class EvaluateInstr extends Expression {
                 }
 
                 if (dynamicParams != null) {
-                    AtomicIterator iter = dynamicParams.keys();
-                    QNameValue paramName;
-                    while ((paramName = (QNameValue) iter.next()) != null) {
+                    for (KeyValuePair kvp : dynamicParams.keyValuePairs()) {
+                        QNameValue paramName = (QNameValue)  kvp.key;
                         int slot = slotMap.getVariableMap().indexOf(paramName.getStructuredQName());
                         if (slot >= 0) {
                             // can be false if the with-params changes from one call to the next
-                            c2.setLocalVariable(slot, dynamicParams.get(paramName));
+                            c2.setLocalVariable(slot, kvp.value);
                         }
                     }
                 }

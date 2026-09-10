@@ -19,6 +19,7 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
@@ -29,7 +30,6 @@ import net.sf.saxon.trans.StylesheetCache;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
-import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.wrapper.RebasedDocument;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
@@ -229,12 +229,11 @@ public class TransformFn extends SystemFunction implements Callable {
 
     private void setRequestedProperties(Map<String, GroundedValue> options, Processor processor) throws XPathException {
         MapItem requestedProps = (MapItem) options.get("requested-properties").head();
-        AtomicIterator optionIterator = requestedProps.keys();
-        while (true) {
-            AtomicValue option = optionIterator.next();
+        for (KeyValuePair kvp : requestedProps.keyValuePairs()) {
+            AtomicValue option = kvp.key;
             if (option != null) {
                 StructuredQName optionName = ((QNameValue) option.head()).getStructuredQName();
-                AtomicValue value = (AtomicValue)requestedProps.get(option).head();
+                AtomicValue value = (AtomicValue)kvp.value.head();
                 if (optionName.hasURI(NamespaceUri.XSLT)) {
                     String localName = optionName.getLocalPart();
                     String val = value.getStringValue();
@@ -347,15 +346,14 @@ public class TransformFn extends SystemFunction implements Callable {
 
     private void setStaticParams(Map<String, GroundedValue> options, XsltCompiler xsltCompiler, boolean allowTypedNodes) throws XPathException {
         MapItem staticParamsMap = (MapItem) options.get("static-params").head();
-        AtomicIterator paramIterator = staticParamsMap.keys();
-        while (true) {
-            AtomicValue param = paramIterator.next();
+        for (KeyValuePair kvp : staticParamsMap.keyValuePairs()) {
+            AtomicValue param = kvp.key;
             if (param != null) {
                 if (!(param instanceof QNameValue)) {
                     throw new XPathException("Parameter names in static-params must be supplied as QNames", "FOXT0002");
                 }
                 QName paramName = new QName(((QNameValue) param).getStructuredQName());
-                GroundedValue value = staticParamsMap.get(param);
+                GroundedValue value = kvp.value;
                 if (!allowTypedNodes) {
                     checkSequenceIsUntyped(value);
                 }
@@ -921,15 +919,14 @@ public class TransformFn extends SystemFunction implements Callable {
      */
 
     private void processParams(MapItem suppliedParams, Map<QName, XdmValue> checkedParams, boolean allowTypedNodes) throws XPathException {
-        AtomicIterator paramIterator = suppliedParams.keys();
-        while (true) {
-            AtomicValue param = paramIterator.next();
+         for (KeyValuePair kvp : suppliedParams.keyValuePairs()) {
+            AtomicValue param = kvp.key;
             if (param != null) {
                 if (!(param instanceof QNameValue)) {
                     throw new XPathException("The names of parameters must be supplied as QNames", "FOXT0002");
                 }
                 QName paramName = new QName(((QNameValue) param).getStructuredQName());
-                Sequence value = suppliedParams.get(param);
+                Sequence value = kvp.value;
                 if (!allowTypedNodes) {
                     checkSequenceIsUntyped(value);
                 }
@@ -1082,10 +1079,8 @@ public class TransformFn extends SystemFunction implements Callable {
         protected Serializer makeSerializer(Processor processor, MapItem serializationParamsMap) throws XPathException {
             Serializer serializer = processor.newSerializer();
             if (serializationParamsMap != null) {
-                AtomicIterator paramIterator = serializationParamsMap.keys();
-                AtomicValue param;
-                while ((param = paramIterator.next()) != null) {
-                    // See bug 29440/29443. For the time being, accept both the old and new forms of serialization params
+                for (KeyValuePair kvp : serializationParamsMap.keyValuePairs()) {
+                    AtomicValue param = kvp.key;    // See bug 29440/29443. For the time being, accept both the old and new forms of serialization params
                     QName paramName;
                     if (param instanceof StringValue) {
                         paramName = new QName(param.getStringValue());
@@ -1095,7 +1090,7 @@ public class TransformFn extends SystemFunction implements Callable {
                         throw new XPathException("Serialization parameters must be strings or QNames", "XPTY0004");
                     }
                     String paramValue = null;
-                    GroundedValue supplied = serializationParamsMap.get(param);
+                    GroundedValue supplied = kvp.value;
                     if (supplied.getLength() > 0) {
                         if (supplied.getLength() == 1) {
                             Item val = supplied.itemAt(0);

@@ -24,10 +24,12 @@ import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.DecimalValue;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
@@ -200,10 +202,9 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         // Get the external variables and set parameters on DynamicQueryContext dqc
         if (variablesOption != null) {
             MapItem extVariables = (MapItem) variablesOption.head();
-            AtomicIterator iterator = extVariables.keys();
-            AtomicValue key;
-            while ((key = iterator.next()) != null) {
-                dqc.setParameter(((QNameValue) key).getStructuredQName(), ((Sequence) extVariables.get(key)).materialize());
+            for (KeyValuePair kvp : extVariables.keyValuePairs()) {
+                QNameValue key = (QNameValue)kvp.key;
+                dqc.setParameter(key.getStructuredQName(), kvp.value);
             }
         }
 

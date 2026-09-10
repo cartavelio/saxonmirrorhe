@@ -10,9 +10,7 @@ package net.sf.saxon.ma.json;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapBuilder;
-import net.sf.saxon.ma.map.OrderedStringMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -100,7 +98,7 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void startMap() {
-        MapBuilder mapBuilder = retainOrder ? OrderedStringMap.getBuilder() : DictionaryMap.getBuilder();
+        MapBuilder mapBuilder = getContext().getConfiguration().makeMapBuilder(retainOrder, true);
         stack.push(mapBuilder);
     }
 

@@ -24,7 +24,6 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
@@ -335,12 +334,11 @@ public class Serialize extends SystemFunction implements Callable {
     }
 
     public static CharacterMap toCharacterMap(MapItem charMap) throws XPathException {
-        AtomicIterator iterator = charMap.keys();
-        AtomicValue charKey;
         IntHashMap<String> intHashMap = new IntHashMap<>();
-        while ((charKey = iterator.next()) != null) {
+        for (KeyValuePair kvp : charMap.keyValuePairs()) {
+            AtomicValue charKey = kvp.key;
             UnicodeString ch = charKey.getUnicodeStringValue();
-            String str = charMap.get(charKey).head().getStringValue();
+            String str = kvp.value.head().getStringValue();
             if (ch.length() != 1) {
                 throw new XPathException("In the serialization parameter for the character map, each character to be mapped " +
                     "must be a single Unicode character", "SEPM0016");
@@ -502,12 +500,11 @@ public class Serialize extends SystemFunction implements Callable {
             } else if (param instanceof MapItem) {
                 // If any parameters are supplied as QNames in the Saxon namespace, convert them to EQName strings
                 MapItem paramMap = (MapItem)param;
-                AtomicIterator keyIter = ((MapItem)param).keys();
-                AtomicValue k;
-                while ((k = keyIter.next()) != null) {
+                for (KeyValuePair kvp : paramMap.keyValuePairs()) {
+                    AtomicValue k = kvp.key;
                     if (k instanceof QNameValue && ((QNameValue)k).getStructuredQName().hasURI(NamespaceUri.SAXON)) {
                         String s = ((QNameValue) k).getStructuredQName().getEQName();
-                        paramMap = paramMap.addEntry(new StringValue(s), paramMap.get(k));
+                        paramMap = paramMap.addEntry(new StringValue(s), kvp.value);
                     }
                 }
                 Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(paramMap, context);

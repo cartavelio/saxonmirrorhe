@@ -23,8 +23,7 @@ import net.sf.saxon.functions.registry.*;
 import net.sf.saxon.java.CleanerProxy;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
-import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.PatternParser;
 import net.sf.saxon.query.QueryModule;
@@ -33,9 +32,9 @@ import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.resource.*;
-
-import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.XsdCompiler;
 import net.sf.saxon.s9api.Xslt30Transformer;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -43,7 +42,10 @@ import net.sf.saxon.serialize.charcode.CharacterSetFactory;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.style.*;
+import net.sf.saxon.style.Compilation;
+import net.sf.saxon.style.StyleNodeFactory;
+import net.sf.saxon.style.StylesheetPackage;
+import net.sf.saxon.style.XSLTemplate;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.XQueryTraceCodeInjector;
@@ -56,7 +58,6 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TreeStatistics;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
-import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
@@ -3276,6 +3277,18 @@ public class Configuration implements SourceResolver {
             return makeDeepLookupExpression(lhs, modifier, rhs);
         } else {
             return new LookupExpression(lhs, modifier, rhs);
+        }
+    }
+
+    public MapBuilder makeMapBuilder(boolean ordered, boolean stringOnly) {
+        if (ordered) {
+            checkLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION, "ordered maps", -1);
+        }
+        // ordered maps not supported in HE
+        if (stringOnly) {
+            return DictionaryMap.getBuilder();
+        } else {
+            return HashTrieMap.getBuilder();
         }
     }
 

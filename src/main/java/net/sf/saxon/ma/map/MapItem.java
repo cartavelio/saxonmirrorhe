@@ -23,6 +23,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.type.*;
@@ -30,6 +31,7 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Iterator;
 import java.util.Stack;
 
 /**
@@ -81,12 +83,15 @@ public abstract class MapItem implements FunctionItem {
     }
 
     /**
-     * Get the set of all key values in the map.
+     * Get the set of all key values in the map. Default implementation invokes
+     * {@code #keyValuePairs}.
      *
      * @return a set containing all the key values present in the map, in unpredictable order
      */
 
-    abstract public AtomicIterator keys();
+    public AtomicIterator keys() {
+        return new KeyIterator(keyValuePairs().iterator());
+    }
 
     /**
      * Get the set of all key-value pairs in the map
@@ -453,17 +458,13 @@ public abstract class MapItem implements FunctionItem {
     public boolean deepEquals(FunctionItem other, XPathContext context, AtomicMatcher comparer, int flags) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
-            AtomicIterator keyIter = keys();
-            AtomicValue key;
-            while ((key = keyIter.next()) != null) {
-                Sequence thisValue = get(key);
-                assert thisValue != null;
-                Sequence otherValue = ((MapItem) other).get(key);
+            for (KeyValuePair kvp : keyValuePairs()) {
+                Sequence otherValue = ((MapItem) other).get(kvp.key);
                 if (otherValue == null) {
                     return false;
                 }
                 if (!SaxonDeepEqual.deepEqual(otherValue.iterate(),
-                                              thisValue.iterate(), comparer, context, flags)) {
+                                              kvp.value.iterate(), comparer, context, flags)) {
                     return false;
                 }
             }
@@ -476,17 +477,13 @@ public abstract class MapItem implements FunctionItem {
     public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
-            AtomicIterator keyIter = keys();
-            AtomicValue key;
-            while ((key = keyIter.next()) != null) {
-                Sequence thisValue = get(key);
-                assert thisValue != null;
-                Sequence otherValue = ((MapItem) other).get(key);
+            for (KeyValuePair kvp : keyValuePairs()) {
+                Sequence otherValue = ((MapItem) other).get(kvp.key);
                 if (otherValue == null) {
                     return false;
                 }
                 if (!DeepEqual.deepEqual(otherValue.iterate(),
-                                         thisValue.iterate(), context, options)) {
+                                         kvp.value.iterate(), context, options)) {
                     return false;
                 }
             }
@@ -545,6 +542,27 @@ public abstract class MapItem implements FunctionItem {
     public boolean isTrustedResultType() {
         return true;
     }
+
+    public static class KeyIterator implements AtomicIterator {
+
+        private final Iterator<KeyValuePair> kvpIterator;
+
+        public KeyIterator(Iterator<KeyValuePair> kvpIterator) {
+            this.kvpIterator = kvpIterator;
+        }
+
+        @Override
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
+        public AtomicValue next () {
+            if (kvpIterator.hasNext()) {
+                return kvpIterator.next().key;
+            } else {
+                return null;
+            }
+        }
+    }
+
+
 
 
 }

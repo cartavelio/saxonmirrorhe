@@ -15,6 +15,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
+import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -36,7 +37,7 @@ public class HashTrieMap extends MapTypeMaintainer {
     // The number of entries in the map; -1 if unknown
     private int entries = -1;
 
-    private static class HashTrieMapBuilder implements MapBuilder {
+    protected static class HashTrieMapBuilder implements MapBuilder {
 
         HashTrieMap map = new HashTrieMap();
         public HashTrieMapBuilder() {
@@ -62,7 +63,7 @@ public class HashTrieMap extends MapTypeMaintainer {
          */
         @Override
         public void put(String key, GroundedValue value) {
-            map.initialPut(new StringValue(key), value);
+            put(new StringValue(key), value);
         }
 
         /**
@@ -81,7 +82,7 @@ public class HashTrieMap extends MapTypeMaintainer {
          */
         @Override
         public GroundedValue get(String key) {
-            return map.get(new StringValue(key));
+            return get(new StringValue(key));
         }
 
         /**
@@ -328,30 +329,26 @@ public class HashTrieMap extends MapTypeMaintainer {
      */
     @Override
     public Iterable<net.sf.saxon.ma.map.KeyValuePair> keyValuePairs() {
-        // For C# - don't use a lambda expression here
-        //noinspection Convert2Lambda
-        return new Iterable<net.sf.saxon.ma.map.KeyValuePair>() {
+        return new IterableUsingIteratorSupplier<>(this::iterateKeyValuePairs);
+    }
+
+    protected Iterator<net.sf.saxon.ma.map.KeyValuePair> iterateKeyValuePairs() {
+        return new Iterator<>() {
+            final Iterator<TrieKVP<AtomicMatchKey, KeyValuePair>> baseIter = imap.iterator();
+
             @Override
-            @CSharpSuppressWarnings("UnsafeIteratorConversion")
-            public Iterator<net.sf.saxon.ma.map.KeyValuePair> iterator() {
-                return new Iterator<net.sf.saxon.ma.map.KeyValuePair>() {
-                    final Iterator<TrieKVP<AtomicMatchKey, KeyValuePair>> baseIter = imap.iterator();
+            public boolean hasNext() {
+                return baseIter.hasNext();
+            }
 
-                    @Override
-                    public boolean hasNext() {
-                        return baseIter.hasNext();
-                    }
+            @Override
+            public net.sf.saxon.ma.map.KeyValuePair next() {
+                return baseIter.next().value;
+            }
 
-                    @Override
-                    public net.sf.saxon.ma.map.KeyValuePair next() {
-                        return baseIter.next().value;
-                    }
-
-                    @Override
-                    public void remove() {
-                        baseIter.remove();
-                    }
-                };
+            @Override
+            public void remove() {
+                baseIter.remove();
             }
         };
     }

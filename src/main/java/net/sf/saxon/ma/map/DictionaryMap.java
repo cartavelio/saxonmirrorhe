@@ -10,15 +10,19 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
+import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * A simple implementation of MapItem where the strings are keys, and modification is unlikely.
@@ -28,13 +32,16 @@ import java.util.*;
 
 public class DictionaryMap extends StringMap {
 
-    private static class DictionaryMapBuilder implements MapBuilder {
+    protected static class DictionaryMapBuilder implements MapBuilder {
 
-        private HashMap<String, GroundedValue> map;
+        protected Map<String, GroundedValue> map;
         public DictionaryMapBuilder() {
             map = new HashMap<>();
         }
 
+        protected DictionaryMapBuilder(Map<String, GroundedValue> emptyMap) {
+            this.map = emptyMap;
+        }
         public DictionaryMapBuilder(int initialSize) {
             map = new HashMap<>(initialSize);
         }
@@ -47,6 +54,9 @@ public class DictionaryMap extends StringMap {
          */
         @Override
         public void put(AtomicValue key, GroundedValue value) {
+            if (!(key instanceof StringValue)) {
+                throw new IllegalArgumentException("Keys added to DictionaryMap must be strings");
+            }
             map.put(key.getStringValue(), value);
         }
 
@@ -106,14 +116,14 @@ public class DictionaryMap extends StringMap {
         return new DictionaryMapBuilder(initialSize);
     }
 
-    private final Map<String, GroundedValue> hashMap;
+    protected final Map<String, GroundedValue> map;
 
     /**
      * Create an empty dictionary.
      */
 
     public DictionaryMap() {
-        hashMap = new HashMap<>();
+        map = new HashMap<>();
     }
 
     /**
@@ -122,7 +132,7 @@ public class DictionaryMap extends StringMap {
      */
 
     public DictionaryMap(int size) {
-        hashMap = new HashMap<>(size);
+        map = new HashMap<>(size);
     }
 
     /**
@@ -131,8 +141,8 @@ public class DictionaryMap extends StringMap {
      *
      * @param underlyingMap the initial contents of the dictionary
      */
-    public DictionaryMap(HashMap<String, GroundedValue> underlyingMap) {
-        hashMap = underlyingMap;
+    public DictionaryMap(Map<String, GroundedValue> underlyingMap) {
+        map = underlyingMap;
     }
 
     /**
@@ -141,7 +151,7 @@ public class DictionaryMap extends StringMap {
      * @return true if the key is present
      */
     public boolean contains(String key) {
-        return hashMap.containsKey(key);
+        return map.containsKey(key);
     }
 
     /**
@@ -151,7 +161,7 @@ public class DictionaryMap extends StringMap {
      * @return true if the key is present
      */
     public boolean contains(UnicodeString key) {
-        return hashMap.containsKey(key.toString());
+        return map.containsKey(key.toString());
     }
 
     /**
@@ -163,7 +173,7 @@ public class DictionaryMap extends StringMap {
     @Override
     public GroundedValue get(AtomicValue key) {
         if (key instanceof StringValue) {
-            return hashMap.get(key.getStringValue());
+            return map.get(key.getStringValue());
         } else {
             return null;
         }
@@ -175,7 +185,7 @@ public class DictionaryMap extends StringMap {
      * @return the relevant entry if present, or null if absent.
      */
     public GroundedValue get(String key) {
-        return hashMap.get(key);
+        return map.get(key);
     }
 
     /**
@@ -186,7 +196,7 @@ public class DictionaryMap extends StringMap {
      */
     @Override
     public GroundedValue get(UnicodeString key) {
-        return hashMap.get(key.toString());
+        return map.get(key.toString());
     }
 
     /**
@@ -196,7 +206,7 @@ public class DictionaryMap extends StringMap {
      */
     @Override
     public int size() {
-        return hashMap.size();
+        return map.size();
     }
 
     /**
@@ -206,7 +216,7 @@ public class DictionaryMap extends StringMap {
      */
     @Override
     public boolean isEmpty() {
-        return hashMap.isEmpty();
+        return map.isEmpty();
     }
 
     /**
@@ -216,7 +226,7 @@ public class DictionaryMap extends StringMap {
      */
     @Override
     public AtomicIterator keys() {
-        return new KeyIterator(hashMap);
+        return new KeyIterator(map);
     }
 
     /**
@@ -225,12 +235,16 @@ public class DictionaryMap extends StringMap {
      * @return an iterable containing all the key-value pairs
      */
     @Override
+    @CSharpReplaceBody(code="return new Saxon.Hej.tree.jiter.IterableUsingIteratorSupplier<Saxon.Hej.ma.map.KeyValuePair>(\n"
+            + "                () => Saxon.Impl.Helpers.MapUtils.convertStringKeyValuePairs(map));")
     public Iterable<KeyValuePair> keyValuePairs() {
-        List<KeyValuePair> pairs = new ArrayList<>();
-        for (Map.Entry<String, GroundedValue> entry : hashMap.entrySet()) {
-            pairs.add(new KeyValuePair(new StringValue(entry.getKey()), entry.getValue()));
-        }
-        return pairs;
+        return new IterableUsingIteratorSupplier<>(() -> {
+            Iterator<Map.Entry<String, GroundedValue>> entries = map.entrySet().iterator();
+
+            return new net.sf.saxon.tree.jiter.MappingJavaIterator<>(
+                    entries,
+                    e -> new KeyValuePair(new StringValue(e.getKey()), e.getValue()));
+        });
     }
 
     /**
@@ -278,7 +292,7 @@ public class DictionaryMap extends StringMap {
         if (valueType.equals(SequenceType.ANY_SEQUENCE)) {
             return true;
         }
-        for (GroundedValue val : hashMap.values()) {
+        for (GroundedValue val : map.values()) {
             if (!valueType.matches(val, th)) {
                 return false;
             }
@@ -298,7 +312,7 @@ public class DictionaryMap extends StringMap {
         ItemType valueType = null;
         int valueCard = 0;
         // we need to test the entries individually
-        for (Map.Entry<String, GroundedValue> entry : hashMap.entrySet()) {
+        for (Map.Entry<String, GroundedValue> entry : map.entrySet()) {
             GroundedValue val = entry.getValue();
             if (valueType == null) {
                 valueType = SequenceTool.getItemType(val, th);
@@ -324,7 +338,7 @@ public class DictionaryMap extends StringMap {
      */
     @Override
     public UType getKeyUType() {
-        return hashMap.isEmpty() ? UType.VOID : UType.STRING;
+        return map.isEmpty() ? UType.VOID : UType.STRING;
     }
 
     /**
@@ -334,7 +348,7 @@ public class DictionaryMap extends StringMap {
     private HashTrieMap toHashTrieMap() {
         //System.err.println("Dictionary rewrite!!!!");
         MapBuilder target = HashTrieMap.getBuilder();
-        for (Map.Entry<String, GroundedValue> entry : hashMap.entrySet()) {
+        for (Map.Entry<String, GroundedValue> entry : map.entrySet()) {
             target.put(new StringValue(entry.getKey()), entry.getValue());
         }
         return (HashTrieMap)target.getCompletedMap();
