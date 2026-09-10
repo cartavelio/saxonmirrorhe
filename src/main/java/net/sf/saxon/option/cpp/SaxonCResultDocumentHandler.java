@@ -51,7 +51,7 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
      * @param flagInt - option to return result sequence, after it has been constructed.
      * @return  - long value to the created SaxonCResultDocumentHandler object in the ObjectHandles pool
      */
-    @CEntryPoint(name = "createSaxonCResultDocumentHandler")
+    @CEntryPoint(name = "createSaxonCResultDocumentHandler", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createSaxonCResultDocumentHandler(IsolateThread thread, int flagInt) {
         SaxonCResultDocumentHandler resultDocumentHandler = new SaxonCResultDocumentHandler(CTypeConversion.toBoolean(flagInt));
         ObjectHandle handle = SaxonCAPI.createHandle(resultDocumentHandler);
@@ -104,13 +104,16 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
      * @return pointer to the array of XdmNode objects in the C memory space
      */
     @CEntryPoint(name = "j_getResultDocuments", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
-    public static CLongPointer getResultDocuments(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle rdRef) {
+    public static CLongPointer getResultDocuments(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle rdRef)  throws SaxonApiException {
         SaxonCResultDocumentHandler rdHandler = SaxonCAPI.objectHandles.get(rdRef);
         XdmValue[] results = null;
         if (rdHandler.rawResultsFlag) {
             results = rdHandler.getRawResults();
         } else {
             results = rdHandler.getXdmResultDocuments();
+        }
+        if(results == null) {
+            throw new SaxonApiException("No result-documents found");
         }
         int len = results.length;
         long[] resultRefs = Arrays.stream(results).mapToLong(i -> {

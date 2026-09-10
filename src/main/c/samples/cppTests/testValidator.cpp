@@ -7,15 +7,47 @@
 
 using namespace std;
 
-void testValidator1(SchemaValidator * val, sResultCount *sresult){
-	cout<<endl<<"Test Validate Schema from string"<<endl;	
+void testValidator1(SaxonProcessor * processor, SchemaValidator * val, sResultCount *sresult){
+	cout<<endl<<"testValidator1: Test Validate Schema from string - invalid doc"<<endl;
  string invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
  const char* sch1 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault='qualified' attributeFormDefault='unqualified'><xs:element name='request'><xs:complexType><xs:sequence><xs:element name='a' type='xs:string'/><xs:element name='b' type='xs:string'/></xs:sequence><xs:assert test='count(child::node()) = 3'/></xs:complexType></xs:element></xs:schema>";
 
 
-        string doc1 = "<Family xmlns='http://myexample/family'><Parent>John</Parent><Child>Alice</Child></Family>";
+
+
 	try {
 	    val->registerSchemaFromString(sch1);
+
+	    XdmNode * input = processor->parseXmlFromString(invalid_xml.c_str());
+	    val->setSourceNode(input);
+	    val->validate();
+        sresult->failure++;
+        sresult->failureList.push_back("testValidator1");
+	} catch(SaxonApiException &e){
+	    const char * message = e.getMessage();
+	    if(message != nullptr) {
+	        cerr<<"Exception thrown = "<<message<<endl;
+	    }
+	    sresult->success++;
+	}
+
+}
+
+
+void testValidatorInParseXml(SaxonProcessor * processor, SchemaValidator * val, sResultCount *sresult){
+	cout<<endl<<"testValidatorInParseXml: Test Validate Schema from string - invalid doc"<<endl;
+ string invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
+ const char* sch1 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault='qualified' attributeFormDefault='unqualified'><xs:element name='request'><xs:complexType><xs:sequence><xs:element name='a' type='xs:string'/><xs:element name='b' type='xs:string'/></xs:sequence><xs:assert test='count(child::node()) = 3'/></xs:complexType></xs:element></xs:schema>";
+
+
+
+
+	try {
+	    val->registerSchemaFromString(sch1);
+
+	    XdmNode * input = processor->parseXmlFromString(invalid_xml.c_str(), val);
+	    //val->setSourceNode(input);
+	    //val->validate();
         sresult->failure++;
         sresult->failureList.push_back("testValidator1");
 	} catch(SaxonApiException &e){
@@ -100,8 +132,11 @@ void testValidator3(SaxonProcessor * processor, SchemaValidator * val, sResultCo
   }
 }
 
-void testValidator4(SaxonProcessor * processor, SchemaValidator * val, sResultCount *sresult){
-  processor->exceptionClear();
+void testValidator4(sResultCount *sresult){
+
+  SaxonProcessor * processor = new SaxonProcessor(true);
+  processor->setConfigurationProperty("xsdversion", "1.1");
+  SchemaValidator * val = processor->newSchemaValidator();
   val->clearParameters(true);
   val->clearProperties();
   cout<<endl<<"Test 4: Validate source file with schema file. i.e. family.xml and family.xsd"<<endl;	
@@ -128,14 +163,18 @@ void testValidator4(SaxonProcessor * processor, SchemaValidator * val, sResultCo
     sresult->failureList.push_back("testValidator4");
 
   }
+  delete val;
+  delete processor;
 
 }
 
-void testValidator4a(SaxonProcessor * processor, SchemaValidator * val, sResultCount *sresult){
-  processor->exceptionClear();
+void testValidator4a(sResultCount *sresult){
+  SaxonProcessor * processor = new SaxonProcessor(true);
+  processor->setConfigurationProperty("xsdversion", "1.1");
+  SchemaValidator * val = processor->newSchemaValidator();
   val->clearParameters(true);
   val->clearProperties();
-  cout<<endl<<"Test 4: Validate source file with schema file. i.e. family.xml and family.xsd to XdmNode"<<endl;	
+  cout<<endl<<"Test testValidator4a: Validate source file with schema file. i.e. family.xml and family.xsd to XdmNode"<<endl;
 
   try{
 	val->registerSchemaFromFile("../data/family-ext.xsd");
@@ -143,7 +182,7 @@ void testValidator4a(SaxonProcessor * processor, SchemaValidator * val, sResultC
 	XdmNode * node = val->validateToNode("../data/family.xml");
 
     const char * valueStr = node->toString();
-	if(!val->exceptionOccurred() && valueStr != nullptr) {
+	if(valueStr != nullptr) {
 			cout<<endl<<"Doc1 is OK:"<<valueStr<<endl;
 			delete valueStr;
 	 	} else {
@@ -165,7 +204,8 @@ void testValidator4a(SaxonProcessor * processor, SchemaValidator * val, sResultC
     sresult->failureList.push_back("testValidator4a");
   }
 
-
+    delete val;
+    delete processor;
 
 }
 
@@ -292,14 +332,15 @@ int main(int argc, char* argv[])
         delete processor;
 	    return 0;
 	}
-	testValidator1(validator, sresult);
+	testValidator1(processor, validator, sresult);
+	testValidatorInParseXml(processor, validator, sresult);
 	testValidator2(sresult);
 
 	testValidator3(processor, validator, sresult);
 	processor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSchemaImports", "on");
 	SchemaValidator * validator2 = processor->newSchemaValidator();
-	testValidator4(processor, validator2, sresult);
-	testValidator4a(processor, validator2, sresult);
+	testValidator4(sresult);
+	testValidator4a(sresult);
 	processor->setConfigurationProperty("xsdversion", "1.1");
 	SchemaValidator * validator3 = processor->newSchemaValidator();
 	testValidator5(processor, validator3, sresult);
