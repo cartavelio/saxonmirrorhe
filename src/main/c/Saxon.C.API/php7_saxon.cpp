@@ -433,13 +433,15 @@ PHP_METHOD(SaxonProcessor, isSchemaAware)
     zend_object* pobj = Z_OBJ_P(getThis()); 
     saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
     saxonProcessor = obj->saxonProcessor;
+std::cerr << "SaxonProcessor.isSchemaAware() PHP cp0"  << std::endl;
     if (saxonProcessor != nullptr) {
-       
+std::cerr << "SaxonProcessor.isSchemaAware() PHP cp1"  << std::endl;
          if(saxonProcessor->isSchemaAwareProcessor()){
-
+std::cerr << "SaxonProcessor.isSchemaAware() PHP cp2"  << std::endl;
 		RETURN_TRUE;
  	}
     }
+std::cerr << "SaxonProcessor.isSchemaAware() PHP cp3"  << std::endl;
     RETURN_FALSE;
 }
 
