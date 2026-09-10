@@ -8,8 +8,10 @@ import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.SingletonEnumType;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
 
@@ -24,6 +26,9 @@ import net.sf.saxon.value.StringValue;
 
 public class InScopeNamespacesFn extends SystemFunction {
 
+    private final static SingletonEnumType EMPTY_STRING_TYPE
+            = new SingletonEnumType(EmptyUnicodeString.getInstance());
+
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo element = (NodeInfo)arguments[0].head();
@@ -35,8 +40,9 @@ public class InScopeNamespacesFn extends SystemFunction {
         HashTrieMap dict = new HashTrieMap();
         dict.initialPut(new StringValue("xml", BuiltInAtomicType.NCNAME), new StringValue(NamespaceConstant.XML));
         for (NamespaceBinding binding : nsMap) {
-            StringValue prefix = new StringValue(binding.getPrefix(),
-                                                 binding.getPrefix().isEmpty() ? BuiltInAtomicType.STRING : BuiltInAtomicType.NCNAME);
+            StringValue prefix = binding.getPrefix().isEmpty()
+                    ? EMPTY_STRING_TYPE.getInstance()
+                    : new StringValue(binding.getPrefix(), BuiltInAtomicType.NCNAME);
             dict.initialPut(prefix, new StringValue(binding.getNamespaceUri().toUnicodeString()));
         }
         return dict;
