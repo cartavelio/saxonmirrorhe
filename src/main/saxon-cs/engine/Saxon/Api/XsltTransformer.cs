@@ -46,7 +46,7 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// The global context item for the stylesheet, as a node.
+        /// The initial context item for the stylesheet, as a node.
         /// </summary>
         /// <remarks><para>Although XSLT 3.0 allows the global context item to be any item,
         /// this interface only allows it to be a node.
@@ -56,6 +56,14 @@ namespace Saxon.Api {
         /// to strip whitespace, or <c>input-type-annotations="strip"</c> to remove type
         /// annotations, since this will result in the transformation operating on a virtual document
         /// implemented as a view or wrapper of the supplied document.</para>
+        /// <para>The name of this property is potentially misleading. If the supplied node is not
+        /// a document node (for example, if it is the outermost element in the document), then
+        /// the global context item for the transformation (that is, the value of "." when referenced
+        /// withing a global variable in the stylesheet) will actually be the root node of the
+        /// containing document tree. The supplied element node, however, is used as the
+        /// "initial match selection": that is, the transformation will start by finding a template
+        /// rule that matches the element, and evaluating that template with the element as its
+        /// context item.</para> 
         /// </remarks>
 
         public XdmNode InitialContextNode {
@@ -85,6 +93,33 @@ namespace Saxon.Api {
         /// The base URI of the principal input document. This is used for example by the <c>document()</c>
         /// function if the document contains links to other documents in the form of relative URIs.</param>
         public void SetInputStream(Stream input, Uri baseUri) {
+            StreamSource streamSource = new StreamSource(input,
+                Uri.EscapeUriString(baseUri.ToString()));
+            s9Transformer.setSource(streamSource);
+        }
+        
+        /// <summary>
+        /// Supply the principal input document for the transformation in the form of a <c>TextReader</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>If this method is used, the <c>InitialContextNode</c> is ignored.</para>
+        /// <para>The supplied reader will be consumed by the <c>Run()</c> method.
+        /// Closing the input reader after use is the client's responsibility.</para>
+        /// <para>A base URI must be supplied in all cases. It is used to resolve relative
+        /// URI references appearing within the input document.</para>
+        /// <para>Schema validation is applied to the input document according to the value of
+        /// the <c>SchemaValidationMode</c> property.</para>
+        /// <para>Whitespace stripping is applied according to the value of the
+        /// <c>xsl:strip-space</c> and <c>xsl:preserve-space</c> declarations in the stylesheet.</para>
+        /// </remarks>
+        /// <param name="input">
+        /// The reader containing the source XML of the principal input document to the transformation. The document
+        /// node at the root of this document will be the global context item for the transformation.
+        /// </param>
+        /// <param name="baseUri">
+        /// The base URI of the principal input document. This is used for example by the <c>document()</c>
+        /// function if the document contains links to other documents in the form of relative URIs.</param>
+        public void SetInputTextReader(TextReader input, Uri baseUri) {
             StreamSource streamSource = new StreamSource(input,
                 Uri.EscapeUriString(baseUri.ToString()));
             s9Transformer.setSource(streamSource);
