@@ -87,32 +87,11 @@ public class Xslt30TestSuiteDriverEE extends Xslt30TestSuiteDriverPE {
         boolean inverse = "false".equals(dependency.attribute("satisfied"));
         boolean needed = !"false".equals(dependency.attribute("satisfied"));
 
-        if (xxCompilerLocation != null) {
-            if (type.equals("year_component_values") &&
-                    (value.equals("support year above 9999") ||
-                             value.equals("support negative year") ||
-                             value.equals("support year zero")
-                    )) {
-                return false; // whether needed or not
-            }
-            if (unavailableInXX(type, value)) {
-                return !needed;
-            }
-        }
-
         if ("feature".equals(type)) {
             if ("schema_aware".equals(value)) {
                 if (!treeModel.isSchemaAware() && !inverse) {
                     return false; // cannot use the selected tree model for schema-aware tests
                 }
-                if (xxCompilerLocation != null) {
-                    return false; // cannot use the XX compiler for schema-aware tests
-                }
-//                if (env != null && env.processor.isSchemaAware() != !inverse) {
-//                    // DELETED Don't attempt to run non-SA tests with an SA processor; the presence of constructs like
-//                    // DELETED import schema will switch on schema-awareness.
-//                    return false;
-//                }
                 if (inverse) {
                     // Saxon-EE cannot be forced to reject an xsl:import-schema instruction
                     return false;
