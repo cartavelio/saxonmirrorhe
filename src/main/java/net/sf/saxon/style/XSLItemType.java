@@ -1,4 +1,4 @@
-package com.saxonica.xsltextn.style;
+package net.sf.saxon.style;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
@@ -6,7 +6,6 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.*;
-import net.sf.saxon.style.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -19,10 +18,15 @@ import net.sf.saxon.value.SequenceType;
  * to be used in an itemType with the syntax <code>type(N)</code>.
  */
 
-public class SaxonItemType extends StyleElement {
+public class XSLItemType extends StyleElement {
 
     private StructuredQName itemTypeName;
     private boolean resolved = false;
+
+    @Override
+    public boolean isDeclaration() {
+        return true;
+    }
 
     @Override
     public void prepareAttributes() {
@@ -141,7 +145,7 @@ public class SaxonItemType extends StyleElement {
     private class TypeAliasContext extends ExpressionContext {
 
         public TypeAliasContext() {
-            super(SaxonItemType.this, new StructuredQName("", "", "as"));
+            super(XSLItemType.this, new StructuredQName("", "", "as"));
         }
 
         /**

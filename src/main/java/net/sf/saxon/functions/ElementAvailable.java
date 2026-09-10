@@ -61,6 +61,7 @@ public class ElementAvailable extends SystemFunction {
             case StandardNames.XSL_IMPORT:
             case StandardNames.XSL_IMPORT_SCHEMA:
             case StandardNames.XSL_INCLUDE:
+            case StandardNames.XSL_ITEM_TYPE:
             case StandardNames.XSL_ITERATE:
             case StandardNames.XSL_KEY:
             case StandardNames.XSL_MAP:

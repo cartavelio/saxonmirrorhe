@@ -7,38 +7,72 @@
 
 package net.sf.saxon.trans;
 
+import net.sf.saxon.style.XSLItemType;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.type.ItemType;
 
-import java.util.List;
+import java.util.*;
 
 /**
- * Manager for saxon:type-alias declarations in a stylesheet.
+ * Manager for xsl:item-type declarations in a stylesheet.
  *
- * Saxon extension introduced in Saxon 9.8
- *
- * This is a dummy version for Saxon-HE: the feature requires Saxon-PE or higher
+ * Language extension proposed for XSLT 4.0
  */
 public class TypeAliasManager {
 
     public TypeAliasManager() {
     }
 
+
+    // map of type aliases (Saxon extension)
+    private final Map<StructuredQName, ComponentDeclaration> unresolvedDeclarations =
+            new HashMap<>();
+
+    private final Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
+
     public void registerTypeAlias(StructuredQName name, ItemType type) {
-        throw new UnsupportedOperationException();
+        typeAliases.put(name, type);
+        unresolvedDeclarations.remove(name);
     }
 
     public void processDeclaration(ComponentDeclaration declaration) throws XPathException {
-        throw new UnsupportedOperationException();
+        XSLItemType sta = (XSLItemType) declaration.getSourceElement();
+        ItemType type = sta.tryToResolve();
+        if (type != null) {
+            registerTypeAlias(sta.getObjectName(), type);
+        } else {
+            unresolvedDeclarations.put(sta.getObjectName(), declaration);
+        }
     }
 
     public void processAllDeclarations(List<ComponentDeclaration> topLevel) throws XPathException {
-        // No action
+        for (ComponentDeclaration decl : topLevel) {
+            if (decl.getSourceElement() instanceof XSLItemType) {
+                processDeclaration(decl);
+            }
+        }
+        int unresolved = unresolvedDeclarations.size();
+        while (unresolved > 0) {
+            Set<ComponentDeclaration> pending = new HashSet<>(unresolvedDeclarations.values());
+            for (ComponentDeclaration decl : pending) {
+                processDeclaration(decl);
+            }
+            if (unresolvedDeclarations.size() >= unresolved) {
+                StringBuilder fsb = new StringBuilder(256);
+                fsb.append("Cannot resolve all type aliases, because of missing or circular definitions. Unresolved names: ");
+                for (StructuredQName name : unresolvedDeclarations.keySet()) {
+                    fsb.append(name.getDisplayName());
+                    fsb.append(' ');
+                }
+                throw new XPathException(fsb.toString(), SaxonErrorCode.SXTA0001);
+            }
+            unresolved = unresolvedDeclarations.size();
+        }
     }
 
     public ItemType getItemType(StructuredQName alias) {
-        return null;
+        return typeAliases.get(alias);
     }
 }
 
