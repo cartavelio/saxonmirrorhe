@@ -114,9 +114,9 @@
             <li><p>The option <code>-init:callback</code> allows reference to user-written code that
                is called to initialize the configuration programatically.</p>
                 <p class="javaonly">For SaxonJ, the value is the name of a user-written class
-                that implements the interface <code>net.sf.saxon.lib.Initializer</code>.</p>
+                   that implements the interface <code java="net.sf.saxon.lib.Initializer">net.sf.saxon.lib.Initializer</code>.</p>
                <p class="csonly">For SaxonCS, the value is the filename of an assembly that
-               contains a class that implements the interface <code>Saxon.Api.IProcessorInitializer</code>.</p>
+                  contains a class that implements the interface <code cs="Saxon.Api.IProcessorInitializer">Saxon.Api.IProcessorInitializer</code>.</p>
             </li>
          </ul>
          

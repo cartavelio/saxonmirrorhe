@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?> 
+<?xml version="1.0" encoding="utf-8"?>
 <article id="using-xquery" title="Using XQuery">
    <h1>Using XQuery</h1>
 
@@ -1212,10 +1212,10 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
        count="18" t-sum-net="2.7411305" t-avg-net="0.15228502777777778" 
        t-sum="20.292764" t-avg="1.1273757777777778"/>
       
-      <fn match="phase-1-result" construct="xsl:variable" file="****.xq" 
-         count="49" t-sum-net="89.4315515" t-avg-net="1.8066980101010102" line="41" 
-         t-sum="90.9251545" t-avg="1.836871808080808"/>      
-      ]]></samp>
+   <fn match="phase-1-result" construct="xsl:variable" file="****.xq" 
+       count="49" t-sum-net="89.4315515" t-avg-net="1.8066980101010102" line="41" 
+       t-sum="90.9251545" t-avg="1.836871808080808"/>      
+   ]]></samp>
       
       <p>Here:</p>
       
