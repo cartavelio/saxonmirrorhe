@@ -36,17 +36,19 @@ namespace Saxon.Api {
         private ResultDocumentHandler resultDocumentHandler;
         private QName initialTemplateName;
         private Saxon.Hej.s9api.XsltTransformer s9Transformer;
-        private readonly StandardMessageHandler _standardMessageHandler;
         private ResourceResolver textResolver;
         private ResourceResolver xmlDocumentResolver;
         private ErrorReporter errorReporter;
+        private Action<Message> messageListener;
 
         // internal constructor
 
         internal XsltTransformer(Saxon.Hej.s9api.XsltTransformer transformer) {
             this.s9Transformer = transformer;
-            this._standardMessageHandler = new StandardMessageHandler(transformer.controller.getConfiguration());
-            transformer.controller.setMessageHandler(message => this._standardMessageHandler.accept(message));
+            StandardMessageHandler standardMessageHandler = new(transformer.controller.getConfiguration());
+            transformer.controller.setMessageHandler(message => standardMessageHandler.accept(message));
+            var messageHandler = transformer.controller.getMessageHandler();
+            messageListener = msg => messageHandler.Invoke(msg);
         }
 
         /// <summary>
@@ -248,23 +250,26 @@ namespace Saxon.Api {
         /// Handler for messages output using <c>&lt;xsl:message&gt;</c>.
         /// </summary>
         /// <remarks> 
-        /// <para>The caller may supply a message handler before calling <c>Run</c>;
-        /// the processor will then invoke the handler once for each message generated during
+        /// <para>The caller may supply a message listener before calling <c>Run</c>;
+        /// the processor will then invoke the listener once for each message generated during
         /// the transformation. Each message will be output as an object of type <c>XdmNode</c>
         /// representing a document node.</para>
-        /// <para>If no message handler is supplied by the caller, message information will be written to
+        /// <para>If no message listener is supplied by the caller, message information will be written to
         /// the standard error stream.</para>
-        /// <para>Each message is presented as an XML document node. Calling <c>ToString()</c>
-        /// on the message object will usually generate an acceptable representation of the
-        /// message.</para>
+        /// <para>Each message is presented as an instance of the class <c>Message</c>.</para>
         /// <para>When the <c>xsl:message</c> instruction specifies <c>terminate="yes"</c>,
         /// the message is first notified using this interface, and then an exception is thrown
-        /// which terminates the transformation.</para>
+        /// which terminates the transformation. The <c>Message</c> object has a property
+        /// indicating that <c>terminate="yes"</c> was specified.</para>
         /// </remarks>
 
         public Action<Message> MessageListener {
-            get => msg => s9Transformer.controller.getMessageHandler().Invoke(msg);
-            set => s9Transformer.controller.setMessageHandler(value.Invoke);
+            get => messageListener;
+            set {
+                var newListener = value;
+                Implementation.setMessageHandler(msg => newListener.Invoke(msg));
+                messageListener = newListener;
+            }
         }
 
 
@@ -287,7 +292,7 @@ namespace Saxon.Api {
         }
         
         /// <summary>
-        /// The <code>ErrorReporter</code> to be used at run-time to notify any dynamic
+        /// The <c>ErrorReporter</c> to be used at run-time to notify any dynamic
         /// errors that occur.
         /// </summary>
 
@@ -324,9 +329,7 @@ namespace Saxon.Api {
         ///     <c>Saxon.Hej.s9api.XsltTransformer</c>. Information about this class is available in the
         ///     Saxon-EE Javadoc documentation for the very similar Java class <see cref="Saxon.Hej.s9api.XsltTransformer"/>.
         /// </value>
-        public Saxon.Hej.s9api.Destination UnderlyingDestination {
-            get { return s9Transformer; }
-        }
+        public Saxon.Hej.s9api.Destination UnderlyingDestination => s9Transformer;
 
         /// <summary>
         /// The destination for the result of the transformation. The class <c>XmlDestination</c> is an abstraction 
@@ -376,7 +379,7 @@ namespace Saxon.Api {
         }
         
         /// <summary>
-        /// The <code>ResourceResolver</code> to be used at run-time to resolve and dereference URIs
+        /// The <c>ResourceResolver</c> to be used at run-time to resolve and dereference URIs
         /// supplied to functions retrieving XML, such as the <c>fn:doc()</c>, <c>fn:document()</c>, and
         /// <c>fn:doc-available()</c> functions, as well as <c>fn:transform()</c>
         /// </summary>

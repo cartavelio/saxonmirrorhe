@@ -73,18 +73,19 @@ namespace Saxon.Api {
         private ResultDocumentHandler resultDocumentHandler;
         private TextWriter traceFunctionDestination;
         private Saxon.Hej.s9api.Xslt30Transformer s9Transformer;
-        private readonly StandardMessageHandler _standardMessageHandler;
         private ResourceResolver textResolver;
         private ResourceResolver xmlDocumentResolver;
         private ErrorReporter errorReporter;
+        private Action<Message> messageListener;
 
         // internal constructor
 
         internal Xslt30Transformer(Saxon.Hej.s9api.Xslt30Transformer transformer) {
             this.s9Transformer = transformer;
-            _standardMessageHandler = new StandardMessageHandler(transformer.controller.getConfiguration());
-            transformer.controller.setMessageHandler(message => _standardMessageHandler.accept(message));
-            //this.globalParameterSet = new GlobalParameterSet(globalParameters);
+            StandardMessageHandler standardMessageHandler = new(transformer.controller.getConfiguration());
+            transformer.controller.setMessageHandler(message => standardMessageHandler.accept(message));
+            var messageHandler = transformer.controller.getMessageHandler();
+            messageListener = msg => messageHandler.Invoke(msg);
         }
 
 
@@ -325,23 +326,26 @@ namespace Saxon.Api {
         /// Handler for messages output using <c>&lt;xsl:message&gt;</c>.
         /// </summary>
         /// <remarks> 
-        /// <para>The caller may supply a message handler before calling <c>Run</c>;
-        /// the processor will then invoke the handler once for each message generated during
+        /// <para>The caller may supply a message listener before calling <c>Run</c>;
+        /// the processor will then invoke the listener once for each message generated during
         /// the transformation. Each message will be output as an object of type <c>XdmNode</c>
         /// representing a document node.</para>
-        /// <para>If no message handler is supplied by the caller, message information will be written to
+        /// <para>If no message listener is supplied by the caller, message information will be written to
         /// the standard error stream.</para>
-        /// <para>Each message is presented as an XML document node. Calling <c>ToString()</c>
-        /// on the message object will usually generate an acceptable representation of the
-        /// message.</para>
+        /// <para>Each message is presented as an instance of the class <c>Message</c>.</para>
         /// <para>When the <c>xsl:message</c> instruction specifies <c>terminate="yes"</c>,
         /// the message is first notified using this interface, and then an exception is thrown
-        /// which terminates the transformation.</para>
+        /// which terminates the transformation. The <c>Message</c> object has a property
+        /// indicating that <c>terminate="yes"</c> was specified.</para>
         /// </remarks>
 
         public Action<Message> MessageListener {
-            get => msg => s9Transformer.controller.getMessageHandler().Invoke(msg);
-            set => s9Transformer.controller.setMessageHandler(value.Invoke);
+            get => messageListener;
+            set {
+                var newListener = value;
+                GetUnderlyingController.setMessageHandler(msg => newListener.Invoke(msg));
+                messageListener = newListener;
+            }
         }
         
         /// <summary>
