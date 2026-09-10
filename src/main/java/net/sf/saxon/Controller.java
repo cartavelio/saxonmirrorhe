@@ -393,24 +393,47 @@ public class Controller implements ContextOriginator {
      * Controller as well as other configuration information.
      */
 
-    private ParseOptions options;
+    private ParseOptions parseOptions;
+
+    private boolean freezeParseOptions;
+
+    public void freezeParseOptions()
+    {
+        this.freezeParseOptions = true;
+    }
 
     /*@NotNull*/
     public PipelineConfiguration makePipelineConfiguration() {
+
+        //ExitCounter.countTrace(4);
+
         PipelineConfiguration pipe = new PipelineConfiguration(getConfiguration());
         pipe.setController(this);
 
-        if (options == null)
+        if (freezeParseOptions)
         {
-            options = new ParseOptions(getConfiguration().getParseOptions());
-            //ExitCounter.count(options.toString());
+            if (parseOptions == null)
+            {
+                parseOptions = new ParseOptions(getConfiguration().getParseOptions());
+                parseOptions.setSchemaValidationMode(validationMode);
+                parseOptions.setErrorReporter(errorReporter);
+                parseOptions.freeze();
+            }
+            else
+            {
+                ExitCounter.count("avoided new ParseOptions");
+            }
+
+            pipe.setParseOptions(parseOptions);
+        }
+        else
+        {
+            ParseOptions options = new ParseOptions(getConfiguration().getParseOptions());
             options.setSchemaValidationMode(validationMode);
             options.setErrorReporter(errorReporter);
-
-            options.freeze();
+            pipe.setParseOptions(options);
         }
 
-        pipe.setParseOptions(options);
         return pipe;
         //pipe.setURIResolver(userURIResolver == null ? standardURIResolver : userURIResolver);
 //        pipe.getParseOptions().setSchemaValidationMode(validationMode); // added in 9.7
