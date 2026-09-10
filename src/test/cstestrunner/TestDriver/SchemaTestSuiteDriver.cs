@@ -3,19 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Xml;
-using net.sf.saxon.functions;
-using net.sf.saxon.s9api;
 using Saxon.Api;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
 using NullDestination = Saxon.Api.NullDestination;
 using Processor = Saxon.Api.Processor;
 using SchemaManager = Saxon.Api.SchemaManager;
 using SchemaValidator = Saxon.Api.SchemaValidator;
-using StaticError = Saxon.Api.StaticError;
+using XmlProcessingError = Saxon.Api.XmlProcessingError;
 
-namespace TestRunner {
+namespace TestDriver {
     /**
          * This class runs the W3C XML Schema Test Suite, driven from the test catalog.
          */
@@ -49,7 +45,7 @@ namespace TestRunner {
             String href = element.GetAttributeValue(xlinkHref);
             DocumentBuilder builder = processor.NewDocumentBuilder();
             Uri target = new Uri(element.BaseUri, href);
-            builder.IsLineNumbering = true;
+            builder.LineNumbering = true;
             return builder.Build(target);
         }
         
@@ -58,20 +54,20 @@ namespace TestRunner {
                 String href = element.GetAttributeValue(xlinkHref);
                 Uri target = new Uri(element.BaseUri, href);
                 SchemaValidator v = processor.SchemaManager.NewSchemaValidator();
-                v.IsLax = false;
-                v.ErrorList = new List<ValidationFailure>();
-                v.SetSource(target);
+                v.Lax = false;
+                List<ValidationFailure> failures = new ();
+                v.InvalidityListener = failures.Add;
                 v.SetDestination(new NullDestination());
-                v.Run();
+                v.Validate(target);
 
                 if (debug) {
-                    foreach (ValidationFailure invalidity in v.ErrorList)
+                    foreach (ValidationFailure invalidity in failures)
                     {
-                        Console.Error.WriteLine("+++> " + invalidity.GetMessage());
+                        Console.Error.WriteLine("+++> " + invalidity.Message);
                     }
                 }
 
-                return v.ErrorList.Count == 0;
+                return failures.Count == 0;
             }
             catch (Exception e) {
                 Console.WriteLine(e);
@@ -323,8 +319,8 @@ namespace TestRunner {
                                     }
                                 }
 
-                                IList<StaticError> errorList = new List<StaticError>();
-                                schemaManager.ErrorList = errorList;
+                                List<XmlProcessingError> errorList = new ();
+                                schemaManager.ErrorReporter = errorList.Add;
                                 try {
                                     schemaManager.Compile(schemaDoc);
                                 }
@@ -339,7 +335,7 @@ namespace TestRunner {
                                     }
                                 }
 
-                                foreach (StaticError err in errorList) {
+                                foreach (XmlProcessingError err in errorList) {
                                     if (!err.IsWarning) {
                                         schemaOK = false;
                                         break;

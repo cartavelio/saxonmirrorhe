@@ -5,8 +5,7 @@ using System.Text;
 using System.Reflection;
 
 
-namespace TestRunner
-{
+namespace TestDriver {
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public class EnumAttr : Attribute
     {

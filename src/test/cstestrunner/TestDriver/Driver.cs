@@ -11,9 +11,12 @@ using System.Diagnostics;
 using System.Linq;
 using ICU4N.Text;
 using Singulink.Numerics;
+using TestDriver;
+using TestRunner;
+using Environment = System.Environment;
 
-namespace TestRunner {
-    public abstract class TestDriver {
+namespace TestDriver {
+    public abstract class Driver {
         protected string resultsDir = null;
         public ResultsDocument resultsDoc;
         protected int successes = 0;
@@ -83,7 +86,7 @@ namespace TestRunner {
         }
 
 
-        public Spec Spec => requestedSpec;
+        public Spec RequestedSpec => requestedSpec;
 
         public void setFeedbackListener(IFeedbackListener f) {
             feedback = f;
