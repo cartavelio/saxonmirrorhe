@@ -11,6 +11,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.util.Orphan;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
@@ -31,17 +32,20 @@ public class InSituValidator {
     private final MutableNodeInfo[] nodeBuffer = new MutableNodeInfo[16];
     private final MutableNodeInfo root;
     private final int validationMode;
+    private final Schema schema;
 
     /**
      * Create an InSituValidator
      *
      * @param root           the root node of the tree to be validated. This must be a document or element node,
      *                       and it must be an updatable node
+     * @param schema         the schema to be used for validation
      * @param validationMode the validation mode: {@link net.sf.saxon.lib.Validation#STRICT} or {@link net.sf.saxon.lib.Validation#LAX}
      */
 
-    public InSituValidator(MutableNodeInfo root, int validationMode) {
+    public InSituValidator(MutableNodeInfo root, Schema schema, int validationMode) {
         this.root = root;
+        this.schema = schema;
         this.validationMode = validationMode;
     }
 
@@ -62,10 +66,10 @@ public class InSituValidator {
                 .withSpaceStrippingRule(null);
         Receiver validator;
         if (root.getNodeKind() == Type.DOCUMENT) {
-            validator = config.getSchema().getDocumentValidator(endPoint, root.getSystemId(), options, null);
+            validator = schema.getDocumentValidator(endPoint, root.getSystemId(), options, null);
         } else {
             options = options.withTopLevelElement(NameOfNode.makeName(root).getStructuredQName());
-            validator = config.getSchema().getElementValidator(endPoint, options, Loc.NONE);
+            validator = schema.getElementValidator(endPoint, options, Loc.NONE);
         }
         NodeCounter nodeCounter = new NodeCounter(nodeBuffer);
         pipe.setCopyInformee(CSharp.methodRef(nodeCounter::notifyElementNode));

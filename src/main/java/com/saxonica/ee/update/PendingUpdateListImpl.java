@@ -14,6 +14,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.z.IntHashMap;
 
@@ -44,12 +45,15 @@ public class PendingUpdateListImpl implements PendingUpdateList {
 
     private final Set<PackageData> packages = new HashSet<>();
 
+    private final Schema schema;
+
     /**
      * Create a Pending Update List
+     * @param schema the schema to be used for revalidation
      */
 
-    public PendingUpdateListImpl() {
-
+    public PendingUpdateListImpl(Schema schema) {
+        this.schema = schema;
     }
 
     /**
@@ -308,7 +312,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
         // perform revalidation
         if (validationMode == Validation.STRICT || validationMode == Validation.LAX) {
             for (MutableNodeInfo root : affectedTrees) {
-                InSituValidator validator = new InSituValidator(root, validationMode);
+                InSituValidator validator = new InSituValidator(root, schema, validationMode);
                 validator.validate();
             }
         }

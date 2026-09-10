@@ -1129,8 +1129,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public PendingUpdateList newPendingUpdateList() {
-        return new PendingUpdateListImpl();
+    public PendingUpdateList newPendingUpdateList(Schema schema) {
+        return new PendingUpdateListImpl(schema);
     }
 
     /**
