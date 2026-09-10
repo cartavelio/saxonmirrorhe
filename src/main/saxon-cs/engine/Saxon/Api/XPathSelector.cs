@@ -138,7 +138,7 @@ namespace Saxon.Api {
                 selector.setUnparsedTextResolver(Xslt30Transformer.WrapTextResolver(value));
             }
         }
-
+        
         /// <summary>
         /// Evaluate the expression, returning the result as an <c>XdmValue</c> (that is,
         /// a sequence of nodes, atomic values, and possibly function items such as maps and arrays).
