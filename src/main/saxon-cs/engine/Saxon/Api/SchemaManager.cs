@@ -246,6 +246,7 @@ namespace Saxon.Api {
 
         /// <summary>
         /// Factory method to get an <c>AtomicType</c> object representing the atomic type with a given <c>QName</c>.
+        /// Currently works only for built-in atomic types.
         /// </summary>
         /// <remarks>
         /// It is undefined whether two calls on this method supplying the same <c>QName</c> will return the same
@@ -257,20 +258,7 @@ namespace Saxon.Api {
 
         public XdmAtomicType GetAtomicType(QName qname)
         {
-            SchemaType type = config.getSchemaType(qname.GetStructuredQName());
-            if (type is BuiltInAtomicType)
-            {
-                return XdmAtomicType.BuiltInAtomicType(qname);
-            }
-            // else if (type is AtomicType)
-            // {
-            //     ItemTypeFactory factory = new ItemTypeFactory(processor.JProcessor);
-            //     return (XdmAtomicType)factory.getAtomicType(qname);
-            // }
-            else
-            {
-                return null;
-            }
+            return XdmAtomicType.BuiltInAtomicType(qname);
         }
         
         

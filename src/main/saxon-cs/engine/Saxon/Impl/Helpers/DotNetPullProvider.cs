@@ -105,7 +105,7 @@ namespace System.Impl.Helpers {
             // when the same name is used repeatedly. We also get a tiny improvement by avoiding the first hash
             // table lookup for names in the null namespace.
 
-            bool found = nameCache.TryGetValue(uri, out Dictionary<string, NodeName>? map2);
+            bool found = nameCache.TryGetValue(uri, out SysCollGen.Dictionary<string, NodeName>? map2);
             if (!found) {
                 map2 = new(50);
                 nameCache.Add(uri, map2);
