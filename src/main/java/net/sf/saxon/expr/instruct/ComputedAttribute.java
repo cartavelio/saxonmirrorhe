@@ -51,7 +51,6 @@ public final class ComputedAttribute extends AttributeCreator {
 
     public ComputedAttribute(Expression attributeName,
                              Expression namespace,
-                             NamespaceResolver nsContext,
                              int validationAction,
                              SimpleType schemaType,
                              boolean allowNameAsQName) {
@@ -282,7 +281,7 @@ public final class ComputedAttribute extends AttributeCreator {
         ComputedAttribute exp = new ComputedAttribute(
                 getNameExp() == null ? null : getNameExp().copy(rebindings),
                 getNamespaceExp() == null ? null : getNamespaceExp().copy(rebindings),
-                getRetainedStaticContext(), getValidationAction(), getSchemaType(), allowNameAsQName);
+                getValidationAction(), getSchemaType(), allowNameAsQName);
         ExpressionTool.copyLocationInfo(this, exp);
         exp.setSelect(getSelect().copy(rebindings));
         exp.setInstruction(isInstruction());
@@ -359,7 +358,7 @@ public final class ComputedAttribute extends AttributeCreator {
                     XPathException err1 = new XPathException("Invalid attribute name: " + rawName, errorCode, this.getLocation());
                     throw dynamicError(getLocation(), err1, context);
                 }
-                if (rawName.toString().equals("xmlns")) {
+                if (rawName.equals("xmlns")) {
                     if (getNamespaceExp() == null) {
                         String errorCode = isXSLT() ? "XTDE0855" : "XQDY0044";
                         XPathException err = new XPathException("Invalid attribute name: " + rawName, errorCode, this.getLocation());

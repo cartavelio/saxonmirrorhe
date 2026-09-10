@@ -8,7 +8,6 @@
 package net.sf.saxon.option.cpp;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
@@ -40,7 +39,7 @@ public class XdmUtils {
 
         BuiltInAtomicType typei = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
         StructuredQName sname = typei.getTypeName();
-        return new QName(sname.getPrefix(), sname.getURI(), sname.getLocalPart());
+        return new QName(sname);
 
     }
 

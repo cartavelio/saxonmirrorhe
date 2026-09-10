@@ -10,7 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
@@ -39,7 +39,7 @@ public class CallableFunction extends AbstractFunction {
     }
 
     public CallableFunction(int arity, Callable callable, FunctionItemType type) {
-        this.name = new SymbolicName.F(new StructuredQName("", "anon", "anon"), arity);
+        this.name = new SymbolicName.F(new StructuredQName("", NamespaceConstant.ANONYMOUS, "anon"), arity);
         this.callable = callable;
         this.type = type;
     }

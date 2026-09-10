@@ -10,13 +10,10 @@ package net.sf.saxon.option.cpp;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.ValidationException;
-import net.sf.saxon.value.BigIntegerValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringValue;
@@ -101,8 +98,7 @@ public class XdmValueForCpp {
     }
 
     public QName getTypeName() {
-        StructuredQName sname = type.getTypeName();
-        return new QName(sname.getPrefix(), sname.getURI(), sname.getLocalPart());
+        return new QName(type.getTypeName());
     }
 
     public static QName getTypeName(String typeStr) {
@@ -110,8 +106,7 @@ public class XdmValueForCpp {
         int fp = StandardNames.getFingerprint(NamespaceConstant.SCHEMA, typeStr);
 
         BuiltInAtomicType typei = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
-        StructuredQName sname = typei.getTypeName();
-        return new QName(sname.getPrefix(), sname.getURI(), sname.getLocalPart());
+        return new QName(typei.getTypeName());
 
     }
 

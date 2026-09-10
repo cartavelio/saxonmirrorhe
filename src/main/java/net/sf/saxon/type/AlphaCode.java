@@ -1005,10 +1005,10 @@ public class AlphaCode {
             result.name = ((AtomicType) primary).getEQName();
         } else if (primary instanceof UnionType) {
             StructuredQName name = ((UnionType) primary).getTypeName();
-            if (name.getURI().equals(NamespaceConstant.SCHEMA)) {
+            if (name.hasURI(NamespaceConstant.SCHEMA)) {
                 // built-in union types xs:numeric, xs:error
                 result.name = "~" + name.getLocalPart();
-            } else if (name.getURI().equals(NamespaceConstant.ANONYMOUS)) {
+            } else if (name.hasURI(NamespaceConstant.ANONYMOUS)) {
                 // Anonymous union types: Saxon extension defined using the syntax union(A, B, C)
                 try {
                     List<AlphaCodeTree> memberMaps = new ArrayList<>();

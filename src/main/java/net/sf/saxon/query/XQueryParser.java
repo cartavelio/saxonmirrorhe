@@ -3742,7 +3742,6 @@ public class XQueryParser extends XPathParser {
         }
         ComputedAttribute att = new ComputedAttribute(name,
                                                       null,
-                                                      env.getNamespaceResolver(),
                                                       Validation.STRIP,
                                                       null,
                                                       true);
