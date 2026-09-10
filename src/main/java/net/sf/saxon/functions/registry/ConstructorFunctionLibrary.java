@@ -85,24 +85,42 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
             return new ZeroArityConstructorFunction(arity1Function);
         }
         final NamespaceResolver resolver = ((SimpleType) type).isNamespaceSensitive() ? staticContext.getNamespaceResolver() : null;
+        return makeConstructorFunction((SimpleType)type, config.getConversionRules(), resolver);
+    }
+
+    /**
+     * Make a constructor function for simple type
+     * @param type the simple type
+     * @param rules the conversion rules in force (XSD 1.1 rules allow "+INF", for example)
+     * @param resolver the namespace resolver, needed if the simple type is namespace-sensitive. May be null if
+     *                 the type is known not to be namespace-sensitive
+     * @return a constructor function for the type. Returns null if the type is abstract, or if it is namespace-sensitive
+     * and no resolver is supplied.
+     */
+    public static FunctionItem makeConstructorFunction(SimpleType type, ConversionRules rules, NamespaceResolver resolver) {
+        if (type == AnySimpleType.getInstance() || type == BuiltInAtomicType.ANY_ATOMIC || type == BuiltInAtomicType.NOTATION) {
+            return null; // no constructor is defined for abstract types
+        }
+        if (resolver == null && type.isNamespaceSensitive()) {
+            return null;
+        }
         if (type instanceof AtomicType) {
             return new AtomicConstructorFunction((AtomicType) type, resolver);
         } else if (type instanceof ListType) {
-            return new ListConstructorFunction((ListType)type, resolver, true);
+            return new ListConstructorFunction((ListType) type, resolver, true);
         } else {
             assert type instanceof UnionType;
-            ConversionRules rules = staticContext.getConfiguration().getConversionRules();
             SequenceType returnType = ((UnionType) type).getResultTypeOfCast();
             return new SimpleUnaryFunction(
-                    arg -> {
-                        AtomicValue value = (AtomicValue) arg.head();
-                        if (value == null) {
-                            return EmptySequence.getInstance();
-                        }
-                        return UnionConstructorFunction.cast(value, (UnionType) type, resolver, rules);
-                    },
-                    SequenceType.OPTIONAL_ATOMIC,
-                    returnType
+                arg -> {
+                    AtomicValue value = (AtomicValue) arg.head();
+                    if (value == null) {
+                        return EmptySequence.getInstance();
+                    }
+                    return UnionConstructorFunction.cast(value, (UnionType) type, resolver, rules);
+                },
+                SequenceType.OPTIONAL_ATOMIC,
+                returnType
             );
         }
     }
