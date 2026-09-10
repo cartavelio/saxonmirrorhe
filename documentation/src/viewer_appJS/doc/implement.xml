@@ -27,7 +27,7 @@
     <xpath version="3.0"> Requires support for XPath 3.0 to be enabled.</xpath> <!-- Expath functions message -->
     <xpath version="default"> Not implemented thus far in XPath.</xpath> <!-- Expath functions message -->
     
-    <spec value="xpath40"> Available in XPath 4.0, XSLT 4.0, and XQuery 4.1.</spec>
+    <spec value="xpath40"> Available in XPath 4.0, XSLT 4.0, and XQuery 4.0.</spec>
     <spec value="xpath31"> Available in XPath 3.1, XSLT 3.0, XQuery 3.1, and later versions.</spec>
     <spec value="xpath30"> Available in XPath 3.0, XSLT 3.0, XQuery 3.0, and later versions.</spec>
     <spec value="xpath20"> Available in XPath 2.0, XSLT 2.0, XQuery 1.0, and later versions.</spec>
