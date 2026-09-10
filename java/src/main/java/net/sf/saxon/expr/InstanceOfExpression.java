@@ -95,6 +95,8 @@ public final class InstanceOfExpression extends UnaryExpression {
 
         if (Cardinality.subsumes(targetCardinality, operand.getCardinality())) {
             final TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
+//            System.err.println("Testing: " + operand.getItemType());
+//            System.err.println("Against: " + targetType);
             Affinity relation = th.relationship(operand.getItemType(), targetType);
             if (relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMED_BY) {
                 Literal lit = Literal.makeLiteral(BooleanValue.TRUE, this);

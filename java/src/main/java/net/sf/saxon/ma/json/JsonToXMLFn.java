@@ -11,13 +11,14 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.DocumentNodeTest;
+import net.sf.saxon.pattern.NamespaceTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
@@ -45,6 +46,9 @@ public class JsonToXMLFn extends SystemFunction {
         jsonToXmlOptions.addAllowedOption("number-parser", SequenceType.one(parserType), null);
         return jsonToXmlOptions;
     }
+
+    public static ItemType RESULT_TYPE = new DocumentNodeTest(
+            new NamespaceTest(Type.ELEMENT, NamespaceUri.FN));
 
     /**
      * Evaluate the expression

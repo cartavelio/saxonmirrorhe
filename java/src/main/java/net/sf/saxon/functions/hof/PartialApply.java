@@ -137,7 +137,7 @@ public class PartialApply extends Expression {
             for (int i = 0, j = 0; i < boundArgumentsOp.length; i++) {
                 Expression bound = boundArgumentsOp[i].getChildExpression();
                 if (bound instanceof PlaceHolder) {
-                    // TODO: FIXME
+                    // TODO: FIXME (KEYWORDS?)
                     argTypes[j++] = ((SpecificFunctionType) baseItemType).getArgumentTypes()[i];
                 }
             }
