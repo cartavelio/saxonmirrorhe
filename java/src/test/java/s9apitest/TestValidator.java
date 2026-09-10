@@ -1791,7 +1791,7 @@ public class TestValidator {
                         try {
                             XsdCompiler manager = proc.newXsdCompiler();
                             XsdSchema schema = manager.compile(
-                                    new File(configTest.getDataDir() + "../bugs/5978-Rose/schema/ACSJournal-layout.xsd"));
+                                    Testdata.file("../../../java/src/bugs/5978-Rose/schema/ACSJournal-layout.xsd"));
                         } catch (Throwable ex) {
                             System.err.println("thread-# " + Thread.currentThread().getId() + " ERROR");
                             ex.printStackTrace();
