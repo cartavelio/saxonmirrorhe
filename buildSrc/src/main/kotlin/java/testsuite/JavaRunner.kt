@@ -85,7 +85,8 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
       }
 
       return when (suite.get()) {
-        "qt3extra" -> "j-catalog.xml"
+        "qt3extra" -> "j13-catalog.xml"
+        "xslt30extra" -> "j13-catalog.xml"
         else -> "catalog.xml"
       }
     } 
