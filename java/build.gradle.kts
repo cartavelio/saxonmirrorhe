@@ -353,9 +353,11 @@ testSuites.configure("xslt30extra", "XT30", mapOf("strict" to "on"))
 testSuites.configure("xslt30extra", "XT40")
 testSuites.configure("xslt30extra", "XT40", mapOf("export" to "on"))
 testSuites.configure("xslt30extra", "XT40", mapOf("strict" to "on"))
+testSuites.configure("xslt30extra", "XT40", mapOf("jit" to "on"))
 
 testSuites.configure("xslt40", "XT40")
 testSuites.configure("xslt40", "XT40", mapOf("strict" to "on"))
+testSuites.configure("xslt40", "XT40", mapOf("jit" to "on"))
 
 testSuites.configure("xsd", "XSD11")
 testSuites.configure("xsdextra", "XSD11")
