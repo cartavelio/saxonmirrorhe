@@ -1250,9 +1250,12 @@ public class ExpressionTool {
         int total = 1;
         for (Operand o : exp.operands()) {
             total += expressionSize(o.getChildExpression());
-            if (o.getChildExpression() instanceof UserFunctionReference) {  // bug 5054
+            if (o.getChildExpression() instanceof UserFunctionReference) {  // bug 5054, bug 5786
                 UserFunction uf = ((UserFunctionReference) o.getChildExpression()).getNominalTarget();
-                total += expressionSize(uf.getBody());
+                if (uf.getFunctionName() == null) {
+                    // anonymous inline function
+                    total += expressionSize(uf.getBody());
+                }
             }
         }
         return total;
