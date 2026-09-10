@@ -260,6 +260,15 @@
     
     <category name="optimization">
         
+        <p>The class <code>XQueryFunctionLibrary</code>, which holds details of all the functions
+        in an XQuery module, has been redesigned to make importing of large XQuery modules more
+        efficient. The function index is now organized first by namespace and then by local name,
+        and uses immutable maps, so that importing a namespace now typically just adds a reference
+        to the relevant imported module, rather than copying, revalidating, and re-indexing all the
+        imported functions. This is particularly useful when a query module holding many functions
+        is separately compiled and then used repeatedly in many different main modules. It provides
+        savings both in compile time and in the size of XQuery executables.</p>
+        
   
         
     </category>
