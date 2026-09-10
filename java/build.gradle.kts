@@ -26,6 +26,9 @@ dependencies {
   testImplementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 
+  // Necessary so that Saxon.main in IntelliJ can run the HTML tests
+  implementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
+
   downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
 }
 
