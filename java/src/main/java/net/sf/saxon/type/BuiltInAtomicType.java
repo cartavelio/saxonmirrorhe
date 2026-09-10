@@ -389,6 +389,20 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     }
 
     /**
+     * Expand this item type to a choice item type. The default delivers a choice
+     * with this type as its only member. Implementations for abstract types return
+     * a choice of the corresponding concrete types, for example {@code node()} expands
+     * to a choice of the seven node kinds.
+     */
+    @Override
+    public ChoiceItemType asChoiceItemType() {
+        if (fingerprint == StandardNames.XS_ANY_ATOMIC_TYPE) {
+            return ChoiceItemType.CHOICE_OF_ATOMIC;
+        }
+        return ChoiceItemType.of(this);
+    }
+
+    /**
      * Get the target namespace of this type
      *
      * @return the target namespace of this type definition, if it has one. Return null in the case
@@ -1418,22 +1432,6 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
             default -> throw new IllegalArgumentException();
 
         };
-    }
-
-    /**
-     * Normalize this item type, returning a potentially different item type that matches the same
-     * items. For example, {@code record(*)} and {@code map(*)} match the same items. The default
-     * implementation returns the item type unchanged.
-     * <p>Item types should be normalized before comparison using equals().</p>
-     *
-     * @return the normalized item type.
-     */
-    @Override
-    public ItemType normalizeItemType() {
-        if (this == BuiltInAtomicType.ANY_ATOMIC) {
-            return getUType().toItemType();
-        }
-        return this;
     }
 
     /**

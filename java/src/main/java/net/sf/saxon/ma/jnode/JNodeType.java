@@ -67,7 +67,6 @@ public abstract class JNodeType extends GNodeType {
         return UType.JNODE;
     }
 
-
     /**
      * Get the default priority when this ItemType is used as an XSLT pattern
      *

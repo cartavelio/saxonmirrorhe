@@ -570,6 +570,15 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
             sb.append(" n");
             sb.append(((SpecificQNameTest) nameTest).getStructuredQName().getEQName());
         }
+        if (schemaType != Untyped.INSTANCE && schemaType != AnyType.INSTANCE && schemaType != BuiltInAtomicType.UNTYPED_ATOMIC) {
+            sb.append(" c");
+            StructuredQName name = schemaType.getStructuredQName();
+            if (name.hasURI(NamespaceUri.SCHEMA)) {
+                sb.append("~").append(name.getLocalPart());
+            } else {
+                sb.append(name.getEQName());
+            }
+        }
         return sb.toString();
     }
 

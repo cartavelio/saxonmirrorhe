@@ -169,7 +169,7 @@ public interface ItemType {
      */
 
     default String getFullAlphaCode() {
-        return getBasicAlphaCode();
+        return AlphaCode.fromItemType(this);
     }
 
     /**
@@ -188,13 +188,26 @@ public interface ItemType {
     /**
      * Normalize this item type, returning a potentially different item type that matches the same
      * items. For example, {@code record(*)} and {@code map(*)} match the same items. The default
-     * implementation returns the item type unchanged.
+     * implementation returns the item type unchanged. This method does NOT expand item types
+     * to an equivalent choice item type.
      * <p>Item types should be normalized before comparison using equals().</p>
      * @return the normalized item type.
      */
 
     default ItemType normalizeItemType() {
         return this;
+    }
+
+    /**
+     * Expand this item type to a choice item type. The default delivers a choice
+     * with this type as its only member. Implementations for abstract types return
+     * a choice of the corresponding concrete types, for example {@code node()} expands
+     * to a choice of the seven node kinds. The implementation for a choice type
+     * that includes abstract member types should expand these recursively.
+     */
+
+    default ChoiceItemType asChoiceItemType() {
+        return ChoiceItemType.of(this);
     }
 
     /**

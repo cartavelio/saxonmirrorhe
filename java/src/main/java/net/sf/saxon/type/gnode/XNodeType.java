@@ -69,6 +69,7 @@ public abstract class XNodeType extends GNodeType {
         return UType.XNODE;
     }
 
+
     /**
      * Get the allowed content type permitted by this item type. Defaults
      * to allowing any content

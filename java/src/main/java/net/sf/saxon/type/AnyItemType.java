@@ -12,7 +12,6 @@ import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.ItemCheckingPlan;
-import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
@@ -63,6 +62,9 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
     }
 
 
+    public ChoiceItemType asChoiceItemType() {
+        return ChoiceItemType.CHOICE_OF_ANY;
+    }
 
     /**
      * Determine whether this item type is an atomic type
@@ -86,23 +88,12 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
         return "";
     }
 
-    @Override
-    public String getFullAlphaCode() {
-        return "";
-    }
 
     @Override
     public String toExportString() {
         return toString();
     }
-
-    @Override
-    public ItemType normalizeItemType() {
-        return ChoiceItemType.of(AnyGNodeType.getInstance().normalizeItemType(),
-                                 BuiltInAtomicType.ANY_ATOMIC.normalizeItemType(),
-                                 AnyFunctionType.INSTANCE.normalizeItemType());
-    }
-
+    
     /**
      * Determine whether this item type is atomic (that is, whether it can ONLY match
      * atomic values)

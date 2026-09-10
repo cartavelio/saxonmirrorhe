@@ -27,6 +27,9 @@ import java.util.function.Predicate;
 
 public class ChoiceItemType implements ItemType, ChoiceType {
 
+    private ChoiceItemType expandedChoiceItemType;
+    private UType uType;
+
     public static ItemType makeChoiceItemType(List<ItemType> memberTypes) {
         for (ItemType member : memberTypes) {
             if (member.getGenre() != Genre.ATOMIC) {
@@ -195,12 +198,15 @@ public class ChoiceItemType implements ItemType, ChoiceType {
      * @return the smallest UType that subsumes this item type
      */
     @Override
-    public UType getUType() {
-        UType u = UType.VOID;
-        for (ItemType at : memberTypes) {
-            u = u.union(at.getUType());
+    public synchronized UType getUType() {
+        if (uType == null) {
+            UType u = UType.VOID;
+            for (ItemType at : memberTypes) {
+                u = u.union(at.getUType());
+            }
+            uType = u;
         }
-        return u;
+       return uType;
     }
 
     /**
@@ -213,6 +219,26 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     @Override
     public String getBasicAlphaCode() {
         return "U";
+    }
+
+    public String getFullAlphaCode() {
+        // TODO: integrate this code into AlphaCode.fromItemType()
+        if (memberTypes.size() == 1) {
+            return memberTypes.get(0).getFullAlphaCode();
+        }
+        StringBuilder sb = new StringBuilder("U m[");
+        boolean first = true;
+        for (ItemType member : asChoiceItemType().getMemberTypes()) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(",");
+            }
+            sb.append(member.getFullAlphaCode());
+        }
+        sb.append("]");
+        return sb.toString();
+
     }
 
     /**
@@ -370,12 +396,32 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     }
 
     @Override
-    public ItemType normalizeItemType() {
-        List<ItemType> m2 = new ArrayList<>(memberTypes.size());
-        for (ItemType member : memberTypes) {
-            m2.add(member.normalizeItemType());
+    public ChoiceItemType asChoiceItemType() {
+        return this;
+    }
+
+    public synchronized ChoiceItemType expand() {
+        if (expandedChoiceItemType == null) {
+            boolean expanded = false;
+            List<ItemType> members = new ArrayList<>(memberTypes.size());
+            for (ItemType member : memberTypes) {
+                ChoiceItemType asChoice = member.asChoiceItemType();
+                if (asChoice.memberTypes.size() > 1) {
+                    for (ItemType subMember : asChoice.memberTypes) {
+                        members.add(subMember);
+                        expanded = true;
+                    }
+                } else {
+                    members.add(member);
+                }
+            }
+            if (expanded) {
+                expandedChoiceItemType = new ChoiceItemType(members);
+            } else {
+                expandedChoiceItemType = this;
+            }
         }
-        return ChoiceItemType.makeChoiceItemType(m2);
+        return expandedChoiceItemType;
     }
 
     /**
@@ -416,6 +462,84 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         return Optional.empty();
     }
+
+    public final static ChoiceItemType CHOICE_OF_ANY = ChoiceItemType.of(
+            AnyJNodeType.getInstance(),
+            NodeKindType.ELEMENT,
+            NodeKindType.ATTRIBUTE,
+            NodeKindType.NAMESPACE,
+            NodeKindType.DOCUMENT,
+            NodeKindType.TEXT,
+            NodeKindType.COMMENT,
+            NodeKindType.PROCESSING_INSTRUCTION,
+            AnyFunctionType.INSTANCE,
+            BuiltInAtomicType.STRING,
+            BuiltInAtomicType.ANY_URI,
+            BuiltInAtomicType.DECIMAL,
+            BuiltInAtomicType.DURATION,
+            BuiltInAtomicType.G_YEAR,
+            BuiltInAtomicType.G_YEAR_MONTH,
+            BuiltInAtomicType.G_MONTH,
+            BuiltInAtomicType.G_MONTH_DAY,
+            BuiltInAtomicType.G_DAY,
+            BuiltInAtomicType.TIME,
+            BuiltInAtomicType.DATE,
+            BuiltInAtomicType.DATE_TIME,
+            BuiltInAtomicType.DATE_TIME_STAMP,
+            BuiltInAtomicType.BOOLEAN,
+            BuiltInAtomicType.DOUBLE,
+            BuiltInAtomicType.FLOAT,
+            BuiltInAtomicType.HEX_BINARY,
+            BuiltInAtomicType.BASE64_BINARY,
+            BuiltInAtomicType.QNAME,
+            BuiltInAtomicType.NOTATION,
+            BuiltInAtomicType.UNTYPED_ATOMIC
+    );
+
+    public final static ChoiceItemType CHOICE_OF_GNODE = ChoiceItemType.of(
+            AnyJNodeType.getInstance(),
+            NodeKindType.ELEMENT,
+            NodeKindType.ATTRIBUTE,
+            NodeKindType.NAMESPACE,
+            NodeKindType.DOCUMENT,
+            NodeKindType.TEXT,
+            NodeKindType.COMMENT,
+            NodeKindType.PROCESSING_INSTRUCTION
+    );
+
+    public final static ChoiceItemType CHOICE_OF_XNODE = ChoiceItemType.of(
+            NodeKindType.ELEMENT,
+            NodeKindType.ATTRIBUTE,
+            NodeKindType.NAMESPACE,
+            NodeKindType.DOCUMENT,
+            NodeKindType.TEXT,
+            NodeKindType.COMMENT,
+            NodeKindType.PROCESSING_INSTRUCTION
+    );
+
+    public final static ChoiceItemType CHOICE_OF_ATOMIC = ChoiceItemType.of(
+            BuiltInAtomicType.STRING,
+            BuiltInAtomicType.ANY_URI,
+            BuiltInAtomicType.DECIMAL,
+            BuiltInAtomicType.DURATION,
+            BuiltInAtomicType.G_YEAR,
+            BuiltInAtomicType.G_YEAR_MONTH,
+            BuiltInAtomicType.G_MONTH,
+            BuiltInAtomicType.G_MONTH_DAY,
+            BuiltInAtomicType.G_DAY,
+            BuiltInAtomicType.TIME,
+            BuiltInAtomicType.DATE,
+            BuiltInAtomicType.DATE_TIME,
+            BuiltInAtomicType.DATE_TIME_STAMP,
+            BuiltInAtomicType.BOOLEAN,
+            BuiltInAtomicType.DOUBLE,
+            BuiltInAtomicType.FLOAT,
+            BuiltInAtomicType.HEX_BINARY,
+            BuiltInAtomicType.BASE64_BINARY,
+            BuiltInAtomicType.QNAME,
+            BuiltInAtomicType.NOTATION,
+            BuiltInAtomicType.UNTYPED_ATOMIC
+    );
 
 }
 

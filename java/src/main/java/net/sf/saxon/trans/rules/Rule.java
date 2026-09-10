@@ -13,6 +13,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AlphaCode;
 
 /**
  * Rule: common functionality representing an abstraction of a template rule, a strip-space rule,
@@ -174,7 +175,7 @@ public class Rule {
             out.emitAttribute("rank", "" + getRank());
             out.emitAttribute("minImp", getMinImportPrecedence() + "");
             out.emitAttribute("slots", template.getStackFrameMap().getNumberOfVariables() + "");
-            out.emitAttribute("matches", pattern.getItemType().getFullAlphaCode());
+            out.emitAttribute("matches", AlphaCode.fromItemType(pattern.getItemType()));
             template.explainProperties(out);
             exportOtherProperties(out);
 

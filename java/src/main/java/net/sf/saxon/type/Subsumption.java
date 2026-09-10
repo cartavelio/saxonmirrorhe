@@ -15,9 +15,7 @@ import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static net.sf.saxon.type.Affinity.DISJOINT;
 import static net.sf.saxon.type.Affinity.OVERLAPS;
@@ -56,17 +54,20 @@ public abstract class Subsumption {
      * subsumes the other); {@link Affinity#DISJOINT} if the two types are disjoint (have an empty intersection)
      */
 
-    public static Affinity computeRelationship(ItemType t1, ItemType t2) {
+//    public static Affinity computeRelationship(ItemType t1, ItemType t2) {
+//        Affinity rel = computeRelationship0(t1, t2);
+//        System.err.println("computeRelationship(" + t1.getFullAlphaCode() + ", " + t2.getFullAlphaCode() + ") = " + rel);
+//        return rel;
+//    }
 
+    public static Affinity computeRelationship (ItemType t1, ItemType t2){
         if (t1 == t2) {
             return SAME_TYPE;
         }
 
         if (t1 instanceof ChoiceItemType || t2 instanceof ChoiceItemType) {
-            t1 = t1.normalizeItemType();
-            t2 = t2.normalizeItemType();
-            ChoiceItemType c1 = t1 instanceof ChoiceItemType ? (ChoiceItemType) t1 : ChoiceItemType.of(t1);
-            ChoiceItemType c2 = t2 instanceof ChoiceItemType ? (ChoiceItemType) t2 : ChoiceItemType.of(t2);
+            ChoiceItemType c1 = t1.normalizeItemType().asChoiceItemType().expand();
+            ChoiceItemType c2 = t2.normalizeItemType().asChoiceItemType().expand();
             return choiceItemRelationship(c1, c2);
         }
 
@@ -556,38 +557,57 @@ public abstract class Subsumption {
         // * If SUP return SUBSUMED_BY
         // * If every pair of item types is disjoint, then DISJOINT
         // * Else OVERLAPS
-
-        boolean allSUB = true;
-        boolean allSUP = true;
+        //System.err.println("choiceRelationship /// c1=" + c1.getFullAlphaCode() + " /// c2=" + c2.getFullAlphaCode());
+        Affinity[][] affinities = new Affinity[c1.memberTypes.size()][c2.memberTypes.size()];
         boolean allDIS = true;
-        for (ItemType lhs : c1.memberTypes) {
-            boolean foundSUP = false;
-            for (ItemType rhs : c2.memberTypes) {
-                Affinity a = computeRelationship(lhs, rhs);
-                if (a != DISJOINT) {
+        for (int i = 0; i < c1.memberTypes.size(); i++) {
+            for (int j = 0; j < c2.memberTypes.size(); j++) {
+                affinities[i][j] = computeRelationship(c1.memberTypes.get(i), c2.memberTypes.get(j));
+                if (affinities[i][j] != DISJOINT) {
                     allDIS = false;
                 }
-                if (a == Affinity.SAME_TYPE || a == SUBSUMED_BY) {
+            }
+        }
+        if (allDIS) {
+            return DISJOINT;
+        }
+
+        // Let SUP := every predicate on the LHS is subsumed by (or same as) a predicate on the RHS
+
+        boolean allSUP = true;
+        for (int i = 0; i < c1.memberTypes.size(); i++) {
+            boolean foundSUP = false;
+            for (int j = 0; j < c2.memberTypes.size(); j++) {
+                Affinity a = affinities[i][j];
+                if (a == SAME_TYPE || a == SUBSUMED_BY) {
                     foundSUP = true;
+                    break;
                 }
             }
             if (!foundSUP) {
                 allSUP = false;
+                break;
             }
         }
-        for (ItemType rhs : c2.memberTypes) {
+
+        // Let SUB := every predicate on the RHS is subsumed by (or same as) a predicate on the LHS
+
+        boolean allSUB = true;
+        for (int j = 0; j < c2.memberTypes.size(); j++) {
             boolean foundSUB = false;
-            for (ItemType lhs : c1.memberTypes) {
-                Affinity a = computeRelationship(lhs, rhs);
-                if (a == Affinity.SAME_TYPE || a == SUBSUMES) {
+            for (int i = 0; i < c1.memberTypes.size(); i++) {
+                Affinity a = affinities[i][j];
+                if (a == SAME_TYPE || a == SUBSUMED_BY) {
                     foundSUB = true;
                     break;
                 }
             }
             if (!foundSUB) {
                 allSUB = false;
+                break;
             }
         }
+
         if (allSUB && allSUP) {
             return SAME_TYPE;
         }
@@ -597,7 +617,7 @@ public abstract class Subsumption {
         if (allSUP) {
             return SUBSUMED_BY;
         }
-        return allDIS ? DISJOINT : OVERLAPS;
+        return OVERLAPS;
     }
 
     /**
