@@ -251,6 +251,12 @@ public class Serializer extends AbstractDestination {
          */
         SAXON_RECOGNIZE_BINARY(SaxonOutputKeys.RECOGNIZE_BINARY),
         /**
+         * Saxon extension for use in conjunction with {@code CDATA_SECTION_ELEMENTS}: when an element is
+         * named in {@code CDATA_SECTION_ELEMENTS}, and this property is set, then CDATA tags are output
+         * around a text node only if it includes an ampersand or less-than sign.
+         */
+        SAXON_CONDITIONAL_CDATA(SaxonOutputKeys.CONDITIONAL_CDATA),
+        /**
          * Saxon extension for use when output is sent to a SAX ContentHandler: indicates that the output
          * is required to be well-formed (exactly one top-level element, no top-level text nodes)
          */
@@ -727,8 +733,7 @@ public class Serializer extends AbstractDestination {
 
     private void serializeNodeToResult(XdmNode node, Result res) throws SaxonApiException {
         try {
-            SerializationProperties props = new SerializationProperties(getLocallyDefinedProperties(), characterMapIndex);
-            QueryResult.serialize(node.getUnderlyingNode(), res, props);
+            QueryResult.serialize(node.getUnderlyingNode(), res, getLocallyDefinedProperties());
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }

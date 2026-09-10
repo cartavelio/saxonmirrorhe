@@ -78,6 +78,7 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption(sx("canonical"), SequenceType.SINGLE_BOOLEAN);
         //eqnames
         op.addAllowedOption(sx("character-representation"), SequenceType.SINGLE_STRING); //string
+        op.addAllowedOption(sx("conditional-cdata"), SequenceType.SINGLE_BOOLEAN); //boolean
         op.addAllowedOption(sx("double-space"), listOfQNames);
         //eqnames
         op.addAllowedOption(sx("indent-spaces"), SequenceType.SINGLE_INTEGER); //integer
@@ -462,6 +463,9 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if ((seqVal = map.get(sx("recognize-binary"))) != null) {
             props.setProperty(SaxonOutputKeys.RECOGNIZE_BINARY, toYesNoTypeString(seqVal));
+        }
+        if ((seqVal = map.get(sx("conditional-cdata"))) != null) {
+            props.setProperty(SaxonOutputKeys.CONDITIONAL_CDATA, toYesNoTypeString(seqVal));
         }
         if ((seqVal = map.get(sx("require-well-formed"))) != null) {
             props.setProperty(SaxonOutputKeys.REQUIRE_WELL_FORMED, toYesNoTypeString(seqVal));

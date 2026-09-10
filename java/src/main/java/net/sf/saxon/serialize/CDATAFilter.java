@@ -11,6 +11,7 @@ import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.CharacterSet;
@@ -36,6 +37,8 @@ public class CDATAFilter extends ProxyReceiver {
     private final Stack<NodeName> stack = new Stack<>();
     private Set<NodeName> nameList;             // names of cdata elements
     private CharacterSet characterSet;
+    private boolean conditional = false;
+
 
     /**
      * Create a CDATA Filter
@@ -59,6 +62,7 @@ public class CDATAFilter extends ProxyReceiver {
             throws XPathException {
         getCdataElements(details);
         characterSet = getConfiguration().getCharacterSetFactory().getCharacterSet(details);
+        conditional = "yes".equals(details.getProperty(SaxonOutputKeys.CONDITIONAL_CDATA));
     }
 
     /**
@@ -143,13 +147,21 @@ public class CDATAFilter extends ProxyReceiver {
             cdata = isCDATA(top);
         }
 
+        UnicodeString content = buffer.toUnicodeString();
+
+        // Saxon serialization property conditional-cdata - don't output CDATA tags unless
+        // there are special characters
+        if (cdata && conditional && content.indexOf('<') < 0 && content.indexOf('&') < 0) {
+            cdata = false;
+        }
+
         if (cdata) {
 
             // If we're doing Unicode normalization, we need to do this before CDATA processing.
             // In this situation the normalizer will be the next thing in the serialization pipeline.
 
             if (getNextReceiver() instanceof UnicodeNormalizer) {
-                UnicodeString normal = ((UnicodeNormalizer) getNextReceiver()).normalize(buffer.toUnicodeString(), true);
+                UnicodeString normal = ((UnicodeNormalizer) getNextReceiver()).normalize(content, true);
                 buffer = new UnicodeBuilder();
                 buffer.accept(normal);
                 end = (int)buffer.length();
@@ -193,7 +205,7 @@ public class CDATAFilter extends ProxyReceiver {
             flushCDATA(bufferContent.substring(start, end));
 
         } else {
-            nextReceiver.characters(buffer.toUnicodeString(), Loc.NONE, ReceiverOption.NONE);
+            nextReceiver.characters(content, Loc.NONE, ReceiverOption.NONE);
         }
 
         buffer.clear();

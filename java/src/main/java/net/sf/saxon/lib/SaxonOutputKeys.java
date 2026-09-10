@@ -324,6 +324,16 @@ public class SaxonOutputKeys {
     /*@NotNull*/ public static final String WRAP = "{http://saxon.sf.net/}wrap-result-sequence";
 
     /**
+     * Property saxon:conditional-cdata indicates that CDATA, if requested for a particular
+     * element, should be used only if the value of a text node actually includes a character
+     * that needs escaping, viz {@code '<'} or {@code '&'}. The values of the property are yes/no,
+     * defaulting to no. The property has no effect unless the element name is listed in
+     * the CDATA_SECTION_ELEMENTS property.
+     */
+
+    public static final String CONDITIONAL_CDATA = "{http://saxon.sf.net/}conditional-cdata";
+
+    /**
      * Property saxon:unfailing used to indicate that serialization should not fail. This is used when a serialization method such
      * as XML or JSON is invoked from the ADAPTIVE serialization method, and it tailors the error-handling behaviour
      * of the subsidiary output method. There is nothing to stop the property being set directly by the user, though
