@@ -346,10 +346,7 @@ public class DecimalSymbols {
             throw new XPathException("invalid decimal property name");
         }
         Property p = getPropertyForName(prop);
-        Integer existingPrecedence = precedences.get(p);
-        if (existingPrecedence == null) {
-            existingPrecedence = -1;
-        }
+        int existingPrecedence = precedences.getOrDefault(p, -1);
         if (precedence > existingPrecedence) {
             setProperty(prop, value);
             precedences.put(p, precedence);
@@ -474,8 +471,8 @@ public class DecimalSymbols {
     public void checkConsistency(StructuredQName name) throws XPathException {
 
         for (Property prop : properties.keySet()) {
-            Boolean isInconsistent = inconsistent.get(prop);
-            if (isInconsistent != null && isInconsistent) {
+            boolean isInconsistent = inconsistent.containsKey(prop) && inconsistent.get(prop);
+            if (isInconsistent) {
                 throw new XPathException(
                         "Inconsistency in " +
                                 (name == null ? "unnamed decimal format. " : "decimal format " + name.getDisplayName() + ". ") +
