@@ -486,7 +486,7 @@ public class EnumerationType implements AtomicType {
 
     /**
      * Returns the value of the 'block' attribute for this type, as a bit-significant
-     * integer with fields such as {@link Derivatiion#DERIVATION_LIST} and {@link Derivatiion#DERIVATION_EXTENSION}.
+     * integer with fields such as {@link Derivation#DERIVATION_LIST} and {@link Derivation#DERIVATION_EXTENSION}.
      * This corresponds to the property "prohibited substitutions" in the schema component model.
      *
      * @return the value of the 'block' attribute for this type
@@ -523,7 +523,7 @@ public class EnumerationType implements AtomicType {
      * Get the types of derivation that are not permitted, by virtue of the "final" property.
      *
      * @return the types of derivation that are not permitted, as a bit-significant integer
-     * containing bits such as {@link Derivatiion#DERIVATION_EXTENSION}
+     * containing bits such as {@link Derivation#DERIVATION_EXTENSION}
      */
     @Override
     public int getFinalProhibitions() {
@@ -534,7 +534,7 @@ public class EnumerationType implements AtomicType {
      * Determines whether derivation (of a particular kind)
      * from this type is allowed, based on the "final" property
      *
-     * @param derivation the kind of derivation, for example {@link Derivatiion#DERIVATION_LIST}
+     * @param derivation the kind of derivation, for example {@link Derivation#DERIVATION_LIST}
      * @return true if this kind of derivation is allowed
      */
     @Override
@@ -629,7 +629,7 @@ public class EnumerationType implements AtomicType {
      */
     @Override
     public SchemaValidationStatus getValidationStatus() {
-        return null;
+        return SchemaValidationStatus.VALIDATED;
     }
 
     /**

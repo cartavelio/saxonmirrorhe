@@ -38,7 +38,7 @@ public class IntArraySet extends IntSet {
      * Hashcode, evaluated lazily
      */
 
-    private int hashCode = -1;
+    private int _hashCode = -1;
 
     /**
      * Create an empty set
@@ -88,7 +88,7 @@ public class IntArraySet extends IntSet {
     @Override
     public void clear() {
         contents = EMPTY_INT_ARRAY;
-        hashCode = -1;
+        _hashCode = -1;
     }
 
     @Override
@@ -119,7 +119,7 @@ public class IntArraySet extends IntSet {
 
     @Override
     public boolean remove(int value) {
-        hashCode = -1;
+        _hashCode = -1;
         int pos = Arrays.binarySearch(contents, value);
         if (pos < 0) {
             return false;
@@ -146,7 +146,7 @@ public class IntArraySet extends IntSet {
 
     @Override
     public boolean add(int value) {
-        hashCode = -1;
+        _hashCode = -1;
         if (contents.length == 0) {
             contents = new int[]{value};
             return true;
@@ -325,15 +325,15 @@ public class IntArraySet extends IntSet {
 
     public int hashCode() {
         // Note, hashcodes are the same as those used by IntHashSet
-        if (hashCode == -1) {
+        if (_hashCode == -1) {
             int h = 936247625;
             IntIterator it = iterator();
             while (it.hasNext()) {
                 h += it.next();
             }
-            hashCode = h;
+            _hashCode = h;
         }
-        return hashCode;
+        return _hashCode;
     }
 
     /**

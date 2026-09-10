@@ -114,6 +114,7 @@ public interface NodeInfo extends Source, Item, Location {
         return equals(other);
     }
 
+    //#if CSHARP==false
     /**
      * The equals() method compares nodes for identity. It is defined to give the same result
      * as isSameNodeInfo().
@@ -139,7 +140,7 @@ public interface NodeInfo extends Source, Item, Location {
      */
 
     int hashCode();
-
+    //#endif
     /**
      * Get the System ID for the node. Note this is not the
      * same as the base URI: the base URI can be modified by xml:base, but

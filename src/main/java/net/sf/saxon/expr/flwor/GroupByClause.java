@@ -306,7 +306,7 @@ public class GroupByClause extends Clause {
                     concatenatedValue.add(it);
                 }
             }
-            SequenceExtent se = new SequenceExtent(concatenatedValue);
+            SequenceExtent se = new SequenceExtent.Of<>(concatenatedValue);
             context.setLocalVariable(bindings[j].getLocalSlotNumber(), se);
         }
     }
@@ -358,7 +358,7 @@ public class GroupByClause extends Clause {
                         if (val == null) {
                             break;
                         }
-                        h ^= i + val.getXPathComparable(false, comparer.getCollator(), implicitTimezone).hashCode();
+                        h ^= i + val.getXPathMatchKey(comparer.getCollator(), implicitTimezone).hashCode();
                     }
                 } catch (XPathException e) {
                     // ignore any errors

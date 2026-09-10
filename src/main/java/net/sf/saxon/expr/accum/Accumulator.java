@@ -17,6 +17,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.SimpleMode;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -327,7 +328,7 @@ public class Accumulator extends Actor {
         out.setChildRole("init");
         initialValueExpression.export(out);
 
-        SimpleMode.RuleAction action = r -> {
+        Mode.RuleAction action = r -> {
             out.startElement("accRule");
             out.emitAttribute("slots", ((AccumulatorRule)r.getAction()).getStackFrameMap().getNumberOfVariables()+"");
             out.emitAttribute("rank", ""+r.getRank());

@@ -13,9 +13,9 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.SpaceStrippingRule;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import org.xml.sax.XMLReader;
 
 import java.io.*;
@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Optional;
 
 /**
  * AbstractCollection is an abstract superclass for the various implementations
@@ -61,11 +62,11 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
         if (params == null) {
             return false;
         }
-        Boolean stable = params.getStable();
-        if (stable == null) {
+        Optional<Boolean> stable = params.getStable();
+        if (!stable.isPresent()) {
             return context.getConfiguration().getBooleanProperty(Feature.STABLE_COLLECTION_URI);
         } else {
-            return stable;
+            return stable.get();
         }
     }
 
@@ -85,24 +86,24 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
         ParseOptions options = new ParseOptions(context.getConfiguration().getParseOptions());
 
         if (params != null) {
-            Integer v = params.getValidationMode();
+            Optional<Integer> v = params.getValidationMode();
             if (v != null) {
-                options.setSchemaValidationMode(v);
+                options.setSchemaValidationMode(v.get());
             }
 
-            Boolean xInclude = params.getXInclude();
-            if (xInclude != null) {
-                options.setXIncludeAware(xInclude);
+            Optional<Boolean> xInclude = params.getXInclude();
+            if (xInclude.isPresent()) {
+                options.setXIncludeAware(xInclude.get());
             }
 
-            SpaceStrippingRule stripSpace = params.getSpaceStrippingRule();
-            if (stripSpace != null) {
-                options.setSpaceStrippingRule(stripSpace);
+            Optional<SpaceStrippingRule> stripSpace = params.getSpaceStrippingRule();
+            if (stripSpace.isPresent()) {
+                options.setSpaceStrippingRule(stripSpace.get());
             }
 
-            Maker<XMLReader> p = params.getXMLReaderMaker();
-            if (p != null) {
-                options.setXMLReaderMaker(p);
+            Optional<Maker<XMLReader>> p = params.getXMLReaderMaker();
+            if (p.isPresent()) {
+                options.setXMLReaderMaker(p.get());
             }
 
 
@@ -110,8 +111,8 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
             // as warnings, we set up a special ErrorListener to achieve this
 
             int onError = URIQueryParameters.ON_ERROR_FAIL;
-            if (params.getOnError() != null) {
-                onError = params.getOnError();
+            if (params.getOnError().isPresent()) {
+                onError = params.getOnError().get();
             }
             final Controller controller = context.getController();
             //        final PipelineConfiguration oldPipe = context.getConfiguration().makePipelineConfiguration();
@@ -206,8 +207,8 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
             inputDetails.resourceUri = resourceURI;
             URI uri = new URI(resourceURI);
             if ("file".equals(uri.getScheme())) {
-                if (params != null && params.getContentType() != null) {
-                    inputDetails.contentType = params.getContentType();
+                if (params != null && params.getContentType().isPresent()) {
+                    inputDetails.contentType = params.getContentType().get();
                 } else {
                     inputDetails.contentType = guessContentTypeFromName(resourceURI);
                 }
@@ -241,8 +242,8 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                 inputDetails.contentType = guessContentTypeFromContent(stream);
                 stream.close();
             }
-            if (params != null && params.getOnError() != null) {
-                inputDetails.onError = params.getOnError();
+            if (params != null && params.getOnError().isPresent()) {
+                inputDetails.onError = params.getOnError().get();
             }
             return inputDetails;
 

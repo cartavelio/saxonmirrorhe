@@ -35,7 +35,9 @@ public class ForMemberClausePull extends ForClausePull {
         Expression sequence = forClause.getSequence();
         arrayItem = (ArrayItem)sequence.evaluateItem(context);
         Iterator<GroundedValue> members = arrayItem.members().iterator();
-        return new SequenceIteratorOverJavaIterator<>(members, ObjectValue::new);
+        //noinspection Convert2MethodRef
+        return new SequenceIteratorOverJavaIterator<GroundedValue>(members,
+                                                                   mem -> new ObjectValue<GroundedValue>(mem));
     }
 
     @Override

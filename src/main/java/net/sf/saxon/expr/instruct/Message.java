@@ -12,7 +12,6 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardDiagnostics;
-import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.s9api.HostLanguage;
@@ -294,7 +293,7 @@ public class Message extends Instruction {
             };
             content.copy(emitter, CopyOptions.ALL_NAMESPACES, getLocation());
             TerminationException te = new TerminationException(
-                    "Processing terminated by " + StandardErrorListener.getInstructionNameDefault(this) +
+                    "Processing terminated by " + StandardDiagnostics.getInstructionNameDefault(this) +
                             " at line " + getLocation().getLineNumber() +
                             " in " + StandardDiagnostics.abbreviateLocationURIDefault(getLocation().getSystemId()));
             te.setLocation(getLocation());

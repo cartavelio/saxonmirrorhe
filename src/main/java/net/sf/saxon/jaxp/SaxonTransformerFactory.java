@@ -321,7 +321,7 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
                 }
                 break;
             case XMLConstants.ACCESS_EXTERNAL_DTD:
-                getConfiguration().setConfigurationProperty(Feature.XML_PARSER_PROPERTY.name + XMLConstants.ACCESS_EXTERNAL_DTD, value);
+                getConfiguration().setConfigurationProperty(FeatureKeys.XML_PARSER_PROPERTY + XMLConstants.ACCESS_EXTERNAL_DTD, value);
                 break;
             case XMLConstants.ACCESS_EXTERNAL_STYLESHEET:
                 getConfiguration().setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, value.toString());

@@ -11,6 +11,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.EmptySequence;
@@ -104,7 +105,7 @@ public class Chain implements GroundedValue {
     @Override
     public UnfailingIterator iterate() {
         if (extent != null) {
-            return new net.sf.saxon.tree.iter.ListIterator(extent);
+            return new ListIterator.Of<>(extent);
         } else {
             return new ChainIterator(this);
         }
@@ -196,7 +197,7 @@ public class Chain implements GroundedValue {
                 newEnd = extent.size();
             }
         }
-        return new SequenceExtent(extent.subList(newStart, newEnd));
+        return new SequenceExtent.Of<>(extent.subList(newStart, newEnd));
     }
 
     /**
@@ -386,7 +387,7 @@ public class Chain implements GroundedValue {
 
         @Override
         public GroundedValue getResidue() throws XPathException {
-            return new SequenceExtent(this);
+            return SequenceExtent.from(this);
         }
     }
 

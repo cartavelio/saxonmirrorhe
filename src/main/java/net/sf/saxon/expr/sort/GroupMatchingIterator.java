@@ -47,7 +47,7 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
 
     @Override
     public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator(currentMembers);
+        return new ListIterator.Of<>(currentMembers);
     }
 
     @Override
@@ -102,7 +102,7 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
 
         @Override
         public SequenceIterator iterateCurrentGroup() {
-            return new ListIterator(cMembers);
+            return new ListIterator.Of<>(cMembers);
         }
 
 

@@ -695,7 +695,7 @@ public abstract class JPConverter {
                             SaxonErrorCode.SXJE0051);
                 }
             }
-            return new SequenceExtent(list);
+            return new SequenceExtent.Of<>(list);
         }
 
         @Override
@@ -751,7 +751,7 @@ public abstract class JPConverter {
             for (int i = 0; i < array.length; i++) {
                 array[i] = Int64Value.makeDerived(((long[]) object)[i], BuiltInAtomicType.LONG);
             }
-            return new SequenceExtent(array);
+            return new SequenceExtent.Of<>(array);
         }
 
         @Override
@@ -776,7 +776,7 @@ public abstract class JPConverter {
             for (int i = 0; i < array.length; i++) {
                 array[i] = Int64Value.makeDerived(((int[]) object)[i], BuiltInAtomicType.INT);
             }
-            return new SequenceExtent(array);
+            return new SequenceExtent.Of<>(array);
         }
 
         @Override
@@ -801,7 +801,7 @@ public abstract class JPConverter {
             for (int i = 0; i < array.length; i++) {
                 array[i] = Int64Value.makeDerived(((short[]) object)[i], BuiltInAtomicType.SHORT);
             }
-            return new SequenceExtent(array);
+            return new SequenceExtent.Of<>(array);
         }
 
         @Override
@@ -828,7 +828,7 @@ public abstract class JPConverter {
             for (int i = 0; i < array.length; i++) {
                 array[i] = Int64Value.makeDerived(255 & (int) ((byte[]) object)[i], BuiltInAtomicType.UNSIGNED_BYTE);
             }
-            return new SequenceExtent(array);
+            return new SequenceExtent.Of<>(array);
         }
 
         @Override
@@ -869,7 +869,7 @@ public abstract class JPConverter {
             for (int i = 0; i < array.length; i++) {
                 array[i] = new DoubleValue(((double[]) object)[i]);
             }
-            return new SequenceExtent(array);
+            return new SequenceExtent.Of<>(array);
         }
 
         @Override
@@ -894,7 +894,7 @@ public abstract class JPConverter {
             for (int i = 0; i < array.length; i++) {
                 array[i] = new DoubleValue(((float[]) object)[i]);
             }
-            return new SequenceExtent(array);
+            return new SequenceExtent.Of<>(array);
         }
 
         @Override
@@ -919,7 +919,7 @@ public abstract class JPConverter {
             for (int i = 0; i < array.length; i++) {
                 array[i] = BooleanValue.get(((boolean[]) object)[i]);
             }
-            return new SequenceExtent(array);
+            return new SequenceExtent.Of<>(array);
         }
 
         @Override
@@ -964,7 +964,7 @@ public abstract class JPConverter {
                     throw new XPathException("Returned array contains null values: cannot convert to items", SaxonErrorCode.SXJE0051);
                 }
             }
-            return new SequenceExtent(newArray);
+            return new SequenceExtent.Of<>(newArray);
         }
 
         @Override

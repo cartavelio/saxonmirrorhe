@@ -64,7 +64,7 @@ public class InsertBefore extends SystemFunction {
         private final SequenceIterator insert;
         private final int insertPosition;
         private int position = 0;
-        private boolean inserting = false;
+        private boolean inserting;
 
         public InsertIterator(SequenceIterator base, SequenceIterator insert, int insertPosition) {
             this.base = base;

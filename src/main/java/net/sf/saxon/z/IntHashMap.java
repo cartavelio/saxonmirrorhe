@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 
 
 @CSharpInjectMembers(code={""
-        + "public class IntHashMapValueSet<V> : com.saxonica.glue.AbstractIterable<V> {"
+        + "public class IntHashMapValueSet<V> : Saxon.Impl.Helpers.AbstractIterable<V> {"
         + "    internal IntHashMap<V> container;"
         + "    public IntHashMapValueSet(IntHashMap<V> container) {this.container = container;}"
         + "    public override java.util.Iterator<V> iterator() { return container.valueIterator(); }"

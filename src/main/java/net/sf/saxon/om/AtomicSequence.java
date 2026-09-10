@@ -10,7 +10,6 @@ package net.sf.saxon.om;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SchemaComparable;
 
 /**
  * Interface representing a sequence of atomic values. This is often used to represent the
@@ -65,18 +64,18 @@ public interface AtomicSequence extends GroundedValue, Iterable<AtomicValue> {
 
     UnicodeString getCanonicalLexicalRepresentation();
 
-    /**
-     * Get a Comparable value that implements the XML Schema ordering comparison semantics for this value.
-     * The default implementation is written to compare sequences of atomic values.
-     * This method is overridden for AtomicValue and its subclasses.
-     * <p>In the case of data types that are partially ordered, the returned Comparable extends the standard
-     * semantics of the compareTo() method by returning the value {@link SequenceTool#INDETERMINATE_ORDERING} when there
-     * is no defined order relationship between two given values.</p>
-     *
-     * @return a Comparable that follows XML Schema comparison rules
-     */
-
-    SchemaComparable getSchemaComparable();
+//    /**
+//     * Get a Comparable value that implements the XML Schema ordering comparison semantics for this value.
+//     * The default implementation is written to compare sequences of atomic values.
+//     * This method is overridden for AtomicValue and its subclasses.
+//     * <p>In the case of data types that are partially ordered, the returned Comparable extends the standard
+//     * semantics of the compareTo() method by returning the value {@link SequenceTool#INDETERMINATE_ORDERING} when there
+//     * is no defined order relationship between two given values.</p>
+//     *
+//     * @return a Comparable that follows XML Schema comparison rules
+//     */
+//
+//    SchemaComparable getSchemaComparable();
 
     /**
      * Get a string representation of the sequence. The is the space-separated concatenation of the result of

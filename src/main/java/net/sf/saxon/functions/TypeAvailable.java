@@ -47,7 +47,7 @@ public class TypeAvailable extends SystemFunction {
         if (uri.equals(NamespaceConstant.JAVA_TYPE)) {
             try {
                 String className = JavaExternalObjectType.localNameToClassName(qName.getLocalPart());
-                config.getClass(className, false, null);
+                config.getClass(className, false);
                 return true;
             } catch (XPathException err) {
                 return false;

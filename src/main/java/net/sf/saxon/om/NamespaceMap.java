@@ -8,6 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.*;
 
@@ -81,7 +82,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
 
     public NamespaceMap(List<NamespaceBinding> bindings) {
         NamespaceBinding[] bindingArray = bindings.toArray(NamespaceBinding.EMPTY_ARRAY);
-        Arrays.sort(bindingArray, Comparator.comparing(NamespaceBinding::getPrefix));
+        sortByPrefix(bindingArray);
         boolean bindsXmlNamespace = false;
         prefixes = new String[bindingArray.length];
         uris = new String[bindingArray.length];
@@ -100,6 +101,11 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
         if (bindsXmlNamespace) {
             remove("xml");
         }
+    }
+
+    @CSharpReplaceBody(code="System.Array.Sort(bindingArray, (x, y) => x.getPrefix().CompareTo(y.getPrefix());")
+    private void sortByPrefix(NamespaceBinding[] bindingArray) {
+        Arrays.sort(bindingArray, Comparator.comparing(NamespaceBinding::getPrefix));
     }
 
     /**

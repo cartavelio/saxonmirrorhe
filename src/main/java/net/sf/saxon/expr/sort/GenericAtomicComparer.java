@@ -74,14 +74,15 @@ public class GenericAtomicComparer implements AtomicComparer {
                     return new CalendarValueComparer(context);
 
                 case StandardNames.XS_BOOLEAN:
+                case StandardNames.XS_INTEGER:
+                case StandardNames.XS_DECIMAL:
+                case StandardNames.XS_DOUBLE:
+                case StandardNames.XS_FLOAT:
                 case StandardNames.XS_DAY_TIME_DURATION:
                 case StandardNames.XS_YEAR_MONTH_DURATION:
-                    return ComparableAtomicValueComparer.getInstance();
-
                 case StandardNames.XS_BASE64_BINARY:
                 case StandardNames.XS_HEX_BINARY:
-                    // These become fully comparable in XPath 3.1 but we allow it regardless of version
-                    return ComparableAtomicValueComparer.getInstance();
+                    return ContextFreeAtomicComparer.getInstance();
 
                 case StandardNames.XS_QNAME:
                 case StandardNames.XS_NOTATION:
@@ -91,7 +92,7 @@ public class GenericAtomicComparer implements AtomicComparer {
         }
 
         if (type0.isPrimitiveNumeric() && type1.isPrimitiveNumeric()) {
-            return ComparableAtomicValueComparer.getInstance();
+            return ContextFreeAtomicComparer.getInstance();
         }
 
         if ((fp0 == StandardNames.XS_STRING ||
@@ -171,14 +172,14 @@ public class GenericAtomicComparer implements AtomicComparer {
             return collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else {
             int implicitTimezone = context.getImplicitTimezone();
-            AtomicMatchKey ac = a.getXPathComparable(true, collator, implicitTimezone);
-            AtomicMatchKey bc = b.getXPathComparable(true, collator, implicitTimezone);
+            XPathComparable ac = a.getXPathComparable(collator, implicitTimezone);
+            XPathComparable bc = b.getXPathComparable(collator, implicitTimezone);
             if (ac == null || bc == null) {
                 XPathException e = new XPathException("Objects are not comparable (" +
                         Type.displayTypeName(a) + ", " + Type.displayTypeName(b) + ')', "XPTY0004");
                 throw new ComparisonException(e);
             } else {
-                return ((Comparable<AtomicMatchKey>)ac).compareTo(bc);
+                return ac.compareTo(bc);
             }
         }
     }
@@ -205,8 +206,8 @@ public class GenericAtomicComparer implements AtomicComparer {
             return ((CalendarValue) a).compareTo((CalendarValue) b, context.getImplicitTimezone()) == 0;
         } else {
             int implicitTimezone = context.getImplicitTimezone();
-            Object ac = a.getXPathComparable(false, collator, implicitTimezone);
-            Object bc = b.getXPathComparable(false, collator, implicitTimezone);
+            AtomicMatchKey ac = a.getXPathMatchKey(collator, implicitTimezone);
+            AtomicMatchKey bc = b.getXPathMatchKey(collator, implicitTimezone);
             return ac.equals(bc);
         }
     }

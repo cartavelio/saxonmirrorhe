@@ -98,7 +98,7 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
                 int p = random.nextInt(output.size()+1);
                 output.add(p, item);
             }
-            return new SequenceExtent(output);
+            return new SequenceExtent.Of<>(output);
         }
 
         /**

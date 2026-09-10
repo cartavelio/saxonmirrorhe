@@ -323,11 +323,12 @@ public class TinyBuilder extends Builder {
         if (lineNumbering) {
             tt.setLineNumber(nodeNr, location.getLineNumber(), location.getColumnNumber());
         }
+        //#if CSHARP==false
         if (location instanceof ReceivingContentHandler.LocalLocator &&
                 ((ReceivingContentHandler.LocalLocator)location).levelInEntity == 0 && currentDepth >= 1) {
             tt.markTopWithinEntity(nodeNr);
         }
-
+        //#endif
         for (AttributeInfo att : attributes) {
             attribute2(att.getNodeName(), att.getType(),
                       getAttValue(att), location, att.getProperties());

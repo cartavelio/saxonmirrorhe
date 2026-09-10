@@ -7,7 +7,9 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -392,9 +394,13 @@ public abstract class GDateValue extends CalendarValue {
 
 
     /*@NotNull*/
-    @Override
-    public SchemaComparable getSchemaComparable() {
+    public GDateComparable getSchemaComparable() {
         return new GDateComparable(this);
+    }
+
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+        return null;
     }
 
     /**
@@ -426,7 +432,7 @@ public abstract class GDateValue extends CalendarValue {
         }
     }
 
-    private static class GDateComparable implements SchemaComparable {
+    public static class GDateComparable implements Comparable<GDateComparable> {
 
         private final GDateValue value;
 
@@ -441,17 +447,13 @@ public abstract class GDateValue extends CalendarValue {
         }
 
         @Override
-        public int compareTo(SchemaComparable o) {
-            if (o instanceof GDateComparable) {
-                if (asGDateValue().getPrimitiveType() != ((GDateComparable) o).asGDateValue().getPrimitiveType()) {
-                    return SequenceTool.INDETERMINATE_ORDERING;
-                }
-                DateTimeValue dt0 = value.toDateTime();
-                DateTimeValue dt1 = ((GDateComparable) o).value.toDateTime();
-                return dt0.getSchemaComparable().compareTo(dt1.getSchemaComparable());
-            } else {
+        public int compareTo(GDateComparable o) {
+            if (asGDateValue().getPrimitiveType() != o.asGDateValue().getPrimitiveType()) {
                 return SequenceTool.INDETERMINATE_ORDERING;
             }
+            DateTimeValue dt0 = value.toDateTime();
+            DateTimeValue dt1 = o.value.toDateTime();
+            return dt0.getSchemaComparable().compareTo(dt1.getSchemaComparable());
         }
 
         public boolean equals(/*@NotNull*/ Object o) {

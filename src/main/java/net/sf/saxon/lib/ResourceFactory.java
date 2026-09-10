@@ -10,11 +10,14 @@ package net.sf.saxon.lib;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.resource.AbstractResourceCollection;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpDelegate;
 
 /**
  * A ResourceFactory is used for constructing a particular type of resource
  */
 
+@FunctionalInterface
+@CSharpDelegate(true)
 public interface ResourceFactory {
     /**
      * Create a Resource with given content

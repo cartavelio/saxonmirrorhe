@@ -247,6 +247,7 @@ public class Numberer_nl extends AbstractNumberer {
                     break;
                 default:
                     s = "v.m.";
+                    break;
             }
         } else {
             switch (maxWidth) {
@@ -259,6 +260,7 @@ public class Numberer_nl extends AbstractNumberer {
                     break;
                 default:
                     s = "n.m.";
+                    break;
             }
         }
         return s;

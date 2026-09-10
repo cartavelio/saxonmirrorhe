@@ -419,9 +419,9 @@ public abstract class MapItem implements Function {
     public boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
-            AtomicIterator keys = keys();
+            AtomicIterator keyIter = keys();
             AtomicValue key;
-            while ((key = keys.next()) != null) {
+            while ((key = keyIter.next()) != null) {
                 Sequence thisValue = get(key);
                 assert thisValue != null;
                 Sequence otherValue = ((MapItem) other).get(key);
@@ -455,7 +455,7 @@ public abstract class MapItem implements Function {
      * @return a string representation of the object.
      */
 
-    static String mapToString(MapItem map) {
+    public static String mapToString(MapItem map) {
         StringBuilder buffer = new StringBuilder(256);
         buffer.append("map{");
         for (KeyValuePair pair : map.keyValuePairs()) {

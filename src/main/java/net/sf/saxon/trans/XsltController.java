@@ -22,6 +22,7 @@ import net.sf.saxon.serialize.Emitter;
 import net.sf.saxon.serialize.MessageEmitter;
 import net.sf.saxon.serialize.PrincipalOutputGatekeeper;
 import net.sf.saxon.style.StylesheetPackage;
+import net.sf.saxon.trace.TemplateRuleTraceListener;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -58,6 +59,7 @@ public class XsltController extends Controller {
     private AccumulatorManager accumulatorManager = new AccumulatorManager();
     private PrincipalOutputGatekeeper gatekeeper = null;
     private Destination principalDestination;
+    private TemplateRuleTraceListener templateRuleTraceListener = null;
 
     public XsltController(Configuration config, PreparedStylesheet pss) {
         super(config, pss);
@@ -340,7 +342,7 @@ public class XsltController extends Controller {
         if (!name.equals(MessageEmitter.class.getName())) {
             this.messageFactory = () -> {
                 try {
-                    Object messageReceiver = getConfiguration().getInstance(name, null);
+                    Object messageReceiver = getConfiguration().getInstance(name);
                     if (!(messageReceiver instanceof Receiver)) {
                         throw new XPathException(name + " is not a Receiver");
                     }
@@ -546,6 +548,14 @@ public class XsltController extends Controller {
 
     public Destination getPrincipalDestination() {
         return principalDestination;
+    }
+
+    public TemplateRuleTraceListener getTemplateRuleTraceListener() {
+        return templateRuleTraceListener;
+    }
+
+    public void setTemplateRuleTraceListener(TemplateRuleTraceListener templateRuleTraceListener) {
+        this.templateRuleTraceListener = templateRuleTraceListener;
     }
 
 

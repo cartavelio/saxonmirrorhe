@@ -11,9 +11,14 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.Genre;
+import net.sf.saxon.om.IdentityComparable;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -34,11 +39,9 @@ import java.util.Iterator;
  * to use, and many others that are designed for internal use by Saxon itself.
  * These have not been fully classified. At present, therefore, none of the methods on this
  * class should be considered to be part of the public Saxon API.</p>
- *
- * @author Michael H. Kay
  */
 
-public abstract class AtomicValue 
+public abstract class AtomicValue
         implements Item, AtomicSequence, ConversionResult, IdentityComparable {
 
     protected AtomicType typeLabel;
@@ -111,31 +114,13 @@ public abstract class AtomicValue
     }
 
     /**
-     * Get a Comparable value that implements the XML Schema ordering comparison semantics for this value.
-     * An implementation must be provided for all atomic types.
-     * <p>In the case of data types that are partially ordered, the returned Comparable extends the standard
-     * semantics of the compareTo() method by returning the value {@link SequenceTool#INDETERMINATE_ORDERING} when there
-     * is no defined order relationship between two given values. This value is also returned when two values
-     * of different types are compared.</p>
-     *
-     * @return a Comparable that follows XML Schema comparison rules
-     */
-
-    @Override
-    public abstract SchemaComparable getSchemaComparable();
-
-    /**
-     * Get an object value that implements the XPath equality and ordering comparison semantics for this value.
-     * If the ordered parameter is set to true, the result will be a Comparable and will support a compareTo()
-     * method with the semantics of the XPath lt/gt operator, provided that the other operand is also obtained
-     * using the getXPathComparable() method. In all cases the result will support equals() and hashCode() methods
-     * that support the semantics of the XPath eq operator, again provided that the other operand is also obtained
-     * using the getXPathComparable() method. A collation is supplied for comparing strings, and an implicit timezone
-     * for comparing date/time values that have no saved timezone.
+     * Get an object value that implements the XPath equality comparison semantics for this value.
+     * A collation is supplied for comparing strings, and an implicit timezone
+     * for comparing date/time values that have no saved timezone. The returned object supports
+     * equality matching only, not ordering. An atomic value may return itself as its own
+     * {@code AtomicMatchKey} provided that its equality semantics are context-free.
      *
      *
-     * @param ordered  true if an ordered comparison is required. In this case the result is null if the
-     *                 type is unordered; in other cases the returned value will be a Comparable.
      * @param collator the collation to be used when comparing strings
      * @param implicitTimezone  the implicit timezone in the dynamic context, used when comparing
      * dates/times with and without timezone
@@ -149,8 +134,33 @@ public abstract class AtomicValue
      * evaluated dynamically.
      */
 
-    public abstract AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone)
+    public abstract AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone)
             throws NoDynamicContextException;
+
+    /**
+     * Get an object value that implements the XPath equality and ordering comparison semantics for this value.
+     * A collation is supplied for comparing strings, and an implicit timezone for comparing date/time values
+     * that have no saved timezone. An atomic value may return itself as the result, provided that its ordering
+     * rules are independent of the collation and timezone, and provided that it implements the XPathComparable
+     * interface: which means that its compareTo, equals, and hashCode methods must be compatible with the
+     * rules for XPath value comparisons.
+     *
+     * @param collator         the collation to be used when comparing strings
+     * @param implicitTimezone the implicit timezone in the dynamic context, used when comparing
+     *                         dates/times with and without timezone
+     * @return an Object that implements the XPath value comparison semantics
+     * with respect to this atomic value. For an atomic type that is not ordered (according to XPath
+     * rules), return null.
+     * @throws NoDynamicContextException if the supplied implicit timezone is "NO_TIMEZONE" (meaning
+     *                                   unknown), and the implicit timezone is actually required because the value in question is a date/time
+     *                                   value with no timezone. This can cause a failure to evaluate expressions statically (because the implicit
+     *                                   timezone is not known statically), and it will then be caught, meaning that the expression has to be
+     *                                   evaluated dynamically.
+     */
+
+    public abstract XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone)
+            throws NoDynamicContextException;
+
 
     /**
      * Get a value whose equals() method follows the "same key" rules for comparing the keys of a map.
@@ -160,7 +170,7 @@ public abstract class AtomicValue
 
     public AtomicMatchKey asMapKey() {
         try {
-            return getXPathComparable(false, CodepointCollator.getInstance(), CalendarValue.NO_TIMEZONE);
+            return getXPathMatchKey(CodepointCollator.getInstance(), CalendarValue.NO_TIMEZONE);
         } catch (NoDynamicContextException e) {
             // Should not happen
             throw new IllegalStateException("No implicit timezone available");
@@ -198,7 +208,7 @@ public abstract class AtomicValue
 
     public boolean isIdentical(/*@NotNull*/ AtomicValue v) {
         // default implementation
-        return getSchemaComparable().equals(v.getSchemaComparable());
+        return SimpleTypeComparison.getInstance().equal(this, v);
     }
 
     /**

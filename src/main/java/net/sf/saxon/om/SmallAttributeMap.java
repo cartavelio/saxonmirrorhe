@@ -25,7 +25,7 @@ import java.util.List;
 
 public class SmallAttributeMap implements AttributeMap {
 
-    final static int LIMIT = 8;
+    public final static int LIMIT = 8;
 
     private final List<AttributeInfo> attributes;
 

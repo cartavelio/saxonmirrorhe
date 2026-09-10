@@ -7,7 +7,7 @@
 
 package net.sf.saxon.lib;
 
-import net.sf.saxon.expr.sort.LRUCache;
+import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.om.NotationSet;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.*;
@@ -33,9 +33,8 @@ public class ConversionRules {
     private boolean allowYearZero = true;
     private TypeHierarchy typeHierarchy; // may be null
 
-    // These two tables need to be synchronised to make the caching thread-safe
-    private final LRUCache<Integer, Converter> converterCache =
-            new LRUCache<>(100, true);
+    private final LFUCache<Integer, Converter> converterCache =
+            new LFUCache<>(100, true);
 
     /**
      * Default conversion rules. Changed in Saxon 9.9 so these are the XSD 1.1 rules (year zero allowed in dates,

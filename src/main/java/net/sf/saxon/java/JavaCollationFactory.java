@@ -57,7 +57,7 @@ public abstract class JavaCollationFactory {
 
         String classAtt = props.getProperty("class");
         if (classAtt != null) {
-            Object comparator = config.getInstance(classAtt, null);
+            Object comparator = config.getInstance(classAtt);
             if (comparator instanceof Collator) {
                 collator = (Collator) comparator;
             } else if (comparator instanceof StringCollator) {

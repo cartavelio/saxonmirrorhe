@@ -343,75 +343,75 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             }
         }
         props.put("#element", "global");
-        applyProperty(props, "allowedProtocols", Feature.ALLOWED_PROTOCOLS);
-        applyProperty(props, "allowExternalFunctions", Feature.ALLOW_EXTERNAL_FUNCTIONS);
-        applyProperty(props, "allowMultiThreading", Feature.ALLOW_MULTITHREADING);
-        applyProperty(props, "allowOldJavaUriFormat", Feature.ALLOW_OLD_JAVA_URI_FORMAT);
-        applyProperty(props, "allowSyntaxExtensions", Feature.ALLOW_SYNTAX_EXTENSIONS);
-        applyProperty(props, "collationUriResolver", Feature.COLLATION_URI_RESOLVER_CLASS);
-        applyProperty(props, "collectionFinder", Feature.COLLECTION_FINDER_CLASS);
-        applyProperty(props, "compileWithTracing", Feature.COMPILE_WITH_TRACING);
-        applyProperty(props, "debugByteCode", Feature.DEBUG_BYTE_CODE);
-        applyProperty(props, "debugByteCodeDirectory", Feature.DEBUG_BYTE_CODE_DIR);
-        applyProperty(props, "defaultCollation", Feature.DEFAULT_COLLATION);
-        applyProperty(props, "defaultCollection", Feature.DEFAULT_COLLECTION);
-        applyProperty(props, "defaultRegexEngine", Feature.DEFAULT_REGEX_ENGINE);
-        applyProperty(props, "displayByteCode", Feature.DISPLAY_BYTE_CODE);
-        applyProperty(props, "dtdValidation", Feature.DTD_VALIDATION);
-        applyProperty(props, "dtdValidationRecoverable", Feature.DTD_VALIDATION_RECOVERABLE);
-        applyProperty(props, "eagerEvaluation", Feature.EAGER_EVALUATION);
-        applyProperty(props, "entityResolver", Feature.ENTITY_RESOLVER_CLASS);
-        applyProperty(props, "errorListener", Feature.ERROR_LISTENER_CLASS);
-        applyProperty(props, "environmentVariableResolver", Feature.ENVIRONMENT_VARIABLE_RESOLVER_CLASS);
-        applyProperty(props, "expandAttributeDefaults", Feature.EXPAND_ATTRIBUTE_DEFAULTS);
-        applyProperty(props, "generateByteCode", Feature.GENERATE_BYTE_CODE);
-        applyProperty(props, "ignoreSAXSourceParser", Feature.IGNORE_SAX_SOURCE_PARSER);
-        applyProperty(props, "lineNumbering", Feature.LINE_NUMBERING);
-        applyProperty(props, "markDefaultedAttributes", Feature.MARK_DEFAULTED_ATTRIBUTES);
-        applyProperty(props, "maxCompiledClasses", Feature.MAX_COMPILED_CLASSES);
-        applyProperty(props, "monitorHotSpotByteCode", Feature.MONITOR_HOT_SPOT_BYTE_CODE);
-        applyProperty(props, "optimizationLevel", Feature.OPTIMIZATION_LEVEL);
-        applyProperty(props, "parser", Feature.SOURCE_PARSER_CLASS);
-        applyProperty(props, "preEvaluateDoc", Feature.PRE_EVALUATE_DOC_FUNCTION);
-        applyProperty(props, "preferJaxpParser", Feature.PREFER_JAXP_PARSER);
-        applyProperty(props, "recognizeUriQueryParameters", Feature.RECOGNIZE_URI_QUERY_PARAMETERS);
-        applyProperty(props, "retainNodeForDiagnostics", Feature.RETAIN_NODE_FOR_DIAGNOSTICS);
-        applyProperty(props, "schemaValidation", Feature.SCHEMA_VALIDATION_MODE);
-        applyProperty(props, "serializerFactory", Feature.SERIALIZER_FACTORY_CLASS);
-        applyProperty(props, "sourceResolver", Feature.SOURCE_RESOLVER_CLASS);
-        applyProperty(props, "stableCollectionUri", Feature.STABLE_COLLECTION_URI);
-        applyProperty(props, "stableUnparsedText", Feature.STABLE_UNPARSED_TEXT);
-        applyProperty(props, "standardErrorOutputFile", Feature.STANDARD_ERROR_OUTPUT_FILE);
-        applyProperty(props, "streamability", Feature.STREAMABILITY);
-        applyProperty(props, "streamingFallback", Feature.STREAMING_FALLBACK);
-        applyProperty(props, "stripSpace", Feature.STRIP_WHITESPACE);
-        applyProperty(props, "styleParser", Feature.STYLE_PARSER_CLASS);
-        applyProperty(props, "suppressEvaluationExpiryWarning", Feature.SUPPRESS_EVALUATION_EXPIRY_WARNING);
-        applyProperty(props, "suppressXPathWarnings", Feature.SUPPRESS_XPATH_WARNINGS);
-        applyProperty(props, "suppressXsltNamespaceCheck", Feature.SUPPRESS_XSLT_NAMESPACE_CHECK);
-        applyProperty(props, "thresholdForHotspotByteCode", Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE);
-        applyProperty(props, "timing", Feature.TIMING);
-        applyProperty(props, "traceExternalFunctions", Feature.TRACE_EXTERNAL_FUNCTIONS);
-        applyProperty(props, "traceListener", Feature.TRACE_LISTENER_CLASS);
-        applyProperty(props, "traceListenerOutputFile", Feature.TRACE_LISTENER_OUTPUT_FILE);
-        applyProperty(props, "traceOptimizerDecisions", Feature.TRACE_OPTIMIZER_DECISIONS);
-        applyProperty(props, "treeModel", Feature.TREE_MODEL_NAME);
-        applyProperty(props, "unparsedTextUriResolver", Feature.UNPARSED_TEXT_URI_RESOLVER_CLASS);
-        applyProperty(props, "uriResolver", Feature.URI_RESOLVER_CLASS);
-        applyProperty(props, "usePiDisableOutputEscaping", Feature.USE_PI_DISABLE_OUTPUT_ESCAPING);
-        applyProperty(props, "useTypedValueCache", Feature.USE_TYPED_VALUE_CACHE);
-        applyProperty(props, "validationComments", Feature.VALIDATION_COMMENTS);
-        applyProperty(props, "validationWarnings", Feature.VALIDATION_WARNINGS);
-        applyProperty(props, "versionOfXml", Feature.XML_VERSION);
-        applyProperty(props, "xInclude", Feature.XINCLUDE);
-        applyProperty(props, "zipUriPattern", Feature.ZIP_URI_PATTERN);
+        applyProperty(props, "allowedProtocols", FeatureCode.ALLOWED_PROTOCOLS);
+        applyProperty(props, "allowExternalFunctions", FeatureCode.ALLOW_EXTERNAL_FUNCTIONS);
+        applyProperty(props, "allowMultiThreading", FeatureCode.ALLOW_MULTITHREADING);
+        applyProperty(props, "allowOldJavaUriFormat", FeatureCode.ALLOW_OLD_JAVA_URI_FORMAT);
+        applyProperty(props, "allowSyntaxExtensions", FeatureCode.ALLOW_SYNTAX_EXTENSIONS);
+        applyProperty(props, "collationUriResolver", FeatureCode.COLLATION_URI_RESOLVER_CLASS);
+        applyProperty(props, "collectionFinder", FeatureCode.COLLECTION_FINDER_CLASS);
+        applyProperty(props, "compileWithTracing", FeatureCode.COMPILE_WITH_TRACING);
+        applyProperty(props, "debugByteCode", FeatureCode.DEBUG_BYTE_CODE);
+        applyProperty(props, "debugByteCodeDirectory", FeatureCode.DEBUG_BYTE_CODE_DIR);
+        applyProperty(props, "defaultCollation", FeatureCode.DEFAULT_COLLATION);
+        applyProperty(props, "defaultCollection", FeatureCode.DEFAULT_COLLECTION);
+        applyProperty(props, "defaultRegexEngine", FeatureCode.DEFAULT_REGEX_ENGINE);
+        applyProperty(props, "displayByteCode", FeatureCode.DISPLAY_BYTE_CODE);
+        applyProperty(props, "dtdValidation", FeatureCode.DTD_VALIDATION);
+        applyProperty(props, "dtdValidationRecoverable", FeatureCode.DTD_VALIDATION_RECOVERABLE);
+        applyProperty(props, "eagerEvaluation", FeatureCode.EAGER_EVALUATION);
+        applyProperty(props, "entityResolver", FeatureCode.ENTITY_RESOLVER_CLASS);
+        applyProperty(props, "errorListener", FeatureCode.ERROR_LISTENER_CLASS);
+        applyProperty(props, "environmentVariableResolver", FeatureCode.ENVIRONMENT_VARIABLE_RESOLVER_CLASS);
+        applyProperty(props, "expandAttributeDefaults", FeatureCode.EXPAND_ATTRIBUTE_DEFAULTS);
+        applyProperty(props, "generateByteCode", FeatureCode.GENERATE_BYTE_CODE);
+        applyProperty(props, "ignoreSAXSourceParser", FeatureCode.IGNORE_SAX_SOURCE_PARSER);
+        applyProperty(props, "lineNumbering", FeatureCode.LINE_NUMBERING);
+        applyProperty(props, "markDefaultedAttributes", FeatureCode.MARK_DEFAULTED_ATTRIBUTES);
+        applyProperty(props, "maxCompiledClasses", FeatureCode.MAX_COMPILED_CLASSES);
+        applyProperty(props, "monitorHotSpotByteCode", FeatureCode.MONITOR_HOT_SPOT_BYTE_CODE);
+        applyProperty(props, "optimizationLevel", FeatureCode.OPTIMIZATION_LEVEL);
+        applyProperty(props, "parser", FeatureCode.SOURCE_PARSER_CLASS);
+        applyProperty(props, "preEvaluateDoc", FeatureCode.PRE_EVALUATE_DOC_FUNCTION);
+        applyProperty(props, "preferJaxpParser", FeatureCode.PREFER_JAXP_PARSER);
+        applyProperty(props, "recognizeUriQueryParameters", FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS);
+        applyProperty(props, "retainNodeForDiagnostics", FeatureCode.RETAIN_NODE_FOR_DIAGNOSTICS);
+        applyProperty(props, "schemaValidation", FeatureCode.SCHEMA_VALIDATION_MODE);
+        applyProperty(props, "serializerFactory", FeatureCode.SERIALIZER_FACTORY_CLASS);
+        applyProperty(props, "sourceResolver", FeatureCode.SOURCE_RESOLVER_CLASS);
+        applyProperty(props, "stableCollectionUri", FeatureCode.STABLE_COLLECTION_URI);
+        applyProperty(props, "stableUnparsedText", FeatureCode.STABLE_UNPARSED_TEXT);
+        applyProperty(props, "standardErrorOutputFile", FeatureCode.STANDARD_ERROR_OUTPUT_FILE);
+        applyProperty(props, "streamability", FeatureCode.STREAMABILITY);
+        applyProperty(props, "streamingFallback", FeatureCode.STREAMING_FALLBACK);
+        applyProperty(props, "stripSpace", FeatureCode.STRIP_WHITESPACE);
+        applyProperty(props, "styleParser", FeatureCode.STYLE_PARSER_CLASS);
+        applyProperty(props, "suppressEvaluationExpiryWarning", FeatureCode.SUPPRESS_EVALUATION_EXPIRY_WARNING);
+        applyProperty(props, "suppressXPathWarnings", FeatureCode.SUPPRESS_XPATH_WARNINGS);
+        applyProperty(props, "suppressXsltNamespaceCheck", FeatureCode.SUPPRESS_XSLT_NAMESPACE_CHECK);
+        applyProperty(props, "thresholdForHotspotByteCode", FeatureCode.THRESHOLD_FOR_HOTSPOT_BYTE_CODE);
+        applyProperty(props, "timing", FeatureCode.TIMING);
+        applyProperty(props, "traceExternalFunctions", FeatureCode.TRACE_EXTERNAL_FUNCTIONS);
+        applyProperty(props, "traceListener", FeatureCode.TRACE_LISTENER_CLASS);
+        applyProperty(props, "traceListenerOutputFile", FeatureCode.TRACE_LISTENER_OUTPUT_FILE);
+        applyProperty(props, "traceOptimizerDecisions", FeatureCode.TRACE_OPTIMIZER_DECISIONS);
+        applyProperty(props, "treeModel", FeatureCode.TREE_MODEL_NAME);
+        applyProperty(props, "unparsedTextUriResolver", FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS);
+        applyProperty(props, "uriResolver", FeatureCode.URI_RESOLVER_CLASS);
+        applyProperty(props, "usePiDisableOutputEscaping", FeatureCode.USE_PI_DISABLE_OUTPUT_ESCAPING);
+        applyProperty(props, "useTypedValueCache", FeatureCode.USE_TYPED_VALUE_CACHE);
+        applyProperty(props, "validationComments", FeatureCode.VALIDATION_COMMENTS);
+        applyProperty(props, "validationWarnings", FeatureCode.VALIDATION_WARNINGS);
+        applyProperty(props, "versionOfXml", FeatureCode.XML_VERSION);
+        applyProperty(props, "xInclude", FeatureCode.XINCLUDE);
+        applyProperty(props, "zipUriPattern", FeatureCode.ZIP_URI_PATTERN);
     }
 
-    private void applyProperty(Properties props, String attributeName, Feature feature) {
+    private void applyProperty(Properties props, String attributeName, int featureCode) {
         String value = props.getProperty(attributeName);
         if (value != null) {
             try {
-                config.setConfigurationProperty(feature.name, value);
+                config.setConfigurationProperty(FeatureIndex.getData(featureCode).uri, value);
             } catch (IllegalArgumentException e) {
                 String message = e.getMessage();
                 if (message.startsWith(attributeName)) {
@@ -655,19 +655,19 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             }
         }
         props.put("#element", "xquery");
-        applyProperty(props, "allowUpdate", Feature.XQUERY_ALLOW_UPDATE);
-        applyProperty(props, "constructionMode", Feature.XQUERY_CONSTRUCTION_MODE);
-        applyProperty(props, "defaultElementNamespace", Feature.XQUERY_DEFAULT_ELEMENT_NAMESPACE);
-        applyProperty(props, "defaultFunctionNamespace", Feature.XQUERY_DEFAULT_FUNCTION_NAMESPACE);
-        applyProperty(props, "emptyLeast", Feature.XQUERY_EMPTY_LEAST);
-        applyProperty(props, "inheritNamespaces", Feature.XQUERY_INHERIT_NAMESPACES);
-        applyProperty(props, "moduleUriResolver", Feature.MODULE_URI_RESOLVER_CLASS);
-        applyProperty(props, "preserveBoundarySpace", Feature.XQUERY_PRESERVE_BOUNDARY_SPACE);
-        applyProperty(props, "preserveNamespaces", Feature.XQUERY_PRESERVE_NAMESPACES);
-        applyProperty(props, "requiredContextItemType", Feature.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE);
-        applyProperty(props, "schemaAware", Feature.XQUERY_SCHEMA_AWARE);
-        applyProperty(props, "staticErrorListener", Feature.XQUERY_STATIC_ERROR_LISTENER_CLASS);
-        applyProperty(props, "version", Feature.XQUERY_VERSION);
+        applyProperty(props, "allowUpdate", FeatureCode.XQUERY_ALLOW_UPDATE);
+        applyProperty(props, "constructionMode", FeatureCode.XQUERY_CONSTRUCTION_MODE);
+        applyProperty(props, "defaultElementNamespace", FeatureCode.XQUERY_DEFAULT_ELEMENT_NAMESPACE);
+        applyProperty(props, "defaultFunctionNamespace", FeatureCode.XQUERY_DEFAULT_FUNCTION_NAMESPACE);
+        applyProperty(props, "emptyLeast", FeatureCode.XQUERY_EMPTY_LEAST);
+        applyProperty(props, "inheritNamespaces", FeatureCode.XQUERY_INHERIT_NAMESPACES);
+        applyProperty(props, "moduleUriResolver", FeatureCode.MODULE_URI_RESOLVER_CLASS);
+        applyProperty(props, "preserveBoundarySpace", FeatureCode.XQUERY_PRESERVE_BOUNDARY_SPACE);
+        applyProperty(props, "preserveNamespaces", FeatureCode.XQUERY_PRESERVE_NAMESPACES);
+        applyProperty(props, "requiredContextItemType", FeatureCode.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE);
+        applyProperty(props, "schemaAware", FeatureCode.XQUERY_SCHEMA_AWARE);
+        applyProperty(props, "staticErrorListener", FeatureCode.XQUERY_STATIC_ERROR_LISTENER_CLASS);
+        applyProperty(props, "version", FeatureCode.XQUERY_VERSION);
     }
 
     private void readXsltElement(Attributes atts) {
@@ -680,20 +680,20 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             }
         }
         props.put("#element", "xslt");
-        applyProperty(props, "disableXslEvaluate", Feature.DISABLE_XSL_EVALUATE);
-        applyProperty(props, "enableAssertions", Feature.XSLT_ENABLE_ASSERTIONS);
-        applyProperty(props, "initialMode", Feature.XSLT_INITIAL_MODE);
-        applyProperty(props, "initialTemplate", Feature.XSLT_INITIAL_TEMPLATE);
-        applyProperty(props, "messageEmitter", Feature.MESSAGE_EMITTER_CLASS);
-        applyProperty(props, "outputUriResolver", Feature.OUTPUT_URI_RESOLVER_CLASS);
-        applyProperty(props, "recoveryPolicy", Feature.RECOVERY_POLICY_NAME);
-        applyProperty(props, "resultDocumentThreads", Feature.RESULT_DOCUMENT_THREADS);
-        applyProperty(props, "schemaAware", Feature.XSLT_SCHEMA_AWARE);
-        applyProperty(props, "staticErrorListener", Feature.XSLT_STATIC_ERROR_LISTENER_CLASS);
-        applyProperty(props, "staticUriResolver", Feature.XSLT_STATIC_URI_RESOLVER_CLASS);
-        applyProperty(props, "strictStreamability", Feature.STRICT_STREAMABILITY);
-        applyProperty(props, "styleParser", Feature.STYLE_PARSER_CLASS);
-        applyProperty(props, "version", Feature.XSLT_VERSION);
+        applyProperty(props, "disableXslEvaluate", FeatureCode.DISABLE_XSL_EVALUATE);
+        applyProperty(props, "enableAssertions", FeatureCode.XSLT_ENABLE_ASSERTIONS);
+        applyProperty(props, "initialMode", FeatureCode.XSLT_INITIAL_MODE);
+        applyProperty(props, "initialTemplate", FeatureCode.XSLT_INITIAL_TEMPLATE);
+        applyProperty(props, "messageEmitter", FeatureCode.MESSAGE_EMITTER_CLASS);
+        applyProperty(props, "outputUriResolver", FeatureCode.OUTPUT_URI_RESOLVER_CLASS);
+        applyProperty(props, "recoveryPolicy", FeatureCode.RECOVERY_POLICY_NAME);
+        applyProperty(props, "resultDocumentThreads", FeatureCode.RESULT_DOCUMENT_THREADS);
+        applyProperty(props, "schemaAware", FeatureCode.XSLT_SCHEMA_AWARE);
+        applyProperty(props, "staticErrorListener", FeatureCode.XSLT_STATIC_ERROR_LISTENER_CLASS);
+        applyProperty(props, "staticUriResolver", FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS);
+        applyProperty(props, "strictStreamability", FeatureCode.STRICT_STREAMABILITY);
+        applyProperty(props, "styleParser", FeatureCode.STYLE_PARSER_CLASS);
+        applyProperty(props, "version", FeatureCode.XSLT_VERSION);
         //applyProperty(props, "versionWarning", FeatureKeys.VERSION_WARNING);
     }
 
@@ -707,14 +707,14 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             }
         }
         props.put("#element", "xsd");
-        applyProperty(props, "assertionsCanSeeComments", Feature.ASSERTIONS_CAN_SEE_COMMENTS);
-        applyProperty(props, "implicitSchemaImports", Feature.IMPLICIT_SCHEMA_IMPORTS);
-        applyProperty(props, "multipleSchemaImports", Feature.MULTIPLE_SCHEMA_IMPORTS);
-        applyProperty(props, "occurrenceLimits", Feature.OCCURRENCE_LIMITS);
-        applyProperty(props, "schemaUriResolver", Feature.SCHEMA_URI_RESOLVER_CLASS);
-        applyProperty(props, "thresholdForCompilingTypes", Feature.THRESHOLD_FOR_COMPILING_TYPES);
-        applyProperty(props, "useXsiSchemaLocation", Feature.USE_XSI_SCHEMA_LOCATION);
-        applyProperty(props, "version", Feature.XSD_VERSION);
+        applyProperty(props, "assertionsCanSeeComments", FeatureCode.ASSERTIONS_CAN_SEE_COMMENTS);
+        applyProperty(props, "implicitSchemaImports", FeatureCode.IMPLICIT_SCHEMA_IMPORTS);
+        applyProperty(props, "multipleSchemaImports", FeatureCode.MULTIPLE_SCHEMA_IMPORTS);
+        applyProperty(props, "occurrenceLimits", FeatureCode.OCCURRENCE_LIMITS);
+        applyProperty(props, "schemaUriResolver", FeatureCode.SCHEMA_URI_RESOLVER_CLASS);
+        applyProperty(props, "thresholdForCompilingTypes", FeatureCode.THRESHOLD_FOR_COMPILING_TYPES);
+        applyProperty(props, "useXsiSchemaLocation", FeatureCode.USE_XSI_SCHEMA_LOCATION);
+        applyProperty(props, "version", FeatureCode.XSD_VERSION);
     }
 
     private void error(String element, String attribute, String actual, String required) {
@@ -754,14 +754,14 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             if (!content.isEmpty()) {
                 if ("externalObjectModel".equals(localName)) {
                     try {
-                        ExternalObjectModel model = (ExternalObjectModel) config.getInstance(content, null);
+                        ExternalObjectModel model = (ExternalObjectModel) config.getInstance(content);
                         config.registerExternalObjectModel(model);
                     } catch (XPathException | ClassCastException e) {
                         errorClass("externalObjectModel", null, content, ExternalObjectModel.class, e);
                     }
                 } else if ("extensionFunction".equals(localName)) {
                     try {
-                        ExtensionFunctionDefinition model = (ExtensionFunctionDefinition) config.getInstance(content, null);
+                        ExtensionFunctionDefinition model = (ExtensionFunctionDefinition) config.getInstance(content);
                         config.registerExtensionFunction(model);
                     } catch (XPathException | ClassCastException | IllegalArgumentException e) {
                         errorClass("extensionFunction", null, content, ExtensionFunctionDefinition.class, e);

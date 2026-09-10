@@ -170,12 +170,9 @@ public abstract class Sets {
 
         // Filter ns1 to select nodes that come after this one
 
-        Expression filter = new IdentityComparison(
-                new ContextItemExpression(),
-                Token.FOLLOWS,
-                Literal.makeLiteral(new ZeroOrOne<>(first)));
-
-        return new FilterIterator(ns1, filter, context);
+        GlobalOrderComparer comp = GlobalOrderComparer.getInstance();
+        final NodeInfo firstNode = first;
+        return new ItemMappingIterator(ns1, ItemFilter.of(it -> comp.compare(it, firstNode) > 0));
 
     }
 

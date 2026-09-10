@@ -11,13 +11,14 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.AbstractUniStringConsumer;
 import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.StringItem;
-import net.sf.saxon.str.UnicodeBuilder;
 
 /**
  * Outputter: This interface represents a recipient of XML tree-walking (push) events. It was
@@ -354,7 +355,7 @@ public abstract class Outputter implements Receiver {
 
     public UniStringConsumer getStringReceiver(boolean asTextNode) {
         if (asTextNode) {
-            return new UniStringConsumer() {
+            return new AbstractUniStringConsumer() {
 
                 final UnicodeBuilder buffer = new UnicodeBuilder();
 
@@ -370,7 +371,7 @@ public abstract class Outputter implements Receiver {
                 }
             };
         } else {
-            return new UniStringConsumer() {
+            return new AbstractUniStringConsumer() {
 
                 final UnicodeBuilder buffer = new UnicodeBuilder();
 

@@ -161,7 +161,7 @@ public class Numberer_tr extends AbstractNumberer {
             return "";
         }
 
-        StringBuffer ayAdi = new StringBuffer(abbreviate(aylar[ay - 1], max));
+        StringBuilder ayAdi = new StringBuilder(abbreviate(aylar[ay - 1], max));
         while (ayAdi.length() < min) {
             ayAdi.append(' ');
         }

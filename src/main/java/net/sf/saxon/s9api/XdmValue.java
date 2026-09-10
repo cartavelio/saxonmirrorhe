@@ -68,7 +68,7 @@ public class XdmValue implements Iterable<XdmItem> {
         for (XdmItem item : items) {
             values.add(item.getUnderlyingValue());
         }
-        value = new SequenceExtent(values);
+        value = new SequenceExtent.Of<>(values);
     }
 
     /**
@@ -85,7 +85,7 @@ public class XdmValue implements Iterable<XdmItem> {
             while (iterator.hasNext()) {
                 values.add(iterator.next().getUnderlyingValue());
             }
-            value = new SequenceExtent(values);
+            value = new SequenceExtent.Of<>(values);
         } catch (SaxonApiUncheckedException e) {
             throw new SaxonApiException(e.getCause());
         }

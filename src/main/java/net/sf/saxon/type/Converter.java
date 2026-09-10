@@ -441,7 +441,7 @@ public abstract class Converter {
         public final static DoubleToInteger INSTANCE = new DoubleToInteger();
         @Override
         public ConversionResult convert(AtomicValue input) {
-            return IntegerValue.makeIntegerValue((DoubleValue)input);
+            return IntegerValue.fromDouble(((DoubleValue)input).getDoubleValue());
         }
     }
 
@@ -453,7 +453,7 @@ public abstract class Converter {
         public final static FloatToInteger INSTANCE = new FloatToInteger();
         @Override
         public ConversionResult convert(AtomicValue input) {
-            return IntegerValue.makeIntegerValue(new DoubleValue(((FloatValue) input).getDoubleValue()));
+            return IntegerValue.fromDouble(((FloatValue) input).getDoubleValue());
         }
     }
 
@@ -486,9 +486,9 @@ public abstract class Converter {
                 if (in instanceof IntegerValue) {
                     return in;
                 } else if (in instanceof DoubleValue) {
-                    return IntegerValue.makeIntegerValue((DoubleValue) in);
+                    return IntegerValue.fromDouble(in.getDoubleValue());
                 } else if (in instanceof FloatValue) {
-                    return IntegerValue.makeIntegerValue(new DoubleValue(in.getDoubleValue()));
+                    return IntegerValue.fromDouble(in.getDoubleValue());
                 } else {
                     return BigIntegerValue.makeIntegerValue(in.getDecimalValue().toBigInteger());
                 }

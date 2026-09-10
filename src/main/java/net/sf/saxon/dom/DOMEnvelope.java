@@ -239,7 +239,7 @@ public class DOMEnvelope implements ExternalObjectModel {
                     return null;
                 }
             }
-            return new SequenceExtent(nodes);
+            return new SequenceExtent.Of<>(nodes);
 
             // Note, we accept the nodes in the order returned by the function; there
             // is no requirement that this should be document order.

@@ -105,7 +105,7 @@ public class BooleanFn extends SystemFunction {
             public Expression optimize(/*@NotNull*/ ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
                 Expression e = super.optimize(visitor, contextItemType);
                 if (e == this) {
-                    Expression ebv = rewriteEffectiveBooleanValue(getArg(0), visitor, contextItemType);
+                    Expression ebv = rewriteEffectiveBooleanValue(this.getArg(0), visitor, contextItemType);
                     if (ebv != null) {
                         ebv = ebv.optimize(visitor, contextItemType);
                         if (ebv.getItemType() == BuiltInAtomicType.BOOLEAN &&

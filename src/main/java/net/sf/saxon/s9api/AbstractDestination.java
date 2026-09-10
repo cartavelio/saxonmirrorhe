@@ -15,8 +15,12 @@ import java.util.function.Consumer;
  */
 abstract public class AbstractDestination implements Destination {
 
-    protected DestinationHelper helper = new DestinationHelper(this);
+    protected DestinationHelper helper;
     private URI baseURI;
+
+    public AbstractDestination() {
+        helper = new DestinationHelper(this);
+    }
 
     /**
      * Set the base URI of the resource being written to this destination

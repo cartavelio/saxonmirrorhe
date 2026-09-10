@@ -60,7 +60,7 @@ import java.util.*;
 
 @CSharpInjectMembers(code = {
         "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
                 + "    }"
 })
 public class StaticQueryContext {
@@ -1098,6 +1098,7 @@ public class StaticQueryContext {
         return defaultEmptyLeast;
     }
 
+    //#if CSHARP==false
     /**
      * Set the ErrorListener to be used to report compile-time errors in a query. This will also
      * be the default for the run-time error listener used to report dynamic errors.
@@ -1124,6 +1125,7 @@ public class StaticQueryContext {
             return null;
         }
     }
+    //#endif
 
     /**
      * Set an error reporter: that is, a used-supplied object that is to receive

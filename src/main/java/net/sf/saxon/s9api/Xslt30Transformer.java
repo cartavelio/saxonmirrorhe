@@ -24,6 +24,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharpInnerClass;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -649,6 +650,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @since 9.9
      */
 
+    @CSharpInnerClass(outer=false, extra={"net.sf.saxon.s9api.Destination finalDestination"})
     public Destination asDocumentDestination(Destination finalDestination) {
         return new AbstractDestination() {
 

@@ -10,6 +10,7 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.OptimizerOptions;
+import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
@@ -23,9 +24,7 @@ import net.sf.saxon.value.SequenceType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An {@code XPathCompiler} object allows XPath queries to be compiled. The compiler holds information that
@@ -58,7 +57,7 @@ public class XPathCompiler {
     private final IndependentContext env;
     private ItemType requiredContextItemType;
 
-    private Map<String, XPathExecutable> cache = null;
+    private LFUCache<String, XPathExecutable> cache = null;
 
     /**
      * Protected constructor
@@ -462,7 +461,7 @@ public class XPathCompiler {
     public void setCaching(boolean caching) {
         if (caching) {
             if (cache == null) {
-                cache = new ConcurrentHashMap<>();
+                cache = new LFUCache<>(100, true);
             }
         } else {
             cache = null;
@@ -523,14 +522,12 @@ public class XPathCompiler {
     public XPathExecutable compile(String source) throws SaxonApiException {
         Objects.requireNonNull(source);
         if (cache != null) {
-            synchronized(this) {
-                XPathExecutable expr = cache.get(source);
-                if (expr == null) {
-                    expr = internalCompile(source);
-                    cache.put(source, expr);
-                }
-                return expr;
+            XPathExecutable expr = cache.get(source);
+            if (expr == null) {
+                expr = internalCompile(source);
+                cache.put(source, expr);
             }
+            return expr;
         } else {
             return internalCompile(source);
         }

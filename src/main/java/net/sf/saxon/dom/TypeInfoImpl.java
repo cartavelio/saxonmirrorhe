@@ -62,7 +62,7 @@ public class TypeInfoImpl implements TypeInfo {
      * @param typeNamespaceArg the namespace of the "other" type
      * @param typeNameArg      the local name of the "other" type
      * @param derivationMethod the derivation method: zero or more of {@link Derivation#DERIVATION_RESTRICTION},
-     *                         {@link Derivatiion#DERIVATION_EXTENSION}, {@link Derivation#DERIVATION_LIST}, or {@link Derivation#DERIVATION_UNION}.
+     *                         {@link Derivation#DERIVATION_EXTENSION}, {@link Derivation#DERIVATION_LIST}, or {@link Derivation#DERIVATION_UNION}.
      *                         Zero means derived by any possible route.
      */
 

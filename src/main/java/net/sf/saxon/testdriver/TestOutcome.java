@@ -912,7 +912,7 @@ public class TestOutcome {
                     AtomicValue value = (AtomicValue) item.getUnderlyingValue();
                     AtomicMatchKey comparable = value.isNaN() ?
                             AtomicSortComparer.COLLATION_KEY_NaN :
-                            value.getXPathComparable(false, collator, context.getImplicitTimezone());
+                            value.getXPathMatchKey(collator, context.getImplicitTimezone());
                     expected.add(comparable);
                 }
                 int actualItems = 0;
@@ -921,7 +921,7 @@ public class TestOutcome {
                     AtomicValue value = (AtomicValue) item.getUnderlyingValue();
                     AtomicMatchKey comparable = value.isNaN() ?
                             AtomicSortComparer.COLLATION_KEY_NaN :
-                            value.getXPathComparable(false, collator, context.getImplicitTimezone());
+                            value.getXPathMatchKey(collator, context.getImplicitTimezone());
                     if (!expected.contains(comparable)) {
                         return false;
                     }

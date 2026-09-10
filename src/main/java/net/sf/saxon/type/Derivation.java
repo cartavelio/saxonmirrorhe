@@ -1,9 +1,18 @@
 package net.sf.saxon.type;
 
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import org.w3c.dom.TypeInfo;
 
+@CSharpInjectMembers(code={
+        "public const int DERIVATION_RESTRICTION = 1;",
+        "public const int DERIVATION_EXTENSION = 2;",
+        "public const int DERIVATION_UNION = 4;",
+        "public const int DERIVATION_LIST = 8;",
+        "public const int DERIVE_BY_SUBSTITUTION = 16;",
+})
 public abstract class Derivation {
 
+//#if CSHARP==false
     // DerivationMethods. These constants, with one addition are copied from org.w3.dom.TypeInfo.
     // They are used as bit-significant flags.
 
@@ -63,6 +72,8 @@ public abstract class Derivation {
      */
 
     public final static int DERIVE_BY_SUBSTITUTION = 16;
+
+//#endif
 
 }
 

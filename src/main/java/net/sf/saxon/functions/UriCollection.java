@@ -9,12 +9,11 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ResourceCollection;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.LazySequence;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.AnyURIValue;
 
 import java.io.Closeable;
@@ -31,6 +30,7 @@ import java.util.Iterator;
 
 public class UriCollection extends SystemFunction {
 
+    @CSharpInnerClass(outer=false, extra={"java.util.Iterator<string> sources"})
     private SequenceIterator getUris(final String href, final XPathContext context) throws XPathException {
         ResourceCollection rCollection = context.getConfiguration().getCollectionFinder().findCollection(context, href);
         if (rCollection == null) {
@@ -42,9 +42,10 @@ public class UriCollection extends SystemFunction {
 
         }
         final Iterator<String> sources = rCollection.getResourceURIs(context);
-        return new SequenceIterator() {
+        return new AbstractSequenceIterator() {
 
             @Override
+            @CSharpModifiers(code={"public", "override"})
             public AnyURIValue next() {
                 if (sources.hasNext()) {
                     return new AnyURIValue(sources.next());
@@ -54,6 +55,7 @@ public class UriCollection extends SystemFunction {
             }
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public void close() {
                 if (sources instanceof Closeable) {
                     try {

@@ -601,7 +601,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                  * @return the result of the function
                  */
                 @Override
-                public ArrayItem result() {
+                public Sequence result() {
                     return new SimpleArrayItem(members);
                 }
             };

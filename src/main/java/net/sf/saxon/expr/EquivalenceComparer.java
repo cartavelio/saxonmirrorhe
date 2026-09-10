@@ -54,8 +54,8 @@ public class EquivalenceComparer extends GenericAtomicComparer {
             return true;
         } else {
             int implicitTimezone = getContext().getImplicitTimezone();
-            Object ac = a.getXPathComparable(false, getStringCollator(), implicitTimezone);
-            Object bc = b.getXPathComparable(false, getStringCollator(), implicitTimezone);
+            Object ac = a.getXPathMatchKey(getStringCollator(), implicitTimezone);
+            Object bc = b.getXPathMatchKey(getStringCollator(), implicitTimezone);
             return ac.equals(bc);
         }
     }

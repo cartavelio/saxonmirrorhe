@@ -36,32 +36,7 @@ public class XmlResource implements Resource {
     private AbstractResourceCollection.InputDetails details;
     //private int onError = URIQueryParameters.ON_ERROR_FAIL;
 
-    public final static ResourceFactory FACTORY = new ResourceFactory() {
-        @Override
-        public Resource makeResource(Configuration config, AbstractResourceCollection.InputDetails details) throws XPathException {
-            return new XmlResource(config, details);
-            //            String resourceURI = details.resourceUri;
-//            ParseOptions options = details.parseOptions;
-//            if (options == null) {
-//                options = config.getParseOptions();
-//            }
-//            Source source;
-//            if (details.characterContent != null) {
-//                source = new StreamSource(new StringReader(details.characterContent), resourceURI);
-//                return new XmlResource(config, source, options, details.onError);
-//            } else if (details.binaryContent != null) {
-//                source = new StreamSource(new ByteArrayInputStream(details.binaryContent), resourceURI);
-//                return new XmlResource(config, source, options, details.onError);
-//            } else {
-//                try (InputStream stream = details.getInputStream()) {
-//                    source = new StreamSource(stream, resourceURI);
-//                    return new XmlResource(config, source, options, details.onError);
-//                } catch (IOException e) {
-//                    throw new XPathException(e);
-//                }
-//            }
-        }
-    };
+    public final static ResourceFactory FACTORY = (config, details) -> new XmlResource(config, details);
 
     /**
      * Create an XML resource using a specific node

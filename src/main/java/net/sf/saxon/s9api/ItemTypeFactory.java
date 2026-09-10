@@ -14,14 +14,10 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
 import java.util.Map;
@@ -475,6 +471,7 @@ public class ItemTypeFactory {
         return new ConstructedItemType(docTest, processor);
     }
 
+    //#if CSHARP==false
     /**
      * Get an ItemType representing the type of a Java object when used as an external object
      * for use in conjunction with calls on extension/external functions.
@@ -502,6 +499,8 @@ public class ItemTypeFactory {
     public XdmItem getExternalObject(Object object) {
         return (XdmItem) XdmItem.wrap(new ObjectValue<>(object));
     }
+
+    //#endif
 
     /**
      * Obtain a map type, that is a type for XDM maps with a given key type and value type
@@ -588,8 +587,10 @@ public class ItemTypeFactory {
                 return ItemType.ANY_MAP;
             } else if (it instanceof ArrayItem) {
                 return ItemType.ANY_ARRAY;
-            } else if (it instanceof ExternalObject) {
+            //#if CSHARP==false
+            } else if (it.getGenre() == Genre.EXTERNAL) {
                 return new ConstructedItemType(ExternalObjectType.THE_INSTANCE, processor);
+            //#endif
             } else {
                 return ItemType.ANY_FUNCTION;
             }

@@ -97,7 +97,7 @@ public abstract class Math {
                     highest.add(it);
                 }
             }
-            return new SequenceExtent(highest);
+            return new SequenceExtent.Of<>(highest);
         } catch (NumberFormatException e) {
             return EmptySequence.getInstance();
         }
@@ -131,7 +131,7 @@ public abstract class Math {
                     lowest.add(it);
                 }
             }
-            return new SequenceExtent(lowest);
+            return new SequenceExtent.Of<>(lowest);
         } catch (NumberFormatException e) {
             return EmptySequence.getInstance();
         }

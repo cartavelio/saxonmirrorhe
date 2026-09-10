@@ -165,7 +165,7 @@ public class SequenceSlice implements GroundedValue {
         if (length < 0) {
             return EmptySequence.getInstance();
         }
-        int newLength = Integer.min(length, this.length);
+        int newLength = Math.min(length, this.length);
         if (newStart + newLength > value.getLength()) {
             newLength = value.getLength() - newStart;
         }

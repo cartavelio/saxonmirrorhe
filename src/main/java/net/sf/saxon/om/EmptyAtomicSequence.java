@@ -12,7 +12,6 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SchemaComparable;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -60,21 +59,6 @@ public class EmptyAtomicSequence implements AtomicSequence {
     @Override
     public UnicodeString getCanonicalLexicalRepresentation() {
         return EmptyUniString.getInstance();
-    }
-
-    /**
-     * Get a Comparable value that implements the XML Schema ordering comparison semantics for this value.
-     * The default implementation is written to compare sequences of atomic values.
-     * This method is overridden for AtomicValue and its subclasses.
-     * <p>In the case of data types that are partially ordered, the returned Comparable extends the standard
-     * semantics of the compareTo() method by returning the value {@link net.sf.saxon.om.SequenceTool#INDETERMINATE_ORDERING} when there
-     * is no defined order relationship between two given values.</p>
-     *
-     * @return a Comparable that follows XML Schema comparison rules
-     */
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        return null;
     }
 
     @Override

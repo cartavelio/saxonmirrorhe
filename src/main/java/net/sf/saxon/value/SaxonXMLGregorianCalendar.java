@@ -7,6 +7,7 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.trans.XPathException;
 
@@ -482,8 +483,8 @@ public class SaxonXMLGregorianCalendar extends XMLGregorianCalendar {
      */
     @Override
     public int compare(/*@NotNull*/ XMLGregorianCalendar xmlGregorianCalendar) {
-        return toCalendarValue().getSchemaComparable().compareTo(
-                ((SaxonXMLGregorianCalendar) xmlGregorianCalendar).toCalendarValue().getSchemaComparable());
+        return SimpleTypeComparison.getInstance().compareItems(
+                toCalendarValue(), ((SaxonXMLGregorianCalendar) xmlGregorianCalendar).toCalendarValue());
     }
 
     /**

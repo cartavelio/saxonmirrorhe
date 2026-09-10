@@ -88,8 +88,8 @@ public class DirectoryCollection extends AbstractResourceCollection {
     public Iterator<Resource> getResources(final XPathContext context) {
         final ParseOptions options = optionsFromQueryParameters(params, context);
         options.setSpaceStrippingRule(whitespaceRules);
-        Boolean metadataParam = params.getMetaData();
-        final boolean metadata = metadataParam != null && metadataParam;
+        Optional<Boolean> metadataParam = params.getMetaData();
+        final boolean metadata = metadataParam.isPresent() && metadataParam.get();
         Iterator<String> resourceURIs = getResourceURIs(context);
 
         return new MappingJavaIterator<>(resourceURIs,
@@ -98,8 +98,8 @@ public class DirectoryCollection extends AbstractResourceCollection {
                      InputDetails details = getInputDetails(in);
                      details.resourceUri = in;
                      details.parseOptions = options;
-                     if (params.getContentType() != null) {
-                         details.contentType = params.getContentType();
+                     if (params.getContentType().isPresent()) {
+                         details.contentType = params.getContentType().get();
                      }
                      Resource resource = makeResource(context.getConfiguration(), details);
                      if (resource != null) {
@@ -111,10 +111,10 @@ public class DirectoryCollection extends AbstractResourceCollection {
                      }
                      return null;
                  } catch (XPathException e) {
-                     int onError = params.getOnError();
-                     if (onError == URIQueryParameters.ON_ERROR_FAIL) {
+                     Optional<Integer> onError = params.getOnError();
+                     if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_FAIL) {
                          return new FailedResource(in, e);
-                     } else if (onError == URIQueryParameters.ON_ERROR_WARNING) {
+                     } else if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_WARNING) {
                          context.getController().warning("collection(): failed to parse " + in + ": " + e.getMessage(), e.getErrorCodeLocalPart(), null);
                          return null;
                      } else {
@@ -185,13 +185,13 @@ public class DirectoryCollection extends AbstractResourceCollection {
         FilenameFilter filter = null;
         boolean recurse = false;
         if (params != null) {
-            FilenameFilter f = params.getFilenameFilter();
-            if (f != null) {
-                filter = f;
+            Optional<FilenameFilter> f = params.getFilenameFilter();
+            if (f.isPresent()) {
+                filter = f.get();
             }
-            Boolean r = params.getRecurse();
-            if (r != null) {
-                recurse = r;
+            Optional<Boolean> r = params.getRecurse();
+            if (r.isPresent()) {
+                recurse = r.get();
             }
         }
 

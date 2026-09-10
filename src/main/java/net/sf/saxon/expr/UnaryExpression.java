@@ -13,9 +13,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.ItemType;
-import java.util.Iterator;
 
 /**
  * Unary Expression: an expression taking a single operand expression
@@ -48,13 +46,7 @@ public abstract class UnaryExpression extends Expression {
 
     @Override
     public Iterable<Operand> operands() {
-        // For .NEU - don't use a lambda expression here
-        return new Iterable<Operand>() {
-            @Override
-            public Iterator<Operand> iterator() {
-                return new MonoIterator<>(operand);
-            }
-        };
+        return operand;
     }
 
     /**

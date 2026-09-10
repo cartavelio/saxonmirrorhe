@@ -88,7 +88,11 @@ public class LookupExpression extends BinaryExpression {
                     String fieldName = ((StringLiteral) getRhsExpression()).stringify();
                     SequenceType fieldType = ((RecordTest) mapType).getFieldType(fieldName);
                     if (fieldType == null) {
-                        return ((RecordTest) mapType).isExtensible() ? AnyItemType.getInstance() : ErrorType.getInstance();
+                        if (((RecordTest) mapType).isExtensible()) {
+                            return AnyItemType.getInstance();
+                        } else {
+                            return ErrorType.getInstance();
+                        }
                     } else {
                         return fieldType.getPrimaryType();
                     }
@@ -362,43 +366,48 @@ public class LookupExpression extends BinaryExpression {
             SequenceIterator baseIterator = getLhsExpression().iterate(context);
             GroundedValue rhs = getRhsExpression().iterate(context).materialize();
             MappingFunction mappingFunction = SequenceMapper.of(baseItem -> {
-                if (baseItem instanceof ArrayItem) {
-                    MappingFunction arrayAccess = SequenceMapper.of(index -> {
-                        if (index instanceof IntegerValue) {
-                            GroundedValue member = ((ArrayItem) baseItem).get((int) ((IntegerValue) index).longValue() - 1);
-                            return member.iterate();
-                        } else {
+                switch(baseItem.getGenre()) {
+                    case ARRAY: {
+                        MappingFunction arrayAccess = SequenceMapper.of(index -> {
+                            if (index instanceof IntegerValue) {
+                                GroundedValue member = ((ArrayItem) baseItem).get((int) ((IntegerValue) index).longValue() - 1);
+                                return member.iterate();
+                            } else {
+                                XPathException exception = new XPathException(
+                                        "An item on the LHS of the '?' operator is an array, but a value on the RHS of the operator (" +
+                                                baseItem.toShortString() + ") is not an integer", "XPTY0004");
+                                exception.setIsTypeError(true);
+                                exception.setLocation(getLocation());
+                                exception.setFailingExpression(LookupExpression.this);
+                                throw exception;
+                            }
+                        });
+                        SequenceIterator rhsIter = rhs.iterate();
+                        return new MappingIterator(rhsIter, arrayAccess);
+                    }
+                    case MAP: {
+                        SequenceIterator rhsIter = rhs.iterate();
+                        return MappingIterator.map(rhsIter, key ->
+                                optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) key))
+                        );
+                    }
+                    case EXTERNAL: {
+                        if (!(rhs instanceof StringItem)) {
                             XPathException exception = new XPathException(
-                                    "An item on the LHS of the '?' operator is an array, but a value on the RHS of the operator (" +
-                                            baseItem.toShortString() + ") is not an integer", "XPTY0004");
+                                    "An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator (" +
+                                            baseItem.toShortString() + ") is not a singleton string", "XPTY0004");
                             exception.setIsTypeError(true);
                             exception.setLocation(getLocation());
                             exception.setFailingExpression(LookupExpression.this);
                             throw exception;
                         }
-                    });
-                    SequenceIterator rhsIter = rhs.iterate();
-                    return new MappingIterator(rhsIter, arrayAccess);
-                } else if (baseItem instanceof MapItem) {
-                    SequenceIterator rhsIter = rhs.iterate();
-                    return MappingIterator.map(rhsIter, key ->
-                        optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) key))
-                    );
-                } else if (baseItem instanceof ObjectValue) {
-                    if (!(rhs instanceof StringItem)) {
-                        XPathException exception = new XPathException(
-                                "An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator (" +
-                                        baseItem.toShortString() + ") is not a singleton string", "XPTY0004");
-                        exception.setIsTypeError(true);
-                        exception.setLocation(getLocation());
-                        exception.setFailingExpression(LookupExpression.this);
-                        throw exception;
+                        String key = ((StringItem) rhs).getStringValue();
+                        return config.externalObjectAsMap((ObjectValue<?>) baseItem, key).get((StringItem) rhs).iterate();
                     }
-                    String key = ((StringItem) rhs).getStringValue();
-                    return config.externalObjectAsMap((ObjectValue) baseItem, key).get((StringItem) rhs).iterate();
-                } else {
-                    mustBeArrayOrMap(this, baseItem);
-                    return null;
+                    default: {
+                        mustBeArrayOrMap(this, baseItem);
+                        return null;
+                    }
                 }
             });
             return new MappingIterator(baseIterator, mappingFunction);

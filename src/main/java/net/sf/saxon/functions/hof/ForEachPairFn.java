@@ -63,7 +63,7 @@ public class ForEachPairFn extends SystemFunction {
      * The pair of items is returned wrapped in an ObjectValue.
      */
 
-    private static class PairedSequenceIterator implements SequenceIterator {
+    private static class PairedSequenceIterator extends AbstractSequenceIterator {
 
         private final SequenceIterator seq0;
         private final SequenceIterator seq1;

@@ -84,7 +84,7 @@ public class Sort_1 extends SystemFunction {
         for (ItemToBeSorted member : inputList) {
             outputList.add(member.value);
         }
-        return new SequenceExtent(outputList);
+        return new SequenceExtent.Of<>(outputList);
     }
 
 

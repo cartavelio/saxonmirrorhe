@@ -30,7 +30,7 @@ public class SequenceCopier {
 
     public static void copySequence(SequenceIterator in, Receiver out) throws XPathException {
         out.open();
-        in.forEachOrFail(out::append);
+        in.forEachOrFail(out::append);  // it -> out.append(it)
         out.close();
     }
 }

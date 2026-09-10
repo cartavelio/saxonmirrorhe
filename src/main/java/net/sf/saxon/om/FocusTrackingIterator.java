@@ -187,7 +187,7 @@ public class FocusTrackingIterator
      */
     @Override
     public GroundedValue getResidue() throws XPathException {
-        return new SequenceExtent(this);
+        return SequenceExtent.from(this);
     }
 
     /**

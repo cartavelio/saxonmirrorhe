@@ -56,7 +56,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
         List<GroundedValue> members = new ArrayList<>();
         input.forEachOrFail(item -> {
             if (item.getClass().getName().equals("com.saxonica.functions.extfn.ArrayMemberValue")) {
-                members.add((GroundedValue) ((ExternalObject) item).getObject());
+                members.add((GroundedValue) ((ExternalObject<GroundedValue>) item).getObject());
             } else {
                 members.add(item);
             }

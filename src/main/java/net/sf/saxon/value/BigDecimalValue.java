@@ -7,11 +7,14 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.expr.sort.XPathComparable;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.*;
 
 import java.math.BigDecimal;
@@ -31,7 +34,7 @@ public final class BigDecimalValue extends DecimalValue {
     public static final int DIVIDE_PRECISION = 18;
 
     private final BigDecimal value;
-    private Double doubleValue;
+    private double doubleValue = Double.NaN; // meaning unknown
 
     public static final BigDecimal BIG_DECIMAL_ONE_MILLION = BigDecimal.valueOf(1_000_000);
     public static final BigDecimal BIG_DECIMAL_ONE_BILLION = BigDecimal.valueOf(1_000_000_000);
@@ -196,7 +199,7 @@ public final class BigDecimalValue extends DecimalValue {
 
     public BigDecimalValue(double in) throws ValidationException {
         try {
-            BigDecimal d = new BigDecimal(in);
+            BigDecimal d = BigDecimal.valueOf(in);
             value = d.stripTrailingZeros();
         } catch (NumberFormatException err) {
             // Must be a special value such as NaN or infinity
@@ -257,13 +260,10 @@ public final class BigDecimalValue extends DecimalValue {
      */
     @Override
     public double getDoubleValue() {
-        if (doubleValue == null) {
-            double d = value.doubleValue();
-            doubleValue = d;
-            return d;
-        } else {
-            return doubleValue;
+        if (Double.isNaN(doubleValue)) {
+            doubleValue = value.doubleValue();
         }
+        return doubleValue;
     }
 
     /**
@@ -306,9 +306,9 @@ public final class BigDecimalValue extends DecimalValue {
 
     public int hashCode() {
         BigDecimal round = value.setScale(0, RoundingMode.DOWN);
-        long value = round.longValue();
-        if (value > Integer.MIN_VALUE && value < Integer.MAX_VALUE) {
-            return (int) value;
+        long longVal = round.longValue();
+        if (longVal > Integer.MIN_VALUE && longVal < Integer.MAX_VALUE) {
+            return (int) longVal;
         } else {
             return Double.valueOf(getDoubleValue()).hashCode();
         }
@@ -339,7 +339,7 @@ public final class BigDecimalValue extends DecimalValue {
     public UnicodeString getCanonicalLexicalRepresentation() {
         UnicodeString s = this.getUnicodeStringValue().tidy();
         if (s.indexOf('.') < 0) {
-            s = s.concat(BMPString.of(".0"));
+            s = s.concat(StringConstants.POINT_ZERO);
         }
         return s;
     }
@@ -364,6 +364,7 @@ public final class BigDecimalValue extends DecimalValue {
      * @return the supplied StringBuilder, suitably populated
      */
 
+    @CSharpReplaceBody(code="return fsb.append(value.ToString()); /*maybe imprecise?*/")
     public static StringBuilder decimalToString(BigDecimal value, StringBuilder fsb) {
         // Can't use BigDecimal#toString() under JDK 1.5 because this produces values like "1E-5".
         // Can't use BigDecimal#toPlainString() because it retains trailing zeroes to represent the scale
@@ -426,6 +427,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     @Override
+    @CSharpReplaceBody(code="return new BigDecimalValue(Singulink.Numerics.BigDecimal.Floor(value));")
     public NumericValue floor() {
         return new BigDecimalValue(value.setScale(0, RoundingMode.FLOOR));
     }
@@ -435,6 +437,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     @Override
+    @CSharpReplaceBody(code = "return new BigDecimalValue(Singulink.Numerics.BigDecimal.Ceiling(value));")
     public NumericValue ceiling() {
         return new BigDecimalValue(value.setScale(0, RoundingMode.CEILING));
     }
@@ -444,6 +447,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     @Override
+    @CSharpReplaceBody(code = "return new BigDecimalValue(Singulink.Numerics.BigDecimal.Round(value, scale));")
     public NumericValue round(int scale) {
         // The XPath rules say that we should round to the nearest integer, with .5 rounding towards
         // positive infinity. Unfortunately this is not one of the rounding modes that the Java BigDecimal
@@ -476,6 +480,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     @Override
+    @CSharpReplaceBody(code = "return new BigDecimalValue(Singulink.Numerics.BigDecimal.Round(value, scale));")
     public NumericValue roundHalfToEven(int scale) {
         if (scale >= value.scale()) {
             return this;
@@ -501,6 +506,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     @Override
+    @CSharpReplaceBody(code = "return value.DecimalPlaces == 0;")
     public boolean isWholeNumber() {
         return value.scale() == 0 ||
                 value.compareTo(value.setScale(0, RoundingMode.DOWN)) == 0;
@@ -541,25 +547,34 @@ public final class BigDecimalValue extends DecimalValue {
         }
     }
 
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
     /**
      * Compare the value to another numeric value
      */
 
     @Override
-    public int compareTo(NumericValue other) {
-        if (NumericValue.isInteger(other)) {
-            // deliberately triggers a ClassCastException if other value is the wrong type
-            try {
-                return value.compareTo(other.getDecimalValue());
-            } catch (XPathException err) {
-                throw new AssertionError("Conversion of integer to decimal should never fail");
+    public int compareTo(XPathComparable other) {
+        if (other instanceof NumericValue) {
+            if (NumericValue.isInteger(((NumericValue)other))) {
+                // deliberately triggers a ClassCastException if other value is the wrong type
+                try {
+                    return value.compareTo(((NumericValue)other).getDecimalValue());
+                } catch (XPathException err) {
+                    throw new AssertionError("Conversion of integer to decimal should never fail");
+                }
+            } else if (other instanceof BigDecimalValue) {
+                return value.compareTo(((BigDecimalValue) other).value);
+            } else if (other instanceof FloatValue) {
+                return -other.compareTo(this);
+            } else {
+                return super.compareTo(other);
             }
-        } else if (other instanceof BigDecimalValue) {
-            return value.compareTo(((BigDecimalValue) other).value);
-        } else if (other instanceof FloatValue) {
-            return -other.compareTo(this);
         } else {
-            return super.compareTo(other);
+            throw new ClassCastException("Cannot compare xs:decimal to " + other.toString());
         }
     }
 
@@ -576,71 +591,6 @@ public final class BigDecimalValue extends DecimalValue {
             return value.signum();
         }
         return value.compareTo(BigDecimal.valueOf(other));
-    }
-
-    /**
-     * Get a Comparable value that implements the XML Schema ordering comparison semantics for this value.
-     * Returns null if the value is not comparable according to XML Schema rules. The default implementation
-     * returns the value itself if it is comparable, or null otherwise. This is modified for types such as
-     * xs:duration which allow ordering comparisons in XML Schema, but not in XPath.
-     * <p>In the case of data types that are partially ordered, the returned Comparable extends the standard
-     * semantics of the compareTo() method by returning the value {@link net.sf.saxon.om.SequenceTool#INDETERMINATE_ORDERING} when there
-     * is no defined order relationship between two given values.</p>
-     */
-
-    /**
-     * Get an object that implements XML Schema comparison semantics
-     * @return
-     */
-
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        return new DecimalComparable(this);
-    }
-
-    /**
-     * A Comparable that performs comparison of a DecimalValue either with another
-     * DecimalValue or with some other representation of an XPath numeric value
-     */
-
-    protected static class DecimalComparable implements SchemaComparable {
-
-        protected BigDecimalValue value;
-
-        public DecimalComparable(BigDecimalValue value) {
-            this.value = value;
-        }
-
-        public BigDecimal asBigDecimal() {
-            return value.getDecimalValue();
-        }
-
-        @Override
-        public int compareTo(SchemaComparable o) {
-            if (o instanceof DecimalComparable) {
-                return asBigDecimal().compareTo(((DecimalComparable) o).asBigDecimal());
-            } else if (o instanceof Int64Value.Int64Comparable) {
-                return asBigDecimal().compareTo(BigDecimal.valueOf(((Int64Value.Int64Comparable) o).asLong()));
-            } else if (o instanceof BigIntegerValue.BigIntegerComparable) {
-                return asBigDecimal().compareTo(new BigDecimal(((BigIntegerValue.BigIntegerComparable) o).asBigInteger()));
-            } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
-            }
-        }
-
-        public boolean equals(Object o) {
-            return o instanceof SchemaComparable && compareTo((SchemaComparable)o) == 0;
-        }
-
-        public int hashCode() {
-            // Must align with hashCodes for other subtypes of xs:decimal
-            if (value.isWholeNumber()) {
-                IntegerValue iv = Converter.DecimalToInteger.INSTANCE.convert(value);
-                return iv.getSchemaComparable().hashCode();
-                
-            }
-            return value.hashCode();
-        }
     }
 
     /**

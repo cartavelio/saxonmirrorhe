@@ -9,6 +9,7 @@ package net.sf.saxon.tree.linked;
 
 
 import net.sf.saxon.om.*;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.NodeListIterator;
 
@@ -27,6 +28,23 @@ import java.util.stream.Collectors;
  * is an immutable object.</p>
  */
 
+@CSharpInjectMembers(code={
+                  "        public java.util.Iterator<net.sf.saxon.om.AttributeInfo> iterator() {"
+                + "            return new Saxon.Impl.Helpers.IteratorFromEnumerator<net.sf.saxon.om.AttributeInfo>(GetEnumerator());\n"
+                + "        }"
+                + "        "
+                + "        public System.Collections.Generic.IEnumerator<net.sf.saxon.om.AttributeInfo> GetEnumerator() {"
+                + "            foreach (net.sf.saxon.om.AttributeInfo att in attributes) {"
+                + "                if (!(att is net.sf.saxon.om.AttributeInfo.Deleted)) {"
+                + "                    yield return att;"
+                + "                }"
+                + "            }"
+                + "        }"
+                + ""
+                + "        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {"
+                + "            return GetEnumerator();"
+                + "        }"
+})
 public class AttributeMapWithIdentity implements AttributeMap {
 
     private final List<AttributeInfo> attributes;
@@ -142,6 +160,7 @@ public class AttributeMapWithIdentity implements AttributeMap {
         return null;
     }
 
+    //#if CSHARP==false
     @Override
     public Iterator<AttributeInfo> iterator() {
         return attributes.stream().filter(info -> !(info instanceof AttributeInfo.Deleted)).iterator();
@@ -151,6 +170,7 @@ public class AttributeMapWithIdentity implements AttributeMap {
     public List<AttributeInfo> asList() {
         return attributes.stream().filter(info -> !(info instanceof AttributeInfo.Deleted)).collect(Collectors.toList());
     }
+    //#endif
 
     @Override
     public AttributeInfo itemAt(int index) {

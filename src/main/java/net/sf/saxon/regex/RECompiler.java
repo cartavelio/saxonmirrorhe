@@ -31,6 +31,7 @@
 package net.sf.saxon.regex;
 
 import net.sf.saxon.regex.charclass.*;
+import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.transpile.CSharp;
@@ -427,6 +428,7 @@ public class RECompiler {
                 } else {
                     syntaxError("Unknown character category: " + block);
                 }
+                break;
 
             case '0':
                 syntaxError("Octal escapes not allowed");
@@ -447,7 +449,7 @@ public class RECompiler {
                 } else if (isXPath) {
                     int backRef = escapeChar - '0';
                     while (idx < len) {
-                        int c1 = "0123456789".indexOf(pattern.codePointAt(idx));
+                        int c1 = (int)StringConstants.ZERO_TO_NINE.indexOf(pattern.codePointAt(idx));
                         if (c1 < 0) {
                             break;
                         } else {
@@ -802,8 +804,8 @@ public class RECompiler {
                         // current character should bind to the quantifier operator rather than the atom
                         if (lenAtom != 0) {
                             breakAtomLoop = true;
-                            break;
                         }
+                        break;
                 }
             }
             if (breakAtomLoop) {
@@ -1054,6 +1056,7 @@ public class RECompiler {
                         quantifierType = '*';
                     }
                 }
+                break;
 
         }
 
@@ -1328,7 +1331,7 @@ public class RECompiler {
      * @return true if it can be established that there is no input sequence that will match both instructions
      */
 
-    static boolean noAmbiguity(Operation op0, Operation op1, boolean caseBlind, boolean reluctant) {
+    public static boolean noAmbiguity(Operation op0, Operation op1, boolean caseBlind, boolean reluctant) {
         if (op1 instanceof Operation.OpEndProgram) {
             return !reluctant;
         }

@@ -143,21 +143,13 @@ public class PackageLoaderHE implements IPackageLoader {
         options.setDTDValidationMode(Validation.SKIP);
 
         final List<ProxyReceiver> filters = new ArrayList<>(1);
-        FilterFactory checksumFactory = new FilterFactory() {
-            /**
-             * Make a ProxyReceiver to filter events on a push pipeline
-             *
-             * @param next the next receiver in the pipeline
-             * @return a ProxyReceiver initialized to send events to the next receiver in the pipeine
-             */
-            @Override
-            public ProxyReceiver makeFilter(Receiver next) {
-                CheckSumFilter filter = new CheckSumFilter(next);
-                filter.setCheckExistingChecksum(true);
-                filters.add(filter);
-                return filter;
-            }
+        FilterFactory checksumFactory = next -> {
+            CheckSumFilter filter = new CheckSumFilter(next);
+            filter.setCheckExistingChecksum(true);
+            filters.add(filter);
+            return filter;
         };
+
 
         options.addFilter(checksumFactory);
 
@@ -1369,7 +1361,7 @@ public class PackageLoaderHE implements IPackageLoader {
         if (name.equals("CCC")) {
             return CodepointCollatingComparer.getInstance();
         } else if (name.equals("CAVC")) {
-            return ComparableAtomicValueComparer.getInstance();
+            return ContextFreeAtomicComparer.getInstance();
         } else if (name.startsWith("GAC|")) {
             StringCollator collator = config.getCollation(name.substring(4));
             return new GenericAtomicComparer(collator, null);
@@ -1386,7 +1378,7 @@ public class PackageLoaderHE implements IPackageLoader {
         } else if (name.equals("DblSC")) {
             return DoubleSortComparer.getInstance();
         } else if (name.equals("DecSC")) {
-            return DecimalSortComparer.getInstance();
+            return DecimalSortComparer.getDecimalSortComparerInstance();
         } else if (name.startsWith("CAC|")) {
             StringCollator collator = config.getCollation(name.substring(4));
             return new CollatingAtomicComparer(collator);
@@ -2829,7 +2821,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 }
             }
 
-            return Literal.makeLiteral(new One(node));
+            return Literal.makeLiteral(node);
         });
 
 

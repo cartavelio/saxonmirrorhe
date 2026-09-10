@@ -8,7 +8,7 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.Calculator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
@@ -220,15 +220,19 @@ public final class BigIntegerValue extends IntegerValue {
      */
 
     @Override
-    public int compareTo(NumericValue other) {
-        if (other instanceof BigIntegerValue) {
-            return value.compareTo(((BigIntegerValue) other).value);
-        } else if (other instanceof Int64Value) {
-            return value.compareTo(BigInteger.valueOf(((Int64Value) other).longValue()));
-        } else if (other instanceof BigDecimalValue) {
-            return asDecimal().compareTo(((BigDecimalValue) other).getDecimalValue());
+    public int compareTo(XPathComparable other) {
+        if (other instanceof NumericValue) {
+            if (other instanceof BigIntegerValue) {
+                return value.compareTo(((BigIntegerValue) other).value);
+            } else if (other instanceof Int64Value) {
+                return value.compareTo(BigInteger.valueOf(((Int64Value) other).longValue()));
+            } else if (other instanceof BigDecimalValue) {
+                return asDecimal().compareTo(((BigDecimalValue) other).getDecimalValue());
+            } else {
+                return super.compareTo(other);
+            }
         } else {
-            return super.compareTo(other);
+            throw new ClassCastException("Cannot compare xs:integer to " + other);
         }
     }
 
@@ -552,62 +556,6 @@ public final class BigIntegerValue extends IntegerValue {
     }
 
     /**
-     * Get an object that implements XML Schema comparison semantics
-     * @return
-     */
-
-    /*@NotNull*/
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        return new BigIntegerComparable(this);
-    }
-
-    /**
-     * A Comparable that performs comparison of BigInteger values either with other
-     * BigInteger values or with other representations of XPath numeric values
-     */
-
-    protected static class BigIntegerComparable implements SchemaComparable {
-
-        protected BigIntegerValue value;
-
-        public BigIntegerComparable(BigIntegerValue value) {
-            this.value = value;
-        }
-
-        public BigInteger asBigInteger() {
-            return value.asBigInteger();
-        }
-
-        @Override
-        public int compareTo(SchemaComparable o) {
-            if (o instanceof Int64Value.Int64Comparable) {
-                return asBigInteger().compareTo(BigInteger.valueOf(((Int64Value.Int64Comparable) o).asLong()));
-            } else if (o instanceof BigIntegerComparable) {
-                return asBigInteger().compareTo(((BigIntegerComparable) o).asBigInteger());
-            } else if (o instanceof BigDecimalValue.DecimalComparable) {
-                return value.getDecimalValue().compareTo(((BigDecimalValue.DecimalComparable) o).asBigDecimal());
-            } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
-            }
-        }
-
-        public boolean equals(/*@NotNull*/ Object o) {
-            return o instanceof SchemaComparable && compareTo((SchemaComparable)o) == 0;
-        }
-
-        public int hashCode() {
-            // Must align with hashCodes for other subtypes of xs:decimal
-            BigInteger big = value.asBigInteger();
-            if (big.compareTo(MAX_LONG) < 0 && big.compareTo(MIN_LONG) > 0) {
-                Int64Value iv = new Int64Value(big.longValue());
-                return iv.hashCode();
-            }
-            return big.hashCode();
-        }
-    }
-
-    /**
      * Reduce a value to its simplest form.
      */
 
@@ -621,28 +569,6 @@ public final class BigIntegerValue extends IntegerValue {
         }
         return this;
     }
-
-//    /**
-//     * Convert to Java object (for passing to external functions)
-//     *
-//     * @param target The Java class to which conversion is required
-//     * @exception XPathException if conversion is not possible, or fails
-//     * @return the Java object that results from the conversion; always an
-//     *     instance of the target class
-///     */
-
-//    public Object convertAtomicToJava(Class target, XPathContext context) throws XPathException {
-//        if (isWithinLongRange()) {
-//            Int64Value val = Int64Value.makeIntegerValue(longValue());
-//            return val.convertToJava(target, context);
-//        } else if (target.isAssignableFrom(Int64Value.class)) {
-//            return this;
-//        } else if (target == BigInteger.class) {
-//            return value;
-//        } else {
-//            return convertPrimitive(BuiltInAtomicType.DECIMAL, true, context).asAtomic().convertToJava(target, context);
-//        }
-//    }
 
 
 

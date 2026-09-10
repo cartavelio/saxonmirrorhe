@@ -8,6 +8,8 @@
 
 package net.sf.saxon.value;
 
+import java.math.BigDecimal;
+
 /**
  * Abstract class representing the XDM type xs:decimal. An instance of xs:decimal that is also
  * an instance of xs:integer will be implemented as an instance of IntegerValue; every other
@@ -18,6 +20,12 @@ package net.sf.saxon.value;
  */
 
 public abstract class DecimalValue extends NumericValue {
+    /**
+     * Implementations of Decimal value don't throw an exception when converted to BigDecimal
+     * @return the BigDecimal representation of the value
+     */
+    @Override
+    public abstract BigDecimal getDecimalValue();
 }
 
 

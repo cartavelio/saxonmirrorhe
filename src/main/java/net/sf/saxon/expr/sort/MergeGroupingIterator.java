@@ -10,7 +10,10 @@ package net.sf.saxon.expr.sort;
 import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AtomicArray;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -18,7 +21,6 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
 import java.util.*;
@@ -47,7 +49,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
         this.baseItr = p1;
         nextItem = (ObjectValue<ItemWithMergeKeys>)p1.next();
         if (nextItem != null) {
-            compositeMergeKey = ((ItemWithMergeKeys) ((ObjectValue) nextItem).getObject()).sortKeyValues;
+            compositeMergeKey = ((ObjectValue<ItemWithMergeKeys>) nextItem).getObject().sortKeyValues;
         }
         this.comparer = comp;
         this.lastPositionFinder = lpf;
@@ -129,7 +131,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
         }
         currenti = nextItem;
         position++;
-        compositeMergeKey = ((ItemWithMergeKeys) ((ExternalObject) nextItem).getObject()).sortKeyValues;
+        compositeMergeKey = nextItem.getObject().sortKeyValues;
         advance();
         return currenti.getObject().baseItem;
     }
@@ -156,7 +158,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
     @Override
     public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator(currentMembers);
+        return new ListIterator.Of<>(currentMembers);
     }
 
     public SequenceIterator iterateCurrentGroup(String source) {
@@ -164,7 +166,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
         if (sourceMembers == null) {
             return EmptyIterator.emptyIterator();
         } else {
-            return new ListIterator(sourceMembers);
+            return new ListIterator.Of<>(sourceMembers);
         }
     }
 
@@ -181,7 +183,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
         @Override
         public SequenceIterator iterateCurrentGroup() {
-            return new ListIterator(currentGroup);
+            return new ListIterator.Of<>(currentGroup);
         }
 
         @Override

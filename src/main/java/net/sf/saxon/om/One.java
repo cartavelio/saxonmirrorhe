@@ -8,7 +8,6 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.tree.iter.ConstrainedIterator;
 import net.sf.saxon.value.*;
 
 /**
@@ -31,50 +30,6 @@ public class One<T extends Item> extends ZeroOrOne<T> {
         if (item == null) {
             throw new NullPointerException();
         }
-    }
-
-    /**
-     * Return an iterator over this value.
-     */
-    @Override
-    public ConstrainedIterator<T> iterate() {
-        return new ConstrainedIterator<T>() {
-            boolean gone = false;
-            @Override
-            public boolean hasNext() {
-                return !gone;
-            }
-
-            @Override
-            public T next() {
-                if (gone) {
-                    return null;
-                } else {
-                    gone = true;
-                    return head();
-                }
-            }
-
-            @Override
-            public int getLength() {
-                return 1;
-            }
-
-            @Override
-            public GroundedValue materialize() {
-                return head();
-            }
-
-            @Override
-            public GroundedValue getResidue() {
-                return gone ? EmptySequence.getInstance() : head();
-            }
-
-            @Override
-            public SequenceIterator getReverseIterator() {
-                return iterate();
-            }
-        };
     }
 
     /**

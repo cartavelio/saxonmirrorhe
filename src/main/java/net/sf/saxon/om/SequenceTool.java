@@ -49,7 +49,7 @@ public class SequenceTool {
      * @throws XPathException if a failure occurs reading the input iterator
      */
 
-    public static <T extends Item> GroundedValue toGroundedValue(SequenceIterator iterator) throws XPathException {
+    public static GroundedValue toGroundedValue(SequenceIterator iterator) throws XPathException {
         return iterator.materialize();
     }
 
@@ -224,6 +224,7 @@ public class SequenceTool {
         return first;
     }
 
+    //#if CSHARP==false
     /**
      * Convert an XPath value to a Java object.
      * An atomic value is returned as an instance
@@ -238,49 +239,55 @@ public class SequenceTool {
      */
 
     public static Object convertToJava(/*@NotNull*/ Item item) throws XPathException {
-        if (item instanceof NodeInfo) {
-            Object node = item;
-            while (node instanceof VirtualNode) {
-                // strip off any layers of wrapping
-                node = ((VirtualNode) node).getRealNode();
-            }
-            return node;
-        } else if (item instanceof Function) {
-            return item;
-        } else if (item instanceof ExternalObject) {
-            return ((ExternalObject) item).getObject();
-        } else {
-            AtomicValue value = (AtomicValue) item;
-            switch (value.getItemType().getPrimitiveType()) {
-                case StandardNames.XS_STRING:
-                case StandardNames.XS_UNTYPED_ATOMIC:
-                case StandardNames.XS_ANY_URI:
-                case StandardNames.XS_DURATION:
-                case StandardNames.XS_TIME:
-                    return value.getStringValue();
-                case StandardNames.XS_BOOLEAN:
-                    return ((BooleanValue) value).getBooleanValue() ? Boolean.TRUE : Boolean.FALSE;
-                case StandardNames.XS_DECIMAL:
-                    return ((BigDecimalValue) value).getDecimalValue();
-                case StandardNames.XS_INTEGER:
-                    return ((NumericValue) value).longValue();
-                case StandardNames.XS_DOUBLE:
-                    return ((DoubleValue) value).getDoubleValue();
-                case StandardNames.XS_FLOAT:
-                    return ((FloatValue) value).getFloatValue();
-                case StandardNames.XS_DATE_TIME:
-                    return ((DateTimeValue) value).getCalendar().getTime();
-                case StandardNames.XS_DATE:
-                    return ((DateValue) value).getCalendar().getTime();
-                case StandardNames.XS_BASE64_BINARY:
-                    return ((Base64BinaryValue) value).getBinaryValue();
-                case StandardNames.XS_HEX_BINARY:
-                    return ((HexBinaryValue) value).getBinaryValue();
-                default:
-                    return item;
-            }
+        switch (item.getGenre()) {
+            case NODE:
+                Object node = item;
+                while (node instanceof VirtualNode) {
+                    // strip off any layers of wrapping
+                    node = ((VirtualNode) node).getRealNode();
+                }
+                return node;
+            case FUNCTION:
+            case ARRAY:
+            case MAP:
+                return item;
+            case EXTERNAL:
+                return ((ExternalObject<?>) item).getObject();
+            case ATOMIC:
+                AtomicValue value = (AtomicValue) item;
+                switch (value.getItemType().getPrimitiveType()) {
+                    case StandardNames.XS_STRING:
+                    case StandardNames.XS_UNTYPED_ATOMIC:
+                    case StandardNames.XS_ANY_URI:
+                    case StandardNames.XS_DURATION:
+                    case StandardNames.XS_TIME:
+                        return value.getStringValue();
+                    case StandardNames.XS_BOOLEAN:
+                        return ((BooleanValue) value).getBooleanValue() ? Boolean.TRUE : Boolean.FALSE;
+                    case StandardNames.XS_DECIMAL:
+                        return ((BigDecimalValue) value).getDecimalValue();
+                    case StandardNames.XS_INTEGER:
+                        return ((NumericValue) value).longValue();
+                    case StandardNames.XS_DOUBLE:
+                        return ((DoubleValue) value).getDoubleValue();
+                    case StandardNames.XS_FLOAT:
+                        return ((FloatValue) value).getFloatValue();
+                    case StandardNames.XS_DATE_TIME:
+                        return ((DateTimeValue) value).getCalendar().getTime();
+                    case StandardNames.XS_DATE:
+                        return ((DateValue) value).getCalendar().getTime();
+                    case StandardNames.XS_BASE64_BINARY:
+                        return ((Base64BinaryValue) value).getBinaryValue();
+                    case StandardNames.XS_HEX_BINARY:
+                        return ((HexBinaryValue) value).getBinaryValue();
+                    default:
+                        return item;
+                }
+            default:
+                return item;
         }
     }
+    //#endif
 
     /**
      * Get the string value of a sequence. For an item, this is same as the result

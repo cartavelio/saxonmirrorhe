@@ -18,8 +18,10 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trace.TemplateRuleTraceListener;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.trans.rules.Rule;
 
 import java.util.Arrays;
@@ -114,7 +116,14 @@ public class NextMatch extends ApplyNextMatchingTemplate {
             c2.setCurrentTemplateRule(rule);
             c2.setCurrentComponent(modeComponent); // needed in the case where next-match is called from a named template
             c2.setCurrentMergeGroupIterator(null);
-            nh.apply(output, c2);
+            if (mode.isModeTracing()) {
+                TemplateRuleTraceListener tracer = ((XsltController) controller).getTemplateRuleTraceListener();
+                tracer.enter("next-match", getLocation(), currentItem, nh);
+                nh.apply(output, c2);
+                tracer.leave();
+            } else {
+                nh.apply(output, c2);
+            }
         }
         return null;
     }
@@ -207,8 +216,16 @@ public class NextMatch extends ApplyNextMatchingTemplate {
             c2.setCurrentMergeGroupIterator(null);
 
             // System.err.println("Tail call on template");
-
-            return nh.applyLeavingTail(output, c2);
+            Mode mode = evaluationContext.getCurrentMode().getActor();
+            if (mode.isModeTracing()) {
+                TemplateRuleTraceListener tracer = ((XsltController)evaluationContext.getController()).getTemplateRuleTraceListener();
+                tracer.enter("next-match", instruction.getLocation(), evaluationContext.getContextItem(), nh);
+                TailCall tc = nh.applyLeavingTail(output, c2);
+                tracer.leave();
+                return tc;
+            } else {
+                return nh.applyLeavingTail(output, c2);
+            }
         }
     }
 

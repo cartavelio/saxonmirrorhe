@@ -8,7 +8,7 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.Calculator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.Twine8;
@@ -20,7 +20,6 @@ import net.sf.saxon.type.ValidationFailure;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 
 /**
  * An integer value: note this is a subtype of decimal in XML Schema, not a primitive type.
@@ -278,74 +277,6 @@ public final class Int64Value extends IntegerValue {
     }
 
     /**
-     * Get an object that implements XML Schema comparison semantics
-     * @return a comparable
-     */
-
-    /*@NotNull*/
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        return new Int64Comparable(this);
-    }
-
-    /**
-     * A Comparable that performs comparison of an Int64Value either with another
-     * Int64Value or with some other representation of an XPath numeric value
-     */
-
-    protected static class Int64Comparable implements SchemaComparable {
-
-        protected Int64Value value;
-
-        public Int64Comparable(Int64Value value) {
-            this.value = value;
-        }
-
-        public long asLong() {
-            return value.longValue();
-        }
-
-        @Override
-        public int compareTo(SchemaComparable o) {
-            if (o instanceof Int64Comparable) {
-                long long0 = value.longValue();
-                long long1 = ((Int64Comparable) o).value.longValue();
-                if (long0 <= long1) {
-                    if (long0 == long1) {
-                        return 0;
-                    } else {
-                        return -1;
-                    }
-                } else {
-                    return 1;
-                }
-            } else if (o instanceof BigIntegerValue.BigIntegerComparable) {
-                return value.asBigInteger().compareTo(((BigIntegerValue.BigIntegerComparable) o).asBigInteger());
-            } else if (o instanceof BigDecimalValue.DecimalComparable) {
-                return value.getDecimalValue().compareTo(((BigDecimalValue.DecimalComparable) o).asBigDecimal());
-            } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
-            }
-        }
-
-        public boolean equals(/*@NotNull*/ Object o) {
-            if (o instanceof Int64Comparable) {
-                return asLong() == ((Int64Comparable) o).asLong();
-            } else if (o instanceof SchemaComparable) {
-                return compareTo((SchemaComparable)o) == 0;
-            } else {
-                return false;
-            }
-        }
-
-        public int hashCode() {
-            // Must align with hashCodes for other subtypes of xs:decimal
-            return (int) asLong();
-        }
-
-    }
-
-    /**
      * Get the hashCode. This must conform to the rules for other NumericValue hashcodes
      *
      * @see NumericValue#hashCode
@@ -389,15 +320,19 @@ public final class Int64Value extends IntegerValue {
      */
 
     @Override
-    public int compareTo(NumericValue other) {
-        if (other instanceof Int64Value) {
-            return Long.compare(value, ((Int64Value) other).value);
-        } else if (other instanceof BigIntegerValue) {
-            return BigInteger.valueOf(value).compareTo(((BigIntegerValue) other).asBigInteger());
-        } else if (other instanceof BigDecimalValue) {
-            return new BigDecimal(value).compareTo(((BigDecimalValue)other).getDecimalValue());
+    public int compareTo(XPathComparable other) {
+        if (other instanceof NumericValue) {
+            if (other instanceof Int64Value) {
+                return Long.compare(value, ((Int64Value) other).value);
+            } else if (other instanceof BigIntegerValue) {
+                return BigInteger.valueOf(value).compareTo(((BigIntegerValue) other).asBigInteger());
+            } else if (other instanceof BigDecimalValue) {
+                return BigDecimal.valueOf(value).compareTo(((BigDecimalValue)other).getDecimalValue());
+            } else {
+                return super.compareTo(other);
+            }
         } else {
-            return super.compareTo(other);
+            throw new ClassCastException("Cannot compare xs:integer to " + other);
         }
     }
 
@@ -440,7 +375,7 @@ public final class Int64Value extends IntegerValue {
         byte sign = 0;
 
         if (i < 0) {
-            sign = '-';
+            sign = (byte)'-';
             i = -i;
         }
 
@@ -481,9 +416,9 @@ public final class Int64Value extends IntegerValue {
     }
 
 
-    private final static byte[] DIGITS = "0123456789".getBytes(StandardCharsets.UTF_8);
+    private final static byte[] DIGITS = StringConstants.bytes("0123456789");
 
-    private final static byte[] DIGIT_TENS =
+    private final static byte[] DIGIT_TENS = StringConstants.bytes
             (   "0000000000" +
                 "1111111111" +
                 "2222222222" +
@@ -493,9 +428,9 @@ public final class Int64Value extends IntegerValue {
                 "6666666666" +
                 "7777777777" +
                 "8888888888" +
-                "9999999999" ).getBytes(StandardCharsets.UTF_8);
+                "9999999999" );
 
-    private final static byte[] DIGIT_ONES =
+    private final static byte[] DIGIT_ONES = StringConstants.bytes
             (   "0123456789" +
                 "0123456789" +
                 "0123456789" +
@@ -505,7 +440,7 @@ public final class Int64Value extends IntegerValue {
                 "0123456789" +
                 "0123456789" +
                 "0123456789" +
-                "0123456789" ).getBytes(StandardCharsets.UTF_8);
+                "0123456789" );
 
 
     // Requires positive x

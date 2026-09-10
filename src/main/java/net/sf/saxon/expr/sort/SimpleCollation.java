@@ -122,14 +122,11 @@ public class SimpleCollation implements StringCollator {
         if (comparator instanceof SubstringMatcher) {
             return (SubstringMatcher)comparator;
         }
+        //#if CSHARP==false
         if (comparator instanceof RuleBasedCollator) {
             return new RuleBasedSubstringMatcher(uri, (RuleBasedCollator) comparator);
         }
-//        //#if EE==true
-//        if (comparator instanceof UCACollator) {
-//            return new ICUSubstringMatcher(uri, ((UCACollator) comparator).getRuleBasedCollator());
-//        }
-//        //#endif
+        //#endif
         return null;
     }
 

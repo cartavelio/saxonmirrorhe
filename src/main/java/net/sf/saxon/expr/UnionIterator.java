@@ -10,9 +10,9 @@ package net.sf.saxon.expr;
 import net.sf.saxon.expr.sort.ItemOrderComparer;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -29,7 +29,7 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
     // We maintain a sorted list of "intakes", one for each input iterator
     // that is not yet exhausted. Each "intake" contains the iterator itself,
     // and the next node delivered by the iterator; the sorted list is maintained
-    // as a Java TreeMap sorted by the document order of the next node to be
+    // as a Java TreeSet sorted by the document order of the next node to be
     // delivered.
 
     private static class Intake {
@@ -42,7 +42,19 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
         }
     }
 
-    private TreeSet<Intake> intakes;
+    private static class IntakeComparer implements Comparator<Intake> {
+        private final ItemOrderComparer itemOrderComparer;
+        public IntakeComparer(ItemOrderComparer itemOrderComparer) {
+            this.itemOrderComparer = itemOrderComparer;
+        }
+
+        @Override
+        public int compare(Intake o1, Intake o2) {
+            return itemOrderComparer.compare(o1.nextNode, o2.nextNode);
+        }
+    }
+
+    private final TreeSet<Intake> intakes;
 
     /**
      * Create the iterator. The several input iterators must return nodes in document
@@ -58,8 +70,9 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
                          ItemOrderComparer comparer) throws XPathException {
 
         // The comparator between Intakes is based on the supplied comparator between nodes
+        // (The implementation using a static inner class is constrained by the C# conversion)
 
-        Comparator<Intake> comp = (a, b) -> comparer.compare(a.nextNode, b.nextNode);
+        Comparator<Intake> comp = new IntakeComparer(comparer);
 
         // Create a set of intakes, one for each input iterator, primed with the
         // first node delivered by the iterator - unless it is a duplicate, The

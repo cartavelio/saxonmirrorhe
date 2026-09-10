@@ -1,6 +1,8 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntIterator;
 
@@ -79,17 +81,20 @@ public class StringTool {
         return new Twine8(bytes);
     }
 
+    @CSharpInnerClass(outer=false, extra={"string value"})
     public static IntIterator codePoints(CharSequence value) {
         return new IntIterator() {
             int i = 0;
             boolean expectingLowSurrogate;
 
             @Override
+            @CSharpModifiers(code={"public"})
             public boolean hasNext() {
                 return i < value.length();
             }
 
             @Override
+            @CSharpModifiers(code = {"public"})
             public int next() {
                 int c = value.charAt(i++);
                 if (UTF16CharacterSet.isHighSurrogate(c)) {

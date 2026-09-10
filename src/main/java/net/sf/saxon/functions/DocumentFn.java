@@ -291,12 +291,13 @@ public class DocumentFn extends SystemFunction implements Callable {
                 if (options.isLineNumbering()) {
                     b.setLineNumbering(true);
                 }
-
+                //#if CSHARP==false
                 if (silent) {
                     StandardErrorHandler eh = new StandardErrorHandler(controller.getErrorReporter());
                     eh.setSilent(true);
                     options.setErrorHandler(eh);
                 }
+                //#endif
                 if (packageData instanceof StylesheetPackage && ((StylesheetPackage)packageData).isStripsTypeAnnotations()) {
                     s = config.getAnnotationStripper(s);
                 }

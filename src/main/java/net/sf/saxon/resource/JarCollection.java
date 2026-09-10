@@ -105,14 +105,14 @@ public class JarCollection extends AbstractResourceCollection {
         boolean recurse = false;
         if (params != null) {
 
-            FilenameFilter f = params.getFilenameFilter();
-            if (f != null) {
-                filter = f;
+            Optional<FilenameFilter> f = params.getFilenameFilter();
+            if (f.isPresent()) {
+                filter = f.get();
             }
 
-            Boolean r = params.getRecurse();
-            if (r != null) {
-                recurse = r;
+            Optional<Boolean> r = params.getRecurse();
+            if (r.isPresent()) {
+                recurse = r.get();
             }
 
         }
@@ -189,14 +189,14 @@ public class JarCollection extends AbstractResourceCollection {
         boolean recurse = false;
         if (params != null) {
 
-            FilenameFilter f = params.getFilenameFilter();
-            if (f != null) {
-                filter = f;
+            Optional<FilenameFilter> f = params.getFilenameFilter();
+            if (f.isPresent()) {
+                filter = f.get();
             }
 
-            Boolean r = params.getRecurse();
-            if (r != null) {
-                recurse = r;
+            Optional<Boolean> r = params.getRecurse();
+            if (r.isPresent()) {
+                recurse = r.get();
             }
 
         }
@@ -228,8 +228,8 @@ public class JarCollection extends AbstractResourceCollection {
             this.zipInputStream = zipInputStream;
             this.options = optionsFromQueryParameters(params, context);
             this.options.setSpaceStrippingRule(whitespaceRules);
-            Boolean metadataParam = params == null ? null : params.getMetaData();
-            metadata = metadataParam != null && metadataParam;
+            Optional<Boolean> metadataParam = params == null ? Optional.empty() : params.getMetaData();
+            metadata = metadataParam.isPresent() && metadataParam.get();
 
             advance();
         }
@@ -310,8 +310,8 @@ public class JarCollection extends AbstractResourceCollection {
                         }
                         InputDetails details = new InputDetails();
                         details.binaryContent = output.toByteArray();
-                        if (params != null && params.getContentType() != null) {
-                            details.contentType = params.getContentType();
+                        if (params != null && params.getContentType().isPresent()) {
+                            details.contentType = params.getContentType().get();
                         } else {
                             details.contentType = guessContentTypeFromName(entry.getName());
                         }

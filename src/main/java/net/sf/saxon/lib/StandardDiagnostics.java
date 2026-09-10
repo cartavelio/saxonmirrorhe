@@ -71,8 +71,10 @@ public class StandardDiagnostics {
                 nodeMessage += "/@" + saLoc.getAttributeName();
             }
             nodeMessage += ' ';
+        //#if CSHARP==false
         } else if (loc instanceof DOMLocator) {
             nodeMessage = "at " + ((DOMLocator) loc).getOriginatingNode().getNodeName() + ' ';
+        //#endif
         } else if (loc instanceof NodeInfo) {
             node = (NodeInfo) loc;
             nodeMessage = "at " + node.getDisplayName() + ' ';

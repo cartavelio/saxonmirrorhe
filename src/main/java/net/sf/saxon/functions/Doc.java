@@ -10,13 +10,18 @@ package net.sf.saxon.functions;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 
@@ -60,6 +65,7 @@ public class Doc extends SystemFunction implements Callable {
         return expr == null ? super.makeFunctionCall(arguments) : expr;
     }
 
+    @CSharpInnerClass(outer=false, extra={"net.sf.saxon.functions.SystemFunction sf"})
     public static Expression maybePreEvaluate(final SystemFunction sf, final Expression[] arguments) {
         if (arguments.length > 1 ||
                 !sf.getRetainedStaticContext().getConfiguration().getBooleanProperty(Feature.PRE_EVALUATE_DOC_FUNCTION)) {
@@ -73,7 +79,7 @@ public class Doc extends SystemFunction implements Callable {
                 public Expression preEvaluate(ExpressionVisitor visitor) {
                     Configuration config = visitor.getConfiguration();
                     try {
-                        GroundedValue firstArg = ((Literal) getArg(0)).getGroundedValue();
+                        GroundedValue firstArg = ((Literal) this.getArg(0)).getGroundedValue();
                         if (firstArg.getLength() == 0) {
                             return null;
                         } else if (firstArg.getLength() > 1) {
@@ -86,7 +92,7 @@ public class Doc extends SystemFunction implements Callable {
                         NodeInfo item = DocumentFn.preLoadDoc(href, sf.getStaticBaseUriString(), config, getLocation());
                         if (item != null) {
                             Expression constant = Literal.makeLiteral(item);
-                            ExpressionTool.copyLocationInfo(getArg(0), constant);
+                            ExpressionTool.copyLocationInfo(this.getArg(0), constant);
                             return constant;
                         }
                     } catch (Exception err) {

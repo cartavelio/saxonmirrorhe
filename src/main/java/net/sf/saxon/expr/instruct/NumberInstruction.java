@@ -17,7 +17,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomicListIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -261,7 +261,7 @@ public class NumberInstruction extends Expression {
             }
         }
 
-        return new AtomicListIterator(vec);
+        return new ListIterator.Of<>(vec);
     }
 
     @Override
