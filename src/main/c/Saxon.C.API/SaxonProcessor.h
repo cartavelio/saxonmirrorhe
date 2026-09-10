@@ -109,7 +109,7 @@ typedef enum eXdmType {
 struct UserFunctionDescriptor{
   std::string ns;
   std::string functionName;
-  void * (*func)(void **);
+  XdmValue * (*func)(int, XdmValue **);
   std::string returnTypeStr;
   std::string arguments;
   XdmValue * argumentTypes;
@@ -657,7 +657,7 @@ public:
    */
   const char *version();
 
-  void registerUserFunction(const char * ns, const char * functionName, void * (*func)(void **), const char * signatureJSON);
+  void registerUserFunction(const char * ns, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON);
 
   //! Add a native method.
   /**

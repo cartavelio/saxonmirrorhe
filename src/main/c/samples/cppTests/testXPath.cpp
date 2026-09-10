@@ -7,9 +7,9 @@
 
 using namespace std;
 
-typedef XdmValue *(*pfnExample)(void **);
+typedef XdmValue *(*pfnExample)(int, XdmValue **);
 
-extern "C" void * c_nativeCall(char * functionName, void * func, void ** arguments) {
+extern "C" void * c_nativeCall(char * functionName, void * func, int numOfArguments, void ** arguments) {
   //fprintf(stdout, "We are in a c function\n");
   fprintf(stdout, "We are in a c function name= %s\n", functionName);
 
@@ -17,20 +17,41 @@ extern "C" void * c_nativeCall(char * functionName, void * func, void ** argumen
     pfnExample func1 = pfnExample(func);
 
   fflush(stdout);
-  return func1(arguments);
+
+  //void ** arguments1 = (void **)malloc(sizeof(void *) * 1);
+  XdmValue ** arguments1 = new XdmValue*[numOfArguments];
+  for(int i =0; i< numOfArguments; i++) {
+    arguments1[i] = new XdmValue((int64_t)arguments[i]);
+  }
+
+  XdmValue * result = func1(numOfArguments, arguments1);   // call of the user function
+  return (void *)result->getUnderlyingValue();
+  //XdmValue * result = func1(arguments);   // call of the user function
+
+  //return result->getUnderlyingValue();
 }
-void * myFunc(void ** values) {
+XdmValue * myFunc(int length, XdmValue ** values) {
 
     fprintf(stdout, "We are in the C++ myFunc function\n");
     // loop through the values
-    fflush(stdout);
-    int64_t longValueRef = j_makeLongValue(SaxonProcessor::sxn_environ->thread, 5);
-    return (void *)values[0];
-   /*if(values == NULL) {
+        fflush(stdout);
+        int64_t longValueRef = j_makeLongValue(SaxonProcessor::sxn_environ->thread, 5);
+
+        ////
+           // SaxonProcessor
+
+
+
+
+        ////
+
+
+    if(values != NULL) {
+            return (XdmValue *)values[0];
+    } else {
         return NULL;
     }
 
-    return (void *)(values[0]->getUnderlyingValue());*/
 }
 
 
@@ -89,7 +110,7 @@ void testUserExtensionFunction(SaxonProcessor *processor, XPathProcessor *xpath,
   xpath->setContextItem((XdmItem *)input);
   try {
           xpath->declareNamespace("dy", "http://www.example.com");
-    XdmItem *result = xpath->evaluateSingle("dy:myFunc(4)");
+    XdmItem *result = xpath->evaluateSingle("dy:myFunc(3)");
 
     if(result != nullptr) {
 

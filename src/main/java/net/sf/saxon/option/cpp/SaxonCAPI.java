@@ -1956,9 +1956,9 @@ public class SaxonCAPI {
                         "}");
 
 
-
+        //#if EE==true || PE==true
         SaxonCAPI.registerFunctionDefinition(processor, "http://www.example.com", "myFunc", signatureValue, null, null);
-
+        //#endif
         XPathCompiler xpath = processor.newXPathCompiler();
 
         xpath.declareNamespace("dy", "http://www.example.com");

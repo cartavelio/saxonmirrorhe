@@ -359,12 +359,12 @@ SaxonProcessor::~SaxonProcessor() {
   // exceptionClear();
 }
 
-void SaxonProcessor::registerUserFunction(const char * ns1, const char * functionName, void * (*func)(void **), const char * signature)
+void SaxonProcessor::registerUserFunction(const char * ns1, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signature)
 {
 
     UserFunctionDescriptor * userFunctionDescriptor1 = new UserFunctionDescriptor;
     userFunctionDescriptor1->functionName = functionName;
-    userFunctionDescriptor1->func = func;
+    //userFunctionDescriptor1->func = func;
     userFunctionDescriptor1->ns = ns1;
 //    userFunctionDescriptor1->returnType = returnType;
     userFunctionDescriptor1->arguments = signature;
