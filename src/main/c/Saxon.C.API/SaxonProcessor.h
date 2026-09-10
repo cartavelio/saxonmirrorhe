@@ -341,7 +341,7 @@ public:
    * @return Pointer to an XdmArray whose members are xs:boolean values corresponding
    * one-to-one with the input. The caller is responsible for deallocation of memory using `delete`.
    */
-  XdmArray *makeArray(const char **input, int length);
+  XdmArray *makeArray(char **input, int length);
 
   //! Make an XdmArray whose members are xs:short values
   /**

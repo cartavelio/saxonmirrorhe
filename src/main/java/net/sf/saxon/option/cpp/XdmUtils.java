@@ -727,7 +727,7 @@ public class XdmUtils {
      * @throws IllegalArgumentException error with arguments
      */
     @CEntryPoint(name = "j_makeXdmArrayFromStrings", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long makeXdmArrayFromStrings(IsolateThread thread, CCharPointer ccharPointer, int length) throws SaxonApiException {
+    public static long makeXdmArrayFromStrings(IsolateThread thread, CCharPointerPointer ccharPointerPointer, int length) throws SaxonApiException {
 
         XdmArray array = null;
         String [] values = new String[length];
@@ -737,7 +737,8 @@ public class XdmUtils {
          }  else {
 
              for(int i =0; i< length; i++) {
-                 values[i] = SaxonCAPI.toJavaString(ccharPointer.addressOf(i), WordFactory.nullPointer());
+                 CCharPointer pointer = ccharPointerPointer.read(i);
+                 values[i] = SaxonCAPI.toJavaString(pointer, WordFactory.nullPointer());
 
              }
              array = XdmArray.makeArray(values);

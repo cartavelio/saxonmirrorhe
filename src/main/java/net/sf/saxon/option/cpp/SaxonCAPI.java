@@ -1027,18 +1027,18 @@ public class SaxonCAPI {
         }
 
         Configuration config = processor.getUnderlyingConfiguration();
-
+        if (value == null || name == null) {
+            if (debug) {
+                System.err.println("SaxonC DEBUG - applyConfiguration value or name is null");
+            }
+            return SaxonCAPI.STATUS_FAIL;
+        }
 
             if (debug) {
                 System.err.println("SaxonC DEBUG - applyConfiguration, name=" + name);
                 System.err.println("SaxonC DEBUG - applyConfiguration, value=" + value);
             }
-            if (value == null || name == null) {
-                if (debug) {
-                    System.err.println("SaxonC DEBUG - applyConfiguration value or name is null");
-                }
-                return SaxonCAPI.STATUS_FAIL;
-            }
+
             if (name.equals("l")) {
                 processor.setConfigurationProperty(Feature.LINE_NUMBERING,
                         "on".equals(value));
@@ -1117,8 +1117,8 @@ public class SaxonCAPI {
                                 throw new IllegalArgumentException(fnf);
                             }
 
-                        } else if (name.startsWith("http://saxon.sf.net/feature/")) {
-                            processor.setConfigurationProperty(name, value);
+                        } else {
+                            processor.getUnderlyingConfiguration().setConfigurationProperty(name, value);
                         }
                         break;
                 }

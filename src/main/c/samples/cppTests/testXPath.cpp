@@ -763,6 +763,22 @@ void testGetBooleanErrFromString(SaxonProcessor* processor, sResultCount *sresul
   }
 }
 
+void testEmptyXdmItem(sResultCount *sresult) {
+  cout << endl << " testEmptyXdmItem" << endl;
+  try {
+    XdmItem * item = new XdmItem();
+//TODO try and use the empty item
+    sresult->success++;
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("tesEmptyXdmItem");
+  }
+}
+
 void testEmptyXdmMap(sResultCount *sresult) {
   cout << endl << " testEmptyXdmMap" << endl;
   try {
@@ -851,6 +867,71 @@ void testEmptyXdmArray(SaxonProcessor * processor, sResultCount *sresult) {
     sresult->failureList.push_back("tesEmptyXdmArray5");
   }
 
+}
+
+void testCreateXdmArrayOfChars(SaxonProcessor *processor, sResultCount *sresult) {
+  cout << endl << " testCreateXdmArrayOfChars" << endl;
+  try {
+    char **values = new char *[3];
+    values[0]= new char[7]{"value1"};
+    values[1]= new char[7]{"value2"};
+    values[2]= new char[7]{"value3"};
+
+    XdmArray *a = processor->makeArray(values, 3);
+
+    for(int i =0; i < 3; i++) {
+      delete [] values[i];
+    }
+    delete [] values;
+
+    if(a == nullptr) {
+      sresult->failure++;
+      sresult->failureList.push_back("testCreateXdmArrayOfChars0");
+      return;
+    }
+
+    int lengthi = a->arrayLength();
+
+    if(lengthi != 3) {
+      delete a;
+      sresult->failure++;
+      sresult->failureList.push_back("testCreateXdmArrayOfChars1");
+      delete a;
+      return;
+    }
+
+    XdmValue * value1 = a->get(1);
+    XdmItem * item1 = value1->getHead();
+    const char * resultStr = item1->getStringValue();
+
+    if(resultStr == nullptr) {
+      sresult->failure++;
+      sresult->failureList.push_back("testCreateXdmArrayOfChars00");
+      delete item1;
+      item1 = nullptr;
+      delete value1;
+      delete a;
+      return;
+    }
+
+    if(CppTestUtils::assertEquals("value2", resultStr)) {
+      sresult->success++;
+      delete resultStr;
+    } else {
+      std::cout << "testCreateXdmArrayOfChars - result = " << resultStr << std::endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testCreateXdmArrayOfChars2");
+    }
+
+
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    std::cout << "testCreateXdmArrayOfChars - Error Message = " << message << std::endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("testCreateXdmArrayOfChars3");
+  }
 }
 
 
@@ -1109,6 +1190,12 @@ int main() {
        << endl
        << endl;
   testXPathValues2(processor, xpathProc, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+  testCreateXdmArrayOfChars(processor, sresult);
   cout << endl
        << "============================================================="
        << endl
