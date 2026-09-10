@@ -352,8 +352,8 @@ public class FilterExpressionAM extends BinaryExpression
         }
 
         private MapItem filteredMap(XPathContext context, MapItem input, SequenceEvaluator predicate) throws XPathException {
-            MapItem result = new HashTrieMap();
             int size = input.size();
+            GeneralMapBuilder result = new GeneralMapBuilder();
             ManualIterator focus = new ManualIterator();
             XPathContext c2 = context.newMinorContext();
             c2.setCurrentIterator(focus);
@@ -370,7 +370,7 @@ public class FilterExpressionAM extends BinaryExpression
                         if (it instanceof NumericValue) {
                             if (((NumericValue) it).isWholeNumber()
                                     && ((NumericValue) it).longValue() == position) {
-                                result = result.put(pair.key, pair.value);
+                                result.put(pair.key, pair.value);
                                 break;
                             }
                         } else {
@@ -378,10 +378,10 @@ public class FilterExpressionAM extends BinaryExpression
                         }
                     }
                 } else if (predicateValue.effectiveBooleanValue()) {
-                    result = result.put(pair.key, pair.value);
+                    result.put(pair.key, pair.value);
                 }
             }
-            return result;
+            return result.getCompletedMap();
         }
 
         private ArrayItem filteredArray(XPathContext context, ArrayItem input, SequenceEvaluator predicate) throws XPathException {

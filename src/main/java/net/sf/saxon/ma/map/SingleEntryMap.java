@@ -7,6 +7,7 @@
 
 package net.sf.saxon.ma.map;
 
+import com.saxonica.functions.qt4.ma.OrderedMap;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
@@ -120,7 +121,7 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        return toHashTrieMap().put(key, value);
+        return toGeneralMap().put(key, value);
     }
 
     /**
@@ -135,7 +136,7 @@ public class SingleEntryMap extends MapItem {
         if (get(key) == null) {
             return this;
         } else {
-            return new HashTrieMap();
+            return EmptyMap.getInstance();
         }
     }
 
@@ -181,12 +182,12 @@ public class SingleEntryMap extends MapItem {
      * Convert to a HashTrieMap
      */
 
-    private HashTrieMap toHashTrieMap() {
-        return HashTrieMap.singleton(key, value);
+    private MapItem toGeneralMap() {
+        return new OrderedMap().put(key, value);
     }
 
     public String toString() {
-        return "{" + key.toString() + ":" + value.toString() + "}";
+        return "{" + key.toString() + ": " + value.toString() + "}";
     }
 }
 

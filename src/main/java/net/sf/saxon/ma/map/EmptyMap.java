@@ -97,7 +97,7 @@ public class EmptyMap extends MapItem {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        return new HashTrieMap().put(key, value);
+        return new SingleEntryMap(key, value);
     }
 
     /**

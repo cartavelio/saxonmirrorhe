@@ -18,7 +18,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
@@ -895,7 +895,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
         // Build map of secondary results
 
-        MapItem resultMap = new HashTrieMap();
+        MapItem resultMap = EmptyMap.getInstance();
         resultMap = deliverer.populateResultMap(resultMap);
 
         // Add primary result

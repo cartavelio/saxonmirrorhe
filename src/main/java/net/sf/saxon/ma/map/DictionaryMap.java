@@ -25,97 +25,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * A simple implementation of MapItem where the strings are keys, and modification is unlikely.
+ * A simple implementation of MapItem where the keys are strings, and modification is unlikely.
  * A DictionaryMap does not maintain order, so in 4.0 it is suitable only in cases where it
- * can be established that order does not matter (for example, when it is known how the map
- * will be used).
+ * is known that order does not matter (for example, for the result of a function
+ * such as parse-uri()).
  */
 
 public class DictionaryMap extends StringMapItem {
-
-//    protected static class DictionaryMapBuilder implements MapBuilder {
-//
-//        protected Map<UnicodeString, GroundedValue> map;
-//        public DictionaryMapBuilder() {
-//            map = new HashMap<>();
-//        }
-//
-//        protected DictionaryMapBuilder(Map<UnicodeString, GroundedValue> emptyMap) {
-//            this.map = emptyMap;
-//        }
-//        public DictionaryMapBuilder(int initialSize) {
-//            map = new HashMap<>(initialSize);
-//        }
-//
-//        /**
-//         * During initial construction of the map, add a key-value pair
-//         *
-//         * @param key   the key
-//         * @param value the corresponding value
-//         */
-//        @Override
-//        public void put(AtomicValue key, GroundedValue value) {
-//            if (!(key instanceof StringValue)) {
-//                throw new IllegalArgumentException("Keys added to DictionaryMap must be strings");
-//            }
-//            map.put(key.getUnicodeStringValue(), value);
-//        }
-//
-//        /**
-//         * During initial construction of the map, add a key-value pair where the key is a string
-//         *
-//         * @param key   the key
-//         * @param value the corresponding value
-//         */
-//        @Override
-//        public void put(UnicodeString key, GroundedValue value) {
-//            map.put(key, value);
-//        }
-//
-//        /**
-//         * Ask whether the map under construction contains a given key
-//         */
-//
-//        public boolean contains(UnicodeString key) {
-//            return map.get(key) != null;
-//        }
-//
-//        /**
-//         * Get a value from the map under construction
-//         */
-//
-//        public GroundedValue get(String key) {
-//            return map.get(key);
-//        }
-//
-//        /**
-//         * Get a value from the map under construction
-//         */
-//
-//        public GroundedValue get(AtomicValue key) {
-//            return map.get(key.getUnicodeStringValue());
-//        }
-//
-//        /**
-//         * Get the constructed map. This method must only be called once; subsequent calls will return null
-//         *
-//         * @return the constructed map
-//         */
-//        @Override
-//        public DictionaryMap getCompletedMap() {
-//            DictionaryMap result = new DictionaryMap(map);
-//            map = null;
-//            return result;
-//        }
-//    }
-//
-//    public static MapBuilder getBuilder() {
-//        return new DictionaryMapBuilder();
-//    }
-//
-//    public static MapBuilder getBuilder(int initialSize) {
-//        return new DictionaryMapBuilder(initialSize);
-//    }
 
     protected final Map<String, GroundedValue> map;
 
@@ -259,12 +175,12 @@ public class DictionaryMap extends StringMapItem {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        return toHashTrieMap().put(key, value);
+        return toGeneralMap().put(key, value);
     }
 
     @Override
-    public StringMapItem putU(UnicodeString key, GroundedValue value) {
-        throw new UnsupportedOperationException();
+    public MapItem putU(UnicodeString key, GroundedValue value) {
+        return put(new StringValue(key), value);
     }
 
     /**
@@ -276,7 +192,7 @@ public class DictionaryMap extends StringMapItem {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        return toHashTrieMap().remove(key);
+        return toGeneralMap().remove(key);
     }
 
     @Override
@@ -356,7 +272,7 @@ public class DictionaryMap extends StringMapItem {
      * Convert to a HashTrieMap
      */
 
-    private HashTrieMap toHashTrieMap() {
+    private MapItem toGeneralMap() {
         //System.err.println("Dictionary rewrite!!!!");
         MapBuilder target = HashTrieMap.getBuilder();
         for (Map.Entry<String, GroundedValue> entry : map.entrySet()) {

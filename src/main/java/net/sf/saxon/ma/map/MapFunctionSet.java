@@ -262,14 +262,14 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             FunctionItem fn = (FunctionItem) arguments[1].head();
-            MapItem result = new HashTrieMap();
+            GeneralMapBuilder result = new GeneralMapBuilder();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 BooleanValue match = (BooleanValue)dynamicCall(fn, context, pair.key, pair.value).head();
                 if (match != null && match.getBooleanValue()) {
-                    result = result.put(pair.key, pair.value);
+                    result.put(pair.key, pair.value);
                 }
             }
-            return result;
+            return result.getCompletedMapConfidently();
         }
 
     }

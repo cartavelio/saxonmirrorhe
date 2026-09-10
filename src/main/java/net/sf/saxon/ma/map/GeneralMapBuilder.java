@@ -102,16 +102,41 @@ public class GeneralMapBuilder {
             }
             return map;
         } else {
-            // if we are sure there are no duplicates, then we delay indexing the map entries
-            // until a map lookup operation is performed. This is because many maps are built
-            // and immediately discarded or serialized without ever being queried.
-
-            // TODO
-            return null;
+            return getCompletedMapConfidently();
         }
 
 
     }
+
+    /**
+     * Get the constructed map, knowing that there are no duplicate keys.
+     * This method must only be called once, because the
+     * lists of keys and values are used within the constructed map and are mutable.
+     *
+     * @return the constructed map
+     */
+
+    public MapItem getCompletedMapConfidently() {
+        if (keys.size() == 0) {
+            return EmptyMap.getInstance();
+        } else if (keys.size() == 1) {
+            return new SingleEntryMap(keys.get(0), values.get(0));
+        } else {
+            MapItem map = new OrderedMap();
+            Iterator<GroundedValue> valueIter = values.iterator();
+            for (AtomicValue key : keys) {
+                GroundedValue value;
+                if (valueIter.hasNext()) {
+                    value = valueIter.next();
+                } else {
+                    throw new AssertionError();
+                }
+                map = map.put(key, value);
+            }
+            return map;
+        }
+    }
+
 
     private static boolean hasPossibleDuplicates(List<AtomicValue> keys) {
         int filterSize = keys.size() < 50 ? 1024 : 65536;
