@@ -1,0 +1,25 @@
+task doc_FeatureKeysDoc(
+  type: JavaExec,
+  description: "Construct the documentation for feature keys"
+) {
+  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
+  outputs.file "${projectDir}/userdoc/src/featureKeys/FeatureKeysDoc.xml"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
+    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToDoc.xsl",
+    "-o:${projectDir}/userdoc/src/featureKeys/FeatureKeysDoc.xml"
+}
+
+task doc_ConfigFileDoc(
+  type: JavaExec,
+  description: "Construct the documentation for the configuration file"
+) {
+  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
+  outputs.files fileTree(dir: "${projectDir}/userdoc/src/featureKeys")
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "${projectDir}/tools/featureKeys/AdditionalFeatures.xml",
+    "-xsl:${projectDir}/tools/featureKeys/ToConfigFileDoc.xsl",
+    "-o:${projectDir}/userdoc/src/featureKeys/ConfigFileDoc.xml"
+}
