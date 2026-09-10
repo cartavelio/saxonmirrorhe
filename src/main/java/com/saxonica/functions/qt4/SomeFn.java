@@ -2,15 +2,13 @@ package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.functions.hof.CoercedFunction;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.Int64Value;
 
 /**
  * This class implements the function fn:some(), which is a proposed function for XPath 4.0
@@ -30,23 +28,55 @@ public class SomeFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         SequenceIterator iter = arguments[0].iterate();
-        FunctionItem predicate = arguments.length > 1
-                ? (FunctionItem) arguments[1].head()
-                : new CoercedFunction(SystemFunction.makeFunction40("identity", getRetainedStaticContext(), 1),
-                                      new SpecificFunctionType(
-                                            new SequenceType[]{SequenceType.SINGLE_ITEM},
-                                            SequenceType.SINGLE_BOOLEAN), false, false);
-        for (Item item; (item = iter.next()) != null; ) {
-            boolean condition = ((BooleanValue) dynamicCall(predicate, context, new Sequence[]{item}).head()).getBooleanValue();
-            if (condition) {
-                iter.close();
-                return BooleanValue.TRUE;
+        if (arguments.length == 1) {
+            for (Item item; (item = iter.next()) != null; ) {
+                if (item instanceof BooleanValue) {
+                    if (((BooleanValue) item).getBooleanValue()) {
+                        iter.close();
+                        return BooleanValue.TRUE;
+                    }
+                } else {
+                    throw new XPathException("Items supplied to fn:some#1 must be of type xs:boolean", "XPTY0004").asTypeError();
+                }
             }
+            return BooleanValue.FALSE;
+        } else {
+            FunctionItem predicate = (FunctionItem) arguments[1].head();
+            switch (predicate.getArity()) {
+                case 0: {
+                    boolean condition = (((BooleanValue) dynamicCall(predicate, context).head()).getBooleanValue());
+                    boolean empty = iter.next() == null;
+                    iter.close();
+                    return BooleanValue.get(condition && !empty);
+                }
+                case 1: {
+                    for (Item item; (item = iter.next()) != null; ) {
+                        boolean condition = ((BooleanValue) dynamicCall(predicate, context, item).head()).getBooleanValue();
+                        if (condition) {
+                            iter.close();
+                            return BooleanValue.TRUE;
+                        }
+                    }
+                    return BooleanValue.FALSE;
+                }
+                case 2:
+                    int pos = 0;
+                    for (Item item; (item = iter.next()) != null; ) {
+                        boolean condition = ((BooleanValue) dynamicCall(
+                                predicate, context, item, Int64Value.makeIntegerValue(++pos)).head()).getBooleanValue();
+                        if (condition) {
+                            iter.close();
+                            return BooleanValue.TRUE;
+                        }
+                    }
+                    return BooleanValue.FALSE;
+                default:
+                    throw new XPathException("Unsupported arity " + predicate.getArity() + " in fn:some callback");
+            }
+
         }
-        return BooleanValue.FALSE;
+
     }
-
-
 }
 
 
