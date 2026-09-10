@@ -132,7 +132,7 @@ public class CollectionFn extends SystemFunction implements Callable {
      *
      * @param collection the resource collection
      * @param context    the XPath dynamic context
-     * @return a SequenceIterator delivering ObjectValue&lt;Resource> items
+     * @return a SequenceIterator delivering ObjectValue&lt;Resource&gt; items
      * @throws XPathException if a dynamic error occurs
      */
 

@@ -202,7 +202,7 @@ public class CDATAFilter extends ProxyReceiver {
 
     /**
      * Output an array as a CDATA section. At this stage we have checked that all the characters
-     * are OK, but we haven't checked that there is no "]]>" sequence in the data
+     * are OK, but we haven't checked that there is no "]]&gt;" sequence in the data
      *
      * @param data the data to be output
      */

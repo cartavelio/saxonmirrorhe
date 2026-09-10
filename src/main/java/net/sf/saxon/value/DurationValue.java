@@ -48,7 +48,6 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *                be positive or zero if months is positive.
      * @param typeLabel allows a subtype of xs:duration to be constructed - but not xs:dayTimeDuration
      *                  or xs:yearMonthDuration, as these have separate subclasses.
-     * @throws IllegalArgumentException if the months and seconds have conflicting sign
      */
 
     public DurationValue(int months, BigDecimal seconds, AtomicType typeLabel) {
@@ -378,7 +377,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
     /**
      * Get the total number of months (ignoring the days/hours/minutes/seconds)
      *
-     * @return the total number of months, that is <code>getYears()*12 + getMonths()</code, as a positive
+     * @return the total number of months, that is <code>getYears()*12 + getMonths()</code>, as a positive
      *         or negative number according as the duration is positive or negative
      */
 
