@@ -1,10 +1,5 @@
 package s9apitest;
 
-import net.sf.saxon.Configuration;
-import net.sf.saxon.om.TreeInfo;
-import net.sf.saxon.query.DynamicQueryContext;
-import net.sf.saxon.query.StaticQueryContext;
-import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.Attributes;
@@ -12,11 +7,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
-import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.sax.SAXSource;
 import java.io.StringReader;
 import java.net.URI;
-import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -118,8 +111,7 @@ public class TestXQueryToSaxDestination {
                             "            <given>Big</given>\n" +
                             "        </name>\n" +
                             "    </person>\n" +
-                            "</personnel>\n" +
-                            ""))));
+                            "</personnel>\n"))));
 
             eval.setContextItem(document);
             eval.run(result);
@@ -134,49 +126,49 @@ public class TestXQueryToSaxDestination {
     @Test
     public void testQueryToSaxResult() {
         try {
-            Configuration config = new Configuration();
+            Processor proc = new Processor(false);
 
-            // Prepare for debugger
-            config.setLineNumbering(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.setBaseURI(new URI("file://my.xqy"));
 
-            StaticQueryContext staticQueryContext = config.newStaticQueryContext();
-            staticQueryContext.setBaseURI("file://my.xqy");
+            XQueryExecutable queryExpression =
+                    comp.compile(new StringReader(
+                            """
+                               <persons> {
+                                    for $person in /personnel/person
+                                    return
+                                        <person id="{$person/@id}">
+                                            <name>{$person/name/given/text(), " - ", $person/name/family/text()}</name>
+                                        </person>
+                                } </persons>
+                            """));
 
-            XQueryExpression queryExpression =
-                    staticQueryContext.compileQuery(new StringReader(
-                            "<persons>\n" +
-                                    "    {\n" +
-                                    "        for $person in /personnel/person\n" +
-                                    "        return\n" +
-                                    "            <person id=\"{$person/@id}\">\n" +
-                                    "                <name>{$person/name/given/text(), \" - \", $person/name/family/text()}</name>\n" +
-                                    "            </person>\n" +
-                                    "    }\n" +
-                                    "</persons>"));
-
-            SAXResult result = new SAXResult(new ContentHandlerAdapter());
+            SAXDestination result = new SAXDestination(new ContentHandlerAdapter());
             System.out.println("Run query...");
 
-            DynamicQueryContext dynamicQueryContext = new DynamicQueryContext(config);
 
-            TreeInfo document = config.buildDocumentTree(new SAXSource(new InputSource(new StringReader(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                            "<personnel>\n" +
-                            "    <person id=\"Big.Boss\">\n" +
-                            "        <name>\n" +
-                            "            <family>Boss</family>\n" +
-                            "            <given>Big</given>\n" +
-                            "        </name>\n" +
-                            "    </person>\n" +
-                            "</personnel>\n" +
-                            ""))));
-            dynamicQueryContext.setContextItem(document.getRootNode());
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            builder.setLineNumbering(true);
+            XdmNode document = builder.build(new SAXSource(new InputSource(new StringReader(
+                    """
+                            <?xml version="1.0" encoding="UTF-8"?>
+                            <personnel>
+                                <person id="Big.Boss">
+                                    <name>
+                                        <family>Boss</family>
+                                        <given>Big</given>
+                                    </name>
+                                </person>
+                            </personnel>"""))));
 
-            queryExpression.run(dynamicQueryContext, result, new Properties());
+            XQueryEvaluator eval = queryExpression.load();
+            eval.setContextItem(document);
+
+            eval.run(result);
 
             System.out.println("Done.");
         } catch (Exception e) {
-            System.out.println("Transformation failed: " + e);
+            System.out.println("Query failed: " + e);
             e.printStackTrace();
         }
     }
