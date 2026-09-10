@@ -93,7 +93,7 @@ private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, c
     val generator = tasks.register("cmake_generate_${configTaskName}") {
         group = LifecycleBasePlugin.BUILD_GROUP
         inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
-        inputs.files(layout.projectDirectory.dir("../cmake"))
+        inputs.dir(layout.projectDirectory.dir("../cmake"))
         inputs.dir(coreCMakePackageDir.elements.map { it.first().asFile })
         outputs.file(cmakeBuildDir.map { file("CMakeCache.txt") })
 
