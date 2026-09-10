@@ -27,11 +27,9 @@ import net.sf.saxon.type.Untyped;
 public class PushToReceiver implements Push {
 
     private final ComplexContentOutputter cco;
-    private final Configuration config;
 
     public PushToReceiver(Receiver cco) {
         this.cco = new ComplexContentOutputter(new RegularSequenceChecker(cco, false));
-        config = cco.getPipelineConfiguration().getConfiguration();
     }
 
     @Override
@@ -46,7 +44,7 @@ public class PushToReceiver implements Push {
 
     private abstract class ContainerImpl implements Container {
 
-        private ComplexContentOutputter cco;
+        private final ComplexContentOutputter cco;
         private String defaultNamespace;
         private ElemImpl elementAwaitingClosure;
         private boolean closed;

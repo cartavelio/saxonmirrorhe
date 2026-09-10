@@ -30,7 +30,7 @@ import java.util.HashMap;
 
 public class CheckSumFilter extends ProxyReceiver {
     private final static boolean DEBUG = false;
-    private DigestMaker digest = null;
+    private final DigestMaker digest;
     private int checksum = 0;
     private int sequence = 0;
     private boolean checkExistingChecksum = false;
@@ -39,7 +39,7 @@ public class CheckSumFilter extends ProxyReceiver {
     private boolean digestCorrect = false;
     private boolean digestFound = false;
     private boolean requireDigest = false;
-    private boolean rootElement = true;
+    private boolean rootElement;
 
     // The code that uses the checksum asks for it after the document element
     // has been processed but before endDocument is called, so we use depth
@@ -83,10 +83,6 @@ public class CheckSumFilter extends ProxyReceiver {
 
     @Override
     public void endDocument() throws XPathException {
-        /*
-        System.err.println("Σ ::= " + BMPString.of(Integer.toHexString(checksum)));
-        System.err.println(digestbuffer.toString());
-         */
         nextReceiver.endDocument();
     }
 

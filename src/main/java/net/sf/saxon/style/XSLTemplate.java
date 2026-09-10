@@ -422,9 +422,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     }
 
     /**
-     * Return the list of mode names to which this template rule is applicable.
+     * Return the mode names to which this template rule is applicable.
      *
-     * @return the list of mode names. If the mode attribute is absent, #default is assumed.
+     * @return the array of mode names. If the mode attribute is absent, #default is assumed.
      * If #default is present explicitly or implicitly, it is replaced by the default mode, taken
      * from the in-scope default-modes attribute, which defaults to #unnamed. The unnamed mode
      * is represented by {@link Mode#UNNAMED_MODE_NAME}. The token #all translates to

@@ -1274,9 +1274,14 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
 
     private static XPathException handleIOError(IOException err) throws XPathException {
         XPathException xe = new XPathException(err);
-        String localName = err instanceof UnsupportedEncodingException ? ERROR_UNKNOWN_ENCODING : ERROR_IO;
+        String localName = isUnsupportedEncodingException(err) ? ERROR_UNKNOWN_ENCODING : ERROR_IO;
         xe.setErrorCodeQName(new StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, localName));
         throw xe;
+    }
+
+    @CSharpReplaceBody(code="return false;")
+    private static boolean isUnsupportedEncodingException(IOException err) {
+        return err instanceof UnsupportedEncodingException;
     }
 
     private static class TextFileLinesIterator extends TextLinesIterator {

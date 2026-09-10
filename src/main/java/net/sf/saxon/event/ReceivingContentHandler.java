@@ -175,7 +175,7 @@ public class ReceivingContentHandler
         if (!pipe.getParseOptions().isExpandAttributeDefaults()) {
             defaultedAttributesAction = -1;
         } else if (config.getBooleanProperty(Feature.MARK_DEFAULTED_ATTRIBUTES)) {
-            defaultedAttributesAction = +1;
+            defaultedAttributesAction = 1;
         }
         allowDisableOutputEscaping = config.getConfigurationProperty(Feature.USE_PI_DISABLE_OUTPUT_ESCAPING);
         lineNumbering = pipe.getParseOptions().isLineNumbering();

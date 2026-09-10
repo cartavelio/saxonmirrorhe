@@ -71,6 +71,7 @@ public class PipelineConfiguration {
         controller = p.controller;
         parseOptions = p.parseOptions;
         hostLanguage = p.hostLanguage;
+        hostLanguageVersion = p.hostLanguageVersion;
         if (p.components != null) {
             components = new HashMap<>(p.components);
         }
@@ -189,17 +190,6 @@ public class PipelineConfiguration {
     public boolean isRecoverFromValidationErrors() {
         return getParseOptions().isContinueAfterValidationErrors();
     }
-
-//    /**
-//     * Set a user-defined SchemaURIResolver for resolving URIs used in "import schema"
-//     * declarations.
-//     *
-//     * @param resolver the SchemaURIResolver
-//     */
-//
-//    public void setSchemaURIResolver(SchemaURIResolver resolver) {
-//        schemaURIResolver = resolver;
-//    }
 
     /**
      * Get the controller associated with this pipelineConfiguration

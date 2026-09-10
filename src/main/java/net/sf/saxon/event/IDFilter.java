@@ -27,8 +27,6 @@ public class IDFilter extends ProxyReceiver {
     private final String requiredId;
     private int activeDepth = 0;
 
-    private boolean matched = false;
-
     public IDFilter(Receiver next, String id) {
         // System.err.println("IDFilter, looking for " + id);
         super(next);
@@ -44,7 +42,7 @@ public class IDFilter extends ProxyReceiver {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties)
             throws XPathException {
-        matched = false;
+        boolean matched = false;
         if (activeDepth == 0) {
             for (AttributeInfo att : attributes) {
                 if ((att.getNodeName().equals(StandardNames.XML_ID_NAME)) ||
@@ -121,40 +119,6 @@ public class IDFilter extends ProxyReceiver {
     public boolean usesTypeAnnotations() {
         return true;
     }
-
-//    /**
-//     * Test whether a type annotation code represents the type xs:ID or one of its subtypes
-//     *
-//     * @param typeCode the fingerprint of the type name
-//     * @return true if the type is an ID type; false if it is not (or if the type code does not
-//     *         resolve to a known type)
-//     */
-//
-//    private boolean isIDCode(SimpleType typeCode) {
-//        if (typeCode == BuiltInAtomicType.ID) {
-//            return true;
-//        }
-//        if (typeCode instanceof BuiltInAtomicType) {
-//            return false; // No other built-in type is an ID
-//        }
-//
-//        if (nonIDs == null) {
-//            nonIDs = new HashSet<>(20);
-//        }
-//        if (nonIDs.contains(typeCode)) {
-//            return false;
-//        }
-//        if (typeCode.isAtomicType()) {
-//            if (getConfiguration().getTypeHierarchy().isSubType((AtomicType) typeCode, BuiltInAtomicType.ID)) {
-//                return true;
-//            } else {
-//                nonIDs.add(typeCode);
-//                return false;
-//            }
-//        } else {
-//            return false;
-//        }
-//    }
 
 }
 

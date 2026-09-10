@@ -18,6 +18,7 @@ import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.ItemCheckingPlan;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -278,5 +279,9 @@ public class AnyFunctionType implements FunctionItemType {
         return SequenceType.ANY_SEQUENCE;
     }
 
+    @Override
+    public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
+        return Optional.empty();
+    }
 }
 

@@ -194,9 +194,7 @@ public interface ItemType {
      * @return optionally, a message explaining why the item does not match the type
      */
 
-    default Optional<String> explainMismatch(Item item, TypeHierarchy th) {
-        return Optional.empty();
-    }
+    Optional<String> explainMismatch(Item item, TypeHierarchy th);
 
 }
 

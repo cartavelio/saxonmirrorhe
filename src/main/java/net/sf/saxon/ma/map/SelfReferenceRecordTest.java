@@ -16,6 +16,7 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -239,6 +240,11 @@ public class SelfReferenceRecordTest extends AnyFunctionType implements RecordTy
     public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40)
             throws XPathException {
         return new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role, false);
+    }
+
+    @Override
+    public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
+        return Optional.empty();
     }
 
 }

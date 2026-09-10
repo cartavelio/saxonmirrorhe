@@ -14,6 +14,8 @@ import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.ItemCheckingPlan;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Optional;
+
 
 /**
  * An implementation of ItemType that matches any item (node or atomic value)
@@ -236,6 +238,11 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
     @Override
     public CoercionPlan getCoercionPlan(int version) {
         return ItemCheckingPlan.INSTANCE;
+    }
+
+    @Override
+    public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
+        return Optional.empty();
     }
 
 }

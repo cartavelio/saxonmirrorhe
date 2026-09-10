@@ -14,11 +14,9 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
+import static net.sf.saxon.om.Genre.ATOMIC;
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
 
@@ -65,7 +63,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * The members of this Union. The members of this list are TypeReference objects
      */
 
-    private List<TypeReference> memberTypeReferences = null;
+    private List<TypeReference> memberTypeReferences;
 
     /**
      * Flag indicating whether this is a "plain union". Values -1: not yet computed, 0: false, 1: true
@@ -564,7 +562,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
             // This method actually attempts conversion to each member type in turn; when validation
             // succeeds, it then repeats the conversion for the type that succeeded. This is wasteful,
             // but better than throwing exceptions for the conversions that don't succeed.
-            SimpleType type = null;
+            SimpleType type;
             try {
                 type = (SimpleType) ref.getTarget();
             } catch (MissingComponentException e) {
@@ -629,8 +627,6 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
 
     /**
      * Test whether a given item conforms to this type
-     *
-     *
      *
      * @param item    The item to be tested
      * @param th   The type hierarchy
@@ -805,6 +801,29 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
     @Override
     public CoercionPlan getCoercionPlan(int version) {
         return version >= 40 ? UnionCoercionPlan.INSTANCE40 : UnionCoercionPlan.INSTANCE31;
+    }
+
+    /**
+     * Get extra diagnostic information about why a supplied item does not conform to this
+     * item type, if available. If extra information is returned, it should be in the form of a complete
+     * sentence, minus the closing full stop. No information should be returned for obvious cases.
+     *
+     * @param item the item that doesn't match this type
+     * @param th   the type hierarchy cache
+     * @return optionally, a message explaining why the item does not match the type
+     */
+    @Override
+    public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
+        if (item.getGenre() == ATOMIC) {
+            String message = "This is a union type, and the supplied value "
+                    + Err.depict(item)
+                    + " of type "
+                    + ((AtomicValue) item).getItemType().getDescription()
+                    + " does not match any of its member types";
+            return Optional.of(message);
+        } else {
+            return Optional.empty();
+        }
     }
 }
 

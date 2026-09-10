@@ -14,6 +14,7 @@ import net.sf.saxon.type.coercion.CoercionPlan;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -272,6 +273,11 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     @Override
     public CoercionPlan getCoercionPlan(int version) {
         return ChoiceCoercionPlan.INSTANCE40;
+    }
+
+    @Override
+    public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
+        return Optional.empty();
     }
 
 }

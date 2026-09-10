@@ -12,6 +12,8 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.ItemCheckingPlan;
 
+import java.util.Optional;
+
 /**
  * This class represents the type of an external object returned by
  * an extension function, or supplied as an external variable/parameter.
@@ -98,5 +100,10 @@ public class AnyExternalObjectType implements ItemType {
     @Override
     public CoercionPlan getCoercionPlan(int version) {
         return ItemCheckingPlan.INSTANCE;
+    }
+
+    @Override
+    public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
+        return Optional.empty();
     }
 }

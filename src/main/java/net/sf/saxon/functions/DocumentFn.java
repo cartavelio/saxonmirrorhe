@@ -166,7 +166,6 @@ public class DocumentFn extends SystemFunction implements Callable {
      * Supporting routine to load one external document given a URI (href) and a baseURI. This is used
      * in the normal case when a document is loaded at run-time (that is, when a Controller is available)
      *
-     *
      * @param href    the relative URI
      * @param baseURI the base URI
      * @param packageData the stylesheet (or other) package in which the call appears
@@ -206,7 +205,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         }
 
         // Resolve relative URI
-        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, c);
+        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData);
 
         // see if the document is already loaded
 
@@ -250,7 +249,7 @@ public class DocumentFn extends SystemFunction implements Callable {
 
             Source source = resolveURI(href, baseURI, documentKey.toString(), c);
 
-            if (source == null || source instanceof EmptySource) {
+            if (source instanceof EmptySource) {
                 return null;
             }
 
@@ -441,7 +440,7 @@ public class DocumentFn extends SystemFunction implements Callable {
      * Compute a document key
      */
 
-    protected static DocumentKey computeDocumentKey(String href, String baseURI, PackageData packageData, XPathContext c) throws XPathException {
+    protected static DocumentKey computeDocumentKey(String href, String baseURI, PackageData packageData) throws XPathException {
         return computeDocumentKey(href, baseURI, packageData, true);
     }
 
@@ -603,7 +602,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         // see if the document is already loaded
 
         TreeInfo doc = controller.getDocumentPool().find(documentKey);
-        Source source = null;
+        Source source;
         if (doc != null) {
             source = doc.getRootNode().asActiveSource();
         } else {
