@@ -77,6 +77,8 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
 
         <Compile Include="../../../src/main/saxon-cs/engine/Saxon/Impl/XDoc/**" />
         <Compile Remove="**/*.csproj" />
+        <Compile Remove="../../../src/main/saxon-cs/engine/Saxon/Api/Support/XsdCompilerEE.cs" />
+        <Compile Remove="../../../src/main/saxon-cs/engine/Saxon/Api/Support/XsdSchemaEE.cs" />
         <Compile Remove="../../../src/main/saxon-cs/Impl/Parallel" />
         <Compile Remove="../../../src/main/saxon-cs/not-yet-needed/*.cs" />
         <Compile Remove="../../../src/**/*.DS_Store" />
