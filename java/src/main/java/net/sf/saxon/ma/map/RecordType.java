@@ -53,7 +53,7 @@ public interface RecordType extends FunctionItemType {
      * @return true if the field is defined as an optional field
      */
 
-    public boolean isOptionalField(String field);
+    boolean isOptionalField(String field);
 
     /**
      * Ask whether the tuple type is extensible, that is, whether fields other than those named are permitted
