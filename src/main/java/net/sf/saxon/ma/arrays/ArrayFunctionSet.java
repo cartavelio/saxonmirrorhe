@@ -7,6 +7,7 @@
 
 package net.sf.saxon.ma.arrays;
 
+import com.saxonica.functions.qt4.Slice;
 import com.saxonica.functions.qt4.UnparcelFn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.Pingable;
@@ -28,6 +29,7 @@ import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -199,6 +201,12 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("index-where", 2, e -> e.populate(ArrayIndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE | INS, null));
+
+            register("slice", 1, 4, e -> e.populate(ArraySlice::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, AnyItemType.getInstance(), STAR, null)
+                    .arg(1, BuiltInAtomicType.INTEGER, OPT, null)
+                    .arg(2, BuiltInAtomicType.INTEGER, OPT, null)
+                    .arg(3, BuiltInAtomicType.INTEGER, OPT, null));
 
             register("trunk", 1, e -> e.populate(ArrayTrunk::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
@@ -703,6 +711,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         @Override
         public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
             ArrayItem input = (ArrayItem) arguments[0].head();
+            return members(input);
+        }
+
+        public static GroundedValue members(ArrayItem input) {
             List<Parcel> parcels = new ArrayList<>(input.arrayLength());
             for (GroundedValue member : input.members()) {
                 parcels.add(new Parcel(member));
@@ -726,6 +738,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             }
             return makeArray(members);
         }
+
 
     }
 
@@ -763,6 +776,29 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
 
 
+    }
+
+    /**
+     * Implementation of the function array:slice(array, start, end, step) =&gt; array
+     */
+    public static class ArraySlice extends SystemFunction {
+
+        @Override
+        public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+            // Convert the array to a sequence of parcels; invoke fn:slice; then unparcel the result
+            ArrayItem input = (ArrayItem) arguments[0].head();
+            GroundedValue parcels = ArrayMembers.members(input);
+            Sequence[] newArgs = Arrays.copyOf(arguments, arguments.length);
+            newArgs[0] = parcels;
+            GroundedValue slicedParcels = Slice.slice(newArgs);
+
+            List<GroundedValue> members = new ArrayList<>(slicedParcels.getLength());
+            SequenceIterator iter = slicedParcels.iterate();
+            for (Item parcel; (parcel = iter.next()) != null; ) {
+                members.add(UnparcelFn.unparcel(parcel, context));
+            }
+            return new SimpleArrayItem(members);
+        }
     }
 
     /**

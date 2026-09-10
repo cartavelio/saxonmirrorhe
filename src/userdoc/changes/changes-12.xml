@@ -376,6 +376,8 @@
             at the same time.</p></li>
             <li><p>The <code>fn:slice</code> function is implemented; it allows selection of part of a sequence
             with capability for numbering from the end, counting backwards, selecting every Nth item, etc.</p></li>
+            <li><p>The <code>array:slice</code> function is implemented; it does the same as <code>fn:slice</code>,
+                but for arrays rather than sequences.</p></li>
             
         </ul>
 
