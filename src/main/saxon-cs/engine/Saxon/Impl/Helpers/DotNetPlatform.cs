@@ -274,7 +274,6 @@ namespace Saxon.Impl.Helpers {
                 useJava = flags.IndexOf('j', semi) >= 0;
                 useDotNet = flags.IndexOf('n', semi) >= 0;
                 useSaxon = flags.IndexOf('s', semi) >= 0;
-                flags = flags.Substring(0, semi);
             }
 
             if (!useJava && !useDotNet && !useSaxon) {
@@ -288,6 +287,7 @@ namespace Saxon.Impl.Helpers {
             }
 
             if (useJava) {
+                flags = flags.Substring(0, semi);
                 return new Saxon.Hej.regex.JavaRegularExpression(regex, flags);
             }
             else {
