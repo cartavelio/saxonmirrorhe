@@ -212,6 +212,7 @@ interface SaxonJExtension {
     abstract val metaInfServices: MapProperty<String, String>
     abstract val manifestMainClass: Property<String>
     abstract val sourceRoot: DirectoryProperty
+    abstract val testDataDir: DirectoryProperty
     abstract val jarManifestClasspath: ListProperty<String>
     abstract val jarManifestClasspathDefaults: ListProperty<String>
     abstract val editionJarInclusions: ListProperty<String>

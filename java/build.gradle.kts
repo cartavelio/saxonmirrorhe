@@ -18,6 +18,7 @@ saxonj {
   )
   manifestMainClass = "net.sf.saxon.Transform"
   sourceRoot = layout.projectDirectory.dir("src")
+  testDataDir = layout.projectDirectory.dir("../src/test/testdata")
   jarManifestClasspath = jarClasspath("lib/icu4j-${findProperty("icu4jVersion")}.jar", "lib/icu4j.jar")
   editionJarExclusions = listOf("**/sql", "com/saxonica/StatsTransform*.class")
 }
@@ -25,6 +26,13 @@ saxonj {
 val saxonBuild = the<SaxonBuildExtension>()
 
 val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
+
+sourceSets.named("editionTest") {
+  java {
+    exclude("net/sf/saxon/option/cpp/**")
+    exclude("s9apitest/TestXMarkProjection.java")
+  }
+}
 
 val downloadReleaseBundled by configurations.getting
 val samplesConfiguration by configurations.resolvable("samplesConfiguration") {

@@ -118,6 +118,7 @@ configurations.configureEach {
 val javaMainSourceRoot = extension.sourceRoot.map { it.dir("main/java") }
 val javaMainResourcesRoot = extension.sourceRoot.map { it.dir("main/resources") }
 val javaTestSourceRoot = extension.sourceRoot.map { it.dir("test/java") }
+val javaTestResourceRoot = extension.sourceRoot.map { it.dir("test/resources") }
 val libTidyPath = extension.sourceRoot.map { it.file("../lib/Tidy.jar") }
 dependencies {
     javaSourcesBucket(files(javaMainSourceRoot))
@@ -258,146 +259,15 @@ sourceSets.named("editionTest") {
     java {
         setSrcDirs(listOf(javaTestSourceRoot))
 
-        // TODO: this really needs to be per-edition.
-        // For now, exclude everything that won't build in HE. :-(
-        exclude("xqjtck/**")
-        exclude("com/saxonica/functions/extfn/LastModifiedTest.java")
-        exclude("commands/AntTests.java")
-        exclude("commands/QueryTests.java")
-        exclude("commands/Saxon3483.java")
-        exclude("commands/TransformTests.java")
-        exclude("commands/ValidateTests.java")
-        exclude("failing/AntTests.java")
-        exclude("failing/FailingTests.java")
-        exclude("internaltests/ActivateSaxon.java")
-        exclude("internaltests/AlphaCodeTypeTest.java")
-        exclude("internaltests/GizmoCommandTests.java")
-        exclude("internaltests/GizmoCompleterTests.java")
-        exclude("internaltests/IncludeImportJarUri.java")
-        exclude("internaltests/LFUCacheTest.java")
-        exclude("internaltests/LicenseTests.java")
-        exclude("internaltests/NumberingTests.java")
-        exclude("internaltests/RedirectTests.java")
-        exclude("internaltests/ResourceTests.java")
-        exclude("internaltests/SignatureTest.java")
-        exclude("internaltests/TinyTreeTest.java")
-        exclude("internaltests/UnionIteratorTest.java")
-        exclude("iss5701/Test5701.java")
-        exclude("jaxptest/AllowedProtocolsTest.java")
-        exclude("jaxptest/BinarySerializationTest.java")
-        exclude("jaxptest/ConfigTest.java")
-        exclude("jaxptest/DOMTest.java")
-        exclude("jaxptest/DefaultAttributeProblemTest.java")
-        exclude("jaxptest/DocumentBuilderImplTest.java")
-        exclude("jaxptest/EventSourceTest.java")
-        exclude("jaxptest/ExtensionTest.java")
-        exclude("jaxptest/JaxpPlusXqjTest.java")
-        exclude("jaxptest/MemoryTest.java")
-        exclude("jaxptest/MultithreadedExtensionTest.java")
-        exclude("jaxptest/OracleDOMTest.java")
-        exclude("jaxptest/ParserTest.java")
-        exclude("jaxptest/SAXTest.java")
-        exclude("jaxptest/SchemaTests.java")
-        exclude("jaxptest/SerializerTests.java")
-        exclude("jaxptest/StylesheetCopyLineNumbersTest.java")
-        exclude("jaxptest/TemplatesHandlerTest.java")
-        exclude("jaxptest/TestIdentityTransformer.java")
-        exclude("jaxptest/ThreadTest.java")
-        exclude("jaxptest/TransformCallingQueryTest.java")
-        exclude("jaxptest/TransformChainTest.java")
-        exclude("jaxptest/TransformMessageTest.java")
-        exclude("jaxptest/TransformTest.java")
-        exclude("jaxptest/TransformWithValidation.java")
-        exclude("jaxptest/TraxTest.java")
-        exclude("jaxptest/URIResolverTest.java")
-        exclude("jaxptest/ValidationTest.java")
-        exclude("jaxptest/ValidatorHandlerTest.java")
-        exclude("jstests/IxslExtensionTest.java")
-        exclude("modeltests/AxiomTreeTests.java")
-        exclude("modeltests/DOM4JTreeTests.java")
-        exclude("modeltests/DOMTreeTests.java")
-        exclude("modeltests/JDOM2TreeTests.java")
-        exclude("modeltests/LinkedTreeTests.java")
-        exclude("modeltests/ObjectModelTests.java")
-        exclude("modeltests/TinyTreeTests.java")
-        exclude("modeltests/XOMTreeTests.java")
-        exclude("nativetests/ConfigDeadlockTest.java")
-        exclude("nativetests/ConfigurationTest.java")
-        exclude("nativetests/FnSchemaTest.java")
-        exclude("nativetests/ImportFunctionTest.java")
-        exclude("nativetests/ProjectionTests.java")
-        exclude("nativetests/SubtypingTests.java")
-        exclude("nativetests/TestXQueryDOM.java")
-        exclude("nativetests/TestXQueryNative.java")
-        exclude("nativetests/TestXQueryUpdate.java")
-        exclude("nativetests/ThreadedKeyTest.java")
-        exclude("nativetests/ValidationTest.java")
-        exclude("net/sf/saxon/option/cpp/**")
-        exclude("performance/ArrayPerformance.java")
-        exclude("performance/Fernandes.java")
-        exclude("performance/PerformanceTestCase.java")
-        exclude("performance/Playground.java")
-        exclude("performance/QueryGroupingPerformance.java")
-        exclude("performance/SimonSoftTest.java")
-        exclude("performance/SimonSoftTest2.java")
-        exclude("performance/TreeModelPerformance.java")
-        exclude("performance/TreeModelPerformanceDescendantAxis.java")
-        exclude("performance/XPathPerformance.java")
-        exclude("pulltests/PullTest.java")
-        exclude("pulltests/StaxBridgeTest.java")
-        exclude("regextests/testRegex.java")
-        exclude("resolvers/CatalogResolverTest.java")
-        exclude("resolvers/CommandTests.java")
-        exclude("resolvers/ResolverConfigurationTest.java")
-        exclude("resolvers/SchemaURIResolverTest.java")
-        exclude("s9apitest/SumanGantaTest.java")
-        exclude("s9apitest/TestCanonicalSerializer.java")
-        exclude("s9apitest/TestChecksums.java")
-        exclude("s9apitest/TestCollections.java")
-        exclude("s9apitest/TestDocumentBuilder.java")
-        exclude("s9apitest/TestErrorListener.java")
-        exclude("s9apitest/TestFunctionLibrary.java")
-        exclude("s9apitest/TestIntegratedFunctions.java")
-        exclude("s9apitest/TestModuleURIResolver.java")
-        exclude("s9apitest/TestPackage.java")
-        exclude("s9apitest/TestPipeline.java")
-        exclude("s9apitest/TestQueryToTransform.java")
-        exclude("s9apitest/TestReflexion.java")
-        exclude("s9apitest/TestSaxonParam.java")
-        exclude("s9apitest/TestSchemaProcessing.java")
-        exclude("s9apitest/TestSchematron.java")
-        exclude("s9apitest/TestSerializer.java")
-        exclude("s9apitest/TestValidator.java")
-        exclude("s9apitest/TestXMLParserOptions.java")
-        exclude("s9apitest/TestXMarkProjection.java")
-        exclude("s9apitest/TestXPathCompiler.java")
-        exclude("s9apitest/TestXPathErrorCode.java")
-        exclude("s9apitest/TestXQueryCompiler.java")
-        exclude("s9apitest/TestXQueryEvaluator.java")
-        exclude("s9apitest/TestXQueryStreaming.java")
-        exclude("s9apitest/TestXQueryThreads.java")
-        exclude("s9apitest/TestXQueryToSaxDestination.java")
-        exclude("s9apitest/TestXQueryUpdate.java")
-        exclude("s9apitest/TestXdmFunction.java")
-        exclude("s9apitest/TestXslt30Streaming.java")
-        exclude("s9apitest/TestXslt30Transformer.java")
-        exclude("s9apitest/TestXslt30TransformerDebug.java")
-        exclude("s9apitest/TestXsltCompiler.java")
-        exclude("s9apitest/TestXsltIn10Mode.java")
-        exclude("s9apitest/TestXsltTracing.java")
-        exclude("s9apitest/TestXsltTransformer.java")
-        exclude("s9apitest/ThreadCountTest.java")
-        exclude("s9apitest/XQueryStreamingTest.java")
-        exclude("xqjtests/RennauBugs.java")
-        exclude("xqjtests/RennauChainedQueries.java")
-        exclude("xqjtests/TestSaxonDuration.java")
-        exclude("xqjtests/TestTreeWalker.java")
-        exclude("xqjtests/TestXQueryUsingXQJ.java")
-
         compileClasspath += editionSourceSet.output
         runtimeClasspath += editionSourceSet.output
     }
+    resources {
+        setSrcDirs(listOf(javaTestResourceRoot))
+    }
 }
+
+val processEditionTestResources = tasks.named<ProcessResources>("processEditionTestResources")
 
 sourceSets {
     main {
@@ -421,14 +291,27 @@ tasks.named<JavaCompile>("compileEditionTestJava") {
     classpath += editionSourceSet.output
 }
 
+tasks.named<Test>("test") {
+    environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())
+}
+
 val test = tasks.register<Test>("editionTest") {
-    useJUnitPlatform()
+    useJUnitPlatform {
+      excludeTags("performance", "mikeonly")
+    }
+
     description = "Runs JUnit tests."
     group = "verification"
-    environment("SAXON_TEST_DATA", extension.sourceRoot.map { it.dir("../src/test/testdata") })
+    environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())
+
+    val resourceJars = processEditionTestResources.map {
+      files(it.destinationDir).asFileTree.filter { f ->
+        f.extension == "jar"
+      }
+    }
 
     testClassesDirs = editionTestSourceSet.output.classesDirs
-    classpath = editionTestSourceSet.runtimeClasspath
+    classpath = files(resourceJars, editionTestSourceSet.runtimeClasspath)
 }
 
 tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
