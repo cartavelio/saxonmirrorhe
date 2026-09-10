@@ -214,7 +214,6 @@ public class SequenceTool {
      * @param a iterator over the first sequence
      * @param b iterator over the second sequence
      * @return true if the lengths of the two sequences are the same
-     * @throws XPathException if an error is detected
      */
 
     public static boolean sameLength(SequenceIterator a, SequenceIterator b) {

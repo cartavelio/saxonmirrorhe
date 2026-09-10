@@ -567,7 +567,6 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     /**
      * Process the attributes of every node in the stylesheet
      *
-     * @throws net.sf.saxon.trans.XPathException if static errors are found in the stylesheet
      */
 
     public void processAllAttributes() {
@@ -1506,6 +1505,27 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 ((XSLTemplate) node).allocatePatternSlotNumbers();
             }
         }
+    }
+
+
+    /**
+     * Get an imported schema with a given namespace
+     *
+     * @param targetNamespace The target namespace of the required schema.
+     *                        Supply an empty string for the default namespace
+     * @return the required Schema, or null if no such schema has been imported
+     */
+
+    protected boolean isImportedSchema(NamespaceUri targetNamespace) {
+        return stylesheetPackage.getSchemaNamespaces().contains(targetNamespace);
+    }
+
+    protected void addImportedSchema(NamespaceUri targetNamespace) {
+        stylesheetPackage.getSchemaNamespaces().add(targetNamespace);
+    }
+
+    protected Set<NamespaceUri> getImportedSchemaTable() {
+        return stylesheetPackage.getSchemaNamespaces();
     }
 
     /**
