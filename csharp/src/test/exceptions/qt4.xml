@@ -1,7 +1,214 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- exceptions file for the QT4 Test Suite -->
+<!-- exceptions file for the QT4 Test Suite in SaxonCS -->
 <exceptions>
-   <exception test-set="fn-unparsed-text"
+   
+
+ 
+   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
+      <created by="Michael Kay" on="2018-02-01"/>
+      <reason>Known bug in ICU (Still failing 2023-12-02)</reason>
+   </exception>
+   
+ 
+
+   <exception test-set="misc-CombinedErrorCodes" test-case="
+      K-CombinedErrorCodes-2 
+      K-CombinedErrorCodes-3
+      K-CombinedErrorCodes-4
+      K-CombinedErrorCodes-5
+      K-CombinedErrorCodes-6"
+       run="false" report="notRun">
+      <created by="Michael Kay" on="2025-07-17"/>
+      <reason>Hangs trying to access http://example.com/.</reason>
+   </exception>
+   
+   <exception test-set="op-to" test-case="RangeExpr-408f
+      RangeExpr-408g
+      RangeExpr-408h
+      RangeExpr-408i
+      RangeExpr-408j
+      RangeExpr-408k
+      RangeExpr-410f
+      RangeExpr-410g
+      RangeExpr-410h
+      RangeExpr-410i
+      RangeExpr-410j
+      RangeExpr-410k" run="false" report="tooBig">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Exceeds Saxon limit on max length of a sequence</reason>
+   </exception>
+   
+   
+ 
+   
+   <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
+      <created by="Michael Kay" on="2023-01-03"/>
+      <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
+   </exception>
+   
+   <exception test-set="app-CatalogCheck" test-case="Catalog014" run="false" report="disputed">
+      <created by="Michael Kay" on="2023-01-03"/>
+      <reason>QT4 40-specific tests are missing covers-40 attribute</reason>
+   </exception>
+   
+   <!--<exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-03-14"/>
+      <reason>Placeholders currently not allowed as keyword arguments</reason>
+   </exception>-->
+   
+   
+   
+   <exception test-set="prod-FunctionDecl" test-case="
+      function-decl-40-019
+      function-decl-40-020
+      function-decl-40-023
+      function-decl-40-024
+      " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-28"/>
+      <reason>Currently restricting default value of a user function parameter to be a literal or "."</reason>
+   </exception>
+   
+   
+   <exception test-set="prod-ItemTypeDecl" test-case="itemTypeDecl-016 
+                                                      itemTypeDecl-017 
+                                                      itemTypeDecl-018" run="false" report="notRun">
+      <created by="Michael Kay" on="2026-01-01"/>
+      <reason>XQuery item types: forwards references and self-references not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="prod-ModuleImport" test-case="modules-43" run="false" report="notRun">
+      <created by="Michael Kay" on="2026-01-12"/>
+      <reason>XQuery item types: forwards references not yet implemented</reason>
+   </exception>
+   
+
+ 
+   <!--<exception test-set="misc-HtmlTestSuite" test-case="
+      html-test-0020
+      html-test-1050
+      html-test-1054
+      html-test-1147
+      html-test-1216
+      html-test-1238
+      html-test-1258
+      html-test-1294
+      html-test-1296
+      " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-28"/>
+      <reason>Wrong results from validator.nu -\- not much we can do about this. Checked 2026-01-10.</reason>
+   </exception>-->
+ 
+ 
+   
+   <exception test-set="app-spec-examples" 
+      test-case=" fo-test-fn-scan-left-001
+                  fo-test-fn-scan-left-002
+                  fo-test-fn-scan-left-003
+                  fo-test-fn-scan-left-004
+                  fo-test-fn-scan-right-001
+                  fo-test-fn-scan-right-002
+                  fo-test-fn-scan-right-003
+                  " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-01"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <!--<exception test-set="app-spec-examples" 
+      test-case=" fo-test-fn-build-dateTime-001
+                  fo-test-fn-build-dateTime-002
+                  fo-test-fn-build-dateTime-003
+                  fo-test-fn-parts-of-dateTime-001
+                  fo-test-fn-parts-of-dateTime-002
+                  fo-test-fn-parts-of-dateTime-003
+                  " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-02-10"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>-->
+   
+   <exception test-set="fn-serialize" 
+      test-case="serialize-xhtml-149" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-07"/>
+      <reason>Canonical XHTML serialization not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="fn-serialize" 
+      test-case="serialize-json-340 serialize-json-341 serialize-json-342" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-20"/>
+      <reason>PR2372 not yet implemented (JSON representation of INF and NaN)</reason>
+   </exception>
+   
+   <exception test-set="fn-unparsed-text" 
+      test-case="fn-unparsed-text-054a" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-08"/>
+      <reason>Authentication issue reading from http://timeanddate.com</reason>
+   </exception>
+   
+   <exception test-set="fn-xsd-validator" 
+      test-case="xsd-validator-092" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-15"/>
+      <reason>Spec unclear: see spec issue #2384</reason>
+   </exception>
+   
+   <exception test-set="misc-BuiltInKeywords" 
+      test-case=" Keywords-fn-scan-left-1
+                  Keywords-fn-scan-right-1
+                  
+                  " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-05"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="prod-SequenceType" 
+      test-case="built-in-record-type-304" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-06"/>
+      <reason>Functionality not yet implemented: recursive record types</reason>
+   </exception>
+   
+   <exception test-set="method-html" 
+      test-case="Serialization-html-59a" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-06"/>
+      <reason>Functionality not yet implemented: PR2372 - processing instructions in HTML5</reason>
+   </exception>
+   
+   <exception test-set="fn-element-to-map" 
+      test-case="element-to-map-017" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-02-06"/>
+      <reason>Test results anticipate a spec change not yet agreed or implemented: issue 2445</reason>
+   </exception>
+   
+   <exception test-set="fn-element-to-map" 
+      test-case="element-to-map-023" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-02-06"/>
+      <reason>Test result challenged - see spec issue #1948</reason>
+   </exception>
+   
+   <exception test-set="EXPath-file" 
+      test-case="EXPath-file-read-fallback-003
+                 EXPath-file-read-text-lines-fallback-001
+                 EXPath-file-read-text-lines-fallback-003" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-03-23"/>
+      <reason>Fallback option not yet implemented</reason>
+   </exception>
+   
+   
+   
+
+
+   
+   
+   <!--<exception test-set="fn-unparsed-text"
               test-case="fn-unparsed-text-fallback-006"
               run="false" report="n/a">
      <created by="Norm Tovey-Walsh" on="2026-03-12"/>
@@ -591,7 +798,7 @@
 
    
    
-   
+   -->
  
    
 
