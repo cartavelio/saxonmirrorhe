@@ -9,11 +9,15 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.SequenceInstr;
+import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.SequenceType;
+
+import java.util.function.Supplier;
 
 
 /**
@@ -23,6 +27,7 @@ import net.sf.saxon.trans.XPathException;
 public class XSLSequence extends StyleElement {
 
     private Expression select;
+    private SequenceType requiredType;
 
     /**
      * Determine whether this node is an instruction.
@@ -74,6 +79,13 @@ public class XSLSequence extends StyleElement {
             String f = attName.getDisplayName();
             if (f.equals("select")) {
                 select = makeExpression(value, att);
+            } else if (f.equals("as")) {
+                requireXslt40Attribute("as");
+                try {
+                    requiredType = makeSequenceType(value);
+                } catch (XPathException e) {
+                    compileErrorInAttribute(e, "as");
+                }
             } else {
                 checkUnknownAttribute(attName);
             }
@@ -99,6 +111,12 @@ public class XSLSequence extends StyleElement {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (select == null) {
             select = compileSequenceConstructor(exec, decl, false);
+        }
+        if (requiredType != null) {
+            Supplier<RoleDiagnostic> role = () ->
+                    new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:sequence/select", 0, "XPTY0004");
+            select = getConfiguration().getTypeChecker(false).staticTypeCheck(
+                    select, requiredType, role, makeExpressionVisitor());
         }
         if (getConfiguration().getBooleanProperty(Feature.STRICT_STREAMABILITY)) {
             select = new SequenceInstr(select);
