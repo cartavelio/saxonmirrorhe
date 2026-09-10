@@ -14,7 +14,6 @@ import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -33,13 +32,14 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
 
     private boolean disable = false;
     /*@Nullable*/ private Expression separator;
-
+    private Expression cdata;
 
     @Override
     protected void prepareAttributes() {
 
         String selectAtt = null;
         String disableAtt = null;
+        String cdataAtt = null;
         String separatorAtt = null;
 
         for (AttributeInfo att : attributes()) {
@@ -58,13 +58,17 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
                     separatorAtt = value;
                     separator = makeAttributeValueTemplate(separatorAtt, att);
                 }
+                case "cdata" -> {
+                    cdataAtt = value;
+                    cdata = makeAttributeValueTemplate(cdataAtt, att);
+                }
                 default -> {
                     checkUnknownAttribute(attName);
                 }
             }
         }
 
-        if (disableAtt != null) {
+        if (disableAtt != null && cdataAtt == null) {
             disable = processBooleanAttribute("disable-output-escaping", disableAtt);
         }
     }
@@ -74,6 +78,7 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
         super.validate(decl);
         select = typeCheck("select", select);
         separator = typeCheck("separator", separator);
+        cdata = typeCheck("cdata", cdata);
     }
 
     /**
@@ -90,7 +95,6 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Configuration config = getConfiguration();
-        final TypeHierarchy th = config.getTypeHierarchy();
         if (separator == null && select != null && getLocalPart().equals("value-of") && xPath10ModeIsEnabled()) {
             // Handle XSLT 1.0 backwards compatibility
             select = config.getTypeChecker(true).processValueOf(select, config);
@@ -105,6 +109,9 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
         }
         ValueOf inst = new ValueOf(select, disable, false);
         inst.setRetainedStaticContext(makeRetainedStaticContext());
+        if (cdata != null) {
+            inst.setCdataExpression(cdata);
+        }
         compileContent(exec, decl, inst, separator);
         return inst.withLocation(saveLocation());
     }

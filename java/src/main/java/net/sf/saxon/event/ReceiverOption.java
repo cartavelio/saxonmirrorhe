@@ -132,7 +132,7 @@ public class ReceiverOption {
      * says it should inherit the parent namespaces (because there is no copy operation).
      */
 
-    public static final int REFUSE_NAMESPACES = 0x10000;
+    public static final int REFUSE_NAMESPACES = 0x1_0000;
 
     /**
      * Flag set on startElement() to indicate that the namespaces inherited from a new parent element
@@ -142,39 +142,46 @@ public class ReceiverOption {
      * declared within the tree being copied.
      */
 
-    public static final int BEQUEATH_INHERITED_NAMESPACES_ONLY = 0x20000;
+    public static final int BEQUEATH_INHERITED_NAMESPACES_ONLY = 0x2_0000;
 
     /**
      * Flag set on startElement() if the element is known to have children
      */
 
-    public static final int HAS_CHILDREN = 0x40000;
+    public static final int HAS_CHILDREN = 0x4_0000;
 
     /**
      * Flag set on append() to indicate that all in-scope namespaces should be copied
      */
-    public static final int ALL_NAMESPACES = 0x80000;
+    public static final int ALL_NAMESPACES = 0x8_0000;
 
     /**
      * Flag set on attribute() to indicate that there is no need to check for duplicate attributes
      */
-    public static final int NOT_A_DUPLICATE = 0x100000;
+    public static final int NOT_A_DUPLICATE = 0x10_0000;
 
     /**
      * Flag set on characters() to indicate that the text node is a separator space between atomic values
      */
-    public static final int SEPARATOR = 0x100000;
+    public static final int SEPARATOR = 0x10_0000;
 
     /**
      * Flag set on startElement() to indicate that the element node is at the outermost level of an
      * external entity
      */
-    public static final int TOP_IN_ENTITY = 0x200000;
+    public static final int TOP_IN_ENTITY = 0x20_0000;
 
     /**
      * Flag set on startElement() to indicate that it's in a validation=skip wildcard
      */
-    public static final int SKIP_VALIDATION = 0x400000;
+    public static final int SKIP_VALIDATION = 0x40_0000;
+
+    /**
+     * Flag used with the characters() event to indicate that the characters should be
+     * serialized as a CDATA section
+     */
+
+    public static final int USE_CDATA = 0x80_0000;
 
 
     public static boolean contains(int options, int option) {

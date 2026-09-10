@@ -292,24 +292,7 @@ public class MessageInstr extends Instruction {
                     return null;
                 }
 
-                boolean abort = false;
-                String term = Whitespace.trim(terminate.eval(context));
-                switch (term) {
-                    case "no":
-                    case "false":
-                    case "0":
-                        // no action
-                        break;
-                    case "yes":
-                    case "true":
-                    case "1":
-                        abort = true;
-                        break;
-                    default:
-                        throw new XPathException("The terminate attribute of xsl:message must be yes|true|1 or no|false|0")
-                                .withXPathContext(context)
-                                .withErrorCode("XTDE0030");
-                }
+                boolean abort = evaluateBooleanAVT(context, terminate, "terminate", "xsl:message");
 
                 String code;
                 try {
@@ -390,6 +373,27 @@ public class MessageInstr extends Instruction {
 
             };
         }
+    }
+
+    /**
+     * Evaluate an expression representing a boolean-valued attribute value template, such as xsl:message/@terminate
+     * @param context the evaluation context
+     * @param terminate an evaluator for the AVT expression
+     * @param attName the name of the attribute (for diagnostics)
+     * @param instr the name of the containing instruction (for diagnostics)
+     * @return the boolean value of the attribute
+     * @throws XPathException if the value is invalid
+     */
+    public static boolean evaluateBooleanAVT(XPathContext context, StringEvaluator terminate, String attName, String instr) throws XPathException {
+        String term = Whitespace.trim(terminate.eval(context));
+        return switch (term) {
+            case "no", "false", "0" -> false;
+            case "yes", "true", "1" -> true;
+            default ->
+                    throw new XPathException("The " + attName + " attribute of " + instr + " must be yes|true|1 or no|false|0")
+                            .withXPathContext(context)
+                            .withErrorCode("XTDE0030");
+        };
     }
 
 }

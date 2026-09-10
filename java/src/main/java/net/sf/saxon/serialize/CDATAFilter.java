@@ -250,9 +250,9 @@ public class CDATAFilter extends ProxyReceiver {
         nextReceiver.characters(CDATA_CLOSE, loc, chprop);
     }
 
-    private static final UnicodeString CDATA_OPEN = Latin1.of("<![CDATA[");
-    private static final UnicodeString CDATA_CLOSE = Latin1.of("]]>");
-    private static final UnicodeString CDATA_CLOSE_AND_REOPEN = Latin1.of("]]><![CDATA[");
+    public static final UnicodeString CDATA_OPEN = Latin1.of("<![CDATA[");
+    public static final UnicodeString CDATA_CLOSE = Latin1.of("]]>");
+    public static final UnicodeString CDATA_CLOSE_AND_REOPEN = Latin1.of("]]><![CDATA[");
 
 
     /**
