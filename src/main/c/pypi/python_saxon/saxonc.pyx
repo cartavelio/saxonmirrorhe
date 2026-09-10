@@ -46,6 +46,8 @@ def create_xdm_dict(proc, mmap):
                     "c":saxonproc.make_integer_value(3)}
             xdmdict = create_xdm_dict(saxonproc, mymap)
             map = saxonproc.make_map(xdmdict)
+    Raises:
+        PySaxonApiError: Failure in constructing the dict
     """
     xdmMap = {}
     xdmValue_ = None
@@ -147,6 +149,8 @@ cdef class PySaxonProcessor:
         Args:
             config_file (str): Construct a Saxon processor based on a configuration file
             license(bool): Flag that a license is to be used. The Default is false.
+        Raises:
+            PySaxonApiError: Failure to create PySaxonProcessor
         """
         cdef const char * c_str = NULL
         cdef bool l = license
@@ -883,6 +887,7 @@ cdef class PyDocumentBuilder:
             PyXdmNode: The XDM node representation of the XML document
         Raises:
             Exception: Error if the keyword argument is not one of xml_file_name|xml_text|xml_uri.
+            PySaxonApiError: Error if failed to parse XML file or Xml text
         """
         py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
         if len(kwds) != 1:
@@ -1041,6 +1046,8 @@ cdef class PyXslt30Processor:
         Returns:
             PyXsltExecutable: which represents the compiled stylesheet. The PyXsltExecutable is immutable
             and thread-safe; it may be used to run multiple transformations, in series or concurrently.
+        Raises:
+            PySaxonApiError: Error raised if the stylesheet contains static errors or if it cannot be read.
         Example:
             xsltproc = saxon_proc.new_xslt30_processor()
             1) executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>
@@ -1192,6 +1199,8 @@ cdef class PyXslt30Processor:
                 attribute of the xsl:result-document instruction.
         Example:
             result = xsltproc.transform_to_string(source_file="cat.xml", stylesheet_file="test1.xsl")
+        Raises:
+            PySaxonApiError: Error raised if failure in XSLT transformation
         """
         cdef char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
@@ -1237,6 +1246,8 @@ cdef class PyXslt30Processor:
                 attribute of the xsl:result-document instruction.
         Example:
             xsltproc.transform_to_file(source_file="cat.xml", stylesheet_file="test1.xsl", output_file="result.xml")
+        Raises:
+            PySaxonApiError: Error raised if failure in XSLT transformation
         """
         cdef char * c_sourcefile = NULL
         cdef char * c_outputfile = NULL
@@ -1278,6 +1289,8 @@ cdef class PyXslt30Processor:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
             result = xsltproc.transform_to_value(source_file="cat.xml", stylesheet_file="test1.xsl")
+        Raises:
+            PySaxonApiError: Error raised if failure in XSLT transformation
         """
         cdef const char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
@@ -1788,6 +1801,10 @@ cdef class PyXsltExecutable:
             **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode);
                 and base_output_uri (str) which is used for resolving relative URIs
                 in the href attribute of the xsl:result-document instruction.
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+
+
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.transform_to_string(source_file="cat.xml")
@@ -1840,6 +1857,10 @@ cdef class PyXsltExecutable:
             **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode); output_file (str),
                 and base_output_uri (str) which is used for resolving relative URIs in the href attribute of the
                 xsl:result-document instruction.
+
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.transform_to_file(source_file="cat.xml", output_file="result.xml")
@@ -1895,6 +1916,9 @@ cdef class PyXsltExecutable:
                 of the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+                        
         Example:
             xslt30_proc = saxon_proc.new_xslt30_processor()
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -1985,6 +2009,10 @@ cdef class PyXsltExecutable:
                 in the href attribute of the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
+
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+
         Example:
             xslt30_proc = saxon_proc.new_xslt30_processor()
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -2087,6 +2115,9 @@ cdef class PyXsltExecutable:
                 in the href attribute of the xsl:result-document instruction.
         Returns:
             str: Result of the transformation as a str value
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+
         Example:
             xslt30_proc = saxon_proc.new_xslt30_processor()
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -2154,6 +2185,8 @@ cdef class PyXsltExecutable:
             **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue) can be used to supply
                 the initial match selection; output_file (str), and base_output_uri (str) which is used for
                 resolving relative URIs in the href attribute of the xsl:result-document instruction.
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
 
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -2220,6 +2253,9 @@ cdef class PyXsltExecutable:
                 the href attribute of the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+
         Example:
             xslt30_proc = saxon_proc.new_xslt30_processor()
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -2287,6 +2323,9 @@ cdef class PyXsltExecutable:
                 the href attribute of the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.call_template_returning_string("main")
@@ -2322,6 +2361,9 @@ cdef class PyXsltExecutable:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: output_file (str), and base_output_uri (str) which is used for
                 resolving relative URIs in the href attribute of the xsl:result-document instruction.
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.call_template_returning_file("main", output_file="result.xml")
@@ -2362,6 +2404,9 @@ cdef class PyXsltExecutable:
             **kwds: Possible keyword arguments: base_output_uri (str)
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.call_function_returning_value("{http://localhost/example}func", [])
@@ -2442,6 +2487,9 @@ cdef class PyXsltExecutable:
             **kwds: Possible keyword arguments: base_output_uri (str)
         Returns:
             str: Result of the transformation as a str value
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) result = executable.call_function_returning_string("{http://localhost/example}func", [])
@@ -2486,6 +2534,10 @@ cdef class PyXsltExecutable:
 			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
 			    to the function.
             **kwds: Possible keyword arguments: output_file (str) and base_output_uri (str)
+
+        Raises:
+            PySaxonApiError: Error raised in the event of a dynamic error
+
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test2.xsl")
             1) executable.set_output_file("result.xml")
@@ -2733,6 +2785,9 @@ cdef class PyXQueryProcessor:
                 lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
         Returns:
             PyXdmValue: Output result as a PyXdmValue
+        Raises:
+            PySaxonApiError: Error if failure to run query
+            Exception: Error if invalid use of keywords
         """
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmAtomicValue avalue_
@@ -2801,6 +2856,9 @@ cdef class PyXQueryProcessor:
                 lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
         Returns:
             str: Output result as a string
+        Raises:
+            PySaxonApiError: Error if failure to run query
+            Exception: Error if invalid use of keywords
         """
         cdef const char * c_string
         if len(kwds) == 0:
@@ -2833,6 +2891,9 @@ cdef class PyXQueryProcessor:
                 Possible arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to supply
                 the input; query_file (str) or query_text (str) can be used to supply the query;
                 lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
+        Raises:
+            PySaxonApiError: Error if failure to run query file
+            Exception: Error if invalid use of keywords
         """
         if len(kwds) == 0:
           self.thisxqptr.runQueryToFile()
@@ -2998,6 +3059,8 @@ cdef class PyXPathProcessor:
             xpath_str (str): The XPath expression supplied as a string
         Returns:
             PyXdmValue: the result of evaluating the XPath expression
+        Raises:
+            PySaxonApiError: Error if failure to evaluate XPATH
         """
         '''c_xpath = make_c_str(xpath_str)'''
         py_value_string = xpath_str.encode('utf-8') if xpath_str is not None else None
@@ -3021,6 +3084,8 @@ cdef class PyXPathProcessor:
         Returns:
             PyXdmItem: A single XDM item is returned. Returns None if the expression returns an empty sequence.
             If the expression returns a sequence of more than one item, any items after the first are ignored.
+        Raises:
+            PySaxonApiError: Error if evaluate_single fails
         """
         cdef PyXdmNode val = None
         cdef PyXdmAtomicValue aval = None
@@ -3116,7 +3181,9 @@ cdef class PyXPathProcessor:
         Args:
             xpath_str (str): XPath expression supplied as a string
         Returns:
-            boolean: The result is a boolean value.
+            boolean: The result is a boolean value. 4
+        Raises:
+            PySaxonApiError: Error is failure to execute effective_boolean_value
         """
         py_value_string = xpath_str.encode('UTF-8') if xpath_str is not None else None
         c_xpath = py_value_string if xpath_str is not None else ""
@@ -3394,6 +3461,10 @@ cdef class PySchemaValidator:
             **kwds: Possible keyword arguments: must be one of the following (file_name|xml_text|xdm_node).
                 Specifies the source file to be validated. Allow None when source document is
                 supplied using the set_source_node method
+        Raises:
+            Exception: Error if incorrect keyword used - Option available file_name|xdm_node|xml_text
+            PySaxonApiError: if the source document is found to be invalid, or if error conditions occur
+            that prevented validation from taking place (such as failure to read or parse the input document)
         """
         py_error_message = "Error: validate should only contain one of the following keyword arguments: (file_name|xdm_node|xml_text)"
         if len(kwds) > 1:
@@ -3424,6 +3495,10 @@ cdef class PySchemaValidator:
                 using the set_source_node method.
         Returns:
             PyXdmNode: The validated document returned to the calling program as a PyXdmNode
+        Raises:
+            Exception: Error if incorrect keyword used - Option available file_name|xdm_node|xml_text
+            PySaxonApiError: if the source document is found to be invalid, or if error conditions occur
+            that prevented validation from taking place (such as failure to read or parse the input document)
         """
         py_error_message = "Error: validate_to_node should only contain one of the following keyword arguments: (file_name|xdm_node|xml_text)"
         if len(kwds) > 1:
@@ -3470,6 +3545,10 @@ cdef class PySchemaValidator:
         Get the validation report
         Returns:
             PyXdmNode: The Validation report result from the Schema validator
+        Raises:
+            Exception: Error if incorrect keyword used - Option available file_name|xdm_node|xml_text
+            PySaxonApiError: if the source document is found to be invalid, or if error conditions occur
+            that prevented validation from taking place (such as failure to read or parse the input document)
         """
         cdef PyXdmNode val = None
         cdef saxoncClasses.XdmNode * xdmNode = NULL
