@@ -18,7 +18,8 @@
    -->
    
    <xsl:template match="*" priority="1000">
-      <!--<xsl:message>METHOD CALL {name/@identifier}() RESOLVED_TYPE={@RESOLVED_TYPE} is-exception={f:isExceptionType(@RESOLVED_TYPE)}</xsl:message>-->
+      <!--<xsl:message>METHOD CALL {name/@identifier}() RESOLVED_TYPE={@RESOLVED_TYPE} 
+         digest={key('digestClassKey', f:degenerify(@RESOLVED_TYPE), $digest)/@name}</xsl:message>-->
       <xsl:next-match/>
    </xsl:template>
    
@@ -138,9 +139,9 @@
    <!-- Convert calls on delegate methods -->
    <!-- For example 'consumer.accept(item)' becomes 'consumer(item)' if consumer is a functional interface
         that converts to a C# delegate -->
-   <xsl:template match="*[key('digestClassKey', f:degenerify(@RESOLVED_TYPE), $digest)/@delegate='1']" 
+   <xsl:template match="*[key('digestClassKey', f:degenerifyWithoutEscaping(@RESOLVED_TYPE), $digest)/@delegate='1']" 
       priority="30" mode="methods">     
-      <!--<xsl:message>Delegate.{name/@identifier}()</xsl:message>-->
+      <xsl:text>/*Delegate.{name/@identifier}()*/</xsl:text>
       <xsl:apply-templates select="scope" mode="xml-to-cs"/>
       <xsl:text>(</xsl:text>
       <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
@@ -839,7 +840,7 @@
    </xsl:template>-->
    
    <!--Handle List, ArrayList, LinkedList -->
-   <xsl:template match="*[f:degenerify(@RESOLVED_TYPE) = 
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 
       ('java.util.List', 'java.util.ArrayList', 'java.util.LinkedList', 'java.util.Collection')]" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
@@ -860,7 +861,7 @@
    </xsl:template>
    
    <!--Handle Map, HashMap -->
-   <xsl:template match="*[f:degenerify(@RESOLVED_TYPE) = ('java.util.Map', 'java.util.HashMap')]" 
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = ('java.util.Map', 'java.util.HashMap')]" 
       priority="20" mode="methods">
       <xsl:choose>
          <xsl:when test="name/@identifier='entrySet' and count(arguments/argument)=0 and self::iterable">
@@ -884,7 +885,7 @@
    </xsl:template>
    
    <!-- java.util.Map.Entry (which becomes Collections.Generic.KeyValuePair) -->
-   <xsl:template match="*[f:degenerify(@RESOLVED_TYPE) = 'java.util.Map.Entry']" 
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 'java.util.Map.Entry']" 
       priority="20" mode="methods">
       <xsl:choose>
          <xsl:when test="name/@identifier='entrySet' and count(arguments/argument)=0 and self::iterable">
@@ -902,7 +903,7 @@
    </xsl:template>
    
    <!--Handle Set, HashSet, TreeSet -->
-   <xsl:template match="*[f:degenerify(@RESOLVED_TYPE) = ('java.util.Set', 'java.util.HashSet', 'java.util.TreeSet')]" 
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = ('java.util.Set', 'java.util.HashSet', 'java.util.TreeSet')]" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
          'add#1':             '%scope%.Add(%args%)',
@@ -911,6 +912,7 @@
          'containsAll#1':     'Saxon.Impl.Helpers.SetUtils.ContainsAll(%scope%, %args%)',
          'isEmpty#0':         '%scope%.Count==0',
          'iterator#0':        '%scope%.GetEnumerator()',
+         'pollFirst#0':       'Saxon.Impl.Helpers.SetUtils.PollFirst(%scope%, %args%)',
          'remove#1':          '%scope%.Remove(%args%)',
          'size#0':            '%scope%.Count',
          'values#0':          '%scope%.Values',
@@ -918,7 +920,7 @@
          })"/>     
    </xsl:template>
    
-   <xsl:template match="*[f:degenerify(@RESOLVED_TYPE) = 'net.sf.saxon.expr.parser.PathMap.PathMapNodeSet']" 
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 'net.sf.saxon.expr.parser.PathMap.PathMapNodeSet']" 
       priority="20" mode="methods">
       <!-- Same as Set and HashSet, except for the default action, which doesn't capitalize -->
       <xsl:sequence select="f:applyFormat(., map{
@@ -939,7 +941,7 @@
       equivalents (hasNext() shouldn't change the iterator position, but MoveNext does). We
       do the conversion anyway and hope for the best -->
    
-   <xsl:template match="*[f:degenerify(@RESOLVED_TYPE) = 'java.util.Iterator']" 
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 'java.util.Iterator']" 
       priority="20" mode="methods">
       <xsl:variable name="suppressWarning" select="ancestor::*[@nodeType='MethodDeclaration'][1]/annotations/annotation[name/@identifier='CSHarpSuppressWarnings']//@value='UnsafeIteratorConversion'"/>
       <xsl:choose>
@@ -967,7 +969,7 @@
       equivalents (hasNext() shouldn't change the iterator position, but MoveNext does). We
       do the conversion anyway and hope for the best -->
    
-   <xsl:template match="*[f:degenerify(@RESOLVED_TYPE) = 'java.lang.Iterable']" 
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 'java.lang.Iterable']" 
       priority="20" mode="methods">
       <xsl:choose>
          <xsl:when test="name/@identifier='iterator' and count(arguments/argument)=0">
@@ -980,7 +982,7 @@
       </xsl:choose>
    </xsl:template>
    
-   <xsl:template match="*[f:degenerify(@RESOLVED_TYPE) = 'java.util.Comparator' ]" 
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 'java.util.Comparator' ]" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
          '*':           '%scope%.%Name%(%args%)'
