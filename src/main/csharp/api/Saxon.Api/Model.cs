@@ -496,7 +496,7 @@ namespace Saxon.Api
         /// underlying Saxon implementation.</returns>
 
 
-        public JSequence Unwrap()
+        public JGroundedValue Unwrap()
         {
             return value;
         }
@@ -1076,8 +1076,9 @@ namespace Saxon.Api
             }
             try
             {
+                net.sf.saxon.str.UnicodeString us = net.sf.saxon.str.StringView.of(lexicalForm).tidy();
                 net.sf.saxon.type.StringConverter Converter = ((JAtomicType)it).getStringConverter(type.Unwrap().getConversionRules());
-                this.value = Converter.convertString(lexicalForm).asAtomic();
+                this.value = Converter.convertString(us).asAtomic();
             }
             catch (Exception ex) {
                 throw new DynamicError(ex.Message);
@@ -1126,7 +1127,8 @@ namespace Saxon.Api
             {
                 throw new ArgumentException("Specified type " + type + " is namespace-sensitive");
             }
-            JConversionResult result = ((JAtomicType)st).getStringConverter(jconfig.getConversionRules()).convertString((JCharSequence)lexicalForm);
+            net.sf.saxon.str.UnicodeString us = net.sf.saxon.str.StringView.of(lexicalForm).tidy();
+            JConversionResult result = ((JAtomicType)st).getStringConverter(jconfig.getConversionRules()).convertString(us);
 
             if (result is JValidationFailure)
             {
@@ -1278,7 +1280,7 @@ namespace Saxon.Api
             else if (av is JStringValue)
             {
                 JStringToDouble converter = JStringToDouble.getInstance();
-                return (long)converter.stringToNumber(av.getStringValueCS());
+                return (long)converter.stringToNumber(av.getUnicodeStringValue());
             }
             else
             {
@@ -1310,7 +1312,7 @@ namespace Saxon.Api
                 try
                 {
                     JStringToDouble converter = JStringToDouble11.getInstance();
-                    return converter.stringToNumber(av.getStringValueCS());
+                    return converter.stringToNumber(av.getUnicodeStringValue());
                 }
                 catch (Exception e)
                 {
@@ -1349,7 +1351,7 @@ namespace Saxon.Api
             }
             else if (av is JStringValue)
             {
-                return Convert.ToDecimal(av.getStringValueCS().toString());
+                return Convert.ToDecimal(av.getUnicodeStringValue().toString());
             }
             else
             {
