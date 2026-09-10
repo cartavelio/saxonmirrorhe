@@ -762,6 +762,7 @@ public class TransformFn extends SystemFunction implements Callable {
             transformer.setBaseOutputURI(baseOutputUri);
             transformer.setInitialTemplateParameters(templateParams, false);
             transformer.setInitialTemplateParameters(tunnelParams, true);
+            transformer.setResourceResolver(context.getResourceResolver());
 
             if (schemaValidation == Validation.STRICT || schemaValidation == Validation.LAX) {
                 if (sourceNode != null) {
