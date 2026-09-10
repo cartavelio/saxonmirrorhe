@@ -26,6 +26,9 @@ public class DerivedAtomicCoercionPlan extends AtomicCoercionPlan {
         if (prim == BuiltInAtomicType.INTEGER) {
             prim = BuiltInAtomicType.DECIMAL;
         }
+        if (prim == BuiltInAtomicType.DAY_TIME_DURATION) {
+            prim = BuiltInAtomicType.DURATION;
+        }
         ConversionRules rules = request.config.getConversionRules();
         TypeHierarchy th = request.config.getTypeHierarchy();
 
