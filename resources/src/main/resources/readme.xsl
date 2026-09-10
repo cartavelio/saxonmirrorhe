@@ -45,7 +45,7 @@ for details.
 5. saxonc-userdoc
 -----------------
 Provided as a zip. Unzip to access the SaxonC documentation in directory
-saxonc-userdoc/documentation12.
+saxonc-userdoc/documentation13.
 
 Like the main Saxon documentation in source-userdoc below, the SaxonC documentation supplied in this
 resources download runs as an interactive application driven by SaxonJS in the browser, which
@@ -64,6 +64,7 @@ it may be necessary to host this directory on a localhost web-server.
 
 </xsl:variable>
    
+   <!-- $readTextCS was used for the Saxon 11.0 release, which was released only for .NET, not for Java -->
    <xsl:variable name="readTextCS">Saxon Resources Download
 ------------------------
 
