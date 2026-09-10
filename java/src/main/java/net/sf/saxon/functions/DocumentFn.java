@@ -33,6 +33,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -494,6 +495,14 @@ public class DocumentFn extends SystemFunction implements Callable {
         request.uri = href;
         if (baseURI != null) {
             request.baseUri = baseURI;
+            // In principle, it would be better to leave the uri relative, but historically, the
+            // DocumentKey (which is always absolute) was used, and the ResourceRequest contract
+            // says that the uri is absolute...
+            try {
+                request.uri = new URI(baseURI).resolve(href).toString();
+            } catch (URISyntaxException ex) {
+                // Nevermind, just leave it relative
+            }
         }
         request.nature = ResourceRequest.XML_NATURE;
         request.purpose = ResourceRequest.ANY_PURPOSE;
