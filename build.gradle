@@ -217,6 +217,8 @@ dependencies {
     [group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '5.4.2'],
     [group: 'org.junit.platform', name: 'junit-platform-runner', version: '1.8.2'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
+    [group: 'org.postgresql', name: 'postgresql', version: '42.5.1'],
+    [group: 'mysql', name: 'mysql-connector-java', version: '8.0.31'],
     files("${buildDir}/classes/${saxonEdition}j"),
     files("${buildDir}/resources/test/classpath-testing.jar")
   )
