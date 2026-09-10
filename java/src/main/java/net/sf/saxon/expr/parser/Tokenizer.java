@@ -351,11 +351,6 @@ public final class Tokenizer {
                         nextToken = Token.QMARK_LSQB;
                         return;
                     }
-                    if (isFollowedBy('>')) {
-                        inputOffset++;
-                        nextToken = Token.METHOD_CALL;
-                        return;
-                    }
                     nextToken = Token.QMARK;
                     return;
                 case '[':
@@ -454,9 +449,14 @@ public final class Tokenizer {
                         nextToken = Token.FAT_ARROW;
                         return;
                     }
-                    if (isFollowedBy("!>") /*|| isFollowedBy("!" + FULL_WIDTH_GT) */) {
+                    if (isFollowedBy("!>")) {
                         inputOffset+=2;
                         nextToken = Token.MAPPING_ARROW;  // Accepted in 4.0 only
+                        return;
+                    }
+                    if (isFollowedBy("?>")) {
+                        inputOffset+=2;
+                        nextToken = Token.METHOD_CALL;
                         return;
                     }
                     nextToken = Token.EQUALS;
