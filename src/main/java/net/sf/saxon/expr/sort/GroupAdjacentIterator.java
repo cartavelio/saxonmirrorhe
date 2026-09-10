@@ -147,7 +147,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
     }
 
     @Override
-    public Sequence currentGroup() throws XPathException {
+    public GroundedValue currentGroup() throws XPathException {
         return SequenceExtent.makeSequenceExtent(currentMembers);
     }
 

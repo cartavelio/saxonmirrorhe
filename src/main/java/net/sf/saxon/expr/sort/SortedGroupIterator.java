@@ -80,14 +80,14 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
     }
 
     @Override
-    public Sequence currentGroup() throws XPathException {
+    public GroundedValue currentGroup() throws XPathException {
         return ((GroupToBeSorted) values[position - 1]).currentGroup;
     }
 
     //#if EE==true
 
     @Override
-    public ManualGroupIterator getSnapShot(XPathContext context) throws XPathException {
+    public ManualGroupIterator getSnapShot(XPathContext context) {
         return new ManualSortedGroupIterator(values, position);
     }
 
@@ -107,7 +107,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
         }
 
         @Override
-        public Sequence currentGroup() throws XPathException {
+        public GroundedValue currentGroup() throws XPathException {
             return ((GroupToBeSorted) values[position() - 1]).currentGroup;
         }
     }

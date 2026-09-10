@@ -8,7 +8,7 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.GroundedValue;
 
 /**
  * This class is a specialization of ObjectToBeSorted for use when the sequence
@@ -19,7 +19,7 @@ import net.sf.saxon.om.Sequence;
 public class GroupToBeSorted extends ObjectToBeSorted {
 
     public AtomicSequence currentGroupingKey;
-    public Sequence currentGroup;
+    public GroundedValue currentGroup;
 
     public GroupToBeSorted(int numberOfSortKeys) {
         super(numberOfSortKeys);

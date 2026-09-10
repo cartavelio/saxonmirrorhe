@@ -210,7 +210,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
     }
 
     @Override
-    public Sequence currentGroup() throws XPathException {
+    public GroundedValue currentGroup() throws XPathException {
         return SequenceExtent.makeSequenceExtent(groups.get(position - 1));
     }
 

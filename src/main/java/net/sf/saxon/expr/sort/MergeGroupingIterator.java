@@ -169,7 +169,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     }
 
     @Override
-    public Sequence currentGroup() throws XPathException {
+    public GroundedValue currentGroup() throws XPathException {
         return SequenceExtent.makeSequenceExtent(currentMembers);
     }
 

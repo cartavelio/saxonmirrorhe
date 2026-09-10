@@ -46,7 +46,7 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
     }
 
     @Override
-    public Sequence currentGroup() throws XPathException {
+    public GroundedValue currentGroup() throws XPathException {
         return SequenceExtent.makeSequenceExtent(currentMembers);
     }
 
@@ -110,7 +110,7 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
         }
 
         @Override
-        public Sequence currentGroup() throws XPathException {
+        public GroundedValue currentGroup() throws XPathException {
             return SequenceExtent.makeSequenceExtent(cMembers);
         }
     }
