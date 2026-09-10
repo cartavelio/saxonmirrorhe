@@ -103,6 +103,10 @@ namespace Saxon.Ejava.lang {
             return this._builder.Length;
         }
 
+        public bool isEmpty() {
+            return length() == 0;
+        }
+
         public override string ToString() {
             return _builder.ToString();
         }
