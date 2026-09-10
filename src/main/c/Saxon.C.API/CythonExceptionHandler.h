@@ -8,9 +8,5 @@
 #ifndef CYTHON_EXCEPTION_HANDLER_H
 #define CYTHON_EXCEPTION_HANDLER_H
 
-#ifdef _WIN64
-extern PyObject *pysaxonapierror;
-#endif
-
 void raise_py_error();
 #endif
