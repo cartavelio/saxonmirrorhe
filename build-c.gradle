@@ -90,25 +90,9 @@ unjar_XmlResolver.onlyIf {
   !file("${buildDir}/xerces/org/xmlresolver/cat-xhtml.xml").exists()
 }
 
-task unjar_slf4j_api(
-  type: Copy,
-  description: "Unjar SLF4J API"
-) {
-  inputs.file(loggerFactoryJar)
-  from zipTree(file(loggerFactoryJar))
-  into "${buildDir}/xerces"
-}
-// This task is always out of date because we're overwriting
-// files from different jars.
-// Skip this if it doesn't seem to be necessary
-unjar_slf4j_api.onlyIf {
-  !file("${buildDir}/xerces/org/slf4j/LoggerFactory.class").exists()
-}
-
 task rejar_Xerces(
   type: Jar,
-  dependsOn: ["unjar_XercesImpl", "unjar_XmlResolver", "unjar_XmlResolverData",
-              "unjar_slf4j_api"],
+  dependsOn: ["unjar_XercesImpl", "unjar_XmlResolver", "unjar_XmlResolverData"],
   description: "Unjar Xerces and Resolver for .NET build"
 ) {
   inputs.files fileTree("${buildDir}/xerces/org")
