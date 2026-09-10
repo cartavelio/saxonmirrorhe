@@ -1,7 +1,6 @@
 package com.saxonica.ee.pin.pin;
 
 import com.saxonica.xsltextn.pedigree.DelegatingMapItem;
-import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.ma.map.KeyValuePair;
@@ -119,7 +118,7 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
 
 
     private static FunctionItem makeAncestorsFunction(Item start) {
-        Callable logic = new CallableDelegate((context, arguments) -> {
+        CallableDelegate logic = new CallableDelegate((context, arguments) -> {
             List<Item> ancestors = new ArrayList<>();
             Item parent = (Item)start.getLabel().get(new StringValue("parent"));
             while (parent != null && parent.getLabel() != null) {
@@ -128,12 +127,13 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
             }
             return SequenceExtent.makeSequenceExtent(ancestors);
         });
+        logic.setDescription("fn:label()?ancestors");
         return new CallableFunction(0, logic,
                                     new SpecificFunctionType(new SequenceType[0], SequenceType.ANY_SEQUENCE));
     }
 
     private static FunctionItem makePathFunction(Item start) {
-        Callable logic = new CallableDelegate((context, arguments) -> {
+        CallableDelegate logic = new CallableDelegate((context, arguments) -> {
             List<Item> path = new ArrayList<>();
             Item parent = start;
             do {
@@ -147,6 +147,7 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
             } while (parent != null && parent.getLabel() != null);
             return SequenceExtent.makeSequenceExtent(path);
         });
+        logic.setDescription("fn:label()?key");
         return new CallableFunction(0, logic,
                                     new SpecificFunctionType(new SequenceType[0], SequenceType.ANY_SEQUENCE));
     }

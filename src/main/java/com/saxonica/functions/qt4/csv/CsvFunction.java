@@ -6,6 +6,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.EmptyAtomicSequence;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -43,7 +44,7 @@ public abstract class CsvFunction extends SystemFunction {
     public static OptionsParameter extendedOptions() {
         OptionsParameter opts = coreOptions();
         opts.addAllowedOption("header", SequenceType.ATOMIC_SEQUENCE, BooleanValue.FALSE);
-        opts.addAllowedOption("select-columns", SequenceType.INTEGER_SEQUENCE, EmptyAtomicSequence.getInstance());
+        opts.addAllowedOption("select-columns", BuiltInAtomicType.POSITIVE_INTEGER.oneOrMore(), EmptyAtomicSequence.getInstance());
         opts.addAllowedOption("trim-rows", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         return opts;
     }

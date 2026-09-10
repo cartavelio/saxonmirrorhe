@@ -6,10 +6,7 @@ import com.saxonica.functions.qt4.csv.CsvToXml;
 import com.saxonica.functions.qt4.csv.ParseCsv;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
-import net.sf.saxon.functions.hof.FilterFn;
-import net.sf.saxon.functions.hof.ForEachFn;
-import net.sf.saxon.functions.hof.ForEachPairFn;
-import net.sf.saxon.functions.hof.LoadXqueryModule;
+import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
@@ -247,8 +244,53 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
                 .arg(1, predicate2, ONE, null));
 
+        SpecificFunctionType foldLeftArg = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE);
+
+        register("fold-left", 3, e -> e.populate(FoldLeftFn::new, AnyItemType.getInstance(),
+                                                 STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, null)
+                .arg(2, foldLeftArg, ONE, null));
+
+        SpecificFunctionType foldRightArg = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE);
+
+        register("fold-right", 3, e -> e.populate(FoldRightFn::new, AnyItemType.getInstance(),
+                                                  STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, null)
+                .arg(2, foldRightArg, ONE, null));
+
+
         register("foot", 1, e -> e.populate(FootFn::new, AnyItemType.getInstance(), OPT, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
+
+        register("format-date", 2, 5, e -> e.populate(FormatDate::new, BuiltInAtomicType.STRING,
+                                                   OPT, CARD0)
+                .arg(0, BuiltInAtomicType.DATE, OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null)
+                .arg(2, BuiltInAtomicType.STRING, OPT, null)
+                .arg(3, BuiltInAtomicType.STRING, OPT, null)
+                .arg(4, BuiltInAtomicType.STRING, OPT, null));
+
+        register("format-dateTime", 2, 5, e -> e.populate(FormatDate::new, BuiltInAtomicType.STRING,
+                                                       OPT, CARD0)
+                .arg(0, BuiltInAtomicType.DATE_TIME, OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null)
+                .arg(2, BuiltInAtomicType.STRING, OPT, null)
+                .arg(3, BuiltInAtomicType.STRING, OPT, null)
+                .arg(4, BuiltInAtomicType.STRING, OPT, null));
+
+        register("format-time", 2, 5, e -> e.populate(FormatDate::new, BuiltInAtomicType.STRING,
+                                                   OPT, CARD0)
+                .arg(0, BuiltInAtomicType.TIME, OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null)
+                .arg(2, BuiltInAtomicType.STRING, OPT, null)
+                .arg(3, BuiltInAtomicType.STRING, OPT, null)
+                .arg(4, BuiltInAtomicType.STRING, OPT, null));
 
         register("highest", 1, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));

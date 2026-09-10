@@ -1,6 +1,5 @@
 package com.saxonica.functions.extfn;
 
-import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
@@ -42,7 +41,7 @@ public class XQueryFn extends SystemFunction {
         StaticQueryContext sqc = context.getConfiguration().newStaticQueryContext();
         //sqc.setLanguageVersion(31);
         XQueryExpression exp = sqc.compileQuery(query);
-        Callable callable = new CallableDelegate((cxt, args) -> {
+        CallableDelegate callable = new CallableDelegate((cxt, args) -> {
             DynamicQueryContext dqc = new DynamicQueryContext(cxt.getConfiguration());
             Item arg0 = args[0].head();
             if (arg0 != null) {
@@ -57,6 +56,7 @@ public class XQueryFn extends SystemFunction {
             SequenceIterator iter = exp.iterator(dqc);
             return new LazySequence(iter);
         });
+        callable.setDescription("saxon:xquery");
         return new CallableFunction(2, callable, functionType);
     }
 

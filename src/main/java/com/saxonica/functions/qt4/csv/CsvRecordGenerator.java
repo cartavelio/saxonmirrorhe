@@ -1,13 +1,15 @@
 package com.saxonica.functions.qt4.csv;
 
-import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -196,7 +198,7 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
      * @return the function item returned in the "get" field
      */
     private static FunctionItem makeGetterFunction(GroundedValue rows, MapItem columnIndex) {
-        Callable callable = new CallableDelegate(
+        CallableDelegate callable = new CallableDelegate(
                 (context, args) -> {
                     int rowNum = ((IntegerValue)args[0].head()).asSubscript();
                     ArrayItem row = (ArrayItem)rows.itemAt(rowNum - 1);
@@ -212,6 +214,7 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
                     }
                     return row.get(colNum - 1);
                 });
+        callable.setDescription("fn:parse-csv()?get");
         return new CallableFunction(2, callable, GETTER_TYPE);
     }
 
