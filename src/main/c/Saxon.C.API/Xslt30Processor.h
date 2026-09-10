@@ -85,7 +85,7 @@ public:
    * <p><b>Recommendation:</b> disable this option unless you are confident that
    * the stylesheet you are compiling is error-free.</p>
    *
-   * @param jit true if just-in-time compilation is to be enabled. With this
+   * @param jit - true if just-in-time compilation is to be enabled. With this
    * option enabled, static analysis of a template rule is deferred until the
    * first time that the template is matched. This can improve performance when
    * many template rules are rarely used during the course of a particular
@@ -112,7 +112,7 @@ public:
    * Set the value to "4.0"
    * to enable support for experimental features defined in the XSLT 4.0
    * proposal (which is likely to change before it stabilizes).
-   * @param version the language level to be supported. The values "3.0" and
+   * @param version - the language level to be supported. The values "3.0" and
    * "4.0" are recognized
    */
   void setXsltLanguageVersion(const char *version);
@@ -129,7 +129,7 @@ public:
    * other than just-in-time compilation of template rules. Setting this option,
    * however, indicates an intent rather than a mechanism, and the
    * implementation details may change in future to reflect the intent.</i></p>
-   * @param fast set to true to request fast compilation; set to false to revert
+   * @param fast - set to true to request fast compilation; set to false to revert
    * to the optimization options defined in the Configuration.
    */
   void setFastCompilation(bool fast);
@@ -138,7 +138,7 @@ public:
   /**
    * Say whether any package produced by this compiler can be deployed to a
    * different location, with a different base URI
-   * @param relocatable if true then static-base-uri() represents the deployed
+   * @param relocatable - if true then static-base-uri() represents the deployed
    * location of the package, rather than its compile time location
    */
   void setRelocatable(bool relocatable);
@@ -150,9 +150,9 @@ public:
    * Non-static parameters may also be provided using this method if their
    * values will not vary from one transformation to another.
    *
-   * @param name  the name of the stylesheet parameter, as a string. For
+   * @param name - the name of the stylesheet parameter, as a string. For
    * namespaced parameter use the JAXP solution i.e. "{uri}name"
-   * @param value the value of the stylesheet parameter, or nullptr to clear a
+   * @param value - the value of the stylesheet parameter, or nullptr to clear a
    * previously set value
    */
   void setParameter(const char *name, XdmValue *value);
@@ -167,7 +167,7 @@ public:
   /**
    * Remove a parameter (name, value) pair from a stylesheet
    *
-   * @param name  the name of the stylesheet parameter
+   * @param name - the name of the stylesheet parameter
    * @return bool - outcome of the removal
    */
   bool removeParameter(const char *name);
@@ -253,10 +253,11 @@ public:
   //! Import a library package.
   /**
   * Calling this method makes the supplied package available for reference
-  * in the <code>xsl:use-package</code> declarations of subsequent compilations performed using this
-  * <code>Xslt30Processor</code>.
-  * @param packageFile - the sef file name of the package to be imported. File name resolved against the cwd
-  * which is set using the <code>setcwd</code>
+  * in the <code>xsl:use-package</code> declarations of subsequent compilations
+  * performed using this <code>Xslt30Processor</code>.
+  * @param packageFile - the file name of the package to be imported, which should
+  * be supplied as an SEF. If relative, the file name of the SEF is resolved
+  * against the cwd, which is set using <code>setcwd()</code>.
   */
   void importPackage(const char *packageFile);
 
@@ -265,7 +266,7 @@ public:
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
-   * @param stylesheet  - The file name of the stylesheet document.
+   * @param stylesheet - The file name of the stylesheet document.
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
@@ -279,8 +280,9 @@ public:
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
-   * @param stylesheet as a lexical string representation
-   * @param encoding of the stylesheet string argument. If not specified then platform default encoding is used
+   * @param stylesheet - the stylesheet as a lexical string representation
+   * @param encoding - the encoding of the stylesheet string. If not specified
+   * then the platform default encoding is used.
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
@@ -300,7 +302,7 @@ public:
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
-   * @param sourceFile  - The file name of the XML document.
+   * @param sourceFile - The file name of the XML document.
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
@@ -313,7 +315,7 @@ public:
   /**
    *
    * The compiled stylesheet is saved as SEF to file store
-   * @param stylesheet as a lexical string representation
+   * @param stylesheet - the stylesheet as a lexical string representation
    * @param filename - the file to which the compiled package should be saved
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
@@ -333,7 +335,7 @@ public:
   //! compile a stylesheet received as an XdmNode.
   /**
    * The compiled stylesheet is cached and available for execution later.
-   * @param node the XdmNode object for the stylesheet
+   * @param node - the XdmNode object for the stylesheet
    * @param filename - the file to which the compiled package should be saved
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
@@ -344,7 +346,7 @@ public:
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
-   * @param node the XdmNode object for the stylesheet
+   * @param node - the XdmNode object for the stylesheet
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
