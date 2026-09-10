@@ -1148,12 +1148,31 @@ public class SaxonCAPI {
             }
         }
 
+        /*if (debug) {
+            System.err.println("JAVA Debug: Serializer.Properties");
+
+            Serializer.Property[] propss = Serializer.Property.values();
+            for (Serializer.Property property : propss) {
+
+                String name = property.toString();
+                Serializer.Property prop = Serializer.Property.get(name);
+                if (prop == null) {
+                    System.err.println("PropertyXXXX name " + name + " not found");
+                }
+                System.err.println(property.getQName());
+                System.err.println(property.name());
+                System.err.println("PropertyXXXX name =" + name);
+
+            }
+        } */
+
         if (params == null || values == null) {
             return map;
         }
         if (params.length != values.length) {
             throw new SaxonApiException("SaxonC internal Error: params array length does not match values length");
         }
+
         for (int i = 0; i < params.length; i++) {
             if (params[i].startsWith("!")) {
                 String name = params[i].substring(1);
@@ -1989,6 +2008,8 @@ public class SaxonCAPI {
         SaxonCAPI.debug = true;
         Processor processor = new Processor();
 
+
+
         XdmValue signatureValue = processor.newJsonBuilder().parseJson("{\n" +
                         "\"myFunc\": {\n" +
                         "      \"as\": \"xs:boolean?\",\n" +
@@ -2001,23 +2022,16 @@ public class SaxonCAPI {
 
 
         //#if EE==true || PE==true
-        SaxonCAPI.registerFunctionDefinition(processor, "http://www.example.com", signatureValue, null, null, null, false);
+        //SaxonCAPI.registerFunctionDefinition(processor, "http://www.example.com", signatureValue, null, null, null, false);
         //#endif
-        XPathCompiler xpath = processor.newXPathCompiler();
+        /*XPathCompiler xpath = processor.newXPathCompiler();
 
         xpath.declareNamespace("dy", "http://www.example.com");
         XPathExecutable executable = xpath.compile("dy:myFunc(5)");
         XPathSelector selector = executable.load();
         XdmNode node = main_parseXmlString(null,processor,null, null,"<x/>");
         selector.setContextItem(node);
-        XdmValue result = selector.evaluate();
-
-
-
-
-
-
-
+        XdmValue result = selector.evaluate();*/
 
 
     }

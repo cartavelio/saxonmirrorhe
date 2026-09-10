@@ -26,41 +26,161 @@
       explicitly registered by the application; it is the responsibility of the application designer
       to ensure that this does not create vulnerabilities.</p>
 
+    <p>To register a user defined function SaxonC needs to know the signature of any function that it might call.
+    The signature tells the processor the name of each function that can be called, the number and types pf its arguments.
+        and the expected return type.</p>
+
+    <h2>Registering extension functions</h2>
+    <p>SaxonC provides a new API for registering extension functions.
+        This registration must be done before any attempt is made to evaluate an expression
+        or compile an XSLT stylesheet that uses one.</p>
+
+    <p>The SaxonProcessor class in the SaxonC API contains for this purpose the <code>registerUserFunction(apiDescription)</code>
+        method, which takes a JSON string of the user's function. This method exists on the C++, Python and PHP APIs for SaxonC.</p>
+
+    <p>The <code>apiDescription</code> argument is a map of the following form:</p>
+
+    <samp>{
+        "local-name": {
+        "as": "<em>type</em>",
+        "param": ["<em>type_1</em>", "<em>type_2</em>", …],
+        "arity": [2]}
+        }</samp>
+
+    <p>The <code>namespace</code> identifies the function namespace, the <code>signature</code>
+        for the function. The local name of the function identifies the function name; each signature has four properties:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>as</code></td>
+                <td><em>type</em></td>
+                <td>The return type, an XML Schema data type, for example <code>xs:boolean</code>.</td>
+            </tr>
+            <tr>
+                <td><code>param</code></td>
+                <td>List of <code>type</code></td>
+                <td>The parameter types, one for each parameter, as an XML Schema data type.</td>
+            </tr>
+            <tr>
+                <td><code>arity</code></td>
+                <td><code>integer</code></td>
+                <td>The function arities. In the common case, this is just an array of length one containing
+                    the arity of the function. If the function can be called with multiple arities, this
+                    is a list of the arities that can be used, for example <code>[1, 3, 4]</code> for a function
+                    that can be called with one, three, or four arguments.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>When compiling a stylesheet (with the SaxonC EE compiler),
+    the registered extension functions are provided in a JSON object using
+        <code>SaxonProcessor.registerUserFunction(apiDescription)</code>.</p>
+
+    <a id="typeConversions"/>
+    <h2>Function argument and return type conversions</h2>
+
+    <p>As mentioned above, when an XDM item is passed to the user function in the host language (i.e. C++, PHP or Python),
+        it can be passed as an XDM type or for Python and PHP the item can be converted into the Python or PHP representation, respectively.
+        Conversely, when a function wants to return a value, it can either be returned as an XDM type or a Python/PHP representation
+        that can be converted back into an XDM type. We discuss these in more detail for each host language in SaxonC.</p>
+
+    <p>For general information about extension functions, see <a class="bodylink"
+                                                                 href="extension-functions">Extension functions</a>.</p>
+
+    <p>To write extension functions in C++, see <a class="bodylink"
+                                                                     href="extensions_cpp">Extension functions (C++)</a>.</p>
+
+    <p>To write extension functions in PHP, see <a class="bodylink"
+                                                                 href="extensions_php">Extension functions (PHP)</a>.</p>
+
+    <p>To write extension functions in Python, see <a class="bodylink"
+                                                   href="extensions_python">Extension functions (Python)</a>.</p>
+
 
    <section id="extensions_cpp" title="Writing extension functions in C++">
       <h1>Writing extension functions in C++</h1>
 
       <p>A full example of the use of extension functions can be found in the files
-            <code>cppExtensionFunction.cpp</code> and <code>testXSLT.cpp</code> in the
+            <code>testXPath.cpp</code> in the
             <code>samples/cppTest</code> directory. This sample test registers a user written C++
-         extension function called "userFunction", which is then called from an XSLT stylesheet by
-         calling the <code>saxon:native()</code> function.</p>
+         extension function called "myFunc". Arguments and return types of User functions written in C++ can only be XDM types.
+          This is different to Python and PHP which can handle native types.</p>
+       <p>The registering of the user function we use the SaxonProcessor method <code>registerUserFunction</code>:
 
-      <h2 class="subtitle">Calling extension functions from XSLT and XQuery</h2>
+       <samp>void registerUserFunction(const char * ns, XdmValue * (*func)(int, XdmValue **),
+           const char * signatureJSON, bool useNativeTypes=false)</samp>
 
-      <p>User written C++ extension functions can be called from XSLT and XQuery by using the
-            <code>saxon:native()</code> function. This is a Saxon extension function in the Saxon
-         namespace ("http://saxon.sf.net/"), which takes two arguments: the function name, as an
-            <code>xs:string</code>, and the arguments to the function, supplied as an XDM array.</p>
+       </p>
 
-      <p>For instance, the C++ "userFunction" extension function is called from the XSLT stylesheet
-            <code>testExtension.xsl</code> as shown in the following code snippet:</p>
+       <p>Example C++ code to register user function:
 
-      <samp><![CDATA[<xsl:variable name="args" select="['param1-data', .]"/>
-<xsl:variable name="resultVar" select="saxon:native('userFunction', $args)"/>]]></samp>
+       <samp>  processor->registerUserFunction("http://www.example.com", &amp;myFunc, "{ \"myFunc\": {"
+           "      \"as\": \"xs:integer?\","
+           "      \"param\": ["
+           "        \"xs:integer\""
+           "      ],"
+           "      \"arity\": [1]"
+           "    }"
+           "}");</samp></p>
+
+       <p>Notice in the registration of the user function in C++ that we pass the function as a void pointer to the
+           <code>registerUserFunction</code> method. This is essential for the call-back mechanism.
+           The arguments must also have the signature (int length, XdmValue*). Where length is the number of
+           arguments being passed to the function from the SaxonC processor.
+           See example of the user function <code>myFunc</code>:</p>
+
+       <p>
+           <samp>
+XdmValue * myFunc(int length, XdmValue ** values) {
+    SaxonProcessor * processor1 = new SaxonProcessor();
+    XdmValue * myValue1 = values[0]->getHead();
+
+    if(myValue1->isAtomic()) {
+        XdmAtomicValue * item = (XdmAtomicValue *)(myValue1);
+        long valuei = item->getLongValue() + 5;
+
+        XdmAtomicValue * resultValue = processor1->makeLongValue(valuei);
+
+        return (XdmValue *)resultValue;
+    } else {
+        if(values != NULL) {
+               return (XdmValue *)values[0];
+        }
+        return NULL;
+    }
+}
+           </samp>
+       </p>
+
+      <p>Calling the user extension functions from XSLT, XPath and XQuery is done first by
+          declaring the namespace for the function. Then using the function name in your query or stylesheet.
+          The arguments passed must match what is declared in the JSON signature.
+          For example using the XPath API the following example calls the function:
+
+      <samp>
+    xpath->declareNamespace("dy", "http://www.example.com");
+    XdmItem *result = xpath->evaluateSingle("dy:myFunc(3)");</samp></p>
 
       <h2 class="subtitle">Registering the use of C++ extension functions</h2>
 
       <p>The user written C++ extension function must be compiled, and a function library built
          containing this function.</p>
 
-      <p>For instance, to compile the "userFunction" extension function defined in
-            <code>cppExtensionFunction.cpp</code>, and create a corresponding extension function
-         library containing this function, use the following commands:</p>
+      <p>The compilation of the extension function defined in
+            <code>testXPath.cpp</code> is done as follows: Firstly, we compile the CPPUserFunctionHandler.cpp file.
+          On Linux or MacOS we use the following commands:</p>
 
-      <kbd>g++ -fPIC -shared -m64 cppExtensionFunction.cpp -o bin/cppExtensionFunction.o</kbd>
-      <kbd>g++ -m64 -shared -Wl,-soname,cppExtensionFunction.so -o cppExtensionFunction.so
-         bin/cppExtensionFunction.o</kbd>
+      <kbd>g++ -std=c++14 -g -fPIC -I../../Saxon.C.API/graalvm   -c ../../Saxon.C.API/CPPUserFunctionHandler.cpp -o CPPUserFunctionHandler.o $@</kbd>
+      <p>Secondly, we need to pass in the SaxonC library as an option to the compiler:</p>
+       <kbd>g++ -std=c++14 -g -v -fPIC -I../../Saxon.C.API/graalvm   bin/CPPUserFunctionHandler.o b testXPath.cpp $library_dir/libsaxon-eec-13.0.dylib -o testXPath  -Wl, -ldl -lsaxon-eec-13.0</kbd>
 
       <p>The C++ code below (taken from <code>testXSLT.cpp</code>) shows how to register this
          extension function library, before running the testExtension.xsl stylesheet, using the C++
@@ -117,7 +237,7 @@ void testTransformToStringExtensionFunc(SaxonProcessor * processor, XsltProcesso
 
    </section>
 
-   <section id="extensions_php" title="Writing extension functions in PHP">
+  <section id="extensions_php" title="Writing extension functions in PHP">
       <h1>Writing extension functions in PHP</h1>
 
       <p>An example of the use of extension functions can be found in the sample file
@@ -183,6 +303,11 @@ function userFunctionExample($saxon, $proc, $xmlfile, $xslFile){
 }
 
 ]]></code></pre>
+
+   </section>
+
+   <section id="extensions_python" title="Writing extension functions in Python">
+   <h1>Writing extension functions in Python</h1>
 
    </section>
 
