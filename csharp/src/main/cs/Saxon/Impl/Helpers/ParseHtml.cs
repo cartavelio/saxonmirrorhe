@@ -6,6 +6,7 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using Saxon.Hej.expr;
 using Saxon.Hej.functions;
+using Saxon.Hej.value;
 using Saxon.Impl.Dom;
 
 namespace Saxon.Impl.Helpers {
@@ -15,6 +16,9 @@ namespace Saxon.Impl.Helpers {
             Saxon.Hej.Controller controller = context.getController();
             Saxon.Hej.Configuration config = controller.getConfiguration();
             Saxon.Hej.value.AtomicValue content = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
+            if (content == null) {
+                return EmptySequence.INSTANCE;
+            }
             var angleSharpConfig = Configuration.Default;
 
             //Create a new context for evaluating webpages with the given config
