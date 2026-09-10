@@ -40,6 +40,8 @@ namespace System.Impl.Helpers {
 
         public bool AcceptFragment { get; set; }
         public bool IgnoreIgnorableWhitespace { get; set; }
+        
+        public bool IgnoreAllWhitespace { get; set; }
 
         public DotNetPullProvider(XmlReader parser) {
             this.parser = parser;
@@ -268,8 +270,14 @@ namespace System.Impl.Helpers {
                 }
                 else {
                     currentEvent = mapInputKindToOutputKind(intype);
-                    if (currentEvent == Saxon.Hej.pull.PullEvent.TEXT && parser.Depth == 0 && !AcceptFragment) {
-                        currentEvent = null;
+                    if (currentEvent == Saxon.Hej.pull.PullEvent.TEXT) {
+                        if (parser.Depth == 0 && !AcceptFragment) {
+                            currentEvent = null;
+                        }
+
+                        if (IgnoreAllWhitespace && Whitespace.isAllWhite(StringView.of(parser.Value)) && parser.XmlSpace != XmlSpace.Preserve) {
+                            currentEvent = null;
+                        };
                     }
                     else if ((currentEvent == Saxon.Hej.pull.PullEvent.START_ELEMENT)) {
                         if (!DocTypeOk) {

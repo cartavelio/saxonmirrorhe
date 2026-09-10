@@ -366,22 +366,7 @@
       <reason>Function fn:message not yet implemented</reason>
    </exception>-->
    
- <!--  <exception test-set="fn-iterate-while" test-case=" 
-      iterate-while-019
-      iterate-while-020
-      iterate-while-021
-      iterate-while-022
-      iterate-while-023" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-02-28"/>
-      <reason>Two-argument callback not yet implemented</reason>
-   </exception>-->
-   
-
-   
-  <!-- <exception test-set="prod-ForClause.member" test-case="for-member-032" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Bug 6104</reason>
-   </exception>-->
+ 
    
    <exception test-set="fn-serialize" 
       test-case="serialize-html-004 serialize-html-005 serialize-html-006" 
@@ -402,6 +387,20 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-07"/>
       <reason>Canonical XHTML serialization not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case=" fo-test-fn-scan-left-001
+                  fo-test-fn-scan-left-002
+                  fo-test-fn-scan-left-003
+                  fo-test-fn-scan-left-004
+                  fo-test-fn-scan-right-001
+                  fo-test-fn-scan-right-002
+                  fo-test-fn-scan-right-003
+                  " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-01"/>
+      <reason>Functionality not yet implemented</reason>
    </exception>
  
    <exception test-set="app-spec-examples" 
