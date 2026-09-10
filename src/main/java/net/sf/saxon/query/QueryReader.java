@@ -17,6 +17,7 @@ import net.sf.saxon.z.IntPredicateProxy;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.net.URL;
 
 /**
  * This class contains static methods used to read a query as a byte stream, infer the encoding if
@@ -55,6 +56,16 @@ public class QueryReader {
             queryText = readInputStream(is, encoding, charChecker);
         } else if (ss.getReader() != null) {
             queryText = readQueryFromReader(ss.getReader(), charChecker);
+        } else if (ss.getSystemId() != null) {
+            try {
+                URL url = new URL(ss.getSystemId());
+                InputStream stream = url.openStream();
+                stream = InputStreamMarker.ensureMarkSupported(stream);
+                String encoding = readEncoding(stream);
+                queryText = readInputStream(stream, encoding, charChecker);
+            } catch (IOException e) {
+                throw new XPathException("I/O Error reading input stream from " + ss.getSystemId(), e);
+            }
         } else {
             throw new XPathException("Module URI Resolver must supply either an InputStream or a Reader");
         }

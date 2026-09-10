@@ -471,7 +471,7 @@ public class Transform {
 
             value = options.getOptionValue("p");
             if ("on".equals(value)) {
-                config.setParameterizedURIResolver();
+                config.setBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS, true);
                 useURLs = true;
             }
 

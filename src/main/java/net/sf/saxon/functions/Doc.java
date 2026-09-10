@@ -89,7 +89,9 @@ public class Doc extends SystemFunction implements Callable {
                         if (href.indexOf('#') >= 0) {
                             return this;
                         }
-                        NodeInfo item = DocumentFn.preLoadDoc(href, sf.getStaticBaseUriString(), config, getLocation());
+                        NodeInfo item = DocumentFn.preLoadDoc(href, sf.getStaticBaseUriString(),
+                                                              sf.getRetainedStaticContext().getPackageData(),
+                                                              config, getLocation());
                         if (item != null) {
                             Expression constant = Literal.makeLiteral(item);
                             ExpressionTool.copyLocationInfo(this.getArg(0), constant);

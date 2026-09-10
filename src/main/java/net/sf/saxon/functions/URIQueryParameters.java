@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AllElementsSpaceStrippingRule;
 import net.sf.saxon.om.IgnorableSpaceStrippingRule;
@@ -253,6 +254,32 @@ public class URIQueryParameters {
         return parserMaker;
     }
     //#endif
+
+    /**
+     * Create ParseOptions based on these query parameters
+     */
+
+    @SuppressWarnings("OptionalIsPresent")
+    public ParseOptions makeParseOptions(Configuration config) throws XPathException {
+
+        ParseOptions options = new ParseOptions();
+        Optional<SpaceStrippingRule> stripSpace = getSpaceStrippingRule();
+        if (stripSpace.isPresent()) {
+            options.setSpaceStrippingRule(stripSpace.get());
+        }
+
+        Optional<Integer> validation = getValidationMode();
+        if (validation.isPresent()) {
+            options.setSchemaValidationMode(validation.get());
+        }
+
+        Optional<Boolean> xinclude = getXInclude();
+        if (xinclude.isPresent()) {
+            options.setXIncludeAware(xinclude.get());
+        }
+
+        return options;
+    }
 
     /**
      * A FilenameFilter that tests file names against a regular expression

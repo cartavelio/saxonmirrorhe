@@ -11,7 +11,10 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.EnvironmentVariableResolver;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.StandardModuleURIResolver;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
@@ -25,16 +28,20 @@ import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static net.sf.saxon.s9api.streams.Predicates.*;
-import static net.sf.saxon.s9api.streams.Steps.*;
+import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
+import static net.sf.saxon.s9api.streams.Predicates.hasLocalName;
+import static net.sf.saxon.s9api.streams.Predicates.isElement;
+import static net.sf.saxon.s9api.streams.Predicates.not;
+import static net.sf.saxon.s9api.streams.Steps.atomize;
+import static net.sf.saxon.s9api.streams.Steps.attribute;
+import static net.sf.saxon.s9api.streams.Steps.child;
+import static net.sf.saxon.s9api.streams.Steps.descendant;
 import static net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE.isTrue;
 
 /**
@@ -922,10 +929,11 @@ public class QT3TestDriverHE extends TestDriver {
                     StreamSource[] ss = new StreamSource[files.size()];
                     for (int i = 0; i < files.size(); i++) {
                         URI uri = testCase.getBaseURI().resolve(files.itemAt(i).toString());
-                        ss[i] = getQuerySource(uri);
+                        File file = new File(uri.getPath());
+                        ss[i] = new StreamSource(new FileInputStream(file), uri.toString());
                     }
                     return ss;
-                } catch (SaxonApiUncheckedException e) {
+                } catch (SaxonApiUncheckedException | FileNotFoundException e) {
                     throw new XPathException(e);
                 }
             } else {
@@ -945,10 +953,11 @@ public class QT3TestDriverHE extends TestDriver {
                             throw new XPathException("Failed to find module entry for " + moduleURI + " at " + loc);
                         }
                         URI uri = testCase.getBaseURI().resolve(files.itemAt(0).toString());
-                        ss[i] = getQuerySource(uri);
+                        File file = new File(uri.getPath());
+                        ss[i] = new StreamSource(new FileInputStream(file), uri.toString());
                     }
                     return ss;
-                } catch (URISyntaxException e) {
+                } catch (URISyntaxException | FileNotFoundException e) {
                     throw new XPathException(e);
                 }
             }

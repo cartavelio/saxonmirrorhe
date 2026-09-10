@@ -9,19 +9,15 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.resource.Loader;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -39,9 +35,9 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
     Configuration config = null;
 
     /**
-     * Create a StandardModuleURIResolver. Although the class is generally used as a singleton,
-     * a public constructor is provided so that the class can be named in configuration files and
-     * instantiated in the same way as user-written module URI resolvers.
+     * Create a StandardModuleURIResolver. If this constructor is used, a configuration must
+     * be supplied in a subsequent call. The constructor is provided to allow instantiation
+     * from a Configuration file.
      */
 
     public StandardModuleURIResolver() {
@@ -50,9 +46,8 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
 
 
     /**
-     * Create a StandardModuleURIResolver. Although the class is generally used as a singleton,
-     * a public constructor is provided so that the class can be named in configuration files and
-     * instantiated in the same way as user-written module URI resolvers.
+     * Create a StandardModuleURIResolver, with a supplied configuration
+     * @param config the Saxon Configuration object
      */
 
     public StandardModuleURIResolver(Configuration config) {
@@ -62,15 +57,27 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
     /**
      * Set the Configuration that this resolver uses. Has no effect if the configuration
      * has already been supplied by the constructor.
+     * @param config the Saxon Configuration object
      */
-    public void setConfiguration(Configuration newConfig) {
-        if (config == null) {
-            config = newConfig;
+    public void setConfiguration(Configuration config) {
+        if (this.config == null) {
+            this.config = config;
         }
     }
 
     /**
      * Resolve a module URI and associated location hints.
+     * <para>The logic of this is as follows:</para>
+     * <ol>
+     *     <li>First, call the configuration-level ResourceResolver to resolve the module URI
+     *     as a namespace (via the method resolveModuleURI, which can be overridden in a subclass).
+     *     </li>
+     *     <li>If this returns null and there are no location hints, throw XQST0059.</li>
+     *     <li>Otherwise attempt to resolve each of the supplied location hints in turn,
+     *     using first the configuration-level ResourceResolver and then the fallback DirectResourceResolver,
+     *     via the method resolveLocationHint, which can be overridden in a subclass. Return an array containing
+     *     any non-null results; if there are none, throw XQST0059.</li>
+     * </ol>
      *
      * @param moduleURI The module namespace URI of the module to be imported; or null when
      *                  loading a non-library module.
@@ -87,64 +94,39 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
 
     @Override
     public StreamSource[] resolve(String moduleURI, String baseURI, String[] locations) throws XPathException {
+
+        StreamSource source = resolveModuleURI(moduleURI, baseURI);
+        if (source != null) {
+            return new StreamSource[]{source};
+        }
         if (locations.length == 0) {
-            StreamSource source = resolvedNamespaceURI(moduleURI, baseURI);
-            if (source != null) {
-                return new StreamSource[]{source};
-            }
             XPathException err = new XPathException("Cannot locate module for namespace " + moduleURI);
             err.setErrorCode("XQST0059");
             err.setIsStaticError(true);
             throw err;
-        } else {
-            // One or more locations given: import modules from all these locations
-            ResourceRequest rr = new ResourceRequest();
-            rr.baseUri = baseURI;
-            rr.nature = ResourceRequest.XQUERY_NATURE;
-            StreamSource[] sources = new StreamSource[locations.length];
-            for (int m = 0; m < locations.length; m++) {
-                rr.relativeUri = locations[m];
-                try {
-                    rr.uri = ResolveURI.makeAbsolute(rr.relativeUri, baseURI).toString();
-                    sources[m] = (StreamSource)rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
-                } catch (URISyntaxException err) {
-                    XPathException se = new XPathException("Cannot resolve relative URI " + rr.relativeUri, err);
-                    se.setErrorCode("XQST0059");
-                    se.setIsStaticError(true);
-                    throw se;
-                }
-//                URI absoluteURI;
-//                try {
-//                    Source source = null;
-//                    if (config != null) {
-//                        try {
-//                            source = config.getResourceResolver().resolve(href, baseURI);
-//                        } catch (TransformerException ex) {
-//                            // Sigh. Nevermind then.
-//                        }
-//                    }
-//                    if (source == null) {
-//                        absoluteURI = ResolveURI.makeAbsolute(href, baseURI);
-//                    } else {
-//                        absoluteURI = new URI(source.getSystemId());
-//                    }
-//                } catch (URISyntaxException err) {
-//                    XPathException se = new XPathException("Cannot resolve relative URI " + href, err);
-//                    se.setErrorCode("XQST0059");
-//                    se.setIsStaticError(true);
-//                    throw se;
-//                }
-//                if (config != null && !config.getAllowedUriTest().test(absoluteURI)) {
-//                    throw new XPathException("URI scheme '" + absoluteURI.getScheme() + "' has been disallowed");
-//                }
-
-//                sources[m] = getQuerySource(absoluteURI);
-            }
-            return sources;
         }
+
+        // One or more locations given: import modules from all these locations
+
+        List<StreamSource> moduleSources = new ArrayList<>();
+
+        for (String hint : locations) {
+            StreamSource ss = resolveLocationHint(baseURI, hint);
+            if (ss != null) {
+                moduleSources.add(ss);
+            }
+        }
+
+        return moduleSources.toArray(new StreamSource[]{});
     }
 
-    private StreamSource resolvedNamespaceURI(String moduleURI, String baseURI) {
+    /**
+     * Attempt to resolve the module namespace URI without the help of location hints.
+     * @param moduleURI the namespace URI of the module being imported
+     * @param baseURI the base URI of the module containing the "import module" declaration
+     * @return a StreamSource delivering the contents of the module.
+     */                                   
+    protected StreamSource resolveModuleURI(String moduleURI, String baseURI) {
         try {
             Source source = null;
             if (config != null) {
@@ -161,7 +143,7 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
                 }
             }
             if (source != null) {
-                return getQuerySource(new URI(source.getSystemId()));
+                return toStreamSource(source);
             }
         } catch (TransformerException | URISyntaxException ex) {
             // nevermind
@@ -169,97 +151,127 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
         return null;
     }
 
+    private StreamSource toStreamSource(Source src) {
+        return (StreamSource)src; // TODO: handle SAXSource.
+    }
+
     /**
-     * Get a StreamSource object representing the source of a query, given its URI.
-     * This method attempts to discover the encoding by reading any HTTP headers.
-     * If the encoding can be determined, it returns a StreamSource containing a Reader that
-     * performs the required decoding. Otherwise, it returns a StreamSource containing an
-     * InputSource, leaving the caller to sort out encoding problems.
-     *
-     * @param absoluteURI the absolute URI of the source query
-     * @return a StreamSource containing a Reader or InputSource, as well as a systemID representing
-     *         the base URI of the query.
-     * @throws XPathException if the URIs are invalid or cannot be resolved or dereferenced, or
-     *                        if any I/O error occurs
+     * Resolve a location hint appearing in an "import module" declaration
+     * @param baseURI  the base URI of the "import module" declaration
+     * @param locationHint  the location hint, as written
+     * @return  either a StreamSource representing the content of the module, or null
+     * @throws XPathException if the URI is invalid or can't be resolved (but not if the
+     * module simply doesn't exist at that location)
      */
 
-    /*@NotNull*/
-    protected StreamSource getQuerySource(URI absoluteURI)
-            throws XPathException {
-
-        String encoding = null;
+    protected StreamSource resolveLocationHint(String baseURI, String locationHint) throws XPathException {
+        ResourceRequest rr = new ResourceRequest();
+        rr.baseUri = baseURI;
+        rr.relativeUri = locationHint;
+        rr.nature = ResourceRequest.XQUERY_NATURE;
         try {
-            InputStream is = null;
-            if ("classpath".equals(absoluteURI.getScheme())) {
-                String path = absoluteURI.getPath();
-                if (config != null) {
-                    is = config.getDynamicLoader().getResourceAsStream(path);
-                }
-                if (is == null) {
-                    XPathException se = new XPathException("Cannot locate module " + path + " on class path");
-                    se.setErrorCode("XQST0059");
-                    se.setIsStaticError(true);
-                    throw se;
-                }
-            } else {
-                URLConnection connection = Loader.urlConnection(absoluteURI.toURL());
-                is = connection.getInputStream();
-
-                // Get any external (HTTP) encoding label.
-                String contentType;
-
-                // The file:// URL scheme gives no useful information...
-                if (!"file".equals(connection.getURL().getProtocol())) {
-
-                    // Use the contentType from the HTTP header if available
-                    contentType = connection.getContentType();
-
-                    if (contentType != null) {
-                        int pos = contentType.indexOf("charset");
-                        if (pos >= 0) {
-                            pos = contentType.indexOf('=', pos + 7);
-                            if (pos >= 0) {
-                                contentType = contentType.substring(pos + 1);
-                            }
-                            if ((pos = contentType.indexOf(';')) > 0) {
-                                contentType = contentType.substring(0, pos);
-                            }
-
-                            // attributes can have comment fields (RFC 822)
-                            if ((pos = contentType.indexOf('(')) > 0) {
-                                contentType = contentType.substring(0, pos);
-                            }
-                            // ... and values may be quoted
-                            if ((pos = contentType.indexOf('"')) > 0) {
-                                contentType = contentType.substring(pos + 1,
-                                    contentType.indexOf('"', pos + 2));
-                            }
-                            encoding = contentType.trim();
-                        }
-                    }
-                }
-            }
-
-            if (!is.markSupported()) {
-                is = new BufferedInputStream(is);
-            }
-
-
-            StreamSource ss = new StreamSource();
-            if (encoding == null) {
-                ss.setInputStream(is);
-            } else {
-                ss.setReader(new InputStreamReader(is, encoding));
-            }
-            ss.setSystemId(absoluteURI.toString());
-            return ss;
-        } catch (IOException err) {
-            XPathException se = new XPathException(err);
+            rr.uri = ResolveURI.makeAbsolute(rr.relativeUri, baseURI).toString();
+            return (StreamSource) rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+        } catch (URISyntaxException err) {
+            XPathException se = new XPathException("Cannot resolve relative URI " + rr.relativeUri, err);
             se.setErrorCode("XQST0059");
             se.setIsStaticError(true);
             throw se;
         }
-
     }
+
+
+//    /**
+//     * Get a StreamSource object representing the source of a query, given its URI.
+//     * This method attempts to discover the encoding by reading any HTTP headers.
+//     * If the encoding can be determined, it returns a StreamSource containing a Reader that
+//     * performs the required decoding. Otherwise, it returns a StreamSource containing an
+//     * InputSource, leaving the caller to sort out encoding problems.
+//     *
+//     * @param absoluteURI the absolute URI of the source query
+//     * @return a StreamSource containing a Reader or InputSource, as well as a systemID representing
+//     *         the base URI of the query.
+//     * @throws XPathException if the URIs are invalid or cannot be resolved or dereferenced, or
+//     *                        if any I/O error occurs
+//     */
+//
+//    /*@NotNull*/
+//    protected StreamSource getQuerySource(URI absoluteURI)
+//            throws XPathException {
+//
+//        String encoding = null;
+//        try {
+//            InputStream is = null;
+//            if ("classpath".equals(absoluteURI.getScheme())) {
+//                String path = absoluteURI.getPath();
+//                if (config != null) {
+//                    is = config.getDynamicLoader().getResourceAsStream(path);
+//                }
+//                if (is == null) {
+//                    XPathException se = new XPathException("Cannot locate module " + path + " on class path");
+//                    se.setErrorCode("XQST0059");
+//                    se.setIsStaticError(true);
+//                    throw se;
+//                }
+//            } else {
+//                URLConnection connection = Loader.urlConnection(absoluteURI.toURL());
+//                is = connection.getInputStream();
+//
+//                // Get any external (HTTP) encoding label.
+//                String contentType;
+//
+//                // The file:// URL scheme gives no useful information...
+//                if (!"file".equals(connection.getURL().getProtocol())) {
+//
+//                    // Use the contentType from the HTTP header if available
+//                    contentType = connection.getContentType();
+//
+//                    if (contentType != null) {
+//                        int pos = contentType.indexOf("charset");
+//                        if (pos >= 0) {
+//                            pos = contentType.indexOf('=', pos + 7);
+//                            if (pos >= 0) {
+//                                contentType = contentType.substring(pos + 1);
+//                            }
+//                            if ((pos = contentType.indexOf(';')) > 0) {
+//                                contentType = contentType.substring(0, pos);
+//                            }
+//
+//                            // attributes can have comment fields (RFC 822)
+//                            if ((pos = contentType.indexOf('(')) > 0) {
+//                                contentType = contentType.substring(0, pos);
+//                            }
+//                            // ... and values may be quoted
+//                            if ((pos = contentType.indexOf('"')) > 0) {
+//                                contentType = contentType.substring(pos + 1,
+//                                    contentType.indexOf('"', pos + 2));
+//                            }
+//                            encoding = contentType.trim();
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if (!is.markSupported()) {
+//                is = new BufferedInputStream(is);
+//            }
+//
+//
+//            StreamSource ss = new StreamSource();
+//            if (encoding == null) {
+//                ss.setInputStream(is);
+//            } else {
+//                ss.setReader(new InputStreamReader(is, encoding));
+//            }
+//            ss.setSystemId(absoluteURI.toString());
+//            return ss;
+//        } catch (IOException err) {
+//            XPathException se = new XPathException(err);
+//            se.setErrorCode("XQST0059");
+//            se.setIsStaticError(true);
+//            throw se;
+//        }
+//
+//    }
 }
 

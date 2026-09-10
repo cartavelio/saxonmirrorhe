@@ -79,6 +79,11 @@ public class ResourceRequest {
 
     public boolean streamable;
 
+    /**
+     * Make a copy of a resource request (so that it can be modified without changing the original)
+     * @return a copy of the request
+     */
+
     public ResourceRequest copy() {
         ResourceRequest rr = new ResourceRequest();
         rr.relativeUri = relativeUri;

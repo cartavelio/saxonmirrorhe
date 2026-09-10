@@ -773,25 +773,14 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Set the URIResolver to a URI resolver that allows query parameters after the URI,
-     * and in the case of Saxon-EE, that inteprets the file extension .ptree
+     * Set the URIResolver to a URI resolver that allows query parameters after the URI
+     * @deprecated since 11.1 - use <code>setBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS, true);</code>
      */
 
     public void setParameterizedURIResolver() {
         //#if CSHARP==false
-        getSystemURIResolver().setRecognizeQueryParameters(true);
+        setBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS, true);
         //#endif
-    }
-
-    /**
-     * Get the system-defined URI Resolver. This is used when the user-defined URI resolver
-     * returns null as the result of the resolve() method
-     *
-     * @return the system-defined URI resolver
-     */
-
-    public StandardURIResolver getSystemURIResolver() {
-        return null; //systemURIResolver;
     }
 
     /**
@@ -4487,13 +4476,13 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
                 //#endif
 
-                //#if CSHARP==false
-                case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS: {
-                    boolean b = requireBoolean(name, value);
-                    getSystemURIResolver().setRecognizeQueryParameters(b);
-                    break;
-                }
-                //#endif
+//                //#if CSHARP==false
+//                case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS: {
+//                    boolean b = requireBoolean(name, value);
+//                    getSystemURIResolver().setRecognizeQueryParameters(b);
+//                    break;
+//                }
+//                //#endif
 
                 case FeatureCode.RECOVERY_POLICY:
                     // Obsolete: no action
@@ -4972,6 +4961,7 @@ public class Configuration implements SourceResolver, NotationSet {
         booleanFeatures.add(FeatureCode.MULTIPLE_SCHEMA_IMPORTS);
         booleanFeatures.add(FeatureCode.PRE_EVALUATE_DOC_FUNCTION);
         //booleanFeatures.add(FeatureCode.PREFER_JAXP_PARSER);
+        booleanFeatures.add(FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS);
         booleanFeatures.add(FeatureCode.RETAIN_DTD_ATTRIBUTE_TYPES);
         booleanFeatures.add(FeatureCode.STABLE_COLLECTION_URI);
         booleanFeatures.add(FeatureCode.STABLE_UNPARSED_TEXT);
@@ -5129,10 +5119,10 @@ public class Configuration implements SourceResolver, NotationSet {
                 return getOutputURIResolver().getClass().getName();
             //#endif
 
-            //#if CSHARP==false
-            case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS:
-                return getSystemURIResolver().queryParametersAreRecognized();
-            //#endif
+//            //#if CSHARP==false
+//            case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS:
+//                return getSystemURIResolver().queryParametersAreRecognized();
+//            //#endif
 
             case FeatureCode.RECOVERY_POLICY:
                 return 0;

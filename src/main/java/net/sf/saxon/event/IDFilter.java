@@ -7,14 +7,11 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
-
-import java.util.HashSet;
 
 
 /**
@@ -31,7 +28,6 @@ public class IDFilter extends ProxyReceiver {
     private int activeDepth = 0;
 
     private boolean matched = false;
-    private HashSet<SimpleType> nonIDs;
 
     public IDFilter(Receiver next, String id) {
         // System.err.println("IDFilter, looking for " + id);
