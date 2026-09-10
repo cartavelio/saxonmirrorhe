@@ -30,8 +30,9 @@ namespace Saxon.Api {
         }
         
         /// <summary>Construct a <c>LinqDestination</c> using a supplied document.</summary>
-        /// <remarks>With this constructor, the system will add te results of the query
+        /// <remarks>With this constructor, the system will add the results of the query
         /// or transformation to the supplied (skeletal) XDocument.</remarks>
+        /// <param name="doc">A document</param>
 
         public LinqDestination(XDocument doc)
         {
