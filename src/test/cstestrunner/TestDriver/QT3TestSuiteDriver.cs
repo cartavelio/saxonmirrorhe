@@ -342,7 +342,7 @@ namespace TestDriver {
                 Saxon.Eej.config.ProfessionalConfiguration pConfig = new Saxon.Eej.config.ProfessionalConfiguration();
                 pConfig.setNamePool(env.processor.Implementation.getNamePool());
                 env.processor = new Processor(pConfig);
-                env.processor.SetProperty(Feature<bool>.STABLE_UNPARSED_TEXT, true);
+                env.processor.SetProperty(Feature.STABLE_UNPARSED_TEXT, true);
 
 
                 // Note that at present no variables are copied across

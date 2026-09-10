@@ -236,7 +236,7 @@ namespace TestRunner {
                 XQueryCompiler comp = proc.NewXQueryCompiler();
                 
                 foreach (string test1 in tests) {
-                    proc.SetProperty(Saxon.Api.Feature<bool>.TRACE_OPTIMIZER_DECISIONS, false);
+                    proc.SetProperty(Saxon.Api.Feature.TRACE_OPTIMIZER_DECISIONS, false);
                     if (saproduct) {
                         // if (satests) {
                         //     //AutoActivate.activate(config);

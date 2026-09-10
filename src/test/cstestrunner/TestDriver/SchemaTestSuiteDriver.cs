@@ -242,7 +242,7 @@ namespace TestDriver {
                         }
 
                         Processor testConfig = new Processor(true);
-                        testConfig.SetProperty(Feature<string>.XSD_VERSION, versionUnderTest);
+                        testConfig.SetProperty(Feature.XSD_VERSION, versionUnderTest);
 
                         SchemaManager schemaManager = testConfig.SchemaManager;
 
