@@ -1,0 +1,16 @@
+<configuration edition="EE" xmlns="http://saxon.sf.net/ns/configuration"> 
+    <xsltPackages>
+        <package name='http://package-122/' version='1.0-add' sourceLocation='pack-122.xsl'>
+            <withParam name="operator" select="'+'"/>
+            <withParam name="opname" select="'add'"/>
+        </package>
+        <package name='http://package-122/' version='1.0-subtract' sourceLocation='pack-122.xsl'>
+            <withParam name="operator" select="'-'"/>
+            <withParam name="opname" select="'subtract'"/>
+        </package>
+        <package name='http://package-122/' version='1.0-multiply' sourceLocation='pack-122.xsl'>
+            <withParam name="operator" select="'*'"/>
+            <withParam name="opname" select="'multiply'"/>
+        </package>
+    </xsltPackages>
+</configuration>

@@ -734,6 +734,30 @@ public class TestPackage {
     }
 
     @Test
+    public void testPackageVersions() {
+        // In config file, use different package-versions to differentiate between different packages compiled from the same source
+        try {
+            File configFile = Testdata.file("packages/config-122.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            XsltCompiler compiler = processor.newXsltCompiler();
+            XsltExecutable top = compiler.compile(
+                    new StreamSource(Testdata.file("packages/pack-122-top.xsl")));
+            Xslt30Transformer trans = top.load30();
+            XdmNode result = (XdmNode) trans.callTemplate(null);
+            XPathCompiler xp = processor.newXPathCompiler();
+            String sum = xp.evaluateSingle("/out/add", result).getStringValue();
+            String difference = xp.evaluateSingle("/out/subtract", result).getStringValue();
+            String product = xp.evaluateSingle("/out/multiply", result).getStringValue();
+            assertEquals("12", sum);
+            assertEquals("8", difference);
+            assertEquals("20", product);
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
     public void testPackageExportWithParams() {
         try {
             File configFile = Testdata.file("packages/config-120.xml");
