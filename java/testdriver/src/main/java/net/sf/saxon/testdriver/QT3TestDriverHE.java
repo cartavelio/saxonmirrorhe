@@ -956,7 +956,7 @@ public class QT3TestDriverHE extends TestDriver {
 
                         XdmValue files = testCase.select(
                                 child("module").where(matching).then(attribute("file")).then(atomize())).asXdmValue();
-                        if (files.size() == 0) {
+                        if (files.isEmptySequence()) {
                             throw new XPathException("Failed to find module entry for " + moduleURI + " at " + loc);
                         }
                         URI uri = testCase.getBaseURI().resolve(files.itemAt(0).toString());
