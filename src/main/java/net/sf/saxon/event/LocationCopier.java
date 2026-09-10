@@ -23,9 +23,11 @@ import net.sf.saxon.om.NodeInfo;
 public class LocationCopier implements CopyInformee {
     
     private final boolean wholeDocument;
+    private final String systemId;
 
-    public LocationCopier(boolean wholeDocument) {
+    public LocationCopier(boolean wholeDocument, String systemId) {
         this.wholeDocument = wholeDocument;
+        this.systemId = systemId;
     }
 
     /**
@@ -47,6 +49,10 @@ public class LocationCopier implements CopyInformee {
         int lineNumber = element.getLineNumber();
         int columnNumber = element.getColumnNumber();
         return new Loc(systemId, lineNumber, columnNumber);
+    }
+
+    public String getSystemId() {
+        return systemId;
     }
 }
 

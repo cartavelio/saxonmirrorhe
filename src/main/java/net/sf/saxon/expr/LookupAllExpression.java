@@ -299,6 +299,16 @@ public class LookupAllExpression extends UnaryExpression {
                 }
             }
 
+            @Override
+            public void discharge() {
+                if (level0 != null) {
+                    level0.discharge();
+                }
+                if (level2 != null) {
+                    level2.discharge();
+                }
+            }
+
         };
 
     }
