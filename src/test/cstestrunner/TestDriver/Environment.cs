@@ -792,7 +792,7 @@ namespace TestDriver {
                     //string hrefStr = href.ToString ();
                     string hrefStri = (href.IsFile ? href.LocalPath : hrefStr);
                     Stream stream = new FileStream(hrefStri, FileMode.Open);
-                    
+                    resetActions.Add(env => stream.Close());
                     Saxon.Ejavax.xml.transform.Source sourcei = new Saxon.Ejavax.xml.transform.stream.StreamSource(stream);
 
 
