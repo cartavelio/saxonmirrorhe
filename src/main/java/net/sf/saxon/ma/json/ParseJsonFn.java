@@ -16,6 +16,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
@@ -39,6 +40,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         parseJsonOptions.setAllowedValues("duplicates", "FOJS0005", "reject", "use-first", "use-last");
         parseJsonOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("fallback", SequenceType.makeSequenceType(fallbackType, StaticProperty.EXACTLY_ONE), null);
+        parseJsonOptions.addAllowedOption("null", SequenceType.ANY_SEQUENCE, EmptySequence.getInstance());
         parseJsonOptions.addAllowedOption("number-parser", SequenceType.makeSequenceType(parserType, StaticProperty.EXACTLY_ONE), null);
         return parseJsonOptions;
     }
@@ -74,9 +76,11 @@ public class ParseJsonFn extends JsonToXMLFn {
 
     public static Item parse(String input, Map<String, GroundedValue> options, XPathContext context) throws XPathException {
         JsonParser parser = new JsonParser();
+        GroundedValue nullRepresentation = EmptySequence.getInstance();
         int flags = 0;
         if (options != null) {
             flags = JsonParser.getFlags(options, false, false);
+            nullRepresentation = options.get("null");
         }
         JsonHandlerMap handler = new JsonHandlerMap(context, flags);
         if ((flags & JsonParser.DUPLICATES_RETAINED) != 0) {
@@ -87,6 +91,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         }
         if (options != null) {
             handler.setFallbackFunction(options, context);
+            handler.setNullRepresentation(nullRepresentation);
             parser.setNumberParser(options, context);
         }
         parser.parse(input, flags, handler, context);

@@ -32,6 +32,7 @@ public class JsonHandlerMap extends JsonHandler {
     Stack<Sequence> stack;
 
     protected Stack<String> keys;
+    private GroundedValue nullRepresentation = EmptySequence.getInstance();
 
     public JsonHandlerMap(XPathContext context, int flags) {
         setContext(context);
@@ -39,6 +40,10 @@ public class JsonHandlerMap extends JsonHandler {
         keys = new Stack<>();
         escape = (flags & JsonParser.ESCAPE) != 0;
         charChecker = context.getConfiguration().getValidCharacterChecker();
+    }
+
+    public void setNullRepresentation(GroundedValue representation) {
+        this.nullRepresentation = representation;
     }
 
     @Override
@@ -164,7 +169,7 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void writeNull() {
-        writeItem(EmptySequence.getInstance());
+        writeItem(nullRepresentation);
     }
 
 

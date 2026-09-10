@@ -208,6 +208,8 @@ public class JSONEmitter {
             }
         } else if (item instanceof BooleanValue) {
             emit(item.getStringValue());
+        } else if (item instanceof QNameValue && ((QNameValue)item).getEQName().equals("Q{http://www.w3.org/2005/xpath-functions}null")) {
+            emit("null");
         } else {
             emit('"');
             emit(escape(item.getStringValue()));
