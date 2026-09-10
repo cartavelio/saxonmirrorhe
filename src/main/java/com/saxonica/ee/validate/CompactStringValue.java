@@ -32,7 +32,7 @@ public class CompactStringValue implements AtomicSequence {
     /**
      * Try to make a CompactStringValue for a supplied UnicodeString
      * @param str the supplied string
-     * @return a CompactStringValue if possible (specifically, if the characters are all <= 255); otherwise return null
+     * @return a CompactStringValue if possible (specifically, if the characters are all &lt;= 255); otherwise return null
      */
     public static CompactStringValue tryToMake(UnicodeString str) {
         if (str instanceof Twine8) {
