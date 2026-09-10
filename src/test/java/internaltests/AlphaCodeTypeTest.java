@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
- *  Tests of the NodeInfo interface as implemented by the tinytree
+ *  Test round-trip conversion between sequence types and alpha-codes
  */
 public class AlphaCodeTypeTest {
 
