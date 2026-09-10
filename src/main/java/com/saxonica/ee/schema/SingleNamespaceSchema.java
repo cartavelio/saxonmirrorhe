@@ -23,7 +23,7 @@ public class SingleNamespaceSchema extends PreparedSchema {
      * Sets the target namespace for this Schema
      *
      * @param targetNamespace the target namespace for this Schema
-     * @see 2.7 XML Schema Part 1: Structures
+     * @see "2.7 XML Schema Part 1: Structures"
      */
 
     public void setTargetNamespace(NamespaceUri targetNamespace) {
