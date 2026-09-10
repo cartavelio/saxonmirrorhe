@@ -287,6 +287,12 @@ public class RenameExpression extends BasicUpdatingExpression {
                                 .withXPathContext(context)
                                 .withLocation(expr.getLocation());
                     }
+                    if (localName.equalsIgnoreCase("xml")) {
+                        throw new XPathException("Processing instruction cannot be named 'xml'")
+                                .withErrorCode("XQDY0064")
+                                .withXPathContext(context)
+                                .withLocation(expr.getLocation());
+                    }
                 }
 
                 //int nameCode = context.getConfiguration().getNamePool().allocate(prefix, uri, localName);
