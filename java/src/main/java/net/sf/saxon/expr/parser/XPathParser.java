@@ -4560,10 +4560,15 @@ public class XPathParser {
         if (prefixArgument != null) {
             args.add(prefixArgument);
         }
-        
-        StructuredQName nominalName = scanOnly
-                ? NamespaceUri.SAXON.qName("dummy")
-                : qNameParser.parse(fname,NamespaceUri.NULL);
+
+        StructuredQName nominalName = null;
+        try {
+            nominalName = scanOnly
+                    ? NamespaceUri.SAXON.qName("dummy")
+                    : qNameParser.parse(fname,NamespaceUri.NULL);
+        } catch (XPathException e) {
+            grumble(e.getMessage(), e.getErrorCodeQName());
+        }
 
         int placeHolderSequence = 0;
         Map<StructuredQName, Integer> keywordArgs = null;

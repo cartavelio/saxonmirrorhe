@@ -1034,7 +1034,7 @@ public final class Tokenizer {
     public void endEmbeddedExpression() throws XPathException {
         if (inputOffset >= inputLength) {
             throw new XPathException("Reached end of input while processing an embedded expression: last token starts "
-                                             + precedingToken, "XPST0003");
+                                             + precedingToken).asStaticError();
         }
         if (input.charAt(inputOffset++) != '}') {
             throw new AssertionError("Embedded expression must end at '}'");

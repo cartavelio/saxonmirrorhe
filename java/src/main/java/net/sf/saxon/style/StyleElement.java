@@ -800,6 +800,7 @@ public abstract class StyleElement extends ElementImpl {
                                        getCompilation().getCompilerInfo().getCodeInjector());
         } catch (XPathException err) {
             err.maybeSetLocation(allocateLocation());
+            err.maybeSetErrorCode("XPST0003");
             if (err.isReportableStatically()) {
                 compileError(err);
             }
