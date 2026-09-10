@@ -1,4 +1,4 @@
-from saxoncee import *
+from saxonc@@edition@@ import *
 import os
 from lxml import etree
 import urllib.parse

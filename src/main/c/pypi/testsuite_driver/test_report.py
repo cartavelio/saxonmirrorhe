@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from saxoncee import *
+from saxonc@@edition@@ import *
 
 from datetime import datetime
 

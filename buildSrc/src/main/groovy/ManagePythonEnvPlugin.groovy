@@ -1,6 +1,8 @@
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.internal.os.OperatingSystem
 
 interface ManagePythonEnvExtension {
@@ -8,6 +10,7 @@ interface ManagePythonEnvExtension {
     Property<String> getSystemPythonBinary()
     Property<String> getVenvPip()
     Property<String> getVenvPython()
+    Property<String> getVenvBinPath()
 }
 
 class ManagePythonEnvPlugin implements Plugin<Project> {
@@ -25,10 +28,13 @@ class ManagePythonEnvPlugin implements Plugin<Project> {
         }
 
         def venvDir = project.branches.current.map { "py_venvs/${it}" }
-        extension.venvDirPath.convention(project.layout.buildDirectory.file(venvDir).map { it.toString() })
+        def venvBinDir = venvDir.map { "${it}/${pythonBinFolder}" }
+        def venvBinDirectoryProvider = project.layout.buildDirectory.dir(venvBinDir)
 
         extension.systemPythonBinary.convention(sysPythonBinary)
-        extension.venvPip.convention(project.layout.buildDirectory.dir(venvDir).map { it.dir(pythonBinFolder) }.map { it.file("pip") }.map { it.toString() })
-        extension.venvPython.convention(project.layout.buildDirectory.dir(venvDir).map { it.dir(pythonBinFolder) }.map { it.file("python") }.map { it.toString() })
+        extension.venvDirPath.convention(project.layout.buildDirectory.file(venvDir).map { it.toString() })
+        extension.venvBinPath.convention(venvBinDirectoryProvider.map { it.asFile.toString() })
+        extension.venvPip.convention(venvBinDirectoryProvider.map { it.file("pip") }.map { it.toString() })
+        extension.venvPython.convention(venvBinDirectoryProvider.map { it.file("python") }.map { it.toString() })
     }
 }
