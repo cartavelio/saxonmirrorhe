@@ -126,8 +126,10 @@ public class DocumentFn extends SystemFunction implements Callable {
         map.stylesheetURI = getStaticBaseUriString();
         map.packageData = getRetainedStaticContext().getPackageData();
         map.locator = location;
-        map.parseOptions = map.parseOptions.withSpaceStrippingRule(
-                ((StylesheetPackage)getRetainedStaticContext().getPackageData()).getSpaceStrippingRule());
+        if (map.packageData instanceof StylesheetPackage) {
+            map.parseOptions = map.parseOptions.withSpaceStrippingRule(
+                    ((StylesheetPackage) map.packageData).getSpaceStrippingRule());
+        }
 
         ItemMappingIterator iter = new ItemMappingIterator(hrefSequence, map);
 
@@ -492,7 +494,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         }
 
         SpaceStrippingRule rule = options.getSpaceStrippingRule();
-        if (rule == null) {
+        if (rule == null && packageData instanceof StylesheetPackage) {
             rule = ((StylesheetPackage)packageData).getSpaceStrippingRule();
         }
 
