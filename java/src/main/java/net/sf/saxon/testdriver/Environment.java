@@ -369,10 +369,10 @@ public class Environment implements ResourceResolver {
                     Path dest = Paths.get(sandpit.getAbsolutePath());
                     copyFolder(source, dest);
                     environment.sandpit = sandpit;
-                    System.err.println("Sandpit: " + tempdir.getAbsolutePath());
+                    System.err.println("Sandpit: " + sandpit.getAbsolutePath());
 
-                    System.setProperty("user.dir", tempdir.getAbsolutePath());
-                    System.setProperty("expath.base.directory", tempdir.getAbsolutePath());
+                    System.setProperty("user.dir", sandpit.getAbsolutePath());
+                    System.setProperty("expath.base.directory", sandpit.getAbsolutePath());
                 } else {
                     System.err.println("Failed to make temporary directories for sandpit");
                 }
