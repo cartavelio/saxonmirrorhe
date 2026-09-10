@@ -118,14 +118,12 @@ public class StandardSchemaResolver implements SchemaURIResolver {
             locations = null;
         }
 
-        //#if CSHARP==false
         if ((locations == null || locations.length == 0) && targetNamespace != null) {
             Source source = resolveNamespaceURI(targetNamespace, baseURI);
             if (source != null) {
                 return new Source[]{source};
             }
         }
-        //#endif
 
         if (locations == null || locations.length == 0) {
             return EMPTY_SOURCE_ARRAY;
