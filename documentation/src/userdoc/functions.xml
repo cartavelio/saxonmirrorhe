@@ -380,6 +380,21 @@
           zero-length string (or untypedAtomic). In all other cases the result is an error.</p>
       </description>
     </function>
+
+    <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <name namespace="http://www.w3.org/2005/xpath-functions">build-dateTime</name>
+      <signatures>
+        <proto return-type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?">
+          <arg desc="The date time record" name="value"/>
+            </proto>
+         </signatures>
+         <status-ok/>
+         <saxon-edition>EE_13</saxon-edition>
+         <description>
+            <p>Constructs a date time value from the values of the components specified.</p>
+         </description>
+      </function>
+
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">build-uri</name>
       <signatures>
@@ -468,7 +483,7 @@
       <signatures>
         <proto return-type="xs:dayTimeDuration">
           <arg name="value" type="xs:dateTime" desc="The input date/time"/>
-          <arg name="place" type="xs:string" default="()" desc="An IANA timezone name"/>
+          <arg name="place" type="xs:string?" default="()" desc="An IANA timezone name"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
@@ -540,8 +555,6 @@
       <signatures>
         <proto return-type="xs:boolean">
           <arg name="collation" type="xs:string" desc="A collation URI"/>
-          <arg name="usage" type="enum('compare', 'key', 'substring')*" default="()" 
-            desc="A sequence indicating the intended usage of the collation URI"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
@@ -1471,8 +1484,8 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">element-to-map-plan</name>
       <signatures>
-        <proto return-type="map(xs:string, record(*))">
-          <arg name="input" type="(document-node() | element(*))*" 
+        <proto return-type="map(xs:string, (fn:element-conversion-plan-record|fn:attribute-conversion-plan-record)">
+          <arg name="input" type="(document-node() | element())*" 
             desc="An input sequence of element and document nodes"/>
           <in-spec>xpath40</in-spec>
         </proto>
@@ -2046,7 +2059,7 @@
           <arg name="value" type="xs:numeric?" desc="The number to be formatted"/>
           <arg name="picture" type="xs:string"
             desc="Picture showing how the number is to be formatted"/>
-          <arg name="options" type="(xs:string | map(*))?" default="()"
+          <arg name="options" type="(xs:string | map(*))?" default="{}"
             desc="Name of a decimal format definition defined in the context"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -2645,7 +2658,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">invisible-xml</name>
       <signatures>
         <proto return-type="fn(xs:string) as item()">
-          <arg name="grammar" type="(xs:string | element(ixml))?" default="()" 
+          <arg name="grammar" type="(xs:string | element(Q{}ixml))?" default="()" 
             desc="The input grammar"/>
           <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
           <in-spec>xpath40</in-spec>
@@ -2822,7 +2835,7 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">jtree</name>
       <signatures>
-        <proto return-type="jnode((map(*)|array(*)))">
+        <proto return-type="jnode((), (map(*)|array(*)))">
           <arg name="input" type="(map(*)|array(*))" desc="The input map or array"/>
           <in-spec>xpath40</in-spec>
         </proto>
@@ -3813,6 +3826,22 @@
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <name namespace="http://www.w3.org/2005/xpath-functions">parts-of-dateTime</name>
+      <signatures>
+        <proto>
+          <arg desc="The date time value"
+               name="value"
+               type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?"/>
+        </proto>
+      </signatures>
+      <status_oka>
+      <saxon-edition>EE_13</saxon-edition>
+      <description>
+        <p>FIXME:</p>
+        <p>Returns the components of a date time value.</p>
+      </description>
+    </function>
+    <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">path</name>
       <signatures>
         <proto return-type="xs:string?">
@@ -4005,9 +4034,9 @@
           <arg name="pattern" type="xs:string"
             desc="The regular expression matching parts of the string that are to be replaced"/>
           <arg name="replacement"
-            type="(xs:string | fn(xs:untypedAtomic, xs:untypedAtomic*) as item()?)?" default="()"
+            type="(xs:string | fn(xs:untypedAtomic, xs:untypedAtomic*) as item()?)?" default='""'
             desc="The replacement string"/>
-          <arg name="flags" type="xs:string?" default="''"
+          <arg name="flags" type="xs:string?" default='""'
             desc="Flags controlling how the regular expression is interpreted"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
@@ -4313,7 +4342,7 @@
           <arg name="input" type="item()*"
             desc="The input (typically a document or element node) to be serialized"/>
           <arg name="options" type="(element(output:serialization-parameters) | map(*))?"
-            default="()" desc="Serialization parameters"/>
+            default="{}" desc="Serialization parameters"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
           <in-spec>xpath40</in-spec>
@@ -4357,11 +4386,11 @@
       <signatures>
         <proto return-type="item()*">
           <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="start" type="xs:integer?" default="()" 
+          <arg name="start" type="xs:integer?" default="0" 
             desc="The position of the first item from the input sequence to be included in the result"/>
-          <arg name="end" type="xs:integer?" default="()" 
+          <arg name="end" type="xs:integer?" default="0" 
             desc="The position of the last item from the input sequence to be included in the result"/>
-          <arg name="step" type="xs:integer?" default="()" 
+          <arg name="step" type="xs:integer?" default="0" 
             desc="Step between positions to include in the result"/>
           <in-spec>xpath40</in-spec>
         </proto>
@@ -4644,9 +4673,9 @@
       <signatures>
         <proto return-type="item()*">
           <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="start" type="xs:double"
+          <arg name="start" type="xs:numeric"
             desc="The position of the first item from the input sequence to be included in the result"/>
-          <arg name="length" type="xs:double?" default="()"
+          <arg name="length" type="xs:numeric?" default="()"
             desc="The number of items to be included in the result"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
@@ -4763,6 +4792,20 @@
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns the total of a sequence of numbers or durations.</p>
+      </description>
+    </function>
+    <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <name namespace="http://www.w3.org/2005/xpath-functions">system-properties</name>
+      <signatures>
+        <proto return-type="map(xs:QName, xs:anyAtomicType)"/>
+      </signatures>
+      <status>
+        <p>FIXME:</p>
+      </status>
+      <saxon-edition>EE_13</saxon-edition>
+      <description>
+        <p>FIXME:</p>
+        <p>Returns information about the processor.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -5270,7 +5313,7 @@
       <signatures>
         <proto return-type="xs:string?">
           <arg name="source" type="xs:string?" desc="The URI of the text file to be read"/>
-          <arg name="options" type="(xs:string | map(*))?" default="()"
+          <arg name="options" type="(xs:string | map(*))?" default="{}"
             desc="The encoding to be assumed for the text file"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -5297,7 +5340,7 @@
       <signatures>
         <proto return-type="xs:boolean">
           <arg name="source" type="xs:string?" desc="The URI of the text file to be read"/>
-          <arg name="options" type="(xs:string | map(*))?" default="()"
+          <arg name="options" type="(xs:string | map(*))?" default="{}"
             desc="The encoding to be assumed for the text file"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -5328,7 +5371,7 @@
       <signatures>
         <proto return-type="xs:string*">
           <arg name="source" type="xs:string?" desc="The uri of the text file to be read"/>
-          <arg name="options" type="(xs:string | map(*))?" default="()"
+          <arg name="options" type="(xs:string | map(*))?" default="{}"
             desc="The encoding to be assumed for the text file"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -5456,7 +5499,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">xsd-validator</name>
       <signatures>
         <proto
-          return-type="function((document-node(*) | element(*) | attribute(*))?) as record(is-valid as xs:boolean, typed-node? as node(), error-details? as record(*)*)">
+          return-type="function((document-node(*) | element() | attribute())?) as record(is-valid as xs:boolean, typed-node? as node(), error-details? as record(*)*)">
           <arg name="options" type="map(*)?" default="{}" 
             desc="Options map providing details of an XSD schema"/>
           <in-spec>xpath40</in-spec>
@@ -6557,7 +6600,6 @@
       <signatures>
         <proto return-type="array(*)">
           <arg name="arrays" type="array(*)*" desc="The input arrays"/>
-          <arg name="separator" type="array(*)?" default="()"/>
           <in-spec>xpath31</in-spec>
           <in-spec>xpath40</in-spec>
         </proto>
@@ -6686,11 +6728,11 @@
       <signatures>
         <proto return-type="array(*)">
           <arg name="array" type="array(*)" desc="The input array"/>
-          <arg name="start" type="xs:integer?" default="()" 
+          <arg name="start" type="xs:integer?" default="0" 
             desc="The position of the first item from the input array to be included in the result"/>
-          <arg name="end" type="xs:integer?" default="()" 
+          <arg name="end" type="xs:integer?" default="0" 
             desc="The position of the last item from the input array to be included in the result"/>
-          <arg name="step" type="xs:integer?" default="()" 
+          <arg name="step" type="xs:integer?" default="0" 
             desc="Step between positions to include in the result"/>
           <in-spec>xpath40</in-spec>
         </proto>
