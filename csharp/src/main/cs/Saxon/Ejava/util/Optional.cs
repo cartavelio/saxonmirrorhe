@@ -46,7 +46,7 @@ namespace Saxon.Ejava.util {
 
         public override bool Equals(object other) {
             if (other is Optional<T> o) {
-                return _present == o._present && _value.Equals(o._value);
+                return _present == o._present && (!_present || _value.Equals(o._value));
             }
             else {
                 return false;
