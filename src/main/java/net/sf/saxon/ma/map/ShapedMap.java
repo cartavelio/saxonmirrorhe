@@ -2,6 +2,8 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -21,7 +23,7 @@ import java.util.List;
  * in a consistent order.</p>
  */
 
-public class ShapedMap extends MapItem {
+public class ShapedMap extends StringMap {
 
     private final GroundedValue[] values;
     private final Shape shape;
@@ -41,6 +43,10 @@ public class ShapedMap extends MapItem {
         this.values = values;
     }
 
+    public void initialPut(int slot, GroundedValue value) {
+        values[slot] = value;
+    }
+
     /**
      * Get an entry from the Map
      *
@@ -50,12 +56,57 @@ public class ShapedMap extends MapItem {
     @Override
     public GroundedValue get(AtomicValue key) {
         if (key instanceof StringValue) {
-            int slot = shape.getSlot(key.getUnicodeStringValue());
-            if (slot >= 0) {
-                return values[slot];
-            }
+            return get(key.getUnicodeStringValue());
         }
         return null;
+    }
+
+    /**
+     * Get an entry from the map, supplying a Java String as the key
+     *
+     * @param key the key
+     * @return the relevant entry if present, or null if absent.
+     */
+    @Override
+    public GroundedValue get(String key) {
+        return get(StringView.of(key));
+    }
+
+    /**
+     * Get an entry from the map, supplying a {@link UnicodeString} as the key
+     *
+     * @param key the key
+     * @return the relevant entry if present, or null if absent.
+     */
+    @Override
+    public GroundedValue get(UnicodeString key) {
+        int slot = shape.getSlot(key);
+        if (slot >= 0) {
+            return values[slot];
+        }
+        return null;
+    }
+
+    /**
+     * Ask whether a given string is present as a key in the map
+     *
+     * @param key the key being tested
+     * @return true if the key is present
+     */
+    @Override
+    public boolean contains(String key) {
+        return get(key) != null;
+    }
+
+    /**
+     * Ask whether a given string is present as a key in the map
+     *
+     * @param key the key being tested
+     * @return true if the key is present
+     */
+    @Override
+    public boolean contains(UnicodeString key) {
+        return get(key) != null;
     }
 
     /**

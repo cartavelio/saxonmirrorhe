@@ -200,7 +200,7 @@ public abstract class Converter {
 
         @Override
         public AtomicValue convert(/*@NotNull*/ AtomicValue input) {
-            return input.copyAsSubType(newTypeAnnotation);
+            return input.withMetadata(newTypeAnnotation);
         }
 
     }
@@ -244,7 +244,7 @@ public abstract class Converter {
             ValidationFailure f = newType.validate(input, lexicalForm, getConversionRules());
             if (f == null) {
                 // success
-                return input.copyAsSubType(newType);
+                return input.withMetadata(newType);
             } else {
                 // validation failed
                 if (errorCode != null) {

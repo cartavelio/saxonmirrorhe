@@ -15,6 +15,7 @@ import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.IdentityComparable;
@@ -50,11 +51,11 @@ import java.util.Objects;
 public abstract class AtomicValue
         implements Item, AtomicSequence, ConversionResult, IdentityComparable {
 
-    protected final AtomicType typeLabel;
+    protected final AtomicMetadata metadata;
 
-    public AtomicValue(AtomicType typeLabel) {
-        Objects.requireNonNull(typeLabel);
-        this.typeLabel = typeLabel;
+    public AtomicValue(AtomicMetadata metadata) {
+        Objects.requireNonNull(metadata);
+        this.metadata = metadata;
     }
 
     /**
@@ -98,7 +99,7 @@ public abstract class AtomicValue
      */
 
     public boolean isUntypedAtomic() {
-        return typeLabel == BuiltInAtomicType.UNTYPED_ATOMIC;
+        return getItemType() == BuiltInAtomicType.UNTYPED_ATOMIC;
     }
 
     /**
@@ -266,7 +267,7 @@ public abstract class AtomicValue
     public UnicodeString getUnicodeStringValue() {
         UnicodeString cs = getPrimitiveStringValue();
         try {
-            return typeLabel.postprocess(cs);
+            return getItemType().postprocess(cs);
         } catch (XPathException err) {
             // Ignore any XPath errors that occur during postprocessing
             return cs;
@@ -310,7 +311,7 @@ public abstract class AtomicValue
 
     /*@NotNull*/
     public final AtomicType getItemType() {
-        return typeLabel;
+        return metadata.getType();
     }
 
     /**
@@ -348,12 +349,13 @@ public abstract class AtomicValue
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
-     *                  the value actually conforms to this type.
+     * @param metadata the type annotation and/or label of the new copy.
+     *                 The caller is responsible for checking that the value
+     *                 actually conforms to the given type.
      * @return the copied value
      */
 
-    public abstract AtomicValue copyAsSubType(AtomicType typeLabel);
+    public abstract AtomicValue withMetadata(AtomicMetadata metadata);
 
     /**
      * Test whether the value is the special value NaN
@@ -497,7 +499,7 @@ public abstract class AtomicValue
      */
 
     public String show() {
-        return typeLabel + "(\"" + this.getUnicodeStringValue() + "\")";
+        return getItemType() + "(\"" + this.getUnicodeStringValue() + "\")";
     }
 
     /**
@@ -532,5 +534,14 @@ public abstract class AtomicValue
         return Genre.ATOMIC;
     }
 
+    /**
+     * Get the item's label, if there is one. See the 4.0 version of the XDM model.
+     *
+     * @return the item's label (as a map) if it has one, or null otherwise
+     */
+    @Override
+    public StringMap getLabel() {
+        return metadata.getLabel();
+    }
 }
 

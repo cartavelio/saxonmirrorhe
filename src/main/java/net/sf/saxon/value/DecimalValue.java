@@ -8,7 +8,7 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.AtomicMetadata;
 
 import java.math.BigDecimal;
 
@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 
 public abstract class DecimalValue extends NumericValue {
 
-    public DecimalValue(AtomicType typeLabel) {
+    public DecimalValue(AtomicMetadata typeLabel) {
         super(typeLabel);
     }
     /**

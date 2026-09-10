@@ -13,6 +13,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationFailure;
@@ -78,17 +79,17 @@ public final class BigIntegerValue extends IntegerValue {
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
+     * @param metadata the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      */
 
     /*@NotNull*/
     @Override
-    public AtomicValue copyAsSubType(/*@NotNull*/ AtomicType typeLabel) {
-        if (typeLabel.getPrimitiveType() == StandardNames.XS_INTEGER) {
-            return new BigIntegerValue(value, typeLabel);
+    public AtomicValue withMetadata(/*@NotNull*/ AtomicMetadata metadata) {
+        if (metadata.getType().getPrimitiveType() == StandardNames.XS_INTEGER) {
+            return new BigIntegerValue(value, metadata.getType());
         } else {
-            return new BigDecimalValue(new BigDecimal(value), typeLabel);
+            return new BigDecimalValue(new BigDecimal(value), metadata);
         }
 
     }
@@ -520,7 +521,7 @@ public final class BigIntegerValue extends IntegerValue {
     @Override
     public IntegerValue reduce() {
         if (compareTo(Long.MAX_VALUE) < 0 && compareTo(Long.MIN_VALUE) > 0) {
-            return new Int64Value(longValue(), typeLabel);
+            return new Int64Value(longValue(), getItemType());
         }
         return this;
     }

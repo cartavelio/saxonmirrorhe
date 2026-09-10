@@ -696,6 +696,11 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
         return Optional.of("Evaluation of the supplied expression will always fail");
     }
 
+    @Override
+    public AtomicType getType() {
+        return this;
+    }
+
     //#ifdefined SCHEMA
     /**
      * Get the schema component in the form of a function item. This allows schema information

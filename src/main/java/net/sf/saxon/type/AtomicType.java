@@ -8,6 +8,7 @@
 package net.sf.saxon.type;
 
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceUri;
@@ -24,7 +25,7 @@ import java.util.Optional;
  * for items in a sequence) and a SchemaType (a possible type for validating and
  * annotating nodes).
  */
-public interface AtomicType extends SimpleType, PlainType, CastingTarget {
+public interface AtomicType extends SimpleType, PlainType, CastingTarget, AtomicMetadata {
 
     /**
      * Determine the Genre (top-level classification) of this type
@@ -178,6 +179,15 @@ public interface AtomicType extends SimpleType, PlainType, CastingTarget {
             at = at.getBaseType();
         } while (at != BuiltInAtomicType.ANY_ATOMIC);
         return 1 - factor;
+    }
+
+    /**
+     * An atomic type can be used directly as the metadata associated with an atomic value.
+     * In this case the atomic value has no label.
+     */
+
+    default StringMap getLabel() {
+        return null;
     }
 }
 

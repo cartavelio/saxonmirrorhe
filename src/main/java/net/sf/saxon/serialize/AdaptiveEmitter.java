@@ -7,6 +7,7 @@
 
 package net.sf.saxon.serialize;
 
+import net.sf.saxon.ma.pin.LabeledItem;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ReceiverWithOutputProperties;
 import net.sf.saxon.event.SequenceWriter;
@@ -126,6 +127,9 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
     }
 
     private void serializeItem(Item item) throws XPathException {
+        if (item instanceof LabeledItem) {
+            item = ((LabeledItem)item).getSubject();
+        }
         if (item instanceof AtomicValue) {
             emit(serializeAtomicValue((AtomicValue) item));
         } else if (item instanceof NodeInfo) {
