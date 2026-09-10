@@ -10,4 +10,9 @@
       <reason>Imposing a temporary restriction on default function parameters until spec clarified.</reason>
    </exception>
    
+   <exception test-case="next-match-420" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2023-03-30"/>
+      <reason>Default priorities on record type patterns are not implemented.</reason>
+   </exception>
+   
 </exceptions>
