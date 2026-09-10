@@ -16,14 +16,13 @@ import net.sf.saxon.ma.json.JsonToXMLFn;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.pattern.PortableNamedXNodeType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.DocumentNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.type.Type;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
@@ -168,7 +167,10 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         register("serialize", 2, e -> {
             return e.populate( Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
                     .arg(0, AnyItemType.INSTANCE, STAR, null)
-                    .arg(1, Type.ITEM_TYPE, OPT, null)
+                    .arg(1, ChoiceItemType.of(
+                            new PortableNamedXNodeType(Type.ELEMENT, NamespaceUri.OUTPUT.qName("serialization-parameters")),
+                            MapType.ANY_MAP_TYPE), OPT, null)
+                    // second argument declared as (element(output:serialization-parameters) | map(*))?
                     .setOptionDetails(Serialize.makeOptionsParameter(31));
         });
 

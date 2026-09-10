@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Implementation of fn:serialize() as defined in XPath 3.1
+ * Implementation of fn:serialize() as defined in XPath 3.1/4.0
  */
 
 public class Serialize extends SystemFunction implements Callable {

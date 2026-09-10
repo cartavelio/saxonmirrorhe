@@ -17,7 +17,7 @@ import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NamespaceUri;
@@ -882,7 +882,7 @@ public class AlphaCode {
                     }
                 } else {
                     List<SequenceType> fieldTypes = new ArrayList<>(tree.argTypes.size());
-                    RecordTest recordTest = new RecordTest();
+                    RecordType recordTest = new RecordType();
                     for (AlphaCodeTree t : tree.argTypes) {
                         fieldTypes.add(sequenceTypeFromTree(t, schema));
                     }
@@ -1003,16 +1003,16 @@ public class AlphaCode {
                 if (memberType != SequenceType.ANY_SEQUENCE) {
                     result.valueType = makeTree(memberType);
                 }
-            } else if (primary instanceof RecordTest) {
-                result.extensibleTupleType = ((RecordTest) primary).isExtensible();
+            } else if (primary instanceof RecordType) {
+                result.extensibleTupleType = ((RecordType) primary).isExtensible();
                 result.optionalFieldNames = new HashSet<>();
                 result.fieldNames = new ArrayList<>();
                 result.argTypes = new ArrayList<>();
-                for (String s : ((RecordTest) primary).getFieldNames()) {
+                for (String s : ((RecordType) primary).getFieldNames()) {
                     result.fieldNames.add(s);
-                    SequenceType fieldType = ((RecordTest) primary).getFieldType(s);
+                    SequenceType fieldType = ((RecordType) primary).getFieldType(s);
                     result.argTypes.add(makeTree(fieldType));
-                    if (((RecordTest) primary).isOptionalField(s)) {
+                    if (((RecordType) primary).isOptionalField(s)) {
                         result.optionalFieldNames.add(s);
                     }
                 }

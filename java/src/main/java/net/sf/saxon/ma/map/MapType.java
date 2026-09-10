@@ -265,7 +265,7 @@ public class MapType extends AnyFunctionType {
         if (other instanceof MapType f2) {
             return keyType.equals(f2.keyType) && valueType.equals(f2.valueType) && mustBeEmpty == f2.mustBeEmpty;
         }
-        return this == MapType.ANY_MAP_TYPE && other instanceof RecordTest r && r.isExtensible() && r.getSize() == 0;
+        return this == MapType.ANY_MAP_TYPE && other instanceof RecordType r && r.isExtensible() && r.getSize() == 0;
     }
 
     /**
@@ -292,7 +292,7 @@ public class MapType extends AnyFunctionType {
             return Affinity.SUBSUMED_BY;
         } else if (other.isArrayType()) {
             return Affinity.DISJOINT;
-        } else if (other instanceof RecordTest) {
+        } else if (other instanceof RecordType) {
             return Subsumption.inverseRelationship(other.relationship(this));
         } else if (other instanceof MapType) {
             // See bug 3720. Two map types can never be disjoint because the empty

@@ -16,6 +16,8 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNodeType;
+import net.sf.saxon.ma.jnode.RootJNodeType;
+import net.sf.saxon.ma.jnode.SpecificJNodeType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
@@ -38,6 +40,7 @@ import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.GNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -752,47 +755,56 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         if (test == null) {
             test = AnyGNodeType.getInstance();
         }
-        if (test instanceof SelectorTest && firstInPath) {
-            test = ((SelectorTest)test).asXNodeTest(config);
-        }
-        if (test instanceof AnyXNodeType
-                && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
-            test = MultipleNodeKindTest.CHILD_NODE;
-        }
-        int kind = test.getItemType().getPrimitiveType();
-        if (axis == AxisInfo.SELF) {
-            pat = new NodeTestPattern(test);
-        } else if (axis == AxisInfo.ATTRIBUTE) {
-            if (kind == Type.XNODE || kind == Type.GNODE) {
-                // attribute::node() matches any attribute, and only an attribute
-                pat = new NodeTestPattern(NodeKindType.ATTRIBUTE);
-            } else if (!AxisInfo.containsNodeKind(axis, kind)) {
-                // for example, attribute::comment()
-                pat = new ItemTypePattern(ErrorType.getInstance());
-            } else {
-                // TODO: a NodeTestPattern only matches XNodes, but this turns out to be OK with
-                //  template rules because the code for compiling template rules expands it to a union
-                //  pattern. But it might not be OK for patterns in other contexts.
-                pat = new NodeTestPattern(test);
-            }
-        } else if (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF) {
-            if (!AxisInfo.containsNodeKind(axis, kind)) {
-                pat = new ItemTypePattern(ErrorType.getInstance());
-            } else {
-                pat = new NodeTestPattern(test);
-            }
-        } else if (axis == AxisInfo.NAMESPACE) {
-            if (kind == Type.XNODE) {
-                // namespace::node() matches any namespace, and only a namespace
-                pat = new NodeTestPattern(NodeKindType.NAMESPACE);
-            } else if (!AxisInfo.containsNodeKind(axis, kind)) {
-                // for example, namespace::comment()
-                pat = new ItemTypePattern(ErrorType.getInstance());
-            } else {
-                pat = new NodeTestPattern(test);
-            }
+        if (test instanceof SpecificJNodeType sjt) {
+            pat = new JNodePattern(sjt.getSelector(), sjt.getValueType());
+        } else if (test instanceof RootJNodeType rjt) {
+            pat = new JNodePattern(null, rjt.getValueType());
+        } else if (test instanceof AnyJNodeType ajt) {
+            pat = new JNodePattern(null, SequenceType.ANY_SEQUENCE);
         } else {
-            throw new XPathException("Only downwards axes are allowed in a pattern", "XTSE0340");
+
+            if (test instanceof SelectorTest && firstInPath) {
+                test = ((SelectorTest) test).asXNodeTest(config);
+            }
+            if (test instanceof AnyXNodeType
+                    && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
+                test = MultipleNodeKindTest.CHILD_NODE;
+            }
+            int kind = test.getItemType().getPrimitiveType();
+            if (axis == AxisInfo.SELF) {
+                pat = new NodeTestPattern(test);
+            } else if (axis == AxisInfo.ATTRIBUTE) {
+                if (kind == Type.XNODE || kind == Type.GNODE) {
+                    // attribute::node() matches any attribute, and only an attribute
+                    pat = new NodeTestPattern(NodeKindType.ATTRIBUTE);
+                } else if (!AxisInfo.containsNodeKind(axis, kind)) {
+                    // for example, attribute::comment()
+                    pat = new ItemTypePattern(ErrorType.getInstance());
+                } else {
+                    // TODO: a NodeTestPattern only matches XNodes, but this turns out to be OK with
+                    //  template rules because the code for compiling template rules expands it to a union
+                    //  pattern. But it might not be OK for patterns in other contexts.
+                    pat = new NodeTestPattern(test);
+                }
+            } else if (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF) {
+                if (!AxisInfo.containsNodeKind(axis, kind)) {
+                    pat = new ItemTypePattern(ErrorType.getInstance());
+                } else {
+                    pat = new NodeTestPattern(test);
+                }
+            } else if (axis == AxisInfo.NAMESPACE) {
+                if (kind == Type.XNODE) {
+                    // namespace::node() matches any namespace, and only a namespace
+                    pat = new NodeTestPattern(NodeKindType.NAMESPACE);
+                } else if (!AxisInfo.containsNodeKind(axis, kind)) {
+                    // for example, namespace::comment()
+                    pat = new ItemTypePattern(ErrorType.getInstance());
+                } else {
+                    pat = new NodeTestPattern(test);
+                }
+            } else {
+                throw new XPathException("Only downwards axes are allowed in a pattern", "XTSE0340");
+            }
         }
         ExpressionTool.copyLocationInfo(this, pat);
         return pat;

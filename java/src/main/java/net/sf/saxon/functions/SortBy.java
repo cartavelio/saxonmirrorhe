@@ -17,7 +17,7 @@ import net.sf.saxon.expr.sort.DescendingComparer;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.arrays.ArraySort;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -46,10 +46,10 @@ public class SortBy extends SystemFunction {
 
     public static final FunctionItemType keyFunctionType =
         new SpecificFunctionType(SequenceType.SINGLE_ITEM, SequenceType.ATOMIC_SEQUENCE);
-    public static RecordTest sortKeyRecord = RecordTest.nonExtensible(
-            new RecordTest.Field("key", SequenceType.optional(keyFunctionType), true),
-            new RecordTest.Field("collation", SequenceType.OPTIONAL_STRING, true),
-            new RecordTest.Field("order", SequenceType.optional(EnumerationUnionType.of("ascending", "descending")), true)
+    public static RecordType sortKeyRecord = RecordType.nonExtensible(
+            new RecordType.Field("key", SequenceType.optional(keyFunctionType), true),
+            new RecordType.Field("collation", SequenceType.OPTIONAL_STRING, true),
+            new RecordType.Field("order", SequenceType.optional(EnumerationUnionType.of("ascending", "descending")), true)
     );
 
     public static Callable DATA_FN =

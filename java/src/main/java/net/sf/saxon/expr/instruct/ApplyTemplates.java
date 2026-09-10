@@ -627,10 +627,27 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
                         TailCall tc = thisMode.applyTemplates(params, tunnels, separator, output, c2, expr.getLocation());
                         dispatchTailCall(tc);
                     } catch (StackOverflowError e) {
-                        throw new XPathException.StackOverflow(
-                                "Too many nested apply-templates calls. The stylesheet may be looping.",
-                                SaxonErrorCode.SXLM0001, expr.getLocation())
-                                .withXPathContext(context);
+                        int nestedTemplates = 0;
+                        try {
+                            XPathContext cx = context;
+                            while (cx != null && nestedTemplates <= 1000) {
+                                if (cx.getCurrentComponent().getActor() instanceof Mode) {
+                                    nestedTemplates++;
+                                    cx = context.getCaller();
+                                }
+                            }
+                        } catch (Exception e1) {
+                            // ignore secondary error
+                        }
+
+                        if (nestedTemplates >= 1000) {
+                            throw new XPathException.StackOverflow(
+                                    "Too many nested apply-templates calls. Possible infinite recursion.",
+                                    SaxonErrorCode.SXLM0001, expr.getLocation())
+                                    .withXPathContext(context);
+                        } else {
+                            throw e;
+                        }
                     }
                     pipe.setXPathContext(context);
                     return null;

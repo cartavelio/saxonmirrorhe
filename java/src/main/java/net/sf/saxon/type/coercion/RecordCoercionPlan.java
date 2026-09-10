@@ -3,7 +3,7 @@ package net.sf.saxon.type.coercion;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -39,7 +39,7 @@ public final class RecordCoercionPlan extends CoercionPlan {
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         if (item instanceof MapItem) {
             MapItem suppliedMap = (MapItem) item;
-            RecordTest test = (RecordTest) requiredType;
+            RecordType test = (RecordType) requiredType;
             TypeHierarchy th = request.config.getTypeHierarchy();
             // We need to reorder the entries; so start with those that are present in the record type
             StringMapBuilder builder = new StringMapBuilder(suppliedMap.size());

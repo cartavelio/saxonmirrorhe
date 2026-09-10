@@ -172,9 +172,9 @@ public class FilterExpressionAM extends BinaryExpression
         if (startType instanceof ArrayItemType) {
             entryType = ((ArrayItemType)startType).getMemberType();
         } else if (startType instanceof MapType) {
-            entryType = SequenceType.one(RecordTest.nonExtensible(
-                    new RecordTest.Field("key", SequenceType.SINGLE_ATOMIC, false),
-                    new RecordTest.Field("value", SequenceType.ANY_SEQUENCE, false)));
+            entryType = SequenceType.one(RecordType.nonExtensible(
+                    new RecordType.Field("key", SequenceType.SINGLE_ATOMIC, false),
+                    new RecordType.Field("value", SequenceType.ANY_SEQUENCE, false)));
         }
         ContextItemStaticInfo cit = config.makeContextItemStaticInfo(entryType)
                 .withContextSetter(getStart());

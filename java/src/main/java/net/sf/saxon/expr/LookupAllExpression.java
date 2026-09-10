@@ -105,7 +105,7 @@ public class LookupAllExpression extends UnaryExpression {
 
         ItemType containerType = getBaseExpression().getItemType();
         boolean isArrayLookup = containerType instanceof ArrayItemType;
-        boolean isMapLookup = containerType instanceof MapType || containerType instanceof RecordTest;
+        boolean isMapLookup = containerType instanceof MapType || containerType instanceof RecordType;
 
         if (!isArrayLookup && !isMapLookup) {
             if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT) {

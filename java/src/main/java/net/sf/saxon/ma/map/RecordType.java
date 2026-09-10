@@ -40,7 +40,7 @@ import java.util.function.Supplier;
  * types permit fields other than those listed to appear; non-extensible record types do not.
  * An extensible record type is denoted by record(... ,*).
  */
-public class RecordTest implements FunctionItemType {
+public class RecordType implements FunctionItemType {
 
     private final Map<String, SequenceType> fieldTypes = new HashMap<>();
     private final List<String> fieldNamesInOrder = new ArrayList<>();
@@ -48,10 +48,10 @@ public class RecordTest implements FunctionItemType {
     private boolean _extensible;
     private StructuredQName name;
 
-    public static RecordTest VALUE_RECORD = nonExtensible(
+    public static RecordType VALUE_RECORD = nonExtensible(
             new Field("value", SequenceType.ANY_SEQUENCE, false)
     );
-    public static RecordTest KEY_VALUE_RECORD = nonExtensible(
+    public static RecordType KEY_VALUE_RECORD = nonExtensible(
             new Field("key", SequenceType.ATOMIC_SEQUENCE, false),
             new Field("value", SequenceType.ANY_SEQUENCE, false)
     );
@@ -76,13 +76,13 @@ public class RecordTest implements FunctionItemType {
      * Construct a dummy RecordTest, details to be supplied later
      */
 
-    public RecordTest() {}
+    public RecordType() {}
 
     /**
      * Construct a named RecordTest, details to be supplied later
      */
 
-    public RecordTest(StructuredQName name) {
+    public RecordType(StructuredQName name) {
         this.name = name;
     }
 
@@ -95,7 +95,7 @@ public class RecordTest implements FunctionItemType {
      *                   than those declared)
      */
 
-    public RecordTest(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible) {
+    public RecordType(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible) {
         setDetails(names, types, optionalFieldNames, extensible);
     }
 
@@ -110,7 +110,7 @@ public class RecordTest implements FunctionItemType {
      * @param name               the name of the record type
      */
 
-    public RecordTest(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible, StructuredQName name) {
+    public RecordType(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible, StructuredQName name) {
         setDetails(names, types, optionalFieldNames, extensible);
         this.name = name;
     }
@@ -120,7 +120,7 @@ public class RecordTest implements FunctionItemType {
      * @param fields the fields of the record type
      * @return the record type
      */
-    public static RecordTest extensible(Field... fields) {
+    public static RecordType extensible(Field... fields) {
         return makeRecordTest(true, fields);
     }
 
@@ -129,11 +129,11 @@ public class RecordTest implements FunctionItemType {
      * @param fields the fields of the record type
      * @return the record type
      */
-    public static RecordTest nonExtensible(Field... fields) {
+    public static RecordType nonExtensible(Field... fields) {
         return makeRecordTest(false, fields);
     }
 
-    private static RecordTest makeRecordTest(boolean extensible, Field... fields) {
+    private static RecordType makeRecordTest(boolean extensible, Field... fields) {
         List<String> fieldNames = new ArrayList<>(fields.length);
         List<String> optionalFieldNames = new ArrayList<>(fields.length);
         List<SequenceType> fieldTypes = new ArrayList<>(fields.length);
@@ -144,7 +144,7 @@ public class RecordTest implements FunctionItemType {
                 optionalFieldNames.add(field.name);
             }
         }
-        return new RecordTest(fieldNames, fieldTypes, optionalFieldNames, extensible);
+        return new RecordType(fieldNames, fieldTypes, optionalFieldNames, extensible);
     }
 
     /**
@@ -450,10 +450,10 @@ public class RecordTest implements FunctionItemType {
 
     public boolean equals(Object other) {
         return this == other ||
-                other instanceof RecordTest
-                        && _extensible == ((RecordTest) other)._extensible
-                        && fieldTypes.equals(((RecordTest) other).fieldTypes)
-                        && optionalFields.equals(((RecordTest) other).optionalFields);
+                other instanceof RecordType
+                        && _extensible == ((RecordType) other)._extensible
+                        && fieldTypes.equals(((RecordType) other).fieldTypes)
+                        && optionalFields.equals(((RecordType) other).optionalFields);
     }
 
     @Override
@@ -495,8 +495,8 @@ public class RecordTest implements FunctionItemType {
     public Affinity relationship(FunctionItemType other) {
         if (other == AnyFunctionType.INSTANCE) {
             return Affinity.SUBSUMED_BY;
-        } else if (other instanceof RecordTest) {
-            return recordTypeRelationship((RecordTest)other);
+        } else if (other instanceof RecordType) {
+            return recordTypeRelationship((RecordType)other);
         } else if (other == MapType.ANY_MAP_TYPE) {
             return Affinity.SUBSUMED_BY;
         } else if (other.isArrayType()) {
@@ -537,7 +537,7 @@ public class RecordTest implements FunctionItemType {
         }
     }
 
-    private Affinity recordTypeRelationship(RecordTest other) {
+    private Affinity recordTypeRelationship(RecordType other) {
         Set<String> keys = new HashSet<>(fieldTypes.keySet());
         keys.addAll(other.fieldTypes.keySet());
         boolean foundSubsuming = false;

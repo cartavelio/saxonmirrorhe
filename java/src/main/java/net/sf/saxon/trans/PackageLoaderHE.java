@@ -954,6 +954,10 @@ public class PackageLoaderHE implements IPackageLoader {
                 if (name.startsWith("Q{")) {
                     name = name.substring(1);
                 }
+                if (name.equals("{http://saxon.sf.net/}stylesheet-version")) {
+                    // may be found in old SEF files
+                    name = SaxonOutputKeys.SPEC_VERSION;
+                }
                 String value = propertyElement.getAttributeValue(NamespaceUri.NULL, "value");
                 if (name.startsWith("{http://saxon.sf.net/}") && !name.equals(SaxonOutputKeys.SPEC_VERSION)) {
                     needsPELicense("Saxon output properties");

@@ -2277,7 +2277,7 @@ public class XPathParser {
         List<String> optionalFieldNames = new ArrayList<>(6);
         List<SequenceType> fieldTypes = new ArrayList<>(6);
         boolean extensible = false;
-        RecordTest recordTest = new RecordTest();
+        RecordType recordTest = new RecordType();
         if (t.currentToken != Token.RPAREN) {
             while (true) {
                 String name;
@@ -3925,6 +3925,8 @@ public class XPathParser {
                         ? new RootJNodeType(contentType)
                         : new SpecificJNodeType(selector, contentType);
             } else {
+                expect(Token.RPAREN);
+                nextToken();
                 return new SpecificJNodeType(selector, SequenceType.ANY_SEQUENCE);
             }
 

@@ -225,7 +225,7 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
 
         @Override
         public void append(Item item) throws XPathException {
-            if (RecordTest.VALUE_RECORD.matches(item)) {
+            if (RecordType.VALUE_RECORD.matches(item)) {
                 super.append(item);
             } else if (item instanceof ConstantFunction fn) {
                 // Temporary while the 4.0 spec gets sorted out
@@ -237,7 +237,7 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
 
         @Override
         public void append(Item item, Location locationId, int properties) throws XPathException {
-            if (RecordTest.VALUE_RECORD.matches(item)) {
+            if (RecordType.VALUE_RECORD.matches(item)) {
                 super.append(item, locationId, properties);
             } else if (item instanceof ConstantFunction fn) {
                 // Temporary while the 4.0 spec gets sorted out

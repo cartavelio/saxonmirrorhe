@@ -59,11 +59,11 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         return version >= 40 ? instance40 : instance31;
     }
 
-    public static final RecordTest KVP_TYPE_INEXTENSIBLE = RecordTest.nonExtensible(
+    public static final RecordType KVP_TYPE_INEXTENSIBLE = RecordType.nonExtensible(
             field("key", SequenceType.SINGLE_ATOMIC, false),
             field("value", SequenceType.ANY_SEQUENCE, false));
 
-    public static final RecordTest KVP_TYPE_EXTENSIBLE = RecordTest.extensible(
+    public static final RecordType KVP_TYPE_EXTENSIBLE = RecordType.extensible(
             field("key", SequenceType.SINGLE_ATOMIC, false),
             field("value", SequenceType.ANY_SEQUENCE, false));
 
@@ -330,10 +330,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public void supplyTypeInformation(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType, Expression[] arguments) throws XPathException {
             ItemType it = arguments[0].getItemType();
-            if (it instanceof RecordTest && arguments.length == 2) {
+            if (it instanceof RecordType && arguments.length == 2) {
                 if (arguments[1] instanceof StringLiteral) {
                     String key = ((StringLiteral) arguments[1]).stringify();
-                    if (((RecordTest) it).getFieldType(key) == null) {
+                    if (((RecordType) it).getFieldType(key) == null) {
                         XPathException xe = new XPathException("Field " + key + " is not defined for record type " + it, "SXTT0001");
                         xe.setIsTypeError(true);
                         throw xe;
@@ -359,7 +359,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public ItemType getResultItemType(Expression[] args) {
             if (args.length == 2) {
                 ItemType mapType = args[0].getItemType();
-                if (mapType instanceof RecordTest tit && args[1] instanceof StringLiteral) {
+                if (mapType instanceof RecordType tit && args[1] instanceof StringLiteral) {
                     String key = ((StringLiteral) args[1]).stringify();
                     SequenceType valueType = tit.getFieldType(key);
                     if (valueType == null) {
@@ -384,7 +384,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public int getCardinality(Expression[] args) {
             ItemType mapType = args[0].getItemType();
-            if (mapType instanceof RecordTest tit && args[1] instanceof StringLiteral) {
+            if (mapType instanceof RecordType tit && args[1] instanceof StringLiteral) {
                 String key = ((StringLiteral) args[1]).stringify();
                 SequenceType valueType = tit.getFieldType(key);
                 if (valueType == null) {

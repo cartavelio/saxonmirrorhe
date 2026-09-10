@@ -91,8 +91,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
             return base;
         }
         // In a `choose` expression, we can push the wrapper down to the action branches (whence it may disappear)
-        if (getBaseExpression() instanceof Choose) {
-            Choose choose = (Choose) getBaseExpression();
+        if (getBaseExpression() instanceof Choose choose) {
             for (int i = 0; i < choose.size(); i++) {
                 if (canDeliverAdjacentTextNodes(choose.getAction(i), th)) {
                     AdjacentTextNodeMerger atm2 = new AdjacentTextNodeMerger(choose.getAction(i));
@@ -103,8 +102,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
             return choose;
         }
         // In a Block expression, check whether adjacent text nodes can occur (used in test strmode089)
-        if (getBaseExpression() instanceof Block) {
-            Block block = (Block) getBaseExpression();
+        if (getBaseExpression() instanceof Block block) {
             Operand[] actions = block.getOperanda();
             boolean prevtext = false;
             boolean needed = false;

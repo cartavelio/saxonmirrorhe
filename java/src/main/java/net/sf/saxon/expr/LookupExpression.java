@@ -19,7 +19,7 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.Twine8;
@@ -278,11 +278,11 @@ public class LookupExpression extends BinaryExpression {
                 }
             } else if (isMapLookup) {
                 ItemType mapType = getLhsExpression().getItemType();
-                if (mapType instanceof RecordTest && getRhsExpression() instanceof StringLiteral) {
+                if (mapType instanceof RecordType && getRhsExpression() instanceof StringLiteral) {
                     String fieldName = ((StringLiteral) getRhsExpression()).stringify();
-                    SequenceType fieldType = ((RecordTest) mapType).getFieldType(fieldName);
+                    SequenceType fieldType = ((RecordType) mapType).getFieldType(fieldName);
                     if (fieldType == null) {
-                        return ((RecordTest) mapType).isExtensible() ? StaticProperty.ALLOWS_ZERO_OR_MORE : StaticProperty.ALLOWS_ZERO;
+                        return ((RecordType) mapType).isExtensible() ? StaticProperty.ALLOWS_ZERO_OR_MORE : StaticProperty.ALLOWS_ZERO;
                     } else {
                         return fieldType.getCardinality();
                     }

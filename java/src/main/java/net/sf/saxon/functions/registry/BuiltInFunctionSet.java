@@ -14,7 +14,7 @@ import net.sf.saxon.functions.Concat31;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
@@ -96,8 +96,8 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      * @return the field definition
      */
 
-    protected static RecordTest.Field field(String name, SequenceType type, boolean optional) {
-        return new RecordTest.Field(name, type, optional);
+    protected static RecordType.Field field(String name, SequenceType type, boolean optional) {
+        return new RecordType.Field(name, type, optional);
     }
 
     private final HashMap<String, net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry> functionTable = new HashMap<>(200);

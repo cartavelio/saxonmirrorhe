@@ -305,9 +305,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
             register("of-members", 1, e -> e.populate(ArrayOfMembers::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                    .arg(0, RecordTest.VALUE_RECORD, STAR, null));
+                    .arg(0, RecordType.VALUE_RECORD, STAR, null));
 
-            register("members", 1, e -> e.populate(ArrayMembers::new, RecordTest.VALUE_RECORD, STAR, 0)
+            register("members", 1, e -> e.populate(ArrayMembers::new, RecordType.VALUE_RECORD, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
             // TODO: drop this, renamed array:items
