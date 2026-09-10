@@ -1,33 +1,31 @@
 <article id="technical" title="Technical information">
    <h1>Technical information</h1>
 
-   <p>SaxonC is built by cross compiling the Java code of Saxon 11 using the Excelsior JET
-      15.3 Enterprise edition (MP1). This generates platform specific machine code, which we
-      interface with C/C++ using the Java Native Interace (JNI).</p>
+   <p>SaxonC is built by cross compiling the Java code of Saxon 12 using Graalvm native-image (version 22.3.0).
+      This generates platform specific machine code, which we
+      interface with C/C++ using the Native Image C API.</p>
 
    <p><b>Embedded systems</b>: It is also possible to build SaxonC for embedded systems, for
       example on a Linux/ARM System. If such a build is required please contact Saxonica to discuss
       further: <a href="mailto:support@saxonica.com">support@saxonica.com</a>.</p>
 
    <p>The PHP interface is in the form of a C/C++ PHP extension to SaxonC created using the Zend
-      module API. Supports PHP5 and PHP7.</p>
+      module API. Supports PHP8.</p>
 
    <p>The Python interface is in the form of a Cython module interfaced with the C/C++ SaxonC API.
       Currently supports Python3.</p>
 
-   <p>The XML parser used is the one supplied by the Excelsior JET runtime which is cross compiled
-      from the openJDK 8u181. There are currently no links to libxml.</p>
+   <p>We currently use the Xerces XML parser which is also cross compiled. There are currently no links to libxml.</p>
 
 
 
    <h2>Limitations</h2>
 
-   <p>The following limitations apply to the 1.2.1 release:</p>
+   <p>The following limitations apply to the 12 release:</p>
    <ul>
-      <li>No support for the XDM function type in the XDM data model.</li>
-      <li>The bytecode generation feature available in SaxonJ-EE on Java is not available in
-         SaxonC-EE.</li>
+      <li>The ICU localization is currently not support in SaxonC-PE and SaxonC-EE.</li>
       <li>The XQuery Update feature is not supported.</li>
+      <li>Host language extension functions is currently not supported in SaxonC 12.</li>
    </ul>
 
    <h2>Feedback/comments:</h2>
@@ -42,15 +40,13 @@
       <h1>Debugging</h1>
 
       <p>Exceptions and errors are captured and maintained silently in SaxonC, but can be accessed.
-         This is due to the restrictions in JNI: "There is no uniform and general way to throw and
-         catch exceptions in native languages compared to Java. The JNI therefore requires you to
-         check for possible exceptions after calling JNI functions".</p>
+         This is due to the call-back mechanism of the Graalvm Native Image C API. We therefore catch handle any exception thrown in the
+         Java code and report it in the C++ code as a <code>SaxonApiException</code> object.</p>
 
-      <p>Any exceptions or errors found in a SaxonC method can be retrieved by the method call
-               <code>getErrorMessage(<i>n</i>)</code>, where <i>n</i> is an index number referring
-         to the <i>n</i>th error message. The method <code>getErrorCount()</code> gets the total
-         number of errors reported, which helps to loop through the errors if there is more than one
-         of them. For example, see the following PHP code snippet:</p>
+      <p>Any exceptions or errors found in a SaxonC Processor class can be accessed by the <code>getException()</code> method which
+         returns  an <code>SaxonApiException</code> object. The method
+               <code>getMessage()</code> indicates the underlying error message throw from the exception. It is also
+         possdible to get the error message directly from the Processor objects too. For example, see the following PHP code snippet:</p>
 
       <samp><![CDATA[<?php
   ...
