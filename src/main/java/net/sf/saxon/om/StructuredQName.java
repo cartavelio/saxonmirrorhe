@@ -317,9 +317,8 @@ public class StructuredQName implements IdentityComparable {
      * Get a hashcode to reflect the equals() method.
      *
      * <p>The hashcode is based on the URI and local part only, ignoring the prefix. In fact the URI plays little
-     * part in computing the hashcode, because the URI is often long, and largely redundant: QNames with the same
-     * local name will rarely have different URIs, and there are significant performance savings in the NamePool
-     * if a cheaper hashcode is used. So the only contribution from the URI is that we take its length into account.</p>
+     * part in computing the hashcode: {@link NamespaceUri} objects are pooled, so the hashcode is simply the
+     * object identifier.</p>
      *
      * @return a hashcode used to distinguish distinct QNames
      */
