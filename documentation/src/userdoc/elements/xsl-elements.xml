@@ -6043,16 +6043,29 @@
             <p>Saxon supports the full XSLT syntax for patterns. The rules below describe a
                 simplified form of this syntax (for example, it omits the legal but useless pattern
                     <code>@comment()</code>):</p>
-            <samp>pattern ::= path ( '|' path )* path ::= anchor? remainder? (see Note) anchor ::=
-                '/' | '//' | id | key id ::= 'id' '(' value ')' key ::= 'key' '(' literal ',' value
-                ')' value ::= literal | variable-reference remainder ::= path-part ( sep path-part
-                )* sep ::= '/' | '//' path-part ::= node-match predicate+ node-match ::= kind-match
-                | type-match kind-match ::= element-match | text-match | attribute-match | pi-match
-                | any-node-match element-match ::= 'child::'? ( name | '*' ) text-match ::= 'text'
-                '(' ')' attribute-match ::= ('attribute::' | '@') ( name | '*' ) pi-match ::=
-                'processing-instruction' '(' literal? ')' any-node-match ::= 'node' '(' ')'
-                type-match ::= ('element'|'attribute') '(' ('*'|node-name) (',' type-name) ')'
-                predicate ::= '[' ( boolean-expression | numeric-expression ) ']' </samp>
+            <samp><![CDATA[pattern          ::= path ( '|' path )*
+path             ::= anchor? remainder? (see Note)
+
+anchor           ::= '/' | '//' | id | key
+id               ::= 'id' '(' value ')'
+key              ::= 'key' '(' literal ',' value ')'
+value            ::= literal | variable-reference
+
+remainder        ::= path-part ( sep path-part )* 
+sep              ::= '/' | '//'
+path-part        ::= node-match predicate+
+node-match       ::= kind-match | type-match   
+kind-match       ::= element-match | text-match | attribute-match | pi-match | any-node-match
+element-match    ::= 'child::'? ( name | '*' ) 
+text-match       ::= 'text' '(' ')' 
+attribute-match  ::= ('attribute::' | '@') ( name | '*' ) 
+pi-match         ::= 'processing-instruction' '(' literal? ')'
+any-node-match   ::= 'node' '(' ')'
+
+type-match       ::= ('element'|'attribute') '(' ('*'|node-name) (',' type-name) ')'
+
+predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
+]]></samp>
 
             <p>Note: not all combinations are allowed. If the anchor is <code>//</code> then the
                 remainder is mandatory.</p>
