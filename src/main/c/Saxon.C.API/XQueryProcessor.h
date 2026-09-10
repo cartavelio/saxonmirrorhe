@@ -149,7 +149,8 @@ public:
      *
      * @param infilename - The file name of the source document
      * @param ofilename - The file name of where result will be stored
-     * @param query - The query as string representation. TODO check
+     * @param query - The query as string representation.
+     * @throws SaxonApiException
      */
     void executeQueryToFile(const char * infilename, const char * ofilename, const char * query);
 
@@ -157,7 +158,8 @@ public:
     /**
      * @param infilename - The file name of the source document
      * @param query - The query as string representation
-     * @return XdmValue - result of the the query as a XdmValue 
+     * @return XdmValue - result of the the query as a XdmValue
+     * @throws SaxonApiException
      */
     XdmValue * executeQueryToValue(const char * infilename, const char * query);
 
@@ -167,6 +169,7 @@ public:
      * @param infilename - The file name of the source document
      * @param query - The query as string representation
      * @return char array - result of as a string
+     * @throws SaxonApiException
      */
     const char * executeQueryToString(const char * infilename, const char * query);
 
@@ -174,6 +177,7 @@ public:
     /** 
      * The use of the context item would have had to be set in advance
      * @return XdmValue of the result
+     * @throws SaxonApiException
      *
      */
     XdmValue * runQueryToValue();
@@ -182,6 +186,7 @@ public:
      * Execute the Query cached.
      * The use of the context item would have had to be set in advance
      * @return Result as a string (i.e. pointer array of char)
+     * @throws SaxonApiException
      *
      */
     const char * runQueryToString();
@@ -191,6 +196,7 @@ public:
     /**
      * The use of the context item would have had to be set in advance
      * Assume the output filename has been set in advance
+     * @throws SaxonApiException
      *
      */
     void runQueryToFile();

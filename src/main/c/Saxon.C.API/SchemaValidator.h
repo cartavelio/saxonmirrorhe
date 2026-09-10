@@ -25,7 +25,8 @@ public:
 	
     //! Default constructor.
     /*!
-      Creates Schema Validator
+      * Creates Schema Validator
+      * @throws SaxonApiException
     */
     SchemaValidator();
 
@@ -34,6 +35,7 @@ public:
      * The supplied processor should have license flag set to true for the Schema Validator to operate.
      * @param proc - the SaxonProcessor
      * @param cwd - set the current working directory
+     * @throws SaxonApiException
     */
     SchemaValidator(SaxonProcessor* proc, std::string cwd="");
 
@@ -69,7 +71,8 @@ public:
      * the cache of schema components maintained by this SchemaManager
     * @param xsd - File name of the schema relative to the cwd or full path if cwd is null. The document may be
      * either a schema document in source XSD format, or a compiled
- *               schema in Saxon-defined SCM format (as produced using the method exportSchema)
+    *    schema in Saxon-defined SCM format (as produced using the method exportSchema)
+    * @throws SaxonApiException
     */
   void registerSchemaFromFile(const char * xsd);
 
@@ -77,6 +80,7 @@ public:
   /**
    *
    * @param schemaStr - The schema document supplied as a string
+   * @throws SaxonApiException
    */
   void registerSchemaFromString(const char * schemaStr, const char * systemID = nullptr);
 
@@ -85,6 +89,7 @@ public:
    /**
     *
     * @param schemaStr - The schema document supplied as an XdmNode object
+    * @throws SaxonApiException
     */
    void registerSchemaFromNode(XdmNode * node);
 
@@ -92,6 +97,7 @@ public:
   /**
    *
    * @param fileName - The file name where the exported schema will be stored
+   * @throws SaxonApiException
    */
   void exportSchema(const char * fileName);
 
@@ -107,6 +113,7 @@ public:
      *
      * @param sourceFile Name of the file to be validated. Allow nullptr when source document is supplied
      * with other method
+     * @throws SaxonApiException
      */
   void validate(const char * sourceFile = nullptr);
    
@@ -114,6 +121,7 @@ public:
    /**
   * @param sourceFile The name of the file to be validated. Default is nullptr
   * @return XdmNode - the validated document returned to the calling program
+  * @throws SaxonApiException
   */
   XdmNode * validateToNode(const char * sourceFile = nullptr);
 
@@ -128,6 +136,7 @@ public:
    /**
     * The validation-report option must have been set to true in the properties to use this feature.
     * @return XdmNode - Pointer to XdmNode. Return nullptr if validation reporting feature has not been enabled
+    * @throws SaxonApiException
    */
     XdmNode* getValidationReport();
 

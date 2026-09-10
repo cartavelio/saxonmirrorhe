@@ -135,6 +135,7 @@ public:
     *   Null is returned if the user has not enabled this feature via the method setCaptureResultDocuments()
     *   @return std::map - the map is indexed by the absolute URI of the result document, and the corresponding
     *   value is an XdmNode containing the result document (as an in-memory tree, without serialization)
+    *    @throws SaxonApiException if we fail to get result-documents
     */
     std::map<std::string,XdmValue*>& getResultDocuments();
 
@@ -301,6 +302,7 @@ public:
      *
      * @param filename - the destination for the XML document containing the diagnostic representation
      *                    of the compiled stylesheet. The stream will be closed when writing has finished.
+     * @throws SaxonApiException
      */
     void exportStylesheet(const char * filename);
 
@@ -311,6 +313,7 @@ public:
      *
      * @param sourcefile - The file name of the source document
      * @param outputfile - The file name where results will be stored
+     * @throws SaxonApiException
      */
     void transformFileToFile(const char* sourcefile, const char* outputfile);
 
@@ -320,6 +323,7 @@ public:
      *
      * @param sourcefile - The file name of the source document
      * @return char array - result of the transformation
+     * @throws SaxonApiException
      */
     const char * transformFileToString(const char* sourcefile);
 
@@ -328,6 +332,7 @@ public:
      *
      * @param sourcefile - The file name of the source document
      * @return XdmValue - result of the transformation
+     * @throws SaxonApiException
      */
     XdmValue * transformFileToValue(const char* sourcefile);
 
@@ -339,12 +344,14 @@ public:
      * The result is stored in the supplied output file.
      *
      * @param outfile - The file name where results will be stored
+     * @throws SaxonApiException
      */
     void applyTemplatesReturningFile(const char* outfile);
 
      //!Invoke the compiled stylesheet by applying templates to a supplied input sequence, Saving the results as serialized string.
     /**
      * The initial match selection must be set using one of the two methods setInitialMatchSelection or setInitialMatchSelectionFile.
+     * @throws SaxonApiException
      *
      */
     const char* applyTemplatesReturningString();
@@ -352,6 +359,7 @@ public:
      //!Invoke the compiled stylesheet by applying templates to a supplied input sequence, Saving the results as an XdmValue.
     /**
      * The initial match selection must be set using one of the two methods setInitialMatchSelection or setInitialMatchSelectionFile.
+     * @throws SaxonApiException
      *
      */
     XdmValue * applyTemplatesReturningValue();
@@ -363,6 +371,7 @@ public:
     * occurs if parameters are supplied that are not used).
     * @param templateName - The name of the initial template. This must match the name of a public named template in the stylesheet. If the value is nullptr, the clark name for xsl:initial-template is used.
     * @param outfile - The file name where results will be stored.
+    * @throws SaxonApiException
     */
     void callTemplateReturningFile(const char* templateName, const char* outfile);
 
@@ -372,6 +381,7 @@ public:
     * called, then the parameters supplied are made available to the called template (no error
     * occurs if parameters are supplied that are not used).
     * @param templateName - the name of the initial template. This must match the name of a public named template in the stylesheet. If the value is nullptr, the clark name for xsl:initial-template is used.
+    * @throws SaxonApiException
     */
     const char* callTemplateReturningString(const char* templateName=nullptr);
 
@@ -381,6 +391,7 @@ public:
     * called, then the parameters supplied are made available to the called template (no error
     * occurs if parameters are supplied that are not used).
     * @param templateName - the name of the initial template. This must match the name of a public named template in the stylesheet. If the value is nullptr, the clark name for xsl:initial-template is used.
+    * @throws SaxonApiException
     */
     XdmValue* callTemplateReturningValue(const char* templateName=nullptr);
 
@@ -393,7 +404,8 @@ public:
     *                    will be converted if necessary to the type as defined in the function signature, using
     *                    the function conversion rules.
     * @param argument_length - the Coutn of arguments objects in the array
-    * @param outfile - The file name where results will be stored,
+    * @param outfile - The file name where results will be stored
+    * @throws SaxonApiException
     */
     void callFunctionReturningFile(const char* functionName, XdmValue ** arguments, int argument_length, const char* outfile);
 
@@ -404,7 +416,8 @@ public:
     * @param arguments - Pointer array of XdmValue object - he values of the arguments to be supplied to the function. These
     *                    will be converted if necessary to the type as defined in the function signature, using
     *                    the function conversion rules.
-    * @param argument_length - the Coutn of arguments objects in the array
+    * @param argument_length - the Count of arguments objects in the array
+    * @throws SaxonApiException
     */
     const char * callFunctionReturningString(const char* functionName, XdmValue ** arguments, int argument_length);
 
@@ -415,6 +428,7 @@ public:
     *                    will be converted if necessary to the type as defined in the function signature, using
     *                    the function conversion rules.
     * @param argument_length - the Count of arguments objects in the array
+    * @throws SaxonApiException
     */
     XdmValue * callFunctionReturningValue(const char* functionName, XdmValue ** arguments, int argument_length);
 
@@ -426,6 +440,7 @@ public:
      * Perform the transformation based upon what has been cached.
      * @param source - source document supplied as an XdmNode object. nullptr accepted if source document has been set already.
      * @return char*. Pointer to Array of chars. Result returned as a string.
+     * @throws SaxonApiException
      *
      */
     const char * transformToString(XdmNode * source=nullptr);
@@ -435,6 +450,7 @@ public:
      * Perform the transformation based upon cached stylesheet and any source document.
      * @param source - source document supplied as an XdmNode object. nullptr accepted if source document has been set already.
      * @return as an XdmValue.
+     * @throws SaxonApiException
      *
      */
     XdmValue * transformToValue(XdmNode * source=nullptr);
@@ -444,8 +460,7 @@ public:
      * Perform the transformation based upon a compiled stylesheet and source document.
      * Assume the output file has been set in advance
      * @param source - source document supplied as an XdmNode object. nullptr accepted if source document has been set already.
-     *
-
+     * @throws SaxonApiException
      */
     void transformToFile(XdmNode * source=nullptr);
 
