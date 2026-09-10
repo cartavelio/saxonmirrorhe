@@ -268,7 +268,18 @@ public abstract class Verifier {
 
             final boolean valid;
             if (!signature2024.isEmpty()) {
-                valid = verify2(buffer.toString(), signature2024);
+                boolean isvalid = false;
+                try {
+                    isvalid = verify2(buffer.toString(), signature2024);
+                } catch (Exception ex) {
+                    // This would be a lot prettier if we could catch the NoSuchAlgorithmException explicitly
+                    // because that's the only one that should really cause a retry. But that confuses the transpiler
+                    // and really there's no practical way that any *other* failure is not also going to fail
+                    // again here. So...
+                    buffer.append("Signature2024=").append(signature2024).append('\n');
+                    isvalid = verify(buffer.toString(), signature);
+                }
+                valid = isvalid;
             } else {
                 valid = verify(buffer.toString(), signature);
             }
