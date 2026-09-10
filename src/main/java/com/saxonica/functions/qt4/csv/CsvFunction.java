@@ -16,11 +16,10 @@ import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This abstract class provides shared option-handling support used by the functions <code>fn:parse-csv()</code>,
@@ -34,7 +33,7 @@ public abstract class CsvFunction extends SystemFunction {
      */
     static OptionsParameter coreOptions() {
         OptionsParameter opts = new OptionsParameter(40);
-        List<StringValue> defaultRowDelimiter = Stream.of("\r\n", "\n", "\r").map(StringValue::new).collect(Collectors.toList());
+        List<StringValue> defaultRowDelimiter = Arrays.asList(StringValue.CRLF, StringValue.LF, StringValue.CR);
         opts.addAllowedOption("trim-whitespace", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         opts.addAllowedOption("quote-character", SequenceType.SINGLE_STRING, new StringValue("\""));
         opts.addAllowedOption("row-delimiter", BuiltInAtomicType.STRING.oneOrMore(),

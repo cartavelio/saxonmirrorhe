@@ -2,6 +2,7 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
@@ -49,7 +50,7 @@ public class CsvParser {
         public RowDelimiters(GroundedValue delimiters) {
             this.delimiters = new RowDelimiter[delimiters.getLength()];
             for (int i = 0; i < delimiters.getLength(); i++) {
-                this.delimiters[i] = new RowDelimiter(delimiters.itemAt(i).toString().codePoints().toArray());
+                this.delimiters[i] = new RowDelimiter(StringTool.expand(delimiters.itemAt(i).getUnicodeStringValue()));
             }
         }
 
@@ -58,7 +59,7 @@ public class CsvParser {
         }
     }
 
-    private class RowDelimiter {
+    private static class RowDelimiter {
         private final int[] delimiter;
         private final boolean singleCodepoint;
 
@@ -90,7 +91,7 @@ public class CsvParser {
      * but provides a method to access the current codepoint without incrementing the cursor's position within the
      * string.
      */
-    private class CodepointsRewindableIterator {
+    private static class CodepointsRewindableIterator {
         private final IntIterator codepoints;
         private final int bufferCapacity = 8;
         private final int[] buffer = new int[bufferCapacity];
@@ -185,9 +186,9 @@ public class CsvParser {
     private static final String ERR_QUOTING = "FOCV0001";
 
     private final CsvContentHandler handler;
-    private int[] fieldDelimiter;
-    private RowDelimiters rowDelimiters;
-    private int quoteCharacter;
+    private final int[] fieldDelimiter;
+    private final RowDelimiters rowDelimiters;
+    private final int quoteCharacter;
     private final CodepointsRewindableIterator codepoints;
     private final StringBuilder currentField = new StringBuilder();
     private boolean needNewRow = false;
@@ -204,9 +205,9 @@ public class CsvParser {
     public CsvParser(StringValue input, Map<String, GroundedValue> csvOptions, CsvContentHandler handler) {
         this.codepoints = new CodepointsRewindableIterator(input.codePoints());
         this.handler = handler;
-        this.fieldDelimiter = csvOptions.get("field-delimiter").toString().codePoints().toArray();
+        this.fieldDelimiter = StringTool.expand(((StringValue)csvOptions.get("field-delimiter")).getUnicodeStringValue());
         this.rowDelimiters = new RowDelimiters(csvOptions.get("row-delimiter"));
-        this.quoteCharacter = csvOptions.get("quote-character").toString().codePoints().toArray()[0];
+        this.quoteCharacter = ((StringValue)csvOptions.get("quote-character")).getUnicodeStringValue().codePointAt(0);
     }
 
     /**
