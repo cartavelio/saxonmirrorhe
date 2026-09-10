@@ -27,6 +27,10 @@ public class ArrayBuilder implements BuilderDsl {
         return append(AtomicValueBuilder.strings(strings));
     }
 
+    public ArrayBuilder append(Integer... integers) {
+        return append(AtomicValueBuilder.integers(integers));
+    }
+
     public ArrayBuilder append(GroundedValue... values) {
         return append(Arrays.stream(values));
     }

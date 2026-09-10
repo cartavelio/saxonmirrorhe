@@ -32,4 +32,13 @@ public class FixtureBuilder {
     public static ArrayItem array(DslLambda<ArrayBuilder> definition) {
         return (ArrayItem) ArrayBuilder.build(definition);
     }
+
+    public static ArrayItem array(String... values) {
+        return (ArrayItem) ArrayBuilder.build(s -> s.append(values));
+    }
+
+    public static ArrayItem array(Integer... values) {
+        return  (ArrayItem) ArrayBuilder.build(s -> s.append(values));
+    }
+
 }
