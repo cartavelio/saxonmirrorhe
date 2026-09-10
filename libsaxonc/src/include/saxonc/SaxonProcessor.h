@@ -768,6 +768,7 @@ public:
 
 
   /*static JavaVM *jvm;*/
+  static XdmValue *makeXdmValueFromRef(int64_t valueRef);
 
 protected:
   // jclass xdmAtomicClass; /*!< The XdmAtomicValue instance */
@@ -798,6 +799,7 @@ protected:
       *exception; /*!< SaxonApiException object to capture exceptions thrown
                      from the underlying Java code via JNI */
 
+
 private:
   // void createException(const char *message = nullptr);
 
@@ -816,7 +818,6 @@ private:
 
   static int64_t createJArray(XdmValue **values, int length);
 
-  static XdmValue *makeXdmValueFromRef(int64_t valueRef);
 
   static XdmItem *makeXdmItemFromRef(int64_t valueRef);
 
