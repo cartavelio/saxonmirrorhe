@@ -14,22 +14,22 @@
       <reason>change for comparing function items not yet implemented</reason>
    </exception>-->
    
-   <exception test-set="fn-deep-equal" 
+   <!--<exception test-set="fn-deep-equal" 
       test-case="fn-deep-equal-mix-args-017a fn-deep-equal-mix-args-018a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    
    
    
-   <exception test-set="op-same-key" 
+   <!--<exception test-set="op-same-key" 
       test-case="same-key-006a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-12-13"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="fn-distinct-values" 
+   <!--<exception test-set="fn-distinct-values" 
       test-case="cbcl-distinct-values-002c
                  fn-distinct-values-mixed-args-012a
                  fn-distinct-values-mixed-args-013a" run="false" report="n/a">
@@ -42,27 +42,12 @@
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
-   
-   <exception test-set="fn-resolve-uri" 
-      test-case="fn-resolve-uri-36 fn-resolve-uri-37" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-29"/>
-      <reason>Empty sequence in arg2 - not yet implemented</reason>
-   </exception>
-   
-   
-   <exception test-set="fn-tokenize" test-case="  
-      fn-tokenize-40-001
-      fn-tokenize-40-002" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-01-17"/>
-      <reason>Tokenize#2 does not currently allow second argument to be an empty sequence</reason>
-   </exception>
-   
+   -->
  
-   
  
-   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
+  <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
       <created by="Michael Kay" on="2018-02-01"/>
-      <reason>Known bug in ICU</reason>
+      <reason>Known bug in ICU (Still failing 2023-12-02)</reason>
    </exception>
    
  
@@ -147,16 +132,12 @@
    </exception>
    
   
+ 
    
-   <exception test-set="prod-ThinArrow"  run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Not yet implemented</reason>
-   </exception>
-   
-   <exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="n/a">
+<!--   <exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Ternary conditionals implemented in Saxon 12, but now dropped from spec.</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
       <created by="Michael Kay" on="2023-01-03"/>
@@ -193,7 +174,7 @@
       <reason>Context value declaration not yet implemented</reason>
    </exception>
    
-   <exception test-set="prod-DefaultNamespaceDecl" test-case="default-namespace-40-01 
+   <exception test-set="prod-DefaultNamespaceDecl" test-case=" 
       default-namespace-40-04" run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-20"/>
       <reason>Fixed default namespace declaration not yet implemented</reason>
@@ -447,7 +428,7 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-array-filter-004
       fo-test-array-fold-left-004
       fo-test-array-fold-right-004
@@ -472,14 +453,14 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Position argument on callback function not yet implemented.</reason>
-   </exception>
+   </exception>-->
    
  
-   <exception test-set="app-spec-examples" test-case="
+   <!--<exception test-set="app-spec-examples" test-case="
       fo-test-fn-transitive-closure-001" run="false" edition="HE PE" report="n/a">
       <created by="Michael Kay" on="2023-11-21"/>
       <reason>Spec has changed, implementation needs updating.</reason>
-   </exception>
+   </exception>-->
    
    
  

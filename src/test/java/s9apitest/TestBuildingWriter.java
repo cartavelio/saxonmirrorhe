@@ -60,7 +60,7 @@ public class TestBuildingWriter {
                 String ref = "<ns0:out xmlns:ns0=\"http://outer/\" data=\"3\"><ns0:br/><ns1:br xmlns:ns1=\"http://inner/\" style=\"bold\"/></ns0:out>";
                 DocumentBuilder db = proc.newDocumentBuilder();
                 XdmNode expected = db.build(new StreamSource(new StringReader(ref)));
-                assertNull(DeepEqual.deepEquals(
+                assertNull(DeepEqual.deepEqualNodes(
                         actual.getUnderlyingNode(),
                         expected.getUnderlyingNode(),
                         CodepointCollatingComparer.getInstance(),
