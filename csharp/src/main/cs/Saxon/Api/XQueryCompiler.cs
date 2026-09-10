@@ -212,11 +212,8 @@ namespace Saxon.Api {
             }
         }
 
-        /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined IErrorReporter.
-        ///  Requirements here is IErrorReport implementation with a user-written <c>report()</c> method, it is possible to
-        /// intercept error conditions as they occur.
-        /// If this property is used then the ErrorList property and SetErrorList method is overriden.</summary>
-        /// <remarks>The <c>IErrorReporter</c> to be used</remarks>
+        /// <summary>Set the <c>ErrorReporter</c> to be used when compiling a query.</summary>
+
         public ErrorReporter ErrorReporter {
             get => this._errorReporter;
             set {
