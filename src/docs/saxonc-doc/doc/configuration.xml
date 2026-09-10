@@ -123,19 +123,6 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
             </td>
          </tr>
          <tr>
-            <td>'![serialization property]'</td>
-            <td>
-               <code>setProperty("!indent", "yes")</code>
-            </td>
-            <td>
-               <p>Influence the serialization of the result output. Serialization parameters are
-                  specified by name, preceded by a leading exclamation mark (!). This is equivalent
-                  to specifying the corresponding attribute (e.g. <code>indent="yes"</code>) on an
-                     <code>xsl:output</code> declaration in the stylesheet. An output parameter
-                  specified on the command line overrides one specified within the stylesheet.</p>
-            </td>
-         </tr>
-         <tr>
             <td>'o'</td>
             <td>
                <code>setProperty("o", "output.xml")</code>
