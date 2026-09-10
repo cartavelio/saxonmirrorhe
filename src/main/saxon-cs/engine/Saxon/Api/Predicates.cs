@@ -201,9 +201,13 @@ namespace Saxon.Api {
         /// <summary>
         /// Obtain a predicate that tests whether an item is a node with a given local name, irrespective of the namespace.
         /// </summary>
-        /// <param name="localName">The required local name</param>
+        /// <param name="localName">The required local name. If the zero-length string is supplied, the predicate
+        /// matches nodes with no name, such as namespace nodes for the default namespace.</param>
         /// <returns>A predicate that returns true if and only if the supplied item is a node with the given namespace URI and local name.</returns>
         public static Predicate<XdmNode> HasLocalName(string localName) {
+            if (localName == "") {
+                return item => item.NodeName == null;
+            }
             return item => {
                 QName name = item.NodeName;
                 return name != null &&
