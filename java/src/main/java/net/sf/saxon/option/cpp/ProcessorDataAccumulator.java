@@ -198,8 +198,8 @@ public class ProcessorDataAccumulator {
         return (String[]) paramNames.toArray(new String[paramNames.size()]);
     }
 
-    public ArrayList<String> getParameterNamesAsArrayList() {
-        return (ArrayList<String>) paramNames;
+    public List<String> getParameterNamesAsArrayList() {
+        return paramNames;
 
     }
 

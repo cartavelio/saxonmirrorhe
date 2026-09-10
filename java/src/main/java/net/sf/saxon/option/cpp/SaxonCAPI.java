@@ -961,7 +961,7 @@ public class SaxonCAPI {
         Processor processor = objectHandles.get(processorRef);
         ProcessorDataAccumulator accumulator = objectHandles.get(catalogFilesRef);
 
-        ArrayList<String>  catalogFiles = accumulator.getParameterNamesAsArrayList();
+        List<String>  catalogFiles = accumulator.getParameterNamesAsArrayList();
         ArrayList<String>  catalogFilesConverted = new ArrayList<String>();
 
         int sizea = catalogFiles.size();
