@@ -21,7 +21,7 @@ public class ReplaceWith extends RegexFunction  {
 
     @Override
     protected boolean allowRegexMatchingEmptyString() {
-        return false;
+        return true;
     }
 
     /**
