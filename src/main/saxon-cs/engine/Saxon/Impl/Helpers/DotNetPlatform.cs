@@ -36,6 +36,7 @@ namespace Saxon.Impl.Helpers {
             config.setCollectionFinder((cxt, uri) => 
                 new Saxon.Hej.resource.StandardCollectionFinder().findCollection(cxt, uri));
             config.setUnparsedTextURIResolver(new StandardUnparsedTextResolver().resolve);
+            config.setLocalizerFactory(new Saxon.Impl.Overrides.DotNetLocalizerFactory());
         }
         
 

@@ -195,7 +195,7 @@ namespace TestDriver {
                     return ("true".Equals(value) != inverse);
                 }
                 case "language": {
-                    return "en".Equals(value) != inverse;
+                    return ("en".Equals(value) || "de".Equals(value)) != inverse;
                 }
                 case "calendar": {
                     return (("AD".Equals(value) || "ISO".Equals(value)) != inverse);
