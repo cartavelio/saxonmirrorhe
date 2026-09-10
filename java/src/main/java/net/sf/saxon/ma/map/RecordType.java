@@ -56,6 +56,37 @@ public class RecordType implements FunctionItemType {
             new Field("value", SequenceType.ANY_SEQUENCE, false)
     );
 
+    public final static RecordType SCHEMA_TYPE_RECORD = new RecordType(new StructuredQName("fn", NamespaceUri.FN, "schema-type-record"));
+
+    static {
+        SCHEMA_TYPE_RECORD.setDetails(
+                true,
+                f("name", SequenceType.SINGLE_QNAME, false),
+                f("is-simple", SequenceType.SINGLE_BOOLEAN, false),
+                f("base-type", SequenceType.one(
+                        new SpecificFunctionType(SequenceType.optional(SCHEMA_TYPE_RECORD))), false),
+                f("primitive-type", SequenceType.one(
+                        new SpecificFunctionType(SequenceType.one(SCHEMA_TYPE_RECORD))), true),
+                f("variety", SequenceType.one(
+                        EnumerationUnionType.of("atomic", "list", "union", "empty", "simple", "element-only", "mixed")), false),
+                f("members", SequenceType.one(
+                        new SpecificFunctionType(SequenceType.zeroOrMore(SCHEMA_TYPE_RECORD))), true),
+                f("simple-content-type", SequenceType.one(
+                        new SpecificFunctionType(SequenceType.one(SCHEMA_TYPE_RECORD))), true),
+                f("matches", SequenceType.one(
+                        new SpecificFunctionType(SequenceType.SINGLE_ATOMIC,
+                                                 SequenceType.SINGLE_BOOLEAN)), true),
+                f("constructor", SequenceType.one(
+                        new SpecificFunctionType(SequenceType.OPTIONAL_ATOMIC,
+                                                 SequenceType.OPTIONAL_ATOMIC)), true)
+        );
+    }
+
+
+    private static RecordType.Field f(String name, SequenceType type, boolean optional) {
+        return new RecordType.Field(name, type, optional);
+    }
+
     /**
      * Class representing one field definition within a record type definition,
      * used only while constructing a record definition

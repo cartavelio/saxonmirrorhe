@@ -7,7 +7,6 @@
 
 package net.sf.saxon.type;
 
-import com.saxonica.functions.qt4.SchemaTypeFn;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.OperatorSymbol;
@@ -941,7 +940,7 @@ public class AlphaCode {
                     StructuredQName qName = StructuredQName.fromEQName40(tree.name);
                     if (qName.hasURI(NamespaceUri.FN)) {
                         if (qName.getLocalPart().equals("node-type-annotation")) {
-                            return SequenceType.one(SchemaTypeFn.schemaTypeRecord);
+                            return SequenceType.one(RecordType.SCHEMA_TYPE_RECORD);
                         } else {
                             throw new IllegalArgumentException("Unknown record type name " + tree.name);
                         }
