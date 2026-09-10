@@ -69,7 +69,7 @@ public class MetaTagAdjuster extends ProxyReceiver {
         if (htmlVn == null && !isXHTML) {
             htmlVn = details.getProperty(OutputKeys.VERSION);
         }
-        if (htmlVn != null && htmlVn.startsWith("5")) {
+        if (htmlVn == null || (htmlVn != null && htmlVn.startsWith("5"))) {
             htmlVersion = 5;
         }
     }

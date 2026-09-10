@@ -422,12 +422,16 @@ public class SaxonOutputKeys {
      */
     public static boolean isXhtmlHtmlVersion5(Properties properties) {
         String htmlVersion = properties.getProperty(SaxonOutputKeys.HTML_VERSION);
-        try {
-            return htmlVersion != null &&
-                    ((DecimalValue)BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())
-                            .getDecimalValue().equals(BigDecimal.valueOf(5));
-        } catch (ValidationException e) {
-            return false;
+        // No need to check OutputKeys.VERSION because, for XHTML, that's used to specify the XML version.         
+        if (htmlVersion != null) {
+            try {
+                return ((DecimalValue)BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())
+                        .getDecimalValue().equals(BigDecimal.valueOf(5));
+            } catch (ValidationException e) {
+                return false;
+            }
+        } else {
+            return true; // Change in 10.0 to make HTML5 the default
         }
     }
 
@@ -443,7 +447,7 @@ public class SaxonOutputKeys {
     public static boolean isHtmlVersion5(Properties properties) {
         String htmlVersion = properties.getProperty(SaxonOutputKeys.HTML_VERSION);
         if (htmlVersion == null) {
-            htmlVersion = properties.getProperty(OutputKeys.VERSION);
+            htmlVersion = properties.getProperty(OutputKeys.VERSION); 
         }
         if (htmlVersion != null) {
             try {
