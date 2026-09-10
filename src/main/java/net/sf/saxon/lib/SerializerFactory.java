@@ -335,7 +335,9 @@ public class SerializerFactory {
                         uWriter = expandedResult.obtainUnicodeWriter();
                     }
                     JSONEmitter je = new JSONEmitter(pipe, uWriter, props);
-                    je.setMustClose(expandedResult.isMustCloseAfterUse());
+                    if (expandedResult != null) {
+                        je.setMustClose(expandedResult.isMustCloseAfterUse());
+                    }
                     JSONSerializer js = new JSONSerializer(pipe, je, props);
                     String sortOrder = props.getProperty(SaxonOutputKeys.PROPERTY_ORDER);
                     if (sortOrder != null) {
@@ -353,7 +355,9 @@ public class SerializerFactory {
                     }
                     AdaptiveEmitter je = new AdaptiveEmitter(pipe, uWriter);
                     je.setOutputProperties(props);
-                    je.setMustClose(expandedResult.isMustCloseAfterUse());
+                    if (expandedResult != null) {
+                        je.setMustClose(expandedResult.isMustCloseAfterUse());
+                    }
                     CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
                     ProxyReceiver normalizer = makeUnicodeNormalizer(pipe, props);
                     return customizeAdaptiveSerializer(je, props, characterMapExpander, normalizer);
