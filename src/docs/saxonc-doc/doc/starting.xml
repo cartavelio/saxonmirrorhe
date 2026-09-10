@@ -198,15 +198,11 @@ provide any other feedback.</p>
 
       <h2 class="subtitle">SaxonC-PE and SaxonC-EE</h2>
 
-      <p>SaxonC-PE and SaxonC-EE are commercial products, and require a license key. By
-         downloading the software, you agree to the terms and conditions published at <a
-            target="_blank" href="https://www.saxonica.com/license/eval-license.pdf"
-            >https://www.saxonica.com/license/eval-license.pdf</a> (for use with a free <a
-               target="_blank" href="https://www.saxonica.com/download/download.xml">evaluation
-               license</a>) or <a target="_blank" href="https://www.saxonica.com/license/paid-license.pdf"
-                  >https://www.saxonica.com/license/paid-license.pdf</a> (in the case of paid-up licenses,
-         purchased from our <a target="_blank" href="https://www.saxonica.com/shop/shop.html">online
-            store</a>).</p>
+      <p>SaxonC-PE and SaxonC-EE are commercial products, and require a license key. By downloading
+        the software, you agree to the terms and conditions published on the Saxonica website. To
+        find the relevant terms and conditions agreement for your license, see the <a
+          href="https://www.saxonica.com/license/terms.xml" target="_blank">Saxon licensing terms
+          and conditions</a> webpage.</p>
 
      <h3>Location of the Saxon license file</h3>
      

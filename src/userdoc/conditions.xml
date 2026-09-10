@@ -116,8 +116,9 @@
   <div class="javaonly">
   <h2 class="subtitle">SaxonJ-EE and SaxonJ-PE</h2>
       <p>The Enterprise and Professional editions of Saxon are commercial products released under the
-        terms and conditions published at <a href="https://www.saxonica.com/license/paid-license.pdf"
-          class="bodylink">https://www.saxonica.com/license/paid-license.pdf</a>.</p>
+        terms and conditions published on the Saxonica website. To find the relevant terms and
+        conditions agreement for your license, see the <a href="https://www.saxonica.com/license/terms.xml"
+          class="bodylink">Saxon licensing terms and conditions</a> webpage.</p>
     
       <p>From Saxon 11, licenses are issued as term licenses rather than perpetual licenses: that is,
       they have an expiry date. Please take care to order a replacement license so that it can be
