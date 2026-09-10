@@ -7,7 +7,6 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
-import net.sf.saxon.query.SequenceWrapper;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.*;
 import net.sf.saxon.style.Compilation;
@@ -293,17 +292,6 @@ public class SerializerFactoryPE extends SerializerFactory {
         //nextTransformer.open();
 
         return new SequenceNormalizerWithSpaceSeparator(nextTransformer);
-    }
-
-    /**
-     * Get a SequenceWrapper, a class that serializes an XDM sequence with full annotation of item types, node kinds,
-     * etc. There are variants for Saxon-HE and Saxon-PE
-     */
-
-    @Override
-    public SequenceWrapper newSequenceWrapper(Receiver destination) {
-        // TODO: PE version no longer needed
-        return new SequenceWrapperPE(destination);
     }
 
     /**
