@@ -18,7 +18,11 @@ import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
-import net.sf.saxon.pattern.nodetest.*;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTestStar;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.NamespaceQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
@@ -30,7 +34,10 @@ import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.SequenceCoercer;
-import net.sf.saxon.type.gnode.*;
+import net.sf.saxon.type.gnode.AnyGNodeType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.GNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.Cardinality;
 
 import java.util.HashSet;
@@ -244,6 +251,9 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
 
         if (test != null && axis == AxisInfo.NAMESPACE) {
             QNameTest qNameTest = test.getQNameTest();
+            if (qNameTest instanceof NamespaceQNameTest nqt && nqt.getNamespace() == NamespaceUri.NULL) {
+                qNameTest = AnyQNameTest.getInstance();
+            }
             if (qNameTest instanceof NamespaceQNameTest ||
                     (qNameTest instanceof SpecificQNameTest && !((SpecificQNameTest) qNameTest).getStructuredQName().getNamespaceUri().isEmpty())) {
                 if (warnings) {

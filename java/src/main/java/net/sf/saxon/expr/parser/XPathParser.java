@@ -786,7 +786,11 @@ public class XPathParser {
                  if (uri.equals("##any")) {
                      ((IndependentContext) env).setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
                  } else {
-                     ((IndependentContext) env).declareNamespace("", NamespaceUri.of(uri));
+                     NamespaceUri nsUri = NamespaceUri.of(uri);
+                     if (nsUri == NamespaceUri.XML || nsUri == NamespaceUri.XMLNS) {
+                         grumble("Namespace uri " + uri + " is disallowed", "XQST0070");
+                     }
+                     ((IndependentContext) env).declareNamespace("", nsUri);
                  }
                  readToken(Token.SEMICOLON);
             }
@@ -806,8 +810,11 @@ public class XPathParser {
                 String uri = expectStringLiteral();
                 nextToken();
                 NamespaceUri nsUri = NamespaceUri.of(uri);
-                if (prefix.equals("xml") != nsUri.equals(NamespaceUri.XML)) {
-                    grumble("Incorrect binding of XML namespace", "XPST0070");
+                if (prefix.equals("xml") || prefix.equals("xmlns")) {
+                    grumble("Namespace prefix " + prefix + " is disallowed", "XQST0070");
+                }
+                if (nsUri == NamespaceUri.XML || nsUri == NamespaceUri.XMLNS) {
+                    grumble("Namespace uri " + uri + " is disallowed", "XQST0070");
                 }
                 ((IndependentContext)env).declareNamespace(prefix, NamespaceUri.of(uri));
                 readToken(Token.SEMICOLON);
@@ -1074,13 +1081,13 @@ public class XPathParser {
         return OperatorSymbol.NOT_AN_OPERATOR;
     }
 
-    private OperatorSymbol readOperator() throws XPathException {
-        OperatorSymbol op = currentOperator();
-        if (op != OperatorSymbol.NOT_AN_OPERATOR) {
-            nextToken();
-        }
-        return op;
-    }
+//    private OperatorSymbol readOperator() throws XPathException {
+//        OperatorSymbol op = currentOperator();
+//        if (op != OperatorSymbol.NOT_AN_OPERATOR) {
+//            nextToken();
+//        }
+//        return op;
+//    }
 
     private OperatorSymbol currentOperator() throws XPathException {
         OperatorSymbol op = t.currentToken.getOperatorSymbol();
