@@ -7,24 +7,27 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.EmptySequence;
 
 /**
- * Implement the XPath 2.0 root() function with one argument
+ * Implement the XPath 4.0 siblings() function with one argument
  */
 
 
-public class Root_1 extends SystemFunction {
+public class Siblings_1 extends SystemFunction {
 
     /**
      * Get the static properties of this expression (other than its type). The result is
@@ -51,17 +54,20 @@ public class Root_1 extends SystemFunction {
      * @param context   the dynamic evaluation context
      * @param arguments the values of the arguments, supplied as Sequences
      * @return the result of the evaluation, in the form of a Sequence
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo node = (NodeInfo) arguments[0].head();
-        if (node == null) {
+        if (node == null || node.getNodeKind() == Type.ATTRIBUTE || node.getNodeKind() == Type.NAMESPACE) {
             return EmptySequence.getInstance();
-        } else {
-            return node.getRoot();
         }
+        NodeInfo parent = node.getParent();
+        if (parent == null) {
+            return EmptySequence.getInstance();
+        }
+        return new LazySequence(parent.iterateAxis(AxisInfo.CHILD));
     }
 
     @Override
