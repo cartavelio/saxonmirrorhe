@@ -560,7 +560,7 @@ TODO: rethink redefines and override
         
         <ul>
             <li><p>Item type declarations in XSLT and XQuery</p></li>
-            <li><p>PR1355, PR1708 - Named record types in XSLT and XQuery</p></li>
+            <li><p>PR1355, PR1708 - Named record types in XSLT (xsl:record-type) and XQuery</p></li>
             <li><p>PR1817, PR1853 - Methods</p></li>
             <li><p>PR1856: lookahead/behind in regular expressions. While the basic
             capability is implemented, captured groups within lookahead expressions
@@ -571,14 +571,11 @@ TODO: rethink redefines and override
             <li><p>scan-left and scan-right functions</p></li>
             <li><p>PR1864, PR1877 - type specifiers in lookup expressions</p></li>
             <li><p>PR1875 - params passed implicitly through xsl:next-match</p></li>
-            <li><p>PR1858 - xsl:record</p></li>
             <li><p>PR1819 - multiple schemas</p></li>
             <li><p>PR1773 - intersect and except in patterns</p></li>
             <li><p>PR1676 - collation-available</p></li>
             <li><p>PR1674 - composite sort keys in xsl:sort</p></li>
             <li><p>PR1622 - XSLT map-for-key function</p></li>
-            <li><p>Deep lookup expressions with wildcards ??* (works in XQuery, not in XPath)</p></li>
-            <li><p>xsl:record instruction</p></li>
             <li><p>JSON-Lines input and output</p></li>
         </ul>
         
