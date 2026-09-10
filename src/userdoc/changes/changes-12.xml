@@ -36,6 +36,14 @@
     
     <category name="s9api" class="javaonly">
         
+        <p>The <code java="net.sf.saxon.s9api.Processor">Processor</code> class now has a zero-argument
+        constructor (<code>new Processor()</code>) which delivers the most capable processor available,
+        based on the software and license key found on the classpath. For example if Saxon-EE is on the
+        classpath and a license key with schema validation capability is located, then a Saxon-EE
+        configuration is created; while if Saxon-PE is on the classpath, but no license key is found, 
+        it will deliver a Saxon-HE configuration. It is possible to interrogate the returned 
+        <code>Processor</code> to determine its capabilities.</p>
+        
         <p>A number of changes have been made to simplify the use of item types and sequence types (particularly useful
         when defining extension functions):</p>
         
@@ -225,6 +233,12 @@
         resources as soon as the iterator is garbage-collected. This extra thread may be visible in Java monitoring output. The thread
         shuts down when the <code>Cleaner</code> is garbage-collected, which typically happens when the <code>Configuration</code>
         is garbage collected; it can also be forced by calling <code>Configuration.close()</code>.</p>
+        
+        <p>Saxon's original XQuery API, in which a query is compiled using a <code>StaticQueryContext</code> object
+            and executed using a <code>DynamicQueryContext</code> object, has been gradually downgraded over
+            a number of releases. It remains present in the product, but should no longer be considered as
+            a stable public API. The sample application <code>QueryAPIExamples.java</code> has now been
+            dropped from the release.</p>
         
    
     </category>
