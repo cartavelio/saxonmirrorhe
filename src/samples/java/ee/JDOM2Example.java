@@ -33,7 +33,7 @@ public class JDOM2Example {
     /**
      * Method main
      */
-    public static void main(String argv[])
+    public static void main(String[] argv)
             throws TransformerException, XPathExpressionException,
                    JDOMException, IOException {
 

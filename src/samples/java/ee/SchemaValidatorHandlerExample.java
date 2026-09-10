@@ -16,12 +16,12 @@ import java.io.File;
 /**
  * SchemaValidatorHandlerExample demonstrates the use of jaxp validation apis.
  *
- * This version was modified by Michael Kay from the sample application named SchemaValidator
+ * <p>his version was modified by Saxonica from the sample application named SchemaValidator
  * issued with the JAXP 1.3 distribution. It has been changed to use a ValidatorHandler
- * and to display the types of elements and attributes as reported.
+ * and to display the types of elements and attributes as reported.</p>T
  *
- * The original file contained no explicit terms and conditions or copyright statement,
- * but it should be assumed that it is subject to the usual Apache rules.
+ * <p>The original file contained no explicit terms and conditions or copyright statement,
+ * but it should be assumed that it is subject to the usual Apache rules.</p>
  */
 
 public class SchemaValidatorHandlerExample {
@@ -113,7 +113,7 @@ public class SchemaValidatorHandlerExample {
     public static class LocalContentHandler extends DefaultHandler {
 
         int indent = 0;
-        private TypeInfoProvider provider;
+        private final TypeInfoProvider provider;
 
         public LocalContentHandler(TypeInfoProvider provider) {
             this.provider = provider;
@@ -125,9 +125,7 @@ public class SchemaValidatorHandlerExample {
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
             TypeInfo etype = provider.getElementTypeInfo();
             StringBuilder sb = new StringBuilder(100);
-            for (int i=0; i<indent; i++) {
-                sb.append("  ");
-            }
+            sb.append("  ".repeat(indent));
             sb.append("Element ").append(qName);
             sb.append(" of type {")
                     .append(etype.getTypeNamespace())
@@ -138,9 +136,7 @@ public class SchemaValidatorHandlerExample {
                 TypeInfo atype = provider.getAttributeTypeInfo(a);
                 boolean spec = provider.isSpecified(a);
                 sb.setLength(0);
-                for (int i=0; i<indent+2; i++) {
-                    sb.append("  ");
-                }
+                sb.append("  ".repeat(indent + 2));
                 sb.append("Attribute ")
                         .append(attributes.getQName(a))
                         .append(spec ? " (specified)" : " (defaulted)");
@@ -167,7 +163,7 @@ public class SchemaValidatorHandlerExample {
 
     /**
      * Main entry point. Expects two arguments: the schema document, and the source document.
-     * Allows "--" as the schema document, indicating that the schema is identified by xsi:schemaLocation
+     * Allows "--" as the schema document, indicating that the schema is identified by xsi:schemaLocation.
      * @param args command line arguments
      */
     public static void main(String [] args) {

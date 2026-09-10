@@ -39,13 +39,145 @@ import java.util.Properties;
 import static net.sf.saxon.pull.PullEvent.START_ELEMENT;
 
 /**
- * This class contains some examples of how to use the Pull interfaces
- * in Saxon.
+ * This class contains some examples of how to use the Pull interfaces in Saxon. Note that these
+ * are relatively low-level interfaces provided primarily for integrating Saxon with other libraries
+ * that need to operate in pull mode; they are not intended for general application use.
+ *
+ * <p>The key characteristics of these examples are that (a) the client receives the results of a query
+ * or transformation as an iterator over the results, and the actual evaluation takes place
+ * as the client reads items off this iterator, and (b) Saxon reads the source XML using a pull
+ * parser (StAX).</p>
  */
 
 public class PullExamples {
 
     private Configuration config;
+
+    /**
+     * Main program. The current directory must be the "samples" directory. Arguments:
+     * <ol>
+     * <li>Select examples. Each example is identified by a single letter. Use # to run all examples.
+     * <li>-s Source document</li>
+     * <li>-o Output file</li>
+     * <li>-xsl Stylesheet</li>
+     * <li>-q Query
+     * </ol>
+     */
+
+    public static void main(String[] args) throws Exception {
+        String examples;
+        if (args.length < 1 || args[0].equals("#")) {
+            examples = "abcdefghijklmnopqrstuvwxyz";
+        } else {
+            examples = args[0];
+        }
+        File input = null;
+        OutputStream output = null;
+        String query = null;
+        File stylesheet = null;
+
+        for (int i = 1; i < args.length; i++) {
+            switch (args[i]) {
+                case "-s":
+                    input = new File(args[++i]);
+                    break;
+                case "-o":
+                    output = new FileOutputStream(new File(args[++i]));
+                    break;
+                case "-q":
+                    query = readFile(new File(args[++i]));
+                    break;
+                case "-xsl":
+                    stylesheet = new File(args[++i]);
+                    break;
+                default:
+                    System.err.println("Unknown argument " + args[i]);
+                    break;
+            }
+        }
+
+        if (input == null) {
+            input = new File("data/books.xml");
+        }
+
+        if (output == null) {
+            output = System.out;
+        }
+
+        if (stylesheet == null) {
+            stylesheet = new File("styles/books.xsl");
+        }
+
+        if (query == null) {
+            query = readFile(new File("query/books.xq"));
+        }
+
+        PullExamples app = new PullExamples();
+        Configuration config = app.config = new Configuration();
+
+        for (int i = 0; i < examples.length(); i++) {
+            char ex = examples.charAt(i);
+            switch (ex) {
+                case 'a': {
+                    System.out.println("\n\n==== Serialize the input to the output ====\n");
+                    PullProvider p = app.getParser(input);
+                    app.serialize(p, output);
+                    break;
+                }
+                case 'b': {
+                    System.out.println("\n\n==== Validate the input ====\n");
+                    PullProvider p = app.getParser(input);
+                    app.validate(p);
+                    break;
+                }
+                case 'c': {
+                    System.out.println("\n\n==== Transform the input to the output ====\n");
+                    PullProvider p = app.getParser(input);
+                    app.transform(p, stylesheet, output);
+                    break;
+                }
+                case 'd': {
+                    System.out.println("\n\n==== Run XQuery against the input ====\n");
+                    PullProvider p = app.getParser(input);
+                    app.query(p, query, output);
+                    break;
+                }
+                case 'e': {
+                    System.out.println("\n\n==== Remove PRICE elements from the input ====\n");
+                    PullProvider p = app.getParser(input);
+                    app.removePriceElements(p, output);
+                    break;
+                }
+                case 'f': {
+                    System.out.println("\n\n==== Compute average of PRICE elements in the input ====\n");
+                    PullProvider p = app.getParser(input);
+                    app.displayAveragePrice(p, output);
+                    break;
+                }
+                case 'g': {
+                    System.out.println("\n\n==== Obtain query results using a pull iterator ====\n");
+                    NodeInfo node = config.buildDocumentTree(new StreamSource(input)).getRootNode();
+                    PullProvider p = app.pullQueryResults(node,
+                                    "declare function local:f() {" +
+                                            "for $var1 in (<abc/>, <def/>)" +
+                                            "return <e xmlns:x='x1'><f xmlns:y='y1' xmlns:x='x2'>xyz</f></e>};" +
+                                            "local:f()"
+
+                    );
+                    app.serialize(new PullTracer(p), output);
+                    break;
+                }
+                case 'h': {
+                    System.out.println("\n\n==== Obtain query results using a pull iterator on a 'standard' tree ====\n");
+                    PullProvider p1 = app.getParser(input);
+                    NodeInfo node = app.buildStandardTree(p1);
+                    PullProvider p2 = app.pullQueryResults(node, "//CATEGORIES");
+                    app.serialize(p2, output);
+                }
+            }
+        }
+    }
+
 
     /**
      * Serialize a document that is supplied via the pull interface
@@ -216,153 +348,6 @@ public class PullExamples {
         writer.flush();
     }
 
-    /**
-     * Main program. Arguments:
-     * <ol>
-     * <li>Select examples. Each example is identified by a single letter. Use # to run all examples.
-     * <li>-s Source document</li>
-     * <li>-o Output file</li>
-     * <li>-xsl Stylesheet</li>
-     * <li>-q Query
-     * </ol>
-     */
-
-    public static void main(String[] args) throws Exception {
-        String examples;
-        if (args.length < 1 || args[0].equals("#")) {
-            examples = "abcdefghijklmnopqrstuvwxyz";
-        } else {
-            examples = args[0];
-        }
-        File input = null;
-        OutputStream output = null;
-        String query = null;
-        File stylesheet = null;
-
-        for (int i = 1; i < args.length; i++) {
-            switch (args[i]) {
-                case "-s":
-                    input = new File(args[++i]);
-                    break;
-                case "-o":
-                    output = new FileOutputStream(new File(args[++i]));
-                    break;
-                case "-q":
-                    query = readFile(new File(args[++i]));
-                    break;
-                case "-xsl":
-                    stylesheet = new File(args[++i]);
-                    break;
-                default:
-                    System.err.println("Unknown argument " + args[i]);
-                    break;
-            }
-        }
-
-        if (input == null) {
-            input = new File("data/books.xml");
-        }
-
-        if (output == null) {
-            output = System.out;
-        }
-
-        if (stylesheet == null) {
-            stylesheet = new File("styles/books.xsl");
-        }
-
-        if (query == null) {
-            query = readFile(new File("query/books.xq"));
-        }
-
-        PullExamples o = new PullExamples();
-        Configuration config = Configuration.newConfiguration();
-        o.config = config;
-
-        PipelineConfiguration pipe = config.makePipelineConfiguration();
-        for (int i = 0; i < examples.length(); i++) {
-            char ex = examples.charAt(i);
-            switch (ex) {
-                case 'a': {
-                    System.out.println("\n\n==== Serialize the input to the output ====\n");
-
-                    PullProvider p = o.getParser(input);
-                    p.setPipelineConfiguration(pipe);
-                    o.serialize(p, output);
-                    break;
-                }
-                case 'b': {
-                    System.out.println("\n\n==== Validate the input ====\n");
-
-                    PullProvider p = o.getParser(input);
-                    p.setPipelineConfiguration(pipe);
-                    o.validate(p);
-                    break;
-                }
-                case 'c': {
-                    System.out.println("\n\n==== Transform the input to the output ====\n");
-                    PullProvider p = o.getParser(input);
-                    p.setPipelineConfiguration(pipe);
-                    o.transform(p, stylesheet, output);
-                    break;
-                }
-                case 'd': {
-                    System.out.println("\n\n==== Run XQuery against the input ====\n");
-                    // Needs Saxon Professional Edition
-                    if ("HE".equals(config.getEditionCode())) {
-                        System.err.println("Pull-mode query requires Saxon-PE");
-                    } else {
-                        PullProvider p = o.getParser(input);
-                        p.setPipelineConfiguration(pipe);
-                        o.query(p, query, output);
-                        break;
-                    }
-                }
-                case 'e': {
-                    System.out.println("\n\n==== Remove PRICE elements from the input ====\n");
-
-                    PullProvider p = o.getParser(input);
-                    p.setPipelineConfiguration(pipe);
-                    o.removePriceElements(p, output);
-                    break;
-                }
-                case 'f': {
-                    System.out.println("\n\n==== Compute average of PRICE elements in the input ====\n");
-
-                    PullProvider p = o.getParser(input);
-                    p.setPipelineConfiguration(pipe);
-                    o.displayAveragePrice(p, output);
-                    break;
-                }
-                case 'g': {
-                    System.out.println("\n\n==== Obtain query results using a pull iterator ====\n");
-
-                    NodeInfo node = config.buildDocumentTree(new StreamSource(input)).getRootNode();
-                    PullProvider p = o.pullQueryResults(node,
-
-                                                        "declare function local:f() {" +
-                                                                "for $var1 in (<abc/>, <def/>)" +
-                                                                "return <e xmlns:x='x1'><f xmlns:y='y1' xmlns:x='x2'>xyz</f></e>};" +
-                                                                "local:f()"
-
-                    );
-                    o.serialize(new PullTracer(p), output);
-                    break;
-                }
-                case 'h': {
-                    System.out.println("\n\n==== Obtain query results using a pull iterator on a 'standard' tree ====\n");
-
-                    PullProvider p1 = o.getParser(input);
-                    p1.setPipelineConfiguration(pipe);
-                    NodeInfo node = o.buildStandardTree(p1);
-                    PullProvider p2 = o.pullQueryResults(node,
-                                                         "//CATEGORIES"
-                    );
-                    o.serialize(p2, output);
-                }
-            }
-        }
-    }
 
     /**
      * Read the contents of a file into a string

@@ -1,4 +1,6 @@
 package he;
+
+import net.sf.saxon.lib.NamespaceConstant;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -36,7 +38,7 @@ public class XPathExampleServlet extends HttpServlet {
     private XPathFactory xpathFactory;
     private DocumentBuilderFactory domFactory;
 
-    private HashMap documentCache = new HashMap();
+    private final HashMap<String, Document> documentCache = new HashMap<>();
     // The key is an absolute URI identifying a source document
     // The value is the document node of the parsed document
 
@@ -62,22 +64,10 @@ public class XPathExampleServlet extends HttpServlet {
         System.err.println("Loaded XPathFactory " + xpathFactory.getClass().getName());
         System.err.println("Loaded DocumentBuilderFactory " + domFactory.getClass().getName());
 
-
-
-//        InputStream ps = getClass().getResourceAsStream("xpath.properties");
-//        if (ps == null) {
-//            throw new ServletException("Failed to read LicenseParams.properties");
-//        }
-//        Properties props = new Properties();
-//        try {
-//            props.load(ps);
-//        } catch (IOException err) {
-//            throw new ServletException("Failure reading LicenseParams.properties");
-//        }
     }
 
     private synchronized Document getDocument(String shortName) throws ServletException {
-        Document doc = (Document) documentCache.get(shortName);
+        Document doc = documentCache.get(shortName);
         if (doc != null) {
             return doc;
         }
@@ -88,11 +78,7 @@ public class XPathExampleServlet extends HttpServlet {
         try {
             DocumentBuilder builder = domFactory.newDocumentBuilder();
             doc = builder.parse(new File(path));
-        } catch (ParserConfigurationException e) {
-            throw new ServletException(e);
-        } catch (SAXException e) {
-            throw new ServletException(e);
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | SAXException | IOException e) {
             throw new ServletException(e);
         }
         documentCache.put(shortName, doc);
@@ -102,9 +88,9 @@ public class XPathExampleServlet extends HttpServlet {
 
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // Following is specific to Saxon: should be in a properties file
-//        System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_SAXON,
-//                "net.sf.saxon.xpath.XPathFactoryImpl");
+        // Following is specific to Saxon
+        System.setProperty("javax.xml.xpath.XPathFactory:"+ NamespaceConstant.OBJECT_MODEL_SAXON,
+                "net.sf.saxon.xpath.XPathFactoryImpl");
 
         try {
             final String word = request.getParameter("word");
