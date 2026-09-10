@@ -1,25 +1,35 @@
 package com.saxonica.functions.qt4.ixml;
 
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.SequenceCopier;
 import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.AbstractFunction;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.serialize.UnicodeWriterResult;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
 import org.nineml.coffeefilter.InvisibleXml;
 import org.nineml.coffeefilter.InvisibleXmlDocument;
 import org.nineml.coffeefilter.InvisibleXmlParser;
@@ -29,8 +39,10 @@ import org.xml.sax.SAXException;
 
 import javax.xml.transform.sax.SAXSource;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Properties;
 
 public class InvisibleXmlFn extends SystemFunction {
 
@@ -59,7 +71,7 @@ public class InvisibleXmlFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        AtomicValue input = (AtomicValue)arguments[0].head();
+        Object grammar = arguments[0].head();
 
         MapItem options = null;
         if (arguments.length > 1) {
@@ -73,10 +85,33 @@ public class InvisibleXmlFn extends SystemFunction {
 
         InvisibleXml invisibleXml = new InvisibleXml();
         final InvisibleXmlParser parser;
-        if (input == null) {
+        if (grammar == null) {
             parser = invisibleXml.getParser();
         } else {
-            parser = invisibleXml.getParserFromIxml(input.getStringValue());
+            if (grammar instanceof NodeInfo) {
+                // This is a terrible hack. The NineML parser API should (will!) be updated to make this
+                // easier. But for the time being, needs must.
+                NodeInfo nodeInfo = (NodeInfo)grammar;
+                UnicodeBuilder builder = new UnicodeBuilder();
+                UnicodeWriterResult result = new UnicodeWriterResult(builder, null);
+                SerializationProperties params = new SerializationProperties(new Properties());
+
+                SerializerFactory sf = context.getConfiguration().getSerializerFactory();
+                PipelineConfiguration pipe = context.getConfiguration().makePipelineConfiguration();
+                PackageData pack = getRetainedStaticContext().getPackageData();
+                pipe.setHostLanguage(pack.getHostLanguage(), pack.getHostLanguageVersion());
+                Receiver out = sf.getReceiver(result, params, pipe);
+                SequenceCopier.copySequence(nodeInfo.iterate(), out);
+
+                ByteArrayInputStream bais = new ByteArrayInputStream(builder.toString().getBytes(StandardCharsets.UTF_8));
+                try {
+                    parser = invisibleXml.getParserFromVxml(bais, nodeInfo.getSystemId());
+                } catch (IOException ex) {
+                    throw new XPathException(ex);
+                }
+            } else {
+                parser = invisibleXml.getParserFromIxml(((AtomicValue) grammar).getStringValue());
+            }
         }
 
         return functionFromParser(context, parser, checkedOptions);
