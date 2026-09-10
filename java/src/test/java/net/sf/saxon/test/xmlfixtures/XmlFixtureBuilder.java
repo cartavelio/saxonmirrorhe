@@ -2,6 +2,7 @@ package net.sf.saxon.test.xmlfixtures;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.sapling.SaplingDocument;
 import net.sf.saxon.sapling.Saplings;
 import net.sf.saxon.sapling.dsl.DocumentDsl;
@@ -14,7 +15,7 @@ public class XmlFixtureBuilder {
     }
 
     public Item elem(DocumentDsl builder) throws XPathException {
-        return ((NodeInfo) doc(builder)).iterateChildAxis(null).next();
+        return ((NodeInfo) doc(builder)).iterateChildAxis()   .next();
     }
 
     private final Configuration configuration;
