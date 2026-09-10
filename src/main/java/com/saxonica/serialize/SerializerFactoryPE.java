@@ -339,6 +339,7 @@ public class SerializerFactoryPE extends SerializerFactory {
                 case SaxonOutputKeys.CHARACTER_REPRESENTATION:
                 case SaxonOutputKeys.NEXT_IN_CHAIN_BASE_URI:
                 case SaxonOutputKeys.PROPERTY_ORDER:
+                case SaxonOutputKeys.INTERNAL_DTD_SUBSET:
                     // no constraints
                     if (value != null) {
                         checkExtensions(key);
