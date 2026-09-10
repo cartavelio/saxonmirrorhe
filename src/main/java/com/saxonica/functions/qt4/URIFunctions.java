@@ -31,8 +31,6 @@ abstract public class URIFunctions extends SystemFunction {
     }
 
     protected static final AtomicValue URI = new StringValue("uri");
-    protected static final AtomicValue PATH_SEPARATOR = new StringValue("path-separator");
-    protected static final AtomicValue QUERY_SEPARATOR = new StringValue("query-separator");
     protected static final AtomicValue ALLOW_DEPRECATED_FEATURES = new StringValue("allow-deprecated-features");
     protected static final AtomicValue OMIT_DEFAULT_PORTS = new StringValue("omit-default-ports");
     protected static final AtomicValue UNC_PATH = new StringValue("unc-path");
@@ -50,38 +48,38 @@ abstract public class URIFunctions extends SystemFunction {
     protected static final AtomicValue VALUE = new StringValue("value");
     protected static final AtomicValue FRAGMENT = new StringValue("fragment");
     protected static final AtomicValue HIERARCHICAL = new StringValue("hierarchical");
+    protected static final AtomicValue ABSOLUTE = new StringValue("absolute");
 
-    protected static final Set<Character> unescapedUriCharacters;
+    protected static final Set<Character> escapedPathCharacters;
     static {
         HashSet<Character> chars = new HashSet<>();
-        for (char ch = 'A'; ch <= 'Z'; ch++) {
-            chars.add(ch);
-        }
-        for (char ch = 'a'; ch <= 'z'; ch++) {
-            chars.add(ch);
-        }
-        for (char ch = '0'; ch <= '9'; ch++) {
-            chars.add(ch);
-        }
-        chars.add('-');
-        chars.add('.');
-        chars.add('_');
-        chars.add('~');
-        chars.add('!');
-        chars.add('$');
-        chars.add('&');
-        chars.add('\'');
-        chars.add('(');
-        chars.add(')');
-        chars.add('*');
+        chars.add(' ');
+        chars.add('%');
+        chars.add('/');
+        chars.add('?');
+        chars.add('#');
         chars.add('+');
-        chars.add(',');
-        chars.add(';');
-        chars.add('=');
-        chars.add(':');
-        chars.add('@');
+        chars.add('[');
+        chars.add(']');
+        escapedPathCharacters = unmodifiable(chars);
+    }
 
-        unescapedUriCharacters = unmodifiable(chars);
+    protected static final Set<Character> escapedQueryCharacters;
+    static {
+        HashSet<Character> chars = new HashSet<>(escapedPathCharacters);
+        chars.remove('/');
+        chars.remove('?');
+        chars.add('=');
+        chars.add('&');
+        escapedQueryCharacters = unmodifiable(chars);
+    }
+
+    protected static final Set<Character> escapedFragidCharacters;
+    static {
+        HashSet<Character> chars = new HashSet<>(escapedPathCharacters);
+        chars.remove('/');
+        chars.remove('?');
+        escapedFragidCharacters = unmodifiable(chars);
     }
 
     @CSharpReplaceBody(code="return chars;")
@@ -89,8 +87,6 @@ abstract public class URIFunctions extends SystemFunction {
         return Collections.unmodifiableSet(chars);
     }
 
-    protected char pathSeparator = '/';
-    protected char querySeparator = '&';
     protected boolean allowDeprecatedFeatures = false;
     protected boolean omitDefaultPorts = false;
     protected boolean hierarchical = true;
@@ -115,101 +111,37 @@ abstract public class URIFunctions extends SystemFunction {
             if (options == null) {
                 options = new DictionaryMap();
             }
-            if (options.get(PATH_SEPARATOR) != null) {
-                String str = options.get(PATH_SEPARATOR).getStringValue();
-                if (str.length() != 1) {
-                    throw new XPathException("The path separator must be a single character", "FOXX0000");
-                }
-                pathSeparator = str.charAt(0);
-            }
-            if (options.get(QUERY_SEPARATOR) != null) {
-                String str = options.get(QUERY_SEPARATOR).getStringValue();
-                if (str.length() != 1) {
-                    throw new XPathException("The query separator must be a single character", "FOXX0000");
-                }
-                querySeparator = str.charAt(0);
-            }
             allowDeprecatedFeatures = options.get(ALLOW_DEPRECATED_FEATURES) != null && options.get(ALLOW_DEPRECATED_FEATURES).effectiveBooleanValue();
             omitDefaultPorts = options.get(OMIT_DEFAULT_PORTS) != null && options.get(OMIT_DEFAULT_PORTS).effectiveBooleanValue();
             uncPath = options.get(UNC_PATH) != null && options.get(UNC_PATH).effectiveBooleanValue();
         }
     }
 
-    protected String encodePathSegment(GroundedValue value) throws XPathException {
+    private String encodeSomeCharacters(GroundedValue value, Collection<Character> escaped) throws XPathException {
         String input = value.getStringValue();
         StringBuilder output = new StringBuilder();
         for (int pos = 0; pos < input.length(); pos++) {
             char ch = input.charAt(pos);
-            if (ch > 127 || unescapedUriCharacters.contains(ch)) {
-                output.append(ch);
-            } else {
+            if (ch < ' ' || escaped.contains(ch)) {
                 output.append("%");
                 output.append(toTwoHexDigits(ch));
+            } else {
+                output.append(ch);
             }
         }
         return output.toString();
+    }
+
+    protected String encodePathSegment(GroundedValue value) throws XPathException {
+        return encodeSomeCharacters(value, escapedPathCharacters);
     }
 
     protected String encodeQueryPart(GroundedValue value) throws XPathException {
-        // Like encodePathSegment but allow '/' and '?' unencoded.
-        // Force '=' and '&' to be percent encoded.
-        String input = value.getStringValue();
-        StringBuilder output = new StringBuilder();
-        for (int pos = 0; pos < input.length(); pos++) {
-            char ch = input.charAt(pos);
-
-            if (ch == querySeparator) {
-                output.append("%");
-                output.append(toTwoHexDigits(querySeparator));
-                continue;
-            }
-
-            switch (ch) {
-                case '=':
-                    output.append("%3D");
-                    break;
-                case '&':
-                    output.append("%26");
-                    break;
-                case '/':
-                case '?':
-                    output.append(ch);
-                    break;
-                default:
-                    if (ch > 127 || unescapedUriCharacters.contains(ch)) {
-                        output.append(ch);
-                    } else {
-                        output.append("%");
-                        output.append(toTwoHexDigits(ch));
-                    }
-                    break;
-            }
-        }
-        return output.toString();
+        return encodeSomeCharacters(value, escapedQueryCharacters);
     }
 
     protected String encodeFragmentIdentifier(GroundedValue value) throws XPathException {
-        // Like encodePathSegment but allow '/' and '?' unencoded.
-        String input = value.getStringValue();
-        StringBuilder output = new StringBuilder();
-        for (int pos = 0; pos < input.length(); pos++) {
-            char ch = input.charAt(pos);
-            if (ch > 127 || unescapedUriCharacters.contains(ch)) {
-                output.append(ch);
-            } else {
-                switch (ch) {
-                    case '/':
-                    case '?':
-                        output.append(ch);
-                        break;
-                    default:
-                        output.append("%");
-                        output.append(toTwoHexDigits(ch));
-                        break;
-                }
-            }
-        }
-        return output.toString();
+        return encodeSomeCharacters(value, escapedFragidCharacters);
     }
 
     @CSharpReplaceBody(code="return String.Format(\"{0:X2}\", ch);")

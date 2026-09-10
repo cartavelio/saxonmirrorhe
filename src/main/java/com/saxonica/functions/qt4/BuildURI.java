@@ -96,7 +96,7 @@ public class BuildURI extends URIFunctions {
             GroundedValue value = parts.get(PATH_SEGMENTS);
             uri.append(hierarchical ? encodePathSegment(value.itemAt(0)) : value.itemAt(0).getStringValue());
             for (int pos = 1; pos < value.getLength(); pos++) {
-                uri.append(pathSeparator);
+                uri.append("/");
                 uri.append(encodePathSegment(value.itemAt(pos)));
             }
         } else if (parts.get(PATH) != null) {
@@ -108,7 +108,7 @@ public class BuildURI extends URIFunctions {
             for (KeyValuePair pair : ((MapItem) parts.get(QUERY_PARAMETERS)).keyValuePairs()) {
                 if (pair.key != null || pair.value != null) {
                     uri.append(sep);
-                    sep = querySeparator;
+                    sep = '&';
                     if (pair.key != null && !pair.key.getStringValue().isEmpty()) {
                         if (pair.value != null && pair.value.getLength() > 0) {
                             for (int idx = 0; idx < pair.value.getLength(); idx++) {

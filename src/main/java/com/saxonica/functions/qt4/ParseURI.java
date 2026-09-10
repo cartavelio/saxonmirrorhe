@@ -31,13 +31,16 @@ public class ParseURI extends URIFunctions {
             throw new XPathException(e);
         }
 
+        final String fragid;
         int pos = uristr.indexOf("#");
         if (pos >= 0) {
-            String fragid = DecodeFromURI.decode(uristr.substring(pos + 1));
+            fragid = DecodeFromURI.decode(uristr.substring(pos + 1));
             if (!fragid.trim().isEmpty()) {
                 map = map.addEntry(FRAGMENT, new StringValue(fragid));
             }
             uristr = uristr.substring(0, pos);
+        } else {
+            fragid = null;
         }
 
         final String query;
@@ -63,6 +66,8 @@ public class ParseURI extends URIFunctions {
             scheme = matcher.group(1).toLowerCase();
             uristr = matcher.group(2);
         }
+
+        boolean absolute = scheme != null && fragid == null;
 
         if (scheme == null || "file".equals(scheme)) {
             pattern = Pattern.compile("^/*([A-Za-z])[:|](.*)$");
@@ -92,6 +97,14 @@ public class ParseURI extends URIFunctions {
             if (!uristr.isEmpty()) {
                 map = map.addEntry(HIERARCHICAL, BooleanValue.get(hierarchical));
             }
+        }
+
+        if (!hierarchical) {
+            absolute = false;
+        }
+
+        if (absolute) {
+            map = map.addEntry(ABSOLUTE, BooleanValue.get(absolute));
         }
 
         String filepath = null;
@@ -190,7 +203,7 @@ public class ParseURI extends URIFunctions {
             map = map.addEntry(PATH, new StringValue(uristr));
             GroundedValue pathSegments = EmptySequence.getInstance();
             // Can't use string split here because it collapses leading, trailing, and repeated delimiters
-            pos = uristr.indexOf(pathSeparator);
+            pos = uristr.indexOf("/");
             while (pos >= 0) {
                 String seg = DecodeFromURI.decode(uristr.substring(0,pos));
                 if (pathSegments.getLength() == 0 && "tel".equals(scheme) && seg.startsWith(" ")) {
@@ -198,7 +211,7 @@ public class ParseURI extends URIFunctions {
                 }
                 pathSegments = pathSegments.concatenate(new StringValue(seg));
                 uristr = uristr.substring(pos+1); // pathseparator is a single character
-                pos = uristr.indexOf(pathSeparator);
+                pos = uristr.indexOf("/");
             }
             pathSegments = pathSegments.concatenate(new StringValue(DecodeFromURI.decode(uristr)));
             map = map.addEntry(PATH_SEGMENTS, pathSegments);
@@ -211,7 +224,7 @@ public class ParseURI extends URIFunctions {
 
         if (query != null) {
             HashTrieMap querySegments = new HashTrieMap();
-            for (String str : query.split(""+querySeparator)) {
+            for (String str : query.split("&")) {
                 pos = str.indexOf("=");
                 final StringValue key;
                 final StringValue value;
