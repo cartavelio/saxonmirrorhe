@@ -701,6 +701,55 @@ public class TestValidator {
         assertionUsingXPath3(false);
     }
 
+    private void assertionUsingXPath40(boolean allow) {
+
+        String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:element name=\"request\">\n" +
+                "\t\t<xs:complexType>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t\t<xs:assert test='exists(a otherwise b otherwise c)'/>\n" +
+                "\t\t</xs:complexType>\n" +
+                "\t</xs:element>\n" +
+                "</xs:schema>";
+
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, true);
+            proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
+            proc.setConfigurationProperty(Feature.XPATH_VERSION_FOR_XSD, allow ? 40 : 31);
+            XsdCompiler sm = proc.newXsdCompiler();
+            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
+
+            try {
+                XsdSchema schema = sm.compile(source_xsd);
+                if (!allow) {
+                    fail("unexpected success");
+                }
+            } catch (SaxonApiException e) {
+                if (allow) {
+                    fail(e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAssertionUsingXPath40allowed() {
+        assertionUsingXPath40(true);
+    }
+
+    @Test
+    public void testAssertionUsingXPath40notAllowed() {
+        assertionUsingXPath40(false);
+    }
+
+
     @Test
     public void testAssertionsOnBadData() {
 
