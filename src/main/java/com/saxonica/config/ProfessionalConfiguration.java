@@ -829,7 +829,7 @@ public class ProfessionalConfiguration extends Configuration {
     protected synchronized FunctionLibraryList makeBuiltInExtensionLibraryList(int version) {
         FunctionLibraryList result = new FunctionLibraryList();
         result.addFunctionLibrary(getVendorFunctionSet());
-        result.addFunctionLibrary(MathFunctionSet.getInstance());
+        result.addFunctionLibrary(MathFunctionSet.getInstance(version));
         result.addFunctionLibrary(MapFunctionSet.getInstance(version));
         result.addFunctionLibrary(ArrayFunctionSet.getInstance(version));
         result.addFunctionLibrary(EXPathBinaryFunctionSet.getInstance());
