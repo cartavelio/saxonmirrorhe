@@ -497,6 +497,7 @@ public class XQueryParser extends XPathParser {
             }
             if (queryVersion.equals("4.0")) {
                 allowXPath40Syntax = true;
+                t.languageLevel = 40;
             }
 //            if (XQUERY10.equals(queryVersion)) {
 //                // no action
