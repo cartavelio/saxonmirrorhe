@@ -1835,8 +1835,10 @@ public class XPathParser {
                     primaryType = parseArrayItemType();
                     break;
                 case "record":
-                case "tuple": // Retained as synonym for the time being
                     primaryType = parseRecordTest(this);
+                    break;
+                case "tuple": // No longer recognized
+                    grumble("The keyword 'tuple' is no longer recognized: use 'record' instead");
                     break;
                 case "atomic":
                     // Allowed only in patterns, not in item types??
@@ -1936,7 +1938,6 @@ public class XPathParser {
     /**
      * Parse a record type (Saxon 9.8 / XPath 4.0 extension).
      * Syntax: "record" "(" (name (":" sequenceType)?) ("," (name (":" sequenceType)?))* ")"
-     * The keyword "tuple" is accepted as a synonym, for compatibility
      */
 
     private ItemType parseRecordTest(XPathParser p) throws XPathException {

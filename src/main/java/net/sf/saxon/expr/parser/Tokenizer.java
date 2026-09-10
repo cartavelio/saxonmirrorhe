@@ -1249,7 +1249,7 @@ public final class Tokenizer {
             case "attribute":
                 return Token.KEYWORD_LBRA;
             case "atomic":
-            case "tuple": // Retained as synonym of "record" for the time being
+            case "tuple": // No longer supported as a synonym of "record", but still recognized for the sake of error messages
             case "record":
             case "type":
             case "union":
