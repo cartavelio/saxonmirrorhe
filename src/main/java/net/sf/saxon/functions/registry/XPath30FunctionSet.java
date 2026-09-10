@@ -11,6 +11,7 @@ import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
@@ -145,11 +146,11 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null));
 
-        register("format-integer", 2, e -> e.populate( FormatInteger::new, AnyItemType.getInstance(), ONE, 0)
+        register("format-integer", 2, e -> e.populate( FormatInteger::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("format-integer", 3, e -> e.populate( FormatInteger::new, AnyItemType.getInstance(), ONE, 0)
+        register("format-integer", 3, e -> e.populate( FormatInteger::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
@@ -199,7 +200,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                  ONE, CITEM | LATE));
 
         register("has-children", 1, e -> e.populate( HasChildren_1::new, BuiltInAtomicType.BOOLEAN,
-                 OPT, 0)
+                 ONE, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT | INS, null));
 
         register("head", 1, e -> e.populate( HeadFn::new, AnyItemType.getInstance(),
@@ -217,7 +218,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
         register("outermost", 1, e -> e.populate( Outermost::new, AnyNodeTest.getInstance(), STAR, AS_ARG0 | FILTER)
                 .arg(0, AnyNodeTest.getInstance(), STAR | TRA, null));
 
-        register("parse-xml", 1, e -> e.populate( ParseXml::new, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
+        register("parse-xml", 1, e -> e.populate(ParseXml::new, new DocumentNodeTest(NodeKindTest.ELEMENT), OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
         register("parse-xml-fragment", 1, e -> e.populate( ParseXmlFragment::new, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
@@ -248,8 +249,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                  BuiltInAtomicType.STRING, OPT, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
-        register("unparsed-text", 2, e -> e.populate( UnparsedText::new,
-                 BuiltInAtomicType.STRING, OPT, BASE | LATE)
+        register("unparsed-text", 2, e -> e.populate( UnparsedText::new, BuiltInAtomicType.STRING, OPT, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 

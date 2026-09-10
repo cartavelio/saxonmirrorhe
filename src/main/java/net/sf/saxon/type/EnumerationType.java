@@ -616,6 +616,32 @@ public class EnumerationType implements AtomicType {
     }
 
     /**
+     * Produce a string representation of the type name. If the type is anonymous, an internally-allocated
+     * type name will be returned.
+     *
+     * @return the name of the atomic type in the form Q{uri}local
+     */
+
+    public String toString() {
+        StringBuilder fsb = new StringBuilder(256);
+        fsb.append("union(");
+        for (String st : values) {
+            char delim = '"';
+            if (st.indexOf('"') >= 0) {
+                if (st.indexOf('\'') > 0) {
+                    delim = '`';
+                } else {
+                    delim = '\'';
+                }
+            }
+            fsb.append(delim).append(st).append(delim).append(", ");
+        }
+        fsb.setLength(fsb.length() - 2);
+        fsb.append(")");
+        return fsb.toString();
+    }
+
+    /**
      * Check that this type is validly derived from a given type, following the rules for the Schema Component
      * Constraint "Is Type Derivation OK (Simple)" (3.14.6) or "Is Type Derivation OK (Complex)" (3.4.6) as
      * appropriate.

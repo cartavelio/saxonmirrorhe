@@ -19,10 +19,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
@@ -166,7 +163,7 @@ public class RangeKey extends MapItem {
      * @return true if the map conforms to the required type
      */
     @Override
-    public boolean conforms(AtomicType keyType, SequenceType valueType, TypeHierarchy th) {
+    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
         AtomicIterator keyIter = keys();
         AtomicValue key;
         while ((key = keyIter.next()) != null) {

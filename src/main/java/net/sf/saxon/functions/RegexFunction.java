@@ -12,6 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.EmptyUnicodeString;
@@ -111,7 +112,8 @@ public abstract class RegexFunction extends SystemFunction implements StatefulSy
      *
      * @param args the argument values in the function call
      * @return the compiled regular expression; either the expression pre-compiled statically,
-     * or the result of compiling it dynamically
+     * or the result of compiling it dynamically. The XPath 4.0 tokenize() function allows the
+     * argument to be an empty sequence; in this case return null.
      * @throws XPathException if the regular expression is invalid
      */
 
@@ -120,8 +122,15 @@ public abstract class RegexFunction extends SystemFunction implements StatefulSy
             return staticRegex;
         }
         Configuration config = getRetainedStaticContext().getConfiguration();
-        UnicodeString regexArg = args[1].head().getUnicodeStringValue();
-        String flags = args[args.length - 1].head().getStringValue();
+        Item regexItem = args[1].head();
+        if (regexItem == null) {
+            // for XPath 4.0 tokenize() only
+            return null;
+        }
+        UnicodeString regexArg = regexItem.getUnicodeStringValue();
+
+        Item flagsItem = args[args.length - 1].head();   // May generally be empty in XPath 4.0
+        String flags = flagsItem == null ? "" : flagsItem.getStringValue();
         String hostLang = "XP30";
         if (config.getXsdVersion() == Configuration.XSD11) {
             hostLang += "/XSD11";

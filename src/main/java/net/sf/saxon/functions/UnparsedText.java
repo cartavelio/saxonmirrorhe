@@ -13,6 +13,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.StringView;
@@ -46,7 +47,13 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue hrefVal = (StringValue) arguments[0].head();
-        String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
+        String encoding;
+        if (getArity() == 2) {
+            Item enc = arguments[1].head();
+            encoding = enc == null ? null : enc.getStringValue();
+        } else {
+            encoding = null;
+        }
         try {
             return SequenceTool.itemOrEmpty(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context));
         } catch (XPathException e) {

@@ -10,6 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -37,7 +38,13 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue hrefVal = (StringValue) arguments[0].head();
-        String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
+        String encoding;
+        if (getArity() == 2) {
+            Item enc = arguments[1].head();
+            encoding = enc == null ? null : enc.getStringValue();
+        } else {
+            encoding = null;
+        }
         try {
             return SequenceTool.toLazySequence(evalUnparsedTextLines(hrefVal, encoding, context));
         } catch (XPathException e) {

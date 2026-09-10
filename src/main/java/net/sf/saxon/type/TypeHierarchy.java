@@ -604,8 +604,8 @@ public class TypeHierarchy {
                     } else if (t2 == MapType.ANY_MAP_TYPE) {
                         return SUBSUMED_BY;
                     }
-                    AtomicType k1 = ((MapType)t1).getKeyType();
-                    AtomicType k2 = ((MapType)t2).getKeyType();
+                    PlainType k1 = ((MapType)t1).getKeyType();
+                    PlainType k2 = ((MapType)t2).getKeyType();
                     SequenceType v1 = ((MapType)t1).getValueType();
                     SequenceType v2 = ((MapType)t2).getValueType();
                     Affinity keyRel = relationship(k1, k2);

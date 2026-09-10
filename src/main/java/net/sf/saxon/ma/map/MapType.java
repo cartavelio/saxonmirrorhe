@@ -44,11 +44,11 @@ public class MapType extends AnyFunctionType {
     public static final SequenceType SEQUENCE_OF_MAPS =
             SequenceType.makeSequenceType(ANY_MAP_TYPE, StaticProperty.ALLOWS_ZERO_OR_MORE);
 
-    private final AtomicType keyType;
+    private final PlainType keyType;
     private final SequenceType valueType;
     private final boolean mustBeEmpty;
 
-    public MapType(AtomicType keyType, SequenceType valueType) {
+    public MapType(PlainType keyType, SequenceType valueType) {
         this.keyType = keyType;
         this.valueType = valueType;
         this.mustBeEmpty = false;
@@ -73,10 +73,11 @@ public class MapType extends AnyFunctionType {
 
     /**
      * Get the type of the keys
+     *
      * @return the type to which all keys must conform
      */
 
-    public AtomicType getKeyType() {
+    public PlainType getKeyType() {
         return keyType;
     }
 

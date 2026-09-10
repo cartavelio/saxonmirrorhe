@@ -167,7 +167,7 @@ public class DictionaryMap extends MapItem {
      * @return true if the map conforms to the required type
      */
     @Override
-    public boolean conforms(AtomicType keyType, SequenceType valueType, TypeHierarchy th) {
+    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
         if (isEmpty()) {
             return true;
         }
