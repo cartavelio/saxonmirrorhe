@@ -11,7 +11,11 @@
   const char * SaxonApiException::what () {
 	    if(message == nullptr && !cppException) {
             allocFn fn = operator new;
-            message = j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
+            if(isStaticError) {
+                message = j_getCombinedStaticErrorMessages(SaxonProcessor::sxn_environ->thread, (void *)fn);
+            } else {
+                message = j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
+            }
 	    }
 	    return message;
   }
@@ -140,6 +144,7 @@ SaxonApiException::SaxonApiException(const char * m){
                 message = j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
             }
 	    }
+	    
 	    return message;
 
 	}

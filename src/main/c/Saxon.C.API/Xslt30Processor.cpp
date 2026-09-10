@@ -374,8 +374,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 	}
     proc->attachCurrentThread();
 	if(stylesheet==nullptr){
-		std::cerr<< "Error: stylesheet has not been set."<<std::endl;
-		return;
+		throw SaxonApiException("Error: stylesheet has not been set.");
 	}
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     long status = j_transformToFile(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *) nullptr, (char *)source, (char *)stylesheet, (char *)outputfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
@@ -394,13 +393,11 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 	if(exceptionOccurred()) {
 		//Possible error detected in the compile phase. Processor not in a clean state.
 		//Require clearing exception.
-        std::cerr<<"Error: Xslt30Processor not in a clean state. - Exception found"<<std::endl;
-		return nullptr;
+        throw SaxonApiException("Error: Xslt30Processor not in a clean state. - Exception found");
 	}
     proc->attachCurrentThread();
 	if(source == nullptr && stylesheet == nullptr){
-		std::cerr<< "Error: nullptr file name found in transformFileToString."<<std::endl;
-		return nullptr;
+		throw SaxonApiException("Error: nullptr file name found in transformFileToString.");
 	}
     allocFn fn = operator new;
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);

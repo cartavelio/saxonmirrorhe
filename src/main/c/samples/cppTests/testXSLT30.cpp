@@ -2510,17 +2510,21 @@ void testSaxSourceDTDValidation(SaxonProcessor * proc, sResultCount *sresult) {
 
 }
 
-void testTestAssociatedError(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *sresult){
+void testAssociatedError(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *sresult){
     try {
+        cerr<<endl<<"testAssociatedError test"<<endl;
         XsltExecutable * executable = trans->compileFromAssociatedFile("../data/trax/xml/foo.xml");
         sresult->failure++;
-        sresult->failureList.push_back("testTestAssociatedError");
+        sresult->failureList.push_back("testAssociatedError");
     }catch(SaxonApiException &e) {
         const char * emessage = e.getMessage();
         if(emessage != nullptr) {
             cerr << "exception=" << emessage << endl;
         } else {
             cerr<< "exception is nullptr"<<endl;
+            sresult->failure++;
+            sresult->failureList.push_back("testAssociatedError");
+            return;
         }
         sresult->success++;
     }
@@ -2659,7 +2663,7 @@ int main(int argc, char* argv[]) {
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
-    testTestAssociatedError(processor, trans, sresult);
+    testAssociatedError(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
 

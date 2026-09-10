@@ -123,13 +123,7 @@ public class SaxonCException  {
     @CEntryPoint(name = "j_getCombinedStaticErrorMessages")
     public static CCharPointer j_getCombinedStaticErrorMessages(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
 
-        if(errorList.isEmpty()) {
-            return WordFactory.nullPointer();
-        }
-
         String message = new String();
-
-
 
         for(Object item : errorList) {
             XmlProcessingError error = (XmlProcessingError)item;
@@ -139,6 +133,11 @@ public class SaxonCException  {
                 message+=(error.getErrorCode().getLocalName() + ": " +((XmlProcessingError)item).getMessage() + "\n");
             }
 
+        }
+
+        if(SaxonCAPI.debug) {
+            System.err.println("Debug - j_getCombinedStaticErrorMessages errorList.length: "+errorList.size());
+            System.err.println("Debug - j_getCombinedStaticErrorMessages: message length:"+message.length());
         }
 
         if(message.isEmpty()) {

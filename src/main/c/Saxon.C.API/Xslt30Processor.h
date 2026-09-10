@@ -31,14 +31,16 @@ public:
 
     //! Default constructor.
     /*!
-      Creates a Saxon-HE product
+     * Creates a Saxon-HE product
+     * @throws SaxonApiException
     */
     Xslt30Processor();
 
     //! Constructor with the SaxonProcessor supplied.
     /*!
-      @param proc - Supplied pointer to the SaxonProcessor object
-      @param cwd - The current working directory
+      * @param proc - Supplied pointer to the SaxonProcessor object
+      * @param cwd - The current working directory
+      * @throws SaxonApiException
     */
     Xslt30Processor(SaxonProcessor* proc, std::string cwd="");
 
@@ -222,6 +224,7 @@ public:
      * @param sourcefile - The file name of the source document
      * @param stylesheetfile - The file name of the stylesheet document.
      * @param outputfile - The file name where results will be stored
+     * @throws SaxonApiException if the transformation fails
      */
     void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile); 
 
@@ -232,6 +235,7 @@ public:
      * @param sourcefile - The file name of the source document
      * @param stylesheetfile - The file name of the stylesheet document.
      * @return char array - result of the transformation
+     * @throws SaxonApiException if the transformation fails
      */
     const char * transformFileToString(const char* sourcefile, const char* stylesheetfile);
 
@@ -241,6 +245,7 @@ public:
      * @param sourcefile - The file name of the source document
      * @param stylesheetfile - The file name of the stylesheet document.
      * @return XdmValue - result of the transformation
+     * @throws SaxonApiException if the transformation fails
      */
     XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile);
 
@@ -253,6 +258,7 @@ public:
      * @param stylesheet  - The file name of the stylesheet document.
      * @return an XsltExecutable, which represents the compiled stylesheet. The XsltExecutable
      * is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
+     * @throws SaxonApiException if the compilation of the stylesheet fails
      */
     XsltExecutable * compileFromFile(const char* stylesheet);
 
@@ -265,6 +271,7 @@ public:
      * @param stylesheet as a lexical string representation
      * @return an XsltExecutable, which represents the compiled stylesheet. The XsltExecutable
      * is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
+     * @throws SaxonApiException if the compilation of the stylesheet fails
      */
     XsltExecutable * compileFromString(const char* stylesheet);
 
@@ -285,6 +292,7 @@ public:
      * @param sourceFile  - The file name of the XML document.
      * @return an XsltExecutable, which represents the compiled stylesheet. The XsltExecutable
      * is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
+     * @throws SaxonApiException if the compilation of the stylesheet fails
      */
     XsltExecutable * compileFromAssociatedFile(const char* sourceFile);
 
@@ -295,6 +303,7 @@ public:
      * The compiled stylesheet is saved as SEF to file store
      * @param stylesheet as a lexical string representation
      * @param filename - the file to which the compiled package should be saved
+     * @throws SaxonApiException if the compilation of the stylesheet fails
      */
     void compileFromStringAndSave(const char* stylesheet, const char* filename);
 
@@ -305,6 +314,7 @@ public:
      * The compiled stylesheet is saved as SEF to file store
      * @param xslFilename - file name of the stylesheet
      * @param filename - the file to which the compiled package should be saved
+     * @throws SaxonApiException if the compilation of the stylesheet fails
      */
     void compileFromFileAndSave(const char* xslFilename, const char* filename);
 
@@ -314,6 +324,7 @@ public:
      * The compiled stylesheet is cached and available for execution later.
      * @param node the XdmNode object for the stylesheet
      * @param filename - the file to which the compiled package should be saved
+     * @throws SaxonApiException if the compilation of the stylesheet fails
      */
     void compileFromXdmNodeAndSave(XdmNode * node, const char* filename);
 
@@ -325,6 +336,7 @@ public:
      * @param node the XdmNode object for the stylesheet
      * @return an XsltExecutable, which represents the compiled stylesheet. The XsltExecutable
      * is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
+     * @throws SaxonApiException if the compilation of the stylesheet fails
      */
     XsltExecutable * compileFromXdmNode(XdmNode * node);
 
@@ -386,10 +398,10 @@ private:
      //! Clear property values set
     void clearProperties();
 
-	SaxonProcessor* proc;/*! Pointer to SaxonProcessor object*/
+	SaxonProcessor* proc;/*!< Pointer to SaxonProcessor object*/
 	int64_t cppXT;
     std::string cwdXT; /*!< current working directory */
-	bool jitCompilation;
+	bool jitCompilation;  /*!< Just-In=Time compilation flag*/
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
 	std::map<std::string,std::string> properties; /*!< map of properties used for the transformation as (string, string) pairs */
     SaxonApiException * exception;

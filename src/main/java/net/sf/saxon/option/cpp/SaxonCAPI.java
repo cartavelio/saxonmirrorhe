@@ -300,6 +300,9 @@ public class SaxonCAPI {
     }
 
     static CCharPointer stringToNative2(net.sf.saxon.option.cpp.SaxonCAPI.AllocatorCCharFn alloc, String string) {
+        if(string.isEmpty()) {
+            return WordFactory.nullPointer();
+        }
         byte[] b = string.getBytes(StandardCharsets.UTF_8);
         CCharPointer a = alloc.call(b.length + 1);
         for (int i = 0; i < b.length; i++) {
