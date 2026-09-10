@@ -27,14 +27,16 @@
         </configfiledesc>
         <commandline for="TQ">-ext</commandline>
         <desc>
-            <p>ALLOW_EXTERNAL_FUNCTIONS determines whether calls to reflexive external functions are
-                allowed.</p>
+            <p>ALLOW_EXTERNAL_FUNCTIONS has rather wider effect than the name might suggest.
+                It controls whether stylesheets are able to access external resources in the server environment.</p>
             <p>More specifically, if set to <b>false</b> it disallows all of the
                 following:</p>
             <ul>
-                <li>Calls to reflexive Java extension functions</li>
-                <li>Use of the XSLT <code>system-property()</code> function to access Java system
+                <li class="javaonly">With SaxonJ, calls to reflexive Java extension functions</li>
+                <li class="javaonly">Use of the XSLT <code>system-property()</code> function to access Java system
                     properties</li>
+                <li class="javaonly">Use of the Saxon SQL extension library</li>
+                <li>Use of the EXPath File library</li>
                 <li>Use of a URI in the <code>href</code> attribute of an <code>xsl:result-document</code> instruction</li>
                 <li>Calls to XSLT extension instructions</li>
             </ul>
