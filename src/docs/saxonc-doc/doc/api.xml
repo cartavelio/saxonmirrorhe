@@ -848,11 +848,11 @@
                   <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a>
                </td>
                <td>
-                  <span class="signature">transformFileToValue(string $fileName, string
-                                                         $stylesheetFileName)</span>
-                  <div class="fcomment">Perform a one shot transformation. The $fileName argument
-                                       is the name of the source file. The argument $stylesheetFileName is the
-                     name of the stylesheet file name.The result is returned as
+                  <span class="signature">transformFileToValue(string $sourceFileName, string
+                     $stylesheetFileName)</span>
+                  <div class="fcomment">Perform a one shot transformation. The $sourceFileName
+                     argument is the name of the source file. The $stylesheetFileName argument is
+                     the name of the stylesheet file. The result is returned as
                      an <a class="bodylink code" href="../saxon_c_php_xdmvalue">XdmValue</a>.</div>
                </td>
             </tr>
@@ -861,12 +861,11 @@
                   <code>string</code>
                </td>
                <td>
-                  <span class="signature">transformFileToString(string $fileName, string
-                                       $stylesheetFileName)</span>
-                  <div class="fcomment">Perform a one shot transformation. The $fileName argument
-                     is the name of the source file. The argument $stylesheetFileName is the name of the stylesheet
-                     file name. The result is returned as
-                     a string.</div>
+                  <span class="signature">transformFileToString(string $sourceFileName, string
+                     $stylesheetFileName)</span>
+                  <div class="fcomment">Perform a one shot transformation. The $sourceFileName
+                     argument is the name of the source file. The $stylesheetFileName argument is
+                     the name of the stylesheet file. The result is returned as a string.</div>
                </td>
             </tr>
             <tr>
