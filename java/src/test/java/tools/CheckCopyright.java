@@ -20,8 +20,8 @@ public class CheckCopyright {
     private final int totalNonCommentLines = 0;
     private int totalFiles = 0;
     private static String suffix = ".java";
-    private static String dir = "/Users/mike/GitHub/saxon2020/src/main/java";
-    private static String currentYear = "2023";
+    private static String dir = "/Users/mike/GitHub/2025-saxon-main/java/src/main/java";
+    private static String currentYear = "2026";
 
     public static void main(String[] args) throws Exception {
         if (args.length >= 1) {
