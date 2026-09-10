@@ -512,7 +512,12 @@ namespace TestDriver {
                     string value = formatAttribute.StringValue;
                     environment.paramDecimalDeclarations.Append(property + "=\"" + value + "\" ");
                     try {
-                        environment.xpathCompiler.SetDecimalFormatProperty(formatQName, property, value);
+                        if (formatQName == null) {
+                            environment.xpathCompiler.SetDecimalFormatProperty(property, value);
+                        }
+                        else {
+                            environment.xpathCompiler.SetDecimalFormatProperty(formatQName, property, value);
+                        }
                     }
                     catch (Exception e) {
                         driver.println("**** Error in Decimal format: " + e.Message);
