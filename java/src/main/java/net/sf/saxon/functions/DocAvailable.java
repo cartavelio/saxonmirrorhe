@@ -10,6 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.lib.Validation;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
@@ -82,7 +83,7 @@ public class DocAvailable extends SystemFunction  {
             PackageData packageData = getRetainedStaticContext().getPackageData();
 
             int schemaValidationMode = parseOptions.getSchemaValidationMode();
-            if (!packageData.isSchemaAware() && (schemaValidationMode == 1  || schemaValidationMode == 2)) {
+            if (!packageData.isSchemaAware() && (schemaValidationMode == Validation.STRICT  || schemaValidationMode == Validation.LAX)) {
                 // Regardless of whether it exists, the document will be unavailable because
                 // schema validation (STRICT or LAX) is required but not supported
                 return false;
