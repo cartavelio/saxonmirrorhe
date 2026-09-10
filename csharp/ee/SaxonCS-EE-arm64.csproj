@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-  <Target Name="SetupCSBuild" BeforeTargets="BeforeBuild">
-    <Exec ContinueOnError="true" IgnoreExitCode="true"
-          WorkingDirectory="../../"
-          Command='./gradlew csharp:ee:dotnetBuild'/>
-  </Target>
-
   <Import Project="build\arm64\SaxonCS\core.csproj"/>
    <ItemGroup>
       <None Include="build\LICENSE.txt" Pack="true" PackagePath=""/>
