@@ -53,7 +53,7 @@ public class JavaRegularExpression implements RegularExpression {
             //#endif
             pattern = Pattern.compile(this.javaRegex, flagBits);
         } catch (PatternSyntaxException e) {
-            throw new XPathException("Incorrect syntax for Java regular expression", e);
+            throw new XPathException("Incorrect syntax for native regular expression: " + e.getMessage(), "FORX0002");
         }
     }
 
