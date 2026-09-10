@@ -345,9 +345,23 @@ div.section h2{
     color:#688790 !important;
     font-size:inherit;
 }
-.javaclassmember, .javalink {
+.javaclassmember, .javalink, .feature {
     font-family:monospace;
     color:#3D5B96;
+}
+.javaonly {
+   padding: .5em;
+   border: .5em;
+   border-left-style: solid;
+   margin: 1em auto;
+   border-color: #333399;
+}
+.csonly {
+   padding: .5em;
+   border: .5em;
+   border-left-style: solid;
+   margin: 1em auto;
+   border-color: #990033;
 }
 .signature, .fullsignature {
     font-size:inherit;
@@ -503,6 +517,14 @@ div.foundP p.hot {
     margin-left:0px;
     /*padding-left:0px;*/
     /*background-position:3px 3px;*/
+}
+.langChoice{
+    margin:0px;
+    padding:6px;
+    cursor:pointer; /* Safari Mobile bug, not cursor:default;*/
+    position: absolute;
+    left: 50%;
+    border:none; 
 }
 .arrowLeft,
 .arrowRight,

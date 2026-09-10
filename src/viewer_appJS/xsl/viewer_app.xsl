@@ -240,8 +240,7 @@
         <xsl:variable name="count" select="count($hash-parts)"/>
         <xsl:variable name="hpart" select="$hash-parts[$count]"/>
         <xsl:variable name="subpage"
-            select="if ($start = ('javadoc', 'dotnetdoc')) then substring-after($hpart, '@') 
-            else ''"/>
+            select="if (contains($hpart, '@')) then substring-after($hpart, '@') else ''"/>
         
         <xsl:variable name="hash-parts-simp" select="if ($subpage eq '') then $hash-parts else
             (subsequence($hash-parts, 1, $count - 1), substring-before($hpart, '@'))"/>
@@ -292,7 +291,7 @@
                         </xsl:when>
                         <xsl:otherwise>
                             <xsl:apply-templates select="$doc/*" mode="get-section">
-                                <xsl:with-param name="hash-parts" select="$hash-parts"/>
+                                <xsl:with-param name="hash-parts" select="$hash-parts-simp"/>
                                 <xsl:with-param name="parent" select="$doc/*"/>
                                 <xsl:with-param name="index" select="2"/>
                             </xsl:apply-templates>
@@ -392,11 +391,12 @@
     </xsl:template>
     
     <!-- Used by javadoc and dotnetdoc to scroll to particular method, etc. -->
+    <!-- Also used for feature keys -->
     <xsl:template name="scrollpage">
         <xsl:param name="id"/>
         <xsl:variable name="subnode"
-            select="(ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main']/div[@class
-            = 'section']/div[@class = 'method']/h3[. eq $id])[1]"
+            select="(ixsl:page()/html/body/(./div[@id = 'wrap']/div[@id = 'main']/div[@class
+            = 'section']/div[@class = 'method']/h3[. eq $id], .//*[@id = $id]))[1]"
             as="node()?"/>
         <!-- Note that scroll to overpopulated method just goes to first one  -->
         
@@ -484,6 +484,26 @@
     
     <xsl:template match="li[@class eq 'trail']" mode="ixsl:onclick">
         <xsl:sequence select="f:crumb-navigation(.)"/>
+    </xsl:template>
+    
+    <xsl:template match="input[@id = 'javacheckbox']" mode="ixsl:onclick">
+        <xsl:variable name="this" select="."/>
+        <xsl:for-each select="//*[@class='javaonly']">
+            <ixsl:set-style name="display" 
+                select="if (ixsl:get($this,'checked')) 
+                then if (self::tr) then 'table-row' else 'block' 
+                else 'none'"/>
+        </xsl:for-each>
+    </xsl:template>
+    
+    <xsl:template match="input[@id = 'cscheckbox']" mode="ixsl:onclick">
+        <xsl:variable name="this" select="."/>
+        <xsl:for-each select="//*[@class='csonly']">
+            <ixsl:set-style name="display" 
+                select="if (ixsl:get($this,'checked')) 
+                then if (self::tr) then 'table-row' else 'block' 
+                else 'none'"/>
+        </xsl:for-each>
     </xsl:template>
     
     <xsl:template match="p[@class = ('arrowLeft','arrowRight')]" mode="ixsl:onclick">

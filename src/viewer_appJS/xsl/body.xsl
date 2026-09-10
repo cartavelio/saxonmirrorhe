@@ -76,6 +76,13 @@
         </span>
     </xsl:template>
     
+    <xsl:template match="a[@class ='feature']" mode="secondary">
+        <span data-href="/configuration/config-features@{@href}" class="javalink">
+            <xsl:copy-of select="@* except @href"/>
+            <xsl:value-of select="@href"/>
+        </span>
+    </xsl:template>
+    
     <xsl:template match="code[@java]" mode="secondary">
     <span data-href="{@java}" class="javalink">
         <xsl:copy-of select="@* except @java|@class"/>
