@@ -4,6 +4,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.CatalogResourceResolver;
 import net.sf.saxon.lib.CommonResourceResolver;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.trans.XPathException;
 import org.junit.Test;
 import org.xml.sax.InputSource;
@@ -23,16 +24,16 @@ public class ResolverConfigurationTest {
     @Test
     public void defaultCatalogResourceResolver() {
         Configuration config = new Configuration();
-        assertNotNull(config.getCommonResourceResolver());
-        assertEquals("net.sf.saxon.lib.CatalogResourceResolver", config.getCommonResourceResolver().getClass().getName());
+        assertNotNull(config.getResourceResolver());
+        assertEquals("net.sf.saxon.lib.CatalogResourceResolver", config.getResourceResolver().getClass().getName());
     }
 
     @Test
     public void explicitCatalogResourceResolverClass() {
         Configuration config = new Configuration();
-        config.setConfigurationProperty(Feature.COMMON_RESOURCE_RESOLVER_CLASS, "net.sf.saxon.lib.CatalogResourceResolver");
-        assertNotNull(config.getCommonResourceResolver());
-        assertEquals("net.sf.saxon.lib.CatalogResourceResolver", config.getCommonResourceResolver().getClass().getName());
+        config.setConfigurationProperty(Feature.RESOURCE_RESOLVER_CLASS, "net.sf.saxon.lib.CatalogResourceResolver");
+        assertNotNull(config.getResourceResolver());
+        assertEquals("net.sf.saxon.lib.CatalogResourceResolver", config.getResourceResolver().getClass().getName());
     }
 
     @Test
@@ -43,9 +44,9 @@ public class ResolverConfigurationTest {
 
         MyResolver resolver = new MyResolver(underlyingResolver);
 
-        config.setConfigurationProperty(Feature.COMMON_RESOURCE_RESOLVER, resolver);
-        assertNotNull(config.getCommonResourceResolver());
-        assertEquals("resolvers.ResolverConfigurationTest$MyResolver", config.getCommonResourceResolver().getClass().getName());
+        config.setConfigurationProperty(Feature.RESOURCE_RESOLVER, resolver);
+        assertNotNull(config.getResourceResolver());
+        assertEquals("resolvers.ResolverConfigurationTest$MyResolver", config.getResourceResolver().getClass().getName());
     }
 
     @Test
@@ -53,7 +54,7 @@ public class ResolverConfigurationTest {
         Configuration config = new Configuration();
 
         try {
-            config.setConfigurationProperty(Feature.COMMON_RESOURCE_RESOLVER, "Hello");
+            config.setConfigurationProperty(Feature.RESOURCE_RESOLVER, "Hello");
             fail();
         } catch (IllegalArgumentException ex) {
             assertTrue(ex.getMessage().contains("SAXON_RESOURCE_RESOLVER value must be an instance of"));
@@ -85,8 +86,8 @@ public class ResolverConfigurationTest {
         }
 
         @Override
-        public Source resolve(String href, String base) throws TransformerException {
-            return resolver.resolve(href, base);
+        public Source resolve(ResourceRequest rr) throws XPathException {
+            return resolver.resolve(rr);
         }
 
         @Override

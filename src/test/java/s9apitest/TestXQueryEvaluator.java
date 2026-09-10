@@ -917,7 +917,7 @@ public class TestXQueryEvaluator {
     public void testGlobalURIResolver() {
         try {
             Processor p = new Processor(false);
-            p.getUnderlyingConfiguration().setURIResolver((href, base) -> new StreamSource(new StringReader("<z>17</z>")));
+            p.getUnderlyingConfiguration().setResourceResolver(request -> new StreamSource(new StringReader("<z>17</z>")));
             XQueryCompiler c = p.newXQueryCompiler();
             XQueryEvaluator eval = c.compile("doc('file:///a.xml')/z").load();
             XdmItem result = eval.iterator().next();

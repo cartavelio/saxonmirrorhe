@@ -15,7 +15,6 @@ import org.w3c.dom.Element;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.xmlresolver.ResolverFeature;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,7 +27,6 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -294,16 +292,13 @@ public class SchemaTests {
             Processor proc = new Processor(true);
             SchemaManager mgr = proc.getSchemaManager();
             mgr.setXsdVersion("1.1");
-            proc.getUnderlyingConfiguration().getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, Collections.singletonList(catalog));
+            proc.setCatalogFile(catalog);
 
             mgr.load(new StreamSource(new StringReader(over), "http://dummy/over"));
             SchemaValidator val = mgr.newSchemaValidator();
             val.validate(new StreamSource(new StringReader(data)));
         } catch (SaxonApiException e) {
             // expected failure
-        } catch (XPathException e) {
-            e.printStackTrace();
-            fail();
         }
 
     }
