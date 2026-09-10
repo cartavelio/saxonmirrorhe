@@ -193,6 +193,103 @@ XdmNode *getRoot(XdmNode *document)
   return root;
 }
 
+// Test case to process JSON parsed with parseJsonFromString
+void testParseJsonFromString(SaxonProcessor* processor, XPathProcessor* xpath, sResultCount* sresult) {
+
+    cout << endl << "Test testParseJsonFromString:" << endl;
+    xpath->clearParameters();
+    xpath->clearProperties();
+    XdmItem* input =
+        processor->parseJsonFromString("{\"foo\":\"bar\"}")->getHead();
+
+    xpath->setContextItem(input);
+    try {
+        XdmItem* result = xpath->evaluateSingle("?foo");
+        const char* messagei = result->getStringValue();
+        cout << "String Value of result=" << messagei << endl;
+        sresult->success++;
+        operator delete((char*)messagei);
+        delete result;
+    }
+    catch (SaxonApiException& e) {
+        cout << "Error Message = " << e.what() << endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testParseJsonFromString");
+    }
+
+    xpath->clearParameters();
+    xpath->clearProperties();
+    delete input;
+}
+
+// Test case to process JSON parsed with parseJsonFromString
+void testParseJsonFromString2(SaxonProcessor* processor, XPathProcessor* xpath, sResultCount* sresult) {
+
+    cout << endl << "Test testParseJsonFromString2:" << endl;
+
+	try {
+    	XdmValue * input =
+        	processor->parseJsonFromString("{ \"myFunc\": {"
+                                                  "      \"as\": \"xs:integer?\","
+                                                  "      \"param\": ["
+                                                  "        \"xs:integer\""
+                                                  "      ],"
+                                                  "      \"arity\": [1]"
+                                                  "    }"
+                                                  "}");
+
+		if(input != nullptr) {
+
+			XdmItem * item = input->getHead();
+
+    		if(item != nullptr && item->isMap()) {
+				XdmMap * funcMap = (XdmMap *)item;
+
+				XdmValue * signatureValue = funcMap->get("myFunc");
+
+				XdmItem * signatureItem = signatureValue->getHead();
+
+				if(signatureItem != nullptr && signatureItem->isMap()) {
+					XdmMap * signatureMap = (XdmMap *)signatureItem;
+
+					XdmValue * paramsValue = signatureMap->get("param");
+
+					if(paramsValue != nullptr) {
+						XdmItem * paramsItem = paramsValue->getHead();
+						if(paramsItem != nullptr && paramsItem->isArray()) {
+							XdmArray * paramArray = (XdmArray *)paramsItem;
+							cout << "Param Array length=" << paramArray->arrayLength() << endl;
+							if(paramArray->arrayLength() >0) {
+								//Method asList() or values() can be used instead of get(i)
+								XdmValue * item0Value = paramArray->get(0);
+								XdmItem * item0 = item0Value->getHead();
+
+        						const char* messagei = item0->getStringValue();
+        						cout << "String Value of result=" << messagei << endl;
+        						sresult->success++;
+        						operator delete((char*)messagei);
+								delete item0;
+								delete item0Value;
+							}
+							delete paramArray;
+						}
+
+					}
+					delete signatureMap;
+				}
+				delete item;
+			}
+
+			delete input;
+		}
+    }
+    catch (SaxonApiException& e) {
+        cout << "Error Message = " << e.what() << endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testParseJsonFromString2");
+    }
+}
+
 void testCopyConstructorForXdmNode(SaxonProcessor *processor,
                                          XPathProcessor *xpath,
                                          sResultCount *sresult) {
@@ -239,6 +336,7 @@ void testCopyConstructorForXdmNode(SaxonProcessor *processor,
 }
 
 void testEncoding(SaxonProcessor *processor,
+                                         const std::string *const dataDir,
                                          XPathProcessor *xpath,
                                          sResultCount *sresult) {
 
@@ -246,8 +344,9 @@ void testEncoding(SaxonProcessor *processor,
 try{
 
   // parser the XML
-
-  XdmItem * item = xpath->evaluateSingle("unparsed-text('../data/help.txt')");
+  std::string xpathContents;
+  xpathContents = CppTestUtils::concat(3, "unparsed-text('", dataDir->c_str(), "/help.txt')");
+  XdmItem * item = xpath->evaluateSingle(xpathContents.c_str());
   const char * value = item->getStringValue();
   std::string encoding = "Cp437";//"windows-1252";
   const char * result = SaxonProcessor::encodeString(value, encoding.c_str());
@@ -647,11 +746,13 @@ void testEmptyXdmValueToString(SaxonProcessor *processor, XPathProcessor *xpath,
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
 void testXPathOnFile(SaxonProcessor *processor, XPathProcessor *xpath,
+                     const std::string * const dataDir,
                      sResultCount *sresult) {
+
   cout << endl << "testXPathOnFile: Test testXPath with file source:" << endl;
   xpath->clearParameters();
   xpath->clearProperties();
-  xpath->setContextFile("../data/cat.xml");
+  xpath->setContextFile(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
 
   try {
     XdmValue *resultValues = xpath->evaluate("//person");
@@ -1032,11 +1133,11 @@ void testXdmArray(SaxonProcessor *processor, sResultCount *sresult) {
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
-void testXPathOnFile2(XPathProcessor *xpath, sResultCount *sresult) {
+void testXPathOnFile2(XPathProcessor *xpath, const std::string * const dataDir, sResultCount *sresult) {
   cout << endl << "Test testXPath with file source-2:" << endl;
   xpath->clearParameters();
   xpath->clearProperties();
-  xpath->setContextFile("../data/cat.xml");
+  xpath->setContextFile(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
   try {
     XdmItem *result = xpath->evaluateSingle("//person[1]");
 
@@ -1082,11 +1183,11 @@ void testXPathOnFile2(XPathProcessor *xpath, sResultCount *sresult) {
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
-void testXdmNodeEquals(XPathProcessor *xpath, sResultCount *sresult) {
+void testXdmNodeEquals(XPathProcessor *xpath, const std::string * const dataDir, sResultCount *sresult) {
   cout << endl << "Test testXdmNodeEquals:" << endl;
   xpath->clearParameters();
   xpath->clearProperties();
-  xpath->setContextFile("../data/cat.xml");
+  xpath->setContextFile(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
   try {
     XdmNode *result = (XdmNode *)xpath->evaluateSingle("//person[1]");
     XdmNode *result2 = new XdmNode(* result);
@@ -1127,11 +1228,11 @@ void testXdmNodeEquals(XPathProcessor *xpath, sResultCount *sresult) {
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
-void testXdmNodeEquals2(XPathProcessor *xpath, sResultCount *sresult) {
+void testXdmNodeEquals2(XPathProcessor *xpath, const std::string * const dataDir, sResultCount *sresult) {
   cout << endl << "Test testXdmNodeEquals2:" << endl;
   xpath->clearParameters();
   xpath->clearProperties();
-  xpath->setContextFile("../data/cat.xml");
+  xpath->setContextFile(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
   try {
     XdmNode *result = (XdmNode *)xpath->evaluateSingle("//person[1]");
     XdmNode *result2 = new XdmNode(* result);
@@ -1217,17 +1318,10 @@ void runTest(const char *testName, const char *expr, const char *expectedResult,
   }
 }
 
-int main() {
-
-  const char *cwd = nullptr;
+int main(int argc, char *argv[]) {
+  const std::string dataDir = argc > 1 ? string(argv[1]) : string();
 
   SaxonProcessor *processor = new SaxonProcessor(false);
-
-  char buff[FILENAME_MAX]; // create string buffer to hold path
-  GetCurrentDir(buff, FILENAME_MAX);
-  processor->setcwd(buff);
-  cwd = (const char *)buff;
-
   XPathProcessor *xpathProc = processor->newXPathProcessor();
   xpathProc->setLanguageVersion("3.1");
   sResultCount *sresult = new sResultCount();
@@ -1340,23 +1434,36 @@ int main() {
      << endl
      << endl;
 
-  testXPathOnFile(processor, xpathProc, sresult);
+  testXPathOnFile(processor, xpathProc, &dataDir, sresult);
   cout << endl
        << "============================================================="
        << endl
        << endl;
-  testXPathOnFile2(xpathProc, sresult);
+  testXPathOnFile2(xpathProc, &dataDir, sresult);
   cout << endl
        << "============================================================="
        << endl
        << endl;
-  testXdmNodeEquals(xpathProc, sresult);
+  testXdmNodeEquals(xpathProc, &dataDir, sresult);
 
   cout << endl
        << "============================================================="
        << endl
        << endl;
-  testXdmNodeEquals2(xpathProc, sresult);
+
+  testParseJsonFromString(processor, xpathProc, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+  testParseJsonFromString2(processor, xpathProc, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+  testXdmNodeEquals2(xpathProc, &dataDir, sresult);
 
   cout << endl
      << "============================================================="
@@ -1542,7 +1649,7 @@ int main() {
   runTest("testDefaultLanguage", "default-language()", "en", xpathProc, sresult,
           document);
 
-  testEncoding(processor, xpathProc, sresult);
+  testEncoding(processor, &dataDir, xpathProc, sresult);
 
   std::cout << "\nTest Results - Number of tests= "
             << (sresult->success + sresult->failure)
