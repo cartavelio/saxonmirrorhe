@@ -1,6 +1,7 @@
 <xsl:transform
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  version="2.0">
+  version="3.0"
+  expand-text="yes">
   
   <!-- This style sheet displays the books.xml file.  -->
   
@@ -17,7 +18,7 @@
   
   <xsl:template match="/">
     <html>
-      <xsl:comment>Generated at <xsl:value-of select="$now"/></xsl:comment>
+      <xsl:comment>Generated at {$now}</xsl:comment>
       <xsl:comment><xsl:copy-of select="unparsed-text('books.txt')"/></xsl:comment>
       
       <xsl:call-template name="header">
@@ -46,11 +47,11 @@
   
   <xsl:template match="BOOKLIST">
     
-    <h2>This week's top author is <xsl:value-of select="$top-author"/></h2>
+    <h2>This week's top author is {$top-author}</h2>
     <xsl:variable name="top-authors-books" select="key('authkey', $top-author)"/>
     
     <xsl:if test="$top-authors-books">
-      <p>We stock the following <xsl:value-of select="count($top-authors-books)"/> books by this author:</p>
+      <p>We stock the following {count($top-authors-books)} books by this author:</p>
       <ul>
         <xsl:for-each select="$top-authors-books">
           <li><xsl:value-of select="TITLE"/></li>
@@ -64,9 +65,9 @@
         </xsl:for-each>
       </ul>
       
-      <p>The average price of these books is: 
-        <xsl:value-of select="format-number(avg($top-authors-books/PRICE),'$####.00')"/>
-      </p>
+      <p>The average price of these books is: {
+        format-number(avg($top-authors-books/PRICE),'$####.00')
+        }</p>
     </xsl:if>
     
     <h2>A complete list of books, grouped by author</h2>
@@ -88,15 +89,14 @@
       <xsl:for-each-group select="ITEM" group-by="AUTHOR">
         <xsl:sort select="AUTHOR" order="ascending"/>
         <xsl:sort select="TITLE" order="ascending"/>
-        <h3>AUTHOR: <xsl:value-of select="AUTHOR"/></h3>
+        <h3>AUTHOR: {AUTHOR}</h3>
         <table>
           <xsl:for-each select="current-group()">
             <tr>
               <td width="100" valign="top"><xsl:number value="position()" format="i"/></td>
               <td>
-                TITLE: <xsl:value-of select="TITLE"/><br/>
-                CATEGORY: <xsl:value-of select="id(@CAT)/@DESC" />
-                (<xsl:value-of select="@CAT" />)
+                TITLE: {TITLE}<br/>
+                CATEGORY: {id(@CAT)/@DESC} ({@CAT})
               </td>
             </tr>
           </xsl:for-each>
@@ -111,11 +111,11 @@
       <xsl:for-each-group select="ITEM" group-by="@CAT">
         <xsl:sort select="id(@CAT)/@DESC" order="ascending"/>
         <xsl:sort select="TITLE" order="ascending"/>
-        <h3>CATEGORY: <xsl:value-of select="id(@CAT)/@DESC" /></h3>
+        <h3>CATEGORY: {id(@CAT)/@DESC}</h3>
         <ol>
           <xsl:for-each select="current-group()">
-            <li>AUTHOR: <xsl:value-of select="AUTHOR"/><br/>
-              TITLE: <xsl:value-of select="TITLE"/>
+            <li>AUTHOR: {AUTHOR}<br/>
+              TITLE: {TITLE}
             </li>                
           </xsl:for-each>
         </ol>

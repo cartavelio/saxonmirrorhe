@@ -1,6 +1,6 @@
 package s9apitest;
 
-import com.saxonica.functions.extfn.SaxonDeepEqual;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;

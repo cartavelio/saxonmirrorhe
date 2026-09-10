@@ -12,7 +12,6 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.UnionCoercionPlan;
 import net.sf.saxon.value.AtomicValue;
@@ -214,22 +213,30 @@ public class LocalUnionType extends ChoiceItemType implements PlainType, UnionTy
     @Override
     public AtomicValue getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
+        ValidationException failure = null;
         for (ItemType type : memberTypes) {
             if (type instanceof EnumerationUnionType) {
-                throw new UncheckedXPathException("NOT YET IMPLEMENTED");
-            }
-            StringConverter converter = rules.makeStringConverter((AtomicType)type);
-            converter.setNamespaceResolver(resolver);
-            ConversionResult outcome = converter.convertString(value);
-            if (outcome instanceof AtomicValue) {
-                return (AtomicValue)outcome;
+                try {
+                    return ((EnumerationUnionType) type).getTypedValue(value, resolver, rules);
+                } catch (ValidationException e) {
+                    failure = e;
+                }
+            } else {
+                StringConverter converter = rules.makeStringConverter((AtomicType) type);
+                converter.setNamespaceResolver(resolver);
+                ConversionResult outcome = converter.convertString(value);
+                if (outcome instanceof AtomicValue) {
+                    return (AtomicValue) outcome;
+                }
             }
         }
-        ValidationFailure ve = new ValidationFailure(
-                "Value " + Err.wrap(value, Err.VALUE) +
-                        " does not match any member of union type " + toString());
-        //ve.setSchemaType(this);
-        throw ve.makeException();
+        if (failure == null) {
+            ValidationFailure ve = new ValidationFailure(
+                    "Value " + Err.wrap(value, Err.VALUE) +
+                            " does not match any member of union type " + toString());
+            failure = ve.makeException();
+        }
+        throw failure;
     }
 
     /**

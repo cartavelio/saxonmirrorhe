@@ -411,7 +411,7 @@ public class TestXQueryEvaluator {
             fail("Failed to throw error"); // expect failure
         } catch (SaxonApiException e) {
             //e.printStackTrace();
-            assertTrue(e.getMessage().contains("required item type of the second argument"), "type-error");
+            assertTrue(e.getMessage().contains("Failed to convert the second argument"), "type-error");
         }
     }
 

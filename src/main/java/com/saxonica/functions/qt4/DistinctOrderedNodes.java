@@ -1,22 +1,22 @@
 package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.DocumentOrderIterator;
+import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.Int64Value;
 
 /**
- * This class implements the function fn:do-until(), which is a proposed function for XPath 4.0
+ * This class implements the function fn:distinct-ordered-nodes(), which is a proposed function for XPath 4.0
  */
 
-public class DoUntilFn extends SystemFunction {
+public class DistinctOrderedNodes extends SystemFunction {
 
     /**
-     * Evaluate the expression
+     * Evaluate the function call
      *
      * @param context   the dynamic evaluation context
      * @param arguments the values of the arguments, supplied as SequenceIterators
@@ -26,39 +26,9 @@ public class DoUntilFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        GroundedValue input = arguments[0].materialize();
-
-
-        FunctionItem action = (FunctionItem) arguments[1].head();
-        int actionArity = action.getArity();
-        Sequence[] actionParams = new Sequence[actionArity];
-
-        FunctionItem predicate = (FunctionItem) arguments[2].head();
-        int predicateArity = predicate.getArity();
-        Sequence[] predicateParams = new Sequence[predicateArity];
-
-
-        int pos = 0;
-        while (true) {
-            pos++;
-            if (actionArity > 0) {
-                actionParams[0] = input;
-                if (actionArity > 1) {
-                    actionParams[1] = new Int64Value(pos);
-                }
-            }
-            input = dynamicCall(action, context, actionParams).materialize();
-            if (predicateArity > 0) {
-                predicateParams[0] = input;
-                if (predicateArity > 1) {
-                    predicateParams[1] = new Int64Value(pos);
-                }
-            }
-            BooleanValue condition = ((BooleanValue) dynamicCall(predicate, context, predicateParams).head());
-            if (condition != null && condition.getBooleanValue()) {
-                return input;
-            }
-        }
+        SequenceIterator in = arguments[0].iterate();
+        SequenceIterator out = new DocumentOrderIterator(in, GlobalOrderComparer.getInstance());
+        return new LazySequence(out);
     }
 
 

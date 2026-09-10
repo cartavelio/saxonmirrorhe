@@ -410,6 +410,7 @@ namespace TestDriver {
                                 Console.Error.WriteLine("*** UNEXPECTED STATIC ERROR: " + code + " at " +
                                                         loc.SystemId + "#" + loc.LineNumber +
                                                         "\n   " + err.Message);
+                                recordFailure(testSetName, testName);
                             }
                             catch (Exception) {
                                 // No action

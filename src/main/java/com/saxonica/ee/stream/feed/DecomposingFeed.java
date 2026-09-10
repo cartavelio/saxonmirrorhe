@@ -8,9 +8,9 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NameOfNode;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.Stack;

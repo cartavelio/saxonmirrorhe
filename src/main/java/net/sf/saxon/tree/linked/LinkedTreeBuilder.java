@@ -292,6 +292,9 @@ public class LinkedTreeBuilder extends Builder {
                 TextImpl n = nodeFactory.makeTextNode(currentNode, t);
                 //TextImpl n = new TextImpl(chars.toString());
                 currentNode.addChild(n, size[depth]++);
+                if (lineNumbering) {
+                    n.setLocation(locationId);
+                }
             }
         }
     }

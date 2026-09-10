@@ -1,6 +1,6 @@
 package net.sf.saxon.test.matchers;
 
-import com.saxonica.functions.extfn.SaxonDeepEqual;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.XPathContext;

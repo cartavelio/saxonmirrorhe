@@ -11,6 +11,33 @@
         
     </category>
     
+    <category name="Handling of Source Documents" class="javaonly">
+        <p>Line numbering of XML documents read using a SAX parser 
+            (including schema documents and stylesheets) has changed.</p>
+        
+        <p>Wherever possible, the line and column number associated with a node
+        are now the position where the node starts: in the case of elements,
+        the start of the start tag. Previously, Saxon reported the location
+        returned by the SAX parser, which is the position after the associated
+        SAX event (for elements, the end of the start tag). There are a few
+        cases where this information is not available, notably when an
+        element is immediately preceded by a <code>DOCTYPE</code>
+        declaration or an external entity reference. In these cases Saxon
+        will continue to report the location as reported by the SAX parser.</p>
+        
+        <p>In addition, the linked tree model now retains line and column
+        position for text nodes (if line numbering is enabled, which is
+        always the case for stylesheets and schema documents). This enables
+        more accurate location information to be provided for expressions
+        in XSLT text value templates.</p>
+        
+        <p>This change affects the line and column numbers reported by the
+        <code>saxon:line-number()</code> and <code>saxon:column-number()</code>
+        extension functions, as well as diagnostic output including the results
+        of schema validation, the output of <code>-T</code> tracing, and so on.</p>
+        
+    </category>
+    
     <category name="Functions, operators, and data types for XPath 3.1">
          <p>The implementation of <code>xs:duration</code> and <code>xs:dayTimeDuration</code>
          has changed so the seconds component (representing the number of days, hours, minutes,
@@ -53,6 +80,12 @@
         <p>The interface <code>net.sf.saxon.s9api.StaticError</code>, which was no longer used, has now been
         dropped from the product.</p>
         
+        <p>New methods <code>checkpoint()</code> and <code>recover()</code> have been added to the
+        <code>TraceListener</code> interface. The default implementations do nothing. These methods
+        are called when dynamic errors are caught using try/catch; in the case of the standard <code>-T</code>
+        output, they are used to ensure that the trace output remains well-formed when errors are
+        caught and recovered.</p>
+        
   
     </category>
     
@@ -82,6 +115,8 @@
         <p>The internal APIs for manipulating values of type <code>xs:duration</code>
         and <code>xs:dayTimeDuration</code> have changed, reflecting the fact that
         the seconds component is now held as a <code>BigDecimal</code> value.</p>
+        
+        
    
     </category>
 

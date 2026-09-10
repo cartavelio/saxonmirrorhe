@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.Mode;
+import net.sf.saxon.trans.XPathException;
 
 import java.util.Map;
 
@@ -67,6 +68,17 @@ public interface TraceListener {
      * Method that is called after processing an instruction of the stylesheet,
      * that is, after any child instructions have been processed. Default implementation does nothing.
      *
+     * <p>In normal operation, {@code enter} and {@code leave} operations are paired, reflecting
+     * a simple execution stack. There are two things that can disrupt this: dynamic errors, and
+     * parallel evaluation.</p>
+     *
+     * <p>If a dynamic error occurs during evaluation of an instruction, there will be
+     * {@code enter} events with no corresponding {@code leave}. If the error is caught,
+     * execution may continue. A {@code TraceListener} may attempt to recover from this
+     * by implementing the {@link #checkpoint} and @link #recover} methods.</p>
+     *
+     * <p></p>
+     *
      * @param instruction gives the same information that was supplied to the
      *                    enter method, though it is not necessarily the same object. Note that the
      *                    line number of the instruction is that of the start tag in the source stylesheet,
@@ -99,6 +111,27 @@ public interface TraceListener {
      */
 
     default void endCurrentItem(Item currentItem) {}
+
+    /**
+     * Method called immediately after the {@link #enter} method corresponding to an
+     * {@code xsl:try} instruction (or XQuery try/catch). The method may return an object
+     * containing checkpoint information, which will be passed to the {@link #recover}
+     * method if an error occurs and is caught.
+     * @return arbitrary checkpoint information, or null. The default implementation returns
+     * null.
+     */
+
+    default Object checkpoint() {
+        return null;
+    }
+
+    /**
+     * Method called when an error is caught by an {@code xsl:catch} (or XQuery try/catch).
+     * @param checkpoint A checkpoint object returned by a previous call to the {@link #checkpoint} method.
+     * @param err The error that was caught
+     */
+
+    default void recover(Object checkpoint, XPathException err) {}
 
     /**
      * Method called when a search for a template rule is about to start

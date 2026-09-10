@@ -4309,7 +4309,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
             // Decide whether line numbering is in use
 
-            boolean lineNumbering = options.isLineNumbering();
+            boolean lineNumbering = isLineNumbering() || options.isLineNumbering();
 
             PipelineConfiguration pipe = makePipelineConfiguration();
             pipe.setParseOptions(options);
@@ -4318,7 +4318,12 @@ public class Configuration implements SourceResolver, NotationSet {
             builder.setLineNumbering(lineNumbering);
             builder.setPipelineConfiguration(pipe);
             builder.setSystemId(source.getSystemId());
-            Sender.send(source, builder, options);
+
+            Receiver dest = builder;
+            if (lineNumbering) {
+                dest = new LineNumberRetainer(dest);
+            }
+            Sender.send(source, dest, options);
 
             // Get the constructed document
 

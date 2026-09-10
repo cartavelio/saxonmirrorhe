@@ -11,6 +11,7 @@ import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.number.NamedTimeZone;
 import net.sf.saxon.functions.ContextItemAccessorFunction;
 import net.sf.saxon.functions.Doc_2;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
@@ -157,7 +158,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
 
         register("current-mode-name", 0, e -> e.populate(CurrentModeName::new, BuiltInAtomicType.QNAME, OPT, CITEM | LATE));
 
-        register("deep-equal", 4, e -> e.populate( SaxonDeepEqual::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("deep-equal", 4, e -> e.populate(SaxonDeepEqual::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null)

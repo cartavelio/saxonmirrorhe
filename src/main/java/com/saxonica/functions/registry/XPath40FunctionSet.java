@@ -192,14 +192,17 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
-        register("do-until", 3, e -> e.populate(DoUntilFn::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, valueAction, ONE, null)
-                .arg(2, valuePredicate, ONE, null));
+        register("distinct-ordered-nodes", 1, e -> e.populate(DistinctOrderedNodes::new, AnyNodeTest.getInstance(), STAR, UO)
+                .arg(0, AnyNodeTest.getInstance(), STAR, EMPTY));
 
         register("distinct-values", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.ANY_ATOMIC, STAR, BASE | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
+        register("do-until", 3, e -> e.populate(DoUntilFn::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, valueAction, ONE, null)
+                .arg(2, valuePredicate, ONE, null));
 
         register("duplicate-values", 1, e -> e.populate(DuplicateValues::new, BuiltInAtomicType.ANY_ATOMIC, STAR, DCOLL | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));

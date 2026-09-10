@@ -2062,7 +2062,7 @@ public abstract class StyleElement extends ElementImpl {
                         // The test for XSLParam and XSLSort is to eliminate whitespace nodes that have been retained
                         // because of xml:space="preserve"
                         Expression text = new ValueOf(new StringLiteral(node.getUnicodeStringValue()), false, false);
-                        text.setLocation(allocateLocation());
+                        text.setLocation(new Loc(node));
 
 //                        CodeInjector injector = getCompilation().getCompilerInfo().getCodeInjector();
 //                        if (injector != null) {
@@ -2163,12 +2163,15 @@ public abstract class StyleElement extends ElementImpl {
     void compileContentValueTemplate(TextImpl node, List<Expression> contents) {
         if (node instanceof TextValueTemplateNode) {
             Expression exp = ((TextValueTemplateNode) node).getContentExpression();
+            exp.setLocation(new Loc(node));
             if (getConfiguration().getBooleanProperty(Feature.STRICT_STREAMABILITY) && !(exp instanceof Literal)) {
                 exp = new SequenceInstr(exp);
             }
             contents.add(exp);
         } else {
-            contents.add(new StringLiteral(node.getUnicodeStringValue()));
+            StringLiteral exp = new StringLiteral(node.getUnicodeStringValue());
+            exp.setLocation(new Loc(node));
+            contents.add(exp);
         }
     }
 

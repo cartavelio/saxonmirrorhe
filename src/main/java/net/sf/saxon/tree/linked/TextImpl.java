@@ -23,6 +23,14 @@ public class TextImpl extends NodeImpl {
 
     private UnicodeString content;
 
+    // The location of a text node is held compactly, if available. A value of -1 indicates
+    // that the information is not available. Any other value is a pair of 16 bit
+    // integers. The first holds the line number relative to the line number of the
+    // parent element node, the second holds the absolute column number.
+
+    private int locationDelta = -1;
+
+
     public TextImpl(UnicodeString content) {
         this.content = content;
     }
@@ -84,5 +92,63 @@ public class TextImpl extends NodeImpl {
         }
     }
 
+
+    /**
+     * Get the line number of this text node, if available
+     * @return the line number, or -1 if not available
+     */
+
+    @Override
+    public int getLineNumber() {
+        if (locationDelta == -1) {
+            return -1;
+        }
+        NodeImpl parent = getParent();
+        if (parent == null) {
+            return -1;
+        }
+        int lineOffset = (locationDelta >> 16) & 0xffff;
+        int parentLine = parent.getLineNumber();
+        if (parentLine == -1) {
+            return -1;
+        }
+        return parentLine + lineOffset;
+    }
+
+    /**
+     * Get the column number of this text node, if available
+     *
+     * @return the column number, or -1 if not available
+     */
+
+    @Override
+    public int getColumnNumber() {
+        if (locationDelta == -1) {
+            return -1;
+        }
+        return locationDelta & 0xffff;
+    }
+
+    public void setLocation(Location loc) {
+        NodeImpl parent = getParent();
+        if (parent == null) {
+            return;
+        }
+        int line = loc.getLineNumber();
+        int parentLine = parent.getLineNumber();
+        if (line == -1 || parentLine == -1) {
+            return;
+        }
+        int lineDelta = line - parentLine;
+        if (lineDelta >= 65535) {
+            return;
+        }
+        int col = loc.getColumnNumber();
+        if (col < 0 || col > 65535) {
+            return;
+        }
+        locationDelta = lineDelta << 16 | col;
+
+    }
 }
 

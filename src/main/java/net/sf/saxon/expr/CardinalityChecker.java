@@ -139,8 +139,15 @@ public final class CardinalityChecker extends UnaryExpression {
         }
         if ((base.getCardinality() & requiredCardinality) == 0) {
             RoleDiagnostic role = roleSupplier.get();
-            throw new XPathException("The " + role.getMessage() +
-                    " does not satisfy the cardinality constraints", role.getErrorCode())
+            String message;
+            if (base.getCardinality() == StaticProperty.ALLOWS_ZERO && !Cardinality.allowsZero(requiredCardinality)) {
+                message = "An empty sequence is not allowed as the " + role.getMessage();
+            } else {
+                message = "The " + role.getMessage() +
+                        " does not satisfy the cardinality constraints";
+            }
+            throw new XPathException(message)
+                    .withErrorCode(role.getErrorCode())
                     .withLocation(getLocation())
                     .asTypeErrorIf(role.isTypeError());
         }

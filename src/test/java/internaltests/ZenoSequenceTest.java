@@ -8,7 +8,7 @@
 package internaltests;
 
 
-import com.saxonica.functions.extfn.SaxonDeepEqual;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.expr.XPathContext;

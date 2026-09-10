@@ -39,7 +39,7 @@ public abstract class NodeImpl
     /*@Nullable*/ private ParentNodeImpl parent;
     private int index; // Set to -1 when the node is deleted
     /**
-     * Chararacteristic letters to identify each type of node, indexed using the node type
+     * Characteristic letters to identify each type of node, indexed using the node type
      * values. These are used as the initial letter of the result of generate-id()
      */
 
@@ -286,7 +286,6 @@ public abstract class NodeImpl
             assert prev != null;
             prev = prev.getPreviousInDocument();
         }
-
     }
 
     /**

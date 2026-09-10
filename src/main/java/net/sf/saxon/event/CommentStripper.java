@@ -7,7 +7,6 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
@@ -32,6 +31,7 @@ import java.util.function.Predicate;
 public class CommentStripper extends ProxyReceiver {
 
     private UnicodeString currentTextNode = null;
+    private Location currentTextLocation = null;
     private Predicate<NodeName> skippedElementTest = (NodeName name) -> false;
     private int depthOfHole = 0;
 
@@ -93,6 +93,7 @@ public class CommentStripper extends ProxyReceiver {
         if (depthOfHole == 0) {
             if (currentTextNode == null) {
                 currentTextNode = chars;
+                currentTextLocation = locationId;
             } else {
                 currentTextNode = currentTextNode.concat(chars);
             }
@@ -124,9 +125,10 @@ public class CommentStripper extends ProxyReceiver {
 
     private void flush() throws XPathException {
         if (currentTextNode != null) {
-            nextReceiver.characters(currentTextNode, Loc.NONE, ReceiverOption.NONE);
+            nextReceiver.characters(currentTextNode, currentTextLocation, ReceiverOption.NONE);
         }
         currentTextNode = null;
+        currentTextLocation = null;
     }
 
 }

@@ -330,6 +330,10 @@ public class TryCatch extends Expression {
                     o2 = new EventMonitor(output);
                     o2.setPipelineConfiguration(pipe);
                 }
+                Object checkpoint = null;
+                if (c1.getController().isTracing()) {
+                    checkpoint = c1.getController().getTraceListener().checkpoint();
+                }
                 try {
                     try {
                         TailCall tc = tryPush.processLeavingTail(o2, c1);
@@ -365,6 +369,9 @@ public class TryCatch extends Expression {
                                     throw new XPathException(message, "XTDE3530")
                                             .withLocation(err.getLocator())
                                             .withXPathContext(context);
+                                }
+                                if (checkpoint != null) {
+                                    context.getController().getTraceListener().recover(checkpoint, err);
                                 }
                                 Expression caught = clause.catchOp.getChildExpression();
                                 XPathContextMajor c2 = context.newContext();

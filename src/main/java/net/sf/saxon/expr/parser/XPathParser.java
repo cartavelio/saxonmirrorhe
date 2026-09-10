@@ -924,7 +924,7 @@ public class XPathParser {
                         if (target instanceof CastingTarget) {
                             at = (CastingTarget)target;
                         } else {
-                            grumble("Item type " + target + " cannot be used as the target of a cast/castable expression");
+                            grumble("Item type " + target + " cannot be used as the target of a cast/castable expression", "XPST0080");
                             return null;
                         }
                     } else {
@@ -944,7 +944,7 @@ public class XPathParser {
                                 if (alias instanceof CastingTarget) {
                                     at = (CastingTarget) alias;
                                 } else {
-                                    grumble("The type " + t.currentTokenValue + " cannot be used as the target of a cast");
+                                    grumble("The type " + alias + " cannot be used as the target of a cast", "XPST0080");
                                     at = null;
                                 }
                             } else {

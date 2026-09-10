@@ -13,6 +13,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ApplyTemplates;
 import net.sf.saxon.expr.instruct.CallTemplate;
+import net.sf.saxon.functions.TransformFn;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardLogger;
@@ -22,11 +23,13 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Mode;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * This is the standard trace listener used when the -T option is specified on the command line.
@@ -38,6 +41,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     protected int indent = 0;
     protected int detail = TraceLevel.NORMAL;
     protected Logger out = new StandardLogger();
+    private Stack<Object> stack = new Stack<>();
     /*@NotNull*/ private static final StringBuilder spaceBuffer = new StringBuilder("                ");
 
     /**
@@ -56,10 +60,12 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     @Override
     public void open(Controller controller) {
-        out.info("<trace " +
-                "saxon-version=\"" + Version.getProductVersion() + "\" " +
-                getOpeningAttributes() + '>');
-        indent++;
+        if (indent == 0) {
+            out.info("<trace " +
+                             "saxon-version=\"" + Version.getProductVersion() + "\" " +
+                             getOpeningAttributes() + '>');
+            indent++;
+        }
     }
 
     protected abstract String getOpeningAttributes();
@@ -81,6 +87,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     @Override
     public void enter(Traceable info, Map<String, Object> properties, XPathContext context) {
         if (isApplicable(info)) {
+            stack.push(info);
             Location loc = info.getLocation();
             String file = abbreviateLocationURI(loc.getSystemId());
             String elementTag = tag(info);
@@ -102,7 +109,10 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
                 }
             }
 
-            msg.append(" line=\"").append(loc.getLineNumber()).append('"');
+            int line = loc.getLineNumber();
+            if (line >= 0) {
+                msg.append(" line=\"").append(loc.getLineNumber()).append('"');
+            }
 
             int col = loc.getColumnNumber();
             if (col >= 0) {
@@ -162,6 +172,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     @Override
     public void leave(Traceable info) {
         if (isApplicable(info)) {
+            stack.pop();
             indent--;
             out.info(AbstractTraceListener.spaces(indent) + "</" + tag(info) + '>');
         }
@@ -176,7 +187,9 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     protected int level(Traceable info) {
         if (info instanceof TraceableComponent || info instanceof ApplyTemplates || info instanceof CallTemplate) {
             return 1;
-        } if (info instanceof Expression && ((Expression)info).isInstruction()) {
+        }
+        if (info instanceof Expression &&
+                (((Expression)info).isInstruction() || ((Expression) info).isCallOn(TransformFn.class))) {
             return 2;
         } else {
             return 3;
@@ -190,13 +203,15 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     @Override
     public void startCurrentItem(Item item) {
         if (item instanceof NodeInfo && detail > 0) {
+            stack.push(item);
             NodeInfo curr = (NodeInfo) item;
             out.info(AbstractTraceListener.spaces(indent) + "<source node=\"" + Navigator.getPath(curr)
                     + "\" line=\"" + curr.getLineNumber()
+                    + "\" column=\"" + curr.getColumnNumber()
                     + "\" file=\"" + abbreviateLocationURI(curr.getSystemId())
                     + "\">");
+            indent++;
         }
-        indent++;
     }
 
     /**
@@ -205,11 +220,12 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     @Override
     public void endCurrentItem(Item item) {
-        indent--;
         if (item instanceof NodeInfo && detail > 0) {
+            indent--;
             NodeInfo curr = (NodeInfo) item;
             out.info(AbstractTraceListener.spaces(indent) + "</source><!-- " +
                     Navigator.getPath(curr) + " -->");
+            stack.pop();
         }
     }
 
@@ -224,6 +240,42 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
             spaceBuffer.append(AbstractTraceListener.spaceBuffer);
         }
         return spaceBuffer.substring(0, n);
+    }
+
+    /**
+     * Method called immediately after the {@link #enter} method corresponding to an
+     * {@code xsl:try} instruction (or XQuery try/catch). The method may return an object
+     * containing checkpoint information, which will be passed to the {@link #recover}
+     * method if an error occurs and is caught.
+     *
+     * @return arbitrary checkpoint information, or null. This implementation returns
+     * the size of the stack.
+     */
+    @Override
+    public Object checkpoint() {
+        return stack.size();
+    }
+
+    /**
+     * Method called when an error is caught by an {@code xsl:catch} (or XQuery try/catch).
+     *
+     * @param checkpoint A checkpoint object returned by a previous call to the {@link #checkpoint} method.
+     * @param error The error that was caught
+     */
+    @Override
+    public void recover(Object checkpoint, XPathException error) {
+        out.info(AbstractTraceListener.spaces(indent) + "<error code='"
+                         + error.getErrorCodeQName().getLocalPart()
+                         + "'>" + error.getMessage() + "</error>");
+        while (stack.size() > (int)checkpoint) {
+            Object o = stack.peek();
+            if (o instanceof Item) {
+                endCurrentItem((Item)o);
+            } else if (o instanceof Traceable) {
+                leave((Traceable)o);
+            }
+        }
+        out.info(AbstractTraceListener.spaces(indent) + "<catch/>");
     }
 
     /**

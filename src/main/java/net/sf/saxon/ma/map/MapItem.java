@@ -7,7 +7,7 @@
 
 package net.sf.saxon.ma.map;
 
-import com.saxonica.functions.extfn.SaxonDeepEqual;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.OperandRole;

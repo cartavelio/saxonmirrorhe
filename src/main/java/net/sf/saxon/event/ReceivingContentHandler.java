@@ -256,6 +256,33 @@ public class ReceivingContentHandler
         }
     }
 
+    // Commented out - requires Java 14
+//    /**
+//     * Receives notification of the XML declaration.
+//     *
+//     * @param version    the version string as in the input document, null if not
+//     *                   specified
+//     * @param encoding   the encoding string as in the input document, null if not
+//     *                   specified
+//     * @param standalone the standalone string as in the input document, null if
+//     *                   not specified
+//     * @throws SAXException if the application wants to report an error or
+//     *                      interrupt the parsing process
+//     * @implSpec The default implementation in the SAX API is to do nothing.
+//     * @since 14
+//     */
+//
+//    //@Override
+//    public void declaration(String version, String encoding, String standalone) throws SAXException {
+//        resetLocation();
+//    }
+
+    private void resetLocation() {
+        if (receiver instanceof LineNumberRetainer) {
+            ((LineNumberRetainer) receiver).resetLocation(localLocator);
+        }
+    }
+
     /**
      * Receive notification of the end of a document
      */
@@ -288,6 +315,7 @@ public class ReceivingContentHandler
         if (!lineNumbering) {
             lastTextNodeLocator = localLocator;
         }
+        getPipelineConfiguration().setComponent("LocalLocator", localLocator);
     }
 
     /**
@@ -748,6 +776,7 @@ public class ReceivingContentHandler
     @Override
     public void endEntity(String name) {
         localLocator.levelInEntity = elementDepthWithinEntity.pop();
+        resetLocation();
     }
 
     @Override

@@ -3,6 +3,7 @@ package net.sf.saxon.type.coercion;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
@@ -22,6 +23,9 @@ public class DerivedAtomicCoercionPlan extends AtomicCoercionPlan {
     protected AtomicValue promote(AtomicValue atom, ItemType requiredType, CoercionRequest request) throws XPathException {
         AtomicType req = (AtomicType) requiredType;
         AtomicType prim = (AtomicType) req.getPrimitiveItemType();   // cast needed for C#
+        if (prim == BuiltInAtomicType.INTEGER) {
+            prim = BuiltInAtomicType.DECIMAL;
+        }
         ConversionRules rules = request.config.getConversionRules();
         TypeHierarchy th = request.config.getTypeHierarchy();
 

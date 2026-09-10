@@ -1,10 +1,9 @@
-package com.saxonica.functions.extfn;
+package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
-import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StringCollator;

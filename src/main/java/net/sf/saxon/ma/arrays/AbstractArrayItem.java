@@ -7,7 +7,7 @@
 
 package net.sf.saxon.ma.arrays;
 
-import com.saxonica.functions.extfn.SaxonDeepEqual;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;

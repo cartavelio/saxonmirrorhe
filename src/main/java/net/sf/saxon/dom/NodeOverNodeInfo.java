@@ -7,7 +7,7 @@
 
 package net.sf.saxon.dom;
 
-import com.saxonica.functions.extfn.SaxonDeepEqual;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.CodepointCollator;

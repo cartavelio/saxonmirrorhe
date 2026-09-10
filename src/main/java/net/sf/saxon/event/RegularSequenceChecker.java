@@ -27,7 +27,7 @@ import java.util.Stack;
  * <p>A sequence of {@code Receiver} events is <b>regular</b> if the following conditions
  * are satisfied:</p>
  * <ol>
- *     <li>Calls to {@link Outputter#startElement(NodeName, SchemaType, Location, int)}, {@link #endElement()},
+ *     <li>Calls to {@link Outputter#startElement(NodeName, SchemaType, Location, int)}, {@link Receiver#endElement()},
  *     {@link Outputter#startDocument(int)}, and {@link #endDocument()} are properly paired and nested.</li>
  *     <li>Events must only occur in a state where they are permitted; the states and transitions
  *     between states are defined by the table below. The initial state is <b>initial</b>,
@@ -49,7 +49,7 @@ import java.util.Stack;
  *         <tr><td>content</td><td>{@link Receiver#characters(UnicodeString, Location, int)}, {@link Receiver#comment(UnicodeString, Location, int)},
  *         {@link Receiver#processingInstruction(String, UnicodeString, Location, int)}</td><td>content</td></tr>
  *         <tr><td>content</td><td>{@link Outputter#startElement(NodeName, SchemaType, Location, int)}</td><td>startTag</td></tr>
- *         <tr><td>content</td><td>{@link #endDocument()}, {@link #endElement()}</td><td>if the stack is empty, then content, otherwise open</td></tr>
+ *         <tr><td>content</td><td>{@link #endDocument()}, {@link Receiver#endElement()}</td><td>if the stack is empty, then content, otherwise open</td></tr>
  *         <tr><td>(any)</td><td>close</td><td>final</td></tr>
  *         <tr><td>final</td><td>close</td><td>final</td></tr>
  *     </tbody>
