@@ -12,6 +12,17 @@
       <reason>QT4 40-specific tests are missing covers-40 attribute</reason>
    </exception>
   
+  <exception test-set="misc-CombinedErrorCodes" test-case="
+    K-CombinedErrorCodes-2 
+    K-CombinedErrorCodes-3
+    K-CombinedErrorCodes-4
+    K-CombinedErrorCodes-5
+    K-CombinedErrorCodes-6"
+    run="false" report="notRun">
+    <created by="Michael Kay" on="2025-07-17"/>
+    <reason>Hangs trying to access http://example.com/.</reason>
+  </exception>
+  
   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009" run="false" report="known bug in ICU">
     <created by="Michael Kay" on="2018-02-01"/>
     <reason>Known bug in ICU</reason>
