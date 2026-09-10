@@ -7,28 +7,102 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.*;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.ma.map.EmptyMap;
+import net.sf.saxon.ma.map.KeyValuePair;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-
 import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.LocalUnionType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
-/**
- * Implement the fn:path function with one argument
- */
-public class Path_1 extends ScalarSystemFunction {
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-    @Override
-    public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
-        return makePath((NodeInfo)arg, context);
+/**
+ * Implement the fn:path function with one or two arguments
+ */
+public class Path_1 extends SystemFunction {
+
+    public static OptionsParameter getOptionDetails() {
+//        ItemType inScopeNamespacesResult = new MapType(
+//                LocalUnionType.of(BuiltInAtomicType.NCNAME, InScopeNamespacesFn.EMPTY_STRING_TYPE),
+//                BuiltInAtomicType.ANY_URI.one());
+        // TODO: this is a more liberal type than prescribed by the spec, because we don't yet do coercion on maps
+        ItemType inScopeNamespacesResult = new MapType(
+                BuiltInAtomicType.STRING,
+                SequenceType.one(LocalUnionType.of(BuiltInAtomicType.STRING, BuiltInAtomicType.ANY_URI)));
+        OptionsParameter pathOptions = new OptionsParameter(40);
+        pathOptions.addAllowedOption("indexes", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        pathOptions.addAllowedOption("namespaces", SequenceType.one(inScopeNamespacesResult), EmptyMap.getInstance());
+        return pathOptions;
     }
 
-    public static StringValue makePath(NodeInfo node, XPathContext context) {
+    /**
+     * Call the function.
+     */
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        NodeInfo node;
+        if (arguments.length == 0) {
+            Item item = context.getContextItem();
+            if (item == null) {
+                throw new XPathException("In call to fn:path(), the context item is absent", "XPDY0002");
+            }
+            if (!(item instanceof NodeInfo)) {
+                throw new XPathException("In call to fn:path(), the context item is not a node", "XPTY0004");
+            }
+            node = (NodeInfo)item;
+        } else {
+            node = (NodeInfo)arguments[0].head();
+            if (node == null) {
+                return EmptySequence.getInstance();
+            }
+        }
+        boolean withIndexes = true;
+        Map<NamespaceUri, String> namespaces = Collections.emptyMap();
+        if (arguments.length > 1) {
+            MapItem options = (MapItem)arguments[1].head();
+            Map<String, GroundedValue> checkedOptions = null;
+            if (options != null) {
+                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+                if (checkedOptions.containsKey("indexes")) {
+                    withIndexes = checkedOptions.get("indexes").effectiveBooleanValue();
+                }
+                if (checkedOptions.containsKey("namespaces")) {
+                    MapItem nsMap = (MapItem) checkedOptions.get("namespaces");
+                    namespaces = new HashMap<>();
+                    for (KeyValuePair kvp : nsMap.keyValuePairs()) {
+                        namespaces.put(NamespaceUri.of(kvp.value.getStringValue()), kvp.key.getStringValue());
+                    }
+                }
+            }
+
+        }
+        return makePath(node, withIndexes, namespaces, context);
+
+    }
+
+    /**
+     * Get the path to a node
+     * @param node the node whose path is required
+     * @param withIndex true if index positions are to be included (in square brackets, after each element name)
+     * @param namespaces map from namespace URIs to prefixes. If a namespace is present in the map, the prefix
+     *                   is used in preference to Q{uri}local notation
+     * @param context the dynamic evaluation context
+     * @return the path, as a StringValue.
+     */
+    public static StringValue makePath(NodeInfo node, boolean withIndex, Map<NamespaceUri, String> namespaces, XPathContext context) {
         if (node.getNodeKind() == Type.DOCUMENT) {
             return StringValue.makeStringValue("/");
         }
@@ -40,7 +114,7 @@ public class Path_1 extends ScalarSystemFunction {
                 if (n.getNodeKind() == Type.DOCUMENT) {
                     return new StringValue(fsb.toString());
                 } else {
-                    fsb.insert(0, "Q{http://www.w3.org/2005/xpath-functions}root()");
+                    fsb.insert(0, qualifier(NamespaceUri.FN, namespaces) + "root()");
                     return new StringValue(fsb.toString());
                 }
             }
@@ -49,43 +123,54 @@ public class Path_1 extends ScalarSystemFunction {
                 case Type.DOCUMENT:
                     return new StringValue(fsb.toString());
                 case Type.ELEMENT:
-                    fsb2.append("/Q{").append(n.getNamespaceUri()).append("}");
-                    fsb2.append(n.getLocalPart());
-                    fsb2.append("[").append(Navigator.getNumberSimple(n, context)).append("]");
+                    fsb2.append("/")
+                            .append(qualifier(n.getNamespaceUri(), namespaces))
+                            .append(n.getLocalPart());
+                    if (withIndex) {
+                        fsb2.append("[").append(Navigator.getNumberSimple(n, context)).append("]");
+                    }
                     fsb2.append(fsb);
                     fsb = fsb2;
                     break;
                 case Type.ATTRIBUTE:
                     fsb2.append("/@");
-                    String attURI = n.getNamespaceUri().toString();
-                    if (!"".equals(attURI)) {
-                        fsb2.append("Q{").append(attURI).append("}");
+                    if (n.getNamespaceUri() != NamespaceUri.NULL) {
+                        fsb2.append(qualifier(n.getNamespaceUri(), namespaces));
                     }
                     fsb2.append(n.getLocalPart());
                     fsb2.append(fsb);
                     fsb = fsb2;
                     break;
                 case Type.TEXT:
-                    fsb2.append("/text()[").append(Navigator.getNumberSimple(n, context) + "]").append(fsb);
+                    fsb2.append("/text()");
+                    if (withIndex) {
+                        fsb2.append("[").append(Navigator.getNumberSimple(n, context)).append("]");
+                    }
+                    fsb2.append(fsb);
                     fsb = fsb2;
                     break;
                 case Type.COMMENT:
-                    fsb2.append("/comment()[").append(Navigator.getNumberSimple(n, context)).append("]");
+                    fsb2.append("/comment()");
+                    if (withIndex) {
+                        fsb2.append("[").append(Navigator.getNumberSimple(n, context)).append("]");
+                    }
                     fsb2.append(fsb);
                     fsb = fsb2;
                     break;
                 case Type.PROCESSING_INSTRUCTION:
-                    fsb2.append("/processing-instruction(").append(n.getLocalPart()).append(")[");
-                    fsb2.append(Navigator.getNumberSimple(n, context)).append("]");
+                    fsb2.append("/processing-instruction(").append(n.getLocalPart()).append(")");
+                    if (withIndex) {
+                        fsb2.append("[").append(Navigator.getNumberSimple(n, context)).append("]");
+                    }
                     fsb2.append(fsb);
                     fsb = fsb2;
                     break;
                 case Type.NAMESPACE:
                     fsb2.append("/namespace::");
                     if (n.getLocalPart().isEmpty()) {
-                        fsb2.append("*[Q{" + NamespaceConstant.FN + "}local-name()=\"\"]");
+                        fsb2.append("*[").append(qualifier(NamespaceUri.FN, namespaces)).append("local-name()=\"\"]");
                     } else {
-                        fsb.append(n.getLocalPart());
+                        fsb2.append(n.getLocalPart());
                     }
                     fsb2.append(fsb);
                     fsb = fsb2;
@@ -97,6 +182,19 @@ public class Path_1 extends ScalarSystemFunction {
         // should not reach here...
         fsb.insert(0, "Q{http://www.w3.org/2005/xpath-functions}root()");
         return new StringValue(fsb.toString());
+    }
+
+    private static String qualifier(NamespaceUri uri, Map<NamespaceUri, String> namespaces) {
+        if (namespaces.containsKey(uri)) {
+            String prefix = namespaces.get(uri);
+            if (prefix.isEmpty()) {
+                return prefix;
+            } else {
+                return prefix + ":";
+            }
+        } else {
+            return "Q{" + uri.toString() + "}";
+        }
     }
 
 }

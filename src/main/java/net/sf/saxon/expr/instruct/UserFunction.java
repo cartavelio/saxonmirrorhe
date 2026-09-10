@@ -1147,14 +1147,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
         }
         for (int a = 0; a < maxArity; a++) {
             if (expandedArgs[a] == null) {
-                Expression defaultVal = new DefaultedArgumentExpression(); // to be fixed up later
-                expandedArgs[a] = defaultVal;
-//                Expression defaultVal = fd.getDefaultValueExpression(a);
-//                if (defaultVal == null) {
-//                    defaultVal = new DefaultedArgumentExpression(); // to be fixed up later
-//                }
-//                expandedArgs[a] = defaultVal.copy(new RebindingMap());
-                //expandedArgs[a] = new ErrorExpression("UseDefault", "UseDefault", false); // for now
+                expandedArgs[a] = new DefaultedArgumentExpression(); // to be fixed up later;
             }
         }
         return expandedArgs;

@@ -628,14 +628,14 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             return this;
         }
 
-//        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry withDefault(int arg, Expression defaultValue) {
-//            if (this.defaultValueExpressions == null) {
-//                this.defaultValueExpressions = new IntHashMap<>(getNumberOfParameters());
-//            }
-//            this.defaultValueExpressions.put(arg, defaultValue);
-//            // if argument N can be defaulted, then register a variant of the function with arity N-1
-//            return this;
-//        }
+        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry withDefault(int arg, Expression defaultValue) {
+            if (this.defaultValueExpressions == null) {
+                this.defaultValueExpressions = new IntHashMap<>(getNumberOfParameters());
+            }
+            this.defaultValueExpressions.put(arg, defaultValue);
+            // if argument N can be defaulted, then register a variant of the function with arity N-1
+            return this;
+        }
 
         /**
          * Add details for options parameters (only applies to one argument, the function is expected to know which)

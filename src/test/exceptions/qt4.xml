@@ -12,52 +12,7 @@
    
  
 
-   <!--<exception test-set="misc-BuiltInKeywords" 
-      test-case=" Keywords-array-deep-update-1
-      Keywords-array-of-members-1
-      Keywords-fn-build-uri-1
-      Keywords-fn-csv-fetch-field-by-column-1
-      Keywords-fn-csv-to-xdm-1
-      Keywords-fn-csv-to-xml-1
-      Keywords-fn-log-1
-      Keywords-fn-parse-csv-1
-      Keywords-fn-partition-1
-      Keywords-fn-void-1
-      Keywords-map-deep-update-1
-      Keywords-map-of-pairs-1
-       " run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-17"/>
-      <reason>Functions not implemented</reason>
-   </exception>-->
    
-   <!--<exception test-set="misc-BuiltInKeywords" 
-      test-case="Keywords-map-of-1
-      Keywords-map-pairs-1
-      Keywords-map-values-1
-      Keywords-fn-replace-1
-      Keywords-array-values-1
-      Keywords-array-fold-left-1
-      Keywords-array-sort-1
-      Keywords-fn-chain-1
-      Keywords-fn-csv-to-simple-rows-1
-      Keywords-fn-fold-left-1
-      Keywords-fn-function-annotations-1
-      Keywords-fn-invisible-xml-1
-      Keywords-fn-message-1
-      Keywords-fn-sort-1
-      Keywords-fn-transitive-closure-1
-      " run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Function not implemented yet</reason>
-   </exception>-->
-   
-   <exception test-set="misc-BuiltInKeywords" 
-      test-case="Keywords-fn-json-1" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Function likely to be renamed</reason>
-   </exception>
-
-
 
 
    
@@ -78,13 +33,7 @@
    </exception>
    
    
- <!--  
-   
-   <exception test-set="prod-ByExpr"  run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Not yet implemented (spec not agreed)</reason>
-   </exception>
-   -->
+ 
    <exception test-set="prod-CastExpr" test-case=" K-SeqExprCast-76a
       K-SeqExprCast-81a"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
@@ -103,10 +52,7 @@
       <reason>Placeholders currently not allowed as keyword arguments</reason>
    </exception>
    
-   <!--<exception test-set="prod-ForClause.map"  run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-18"/>
-      <reason>Not yet implemented</reason>
-   </exception>-->
+   
    
    <exception test-set="prod-FunctionDecl" test-case="
       function-decl-40-019

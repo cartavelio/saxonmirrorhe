@@ -221,7 +221,7 @@ public class ParamKeywords {
         fnParamNames.put("parse-xml-fragment", "value|options");
         fnParamNames.put("partition", "input|split-when");
         fnParamNames.put("parts", "");
-        fnParamNames.put("path", "node");
+        fnParamNames.put("path", "node|options");
         fnParamNames.put("pin", "input");
         fnParamNames.put("position", "");
         fnParamNames.put("prefix-from-QName", "value");

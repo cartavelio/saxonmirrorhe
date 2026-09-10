@@ -222,6 +222,8 @@ public abstract class FunctionCall extends Expression {
         FunctionDefinition fd = null;
         if (target instanceof FunctionDefinition) {
             fd = (FunctionDefinition)target;
+        } else if (target instanceof SystemFunction) {
+            fd = ((SystemFunction) target).getDetails();
         }
         if (target.isSequenceVariadic()) {
             String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
@@ -260,13 +262,15 @@ public abstract class FunctionCall extends Expression {
                         } else {
                             Expression defaultValue = fd.getDefaultValueExpression(i);
                             if (defaultValue == null) {
+                                arg = Literal.makeEmptySequence();
                                 // This only happens if there's an error in the function definition
-                                throw new XPathException("No value or default available for " + RoleDiagnostic.ordinal(i + 1) +
-                                                                 " parameter of function " +
-                                                                 (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
-                                                         "XPST0141");
+//                                throw new XPathException("No value or default available for " + RoleDiagnostic.ordinal(i + 1) +
+//                                                                 " parameter of function " +
+//                                                                 (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
+//                                                         "XPST0141");
+                            } else {
+                                arg = defaultValue.copy(new RebindingMap());
                             }
-                            arg = defaultValue.copy(new RebindingMap());
                             adoptChildExpression(arg);
                         }
                     } else if (target instanceof net.sf.saxon.functions.SystemFunction) {
@@ -279,7 +283,7 @@ public abstract class FunctionCall extends Expression {
                                                              (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
                                                      "XPST0141");
                         }
-                        // For the moment, assume a default value of ()
+
                         arg = new Literal(EmptySequence.getInstance());
                         adoptChildExpression(arg);
                     } else {
