@@ -10,7 +10,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.z.*;
@@ -379,8 +378,8 @@ public class MultiIndex {
          * is stateless and it is not necessary (or usual) to call it before calling
          * next(). It is used only when there is an explicit need to tell if we
          * are at the last element.
-         * <p>This method must not be called unless the result of getProperties() on the iterator
-         * includes the bit setting {@link SequenceIteratorProperty#LOOKAHEAD}</p>
+         * <p>This method must not be called unless the result of {@link #supportsHasNext()}
+         * is true.</p>
          *
          * @return true if there are more items in the sequence
          */
@@ -429,9 +428,9 @@ public class MultiIndex {
         /**
          * Get the last position (that is, the number of items in the sequence). This method is
          * non-destructive: it does not change the state of the iterator.
-         * The result is undefined if the next() method of the iterator has already returned null.
-         * This method must not be called unless the result of getProperties() on the iterator
-         * includes the bit setting {@link SequenceIteratorProperty#LAST_POSITION_FINDER}
+         * <p>The result is undefined if the next() method of the iterator has already returned null.</p>
+         * <p>This method must not be called unless the result of {@link #supportsGetLength()}
+         * is true.</p>
          */
 
         @Override

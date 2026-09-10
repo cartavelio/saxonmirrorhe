@@ -3,7 +3,6 @@ package com.saxonica.ee.parallel;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 /**
  * This is a thread-safe version of the parent class {@link FocusTrackingIterator}. It is identical
@@ -115,8 +114,7 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * is stateless and it is not necessary (or usual) to call it before calling
      * next(). It is used only when there is an explicit need to tell if we
      * are at the last element.
-     * <p>This method must not be called unless the result of getProperties() on the iterator
-     * includes the bit setting {@link SequenceIteratorProperty#LOOKAHEAD}</p>
+     * <p>This method must not be called unless the result of {@link #supportsHasNext()} is true.</p>
      *
      * @return true if there are more items in the sequence
      * @throws ClassCastException if the base iterator does not support lookahead processing
@@ -133,7 +131,6 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * @return the corresponding Value
      * @throws UncheckedXPathException     in the cases of subclasses (such as the iterator over a MemoClosure)
      *                            which cause evaluation of expressions while materializing the value.
-     * @throws ClassCastException if the iterator does not have the {@link SequenceIteratorProperty#GROUNDED} property.
      */
     @Override
     public synchronized GroundedValue materialize()  {
@@ -147,7 +144,6 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * @return the corresponding Value
      * @throws UncheckedXPathException     in the cases of subclasses (such as the iterator over a MemoClosure)
      *                            which cause evaluation of expressions while materializing the value.
-     * @throws ClassCastException if the iterator does not have the {@link SequenceIteratorProperty#GROUNDED} property.
      */
     @Override
     public synchronized GroundedValue getResidue() {
