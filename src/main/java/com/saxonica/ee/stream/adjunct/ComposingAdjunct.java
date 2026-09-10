@@ -15,7 +15,7 @@ import net.sf.saxon.trans.XPathException;
 
 
 /**
- * Watch factory class for an class that composes items from sequences of events:
+ * Watch factory class for a class that composes items from sequences of events:
  * examples are copy-of(), data(), and string().
  */
 public abstract class ComposingAdjunct extends StreamingAdjunct {
