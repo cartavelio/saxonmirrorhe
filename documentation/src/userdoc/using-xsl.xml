@@ -2807,9 +2807,7 @@ XdmValue * messages = executable->getXslMessages();]]></code></pre>
             </p>
          </li>
          <li>
-            <p>
-               <a class="bodylink" href="/expressions/xpath30maps">Maps in XPath</a>
-            </p>
+            <p><a class="bodylink" href="/expressions/types/xpath30maps">Maps in XPath</a></p>
          </li>
          <li>
             <p>

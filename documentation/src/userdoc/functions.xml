@@ -7150,11 +7150,9 @@
           <p>Note that the value returned is dependent on information supplied by the XML parser.
             For an element node, SAX parsers generally report the line and column position of the
             "&gt;" character at the end of the start tag. StAX parsers by contrast report the
-            position of the "&lt;" character at the start of the start tag.</p>
-          
-          <p>From Saxon 13, Saxon maintains location information for text, comment, and processing
-          instruction nodes as well as for element nodes. A SAX parser reports the location of the
-          end of the node, not the location at the start.</p>
+            position of the "&lt;" character at the start of the start tag. SAX parsers report line
+            and column numbers only for element nodes, so for any other kind of node, the returned
+            value will be -1.</p>
         </div>
       </details>
       <see-also name="system-id" namespace="http://saxon.sf.net/"/>
@@ -8295,8 +8293,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
                  return map:entry($key, $item) ) 
 };</code></pre>
 
-          <p>For further information about maps see <a class="bodylink"
-              href="/expressions/xpath30maps">Maps in XPath</a>.</p>
+          <p>For further information about maps see <a class="bodylink" href="/expressions/types/xpath30maps">Maps in XPath</a>.</p>
         </div>
       </details>
     </function>
@@ -8827,13 +8824,11 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           <p>Note that the value returned is dependent on information supplied by the XML parser.
             For an element node, SAX parsers generally report the line and column position of the
             "&gt;" character at the end of the start tag. StAX parsers by contrast report the
-            position of the "&lt;" character at the start of the start tag.</p>
-          
-          <p>From Saxon 13, Saxon maintains location information for text, comment, and processing
-          instruction nodes as well as for element nodes. A SAX parser reports the location of the
-          end of the node, not the location at the start.</p>
+            position of the "&lt;" character at the start of the start tag. SAX parsers report line
+            and column numbers only for element nodes, so for any other kind of node, the returned
+            value will be -1.</p>
 
-          <p>The <code>-l</code> option also causes line numbers to be copied from
+          <p>From release 9.0, the <code>-l</code> option also causes line numbers to be copied from
             a source document to a result document when the <a class="bodylink code"
               href="/xsl-elements/copy-of">xsl:copy-of</a> instruction is applied to a document or
             element node. For elements created using other instructions, the line number will
