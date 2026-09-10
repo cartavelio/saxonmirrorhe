@@ -2379,7 +2379,12 @@ public class PackageLoaderHE implements IPackageLoader {
 
             Expression threads = loader.getExpressionWithRole(element, "threads");
             if (threads == null) {
-                return new ForEach(lhs, rhs);
+                ForEach forEach =new ForEach(lhs, rhs);
+                Expression sep = loader.getExpressionWithRole(element, "separator");
+                if (sep != null) {
+                    forEach.setSeparatorExpression(sep);
+                }
+                return forEach;
             } else {
                 ForEach forEach = new ForEach(lhs, rhs, false, threads);
                 Expression sep = loader.getExpressionWithRole(element, "separator");
