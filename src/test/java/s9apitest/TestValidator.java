@@ -1417,25 +1417,70 @@ public class TestValidator {
         }
     }
 
-    @Test
-    public void testIgnoreSchemaLocationHints() {
+    private void testSchemaLocationHints(boolean useHints, boolean withNS) {
         try {
             Processor processor = new Processor(true);
             DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode source = builder.build(new File(ConfigTest.DATA_DIR + "xsdhints/document.xml"));
+            XdmNode source = builder.build(new File(ConfigTest.DATA_DIR + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
             SchemaManager manager = processor.getSchemaManager();
             SchemaValidator validator = manager.newSchemaValidator();
 
-            validator.setUseXsiSchemaLocation(false);
+            validator.setUseXsiSchemaLocation(useHints);
 
             validator.validate(source.asSource());
 
-            fail("Document should not have validated");
+            if (!useHints) {
+                fail("Document should not have validated");
+            }
         } catch (Exception ex) {
-            assert(ex.getCause() instanceof ValidationException);
+            if (useHints) {
+                fail("Validation should not have failed");
+            }
         }
     }
+
+    @Test
+    public void testIgnoreSchemaLocationHints() {
+        testSchemaLocationHints(false, false);
+        testSchemaLocationHints(false, true);
+        testSchemaLocationHints(true, false);
+        testSchemaLocationHints(true, true);
+    }
+
+    private void testSchemaLocationHintsWithDestination(boolean useHints, boolean withNS) {
+        try {
+            Processor processor = new Processor(true);
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            XdmNode source = builder.build(new File(ConfigTest.DATA_DIR + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
+
+            SchemaManager manager = processor.getSchemaManager();
+            SchemaValidator validator = manager.newSchemaValidator();
+            validator.setUseXsiSchemaLocation(useHints);
+
+            XQueryCompiler comp = processor.newXQueryCompiler();
+            XQueryEvaluator eval = comp.compile(".").load();
+            eval.setContextItem(source);
+            eval.run(validator);
+
+            if (!useHints) {
+                fail("Document should not have validated");
+            }
+        } catch (Exception ex) {
+            if (useHints) {
+                fail("Validation should not have failed");
+            }
+        }
+    }
+
+    @Test
+    public void testIgnoreSchemaLocationHintsWithValidatorDestination() {
+        testSchemaLocationHintsWithDestination(false, false);
+        testSchemaLocationHintsWithDestination(false, true);
+        testSchemaLocationHintsWithDestination(true, false);
+        testSchemaLocationHintsWithDestination(true, true);
+    }
+
 
     @Test
     public void testErrorListenerBug4744b() {
