@@ -637,9 +637,9 @@
    <xsl:template match="*[@RESOLVED_TYPE = 'java.lang.Math']" priority="30" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
          'random#0':          '(new System.Random()).NextDouble()',
-         'round#1':           'System.Math.Round(%args%, System.MidpointRounding.AwayFromZero))',
+         'round#1':           'System.Math.Round(%args%, System.MidpointRounding.AwayFromZero)',
          'ceil#1':            'System.Math.Ceiling(%args%)',
-         '*':                 '%scope%.%Name%(%args%)' 
+         '*':                 'System.Math.%Name%(%args%)' 
          })"/>
    </xsl:template>
    
@@ -705,7 +705,7 @@
    <xsl:template match="*[starts-with(@RESOLVED_TYPE, 'java.lang.Character')]" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'getType#1':           'System.Globalization.CharUnicodeInfo.GetUnicodeCategory((char)%args%)',
+         'getType#1':           'System.Globalization.CharUnicodeInfo.GetUnicodeCategory(%args%)',
          '*':                   '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
