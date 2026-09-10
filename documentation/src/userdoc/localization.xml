@@ -354,7 +354,8 @@ config.setLocalizerFactory(new LocalizerFactory() {
           based on the requested language, and it uses case-blind comparison when requested; other properties in the
           UCA collation URI are ignored. For operations that require substring matching, such as the <code>fn:contains</code>,
           <code>fn:starts-with</code>, and <code>fn:substring-before</code> functions, the only aspects of the
-          collation that affect the outcome. The same applies to <code>fn:collation-key</code>, and other operations
+          collation that affect the outcome are <code>lang</code> and <code>strength</code>. 
+          The same applies to <code>fn:collation-key</code>, and other operations
         that use collation keys, for example <code>fn:distinct-values</code> and <code>xsl:for-each-group</code>.</p>
         </p></li>
         <li class="csonly">       
