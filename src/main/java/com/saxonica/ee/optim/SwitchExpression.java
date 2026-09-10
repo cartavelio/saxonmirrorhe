@@ -513,14 +513,14 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
             return context -> {
                 AtomicValue subjectValue = (AtomicValue) subjectEvaluator.eval(context);
                 if (subjectValue == null) {
-                    return otherwiseEvaluator.eval(context);
+                    return otherwiseEvaluator.iterate(context);
                 }
                 AtomicMatchKey key = subjectValue.getXPathMatchKey(expr.getCollation(), context.getImplicitTimezone());
                 int selection = expr.getIndex(key);
                 if (selection == -1) {
-                    return otherwiseEvaluator.eval(context);
+                    return otherwiseEvaluator.iterate(context);
                 } else {
-                    return actionEvaluators.get(selection).eval(context);
+                    return actionEvaluators.get(selection).iterate(context);
                 }
             };
         }

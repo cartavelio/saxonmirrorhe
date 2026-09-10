@@ -1,5 +1,6 @@
 package com.saxonica.ee.optim;
 
+import net.sf.saxon.expr.elab.FallbackElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.*;
@@ -29,6 +30,9 @@ public final class IndexedFilterExpression extends Expression {
     private final Operand searchOp;
     private final AtomicComparer comparer;
     private final boolean convertUntypedToOther;
+
+    private PullEvaluator basePullEvaluator = null;
+    private PullEvaluator searchPullEvaluator = null;
 
     /**
      * Constructor
@@ -314,8 +318,6 @@ public final class IndexedFilterExpression extends Expression {
                 getSearchExpression().hashCode();
     }
 
-    private PullEvaluator basePullEvaluator = null;
-    private PullEvaluator searchPullEvaluator = null;
 
     /**
      * Iterate over the results, returning them in the correct order
@@ -351,7 +353,7 @@ public final class IndexedFilterExpression extends Expression {
             if (basePullEvaluator == null) {
                 basePullEvaluator = Elaborator.makeElaborator(baseExp).elaborateForPull();
             }
-            indexedValue = SearchableValue.makeSearchableValue(basePullEvaluator.eval(context));
+            indexedValue = SearchableValue.makeSearchableValue(basePullEvaluator.iterate(context));
         }
         // In all other cases there must have been some kind of rewrite; evaluate as a regular
         // filter expression
@@ -363,7 +365,7 @@ public final class IndexedFilterExpression extends Expression {
         if (searchPullEvaluator == null) {
             searchPullEvaluator = Elaborator.makeElaborator(getSearchExpression()).elaborateForPull();
         }
-        SequenceIterator values = searchPullEvaluator.eval(context);
+        SequenceIterator values = searchPullEvaluator.iterate(context);
         return indexedValue.findItems(getUseExpression(), values, convertUntypedToOther,
                                       false, comparer, context);
 
@@ -428,6 +430,16 @@ public final class IndexedFilterExpression extends Expression {
     public String toShortString() {
         return getBaseExpression().toShortString() + "[(:indexed:)" +
                 getUseExpression().toShortString() + "=" + getSearchExpression().toShortString() + "]";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new FallbackElaborator();
     }
 }
 

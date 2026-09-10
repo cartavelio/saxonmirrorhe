@@ -8,6 +8,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.SchemaException;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.*;
@@ -46,8 +47,8 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * supplying an OEM license key
      */
 
-    @SuppressWarnings("Convert2MethodRef") // For Java-C# conversion
-    private static Supplier<EnterpriseConfiguration> configurationFactory = () -> new EnterpriseConfiguration();
+    private static Supplier<EnterpriseConfiguration> configurationFactory =
+            CSharp.methodRef(EnterpriseConfiguration::new);
 
     static ErrorHandler DRACONIAN_ERROR_HANDLER = new ErrorHandler() {
         @Override

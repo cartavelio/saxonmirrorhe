@@ -382,9 +382,8 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
             GroundedValue gv = arguments[0].materialize();
             byte[] bytes = new byte[gv.getLength()];
             SequenceIterator iter = gv.iterate();
-            Item item;
             int i=0;
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 long v = ((IntegerValue)item).longValue();
                 if (0 <= v && v <= 255) {
                     bytes[i++] = (byte) v;

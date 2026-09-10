@@ -12,6 +12,7 @@ import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.ValidationException;
@@ -381,8 +382,7 @@ public class Validate {
             }
 
             if (options.definesParameterValues()) {
-                //noinspection Convert2MethodRef
-                options.setParams(processor, (name, val) -> validator.setParameter(name, val));
+                options.setParams(processor, CSharp.methodRef(validator::setParameter));
             }
 
             Serializer statsSerializer = null;

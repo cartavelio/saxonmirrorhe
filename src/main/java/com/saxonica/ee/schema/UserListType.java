@@ -11,6 +11,7 @@ import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
@@ -102,8 +103,8 @@ public class UserListType extends UserSimpleType implements ListType {
         return true;
     }
 
-    @SuppressWarnings("Convert2MethodRef")  // For Java-C# conversion
-    private Function<UnicodeString, AtomicIterator> tokenizerFactory = str -> new Whitespace.Tokenizer(str);
+    private Function<UnicodeString, AtomicIterator> tokenizerFactory =
+            CSharp.constructorRef(Whitespace.Tokenizer::new, 1);
 
     /**
      * Get the extended facet list, creating it if necessary. The extended facet

@@ -36,8 +36,7 @@ public class MapSearch extends SystemFunction {
     private void processSequence(GroundedValue seq, AtomicValue key, Function tester, XPathContext context, List<Item> result) throws XPathException {
         GroundedValue in = ((Sequence) seq).materialize();
         SequenceIterator iter = in.iterate();
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             if (item instanceof ArrayItem) {
                 ArrayItem array = (ArrayItem)item;
                 if (!(array instanceof PedigreeValue)) {

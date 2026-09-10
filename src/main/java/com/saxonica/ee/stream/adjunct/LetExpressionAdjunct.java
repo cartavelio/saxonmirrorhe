@@ -14,6 +14,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 
@@ -38,8 +39,7 @@ public class LetExpressionAdjunct extends StreamingAdjunct {
             letAction.pushMethod = Expression.ITEM_FEED_METHOD;
             letAction.streamingChildSequence = 0;
             route.prepend(letAction);
-            //noinspection Convert2MethodRef
-            return (watchManager, out, context) -> route.getWatch(watchManager, out, context);
+            return CSharp.methodRef(route::getWatch);
         } else {
 
             // If the action operand consumes the input stream, use LetExpressionAdjunctB, which handles
@@ -137,7 +137,7 @@ public class LetExpressionAdjunct extends StreamingAdjunct {
         @Override
         public void close() throws XPathException {
             LetExpression letExpr = (LetExpression)getExpression();
-            Sequence value = collector.getSequence();
+            GroundedValue value = collector.getSequence();
             XPathContext context = getContext();
             context.setLocalVariable(letExpr.getLocalSlotNumber(), value);
             letExpr.getAction().process(getResultFeed(), context);

@@ -247,15 +247,14 @@ public class InsertExpression extends BasicUpdatingExpression {
         }
         if (!(parent instanceof MutableNodeInfo)) {
             XPathException err = new XPathException("Target node of insert expression is not updateable",
-                    SaxonErrorCode.SXUP0081);
+                                                    SaxonErrorCode.SXUP0081);
             err.setLocation(getLocation());
             err.setXPathContext(context);
             throw err;
         }
         boolean foundNonAttribute = false;
         SequenceIterator iter = getSourceExpression().iterate(context);
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE) {
                 if (foundNonAttribute) {
                     XPathException err = new XPathException(
@@ -301,7 +300,7 @@ public class InsertExpression extends BasicUpdatingExpression {
 
                 try {
                     InsertAttributeAction action = new InsertAttributeAction(
-                            (MutableNodeInfo)parent,
+                            (MutableNodeInfo) parent,
                             NameOfNode.makeName(copiedNode),
                             attributeType,
                             copiedNode.getStringValue(),

@@ -221,8 +221,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
         if (kind == Type.ATTRIBUTE) {
             SequenceIterator iter = getReplacementExp().iterate(context);
             AttributeMap atts = EmptyAttributeMap.getInstance();
-            Item item;
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 boolean isAttribute = item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE;
                 if (!isAttribute) {
                     XPathException err = new XPathException(
@@ -259,8 +258,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
         } else {
 
             SequenceIterator iter = getReplacementExp().iterate(context);
-            Item item;
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE) {
                     XPathException err = new XPathException(
                             "An attribute node cannot replace a node that is not itself an attribute",

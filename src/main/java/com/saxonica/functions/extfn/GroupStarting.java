@@ -72,9 +72,8 @@ public class GroupStarting extends SystemFunction {
             if (pending != null) {
                 group.add(pending);
             }
-            Item item;
             try {
-                while ((item = baseIterator.next()) != null) {
+                for (Item item; (item = baseIterator.next()) != null; ) {
                     Sequence test = function.call(context, SequenceTool.fromItems(item));
                     boolean match = ExpressionTool.effectiveBooleanValue(test.head());
                     if (match) {

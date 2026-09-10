@@ -21,6 +21,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.TextLinesIterator;
 import net.sf.saxon.type.AnyItemType;
@@ -384,8 +385,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 }
                 Writer writer = newOutputStreamWriter(makeFileAppendOutputStream(file), encoding);
                 SequenceIterator iter = arguments[1].iterate();
-                Item item;
-                while ((item = iter.next()) != null) {
+                for (Item item; (item = iter.next()) != null; ) {
                     writer.write(item.getStringValue());
                     writer.write(NEWLINE);
                 }
@@ -1284,8 +1284,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                     Objects.requireNonNull(
                             getInputStreamReader(file, encoding)));
             uri = file.toURI();
-            //noinspection Convert2MethodRef
-            checker = IntPredicateLambda.of(ch -> XMLCharacterData.isValid11(ch));
+            checker = IntPredicateLambda.of(CSharp.methodRef(XMLCharacterData::isValid11));
         }
 
     }

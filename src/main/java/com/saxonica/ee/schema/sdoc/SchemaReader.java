@@ -14,6 +14,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
@@ -219,8 +220,7 @@ public abstract class SchemaReader {
                 schemaBuilder.setSystemId(base);
             }
             LocationCopier copier = new LocationCopier(((NodeInfo) source).getNodeKind() == Type.DOCUMENT, base);
-            //noinspection Convert2MethodRef
-            pipe.setCopyInformee(element -> copier.notifyElementNode(element));
+            pipe.setCopyInformee(CSharp.methodRef(copier::notifyElementNode));
         }
 
         // Alternative pipeline for compiled schema documents

@@ -15,6 +15,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 
 
 /**
@@ -34,9 +35,7 @@ public class LetExpressionAdjunctB extends TransmissionAdjunct {
         letAction.pushMethod = Expression.ITEM_FEED_METHOD;
         letAction.streamingChildSequence = 0;
         route.prepend(letAction);
-        //noinspection Convert2MethodRef
-        return (watchManager, out, context) -> route.getWatch(watchManager, out, context);
-//        }
+        return CSharp.methodRef(route::getWatch);
     }
 
     @Override

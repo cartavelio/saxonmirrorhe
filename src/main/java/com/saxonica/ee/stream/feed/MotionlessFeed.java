@@ -42,8 +42,7 @@ public class MotionlessFeed extends ItemFeed {
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         //System.err.println("Motionless start " + node.toShortString());
         SequenceIterator iter = expression.iterate(getContext());
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             if (item instanceof FleetingParentNode) {
                 // We're assuming that if we process the streaming node, we only do it once.
                 // Test case su-shallow-descent-004

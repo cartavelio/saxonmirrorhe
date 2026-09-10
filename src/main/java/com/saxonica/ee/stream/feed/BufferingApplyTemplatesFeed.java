@@ -73,11 +73,10 @@ public class BufferingApplyTemplatesFeed extends ItemFeed {
 
         Mode mode = targetMode.getActor();
 
-        Item item;
         FocusIterator iter = c2.getCurrentIterator();
 
         // TODO: following code is shared with ApplyTemplatesFeed...
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             Rule rule = mode.getRule(item, c2);
 
             if (rule == null) {

@@ -9,6 +9,7 @@ import net.sf.saxon.expr.XPathContextMinor;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.ManualIterator;
 
 import java.util.concurrent.*;
@@ -58,8 +59,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
         // Don't pre-calculate last(); get it on demand. The focus tracking iterator is synchronised so that
         // if two threads both try to calculate last(), one of them will do the work, and the other
         // will take advantage of the known answer.
-        //noinspection Convert2MethodRef
-        lastPositionFinder = () -> context.getLast();
+        lastPositionFinder = CSharp.methodRef(context::getLast);
         EnterpriseConfiguration config = (EnterpriseConfiguration) context.getConfiguration();
         service = config.getMultithreadingFactory().makeExecutorService(threads);
         // prime the queue

@@ -130,8 +130,7 @@ public class SendMail extends SystemFunction {
     private static InternetAddress[] createRecipients(Sequence seq, XPathContext context) throws XPathException {
         SequenceIterator iter = seq.iterate();
         List<InternetAddress> recipient = new ArrayList<>();
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             try {
                 recipient.add(parseInternetAddress(item.getStringValue(), context));
             } catch (Exception e) {
@@ -325,8 +324,7 @@ public class SendMail extends SystemFunction {
         if (arguments.length == 4) {
             Sequence attachments = arguments[3];
             SequenceIterator iter = attachments.iterate();
-            Item item;
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 try {
                     mailer.addBodyPart(createAttachment(context, item));
                 } catch (MessagingException e) {

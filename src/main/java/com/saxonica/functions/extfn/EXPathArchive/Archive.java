@@ -237,8 +237,7 @@ public class Archive {
             return requested;
         }
         SequenceIterator iter = entries.iterate();
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             if (item instanceof MapItem) {
                 AtomicIterator ui = ((MapItem) item).keys();
                 AtomicValue av;
@@ -248,8 +247,7 @@ public class Archive {
             } else {
                 requested.add(new Entry(entryDefault, item.getStringValue()));
             }
-
-        }
+}
         return requested;
     }
 

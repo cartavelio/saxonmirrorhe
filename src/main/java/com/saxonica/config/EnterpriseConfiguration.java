@@ -60,6 +60,7 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.style.XSLTemplate;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.*;
@@ -1230,8 +1231,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             DocumentValidator dv = new DocumentValidator(pathMaintainer, hostLanguage == HostLanguage.XSLT ? "XTTE1550" : "XQDY0061");
 
             LocationCopier copier = new LocationCopier(true, systemId);
-            //noinspection Convert2MethodRef
-            pipe.setCopyInformee((element) -> copier.notifyElementNode(element));
+            pipe.setCopyInformee(CSharp.methodRef(copier::notifyElementNode));
 
             vc.startValidation(systemId);
 
@@ -1612,11 +1612,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if (multithreaded || (getBooleanProperty(Feature.ALLOW_MULTITHREADING) &&
                 exec.createsSecondaryResult() &&
                 isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT))) {
-            //noinspection Convert2MethodRef
-            return (iter) -> new MultithreadedFocusTrackingIterator(iter); // written this way for Java-C# conversion
+            return CSharp.constructorRef(MultithreadedFocusTrackingIterator::new, 1);
         } else {
-            //noinspection Convert2MethodRef
-            return (iter) -> new FocusTrackingIterator(iter); // written this way for Java-C# conversion
+            return CSharp.constructorRef(FocusTrackingIterator::new, 1);
         }
     }
 
@@ -1951,8 +1949,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if (context.getCurrentIterator() != null) {
             ManualIterator manualIterator =
                     new ManualIterator(context.getContextItem(), context.getCurrentIterator().position());
-            //noinspection Convert2MethodRef
-            manualIterator.setLengthFinder(() -> context.getLast());
+            manualIterator.setLengthFinder(CSharp.methodRef(context::getLast));
             c3.setCurrentIterator(manualIterator);
         }
 

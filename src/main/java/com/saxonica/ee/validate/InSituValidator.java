@@ -9,6 +9,7 @@ import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -67,8 +68,7 @@ public class InSituValidator {
             validator = config.getElementValidator(endPoint, options, Loc.NONE);
         }
         NodeCounter nodeCounter = new NodeCounter(nodeBuffer);
-        //noinspection Convert2MethodRef
-        pipe.setCopyInformee(element -> nodeCounter.notifyElementNode(element));
+        pipe.setCopyInformee(CSharp.methodRef(nodeCounter::notifyElementNode));
         // Run the validation by invoking the copy() method to send events to the validation pipeline
         root.copy(validator, CopyOptions.ALL_NAMESPACES, Loc.NONE);
     }
