@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<out>
-   <ent name="hatch-pic"
-        sys="/testinputs/extensions/grafix/openhatch.gif"
-        pub=""/>
-   <ent name="patch-pic"
-        sys="/testinputs/extensions/grafix/openpatch.gif"
-        pub="//PUBLIC//ID//"/>
-</out>

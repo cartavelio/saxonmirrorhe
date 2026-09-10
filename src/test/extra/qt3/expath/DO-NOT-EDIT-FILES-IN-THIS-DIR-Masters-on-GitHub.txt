@@ -1,1 +1,0 @@
-The real sources are contained GitHub: expath/expath-cg/tests/qt3

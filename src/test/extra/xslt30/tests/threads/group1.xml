@@ -1,7 +1,0 @@
-<cities>
-  <city name="milan"  country="italy"   pop="5" type="city"/>
-  <city name="venice" country="italy"   pop="1"  type="city"/>
-  <city name="paris"  country="france"  pop="7"  type="city"/>
-  <city name="lyon"   country="france"  pop="2"  type="city"/>
-  <city name="munich" country="germany" pop="4"  type="city"/>
-</cities>

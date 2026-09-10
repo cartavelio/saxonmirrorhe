@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<out>
-  <a id="x" name="y" alpha="z" beta="w" gamma="g" xml:space="preserve"/>
-  <a id="x" name="y" alpha="z" beta="w" gamma="g" java:jam="j" xs:extra="4" xml:space="preserve"/>
-  <a id="x" name="y" alpha="z" beta="w" gamma="g" xs:extra="4" xml:space="preserve"/>
-  <a b="3" c="4"/>
-</out>

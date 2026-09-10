@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?> 
-<document xmlns="http://saxon097.uri/">
-<path>following-sibling::data</path>
-<data>Saxon is great</data> 
-</document>

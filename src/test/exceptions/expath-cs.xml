@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exceptions>
+
+   <exception test-set="saxon-parse-dateTime" run="false" report="Not supported">
+      <created by="Michael Kay" on="2021-08-20"/>
+      <reason>Function not supported in Saxon-CS</reason>
+   </exception>
+
+</exceptions>
