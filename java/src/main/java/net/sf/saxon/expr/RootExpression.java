@@ -12,9 +12,12 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.ma.jnode.RootJNodeType;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -239,8 +242,12 @@ public class RootExpression extends Expression {
                 dynamicError("The root of the tree containing the context item is not a document node", "XPDY0050", context);
             }
             return doc;
-        } else if (current instanceof JNode) {
-            return ((JNode) current).getRoot();
+        } else if (current instanceof JNode jnode) {
+            return jnode.getRoot();
+        } else if (current instanceof MapItem mapItem) {
+            return new RootJNode(mapItem);
+        } else if (current instanceof ArrayItem arrayItem) {
+            return new RootJNode(arrayItem);
         }
         typeError("Finding root of tree: the context item is not a node", "XPTY0020", context);
         // dummy return; we never get here
