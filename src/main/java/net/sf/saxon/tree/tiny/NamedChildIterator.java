@@ -40,7 +40,6 @@ final class NamedChildIterator implements AxisIterator, LookaheadIterator, Atomi
         this.tree = tree;
         this.fingerprint = fingerprint;
         this.startNode = node;
-        startNode = node;
 
         // move to first child
         // ASSERT: we don't invoke this code unless the node has children
