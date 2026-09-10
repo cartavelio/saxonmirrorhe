@@ -12,6 +12,7 @@ import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.AnnotationList;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
@@ -217,6 +218,13 @@ public class StringArrayItem extends AbstractArrayItem {
 
     @Override
     public ArrayItem append(GroundedValue newMember) {
+        if (newMember == StringValue.EMPTY_STRING) {
+            // Common case, padding CSV rows with empty strings
+            UnicodeString[] m2 = Arrays.copyOf(_members, _members.length + 1);
+            m2[m2.length - 1] = EmptyUnicodeString.getInstance();
+            return new StringArrayItem(m2);
+        }
+
         ImmutableArrayItem a2 = new ImmutableArrayItem(getMembers());
         return a2.append(newMember);
     }
