@@ -3690,14 +3690,15 @@ public class XPathParser {
     }
 
     /**
-     * Check that XPath 4.0 is in use
+     * Check that XPath/XQuery 4.0 is in use
      *
      * @throws net.sf.saxon.trans.XPathException if XPath 3.1 support was not requested
      */
 
     protected void checkLanguageVersion40() throws XPathException {
+        String lang = getLanguage();
         if (!allowXPath40Syntax) {
-            grumble("The XPath parser is not configured to allow use of XPath 4.0 syntax");
+            grumble("The parser is not configured to allow use of " + lang + " 4.0 syntax");
         }
     }
 
