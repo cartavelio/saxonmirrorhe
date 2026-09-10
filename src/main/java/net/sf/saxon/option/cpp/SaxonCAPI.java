@@ -323,7 +323,7 @@ public class SaxonCAPI {
      * Get a particular exceptions
      *
      * @param i - index into the list of thrown exceptions
-     * @return SaxonCException - Saxon/C wrapped exception
+     * @return SaxonCException - SaxonC wrapped exception
      */
     /*public SaxonApiException getException(int i) {
         if (i < saxonExceptions.size()) {
@@ -355,7 +355,7 @@ public class SaxonCAPI {
             return map;
         }
         if (params.length != values.length) {
-            throw new SaxonApiException("Saxon/C internal Error: params array length does not match values length");
+            throw new SaxonApiException("SaxonC internal Error: params array length does not match values length");
         }
         for (int i = 0; i < params.length; i++) {
             if (params[i].startsWith("!")) {

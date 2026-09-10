@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * * This class is to use with Saxon/C on C++
+ * * This class is to use with SaxonC on C++
  */
 public class XPathProcessor extends SaxonCAPI {
 
