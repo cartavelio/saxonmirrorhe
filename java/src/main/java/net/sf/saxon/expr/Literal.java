@@ -298,21 +298,6 @@ public class Literal extends Expression {
     }
 
     /**
-     * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
-     * by an expression in a source tree.
-     *
-     * @param pathMap        the PathMap to which the expression should be added
-     * @param pathMapNodeSet the set of nodes within the path map
-     * @return the pathMapNode representing the focus established by this expression, in the case where this
-     * expression is the first operand of a path expression or filter expression
-     */
-
-    @Override
-    public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        return pathMapNodeSet;
-    }
-
-    /**
      * Determine which aspects of the context the expression depends on. The result is
      * a bitwise-or'ed value composed from constants such as StaticProperty.VARIABLES and
      * StaticProperty.CURRENT_NODE

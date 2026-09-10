@@ -18,7 +18,6 @@ import net.sf.saxon.om.NoElementsSpaceStrippingRule;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.om.TreeModel;
-import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -54,7 +53,6 @@ public class DocumentBuilder {
     private TreeModel treeModel = TreeModel.TINY_TREE;
     private WhitespaceStrippingPolicy whitespacePolicy = WhitespaceStrippingPolicy.UNSPECIFIED;
     private URI baseURI;
-    private XQueryExecutable projectionQuery;
 
     /**
      * Create a DocumentBuilder. This is a protected constructor. Users should construct a DocumentBuilder
@@ -282,10 +280,11 @@ public class DocumentBuilder {
      *
      * @param query the compiled query used to control document projection
      * @since 9.3
+     * @deprecated since 13.0 - document projection is no longer supported
      */
 
     public void setDocumentProjectionQuery(XQueryExecutable query) {
-        this.projectionQuery = query;
+        throw new UnsupportedOperationException("Document projection was dropped in Saxon 13");
     }
 
     /**
@@ -294,10 +293,11 @@ public class DocumentBuilder {
      * @return the query set using {@link #setDocumentProjectionQuery} if this
      *         has been called, or null otherwise
      * @since 9.3. In 9.4 the unused and undocumented first argument is removed.
+     * @deprecated since 13.0 - document projection is no longer supported
      */
 
     public XQueryExecutable getDocumentProjectionQuery() {
-        return this.projectionQuery;
+        return null;
     }
 
     /**
@@ -389,13 +389,6 @@ public class DocumentBuilder {
         options = options.withLineNumbering(lineNumbering);
         if (source.getSystemId() == null && baseURI != null) {
             source.setSystemId(baseURI.toString());
-        }
-        if (projectionQuery != null) {
-            XQueryExpression exp = projectionQuery.getUnderlyingCompiledQuery();
-            FilterFactory ff = config.makeDocumentProjector(exp);
-            if (ff != null) {
-                options = options.withFilter(ff);
-            }
         }
         if (source instanceof AugmentedSource) {
             options = options.merge(((AugmentedSource)source).getParseOptions());

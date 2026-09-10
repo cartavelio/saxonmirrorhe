@@ -12,7 +12,6 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
@@ -328,11 +327,6 @@ public class GroupByClause extends Clause {
 
     public TupleComparisonKey getComparisonKey(FlworTuple<AtomicValue> t, XPathContext context) {
         return new TupleComparisonKey(t.getValues(), stringCollators, context.getImplicitTimezone());
-    }
-
-    @Override
-    public void addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        throw new UnsupportedOperationException("Cannot use document projection with group-by");
     }
 
     /**

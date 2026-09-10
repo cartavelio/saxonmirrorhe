@@ -155,6 +155,11 @@ TODO: rethink redefines and override
     </category>
     
     <category name="xquery31">
+        
+        <p>Support for document projection is dropped. (Document projection allowed the document building
+        process to filter a document as it was being constructed, to retain only those nodes needed for evaluation
+        of a particular query. In most cases streamed execution of queries provides a more flexible and performant
+        solution for this requirement.)</p>
  
     </category>
 

@@ -20,7 +20,6 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeSetPattern;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.Pattern;
@@ -32,7 +31,6 @@ import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.jiter.MonoIterator;
-import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.UType;
@@ -1528,60 +1526,6 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
 
     public Iterator<String> getProperties() {
         return new MonoIterator<>("expression");
-    }
-
-    /**
-     * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
-     * by an expression in a source tree.
-     * <p>The default implementation of this method assumes that an expression does no navigation other than
-     * the navigation done by evaluating its subexpressions, and that the subexpressions are evaluated in the
-     * same context as the containing expression. The method must be overridden for any expression
-     * where these assumptions do not hold. For example, implementations exist for AxisExpression, ParentExpression,
-     * and RootExpression (because they perform navigation), and for the doc(), document(), and collection()
-     * functions because they create a new navigation root. Implementations also exist for PathExpression and
-     * FilterExpression because they have subexpressions that are evaluated in a different context from the
-     * calling expression.</p>
-     *
-     * @param pathMap        the PathMap to which the expression should be added
-     * @param pathMapNodeSet the PathMapNodeSet to which the paths embodied in this expression should be added
-     * @return the pathMapNodeSet representing the points in the source document that are both reachable by this
-     *         expression, and that represent possible results of this expression. For an expression that does
-     *         navigation, it represents the end of the arc in the path map that describes the navigation route. For other
-     *         expressions, it is the same as the input pathMapNode.
-     */
-
-    /*@Nullable*/
-    public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, /*@Nullable*/ PathMap.PathMapNodeSet pathMapNodeSet) {
-        boolean dependsOnFocus = ExpressionTool.dependsOnFocus(this);
-        PathMap.PathMapNodeSet attachmentPoint;
-        if (pathMapNodeSet == null) {
-            if (dependsOnFocus) {
-                ContextItemExpression cie = new ContextItemExpression();
-                ExpressionTool.copyLocationInfo(this, cie);
-                pathMapNodeSet = new PathMap.PathMapNodeSet(pathMap.makeNewRoot(cie));
-            }
-            attachmentPoint = pathMapNodeSet;
-        } else {
-            attachmentPoint = dependsOnFocus ? pathMapNodeSet : null;
-        }
-        PathMap.PathMapNodeSet result = new PathMap.PathMapNodeSet();
-        for (Operand o : operands()) {
-            OperandUsage usage = o.getUsage();
-            Expression child = o.getChildExpression();
-            PathMap.PathMapNodeSet target = child.addToPathMap(pathMap, attachmentPoint);
-            if (usage == OperandUsage.NAVIGATION) {
-                // indicate that the function navigates to all elements in the document
-                target = target.createArc(AxisInfo.ANCESTOR_OR_SELF, NodeKindTest.ELEMENT);
-                target = target.createArc(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
-            }
-            result.addNodeSet(target);
-        }
-        if (getItemType() instanceof AtomicType) {
-            // if expression returns an atomic value then any nodes accessed don't contribute to the result
-            return null;
-        } else {
-            return result;
-        }
     }
 
     /**

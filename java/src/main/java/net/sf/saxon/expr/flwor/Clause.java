@@ -196,15 +196,6 @@ public abstract class Clause {
     }
 
     /**
-     * Collect information about the navigation paths followed by this clause, for document projection purposes
-     *
-     * @param pathMap        the path map in which the data is to be collected
-     * @param pathMapNodeSet the path map node set representing the paths to the context item
-     */
-
-    public abstract void addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet);
-
-    /**
      * Get a keyword identifying what kind of clause this is
      *
      * @return the kind of clause

@@ -637,26 +637,6 @@ public final class AxisExpression extends Expression {
 
 
     /**
-     * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
-     * by an expression in a source tree.
-     *
-     * @param pathMap        the PathMap to which the expression should be added
-     * @param pathMapNodeSet the PathMapNodeSet to which the paths embodied in this expression should be added
-     * @return the pathMapNode representing the focus established by this expression, in the case where this
-     * expression is the first operand of a path expression or filter expression
-     */
-
-    @Override
-    public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        if (pathMapNodeSet == null) {
-            ContextItemExpression cie = new ContextItemExpression();
-            //cie.setContainer(getContainer());
-            pathMapNodeSet = new PathMap.PathMapNodeSet(pathMap.makeNewRoot(cie));
-        }
-        return pathMapNodeSet.createArc(axis, test == null ? AnyNodeTest.getInstance() : test);
-    }
-
-    /**
      * Ask whether there is a possibility that the context item will be undefined
      *
      * @return true if this is a possibility

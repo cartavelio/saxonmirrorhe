@@ -456,39 +456,6 @@ public abstract class FunctionCall extends Expression {
 
 
     /**
-     * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
-     * by an expression in a source tree.
-     * <p>The default implementation of this method assumes that an expression does no navigation other than
-     * the navigation done by evaluating its subexpressions, and that the subexpressions are evaluated in the
-     * same context as the containing expression. The method must be overridden for any expression
-     * where these assumptions do not hold. For example, implementations exist for AxisExpression, ParentExpression,
-     * and RootExpression (because they perform navigation), and for the doc(), document(), and collection()
-     * functions because they create a new navigation root. Implementations also exist for PathExpression and
-     * FilterExpression because they have subexpressions that are evaluated in a different context from the
-     * calling expression.</p>
-     *
-     * @param pathMap      the PathMap to which the expression should be added
-     * @param pathMapNodes the node in the PathMap representing the focus at the point where this expression
-     *                     is called. Set to null if this expression appears at the top level, in which case the expression, if it
-     *                     is registered in the path map at all, must create a new path map root.
-     * @return the pathMapNode representing the focus established by this expression, in the case where this
-     * expression is the first operand of a path expression or filter expression. For an expression that does
-     * navigation, it represents the end of the arc in the path map that describes the navigation route. For other
-     * expressions, it is the same as the input pathMapNode.
-     */
-
-    public PathMap.PathMapNodeSet addExternalFunctionCallToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodes) {
-        // Except in the case of system functions, we have no idea where a function call might
-        // navigate, so we assume the worst, and register that the path has unknown dependencies
-        PathMap.PathMapNodeSet result = new PathMap.PathMapNodeSet();
-        for (Operand o : operands()) {
-            result.addNodeSet(o.getChildExpression().addToPathMap(pathMap, pathMapNodes));
-        }
-        result.setHasUnknownDependencies();
-        return result;
-    }
-
-    /**
      * Get a name identifying the kind of expression, in terms meaningful to a user.
      *
      * @return a name identifying the kind of expression, in terms meaningful to a user.

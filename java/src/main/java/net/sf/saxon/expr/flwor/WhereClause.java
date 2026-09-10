@@ -131,11 +131,6 @@ public class WhereClause extends Clause {
         processor.processOperand(predicateOp);
     }
 
-    @Override
-    public void addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        getPredicate().addToPathMap(pathMap, pathMapNodeSet);
-    }
-
     /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.

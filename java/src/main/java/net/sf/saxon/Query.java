@@ -70,7 +70,6 @@ public class Query {
     protected String moduleURIResolverClass = null;
     protected boolean explaining = false;
     protected boolean wrap = false;
-    protected boolean projection = false;
     protected boolean streaming = false;
     protected boolean updating = false;
     protected boolean writeback = false;
@@ -160,8 +159,6 @@ public class Query {
         options.setPermittedValues("outval", new String[]{"recover", "fatal"}, null);
         options.addRecognizedOption("p", CommandLineOptions.TYPE_BOOLEAN,
                                     "Recognize query parameters in URI passed to doc()");
-        options.addRecognizedOption("projection", CommandLineOptions.TYPE_BOOLEAN,
-                                    "Use source document projection");
         options.addRecognizedOption("q", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Query filename");
         options.addRecognizedOption("qs", CommandLineOptions.TYPE_STRING | CommandLineOptions.VALUE_REQUIRED,
@@ -417,9 +414,8 @@ public class Query {
                 exp.explain(out);
             }
 
-            // Load the source file (applying document projection if requested)
+            // Load the source file
 
-            exp.getUnderlyingCompiledQuery().setAllowDocumentProjection(projection);
             final XQueryEvaluator evaluator = exp.load();
             evaluator.setTraceFunctionDestination(traceDestination);
             if (options.getOptionValue("now") != null) {
@@ -594,9 +590,6 @@ public class Query {
             config.setBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS, true);
             useURLs = true;
         }
-
-        projection = "on".equals(options.getOptionValue("projection"));
-
 
         value = options.getOptionValue("q");
         if (value != null) {
@@ -993,12 +986,6 @@ public class Query {
             if (!exp.getUnderlyingCompiledQuery().usesContextItem()) {
                 config.getLogger().warning("Source document ignored - query can be evaluated without reference to the context item");
                 return;
-            }
-            if (projection) {
-                builder.setDocumentProjectionQuery(exp);
-                if (explaining) {
-                    exp.getUnderlyingCompiledQuery().explainPathMap();
-                }
             }
             builder.setDTDValidation(getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION));
             if (getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION_RECOVERABLE)) {

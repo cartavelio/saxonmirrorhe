@@ -588,20 +588,6 @@ public class SlashExpression extends BinaryExpression
 
 
     /**
-     * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
-     * by an expression in a source tree.
-     *
-     * @return the pathMapNode representing the focus established by this expression, in the case where this
-     *         expression is the first operand of a path expression or filter expression
-     */
-
-    @Override
-    public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        PathMap.PathMapNodeSet target = getStart().addToPathMap(pathMap, pathMapNodeSet);
-        return getStep().addToPathMap(pathMap, target);
-    }
-
-    /**
      * An implementation of Expression must provide at least one of the methods evaluateItem(), iterate(), or process().
      * This method indicates which of these methods is provided directly. The other methods will always be available
      * indirectly, using an implementation that relies on one of the other methods.

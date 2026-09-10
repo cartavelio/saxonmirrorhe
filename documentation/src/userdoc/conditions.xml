@@ -1154,17 +1154,7 @@ SOFTWARE.
           <p> Saxon uses this algorithm to convert floating point numbers to strings </p>
         </td>
       </tr>
-      <tr>
-        <td>
-          <p>Amélie Marian and Jérôme Siméon. Projecting XML Documents. VLDB'2003, Berlin, Germany,
-            September 2003 </p>
-        </td>
-        <td>
-          <p> Saxon-EE provides the option of performing document projection (to eliminate parts of
-            a source document that a query cannot reach) using an algorithm similar to the one
-            published in this paper </p>
-        </td>
-      </tr>
+ 
       <tr>
         <td>
           <p>XQJ (XQuery API for Java). Java Community Process JSR-225. The current <a

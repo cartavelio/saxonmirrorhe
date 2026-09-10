@@ -17,7 +17,6 @@ import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
@@ -115,7 +114,6 @@ public class Controller implements ContextOriginator {
     private int lastRememberedNumber = -1;
     private DateTimeValue currentDateTime;
     private boolean dateTimePreset = false;
-    private PathMap pathMap = null;
     protected int validationMode = Validation.DEFAULT;
     protected boolean inUse = false;
     private boolean stripSourceTrees = true;
@@ -1504,29 +1502,6 @@ public class Controller implements ContextOriginator {
         c.setCurrentOutputUri(principalResultURI);
         return c;
     }
-
-    /**
-     * Indicate whether document projection should be used, and supply the PathMap used to control it.
-     * Note: this is available only under Saxon-EE.
-     *
-     * @param pathMap a path map to be used for projecting source documents
-     */
-
-    public void setUseDocumentProjection(PathMap pathMap) {
-        this.pathMap = pathMap;
-    }
-
-    /**
-     * Get the path map used for document projection, if any.
-     *
-     * @return the path map to be used for document projection, if one has been supplied; otherwise null
-     */
-
-    /*@Nullable*/
-    public PathMap getPathMapForDocumentProjection() {
-        return pathMap;
-    }
-
 
     /**
      * Get the cache of stylesheets (cached during calls on fn:transform()) for this query or transformation.

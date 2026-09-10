@@ -11,10 +11,8 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.StringEvaluator;
-import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -71,15 +69,6 @@ public final class AttributeGetter extends Expression {
     @Override
     public AttributeGetter copy(RebindingMap rebindings) {
         return new AttributeGetter(attributeName);
-    }
-
-    @Override
-    public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        if (pathMapNodeSet == null) {
-            ContextItemExpression cie = new ContextItemExpression();
-            pathMapNodeSet = new PathMap.PathMapNodeSet(pathMap.makeNewRoot(cie));
-        }
-        return pathMapNodeSet.createArc(AxisInfo.ATTRIBUTE, new NameTest(Type.ATTRIBUTE, attributeName, getConfiguration().getNamePool()));
     }
 
     @Override

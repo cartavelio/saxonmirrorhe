@@ -12,7 +12,6 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
@@ -256,24 +255,6 @@ public class RootExpression extends Expression {
     @Override
     public Pattern toPattern(Configuration config) throws XPathException {
         return new NodeTestPattern(NodeKindTest.DOCUMENT);
-    }
-
-    /**
-     * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
-     * by an expression in a source tree.
-     *
-     * @return the pathMapNode representing the focus established by this expression, in the case where this
-     *         expression is the first operand of a path expression or filter expression
-     */
-
-    @Override
-    public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        if (pathMapNodeSet == null) {
-            ContextItemExpression cie = new ContextItemExpression();
-            ExpressionTool.copyLocationInfo(this, cie);
-            pathMapNodeSet = new PathMap.PathMapNodeSet(pathMap.makeNewRoot(cie));
-        }
-        return pathMapNodeSet.createArc(AxisInfo.ANCESTOR_OR_SELF, NodeKindTest.DOCUMENT);
     }
 
     /**

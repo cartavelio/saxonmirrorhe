@@ -587,23 +587,6 @@ public final class FilterExpression extends BinaryExpression implements ContextS
     }
 
     /**
-     * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
-     * by an expression in a source tree.
-     *
-     * @param pathMap        the PathMap to which the expression should be added
-     * @param pathMapNodeSet the PathMapNodeSet to which the paths embodied in this expression should be added
-     * @return the pathMapNode representing the focus established by this expression, in the case where this
-     * expression is the first operand of a path expression or filter expression
-     */
-
-    @Override
-    public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        PathMap.PathMapNodeSet target = getBase().addToPathMap(pathMap, pathMapNodeSet);
-        getFilter().addToPathMap(pathMap, target);
-        return target;
-    }
-
-    /**
      * Construct an expression that obtains the effective boolean value of a given expression,
      * by wrapping it in a call of the boolean() function
      *

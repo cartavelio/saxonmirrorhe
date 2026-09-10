@@ -2503,38 +2503,6 @@ public class Configuration implements SourceResolver {
     }
 
     /**
-     * Create a document projector for a given path map root. Document projection is available only
-     * in Saxon-EE, so the Saxon-HE version of this method throws an exception
-     *
-     * @param map a path map root in a path map. This might represent the call to the initial
-     *            context item for a query, or it might represent a call on the doc() function. The path map
-     *            contains information about the paths that the query uses within this document.
-     * @return a push filter that implements document projection
-     * @throws UnsupportedOperationException if this is not a schema-aware configuration, or
-     *                                       if no Saxon-EE license is available
-     */
-
-    public FilterFactory makeDocumentProjector(PathMap.PathMapRoot map) {
-        throw new UnsupportedOperationException("Document projection requires Saxon-EE");
-    }
-
-    /**
-     * Create a document projector for the document supplied as the initial context item
-     * in a query. Document projection is available only
-     * in Saxon-EE, so the Saxon-HE version of this method throws an exception
-     *
-     * @param exp an XQuery expression. The document projector that is returned will
-     *            be for the document supplied as the context item to this query.
-     * @return a push filter that implements document projection
-     * @throws UnsupportedOperationException if this is not a schema-aware configuration, or
-     *                                       if no Saxon-EE license is available
-     */
-
-    public FilterFactory makeDocumentProjector(XQueryExpression exp) {
-        throw new UnsupportedOperationException("Document projection requires Saxon-EE");
-    }
-
-    /**
      * Ask whether source documents (supplied as a StreamSource or SAXSource)
      * should be subjected to schema validation, and if so, in what validation mode
      *

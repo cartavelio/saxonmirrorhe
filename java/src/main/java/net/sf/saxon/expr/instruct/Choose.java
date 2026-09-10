@@ -876,40 +876,6 @@ public class Choose extends Instruction implements ConditionalInstruction {
 
 
     /**
-     * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
-     * by an expression in a source tree.
-     * <p>The default implementation of this method assumes that an expression does no navigation other than
-     * the navigation done by evaluating its subexpressions, and that the subexpressions are evaluated in the
-     * same context as the containing expression. The method must be overridden for any expression
-     * where these assumptions do not hold. For example, implementations exist for AxisExpression, ParentExpression,
-     * and RootExpression (because they perform navigation), and for the doc(), document(), and collection()
-     * functions because they create a new navigation root. Implementations also exist for PathExpression and
-     * FilterExpression because they have subexpressions that are evaluated in a different context from the
-     * calling expression.</p>
-     *
-     * @param pathMap        the PathMap to which the expression should be added
-     * @param pathMapNodeSet the set of PathMap nodes to which the paths from this expression should be appended
-     * @return the pathMapNode representing the focus established by this expression, in the case where this
-     *         expression is the first operand of a path expression or filter expression. For an expression that does
-     *         navigation, it represents the end of the arc in the path map that describes the navigation route. For other
-     *         expressions, it is the same as the input pathMapNode.
-     */
-
-    @Override
-    public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        // expressions used in a condition contribute paths, but these do not contribute to the result
-        for (Operand condition : conditions()) {
-            condition.getChildExpression().addToPathMap(pathMap, pathMapNodeSet);
-        }
-        PathMap.PathMapNodeSet result = new PathMap.PathMapNodeSet();
-        for (Operand action : actions()) {
-            PathMap.PathMapNodeSet temp = action.getChildExpression().addToPathMap(pathMap, pathMapNodeSet);
-            result.addNodeSet(temp);
-        }
-        return result;
-    }
-
-    /**
      * The toString() method for an expression attempts to give a representation of the expression
      * in an XPath-like form, but there is no guarantee that the syntax will actually be true XPath.
      * In the case of XSLT instructions, the toString() method gives an abstracted view of the syntax

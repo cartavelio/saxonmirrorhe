@@ -670,28 +670,6 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
     }
 
     /**
-     * Indicate that document projection is or is not allowed
-     *
-     * @param allowed true if projection is allowed
-     */
-
-    public void setAllowDocumentProjection(boolean allowed) {
-        if (allowed) {
-            throw new UnsupportedOperationException("Document projection requires Saxon-EE");
-        }
-    }
-
-    /**
-     * Ask whether document projection is allowed
-     *
-     * @return true if document projection is allowed
-     */
-
-    public boolean isDocumentProjectionAllowed() {
-        return false;
-    }
-
-    /**
      * Return the public identifier for the current document event.
      * <p>The return value is the public identifier of the document
      * entity or of the external parsed entity in which the markup that

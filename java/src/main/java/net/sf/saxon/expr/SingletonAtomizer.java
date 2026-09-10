@@ -19,7 +19,6 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -203,21 +202,6 @@ public final class SingletonAtomizer extends UnaryExpression {
         return roleSupplier.get();
     }
 
-
-    /*@Nullable*/
-    @Override
-    public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        PathMap.PathMapNodeSet result = getBaseExpression().addToPathMap(pathMap, pathMapNodeSet);
-        if (result != null) {
-            TypeHierarchy th = getConfiguration().getTypeHierarchy();
-            ItemType operandItemType = getBaseExpression().getItemType();
-            if (th.relationship(NodeKindTest.ELEMENT, operandItemType) != Affinity.DISJOINT ||
-                    th.relationship(NodeKindTest.DOCUMENT, operandItemType) != Affinity.DISJOINT) {
-                result.setAtomized();
-            }
-        }
-        return null;
-    }
 
     /**
      * Evaluate as an Item. This should only be called if a singleton or empty sequence is required;

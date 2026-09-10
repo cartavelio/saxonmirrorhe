@@ -164,16 +164,6 @@ public class OrderByClause extends Clause {
         }
     }
 
-    @Override
-    public void addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        SortKeyDefinitionList sortKeys = getSortKeyDefinitions();
-        for (SortKeyDefinition skd : sortKeys) {
-            Expression sortKey = skd.getSortKey();
-            sortKey.addToPathMap(pathMap, pathMapNodeSet);
-
-        }
-    }
-
     /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.

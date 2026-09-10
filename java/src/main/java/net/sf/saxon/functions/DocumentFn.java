@@ -11,7 +11,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.lib.*;
@@ -302,13 +301,6 @@ public class DocumentFn extends SystemFunction implements Callable {
                     s = config.getAnnotationStripper(s);
                 }
 
-                PathMap map = controller.getPathMapForDocumentProjection();
-                if (map != null) {
-                    PathMap.PathMapRoot pathRoot = map.getRootForDocument(documentKey.toString());
-                    if (pathRoot != null && !pathRoot.isReturnable() && !pathRoot.hasUnknownDependencies()) {
-                        options = options.withFilter(config.makeDocumentProjector(pathRoot));
-                    }
-                }
                 s.setPipelineConfiguration(b.getPipelineConfiguration());
                 try {
                     Sender.send(source, s, options);

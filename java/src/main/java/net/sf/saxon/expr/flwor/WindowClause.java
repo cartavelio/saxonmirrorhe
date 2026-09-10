@@ -268,11 +268,6 @@ public class WindowClause extends Clause {
         }
     }
 
-    @Override
-    public void addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        throw new UnsupportedOperationException("Cannot use document projection with windowing");
-    }
-
     /**
      * Get the variables bound by this clause
      *

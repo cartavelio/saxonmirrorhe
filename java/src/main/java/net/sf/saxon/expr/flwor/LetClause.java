@@ -178,37 +178,6 @@ public class LetClause extends Clause {
 //     * @param visitor an ExpressionVisitor
 //     */
 
-//    public void refineVariableType(
-//            ItemType type, int cardinality, Value constantValue, int properties, ExpressionVisitor visitor) {
-//        Executable exec = visitor.getExecutable();
-//        if (exec == null) {
-//            // happens during use-when evaluation
-//            return;
-//        }
-//        TypeHierarchy th = exec.getConfiguration().getTypeHierarchy();
-//        ItemType oldItemType = rangeVariable.getRequiredType().getPrimaryType();
-//        ItemType newItemType = oldItemType;
-//        if (th.isSubType(type, oldItemType)) {
-//            newItemType = type;
-//        }
-//        if (oldItemType instanceof NodeTest && type instanceof AtomicType) {
-//            // happens when all references are flattened
-//            newItemType = type;
-//        }
-//        int newcard = cardinality & rangeVariable.getRequiredType().getCardinality();
-//        if (newcard==0) {
-//            // this will probably lead to a type error later
-//            newcard = rangeVariable.getRequiredType().getCardinality();
-//        }
-//        SequenceType seqType = SequenceType.makeSequenceType(newItemType, newcard);
-//        //setStaticType(seqType, constantValue, properties);
-//    }
-    @Override
-    public void addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
-        PathMap.PathMapNodeSet varPath = getSequence().addToPathMap(pathMap, pathMapNodeSet);
-        pathMap.registerPathForVariable(rangeVariable, varPath);
-    }
-
     /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.
