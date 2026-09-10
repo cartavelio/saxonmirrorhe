@@ -50,6 +50,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -307,11 +308,7 @@ public class Gizmo {
         } else {
             cmd.action.perform(new StringBuilder(remainder));
         }
-        try {
-            return outStream.toString("utf-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new XPathException(e);
-        }
+        return outStream.toString(StandardCharsets.UTF_8);
     }
 
     protected Talker initTalker(String script) {
@@ -325,7 +322,7 @@ public class Gizmo {
             }
         } else {
             try {
-                return new DefaultTalker(new FileInputStream(new File(script)), sysOut);
+                return new DefaultTalker(new FileInputStream(script), sysOut);
             } catch (FileNotFoundException e) {
                 System.err.println(e.getMessage());
                 System.exit(2);
@@ -364,9 +361,8 @@ public class Gizmo {
                             } else if (answer.equalsIgnoreCase("n")) {
                                 quit = false;
                                 break;
-                            } else {
-                                //continue;
                             }
+                            // continue
                         }
                     }
                     if (quit) {
@@ -393,9 +389,7 @@ public class Gizmo {
 
             } catch (XPathException e) {
                 sysOut.println(e.showErrorCode() + ": " + e.getMessage());
-                if (interactive) {
-                    //sysOut.print("|>");
-                } else {
+                if (!interactive) {
                     System.exit(2);
                 }
             }
@@ -560,7 +554,7 @@ public class Gizmo {
         }
     }
 
-    private static String[] keywords = new String[] {
+    private final static String[] keywords = new String[] {
         "ancestor::", "ancestor-or-self::", "array", "attribute", "cast as", "castable as", "child::",
         "comment()", "descendant::", "descendant-or-self::", "document-node()", "element()", "else",
         "empty-sequence()", "every", "except", "following::", "following-sibling::", "function",
@@ -866,7 +860,12 @@ public class Gizmo {
         }
         String varName = buffer.substring(0, ws).trim();
         if (varName.startsWith("$")) {
+            // forgive use of a leading '$'
             varName = varName.substring(1);
+        }
+        if (varName.endsWith(":")) {
+            // forgive use of `:=` in place of `=`
+            varName = varName.substring(0, varName.length() - 1).trim();
         }
         DocumentImpl saved = currentDoc;
 
@@ -960,7 +959,7 @@ public class Gizmo {
                 props.setProperty("indent", "yes");
                 Receiver r = config.getSerializerFactory().getReceiver(new StreamResult(sw), props);
                 r.append(item);
-                sysOut.println(sw.toString());
+                sysOut.println(sw);
             }
         }
     }

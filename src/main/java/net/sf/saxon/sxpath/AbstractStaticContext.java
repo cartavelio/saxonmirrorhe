@@ -390,6 +390,7 @@ public abstract class AbstractStaticContext implements StaticContext {
         if (packageData.getHostLanguageVersion() != level) {
             packageData.setHostLanguage(packageData.getHostLanguage(), level);
         }
+        setDefaultFunctionLibrary(level);
     }
 
     /**
