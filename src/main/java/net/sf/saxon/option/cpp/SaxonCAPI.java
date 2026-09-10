@@ -316,6 +316,12 @@ public class SaxonCAPI {
         return handle.rawValue();
     }
 
+
+    @CEntryPoint(name = "j_gc")
+    public static void gc(IsolateThread thread) {
+        System.gc();
+    }
+
     /**
      *  Static method to check if the Processor object is schema aware
      * @param thread - Graalvm runtime data structure for a thread
@@ -452,8 +458,8 @@ public class SaxonCAPI {
                 System.err.println("Object handle key already exists!");
             }
             System.err.println("Created Object Handle ref=" + handle.rawValue() + " Class name = "+ obj.getClass().getName());
-            objectHandlesPool.put(handle.rawValue(), obj.getClass().getName())
-;        }
+            objectHandlesPool.put(handle.rawValue(), obj.getClass().getName());
+        }
         return handle;
     }
 
@@ -602,7 +608,6 @@ public class SaxonCAPI {
 
     }
 
-
     /**
      * Test method
      * @param thread  - Graalvm runtime data structure for a thread
@@ -718,7 +723,7 @@ public class SaxonCAPI {
     /**
      * Allocate Char array in the C/C++ memory space
      */
-    interface AllocatorCCharFn extends CFunctionPointer {
+    public interface AllocatorCCharFn extends CFunctionPointer {
         @InvokeCFunctionPointer
         CCharPointer call(long size);
     }
@@ -1413,7 +1418,8 @@ public class SaxonCAPI {
             valueForCpp = (XdmValue) value;
             if (debug) {
 
-                System.err.println("DEBUG: SaxonCAPI convertObjectToXdmValue= " + valueForCpp.getUnderlyingValue().toString());
+                System.err.println("DEBUG: XSLTTransformerForCpp: " + valueForCpp.getUnderlyingValue().toString());
+                System.err.println("DEBUG: XSLTTransformerForCpp: " + valueForCpp.getUnderlyingValue());
             }
 
         } else if (value instanceof Object[]) {
@@ -1905,6 +1911,23 @@ public class SaxonCAPI {
         XdmValue value = objectHandles.get(xdmvalueRef);
         CCharPointer a = SaxonCAPI.stringToNative2(alloc, value.toString());
         return a;
+    }
+
+    @CEntryPoint(name = "j_cpp_encodeString",  exceptionHandler = SaxonCExceptionCCharHandler.class)
+    public static CCharPointer encodeStringValue(IsolateThread thread, CCharPointer c_string, CCharPointer c_outEncoding, SaxonCAPI.AllocatorCCharFn alloc) throws net.sf.saxon.s9api.SaxonApiException, UnsupportedEncodingException {
+            String outEncoding = "utf-8";
+            if (!c_outEncoding.isNull()) {
+                outEncoding = CTypeConversion.toJavaString(c_outEncoding);
+            }
+
+            String str = toJavaString(c_string, c_outEncoding);
+            if(SaxonCAPI.debug) {
+                System.err.println("Java DEBUG string before encoding (from: "+outEncoding+ ") = " + str);
+            }
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            stream.writeBytes(str.toString().getBytes(outEncoding));
+            CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
+            return a;
     }
 
 

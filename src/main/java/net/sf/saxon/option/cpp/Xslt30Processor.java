@@ -2052,6 +2052,13 @@ public class Xslt30Processor extends SaxonCAPI {
             ByteArrayOutputStream bStream = new ByteArrayOutputStream();
             Serializer serializer = processor.newSerializer(bStream);
 
+            /* String outputEncoding = null;
+            if (paramsMap.containsKey("outputEncoding")) {
+                outputEncoding = (String) paramsMap.get("outputEncoding");
+                serializer.setOutputProperty(Serializer.Property.ENCODING, outputEncoding);
+            } */
+
+
 
             applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
             XdmNode doc = null;
@@ -2091,7 +2098,7 @@ public class Xslt30Processor extends SaxonCAPI {
                     System.err.println("DEBUG: before transformer.transform(source, serializer), source is null");
             }
             transformer.transform(source, serializer);
-            serializer = null;
+
             CCharPointer a = SaxonCAPI.stringToNative(alloc, bStream);
             return a;
         } catch (Exception e) {

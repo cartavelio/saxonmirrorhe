@@ -68,26 +68,31 @@ int64_t XdmItem::getUnderlyingValue() {
   return value;
 }
 
-const char *XdmItem::getStringValue() {
+const char *XdmItem::getStringValue(const char *encoding) {
   const char *stringValuei = nullptr;
-  // if (stringValue == nullptr) {
+
   if (value < 0) {
     return nullptr;
   }
   allocFn fn = operator new;
   stringValuei = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread,
-                                          (void *)fn, (void *)value);
-  //}
+                                          (void *)fn, (void *)value, (char *)encoding);
+  if(stringValuei == nullptr && (bool)j_checkForException(SaxonProcessor::sxn_environ->thread)) {
+    throw SaxonApiException();
+  }
   return stringValuei;
 }
 
-const char *XdmItem::toString() {
+const char *XdmItem::toString(const char *encoding) {
   const char *itemToStringi = nullptr;
   // if (itemToString == nullptr) {
   allocFn fn = operator new;
   itemToStringi = xdmItemToString(SaxonProcessor::sxn_environ->thread,
-                                  (void *)fn, (void *)value);
-  //}
+                                  (void *)fn, (void *)value, (char *)encoding);
+
+  if(itemToStringi == nullptr && (bool)j_checkForException(SaxonProcessor::sxn_environ->thread)) {
+    throw SaxonApiException();
+  }
   return itemToStringi;
 }
 

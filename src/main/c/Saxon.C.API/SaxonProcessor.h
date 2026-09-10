@@ -566,6 +566,12 @@ public:
   static SaxonApiException *checkForExceptionCPP(
       /*JNIEnv *env, jclass callingClass, jobject callingObject*/);
 
+
+ /**
+ *
+*/
+ static  const char * encodeString(const char * stringValue, const char * toCharSetName);
+
   /**
    * Clean up and destroy Java VM to release memory used; method to be called at the end of the program
    */

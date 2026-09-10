@@ -43,7 +43,7 @@ XdmValue *XdmArray::get(int n) {
   return getXdmValueSubClass(result);
 }
 
-const char *XdmArray::toString() {
+const char *XdmArray::toString(const char *encoding) {
   if (value == SXN_UNSET) {
     return nullptr;
   }
@@ -57,7 +57,7 @@ const char *XdmArray::toString() {
   return str;
 }
 
-const char *XdmArray::getStringValue() {
+const char *XdmArray::getStringValue(const char *encoding) {
   throw SaxonApiException("An array has no string value", "FOTY0014", nullptr,
                           -1);
 }

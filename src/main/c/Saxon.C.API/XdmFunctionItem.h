@@ -81,7 +81,7 @@ public:
    * has no associated string value.
    * @throws SaxonApiException
    */
-  const char *getStringValue();
+  const char *getStringValue(const char *encoding = nullptr);
 
   /**
    * Get a system function.

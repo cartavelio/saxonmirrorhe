@@ -77,8 +77,8 @@ double XdmAtomicValue::getDoubleValue() {
   return result;
 }
 
-const char *XdmAtomicValue::getStringValue() {
-  return XdmItem::getStringValue();
+const char *XdmAtomicValue::getStringValue(const char *encoding) {
+  return XdmItem::getStringValue(encoding);
 }
 
 long XdmAtomicValue::getLongValue() {

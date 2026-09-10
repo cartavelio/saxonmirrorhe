@@ -20,6 +20,8 @@ import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.*;
 import org.graalvm.word.WordFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -115,12 +117,30 @@ public class XdmUtils {
      * @return C Pointer to the string value in the C memory space
      */
     @CEntryPoint(name = "getStringValueForXdmValue")
-    public static CCharPointer getStringValue_XdmValue(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) {
+    public static CCharPointer getStringValue_XdmValue(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding) throws UnsupportedEncodingException {
         if(value == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
         }
         XdmValue item = SaxonCAPI.objectHandles.get(value);
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.toString());
+
+        String encoding = null;
+        if (!c_encoding.isNull()) {
+            encoding = CTypeConversion.toJavaString(c_encoding);
+        }
+
+        String itemStr = item.toString();
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        if(encoding == null){
+            stream.writeBytes(itemStr.getBytes());
+        } else {
+            stream.writeBytes(itemStr.getBytes(encoding));
+        }
+
+        CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
+
+
+        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.toString());
         return a;
     }
 
@@ -133,7 +153,7 @@ public class XdmUtils {
      * @throws SaxonApiException if the XdmItem is null
      */
     @CEntryPoint(name = "getStringValueForXdmItem", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer getStringValue_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value)  throws SaxonApiException {
+    public static CCharPointer getStringValue_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding) throws SaxonApiException, UnsupportedEncodingException {
         if(value == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
         }
@@ -141,7 +161,24 @@ public class XdmUtils {
         if(item == null) {
             throw new SaxonApiException("XdmItem is null cannot getStringValue");
         }
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.getStringValue());
+
+        String encoding = null;
+        if (!c_encoding.isNull()) {
+            encoding = CTypeConversion.toJavaString(c_encoding);
+        }
+
+        String itemStr = item.getStringValue();
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        if(encoding == null){
+            stream.writeBytes(itemStr.getBytes());
+        } else {
+            stream.writeBytes(itemStr.getBytes(encoding));
+        }
+
+        CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
+
+        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.getStringValue());
         return a;
     }
 
@@ -153,7 +190,7 @@ public class XdmUtils {
      * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
      */
     @CEntryPoint(name = "xdmItemToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer toString_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) {
+    public static CCharPointer toString_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding) throws UnsupportedEncodingException {
         String itemStr = "";
         if(value == WordFactory.nullPointer()) {
             itemStr = XdmEmptySequence.getInstance().toString();
@@ -163,7 +200,21 @@ public class XdmUtils {
         }
         XdmItem item = SaxonCAPI.objectHandles.get(value);
 
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, itemStr);
+        String encoding = null;
+        if (!c_encoding.isNull()) {
+            encoding = CTypeConversion.toJavaString(c_encoding);
+        }
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        if(encoding == null){
+            stream.writeBytes(itemStr.getBytes());
+        } else {
+            stream.writeBytes(itemStr.getBytes(encoding));
+        }
+
+        CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
+
+        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, itemStr);
         return a;
     }
 
@@ -231,13 +282,27 @@ public class XdmUtils {
      * @throws SaxonApiException if failure to convert C string to Java string
      */
     @CEntryPoint(name = "xdmNodeToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer toString_XdmNode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) throws SaxonApiException{
+    public static CCharPointer toString_XdmNode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding) throws SaxonApiException, UnsupportedEncodingException {
         if(value == WordFactory.nullPointer()) {
             throw new SaxonApiException("XdmNode object is null");
         }
         XdmNode node = SaxonCAPI.objectHandles.get(value);
 
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, node.toString());
+        String encoding = null;
+        if (!c_encoding.isNull()) {
+            encoding = CTypeConversion.toJavaString(c_encoding);
+        }
+
+        String result = node.toString();
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        if(encoding == null){
+            stream.writeBytes(result.getBytes());
+        } else {
+            stream.writeBytes(result.getBytes(encoding));
+        }
+        CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
+        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, node.toString());
         return a;
     }
 
@@ -249,13 +314,29 @@ public class XdmUtils {
      * @return C Pointer to the string value in the C++ heap memory space.  Exceptions are handled and returned to the C program as null pointer
      */
     @CEntryPoint(name = "xdmMapToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer toString_XdmMap(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value){
+    public static CCharPointer toString_XdmMap(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding) throws UnsupportedEncodingException {
         if(value == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
         }
         XdmMap map = SaxonCAPI.objectHandles.get(value);
+        return makeCString(alloc, map.toString(), c_encoding);
+    }
 
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, map.toString());
+    public static CCharPointer makeCString(SaxonCAPI.AllocatorCCharFn alloc, String str, CCharPointer c_encoding) throws UnsupportedEncodingException {
+        String encoding = null;
+        if (!c_encoding.isNull()) {
+            encoding = CTypeConversion.toJavaString(c_encoding);
+        }
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        if(encoding == null){
+            stream.writeBytes(str.getBytes());
+        } else {
+            stream.writeBytes(str.getBytes(encoding));
+        }
+
+        CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
+
         return a;
     }
 
@@ -1305,8 +1386,8 @@ public class XdmUtils {
      * @param processorDataAccumulatorRef - ObjectHandle to array of XdmValue held as ProcessorDataAccumulator
      * @return C string pointer to the string representation of the XdmValue array in the C memory space. Return null pointer if XdmValue is null
      */
-    @CEntryPoint(name = "xdmValueArrayToString")
-    public static CCharPointer xdmValueArrayToString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle processorDataAccumulatorRef){
+    @CEntryPoint(name = "xdmValueArrayToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    public static CCharPointer xdmValueArrayToString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle processorDataAccumulatorRef, CCharPointer c_encoding) throws UnsupportedEncodingException {
         if(processorDataAccumulatorRef == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
         }
@@ -1317,7 +1398,23 @@ public class XdmUtils {
              values[i]  = (XdmValue) objs[i];
         }
 
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, buildXdmValue(values).toString());
+        String result = buildXdmValue(values).toString();
+
+        String encoding = null;
+        if (!c_encoding.isNull()) {
+            encoding = CTypeConversion.toJavaString(c_encoding);
+        }
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        if(encoding == null){
+            stream.writeBytes(result.getBytes());
+        } else {
+            stream.writeBytes(result.getBytes(encoding));
+        }
+
+        CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
+
+        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, buildXdmValue(values).toString());
         return a;
     }
 

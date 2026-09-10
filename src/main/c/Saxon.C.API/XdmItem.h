@@ -131,19 +131,20 @@ public:
    * the result of calling <code>toString</code>. This is not the case for
    * nodes, where <code>toString</code> returns an XML serialization of the
    * node. The caller is responsible for memory deallocation using `operator delete`.</p>
-   *
+   * @param encoding - the encoding of the string returned. If NULL or omitted it defaults to the JVM encoding, which in most cases is UTF-8.
    * @return The result of converting the item to a string.
    * @throws SaxonApiException if the item is a function
    */
-  virtual const char *getStringValue();
+  virtual const char *getStringValue(const char *encoding = nullptr);
 
   /**
    * Create a string representation of the item. This is the result of serializing
    * the item using the adaptive serialization method.
+   * @param encoding - the encoding of the string returned. If NULL or omitted it defaults to the JVM encoding, which in most cases is UTF-8.
    * @return A string representation of the XdmItem.
    * The caller is responsible for memory deallocation using `operator delete`.
    */
-  const char *toString();
+  const char *toString(const char *encoding = nullptr);
 
   /**
    * Get the first item in the sequence consisting of just this item

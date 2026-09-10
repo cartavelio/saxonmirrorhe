@@ -198,7 +198,7 @@ void testCopyConstructorForXdmNode(SaxonProcessor *processor,
   if(document == nullptr) {
     delete document;
     sresult->failure++;
-    sresult->failureList.push_back("testCopyConstructorForXdmNode");
+    sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
     return;
 
   }
@@ -216,9 +216,34 @@ void testCopyConstructorForXdmNode(SaxonProcessor *processor,
     sresult->failureList.push_back("testCopyConstructorForXdmNode");
   }
   delete document;
+}
 
-  fflush(stdout);
-  fflush(stderr);
+void testEncoding(SaxonProcessor *processor,
+                                         XPathProcessor *xpath,
+                                         sResultCount *sresult) {
+
+  cout << endl << "Test testEncoding:" << endl;
+try{
+
+  // parser the XML
+
+  XdmItem * item = xpath->evaluateSingle("unparsed-text('../data/help.txt')");
+  const char * value = item->getStringValue();
+  std::string encoding = "Cp437";//"windows-1252";
+  const char * result = SaxonProcessor::encodeString(value, encoding.c_str());
+  if(item != nullptr) {
+    cout << endl << "Item-String="<<result << endl;
+    delete item;
+    operator delete(result);
+  }
+  sresult->success++;
+  } catch(SaxonApiException e){
+      cout << "Error Message = " << e.getMessage() << endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testEncoding");
+  }
+
+
 }
 
 void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor,
@@ -1158,7 +1183,9 @@ void runTest(const char *testName, const char *expr, const char *expectedResult,
     sresult->failureList.push_back(testName);
     return;
   }
+  
   const char *resultStr = result->toString();
+
   if (CppTestUtils::assertEquals(expectedResult, resultStr)) {
     sresult->success++;
     operator delete((char *)resultStr);
@@ -1189,6 +1216,17 @@ int main() {
        << endl;
   testXPathSingle(processor, xpathProc, sresult);
   testUserExtensionFunction(processor, xpathProc, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+  testEdition(processor, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+  testIsLicensed(sresult);
   cout << endl
        << "============================================================="
        << endl
@@ -1475,6 +1513,8 @@ int main() {
        << endl;
   runTest("testDefaultLanguage", "default-language()", "en", xpathProc, sresult,
           document);
+
+  testEncoding(processor, xpathProc, sresult);
 
   std::cout << "\nTest Results - Number of tests= "
             << (sresult->success + sresult->failure)
