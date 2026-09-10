@@ -24,6 +24,7 @@
       'equals':'Equals',
       'hashCode':'GetHashCode',
       'toString':'ToString',
+      'java.util.Iterator#hasNext': 'MoveNext',
       'java.lang.System#out' : 'Out',
       'java.lang.System#in' : 'In',
       'java.util.Map#get' : 'Get',
@@ -32,19 +33,27 @@
    <xsl:variable name="specialTypes" as="map(xs:string, xs:string)" select="map{
       'java.lang.Class': 'System.Type',
       'java.lang.Exception': 'System.Exception',
+      'java.lang.Iterable': 'System.Collections.Generic.IEnumerable',
       'java.lang.Object': 'System.Object',
       'java.lang.RuntimeException': 'System.Exception',
       'java.lang.System': 'System.Console',
       'java.io.File': 'System.IO.File',
       'java.io.InputStream': 'System.IO.Stream',
+      'java.io.Reader': 'System.IO.TextReader',
+      'java.io.StringReader': 'System.IO.StringReader',
+      'java.io.StringWriter': 'System.IO.StringWriter',
+      'java.io.Writer': 'System.IO.TextWriter',
       'java.util.function.Function': 'System.Func',
       'java.util.function.Predicate': 'System.Predicate',
+      'java.util.ArrayList': 'System.Collections.Generic.List',
       'java.util.HashMap': 'net.sf.saxon.glue.GDictionary',
       'java.util.HashSet': 'System.Collections.Generic.Set',
-      'java.util.Iterator': 'System.Collections.Generic.IEnumerable',
+      'java.util.Iterator': 'System.Collections.Generic.IEnumerator',
+      'java.util.List': 'System.Collections.Generic.IList',
       'java.util.Map': 'net.sf.saxon.glue.IGDictionary',
       'java.util.Map.Entry': 'System.Collections.Generic.KeyValuePair',
       'java.util.Set': 'System.Collections.Generic.ISet',
+      'java.util.Stack': 'System.Collections.Generic.Stack',
       'java.net.URI': 'URI'
       }"/>
    
@@ -66,7 +75,7 @@
       <!-- Currently only handles zero-argument methods -->
       <!-- Currently insensitive to the type of the target of the method -->
       <xsl:variable name="json" as="xs:string" expand-text="no">
-         { "printStackTrace": "Console.Write($0.ToString() + ' -- ' + $0.StackTrace)",
+         { "printStackTrace": "Console.Write($0.ToString() + \" -- \" + $0.StackTrace)",
            "newInstance": "System.Activator.CreateInstance($0)"
          }    
       </xsl:variable>
@@ -158,6 +167,16 @@
    <xsl:template name="indent">
       <xsl:param name="indent" as="xs:integer" tunnel="yes" select="0"/>
       <xsl:value-of select="string-join((1 to $indent*4)!' ', '')"/>
+   </xsl:template>
+   
+   <xsl:template name="indent-extra">
+      <xsl:param name="indent" as="xs:integer" tunnel="yes" select="0"/>
+      <xsl:value-of select="string-join((1 to ($indent+1)*4)!' ', '')"/>
+   </xsl:template>
+   
+   <xsl:template name="indent-plus-two">
+      <xsl:param name="indent" as="xs:integer" tunnel="yes" select="0"/>
+      <xsl:value-of select="string-join((1 to ($indent+2)*4)!' ', '')"/>
    </xsl:template>
    
    <xsl:template match="root">
@@ -255,6 +274,9 @@
          <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
       </xsl:apply-templates>
       <xsl:call-template name="indent"/>
+      <xsl:apply-templates select=".//anonymousClassBody">
+         <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
+      </xsl:apply-templates>
       <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
    
@@ -298,14 +320,15 @@
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:call-template name="indent"/>
       <xsl:call-template name="modifiers"/>
-      <xsl:apply-templates select="typeParameters, type"/>
+      <!--<xsl:apply-templates select="typeParameters"/>-->
+      <xsl:apply-templates select="type"/>
       <xsl:text> {name/@identifier}(</xsl:text>
       <xsl:apply-templates select="parameters"/>
-      <xsl:text>) </xsl:text>
-      <xsl:apply-templates select="thrownExceptions"/>
+      <xsl:text>)</xsl:text>
+      <!--<xsl:apply-templates select="thrownExceptions"/>-->
       <xsl:choose>
          <xsl:when test="body and modifiers/modifier/@keyword[. = 'SYNCHRONIZED']">
-            <xsl:text>{{ lock(this) {{{$NL}</xsl:text>
+            <xsl:text> {{ lock(this) {{{$NL}</xsl:text>
             <xsl:apply-templates select="body/statements">
                <xsl:with-param name="indent" select="$indent + 1" tunnel="yes"/>
             </xsl:apply-templates>
@@ -313,7 +336,7 @@
             <xsl:text>}}}}{$NL}</xsl:text>
          </xsl:when>
          <xsl:when test="body">
-            <xsl:text>{{{$NL}</xsl:text>
+            <xsl:text> {{{$NL}</xsl:text>
             <xsl:apply-templates select="body/statements">
                <xsl:with-param name="indent" select="$indent + 1" tunnel="yes"/>
             </xsl:apply-templates>
@@ -325,39 +348,98 @@
    </xsl:template>
    
    <xsl:template match="*[@nodeType='EnumDeclaration']">
+      <!-- Code for enum classes is inspired by the Tangible converter -->
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:call-template name="indent"/>
       <xsl:call-template name="modifiers"/>
-      <xsl:text>enum </xsl:text>
-      <xsl:text> {name/@identifier} </xsl:text>
+      <xsl:text>class </xsl:text>
+      <xsl:variable name="className" select="name/@identifier" as="xs:string"/>
+      <xsl:text> {$className} </xsl:text>
       <xsl:if test="extendedTypes/extendedType">
-         <xsl:text> extends </xsl:text>
+         <xsl:text>/* extends </xsl:text>
          <xsl:for-each select="extendedTypes/extendedType">
             <xsl:if test="position() ne 1">, </xsl:if>
             <xsl:apply-templates select="."/>
          </xsl:for-each>
+         <xsl:text> */</xsl:text>
       </xsl:if>
       <xsl:if test="implementedTypes/implementedType">
-         <xsl:text> implements </xsl:text>
+         <xsl:text>/* implements </xsl:text>
          <xsl:for-each select="implementedTypes/implementedType">
             <xsl:if test="position() ne 1">, </xsl:if>
             <xsl:apply-templates select="."/>
          </xsl:for-each>
+         <xsl:text> */</xsl:text>
       </xsl:if>
-      <xsl:text> {{</xsl:text>
+      <xsl:text> {{{$NL}</xsl:text>
       <xsl:for-each select="entries/entrie">
-         <xsl:if test="position() ne 1">, </xsl:if>
-         <xsl:apply-templates select="name"/>
-         <xsl:if test="arguments">
-            <xsl:text>(</xsl:text>
-            <xsl:apply-templates select="arguments"/>
-            <xsl:text>)</xsl:text>
-         </xsl:if>
+         <xsl:variable name="symbol" select="name/@identifier" as="xs:string"/>
+         <xsl:call-template name="indent-extra"/>
+         <xsl:text>public static readonly {$className} {$symbol}</xsl:text>
+         <xsl:text> = new {$className}("{$symbol}", InnerEnum.{$symbol}</xsl:text>
+         <xsl:for-each select="arguments/argument">
+            <xsl:text>, </xsl:text>
+            <xsl:apply-templates select="."/>           
+         </xsl:for-each>
+         <xsl:text>);{$NL}</xsl:text>
       </xsl:for-each>
-      <xsl:text>;</xsl:text>     
-      <xsl:apply-templates select="members/member">
+      
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>private static readonly List&lt;{$className}> valueList = new List&lt;{$className}>();{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>static {$className}() {{{$NL}</xsl:text>
+      <xsl:for-each select="entries/entrie">
+         <xsl:call-template name="indent-plus-two"/>
+         <xsl:text>valueList.Add({name/@identifier});{$NL}</xsl:text>
+      </xsl:for-each>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>}}{$NL}</xsl:text>
+      
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>public enum InnerEnum {{{$NL}</xsl:text>
+      <xsl:for-each select="entries/entrie">
+         <xsl:call-template name="indent-plus-two"/>
+         <xsl:text>{name/@identifier},{$NL}</xsl:text>
+      </xsl:for-each>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>}}{$NL}</xsl:text>
+      
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>public readonly InnerEnum innerEnumValue;{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>public readonly string nameValue;{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>public readonly int ordinalValue;{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>public static int nextOrdinal = 0;{$NL}</xsl:text>
+           
+      <!--<xsl:apply-templates select="members/member">
          <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
+      </xsl:apply-templates>-->
+      
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>internal {$className}(string name, InnerEnum innerEnum</xsl:text>
+      <xsl:for-each select="members/member[@nodeType='ConstructorDeclaration']/parameters/parameter">
+         <xsl:text>, </xsl:text>
+         <xsl:apply-templates select="type"/>
+         <xsl:text> </xsl:text>
+         <xsl:apply-templates select="name"/>
+      </xsl:for-each>
+      <xsl:text>) {{{$NL}</xsl:text>
+      <xsl:for-each select="members/member[@nodeType='ConstructorDeclaration']/parameters/parameter">
+         <xsl:call-template name="indent-plus-two"/>
+         <xsl:text>this.{name/@identifier} = {name/@identifier};{$NL}</xsl:text>
+      </xsl:for-each>
+      
+      <xsl:call-template name="indent-plus-two"/>
+      <xsl:text>nameValue = name; ordinalValue = nextOrdinal++; innerEnumValue = innerEnum;{$NL}</xsl:text>      
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>}}{$NL}</xsl:text>
+      
+      <xsl:apply-templates select="members/member[not(@nodeType='ConstructorDeclaration')]">
+         <xsl:with-param name="indent" tunnel="yes" select="$indent+1"/>
       </xsl:apply-templates>
+      
       <xsl:call-template name="indent"/>
       <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
@@ -396,8 +478,8 @@
    <xsl:template match="parameters">
       <xsl:for-each select="parameter">
          <xsl:if test="position() ne 1">, </xsl:if>
+         <xsl:if test="@isVarArgs='true'">params </xsl:if>
          <xsl:apply-templates select="type"/>
-         <xsl:if test="@isVarArgs='true'">...</xsl:if>
          <xsl:text> </xsl:text>
          <xsl:apply-templates select="name"/>
       </xsl:for-each>
@@ -564,7 +646,11 @@
             <xsl:otherwise>
                <xsl:text>  default:{$NL}</xsl:text>
             </xsl:otherwise>
-         </xsl:choose>        
+         </xsl:choose>
+         <xsl:if test="position() = last() and empty(statements)">
+            <xsl:call-template name="indent-extra"/>
+            <xsl:text>break;{$NL}</xsl:text>
+         </xsl:if>
          <xsl:apply-templates select="statements">
             <xsl:with-param name="indent" select="$indent + 1" tunnel="yes"/>
          </xsl:apply-templates>
@@ -844,8 +930,9 @@
             <xsl:apply-templates select="modifiers/modifier"/>
          </xsl:otherwise>
       </xsl:choose>
-      <xsl:if test="annotations/annotation/name/@identifier = 'Override' 
-         or (../../name/@identifier = ('equals', 'hashCode', 'toString'))">override </xsl:if>
+      <xsl:if test="(annotations/annotation/name/@identifier = 'Override' 
+         or (../../name/@identifier = ('equals', 'hashCode', 'toString'))) 
+         and not(ancestor::type[@nodeType='ClassOrInterfaceDeclaration'][1]/@isInterface='true')">override </xsl:if>
    </xsl:template>
    
    <xsl:template match="modifier">
@@ -879,8 +966,8 @@
    <xsl:template match="typeParameter">
       <xsl:apply-templates select="name"/>
       <xsl:if test="typeBound">
-         <xsl:text> extends </xsl:text>
-         <xsl:apply-templates select="typeBound/typeBoun"/>
+         <!--<xsl:text> extends </xsl:text>
+         <xsl:apply-templates select="typeBound/typeBoun"/>-->
       </xsl:if>
    </xsl:template>
    
@@ -890,12 +977,16 @@
    </xsl:template>
    
    <xsl:template match="*[@nodeType = 'PrimitiveType']" priority="10">
-      <xsl:text>{lower-case(@type)}</xsl:text>
+      <xsl:text>{if (@type='BOOLEAN') then 'bool' else lower-case(@type)}</xsl:text>
    </xsl:template>
    
    <xsl:template match="*[@nodeType = 'ClassOrInterfaceType'][name/@identifier='String']" priority="30">
       <xsl:text>string</xsl:text>
    </xsl:template>
+   
+   <!--<xsl:template match="*[@nodeType = 'ClassOrInterfaceType'][name/@identifier='boolean']" priority="30">
+      <xsl:text>bool</xsl:text>
+   </xsl:template>-->
    
    <xsl:template match="*[@nodeType = 'ArrayType']">
       <xsl:apply-templates select="componentType"/>
@@ -919,17 +1010,17 @@
    </xsl:template>
    
    <xsl:template match="typeArgument[extendedType]" priority="20">
-      <xsl:text>? extends </xsl:text>
+      <!--<xsl:text>? extends </xsl:text>-->
       <xsl:apply-templates select="extendedType"/>
    </xsl:template>
    
    <xsl:template match="typeArgument[superType]" priority="20">
-      <xsl:text>? super </xsl:text>
-      <xsl:apply-templates select="superType"/>
+      <!--<xsl:text>? super </xsl:text>
+      <xsl:apply-templates select="superType"/>-->
    </xsl:template>
    
    <xsl:template match="typeArgument[@nodeType = 'WildcardType']" priority="10">
-      <xsl:text>Object</xsl:text>
+      <xsl:text>object</xsl:text>
    </xsl:template>
    
    <xsl:template match="variables">
@@ -976,12 +1067,35 @@
       <xsl:text>(</xsl:text>
       <xsl:apply-templates select="arguments"/>
       <xsl:text>)</xsl:text>
-      <xsl:apply-templates select="anonymousClassBody"/>
    </xsl:template>
+   
+   <xsl:template match="*[@nodeType='ObjectCreationExpr'][anonymousClassBody]" priority="20">
+      <xsl:text>new {f:allocateInnerClassName(.)}(</xsl:text>
+      <xsl:apply-templates select="arguments"/>
+      <xsl:text>)</xsl:text>
+   </xsl:template>
+   
+   <xsl:function name="f:allocateInnerClassName" as="xs:string">
+      <xsl:param name="creationExpr" as="element(*)"/>
+      <xsl:text>Inner_{$creationExpr/type!tokenize(f:degenerify(@RESOLVED_TYPE), '\.')[last()]}_{generate-id($creationExpr)}</xsl:text>
+   </xsl:function>
    
    <xsl:template match="anonymousClassBody">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
-      <xsl:text> {{{$NL}</xsl:text>
+      <xsl:variable name="allocatedName" as="xs:string" select="f:allocateInnerClassName(..)"/>
+      <xsl:text>{$NL}</xsl:text>
+      <xsl:call-template name="indent"/>
+      <xsl:text>private class {$allocatedName} : {../type/@RESOLVED_TYPE} {{{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:variable name="containingClass" select="ancestor::type[@nodeType='ClassOrInterfaceDeclaration'][1]/name/@identifier" as="xs:string"/>
+      <xsl:text>private readonly {$containingClass} outerInstance;{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>public {$allocatedName}({$containingClass} outerInstance /*...*/)</xsl:text>
+      <xsl:text> : base(outerInstance /*, ...*/) {{{$NL}</xsl:text>
+      <xsl:call-template name="indent-plus-two"/>
+      <xsl:text>this.outerInstance = outerInstance;{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>}}{$NL}</xsl:text>
       <xsl:apply-templates select="*">
          <xsl:with-param name="indent" select="$indent + 1" tunnel="yes"/>
       </xsl:apply-templates>
@@ -1007,20 +1121,12 @@
    </xsl:template>
    
    <xsl:template match="*[@nodeType='MethodReferenceExpr'][@identifier='new']" priority="20">
+      <!-- Problem with this is identifying the params to the constructor. Have removed ::new
+           construct from the Java code so it doesn't arise -->
       <xsl:text>() => new </xsl:text>
       <xsl:apply-templates select="scope"/>
       <xsl:text>()</xsl:text>
    </xsl:template>
-   
-   <expression nodeType="MethodReferenceExpr" identifier="isValid11">
-      <scope nodeType="TypeExpr">
-         <type nodeType="ClassOrInterfaceType"
-            RESOLVED_TYPE="net.sf.saxon.serialize.charcode.XMLCharacterData">
-            <name nodeType="SimpleName" identifier="XMLCharacterData"
-            />
-         </type>
-      </scope>
-   </expression>
    
    <xsl:template match="*[@nodeType='StringLiteralExpr']">
       <xsl:text>"{@value}"</xsl:text>
