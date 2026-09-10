@@ -337,16 +337,6 @@ tasks.named<Sync>("signingDownloadJars") {
   from(xqjDownloadJar)
 }
 
-val downloadRelease = tasks.named<Zip>("downloadRelease") {
-  if (signedReleaseArtifacts) {
-    val name = "signed-download/saxon-he"
-    val vers = saxonBuild.publishVersion.get()
-    from(tasks.named("downloadSignedDownloadJars").map {layout.buildDirectory.file("${name}-xqj-${vers}.jar") })
-  } else {
-    from(xqjDownloadJar)  
-  }
-}
-
 val pseudoXqjMavenJar = tasks.register("pseudoXqjMavenJar") {
   inputs.file(xqjMavenJar)
   outputs.file(xqjMavenJar)

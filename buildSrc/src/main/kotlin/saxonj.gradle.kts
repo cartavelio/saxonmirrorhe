@@ -524,16 +524,16 @@ val uploadUnsignedDownloadJars = tasks.register<UnsignedArtifactUploadTask>("upl
 val downloadSignedDownloadJars = if (signedReleaseArtifacts) {
   tasks.register<SignedArtifactDownloadTask>("downloadSignedDownloadJars") {
     outputDir = layout.buildDirectory.dir("signed-download")
+    payload = uploadUnsignedDownloadJars.map { it.payload.get() }
     bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
     queueUrl = signingResources.map { it.codeSigningOutputsQueueUrl.get() }
     region = signingResources.map { it.region.get() }
     jobFile = uploadUnsignedDownloadJars.map { it.jobFile.get() }
   }
 } else {
-  tasks.register<Copy>("downloadSignedDownloadJars") {
-    dependsOn(signingDownloadJars)
-    into(layout.buildDirectory.dir("signed-download"))
-    from(layout.buildDirectory.dir("signing/download"))
+  tasks.register<UnsignedArtifactFakeDownloadTask>("downloadSignedDownloadJars") {
+    inputDir = signingDownloadJars.map { it.destinationDir }
+    outputDir = layout.buildDirectory.dir("signed-download")
   }
 }
 
@@ -549,16 +549,17 @@ val uploadUnsignedMavenJars = tasks.register<UnsignedArtifactUploadTask>("upload
 val downloadSignedMavenJars = if (signedReleaseArtifacts) {
   tasks.register<SignedArtifactDownloadTask>("downloadSignedMavenJars") {
     outputDir = layout.buildDirectory.dir("signed-maven")
+    payload = uploadUnsignedMavenJars.map { it.payload.get() }
     bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
     queueUrl = signingResources.map { it.codeSigningOutputsQueueUrl.get() }
     region = signingResources.map { it.region.get() }
     jobFile = uploadUnsignedMavenJars.map { it.jobFile.get() }
   }
 } else {
-  tasks.register<Copy>("downloadSignedMavenJars") {
+  tasks.register<UnsignedArtifactFakeDownloadTask>("downloadSignedMavenJars") {
     dependsOn(signingMavenJars)
-    into(layout.buildDirectory.dir("signed-maven"))
-    from(layout.buildDirectory.dir("signing/mavendownload"))
+      inputDir = signingDownloadJars.map { it.destinationDir }
+      outputDir = layout.buildDirectory.dir("signed-download")
   }
 }
 
@@ -570,15 +571,6 @@ val downloadRelease = tasks.register<Zip>("downloadRelease") {
     }
 
     destinationDirectory = layout.buildDirectory.dir("releases")
-
-    if (signedReleaseArtifacts) {
-      val name = "signed-download/saxon-${extension.edition.get()}"
-      val vers = saxonBuild.publishVersion.get()
-      from(downloadSignedDownloadJars.map { layout.buildDirectory.file("${name}-${vers}.jar") })
-      from(downloadSignedDownloadJars.map { layout.buildDirectory.file("${name}-test-${vers}.jar") })
-    } else {
-      from(editionDownloadJarTask)
-    }
 
     into("lib") {
       from(downloadReleaseBundled.getIncoming().files)

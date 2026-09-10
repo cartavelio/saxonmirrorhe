@@ -344,13 +344,6 @@ testSuites {
 }
 
 val downloadRelease = tasks.named<Zip>("downloadRelease") {
-  if (signedReleaseArtifacts) {
-    val name = "signed-download/saxon"
-    val vers = saxonBuild.publishVersion.get()
-    from(tasks.named("downloadSignedDownloadJars").map {layout.buildDirectory.file("${name}-sql-${vers}.jar") })
-  } else {
-    from(downloadSqlJar)
-  }
   into("notices") {
     from(layout.projectDirectory.dir("../../src/main/notices"))
     include("ICU-J.txt")

@@ -507,6 +507,7 @@ val uploadUnsignedNugetPkg = tasks.register<UnsignedArtifactUploadTask>("uploadU
 
 val downloadSignedNugetPkg = tasks.register<SignedArtifactDownloadTask>("downloadSignedNugetPkg") {
   outputDir = layout.buildDirectory.dir("signed-nuget")
+  payload = uploadUnsignedNugetPkg.map { it.payload.get() }
   bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
   queueUrl = signingResources.map { it.windowsCodeSigningOutputsQueueUrl.get() }
   region = signingResources.map { it.region.get() }

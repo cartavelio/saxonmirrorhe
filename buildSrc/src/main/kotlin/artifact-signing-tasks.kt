@@ -4,13 +4,16 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.property
+import org.gradle.kotlin.dsl.register
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.cloudformation.CloudFormationClient
@@ -146,6 +149,9 @@ abstract class UnsignedArtifactUploadTask
   @get:InputDirectory
   abstract val inputDir: DirectoryProperty
 
+  @get:Internal
+  val payload: Provider<List<String>> = inputDir.map { it.asFileTree.files.map { file -> file.relativeTo(it.asFile).toString() } }
+
   @get:Input
   abstract val baseKeyPrefix: Property<String>
 
@@ -183,14 +189,32 @@ abstract class UnsignedArtifactUploadTask
     val messageAttributes = mapOf(
       "jobId" to MessageAttributeValue.builder().stringValue(generatedJobId).dataType("String").build(),
     )
-    val payload = inputDir.map { it.asFileTree.files.map { file -> file.relativeTo(it.asFile).toString() } }.get()
     sqsClient.sendMessage { builder ->
       builder.queueUrl(queueUrl.get())
-        .messageBody(payload.joinToString("\n"))
+        .messageBody(payload.get().joinToString("\n"))
         .messageAttributes(messageAttributes)
     }
 
     jobFile.get().asFile.writeText(generatedJobId)
+  }
+}
+
+abstract class UnsignedArtifactFakeDownloadTask @Inject constructor(private val fs: FileSystemOperations) : DefaultTask() {
+  @get:InputDirectory
+  abstract val inputDir: DirectoryProperty
+
+  @get:Internal
+  abstract val outputDir: DirectoryProperty
+
+  @get:OutputFiles
+  val outputFiles = outputDir.map { it.files(inputDir.asFileTree.files.map { file -> file.relativeTo(it.asFile).toString() }) }
+
+  @TaskAction
+  fun fakeDownload() {
+    fs.sync {
+      into(outputDir)
+      from(inputDir)
+    }
   }
 }
 
@@ -203,6 +227,12 @@ abstract class SignedArtifactDownloadTask: AbstractS3ArtifactHandlingTask() {
 
   @get:InputFile
   abstract val jobFile: RegularFileProperty
+
+  @get:Input
+  abstract val payload: ListProperty<String>
+
+  @get:OutputFiles
+  val outputFiles = outputDir.map { it.files(*payload.get().toTypedArray()) }
 
   private val jobId by lazy {
     jobFile.get().asFile.readText().trim()
