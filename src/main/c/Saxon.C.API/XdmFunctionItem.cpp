@@ -109,7 +109,7 @@
         }
 
         int64_t result = j_getSystemFunction(SaxonProcessor::sxn_environ->thread, (void *)processor->procRef, (char *)name, arity);
-                if(result) {
+                if(result >= 0) {
                        XdmFunctionItem * functionItem = new XdmFunctionItem(result);
                        return functionItem;
 
@@ -139,9 +139,7 @@
            }
            if(results == -2) {
                SaxonApiException * exception = new SaxonApiException();
-               std::cerr<<"Exception found in XdmFunctionItem.call Message= "<<exception->getMessage()<<std::endl;
-               delete exception;
-               return nullptr;
+               throw exception;
            }
         return getXdmValueSubClass(results);
 
