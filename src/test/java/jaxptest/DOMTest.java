@@ -44,7 +44,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -1637,51 +1636,7 @@ public class DOMTest {
     }
 
 
-    @Test
-    public void testBug4509b() {
-        try {
-            Processor processor = new Processor(false);
-            net.sf.saxon.s9api.DocumentBuilder documentBuilder = processor.newDocumentBuilder();
-            SAXSource saxSource = new SAXSource(new InputSource(new StringReader("<root xmlns='namespace' abc='100'><element0 def='200'/><element1 ghi='300'/></root>")));
-            XdmNode node = documentBuilder.build(saxSource);
-            Document document = (DocumentOverNodeInfo) DocumentOverNodeInfo.wrap(node.getUnderlyingNode());
-            Element root = document.getDocumentElement();
-            Element element0 = (Element) root.getChildNodes().item(0);
-            System.out.println(String.format("%s", element0.getNodeName()));
-            for (int i = 0; i < element0.getAttributes().getLength(); i++) {
-                System.out.println(String.format("element0 attribute[%d] %s=%s", i, element0.getAttributes().item(i).getNodeName(), element0.getAttributes().item(i).getNodeValue()));
-            }
-            System.out.println();
-            Element element1 = (Element) root.getChildNodes().item(1);
-            System.out.println(String.format("%s", element1.getNodeName()));
-            for (int i = 0; i < element1.getAttributes().getLength(); i++) {
-                System.out.println(String.format("element1 attribute[%d] %s=%s", i, element1.getAttributes().item(i).getNodeName(), element1.getAttributes().item(i).getNodeValue()));
-            }
-            System.out.println();
-            System.out.println(String.format("treeModel=%s", documentBuilder.getTreeModel().getClass().getName()));
-            System.out.println("java -cp 'SaxonHE9-9-17J\\saxon9he.jar';. TEST");
-            System.out.println("ACTUAL OUTPUT ON MY PC");
-            System.out.println("element0");
-            System.out.println("element0 attribute[0] xmlns:xml=http://www.w3.org/XML/1998/namespace");
-            System.out.println("element0 attribute[1] def=200");
-            System.out.println("element1");
-            System.out.println("element1 attribute[0] xmlns:xml=http://www.w3.org/XML/1998/namespace");
-            System.out.println("element1 attribute[1] ghi=300");
-            System.out.println("treeModel=net.sf.saxon.om.TreeModel$TinyTree");
-            System.out.println();
-            System.out.println("java -cp 'SaxonHE10-0J\\saxon-he-10.0.jar';. TEST");
-            System.out.println("ACTUAL OUTPUT ON MY PC");
-            System.out.println("element0");
-            System.out.println("element0 attribute[0] xmlns=namespace");
-            System.out.println("element0 attribute[1] def=200");
-            System.out.println("element1");
-            System.out.println("element1 attribute[0] xmlns=namespace");
-            System.out.println("element1 attribute[1] ghi=300");
-            System.out.println("treeModel=net.sf.saxon.om.TreeModel$TinyTree");
-            System.out.println();
-        } catch (Exception e) {
-        }
-    }
+
 
     /**
      * Method to be called from next test
