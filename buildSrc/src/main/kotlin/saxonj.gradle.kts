@@ -1,6 +1,5 @@
 import com.saxonica.build.*
 import com.saxonica.build.java.*
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.*
 
@@ -70,9 +69,7 @@ val releaseMaven by configurations.consumable("releaseMaven")
 val preprocessor by configurations.creating {
     extendsFrom(configurations["runtimeOnly"])
 }
-val testDrivers by configurations.creating {
-    extendsFrom(configurations["testImplementation"])
-}
+
 val testRuntime by configurations.creating {
     extendsFrom(configurations["runtimeOnly"])
 }
@@ -120,8 +117,6 @@ configurations.configureEach {
 extension.javaTestPathSuffix = "test/java"
 val javaMainSourceRoot = extension.sourceRoot.map { it.dir("main/java") }
 val javaMainResourcesRoot = extension.sourceRoot.map { it.dir("main/resources") }
-val javaTestSourceRoot = extension.javaTestSourceRoot
-val javaTestResourceRoot = extension.sourceRoot.map { it.dir("test/resources") }
 val libTidyPath = extension.sourceRoot.map { it.file("../lib/Tidy.jar") }
 dependencies {
     javaSourcesBucket(files(javaMainSourceRoot))
@@ -275,7 +270,6 @@ sourceSets {
 val compile = tasks.named("compileEditionJava")
 tasks.register("allJars") {
     finalizedBy("editionDownloadJar")
-    finalizedBy("testDriversDownloadJar")
 }
 
 testing {
@@ -287,14 +281,6 @@ testing {
     register<JvmTestSuite>("editionTest") {
       // Keep a record of the suite around so that we can add test sources at plugin configuration time
       extension.editionTestSuite = this
-      sources {
-        java {
-          srcDir(javaTestSourceRoot)
-        }
-        resources {
-          setSrcDirs(listOf(javaTestResourceRoot))
-        }
-      }
       dependencies {
         implementation(editionSourceSet.output)
         implementation(testImplementationResolvable)
@@ -432,14 +418,6 @@ tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
     dependsOn(editionDownloadJarTask, editionMavenJarTask)
 }
 
-val compileTestDrivers = tasks.register<JavaCompile>("compileTestDrivers") {
-    destinationDirectory = layout.buildDirectory.dir("testdriver/classes")
-    classpath = editionSourceSet.compileClasspath + files(compile)
-
-    source = files(javaSources).asFileTree
-    include("net/sf/saxon/testdriver/**.java")
-}
-
 val jarTaskBuilder = extension.jarTaskBuilder(project)
 
 val (editionDownloadSourceJarTask, editionMavenSourceJarTask) = jarTaskBuilder("editionSource") {
@@ -447,13 +425,6 @@ val (editionDownloadSourceJarTask, editionMavenSourceJarTask) = jarTaskBuilder("
     common {
         from(preprocessJava)
         from(preprocessResources)
-    }
-}
-
-val (testdriverJarTask, _) = jarTaskBuilder("testDrivers") {
-    jarClassifier = "test"
-    common {
-        from(compileTestDrivers)
     }
 }
 
@@ -478,7 +449,6 @@ val signingDownloadJars = tasks.register<Sync>("signingDownloadJars") {
     duplicatesStrategy = DuplicatesStrategy.WARN
     into(layout.buildDirectory.dir("signing/download"))
     from(editionDownloadJarTask)
-    from(testdriverJarTask)
 }
 
 val signingMavenJars = tasks.register<Sync>("signingMavenJars") {
@@ -556,7 +526,6 @@ val downloadRelease = tasks.register<Zip>("downloadRelease") {
       from(downloadSignedDownloadJars.map { layout.buildDirectory.file("${name}-test-${vers}.jar") })
     } else {
       from(editionDownloadJarTask)
-      from(testdriverJarTask)
     }
 
     into("lib") {

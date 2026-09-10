@@ -39,6 +39,11 @@ saxonj {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
+val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
+val testdriverJar = configurations.resolvable("testdriverJar") {
+  extendsFrom(testdriverJarBucket)
+}
+
 val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
 
 sourceSets.named("editionTest") {
@@ -219,12 +224,17 @@ dependencies {
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
+  testdriverJarBucket(project(":java:testdriver"))
 
   testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
   testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
   testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
   testImplementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
+}
+
+configurations {
+  testImplementation { extendsFrom(testdriverJar) }
 }
 
 tasks.named("compileJava") {
@@ -243,8 +253,6 @@ tasks.filteredSources {
     include("net/sf/saxon/**/package.html")
     exclude("com/saxonica/ee/**")
     exclude("com/saxonica/functions/extfn/cpp/*.java")
-    exclude("com/saxonica/testdriver/**")
-    exclude("net/sf/saxon/testdriver/**")
     exclude("net/sf/saxon/option/cpp/**")
     exclude("com/saxonica/Validate.java")
     exclude("com/saxonica/config/EnterpriseConfiguration.java")
@@ -292,13 +300,6 @@ tasks.jar {
   }
 }
 
-tasks.compileTestDrivers {
-  include("com/saxonica/testdriver/QT3TestDriverPE.java")
-  include("com/saxonica/testdriver/Xslt30TestSuiteDriverPE.java")
-  include("com/saxonica/testdriver/Licensor.java")
-  include("com/saxonica/ee/domino/**")
-}
-
 val jarTaskBuilder = saxonj.jarTaskBuilder(project)
 val editionCompileJava = tasks.named("compileEditionJava")
 
@@ -333,12 +334,9 @@ tasks.named<Sync>("signingMavenJars") {
   from(mavenSqlSourceJar)
 }
 
-val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers")
-
 val testSuitesClasspath = files(sourceSets["edition"].output)
-    .from(configurations.testDrivers)
+    .from(testdriverJar)
     .from(testsuiteExtra)
-    .from(compile_testdrivers)
 testSuites {
   product = "java"
   edition = "pe"

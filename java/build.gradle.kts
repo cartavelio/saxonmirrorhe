@@ -29,6 +29,11 @@ saxonj {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
+val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
+val testdriverJar = configurations.resolvable("testdriverJar") {
+  extendsFrom(testdriverJarBucket)
+}
+
 val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
 
 sourceSets.named("editionTest") {
@@ -99,16 +104,18 @@ dependencies {
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
+  testdriverJarBucket(project(":java:testdriver"))
 
-  testDrivers(files(layout.projectDirectory.dir("../lib/Tidy.jar")))
-
-  testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
-  testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
+  testImplementation(files(layout.projectDirectory.dir("../lib/Tidy.jar")))
   testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
   testImplementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 
   downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
+}
+
+configurations {
+  testImplementation { extendsFrom(testdriverJar) }
 }
 
 tasks.filteredSources {
@@ -117,11 +124,9 @@ tasks.filteredSources {
     include("javax/xml/xquery/*.java")
     exclude("**/dotnet/**")
     include("net/sf/saxon/**/package.html")
-    exclude("net/sf/saxon/testdriver/**")
     exclude("net/sf/saxon/option/cpp/**")
     exclude("com/saxonica/functions/extfn/cpp/*.java")
     include("com/saxonica/**/*.java")
-    exclude("com/saxonica/testdriver/**/*.java")
     exclude("com/saxonica/config/DotNetExtensionFunctionFactory.java")
     exclude("com/saxonica/config/DotNetExtensionLibrary.java")
     exclude("com/saxonica/config/DotNetPlatformPE.java")
@@ -147,20 +152,6 @@ tasks.preprocessJava {
   }
 }
 
-val compileDrivers = tasks.compileTestDrivers {
-  include("com/saxonica/testdriver/**/*.java")
-}
-
-val testDriverOutput = tasks.register<Copy>("_testDriverOutput") {
-  dependsOn("compileTestDrivers")
-  outputs.dir(layout.buildDirectory.dir("XXX"))
-  from(tasks.named("compileTestDrivers").get().outputs)
-  into(layout.buildDirectory.dir("XXX"))
-}
-
-val testDriversArtifacts by configurations.consumable("testDriversArtifacts")
-testDriversArtifacts.outgoing.artifact(testDriverOutput) { builtBy(testDriverOutput) }
-
 val editionCompileJava = tasks.named("compileEditionJava")
 
 val jarTaskBuilder = saxonj.jarTaskBuilder(project)
@@ -170,10 +161,12 @@ val (downloadSqlJar, mavenSqlJar) = jarTaskBuilder("sql") {
   jarClassifier = "sql"
   common {
     from(editionCompileJava)
-    include("net/sf/saxon/option/sql/*.class")
+    include("com/saxonica/option/sql/*.class")
     include("com/saxonica/functions/sql/*.class")
   }
 }
+
+val sqlMavenJarArtifact by configurations.consumable("sqlMavenJarArtifact")
 
 val (_, mavenSqlSourceJar) = jarTaskBuilder("sqlSource") {
   jarClassifier = "sql-sources"
@@ -213,6 +206,7 @@ val xqjSourceMavenJarArtifact by configurations.consumable("xqjSourceMavenJarArt
 xqjDownloadJarArtifact.outgoing.artifact(downloadXqjJar)
 xqjMavenJarArtifact.outgoing.artifact(mavenXqjJar) { builtBy(mavenXqjJar) }
 xqjSourceMavenJarArtifact.outgoing.artifact(mavenXqjSourceJar) { builtBy(mavenXqjSourceJar) }
+sqlMavenJarArtifact.outgoing.artifact(mavenSqlJar) { builtBy(mavenSqlJar) }
 
 tasks.register<GatherReleaseArtifacts>("gather_release_artifacts") {
   artifacts.from(heReleaseZips)
@@ -299,14 +293,9 @@ if (project.findProperty("xmark") == "true") {
 // ============================================================
 
 
-val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers") {
-  include("com/saxonica/testdriver/**")
-  include("com/saxonica/testdriver/ee/**")
-}
 val testSuitesClasspath = files(sourceSets["edition"].output)
-    .from(configurations.testDrivers)
+    .from(testdriverJar)
     .from(testsuiteExtra)
-    .from(compile_testdrivers)
 testSuites {
   product = "java"
   edition = "ee"

@@ -10,8 +10,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-val testdriverJarArtifact by configurations.consumable("testdriverJarArtifact")
-
 val inputSaxonJarBucket by configurations.dependencyScope("inputSaxonJarBucket")
 val inputSaxonJar = configurations.resolvable("inputSaxonJar") {
   extendsFrom(inputSaxonJarBucket)
@@ -31,9 +29,6 @@ configurations {
   implementation { extendsFrom(inputSaxonJar) }
   implementation { extendsFrom(inputSqlJar) }
 }
-
-val tdjar = tasks.named("jar").get()
-testdriverJarArtifact.outgoing.artifact(tdjar) { builtBy(tdjar) }
 
 tasks.register<Jar>("he_jar") {
   archiveFileName = "saxon-he-test-${saxonBuild.version.get()}.jar"

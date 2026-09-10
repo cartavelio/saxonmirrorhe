@@ -20,6 +20,11 @@ saxonj {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
+val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
+val testdriverJar = configurations.resolvable("testdriverJar") {
+  extendsFrom(testdriverJarBucket)
+}
+
 sourceSets.named("editionTest") {
   java {
     // Exclude everything that won't build in HE...
@@ -181,6 +186,7 @@ dependencies {
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
+  testdriverJarBucket(project(":java:testdriver"))
   xqjDownloadJarBucket(project(path = ":java", configuration = "xqjDownloadJarArtifact"))
   xqjMavenJarBucket(project(path = ":java", configuration = "xqjMavenJarArtifact"))
   xqjSourceMavenJarBucket(project(path = ":java", configuration = "xqjSourceMavenJarArtifact"))
@@ -190,6 +196,10 @@ dependencies {
   testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
   testImplementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
+}
+
+configurations {
+  testImplementation { extendsFrom(testdriverJar) }
 }
 
 tasks.named("compileJava") {
@@ -202,7 +212,6 @@ tasks.filteredSources {
     include("net/sf/saxon/**/package.html")
     exclude("javax/xml/xquery/*.java")
     exclude("**/dotnet/**")
-    exclude("net/sf/saxon/testdriver/**")
     exclude("net/sf/saxon/option/sql/**")
     exclude("net/sf/saxon/option/cpp/**")
 
@@ -289,11 +298,9 @@ tasks.register<Exec>("samples") {
 
 // ============================================================
 
-val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers")
 val testSuitesClasspath = files(sourceSets["edition"].output)
-    .from(configurations.testDrivers)
+    .from(testdriverJar)
     .from(testsuiteExtra)
-    .from(compile_testdrivers)
 testSuites {
   product = "java"
   edition = "he"

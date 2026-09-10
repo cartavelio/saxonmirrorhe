@@ -12,7 +12,7 @@ rootProject.name = "Saxon"
 
 include("java:he")
 include("java:pe")
-//include("java:ee")
+include("java:testdriver")
 include("java")
 include("csharp:transpiler")
 include("csharp:he")
