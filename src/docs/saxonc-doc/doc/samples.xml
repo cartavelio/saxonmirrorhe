@@ -5,7 +5,7 @@
    <p>This section of the documentation describes some example code in C/C++, PHP and Python to help
       get started using SaxonC. A number of samples and unit test code for C/C++ and PHP can be
       found in the <code>samples</code> directory of the SaxonC installation. Samples and unit
-      tests for Python can be found in the <code>Saxon.C.API/python-saxon</code> directory.</p>
+      tests for Python can be found in the <code>pypi</code> directory.</p>
 
    <nav>
       <ul/>
@@ -233,15 +233,15 @@ queryProc->runQueryToString();
    <section id="samples_python" title="Python samples">
       <h1>Python samples</h1>
 
-      <p>The <code>Saxon.C.API/python-saxon</code> directory in the SaxonC download includes the
+      <p>The <code>pypi</code> directory in the SaxonC download includes the
          unit test files <code>test_saxonc.py</code> and <code>test_saxon_schema.py</code>, which
          contain a collection of Python unit test cases to be run with the pytest framework. The
          pyunit tests can be run with the following command:</p>
 
-      <kbd>cd Saxon.C.API/python-saxon</kbd>
+      <kbd>cd pypi</kbd>
       <kbd>pytest test_saxonc.py</kbd>
 
-      <p>To help get started with SaxonC and Python, the <code>Saxon.C.API/python-saxon</code>
+      <p>To help get started with SaxonC and Python, the <code>pypi/samples</code>
          directory also includes some python example scripts: <code>saxon_example.py</code>,
             <code>saxon_example2.py</code> and <code>saxon_example3.py</code>.</p>
 

@@ -79,10 +79,10 @@
             <li><p>Some changes have been made to the structure of the SaxonC product downloads:</p>
                <ul>
                   <li>The download directory has been restructured to move the core library file into the
-                     <code>libs/[nix|darwin|windows]</code> directory.</li>
+                     <code>libs/[nix|darwin|win]</code> directory.</li>
                   <li>The Windows download is now presented as a .zip file rather than an .exe file.</li>
-                  <li>The python source code has been moved out of the <code>Saxon.C.API</code> directory to
-                     the top-level under the directory <code>pypi/python_saxon</code>.</li>
+                  <li>The python source code has been moved out of the <code>Saxon.C.API/python-saxon</code> directory to
+                     the top-level under the <code>pypi</code> directory.</li>
                </ul>
             </li>
          </ul>
