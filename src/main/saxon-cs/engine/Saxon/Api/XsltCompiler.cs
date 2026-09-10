@@ -12,6 +12,7 @@ using Saxon.Hej.trans;
 using Saxon.Hej.trans.packages;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
+using Saxon.Hej.s9api;
 using Saxon.Impl.Helpers;
 using JXsltCompiler = Saxon.Hej.s9api.XsltCompiler;
 
