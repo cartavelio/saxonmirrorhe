@@ -173,8 +173,7 @@ public class XPathParser {
         m.put(Token.IS, 6);
         m.put(Token.PRECEDES, 6);
         m.put(Token.FOLLOWS, 6);
-        m.put(Token.OTHERWISE, 7);
-        m.put(Token.CONCAT, 8);
+        m.put(Token.CONCAT, 7);
         m.put(Token.TO, 9);
         m.put(Token.PLUS, 10);
         m.put(Token.MINUS, 10);
@@ -184,6 +183,7 @@ public class XPathParser {
         m.put(Token.MATH_DIVIDE, 11);
         m.put(Token.IDIV, 11);
         m.put(Token.MOD, 11);
+        m.put(Token.OTHERWISE, 12);
         m.put(Token.UNION, 13);
         m.put(Token.INTERSECT, 14);
         m.put(Token.EXCEPT, 14);
