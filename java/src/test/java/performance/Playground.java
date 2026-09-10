@@ -28,7 +28,7 @@ public class Playground extends PerformanceTestCase {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i=0; i<100000; i++) {
             values.add(new Int64Value(i));
-            values.add(StringValue.makeUntypedAtomic(StringView.wrap("" + i)));
+            values.add(StringValue.makeUntypedAtomic(StringView.tidy("" + i)));
         }
         measure(new Measurable() {
             @Override
@@ -59,7 +59,7 @@ public class Playground extends PerformanceTestCase {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 100000; i++) {
             values.add(new Int64Value(i));
-            values.add(StringValue.makeUntypedAtomic(StringView.wrap ("" + i)));
+            values.add(StringValue.makeUntypedAtomic(StringView.tidy("" + i)));
         }
         measure(new Measurable() {
             @Override
@@ -90,7 +90,7 @@ public class Playground extends PerformanceTestCase {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 100000; i++) {
             values.add(new Int64Value(i));
-            values.add(StringValue.makeUntypedAtomic(StringView.wrap ("" + i)));
+            values.add(StringValue.makeUntypedAtomic(StringView.tidy("" + i)));
         }
         measure(new Measurable() {
             @Override
@@ -121,7 +121,7 @@ public class Playground extends PerformanceTestCase {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 100000; i++) {
             values.add(new Int64Value(i));
-            values.add(StringValue.makeUntypedAtomic(StringView.wrap("" + i)));
+            values.add(StringValue.makeUntypedAtomic(StringView.tidy("" + i)));
         }
         measure(new Measurable() {
             @Override

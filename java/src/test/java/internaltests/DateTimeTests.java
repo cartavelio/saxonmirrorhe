@@ -128,14 +128,14 @@ public class DateTimeTests {
     @Test
     public void testZonedDateTime() {
         try {
-            DateTimeValue val = DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00+10:15"));
+            DateTimeValue val = DateTimeValue.parse(StringView.tidy("2012-02-29T14:00:00+10:15"));
             ZonedDateTime zdt = val.toZonedDateTime();
             DateTimeValue val2 = DateTimeValue.fromZonedDateTime(zdt);
             assertEquals(val, val2, "round-trip");
-            DateTimeValue val3 = DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00"));
+            DateTimeValue val3 = DateTimeValue.parse(StringView.tidy("2012-02-29T14:00:00"));
             ZonedDateTime zdt2 = val3.toZonedDateTime();
             DateTimeValue val4 = DateTimeValue.fromZonedDateTime(zdt2);
-            assertEquals(val4, DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00Z")), "round-trip2");
+            assertEquals(val4, DateTimeValue.parse(StringView.tidy("2012-02-29T14:00:00Z")), "round-trip2");
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -145,14 +145,14 @@ public class DateTimeTests {
     @Test
     public void testLocalDateTime() {
         try {
-            DateTimeValue val = DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00"));
+            DateTimeValue val = DateTimeValue.parse(StringView.tidy("2012-02-29T14:00:00"));
             LocalDateTime zdt = val.toLocalDateTime();
             DateTimeValue val2 = DateTimeValue.fromLocalDateTime(zdt);
             assertEquals(val, val2, "round-trip");
-            DateTimeValue val3 = DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00-05:00"));
+            DateTimeValue val3 = DateTimeValue.parse(StringView.tidy("2012-02-29T14:00:00-05:00"));
             LocalDateTime zdt2 = val.toLocalDateTime();
             DateTimeValue val4 = DateTimeValue.fromLocalDateTime(zdt2);
-            assertEquals(val4, DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00")), "round-trip2");
+            assertEquals(val4, DateTimeValue.parse(StringView.tidy("2012-02-29T14:00:00")), "round-trip2");
         } catch (Exception e) {
             fail();
             e.printStackTrace();
@@ -162,13 +162,13 @@ public class DateTimeTests {
     @Test
     public void testNanosecondPrecision() {
         try {
-            DateTimeValue val = DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00.123456789"));
-            DateTimeValue val2 = val.add((DurationValue)DayTimeDurationValue.makeDayTimeDurationValue(StringView.wrap("PT0.000000001S")).asAtomic());
-            assertEquals(DateTimeValue.parse(StringView.wrap("2012-02-29T14:00:00.12345679")), val2, "val2");
+            DateTimeValue val = DateTimeValue.parse(StringView.tidy("2012-02-29T14:00:00.123456789"));
+            DateTimeValue val2 = val.add((DurationValue)DayTimeDurationValue.makeDayTimeDurationValue(StringView.tidy("PT0.000000001S")).asAtomic());
+            assertEquals(DateTimeValue.parse(StringView.tidy("2012-02-29T14:00:00.12345679")), val2, "val2");
             DateTimeValue val3 = val2.add(DayTimeDurationValue.fromNanoseconds(-1));
             assertEquals("2012-02-29T14:00:00.123456789", val3.getStringValue(), "val3");
             assertEquals(DayTimeDurationValue.fromNanoseconds(1_000_000_000),
-                         DayTimeDurationValue.makeDayTimeDurationValue(StringView.wrap("PT1S")),
+                         DayTimeDurationValue.makeDayTimeDurationValue(StringView.tidy("PT1S")),
                          "dtd");
         } catch (XPathException e) {
             e.printStackTrace();
