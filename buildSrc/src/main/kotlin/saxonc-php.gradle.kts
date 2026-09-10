@@ -7,10 +7,91 @@ plugins {
   id("saxon-build")
 }
 
+val extension = project.extensions.create<SaxonCPhpExtension>("saxoncPhp")
+
+val libsaxoncReleaseArtifactsBucket by configurations.dependencyScope("libsaxoncReleaseArtifactsBucket")
+val libsaxoncReleaseArtifactsDir by configurations.resolvable("libsaxoncReleaseArtifactsDir") {
+  extendsFrom(libsaxoncReleaseArtifactsBucket)
+}
+dependencies {
+  libsaxoncReleaseArtifactsBucket(extension.edition.map { edition ->
+    project(path = ":libsaxonc:${edition}", configuration = "releaseArtifactsDir")
+  })
+}
+
 val srcFolder = project.layout.projectDirectory.dir("../src")
 val releaseBuildFolder = project.layout.buildDirectory.dir("release")
 
 val saxonBuild = the<SaxonBuildExtension>()
+
+val phpizeOutputs = arrayOf("configure", "config.h.in", "configure.ac", "run-tests.php")
+val phpizeBuildOutputs = arrayOf("ax_check_compile_flag.m4", "ax_gcc_func_attribute.m4", "config.guess", "config.sub",
+  "gen_stub.php", "libtool.m4", "ltmain.sh", "Makefile.global", "php_cxx_compile_stdcxx.m4", "php.m4", "pkg.m4",
+  "shtool")
+val configureOutputs = arrayOf("config.h", "config.log", "config.nice", "config.status", "configure~",
+  "libtool", "Makefile", "Makefile.fragments", "Makefile.objects"
+)
+
+val phpizeTask = tasks.register<Exec>("phpize") {
+  inputs.file(layout.projectDirectory.file("config.m4"))
+  inputs.dir(srcFolder)
+  inputs.file(layout.projectDirectory.file("../saxon-config-base.m4"))
+
+  outputs.files(layout.projectDirectory.files(phpizeOutputs))
+  outputs.files(layout.projectDirectory.dir("build").files(phpizeBuildOutputs))
+  outputs.dir(layout.projectDirectory.dir("autom4te.cache"))
+
+  workingDir = layout.projectDirectory.asFile
+  executable("phpize")
+}
+
+open class DefaultWithExec @Inject constructor(@Internal val execOperations: ExecOperations): DefaultTask()
+
+val phpConfigureTask = tasks.register<DefaultWithExec>("configure") {
+  inputs.files(phpizeTask)
+  outputs.files(layout.projectDirectory.files(configureOutputs))
+  outputs.dir(layout.projectDirectory.dir("modules"))
+
+  doLast {
+    val libsaxoncDir = libsaxoncReleaseArtifactsDir.elements.get().first().asFile.toPath()
+
+    execOperations.exec {
+      workingDir = layout.projectDirectory.asFile
+      executable("./configure")
+      environment("SAXON_VERSION" to saxonBuild.version.get(),
+        "LDFLAGS" to "-L${libsaxoncDir.resolve("lib")}")
+      args("--with-saxon=${libsaxoncDir}")
+    }
+  }
+}
+
+val makeOutputs = arrayOf("saxon.la", ".lo", ".dep")
+val makeTask = tasks.register<Exec>("make") {
+  inputs.files(phpConfigureTask)
+  outputs.files(layout.projectDirectory.files(makeOutputs))
+  outputs.dir(layout.projectDirectory.dir(".libs"))
+
+  workingDir = layout.projectDirectory.asFile
+  executable("make")
+}
+
+val makeInstall = tasks.register<Exec>("makeInstall") {
+  dependsOn(makeTask)
+  workingDir = layout.projectDirectory.asFile
+  executable("make")
+  args("install")
+}
+
+val makeCleanTask = tasks.register<Exec>("makeClean") {
+  workingDir = layout.projectDirectory.asFile
+  executable("make")
+  args("clean")
+}
+
+
+tasks.named("clean") {
+  dependsOn("cleanPhpize", "cleanConfigure")
+}
 
 val releaseFolderTask = tasks.register<Copy>("release_folder") {
   into(releaseBuildFolder)
@@ -55,6 +136,8 @@ val configM4Task = tasks.register("config_m4") {
         prelimsTakeable
       }.forEach { line -> configLines.add(line) }
     }
+
+    configLines.add("SAXON_VERSION=\"${saxonBuild.version.get()}\"")
 
     val newExtRegex = Regex("""^(\s+)PHP_NEW_EXTENSION\(saxon, \.\./src/(.+\.cpp).+""")
     val newExtReplace: (String) -> String = { line ->
