@@ -11,6 +11,8 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 
+import java.util.function.Supplier;
+
 /**
  * This class is at the heart of the mechanism for elaborating expressions.
  *
@@ -72,19 +74,23 @@ public abstract class Elaborator {
     public static Elaborator makeElaborator(Expression expression) {
         if (expression instanceof SystemFunctionCall) {
             String label = ((SystemFunctionCall)expression).getTargetFunction().getCompilerName();
-            Elaborator elab = ElaboratorFactory.getElaborator(label);
-            if (elab == null) {
+            Elaborator elab;
+            Supplier<Elaborator> elabFactory = ElaboratorFactory.getElaborator(label);
+            if (elabFactory == null) {
                 elab = new SystemFunctionCallElaborator();
+            } else {
+                elab = elabFactory.get();
             }
             elab.setExpression(expression);
             return elab;
         } else {
             String label = expression.getExpressionName();
-            Elaborator elab = ElaboratorFactory.getElaborator(label);
-            if (elab == null) {
+            Supplier<Elaborator> elabFactory = ElaboratorFactory.getElaborator(label);
+            if (elabFactory == null) {
                 System.err.println("Using fallback elaborator for " + label + ": " + expression.toShortString());
                 return new FallbackElaborator(expression);
             } else {
+                Elaborator elab = elabFactory.get();
                 elab.setExpression(expression);
                 return elab;
             }

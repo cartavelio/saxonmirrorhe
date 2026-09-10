@@ -21,7 +21,7 @@ public class SubstringFnElaborator extends ItemElaborator {
                 return Substring.substring(sv, start);
             };
         } else {
-            final ItemEvaluator arg2Eval = makeElaborator(fnc.getArg(1)).elaborateForItem();
+            final ItemEvaluator arg2Eval = makeElaborator(fnc.getArg(2)).elaborateForItem();
             return context -> {
                 StringValue sv = (StringValue) arg0Eval.eval(context);
                 NumericValue start = (NumericValue) arg1Eval.eval(context);

@@ -48,7 +48,7 @@ public class AxisExpressionElaborator extends PullElaborator {
         // that aren't needed because the condition cannot occur
         boolean checkContextItemExists = axisExpression.isContextPossiblyUndefined();
         boolean checkContextItemIsNode = axisExpression.getContextItemType().getGenre() != Genre.NODE;
-        if (test instanceof AnyNodeTest) {
+        if (test == null || test instanceof AnyNodeTest) {
             return context -> {
                 Item item = context.getContextItem();
                 if (checkContextItemExists && item == null) {
