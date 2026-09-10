@@ -121,21 +121,44 @@
                   fo-test-fn-system-properties-001
                   fo-test-fn-system-properties-002
                   fo-test-fn-system-properties-003
-                  fo-test-fn-matching-segments-001
-                  fo-test-fn-matching-segments-002
-                  fo-test-fn-matching-segments-003
-                  fo-test-fn-matching-segments-004
-                  fo-test-fn-matching-segments-005
+                  fo-test-fn-matching-segments-001                
                   fo-test-fn-parse-json-008
-                  fo-test-fn-regex-001
-                  fo-test-fn-regex-002
-                  fo-test-fn-regex-003
-                  fo-test-fn-regex-004
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-01"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-regex-003" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-06-09"/>
+      <reason>Test case incorrect: parens missing</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-matching-segments-010" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-06-09"/>
+      <reason>Test case incorrect: missing comma in expected result</reason>
+   </exception>
+   
+   <!--<exception test-set="app-spec-examples" 
+      test-case="
+      fo-test-fn-matching-segments-001
+      fo-test-fn-matching-segments-002
+      fo-test-fn-matching-segments-003
+      fo-test-fn-matching-segments-004
+      fo-test-fn-matching-segments-005
+      fo-test-fn-regex-001
+      fo-test-fn-regex-002
+      fo-test-fn-regex-003
+      fo-test-fn-regex-004
+      " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-01"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>-->
    
    <exception test-set="app-spec-examples" 
       test-case=" fo-test-fn-jvalue-003 " 
