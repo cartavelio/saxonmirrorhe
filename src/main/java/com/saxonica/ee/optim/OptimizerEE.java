@@ -1610,14 +1610,14 @@ public class OptimizerEE extends Optimizer {
             return choose;
         }
         // Not interested unless there are at least 4 conditions
-        if (choose.getNumberOfConditions() < 4) {
+        if (choose.size() < 4) {
             return choose;
         }
         SwitchExpression.SwitchCaseInfo switchCaseInfo = new SwitchExpression.SwitchCaseInfo();
         // The conditions must all be ValueComparisons or SingletonComparisons
         switchCaseInfo.commonlhs = null;
         switchCaseInfo.commontype = null;
-        switchCaseInfo.index = new HashMap<>(choose.getNumberOfConditions());
+        switchCaseInfo.index = new HashMap<>(choose.size());
 
         String defaultCollation = choose.getRetainedStaticContext().getDefaultCollationName();
         try {
@@ -1627,7 +1627,7 @@ public class OptimizerEE extends Optimizer {
         }
         switchCaseInfo.defaultAction = Literal.makeEmptySequence();
 
-        int size = choose.getNumberOfConditions();
+        int size = choose.size();
         for (int c = 0; c < size; c++) {
             Expression condition = choose.getCondition(c);
             boolean isOtherwise = c == size - 1 && Literal.hasEffectiveBooleanValue(condition, true);

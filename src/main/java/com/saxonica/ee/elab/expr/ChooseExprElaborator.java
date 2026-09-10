@@ -18,7 +18,7 @@ public class ChooseExprElaborator extends PullElaborator {
 
     public PullEvaluator elaborateForPull() {
         final Choose expr = (Choose) getExpression();
-        final int count = expr.getNumberOfConditions();
+        final int count = expr.size();
         final BooleanEvaluator[] conditions = new BooleanEvaluator[count];
         final PullEvaluator[] actions = new PullEvaluator[count];
         for (int i = 0; i < count; i++) {
@@ -38,7 +38,7 @@ public class ChooseExprElaborator extends PullElaborator {
     @Override
     public ItemEvaluator elaborateForItem() {
         final Choose expr = (Choose) getExpression();
-        final int count = expr.getNumberOfConditions();
+        final int count = expr.size();
         final BooleanEvaluator[] conditions = new BooleanEvaluator[count];
         final ItemEvaluator[] actions = new ItemEvaluator[count];
         for (int i = 0; i < count; i++) {
@@ -58,7 +58,7 @@ public class ChooseExprElaborator extends PullElaborator {
     @Override
     public PushEvaluator elaborateForPush() {
         final Choose expr = (Choose) getExpression();
-        final int count = expr.getNumberOfConditions();
+        final int count = expr.size();
         final BooleanEvaluator[] conditions = new BooleanEvaluator[count];
         final PushEvaluator[] actions = new PushEvaluator[count];
         for (int i = 0; i < count; i++) {
