@@ -94,10 +94,11 @@ XPathProcessor::~XPathProcessor() {
   if(xp_baseURI != nullptr) {
     delete [] xp_baseURI;
   }
-  if (cppXP > 0) {
+  if (cppXP != SXN_UNSET) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppXP);
+    cppXP = SXN_UNSET;
   }
-  cppXP = SXN_UNSET;
+
   // exceptionClear();
 }
 
