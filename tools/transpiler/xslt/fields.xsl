@@ -179,13 +179,24 @@
    </xsl:template>
    
    <!-- Identify static field accessors in net.sf.saxon.s9api.WhitespaceStrippingPolicy -->
-   <!-- Complication here is that different .NET versions support different sets of rounding modes? -->
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'net.sf.saxon.s9api.WhitespaceStrippingPolicy']" priority="20">
       <xsl:choose>
          <xsl:when test="name/@identifier='NONE'">Saxon.Api.WhitespacePolicy.PreserveAll</xsl:when>
          <xsl:when test="name/@identifier='IGNORABLE'">Saxon.Api.WhitespacePolicy.StripIgnorable</xsl:when>
          <xsl:when test="name/@identifier='ALL'">Saxon.Api.WhitespacePolicy.StripAll</xsl:when>
          <xsl:when test="name/@identifier='UNSPECIFIED'">Saxon.Api.WhitespacePolicy.Unspecified</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Identify static field accessors in net.sf.saxon.s9api.UnprefixedElementMatchingPolicy -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'net.sf.saxon.s9api.UnprefixedElementMatchingPolicy']" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='DEFAULT_NAMESPACE'">Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace</xsl:when>
+         <xsl:when test="name/@identifier='ANY_NAMESPACE'">Saxon.Api.UnprefixedElementMatchingPolicy.AnyNamespace</xsl:when>
+         <xsl:when test="name/@identifier='DEFAULT_NAMESPACE_OR_NONE'">Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespaceOrNone</xsl:when>
          <xsl:otherwise>
             <xsl:next-match/>
          </xsl:otherwise>
