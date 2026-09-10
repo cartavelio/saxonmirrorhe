@@ -197,6 +197,10 @@
         Note, we're also collecting data on the size of the sequence, which we could potentially use for space allocation,
         at the moment the data is unused.</p>
         
+        <p>TODO: there's potentially a problem because we force lazy evaluation (using both MemoClosure and SingletonClosure)
+        for variables created by loop-lifting or common subexpression elimination. The idea here is (a) to avoid the cost of evaluating
+        the expression if the loop is empty, and (b) to avoid triggering a dynamic error unnecessarily.</p>
+        
         
         
     </category>
