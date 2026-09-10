@@ -8,7 +8,7 @@ package javax.xml.xquery;
  * This interface describes the execute immediate functionality for
  * expressions. This object can be created from the <code>XQConnection</code>
  * and the execution can be done using the <code>executeQuery()</code> or
- * <code>executeCommand()</code> method, passing in the XQuery expression. <p>
+ * <code>executeCommand()</code> method, passing in the XQuery expression.
  * <p>
  * All external variables defined in the prolog of the expression to be executed must
  * be set in the dynamic context of this expression using the bind methods.
@@ -24,27 +24,27 @@ package javax.xml.xquery;
  * an <code>XQResultSequence</code> object is returned.
  * The <code>XQResultSequence</code> object is tied to
  * the <code>XQExpression</code> from which it was prepared and is
- * closed implicitly if that <code>XQExpression</code> is either closed or re-executed.  <p>
+ * closed implicitly if that <code>XQExpression</code> is either closed or re-executed.
  * </p><p>
  * The <code>XQExpression</code> object is dependent on
  * the <code>XQConnection</code> object from which it was created and is only
  * valid for the duration of that object.
  * Thus, if the <code>XQConnection</code> object is closed then
  * this <code>XQExpression</code> object  will be implicitly closed
- * and it can no longer be used. <p>
+ * and it can no longer be used.
  * </p><p>
  * An XQJ driver is not required to provide finalizer methods for
  * the connection and other objects. Hence it is strongly recommended that
  * users call close method explicitly to free any resources. It is also
  * recommended that they do so under a final block to ensure that the object
  * is closed even when there are exceptions. Not closing this object implicitly
- * or explicitly might result in serious memory leaks. <p>
+ * or explicitly might result in serious memory leaks.
  * </p><p>
  * When the <code>XQExpression</code> is closed any <code>XQResultSequence</code>
- * object obtained from it is also implicitly closed. <p>
+ * object obtained from it is also implicitly closed.
  * </p><p>
  * Example -
- * </p><p>
+ * </p>
  * <pre>
  *  XQConnection conn = XQDatasource.getConnection();
  *  XQExpression expr = conn.createExpression();

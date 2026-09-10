@@ -12,8 +12,8 @@ import java.io.*;
  * <p>
  * XQuery expressions are executed and results are returned within the
  * context of a connection. They are either executed through <code>XQExpression</code>
- * or <code>XQPreparedExpression</code> objects. <p>
- * </p><p>
+ * or <code>XQPreparedExpression</code> objects.
+ * </p>
  * <pre>
  *  XQDataSource ds;// obtain the XQuery datasource
  *  ...
@@ -42,13 +42,11 @@ import java.io.*;
  * override these defaults by passing an <code>XQStaticContext</code>
  * object to the <code>setStaticContext()</code> method.
  * </p><p>
- * </p><p>
  * By default a connection operates in auto-commit mode, which means that
  * each xquery is executed and committed in an individual transaction. If
  * auto-commit mode is disabled, a transaction must be ended explicitly by
  * the application calling <code>commit()</code> or
  * <code>rollback()</code>.
- * </p><p>
  * </p><p>
  * An <code>XQConnection</code> object can be created on top of an
  * existing JDBC connection. If an <code>XQConnection</code> is
@@ -57,13 +55,12 @@ import java.io.*;
  * changed, or a transaction is ended using commit or rollback,
  * it also changes the underlying JDBC connection.
  * </p><p>
- * </p><p>
  * An XQJ driver is not required to provide finalizer methods for
  * the connection and other objects. Hence it is strongly recommended that
  * users call close method explicitly to free any resources. It is also
  * recommended that they do so under a final block to ensure that the object
  * is closed even when there are exceptions. Not closing this object explicitly
- * might result in serious memory leaks. <p>
+ * might result in serious memory leaks.
  * </p><p>
  * When the <code>XQConnection</code> is closed any <code>XQExpression</code>
  * and <code>XQPreparedExpression</code> objects obtained from it are also

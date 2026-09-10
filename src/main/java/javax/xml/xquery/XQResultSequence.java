@@ -7,17 +7,17 @@ package javax.xml.xquery;
 /**
  * This interface represents a sequence of items obtained as a result of
  * evaluation XQuery expressions. The result sequence is tied to the
- * <code>XQconnection</code> object on which the expression was evaluated.<p>
+ * <code>XQconnection</code> object on which the expression was evaluated.
  * <p>
  * This sequence can be obtained by performing an <code>executeQuery</code>
- * on the expression object. It represents a cursor-like interface.<p>
+ * on the expression object. It represents a cursor-like interface.
  * </p><p>
  * The <code>XQResultSequence</code> object is dependent on
  * the connection and the expression from which it was created and is only
  * valid for the duration of those objects.  Thus, if any one of those objects is closed,
  * this <code>XQResultSequence</code> object  will be implicitly closed
  * and it can no longer be used. Similarly  re-executing the expression
- * also implicitly closes the associated result sequences. <p>
+ * also implicitly closes the associated result sequences.
  * </p><p>
  * An XQJ driver is not required to provide finalizer methods for
  * the connection and other objects. Hence it is strongly recommended that
@@ -25,13 +25,14 @@ package javax.xml.xquery;
  * recommended that they do so under a final block to ensure that the object
  * is closed even when there are exceptions.
  * Not closing this object implicitly or explicitly might result in serious memory
- * leaks.<p>
+ * leaks.
  * </p><p>
  * When the <code>XQResultSequence</code> is closed any
  * <code>XQResultItem</code> objects obtained from it
- * are also implicitly closed.<p>
+ * are also implicitly closed.
  * </p><p>
  * Example -
+ * </p>
  * <pre>
  *
  *  XQPreparedExpression expr = conn.prepareExpression("for $i ..");

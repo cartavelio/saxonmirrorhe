@@ -6,8 +6,8 @@ package javax.xml.xquery;
 
 /**
  * This interface represents a sequence of items as defined in the
- * XDM. The sequence may be materialized or non-materialized. <p>
- * </p><p>
+ * XDM. The sequence may be materialized or non-materialized.
+ * <p>
  * The <code>next</code> method is useful to position the
  * <code>XQSequence</code> over the next item in the sequence.
  * If the scrollability is <code>XQConstants.SCROLLTYPE_SCROLLABLE</code>,
@@ -17,7 +17,7 @@ package javax.xml.xquery;
  * once per item. To perform multiple gets on an item, extract the item first
  * from the sequence using the <code>getItem</code> method and
  * then operate on the <code>XQItem</code> object.
- * </p><p>
+ * </p>
  * <pre>
  *
  *  XQPreparedExpression expr = conn.prepareExpression("for $i ..");
@@ -48,18 +48,18 @@ package javax.xml.xquery;
  * returns the current position number. A value of 0 indicates
  * that it is  positioned before the first item, a value of <code>count() + 1</code>
  * indicates that it is positioned after the last item, and any other value
- * indicates that it is positioned on the item at that position.  <p>
+ * indicates that it is positioned on the item at that position.  </p><p>
  * For example, a position value of 1 indicates that it is positioned on
- * the item at position 1. <p>
+ * the item at position 1.
  * </p><p>
  * The <code>isOnItem</code> method may be used to find out if the cursor
  * is positioned on the item. When the cursor is positioned on an item,
  * the <code>next</code> method call will move the cursor to be on the next item.
  * </p><p>
- * </p><p>
  * See also: <i>Section 12 Serialization, XQuery API for Java
  * (XQJ) 1.0</i>,  which describes some general information applicable
  * to various XQJ serialization methods.
+ * </p>
  */
 public interface XQSequence extends XQItemAccessor {
 
