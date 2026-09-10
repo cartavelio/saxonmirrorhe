@@ -208,9 +208,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         //#endif
 
         //#if EE==true || PE==true
-        register("parse-uri", 1, 2, e -> e.populate(ParseURI::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+        register("parse-uri", 1, 2, e -> e.populate(ParseURI::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null));
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null));
         //#endif
 
         register("parts", 1, e -> e.populate(Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)

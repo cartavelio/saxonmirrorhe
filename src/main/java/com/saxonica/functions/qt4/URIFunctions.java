@@ -1,19 +1,26 @@
 package com.saxonica.functions.qt4;
 
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Common declarations for BuildURI and ParseURI.
  */
 
 abstract public class URIFunctions extends SystemFunction {
-    protected static HashSet<String> nonHierarchicalSchemes = new HashSet<>(Arrays.asList("urn", "mailto"));
+    protected static HashSet<String> hierarchicalSchemes = new HashSet<>(Arrays.asList("http", "https", "ftp", "file"));
+    protected static HashSet<String> nonHierarchicalSchemes = new HashSet<>(Arrays.asList("urn", "mailto", "news", "tel", "tag", "jar"));
     protected static HashMap<String,String> defaultPorts = new HashMap<>();
     static {
         defaultPorts.put("http", "80");
@@ -22,6 +29,7 @@ abstract public class URIFunctions extends SystemFunction {
         defaultPorts.put("ftp", "21");
     }
 
+    protected static final AtomicValue URI = new StringValue("uri");
     protected static final AtomicValue PATH_SEPARATOR = new StringValue("path-separator");
     protected static final AtomicValue QUERY_SEPARATOR = new StringValue("query-separator");
     protected static final AtomicValue ALLOW_DEPRECATED_FEATURES = new StringValue("allow-deprecated-features");
@@ -38,4 +46,81 @@ abstract public class URIFunctions extends SystemFunction {
     protected static final AtomicValue KEY = new StringValue("key");
     protected static final AtomicValue VALUE = new StringValue("value");
     protected static final AtomicValue FRAGMENT = new StringValue("fragment");
+    protected static final AtomicValue HIERARCHICAL = new StringValue("hierarchical");
+
+    protected String pathSeparator = "/";
+    protected String querySeparator = "&";
+    protected boolean allowDeprecatedFeatures = false;
+    protected boolean omitDefaultPorts = false;
+    protected boolean hierarchical = true;
+
+    protected void checkOptions(Sequence[] arguments) throws XPathException {
+        if (getArity() == 2) {
+            MapItem options = (MapItem) arguments[1].head();
+            if (options.get(PATH_SEPARATOR) != null) {
+                pathSeparator = options.get(PATH_SEPARATOR).getStringValue();
+            }
+            if (options.get(QUERY_SEPARATOR) != null) {
+                querySeparator = options.get(QUERY_SEPARATOR).getStringValue();
+            }
+            allowDeprecatedFeatures = options.get(ALLOW_DEPRECATED_FEATURES) != null && options.get(ALLOW_DEPRECATED_FEATURES).effectiveBooleanValue();
+            omitDefaultPorts = options.get(OMIT_DEFAULT_PORTS) != null && options.get(OMIT_DEFAULT_PORTS).effectiveBooleanValue();
+        }
+    }
+
+    protected String encodePathSegment(GroundedValue value) throws XPathException {
+        String input = value.getStringValue();
+        StringBuilder output = new StringBuilder();
+        for (int pos = 0; pos < input.length(); pos++) {
+            char ch = input.charAt(pos);
+            if (ch == ' ') {
+                output.append("+");
+            } else if (ch == '/') {
+                output.append("%2F");
+            } else {
+                output.append(ch);
+            }
+        }
+        return output.toString();
+    }
+
+    protected String encodeOtherSegment(GroundedValue value) throws XPathException {
+        String input = value.getStringValue();
+        StringBuilder output = new StringBuilder();
+        for (int pos = 0; pos < input.length(); pos++) {
+            char ch = input.charAt(pos);
+            if (ch == ' ') {
+                output.append("+");
+            } else if (ch == '=' || ch == '&' || ch == ';' || ch == '?' || ch == '#' || ch == '\'') {
+                output.append(String.format("%%%02X", (int) ch));
+            } else {
+                output.append(ch);
+            }
+        }
+        return output.toString();
+    }
+
+    protected String decodeString(String value) {
+        Pattern pattern = Pattern.compile("^(.*?)(\\+|%[0-9a-fA-F]{2})(.*)$");
+        String input = value;
+        Matcher matcher = pattern.matcher(input);
+        StringBuilder output = new StringBuilder();
+        while (matcher.find()) {
+            output.append(matcher.group(1));
+            String esc = matcher.group(2);
+
+            if ("+".equals(esc)) {
+                output.append(" ");
+            } else {
+                int hex = Integer.valueOf(esc.substring(1), 16);
+                output.append((char) hex);
+            }
+
+            input = matcher.group(3);
+            matcher = pattern.matcher(input);
+        }
+        output.append(input);
+        return output.toString();
+    }
+
 }
