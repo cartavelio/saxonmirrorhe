@@ -1361,6 +1361,10 @@ public class XQueryParser extends XPathParser {
             executable.addQueryLocationHintProcessed(hint);
         }
 
+        if (sources.length == 0) {
+            grumble("Unable to locate query module " + mImport.namespaceURI, "XQST0059", mImport.offset);
+        }
+
         for (int m = 0; m < sources.length; m++) {
             StreamSource ss = sources[m];
             String baseURI = ss.getSystemId();
