@@ -235,7 +235,7 @@ namespace TestDriver {
                 return null;
             }
 
-            String qnameStr = qname.GetStringValue();
+            String qnameStr = qname.StringValue;
             if (qnameStr.Equals("#unnamed")) {
                 return new QName(NamespaceConstant.XSLT, "unnamed");
             }
@@ -307,7 +307,7 @@ namespace TestDriver {
             XdmValue allDependencies = testSetDependencies.Append(testCaseDependencies);
 
             XdmNode lastSpecValue = allDependencies.Select(Path("spec", "@value")).FirstOrDefault();
-            String specAtt = lastSpecValue != null ? lastSpecValue.GetStringValue() : "XSLT10+";
+            String specAtt = lastSpecValue != null ? lastSpecValue.StringValue : "XSLT10+";
             foreach (XdmNode dep in allDependencies.Select(Child(IsElement()))) {
                 if (!EnsureDependencySatisfied((XdmNode) dep, env)) {
                     notrun++;
@@ -372,7 +372,7 @@ namespace TestDriver {
             }
 
             // If a static error is expected, suppress JIT compilation so we catch it eagerly
-            bool IsStaticError(XdmItem item) => item.GetStringValue().StartsWith("XTSE");
+            bool IsStaticError(XdmItem item) => item.StringValue.StartsWith("XTSE");
             bool expectStaticError = testCase.Select(
                 Steps.Path("result", "//", "error", "@code").Where((Predicate<XdmItem>) IsStaticError)).Any();
             if (expectStaticError) {
@@ -543,7 +543,7 @@ namespace TestDriver {
                     initialTemplate == null ? null : GetQNameAttribute(xpath, initialTemplate, "@name");
                 string baseOutputURI = new System.Uri(resultsDir + "/results/output.xml").AbsoluteUri;
                 XdmNode outputNode = testInput.Select(Steps.Path("output", "@file")).FirstOrDefault();
-                string outputUri = (outputNode != null ? outputNode.GetStringValue() : null);
+                string outputUri = (outputNode != null ? outputNode.StringValue : null);
 
                 if (outputUri != null) {
                     if (outputUri.Equals("")) {
@@ -560,7 +560,7 @@ namespace TestDriver {
                 if (initialMode != null) {
                     XdmItem select = xpath.EvaluateSingle("@select", initialMode);
                     if (select != null) {
-                        initialMatchSelection = env.xpathCompiler.Evaluate(select.GetStringValue(), null);
+                        initialMatchSelection = env.xpathCompiler.Evaluate(@select.StringValue, null);
                     }
                 }
 
@@ -939,12 +939,12 @@ namespace TestDriver {
             XPathSelector exp = xpe.Compile(assertion).Load();
             exp.ContextItem = expressionTree;
             XdmAtomicValue bv = (XdmAtomicValue) exp.EvaluateSingle();
-            if (bv == null || !bv.GetBooleanValue()) {
+            if (bv == null || !bv.AsBoolean()) {
                 println("** Optimization assertion failed");
                 println(expressionTree.StringValue);
             }
 
-            return bv != null && bv.GetBooleanValue();
+            return bv != null && bv.AsBoolean();
         }
 
         protected XsltExecutable exportImport(string testName, string testSetName, TestOutcome outcome,
@@ -1117,7 +1117,7 @@ namespace TestDriver {
             return saveResults ||
                    ((XdmAtomicValue) xpath.EvaluateSingle(
                        "exists(./result//(assert-serialization-error|serialization-matches|assert-serialization)[not(parent::*[self::assert-message|self::assert-result-document])])",
-                       testCase)).GetBooleanValue();
+                       testCase)).AsBoolean();
         }
 
         private void saveResultsToFile(string content, string filePath) {

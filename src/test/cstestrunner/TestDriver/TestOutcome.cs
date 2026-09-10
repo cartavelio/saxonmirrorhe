@@ -577,7 +577,7 @@ namespace TestDriver {
                 return result.value.Count == 1 &&
                        ((XdmAtomicValue) result.value.Simplify).IsAtomic() &&
                        ((XdmAtomicValue) result.value.Simplify).PrimitiveTypeName.Equals(QName.XS_BOOLEAN) &&
-                       !((XdmAtomicValue) result.value.Simplify).GetBooleanValue();
+                       !((XdmAtomicValue) result.value.Simplify).AsBoolean();
             }
         }
 
@@ -589,7 +589,7 @@ namespace TestDriver {
                 return result.value.Count == 1 &&
                        ((XdmAtomicValue) result.value.Simplify).IsAtomic() &&
                        ((XdmAtomicValue) result.value.Simplify).PrimitiveTypeName.Equals(QName.XS_BOOLEAN) &&
-                       ((XdmAtomicValue) result.value.Simplify).GetBooleanValue();
+                       ((XdmAtomicValue) result.value.Simplify).AsBoolean();
             }
         }
 
@@ -601,7 +601,7 @@ namespace TestDriver {
                 assertXpc.DeclareVariable(new QName("result"));
                 XPathSelector s = assertXpc.Compile("$result instance of " + assertion.StringValue).Load();
                 s.SetVariable(new QName("result"), result.value);
-                return ((XdmAtomicValue) s.EvaluateSingle()).GetBooleanValue();
+                return ((XdmAtomicValue) s.EvaluateSingle()).AsBoolean();
             }
         }
 
@@ -613,7 +613,7 @@ namespace TestDriver {
                 string resultstring;
                 string assertionstring = assertion.StringValue;
                 if (result.value is XdmItem) {
-                    resultstring = ((XdmItem) result.value).GetStringValue();
+                    resultstring = ((XdmItem) result.value).StringValue;
                 }
                 else {
                     bool first = true;
@@ -627,7 +627,7 @@ namespace TestDriver {
                             fsb.Append(' ');
                         }
 
-                        fsb.Append(item.GetStringValue());
+                        fsb.Append(item.StringValue);
                     }
 
                     resultstring = fsb.ToString();
@@ -1068,7 +1068,7 @@ namespace TestDriver {
                 assertXpc.DeclareVariable(new QName("result"));
                 XPathSelector s = assertXpc.Compile("deep-equal($result , (" + assertion.StringValue + "))").Load();
                 s.SetVariable(new QName("result"), result.value);
-                return ((XdmAtomicValue) s.Evaluate()).GetBooleanValue();
+                return ((XdmAtomicValue) s.Evaluate()).AsBoolean();
             }
         }
 
@@ -1081,7 +1081,7 @@ namespace TestDriver {
                 XPathSelector s = assertXpc.Compile("$result eq " + assertion.StringValue).Load();
                 s.SetVariable(new QName("result"), result.value);
                 XdmAtomicValue item = (XdmAtomicValue) s.EvaluateSingle();
-                return item != null && item.GetBooleanValue();
+                return item != null && item.AsBoolean();
             }
         }
 

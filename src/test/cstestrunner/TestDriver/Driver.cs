@@ -408,7 +408,7 @@ namespace TestDriver {
                         localEnvironments["default"]);
                     bool baseUriCheck =
                         ((XdmAtomicValue) xpc.EvaluateSingle("static-base-uri/@uri='#UNDEFINED'", environmentNode))
-                        .GetBooleanValue();
+                        .AsBoolean();
                     if (baseUriCheck) {
                         //writeTestcaseElement(testCaseName, "notRun", "static-base-uri not supported", null);
                         return null;

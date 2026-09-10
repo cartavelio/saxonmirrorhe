@@ -733,7 +733,7 @@ namespace TestDriver {
                 }
                 
                 foreach (XdmNode query in coll.Children("query")) {
-                    string queryExpr = query.GetStringValue();
+                    string queryExpr = query.StringValue;
                     XQueryEvaluator evaluator = environment.xqueryCompiler.Compile(queryExpr).Load();
                     XdmValue result = evaluator.Evaluate();
 
@@ -748,16 +748,16 @@ namespace TestDriver {
         }
 
         // Misleading name, it can also be a map or array
-        public class AtomicResource : IResource {
-            private readonly string uri;
+        private class AtomicResource : IResource {
             private readonly XdmItem value;
 
             public AtomicResource(string uri, XdmItem value) {
-                this.uri = uri;
+                this.ResourceURI = uri;
                 this.value = value;
             }
 
-            public string ResourceURI => uri;
+            public string ResourceURI { get; }
+
             public XdmItem GetXdmItem(DynamicContext context) {
                 return value;
             }
