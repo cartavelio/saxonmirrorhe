@@ -16,9 +16,9 @@ import net.sf.saxon.trans.XPathException;
  * in terms of a name and a set of version ranges
  */
 public class UsePack {
-    public String packageName;
-    public PackageVersionRanges ranges;
-    public Location location;
+    public final String packageName;
+    public final PackageVersionRanges ranges;
+    public final Location location;
 
     public UsePack(String name, String version, Location location) throws XPathException {
         this.packageName = name;
