@@ -4195,6 +4195,8 @@ public class XQueryParser extends XPathParser {
                 break;
             } else if (c == Tokenizer.NUL) {
                 grumble("End of input encountered within element start tag");
+            } else if (c != '"' && c != '\'') {
+                grumble("Expected ' or \" as attribute delimiter - found '" + c + "'");
             }
             int attOffset = t.inputOffset - 1;
             buff.setLength(0);
@@ -4211,13 +4213,8 @@ public class XQueryParser extends XPathParser {
             expectChar(c, '=');
             c = t.nextChar();
             c = skipSpaces(c);
-
-            if (c != '"' && c != '\'') {
-                if (c == Tokenizer.NUL) {
-                    grumble("End of input encountered within element start tag");
-                } else {
-                    grumble("Expected ' or \" as attribute delimiter - found '" + c + "'");
-                }
+            if (c == Tokenizer.NUL) {
+                grumble("End of input encountered within element start tag");
             }
             char delim = c;
             boolean isNamespace = "xmlns".equals(attName) || attName.startsWith("xmlns:");
