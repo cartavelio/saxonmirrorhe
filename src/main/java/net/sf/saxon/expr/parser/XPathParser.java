@@ -1073,7 +1073,8 @@ public class XPathParser {
      * @param rhs the B expression
      * @return a conditional expression with the correct semantics
      */
-    private Expression makeOtherwiseExpression (Expression lhs, Expression rhs) {
+    private Expression makeOtherwiseExpression (Expression lhs, Expression rhs) throws XPathException {
+        checkLanguageVersion40();
         LetExpression let = new LetExpression();
         let.setVariableQName(new StructuredQName("vv", NamespaceConstant.ANONYMOUS, "n" + lhs.hashCode()));
         let.setSequence(lhs);
