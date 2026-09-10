@@ -74,14 +74,16 @@ public class ParamKeywords {
         fnParamNames.put("analyze-string", "value|pattern|flags");
         fnParamNames.put("apply", "function|arguments");
         fnParamNames.put("atomic-equal", "value1|value2");
+        fnParamNames.put("atomic-type-annotation", "value");
         fnParamNames.put("available-environment-variables", "");
         fnParamNames.put("avg", "values");
         fnParamNames.put("base-uri", "node");
         fnParamNames.put("boolean", "input");
         fnParamNames.put("build-uri", "parts|options");
         fnParamNames.put("ceiling", "value");
-        fnParamNames.put("char", "name");
+        fnParamNames.put("char", "value");
         fnParamNames.put("characters", "value");
+        fnParamNames.put("civil-timezone", "value|place");
         fnParamNames.put("codepoint-equal", "value1|value2");
         fnParamNames.put("codepoints-to-string", "values");
         fnParamNames.put("collation", "options");
@@ -117,6 +119,7 @@ public class ParamKeywords {
         fnParamNames.put("duplicate-values", "values|collation");
         fnParamNames.put("element-number", "values|node");
         fnParamNames.put("element-with-id", "element|root|predicate");
+        fnParamNames.put("elements-to-maps", "elements|options");
         fnParamNames.put("empty", "input");
         fnParamNames.put("encode-for-uri", "value");
         fnParamNames.put("ends-with", "value|substring|collation");
@@ -141,6 +144,7 @@ public class ParamKeywords {
         fnParamNames.put("format-integer", "value|picture|language");
         fnParamNames.put("format-number", "value|picture|options");
         fnParamNames.put("format-time", "value|picture|language|calendar|place");
+        fnParamNames.put("function-annotations", "function");
         fnParamNames.put("function-arity", "function");
         fnParamNames.put("function-lookup", "name|arity");
         fnParamNames.put("function-name", "function");
@@ -163,7 +167,6 @@ public class ParamKeywords {
         fnParamNames.put("index-where", "input|predicate");
         fnParamNames.put("innermost", "nodes");
         fnParamNames.put("insert-before", "input|position|insert");
-        fnParamNames.put("intersperse", "input|separator");
         fnParamNames.put("invisible-xml", "grammar|options");
         fnParamNames.put("iri-to-uri", "value");
         fnParamNames.put("is-NaN", "value");
@@ -172,7 +175,6 @@ public class ParamKeywords {
         fnParamNames.put("items-before", "input|predicate");
         fnParamNames.put("items-ending-where", "input|predicate");
         fnParamNames.put("items-starting-where", "input|predicate");
-        fnParamNames.put("while-do", "input|predicate|action");
         fnParamNames.put("json", "input|options");
         fnParamNames.put("json-doc", "source|options");
         fnParamNames.put("json-to-xml", "value|options");
@@ -199,6 +201,7 @@ public class ParamKeywords {
         fnParamNames.put("namespace-uri-from-QName", "value");
         fnParamNames.put("nilled", "node");
         fnParamNames.put("node-name", "node");
+        fnParamNames.put("node-type-annotation", "node");
         fnParamNames.put("normalize-space", "value");
         fnParamNames.put("normalize-unicode", "value|form");
         fnParamNames.put("not", "input");
@@ -234,10 +237,12 @@ public class ParamKeywords {
         fnParamNames.put("round-half-to-even", "value|precision");
         fnParamNames.put("scan-left", "input|zero|action");
         fnParamNames.put("scan-right", "input|zero|action");
+        fnParamNames.put("schema-type", "name");
         fnParamNames.put("seconds", "value");
         fnParamNames.put("seconds-from-dateTime", "value");
         fnParamNames.put("seconds-from-duration", "value");
         fnParamNames.put("seconds-from-time", "value");
+        fnParamNames.put("sequence-join", "input|separator");
         fnParamNames.put("serialize", "input|options");
         fnParamNames.put("slice", "input|start|end|step");
         fnParamNames.put("some", "input|predicate");
@@ -270,12 +275,14 @@ public class ParamKeywords {
         fnParamNames.put("true", "");
         fnParamNames.put("trunk", "input");
         fnParamNames.put("void", "input");
+        fnParamNames.put("unix-dateTime", "value");
         fnParamNames.put("unordered", "input");
         fnParamNames.put("unparsed-text", "source|options");
         fnParamNames.put("unparsed-text-available", "source|options");
         fnParamNames.put("unparsed-text-lines", "source|options");
         fnParamNames.put("upper-case", "value");
         fnParamNames.put("uri-collection", "source");
+        fnParamNames.put("while-do", "input|predicate|action");
         fnParamNames.put("xml-to-json", "node|options");
         fnParamNames.put("year-from-date", "value");
         fnParamNames.put("year-from-dateTime", "value");
