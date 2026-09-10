@@ -526,7 +526,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * An array holding functions to evaluate default arguments. The array is
          * allocated only if there are parameters with default values defined
          */
-        public IntHashMap<Expression> defaultValueExpressions;
+        public IntHashMap<Supplier<Expression>> defaultValueExpressions;
         /**
          * Any additional properties. Various bit settings are defined: for example SAME_AS_FIRST_ARGUMENT indicates that
          * the result type is the same as the type of the first argument
@@ -628,7 +628,25 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             return this;
         }
 
-        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry withDefault(int arg, Expression defaultValue) {
+        /**
+         * Add information to a function entry about the argument types of the function
+         *
+         * @param a             the position of the argument, counting from zero
+         * @param type          the item type of the argument
+         * @param options       the cardinality and usage of the argument
+         * @param defaultExpr   supplies an expression that acts as the default value
+         * @return this entry (to allow chaining)
+         */
+
+        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry arg(
+                int a, ItemType type, int options, Sequence resultIfEmpty, Supplier<Expression> defaultExpr) {
+            return arg(a, type, options, resultIfEmpty)
+                    .withDefault(a, defaultExpr);
+
+
+        }
+
+        private net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry withDefault(int arg, Supplier<Expression> defaultValue) {
             if (this.defaultValueExpressions == null) {
                 this.defaultValueExpressions = new IntHashMap<>(getNumberOfParameters());
             }
@@ -689,7 +707,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * @return the expression for computing the value of the Nth parameter, or null if there is none
          */
         @Override
-        public Expression getDefaultValueExpression(int i) {
+        public Supplier<Expression> getDefaultValueExpression(int i) {
             if (defaultValueExpressions != null) {
                 return defaultValueExpressions.get(i);
             } else {

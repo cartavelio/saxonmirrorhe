@@ -260,7 +260,7 @@ public abstract class FunctionCall extends Expression {
                         if (arg instanceof DefaultedArgumentExpression.DefaultCollationArgument) {
                             arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
                         } else {
-                            Expression defaultValue = fd.getDefaultValueExpression(i);
+                            Supplier<Expression> defaultValue = fd.getDefaultValueExpression(i);
                             if (defaultValue == null) {
                                 arg = Literal.makeEmptySequence();
                                 // This only happens if there's an error in the function definition
@@ -269,7 +269,7 @@ public abstract class FunctionCall extends Expression {
 //                                                                 (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
 //                                                         "XPST0141");
                             } else {
-                                arg = defaultValue.copy(new RebindingMap());
+                                arg = defaultValue.get();
                             }
                             adoptChildExpression(arg);
                         }

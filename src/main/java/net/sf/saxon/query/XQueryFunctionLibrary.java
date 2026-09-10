@@ -11,7 +11,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
@@ -38,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * An XQueryFunctionLibrary is a function library containing all the user-defined functions available for use within a
@@ -440,8 +440,10 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                 }
                 for (int a = 0; a < maxArity; a++) {
                     if (expandedArgs[a] == null) {
-                        Expression expr = fd.getParameterDefinitions()[a].getDefaultValueExpression();
-                        expandedArgs[a] = expr.copy(new RebindingMap());
+                        Supplier<Expression> defaultExp = fd.getParameterDefinitions()[a].getDefaultValueExpression();
+                        if (defaultExp != null) {
+                            expandedArgs[a] = defaultExp.get();
+                        }
                     }
                 }
                 ufc.setArguments(expandedArgs);
@@ -618,7 +620,8 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             Sequence[] extendedArguments = Arrays.copyOf(arguments, userFunction.getArity());
             for (int i = arguments.length; i < userFunction.getArity(); i++) {
                 // Evaluate the default value expression for the omitted argument
-                extendedArguments[i] = declaredFunction.getParameterDefinitions()[i].getDefaultValueExpression().makeElaborator().eagerly().evaluate(context);
+                Supplier<Expression> expr = declaredFunction.getParameterDefinitions()[i].getDefaultValueExpression();
+                extendedArguments[i] = expr.get().makeElaborator().eagerly().evaluate(context);
             }
             return userFunction.call(context, extendedArguments);
         }

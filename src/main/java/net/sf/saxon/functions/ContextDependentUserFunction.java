@@ -63,7 +63,7 @@ public class ContextDependentUserFunction extends AbstractFunction implements IC
         int[] mapping = new int[arity];
         for (int i=arity; i< underlyingFunction.getArity(); i++) {
             boundValues[i] = ExpressionTool.eagerEvaluate(
-                    underlyingFunction.getParameterDefinitions()[i].getDefaultValueExpression(), context);
+                    underlyingFunction.getParameterDefinitions()[i].getDefaultValueExpression().get(), context);
         }
         for (int i=0; i<arity; i++) {
             mapping[i] = i;

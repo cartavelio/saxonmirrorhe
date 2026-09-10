@@ -10,6 +10,8 @@ package net.sf.saxon.functions.registry;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.StructuredQName;
 
+import java.util.function.Supplier;
+
 /**
  * A {@code FunctionDefinition} represents the declaration of a user-defined function in XQuery or XSLT; in 4.0
  * a function definition has an arity range. The minimum arity is the number of mandatory parameters,
@@ -53,7 +55,7 @@ public interface FunctionDefinition {
      * @return the expression for computing the value of the Nth parameter, or null if there is none
      */
 
-    Expression getDefaultValueExpression(int i);
+    Supplier<Expression> getDefaultValueExpression(int i);
 
     /**
      * Get the position in the parameter list of a given parameter name

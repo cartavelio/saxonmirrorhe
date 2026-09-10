@@ -17,6 +17,8 @@ import net.sf.saxon.trans.FunctionStreamability;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * Run-time object representing a formal argument to a user-defined function
  */
@@ -31,7 +33,7 @@ public class UserFunctionParameter implements LocalBinding {
     private boolean isIndexed = false;
     private boolean isRequiredParam = true;
     private FunctionStreamability functionStreamability = FunctionStreamability.UNCLASSIFIED;
-    private Expression defaultValue;   // In 4.0, function parameters can have a default value
+    private Supplier<Expression> defaultValue;   // In 4.0, function parameters can have a default value
 
     /**
      * Create a UserFunctionParameter
@@ -167,7 +169,7 @@ public class UserFunctionParameter implements LocalBinding {
      * @param select the default value expression
      */
 
-    public void setDefaultValueExpression(Expression select) {
+    public void setDefaultValueExpression(Supplier<Expression> select) {
         this.defaultValue = select;
     }
 
@@ -176,7 +178,7 @@ public class UserFunctionParameter implements LocalBinding {
      * @return the default value expression, if there is one, otherwise null
      */
 
-    public Expression getDefaultValueExpression() {
+    public Supplier<Expression> getDefaultValueExpression() {
         return defaultValue;
     }
 

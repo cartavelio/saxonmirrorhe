@@ -1081,7 +1081,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
      * @return the expression for computing the value of the Nth parameter, or null if there is none
      */
     @Override
-    public Expression getDefaultValueExpression(int i) {
+    public Supplier<Expression> getDefaultValueExpression(int i) {
         return getParameterDefinitions()[i].getDefaultValueExpression();
     }
 
@@ -1151,16 +1151,6 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
             }
         }
         return expandedArgs;
-    }
-
-    public boolean hasContextDependentDefaults(int suppliedArity) {
-        for (int i=suppliedArity; i<getArity(); i++) {
-            Expression defaultVal = parameterDefinitions[i].getDefaultValueExpression();
-            if (ExpressionTool.dependsOnFocus(defaultVal)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

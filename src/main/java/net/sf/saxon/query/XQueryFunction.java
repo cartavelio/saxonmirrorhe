@@ -268,7 +268,7 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
      * @return the expression for computing the value of the Nth parameter, or null if there is none
      */
 
-    public Expression getDefaultValueExpression(int i) {
+    public Supplier<Expression> getDefaultValueExpression(int i) {
         return parameters.get(i).getDefaultValueExpression();
     }
 

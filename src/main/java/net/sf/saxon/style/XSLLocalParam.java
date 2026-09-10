@@ -111,7 +111,8 @@ public class XSLLocalParam extends XSLGeneralVariable {
                         if (defaultVal == null && !sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
                             defaultVal = new DefaultedArgumentExpression();
                         }
-                        ufp.setDefaultValueExpression(defaultVal);
+                        final Expression finalDefault = defaultVal;
+                        ufp.setDefaultValueExpression(() -> finalDefault);
                     }
                 } else {
                     if (!sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
@@ -246,8 +247,9 @@ public class XSLLocalParam extends XSLGeneralVariable {
                 }
 
                 int pos = getParameterPosition();
+                final Expression finalSelect = selectExpression;
                 ((XSLFunction)getParent()).getCompiledFunction().getParameterDefinitions()[pos]
-                        .setDefaultValueExpression(selectExpression);
+                        .setDefaultValueExpression(() -> finalSelect);
             }
             return null;
         } else {
