@@ -73,6 +73,14 @@ public class ShapedMap extends MapItem {
     }
 
     /**
+     * Get a value by its zero-based position
+     */
+
+    public GroundedValue getByPosition(int slot) {
+        return values[slot];
+    }
+
+    /**
      * Get an entry from the Map, supplying an execution plan which the callee can add information to.
      *
      * @param key   the value of the key

@@ -58,6 +58,15 @@ public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey,
         return binaryValue.length;
     }
 
+    /**
+     * Test whether the value starts with a given octet sequence
+     */
+
+    public boolean startsWith(byte[] bytes) {
+        return binaryValue.length >= bytes.length
+                && Arrays.equals(binaryValue, 0, bytes.length, bytes, 0, bytes.length);
+    }
+
     /*@Nullable*/
     @Override
     public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion) {
