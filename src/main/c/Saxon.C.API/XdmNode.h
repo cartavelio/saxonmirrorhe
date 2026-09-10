@@ -48,6 +48,8 @@ public:
      */
 	XdmNode(XdmNode *parent, int64_t , XDM_NODE_KIND kind);
 
+	XdmNode(const XdmNode &other);
+
     //! Destructor.
     /**
      * Destructor for XdmNode

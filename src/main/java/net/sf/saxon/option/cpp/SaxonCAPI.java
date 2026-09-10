@@ -161,12 +161,15 @@ public class SaxonCAPI {
      }
 
     static CLongPointer longArrayToNative(AllocatorFn alloc, long [] refs) {
-
-      CLongPointer a =  alloc.call(refs.length + 1);
+        if(refs.length == 0) {
+            return WordFactory.nullPointer();
+        }
+      CLongPointer a =  alloc.call(refs.length);
       for (int i = 0; i < refs.length; i++) {
-        a.write(i, refs[i]);
+          System.err.println("DEBUG: Java - refs ["+i+"]: "+refs[i]);
+          a.write(i, refs[i]);
       }
-      a.write(refs.length, (long) 0);
+      //a.write(refs.length, (long) 0);
       return a;
     }
 

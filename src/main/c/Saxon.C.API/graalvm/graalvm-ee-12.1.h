@@ -124,7 +124,7 @@ void j_xp_setBackwardsCompatible(graal_isolatethread_t*, void *, int);
 
 void j_xp_setBaseURI(graal_isolatethread_t*, void *, char*);
 
-long long* j_evaluate(graal_isolatethread_t*, void *, void *, char*, char*, void *);
+long long int j_evaluate(graal_isolatethread_t*, void *, void *, char*, char*, void *);
 
 long long int j_evaluateSingle(graal_isolatethread_t*, void *, char*, char*, void *);
 
@@ -203,6 +203,8 @@ long long int j_makeLongValue(graal_isolatethread_t*, long long int);
 long long int j_makeBooleanValue(graal_isolatethread_t*, int);
 
 long long int j_makeQNameValue(graal_isolatethread_t*, char*);
+
+long long* makeArrayFromXdmValue2(graal_isolatethread_t*, void *, void *);
 
 long long int j_getTypedValue(graal_isolatethread_t*, void *);
 

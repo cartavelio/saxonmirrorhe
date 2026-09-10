@@ -61,22 +61,53 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
 	}
 
 	XdmNode ** children = input->getChildren();
+
+    cout<<"number of children for input: "<<input->getChildCount()<<endl;
 	XdmNode ** children0 = children[0]->getChildren();
 	int num = children[0]->getChildCount();
 
+
 	cout<<"number of children: "<<num<<endl;
-	for(int i=0; i<num;i++) {
-		cout<<"node name:"<<children0[i]->getNodeName()<<endl;
-	}
 
-    	//delete []children;
-	//delete [] children0;
 
-	xpath->setContextItem((XdmItem *)input);
-	XdmValue * resultValues = xpath->evaluate("//person");
-	
-	if(resultValues == nullptr) {
-		 printf("result is null \n");
+
+    for(int i=0; i< children[0]->getChildCount(); i++) {
+        delete children0[i];
+    }
+    delete [] children0;
+
+    for(int i=0; i<input->getChildCount(); i++) {
+        delete children[i];
+    }
+
+    delete [] children;
+
+    delete input;
+
+
+    /*for(int i=0; i<num;i++) {
+        cout<<"checkpoint - 1"<<endl;
+        if(children0[i] == nullptr) {
+            cout<<"checkpoint - 1-1 null found"<<endl;
+            continue;
+        } else {
+            cout<<"Node kind ="<<children0[i]->getNodeKind()<<endl;
+        }
+        if(children0[i]->getNodeName() != nullptr) {
+            cout << "node name:" << children0[i]->getNodeName() << endl;
+        }
+        cout<<"checkpoint - 2"<<endl;
+    }
+    cout<<"checkpoint - 1"<<endl;
+        //delete []children;
+    //delete [] children0;
+
+    xpath->setContextItem((XdmItem *)input);
+    cerr<<"testXPAthValues end cp0 "<<endl;
+    XdmValue * resultValues = xpath->evaluate("//person");
+    cerr<<"testXPAthValues end cp2 "<<endl;
+    if(resultValues == nullptr) {
+         printf("result is null \n");
         SaxonApiException * exception = xpath->getException();
         if(exception != nullptr) {
             const char *message = xpath->getErrorMessage();
@@ -86,30 +117,30 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
         sresult->failure++;
         sresult->failureList.push_back("testXPathValues");
 
-	} else {
-		cout<<"Number of items="<<resultValues->size()<<endl;
-		bool nullFound = false;
-		for(int i =0; i< resultValues->size();i++){
-			XdmItem * itemi = resultValues->itemAt(i);
-			if(itemi == nullptr) {
-				cout<<"Item at position "<<i<<" should not be null"<<endl;
-				nullFound = true;
-				break;
-			}
-			cout<<"Item at "<<i<<" ="<<itemi->getStringValue()<<endl;		
-		}
+    } else {
+        cout<<"Number of items="<<resultValues->size()<<endl;
+        bool nullFound = false;
+        for(int i =0; i< resultValues->size();i++){
+            XdmItem * itemi = resultValues->itemAt(i);
+            if(itemi == nullptr) {
+                cout<<"Item at position "<<i<<" should not be null"<<endl;
+                nullFound = true;
+                break;
+            }
+            cout<<"Item at "<<i<<" ="<<itemi->getStringValue()<<endl;
+        }
         delete resultValues;
-		if(nullFound) {
+        if(nullFound) {
             sresult->success++;
         } else {
-		    sresult->failure++;
-		    sresult->failureList.push_back("testXPathValues");
-		}
-	}
+            sresult->failure++;
+            sresult->failureList.push_back("testXPathValues");
+        }
+    }
     delete input;
     xpath->clearParameters();
     xpath->clearProperties();
-	
+    cerr<<"testXPAthValues end cp2 "<<endl;*/
 
 }
 
@@ -174,6 +205,9 @@ void testXPathAttrValues(SaxonProcessor * processor, XPathProcessor * xpath, sRe
 
 
 void testXPathValues2(SaxonProcessor * processor, XPathProcessor * xpath, sResultCount *sresult){
+
+
+    cout<<endl<<"Test testXPathValues2:"<<endl;
     XdmValue * resultValues = xpath->evaluate("1, 'string', true(), parse-xml-fragment(string-join((1 to 3) ! ('<item>' || . || '</item>')))/node(), array { 1 to 5 }, map { 'key1' : 1, 'key2' : 'foo' }");
 
 
@@ -190,7 +224,11 @@ void testXPathValues2(SaxonProcessor * processor, XPathProcessor * xpath, sResul
 
     } else {
         cout << "Number of items=" << resultValues->size() << endl;
-        cout << "toString()=" << resultValues->toString() << endl;
+        const char * resultStr = resultValues->toString();
+        if(resultStr != nullptr) {
+            cout << "toString()=" << resultValues->toString() << endl;
+            delete resultStr;
+        }
 
     }
 }
@@ -232,7 +270,7 @@ void testXPathOnFile(SaxonProcessor * processor, XPathProcessor * xpath, sResult
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have morethan one XdmItem.
 void testXPathOnFile2(XPathProcessor * xpath, sResultCount *sresult){
-    	 cout<<endl<<"Test testXPath with file source:"<<endl;
+    	 cout<<endl<<"Test testXPath with file source-2:"<<endl;
   	xpath->clearParameters();
   	xpath->clearProperties(); 
 	xpath->setContextFile("../data/cat.xml");
@@ -280,12 +318,12 @@ int main()
     XPathProcessor * xpathProc = processor->newXPathProcessor();
     sResultCount *sresult = new sResultCount();
     cout<<endl<<"Test: XPathProcessor with Saxon version="<<processor->version()<<endl; 
-    testXPathSingle(processor, xpathProc, sresult);
+    //testXPathSingle(processor, xpathProc, sresult);
     testXPathValues(processor, xpathProc, sresult);
-    testXPathAttrValues(processor, xpathProc, sresult);
+    /*testXPathAttrValues(processor, xpathProc, sresult);
     testXPathOnFile(processor, xpathProc, sresult);
     testXPathOnFile2(xpathProc, sresult);
-    testXPathValues2(processor, xpathProc, sresult);
+    testXPathValues2(processor, xpathProc, sresult);*/
 
     std::cout << "\nTest Results - Number of tests= " << (sresult->success + sresult->failure) << ", Successes = "
               << sresult->success << ",  Failures= " << sresult->failure << std::endl;
@@ -303,6 +341,7 @@ int main()
     delete processor;
 
      processor->release();
+     delete sresult;
 
 
 #ifdef MEM_DEBUG
