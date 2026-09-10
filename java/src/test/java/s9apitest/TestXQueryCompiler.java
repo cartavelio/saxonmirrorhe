@@ -1,22 +1,14 @@
 package s9apitest;
 
-import com.saxonica.config.EnterpriseConfiguration;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.dom.DOMNodeWrapper;
-import net.sf.saxon.dom.DocumentWrapper;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.GlobalVariable;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
@@ -29,16 +21,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * JUnit tests for the s9api XQueryCompiler
  */
 public class TestXQueryCompiler {
-    private final ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void testModuleUriResolverNoBaseUri() {
         try {
@@ -174,7 +162,7 @@ public class TestXQueryCompiler {
                 try {
                     XQueryEvaluator q = c.compile("a:foo/b:bar + a:foo/b:bar + a:foo/b:bar + a:foo/b:bar").load();
                     q.setContextItem(foo);
-                    XdmAtomicValue v = (XdmAtomicValue)q.evaluateSingle();
+                    XdmAtomicValue v = (XdmAtomicValue) q.evaluateSingle();
                     assertEquals("48", v.toString(), "ok");
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -228,11 +216,11 @@ public class TestXQueryCompiler {
             Processor proc = new Processor(true);
             XQueryCompiler comp = proc.newXQueryCompiler();
             comp.compileLibrary("module namespace m='http://www.example.com/module-one'; " +
-                                        "declare function m:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };" +
-                                        "declare variable $m:ten as xs:integer := 10;");
+                    "declare function m:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };" +
+                    "declare variable $m:ten as xs:integer := 10;");
             comp.compileLibrary("module namespace m='http://www.example.com/module-two'; " +
-                                        "declare function m:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b + 1 };" +
-                                        "declare variable $m:ten as xs:integer := 11;");
+                    "declare function m:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b + 1 };" +
+                    "declare variable $m:ten as xs:integer := 11;");
             String q1 = "import module namespace m='http://www.example.com/module-two'; m:add(2,2)";
             XQueryEvaluator ev = comp.compile(q1).load();
             assertEquals("5", ev.evaluate().toString(), "2+2");
@@ -256,7 +244,7 @@ public class TestXQueryCompiler {
             Processor proc = new Processor(true);
             XQueryCompiler comp = proc.newXQueryCompiler();
             StringBuilder sb = new StringBuilder("module namespace m='http://www.example.com/module-one'; \n");
-            for (int i=0; i<1000; i++) {
+            for (int i = 0; i < 1000; i++) {
                 sb.append("declare function m:f").append(i).append("() { ").append(i).append("};\n");
             }
             comp.compileLibrary(sb.toString());
@@ -300,12 +288,12 @@ public class TestXQueryCompiler {
             Processor proc = new Processor(true);
             XQueryCompiler comp = proc.newXQueryCompiler();
             comp.compileLibrary("module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';\n"
-                                        + "declare variable $xmlch:xmlLetter := 'foo';");
+                    + "declare variable $xmlch:xmlLetter := 'foo';");
             comp.compileLibrary("module namespace j2x = 'urn:informatica:ae:xquery:json2xml';\n"
-                                        + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';");
+                    + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';");
             comp.compileLibrary("module namespace util = 'urn:activevos:spi:functions:utilities';\n"
-                                        + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';\n"
-                                        + "import module namespace j2x = 'urn:informatica:ae:xquery:json2xml';");
+                    + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';\n"
+                    + "import module namespace j2x = 'urn:informatica:ae:xquery:json2xml';");
 //            String q1 = "import module namespace m2='http://www.example.com/module-two'; m2:add($m2:ten,2)";
 //            XQueryEvaluator ev = comp.compile(q1).load();
 //            assertEquals("12", ev.evaluate().toString(), "10+2");
@@ -323,13 +311,13 @@ public class TestXQueryCompiler {
             Processor proc = new Processor(true);
             XQueryCompiler comp = proc.newXQueryCompiler();
             comp.compileLibrary("module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';\n"
-                                        + "declare variable $xmlch:xmlLetter := 'foo';");
+                    + "declare variable $xmlch:xmlLetter := 'foo';");
             comp.compileLibrary("module namespace j2x = 'urn:informatica:ae:xquery:json2xml';\n"
-                                        + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';");
+                    + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';");
             comp.compileLibrary("module namespace util = 'urn:activevos:spi:functions:utilities';\n"
-                                        + "import module namespace j2x = 'urn:informatica:ae:xquery:json2xml';\n"
-                                        + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';\n"
-                                        );
+                    + "import module namespace j2x = 'urn:informatica:ae:xquery:json2xml';\n"
+                    + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';\n"
+            );
 //            String q1 = "import module namespace m2='http://www.example.com/module-two'; m2:add($m2:ten,2)";
 //            XQueryEvaluator ev = comp.compile(q1).load();
 //            assertEquals("12", ev.evaluate().toString(), "10+2");
@@ -553,7 +541,7 @@ public class TestXQueryCompiler {
             StringWriter sw = new StringWriter();
             Serializer out = p.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            StreamSource in = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
+            StreamSource in = new StreamSource(Testdata.file("books.xml"));
             eval.runStreamed(in, out);
             fail("unexpected success");
         } catch (SaxonApiException e) {
@@ -646,19 +634,19 @@ public class TestXQueryCompiler {
         XQueryCompiler c = p.newXQueryCompiler();
         final List<String> counter = new ArrayList<>();
         p.getUnderlyingConfiguration().setResourceResolver(request -> {
-                switch (request.relativeUri) {
-                    case "http://example.com/bad":
-                        String badXml = "<bad>";
-                        counter.add(request.relativeUri);
-                        return new StreamSource(new StringReader(badXml));
-                    case "http://example.com/good":
-                        String goodXml = "<good/>";
-                        counter.add(request.relativeUri);
-                        return new StreamSource(new StringReader(goodXml));
-                    default:
-                        return null;
-                }
-            });
+            switch (request.relativeUri) {
+                case "http://example.com/bad":
+                    String badXml = "<bad>";
+                    counter.add(request.relativeUri);
+                    return new StreamSource(new StringReader(badXml));
+                case "http://example.com/good":
+                    String goodXml = "<good/>";
+                    counter.add(request.relativeUri);
+                    return new StreamSource(new StringReader(goodXml));
+                default:
+                    return null;
+            }
+        });
         p.setConfigurationProperty(Feature.PRE_EVALUATE_DOC_FUNCTION, false);
         XQueryExecutable q = null;
         try {
@@ -766,51 +754,4 @@ public class TestXQueryCompiler {
             fail();
         }
     }
-
-    @Test
-    public void testBug5680() {
-        try {
-            Configuration c = new EnterpriseConfiguration();
-
-            Processor processor = new Processor(c);
-            XQueryCompiler qc = processor.newXQueryCompiler();
-            XQueryExecutable exp = qc.compile(
-                    "declare function local:f($v as element()?) { " +
-                            "   $v/node()" +
-                            "};" +
-                            "local:f(//inner)");
-
-            XQueryEvaluator ev = exp.load();
-            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-            docFactory.setNamespaceAware(true);
-            javax.xml.parsers.DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("test");
-            Element inner = doc.createElement("inner");
-            //rootElement.appendChild(inner); //uncomment to pass the test
-            doc.appendChild(rootElement);
-
-            DynamicQueryContext dynamicContext = ev.getUnderlyingQueryContext();
-            DocumentWrapper docWrapper = new DocumentWrapper(doc, doc.getBaseURI(), dynamicContext.getConfiguration());
-            DOMNodeWrapper context = docWrapper.wrap(doc.getDocumentElement());
-            dynamicContext.setContextItem(context);
-
-            for (int i = 1; i < 200; i++) //fails on 100 iteration
-            {
-                System.out.println(i);
-                XdmSequenceIterator<XdmItem> result = ev.iterator();
-            }
-        } catch (SaxonApiException e) {
-            e.printStackTrace();
-            fail();
-        } catch (SaxonApiUncheckedException e) {
-            e.printStackTrace();
-            fail();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
-
-
 }

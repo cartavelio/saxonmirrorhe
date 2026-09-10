@@ -135,7 +135,7 @@ sourceSets.named("editionTest") {
     exclude("s9apitest/TestXMarkProjection.java")
     exclude("s9apitest/TestXPathCompiler.java")
     exclude("s9apitest/TestXPathErrorCode.java")
-    exclude("s9apitest/TestXQueryCompiler.java")
+    exclude("s9apitest/TestXQueryCompilerEE.java")
     exclude("s9apitest/TestXQueryEvaluator.java")
     exclude("s9apitest/TestXQueryStreaming.java")
     exclude("s9apitest/TestXQueryThreads.java")
