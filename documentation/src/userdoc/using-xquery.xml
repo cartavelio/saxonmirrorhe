@@ -24,6 +24,11 @@
       that were not present in earlier versions of the language). For information about the conformance of Saxon to the XQuery 3.1
       specification, and about the handling of implementation-defined features of the
       specification, see <a class="bodylink" href="/conformance">Conformance</a>.</p>
+   
+   <p>XQuery 4.0 features are available in Saxon-PE and Saxon-EE when enabled (for
+      details, see <a class="bodylink" href="/v4extensions">QT4 extensions</a>). The Saxon 13
+      release aims to conform to the 4.0 draft specifications dated 28 January 2026. Some of
+      the 4.0 extensions were also available experimentally in earlier versions of Saxon.</p>
 
    <p>Saxon uses the same run-time engine to support both XQuery and XSLT, reflecting the fact that
       the two languages have very similar semantics. Most of the compile-time code (in particular,
@@ -1582,9 +1587,6 @@ XdmValue result = ev.CallFunction(
          href="/functions">Function library</a> is available, except for those (for example, some
          forms of <code>saxon:serialize</code>) that have an intrinsic dependency on an XSLT
          stylesheet.</p>
-      
-      <p>The XPath syntax extensions described in <a class="bodylink"
-         href="/v4extensions">Experimental 4.0 extensions</a> are also available in XQuery.</p>
       
       <p>There are a number of XQuery specific extensions available, which are fully documented in <a
          class="bodylink" href="/extensions/xquery-syntax">XQuery syntax extensions</a>:</p>

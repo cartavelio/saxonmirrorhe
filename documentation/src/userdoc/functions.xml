@@ -1442,9 +1442,9 @@
         <p>The effect of the function changed in XSLT 3.0 to return true for all defined elements in
           the XSLT namespace, not only those classified as instructions. Saxon implements the 3.0
           specification.</p>
-        <p>If experimental XSLT 4.0 extensions are enabled, then <code>element-available</code>
+        <p>If XSLT 4.0 extensions are enabled, then <code>element-available</code>
           returns true for the newly defined elements (such as <code>xsl:item-type</code> and
-            <code>xsl:array</code>)</p>
+            <code>xsl:array</code>).</p>
         <p>For <code>xsl:evaluate</code>, <code>element-available()</code> returns true unless the
           configuration option <a class="feature" href="DISABLE_XSL_EVALUATE"/> is set.</p>
         <p>For <code>xsl:import-schema</code>, <code>element-available()</code> returns true if

@@ -15,7 +15,7 @@
          class="bodylink" href="performanceanalysis">Performance analysis</a>.</p>
 
    <p>Furthermore, a summary description of the current Saxon implementation of <a class="bodylink"
-         href="xslt30">XSLT 3.0</a> is provided, with links to other relevant sections of the
+         href="xslt30">XSLT 3.0 and 4.0</a> is provided, with links to other relevant sections of the
       documentation.</p>
 
    <p>For full information about the conformance of Saxon to the XSLT 3.0
@@ -2771,17 +2771,18 @@ XdmValue * messages = executable->getXslMessages();]]></code></pre>
      
      
    </section>
-   <section id="xslt30" title="XSLT 3.0 support">
-      <h1>XSLT 3.0 support</h1>
+   <section id="xslt30" title="XSLT 3.0 and 4.0 support">
+      <h1>XSLT 3.0 and 4.0 support</h1>
 
       
       <p>Saxon 9.8 and later releases implement the <a class="bodylink"
             href="http://www.w3.org/TR/xslt-30/">XSLT 3.0 Recommendation</a> dated 8 June 2017.
-      Implementation in 9.8 was almost complete, and 9.9 filled the last remaining gaps. Saxon 10 provided 
-      some Saxon-specific extensions that have
-      been found necessary to take full advantage of the new capabilities in XSLT 3.0, for example
-      making it easier to transform JSON documents. Some of these extensions have found their way
-      into the draft XSLT 4.0 specification, which at the time of writing is still under development.</p>
+      Implementation in 9.8 was almost complete, and 9.9 filled the last remaining gaps.</p>
+      
+      <p>XSLT 4.0 features are available in Saxon-PE and Saxon-EE when enabled (for
+         details, see <a class="bodylink" href="/v4extensions">QT4 extensions</a>). The Saxon 13
+         release aims to conform to the 4.0 draft specifications dated 28 January 2026. Many of
+         the 4.0 extensions were also available experimentally in earlier versions of Saxon.</p>
 
       <p>XSLT 3.0 features are available in all Saxon editions. Saxon-HE includes basic conformance,
          serialization, XSLT 1.0 compatability mode, XPath 3.1 support, dynamic evaluation, 
@@ -2818,6 +2819,11 @@ XdmValue * messages = executable->getXslMessages();]]></code></pre>
          <li>
             <p>
                <a class="bodylink" href="/expressions/xpath31new">XPath 3.1 expressions</a>
+            </p>
+         </li>
+         <li>
+            <p>
+               <a class="bodylink" href="/expressions/xpath40new">XPath 4.0 expressions</a>
             </p>
          </li>
          <li>
