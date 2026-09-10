@@ -693,7 +693,7 @@ public class ProfessionalConfiguration extends Configuration {
 
     public SystemFunction makeSystemFunction(String localName, int arity) {
         try {
-            return getXSLTFunctionSet(40).makeFunction(localName, arity);
+            return getXSLTFunctionSet(30).makeFunction(localName, arity);
         } catch (XPathException e) {
             return null;
         }
