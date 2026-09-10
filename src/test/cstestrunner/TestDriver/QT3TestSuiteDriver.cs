@@ -580,15 +580,10 @@ namespace TestDriver {
                             .ToString();
                     }
                     catch (SaxonApiException err) {
+                        // Because we're using unparsed-text(), we can't read the query if it contains characters 
+                        // that are illegal in XML. So substitute a dummy query.
                         println("*** Failed to read query: " + err.Message);
-                        if (err.ErrorCode.LocalName.Equals("FOUT1190")) {
-                            outcome.AddReportedError(new QName("XPST0003"));
-                        }
-                        else {
-                            outcome.SetException(err);
-                        }
-
-                        break;
+                        exp = "))) Failed to read query " + err.Message + "((("; // Force a syntax error
                     }
 
 
