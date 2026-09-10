@@ -83,6 +83,7 @@
                         if (@final and not($isEnum)) then 'final' else (),
                         if (@interface) then 'interface' 
                             else if ($isEnum) then 'enum'
+                            else if (name(.) eq 'delegate') then 'delegate'
                             else if (name(.) eq 'class') then 'class' else ()" />
         </xsl:for-each>
     </xsl:function>
@@ -348,7 +349,7 @@
                     </span>
                 </xsl:for-each>
             </xsl:when>
-            <xsl:when test="$class/type">
+            <xsl:when test="empty($class/self::delegate) and $class/type">
                 <xsl:sequence select="f:showTypeChildren($class)"/>
             </xsl:when>
         </xsl:choose>
@@ -677,6 +678,34 @@
                 </xsl:call-template>
             </xsl:otherwise>
         </xsl:choose>
+        
+    </xsl:template>
+    
+    <xsl:template match="delegate" mode="show-class">
+        <!-- Delegates only appear in C# API. 
+            Process these separately because they are sufficiently different to 
+            Classes, Interfaces, etc. -->
+        <xsl:param name="subpage" as="xs:string*" select="''"/>
+        
+        <xsl:result-document href="#main" method="ixsl:replace-content">
+            
+            <h3>
+                <xsl:sequence select="f:addLink(ancestor::package/@id, ancestor::package/@id, 
+                    'cslink')"/>
+            </h3>
+            <h1>
+                <span class="classLabel">
+                    <xsl:text>Delegate </xsl:text>
+                </span>
+                <xsl:value-of select="@id"/>
+            </h1>
+            
+            <hr style="margin:8px;"/>
+            
+            <xsl:variable name="classid" select="@fulltype"/>
+            <xsl:sequence select="f:sig($classid, ., true())"/>
+            
+        </xsl:result-document>
         
     </xsl:template>
     

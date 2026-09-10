@@ -10,10 +10,10 @@
   <xsl:variable name="root" select="/"/>
   
   <!-- Used for classes which implement an interface, and subclasses of a class -->
-  <xsl:key name="class-by-base" match="class | interface | enum" 
+  <xsl:key name="class-by-base" match="class | interface | enum | delegate" 
     use="tokenize(@base, ', ', 'q')"/>
   
-  <xsl:key name="class-by-name" match="class | interface | enum" 
+  <xsl:key name="class-by-name" match="class | interface | enum | delegate" 
     use="if (contains(@name,'.')) then tokenize(@name, '\.')[last()] else @name"/>
   
   <xsl:template match="/">
@@ -21,7 +21,7 @@
     <xsl:apply-templates select="package/*"/>
   </xsl:template>
   
-  <xsl:template match="class | interface | enum">
+  <xsl:template match="class | interface | enum | delegate">
     <xsl:variable name="shortname" select="@name"/>
     <xsl:variable name="fullname" select="@fulltype"/>
     <xsl:variable name="is-nested" select="contains(@name, '.')"/>
@@ -94,7 +94,29 @@
                   <xsl:if test="@abstract = 'true'">abstract </xsl:if>
                   <xsl:value-of select="name()"/>
                   <xsl:text>&#xa0;</xsl:text>
-                  <xsl:value-of select="concat(@name, f:flatTypeParams(.))"/>
+                  <xsl:choose>
+                    <xsl:when test="self::delegate">
+                      <xsl:sequence select="f:showGenericType(., $depth)"/>
+                      <xsl:text>&#xa0;</xsl:text>
+                      <span class="signature">
+                        <xsl:value-of select="@name"/>
+                        <xsl:text>(</xsl:text>
+                        <xsl:for-each select="param">
+                          <xsl:variable name="position" select="position()"/>
+                          <xsl:sequence select="f:showGenericType(., $depth)"/>
+                          <xsl:text>&#xa0;</xsl:text>
+                          <xsl:variable name="paramName" select="../comments/param[$position]/@name"/>
+                          <xsl:if test="not($paramName)">
+                            <xsl:message>Missing parameter description in <xsl:value-of select="../../@name, ../@name"/></xsl:message>
+                          </xsl:if>
+                          <xsl:value-of select="($paramName, @name)[1]"/>
+                          <xsl:if test="position() ne last()"><xsl:text>, </xsl:text></xsl:if>
+                        </xsl:for-each>
+                        <xsl:text>)</xsl:text>
+                      </span>
+                    </xsl:when>
+                    <xsl:otherwise><xsl:value-of select="concat(@name, f:flatTypeParams(.))"/></xsl:otherwise>
+                  </xsl:choose>
                 </div>
               </dt>
               <xsl:apply-templates select="extends">
@@ -622,10 +644,10 @@
         <xsl:if test="@super">
           <xsl:value-of select="'in '"/>
         </xsl:if>
-        <xsl:if test="@type">
+        <xsl:if test="@type and (local-name() ne 'delegate')">
           <xsl:value-of select="f:shortName(@type)"/>
         </xsl:if>
-        <xsl:if test="exists(type)">
+        <xsl:if test="exists(type) and (local-name() ne 'delegate')">
           <xsl:value-of select="'&lt;'"/>
           <xsl:for-each select="type">
             <xsl:value-of select="f:flatTypeParams(.)"/>
@@ -792,10 +814,13 @@
           <p>Further background information about this API is available at 
             <a href="http://www.saxonica.com/html/documentation/dotnet/dotnetapi.html"
               >http://www.saxonica.com/html/documentation/dotnet/dotnetapi.html</a></p>
-          <!-- Include summary tables for interfaces, classes, enums, and exceptions -->
+          <!-- Include summary tables for interfaces, delegates, classes, enums, and exceptions -->
           <p><xsl:text>&#xa0;</xsl:text></p>
           <xsl:call-template name="summary-table">
             <xsl:with-param name="member" select="'Interface'"/>
+          </xsl:call-template>
+          <xsl:call-template name="summary-table">
+            <xsl:with-param name="member" select="'Delegate'"/>
           </xsl:call-template>
           <xsl:call-template name="summary-table">
             <xsl:with-param name="member" select="'Class'"/>
@@ -830,7 +855,8 @@
         </tr>
       </thead>
       <tbody>
-        <xsl:for-each select="$root//*[local-name() eq lower-case($member)][@public='true'][(@base eq 'Exception') eq $exception]">
+        <xsl:for-each select="$root//*[local-name() eq lower-case($member)][@public='true'][if
+          ($exception) then (@base eq 'System.Exception') else true()]">
           <xsl:sort select="lower-case(@name)"/>
           <tr class="TableRow">
             <td>
