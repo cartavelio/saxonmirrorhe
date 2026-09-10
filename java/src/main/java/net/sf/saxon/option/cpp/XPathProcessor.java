@@ -7,8 +7,6 @@
 
 package net.sf.saxon.option.cpp;
 
-import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
-import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.*;
@@ -52,12 +50,6 @@ public class XPathProcessor extends SaxonCAPI {
         compiler = processor.newXPathCompiler();
         compiler.setAllowUndeclaredVariables(true);
         Configuration config = processor.getUnderlyingConfiguration();
-//#if EE==true || PE==true
-        if(config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
-        }
-//#endif
     }
 
     /**
@@ -69,12 +61,6 @@ public class XPathProcessor extends SaxonCAPI {
         compiler = processor.newXPathCompiler();
         compiler.setAllowUndeclaredVariables(true);
         Configuration config = processor.getUnderlyingConfiguration();
-//#if EE==true || PE==true
-        if(config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
-        }
-//#endif
     }
 
     /**
