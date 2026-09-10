@@ -6,6 +6,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaException;
 
 import javax.xml.transform.ErrorListener;
@@ -15,6 +16,7 @@ import javax.xml.transform.Source;
  * The SchemaManager is used to load schema documents, and to set options for the way in which they are loaded.
  * At present all the resulting schema components are held in a single pool owned by the Processor object.
  */
+@CSharpModifiers(code = {"internal"})
 public class SchemaManagerImpl extends SchemaManager {
 
     private final Processor processor;

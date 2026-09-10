@@ -202,7 +202,7 @@ public class XSDSimpleTypeRestriction extends SchemaElement {
                             error("The " + child.getDisplayName() + " facet must not appear more than once");
                         }
                         facetsSeen.add(fp);
-                        CSharp.emitCode("goto case net.sf.saxon.om.StandardNames.XS_PATTERN;");
+                        CSharp.emitCode("goto case Saxon.Hej.om.StandardNames.XS_PATTERN;");
                         // drop through
                     case StandardNames.XS_PATTERN:
                     case StandardNames.XS_ENUMERATION:

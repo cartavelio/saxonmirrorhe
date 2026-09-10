@@ -78,7 +78,7 @@ public class CommonSubexpressionPromoter {
             let.setVariableQName(new StructuredQName("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "cc" + topCandidate.hashCode()));
             let.setRequiredType(type);
             let.setNeedsLazyEvaluation(true);
-            let.setEvaluator(Cardinality.allowsMany(topCandidate.getCardinality()) ? Evaluator.MemoClosure.INSTANCE : Evaluator.SingletonClosure.INSTANCE);
+            let.setEvaluator(Cardinality.allowsMany(topCandidate.getCardinality()) ? Evaluator.MemoClosureEvaluator.INSTANCE : Evaluator.SingletonClosure.INSTANCE);
             for (Operand o : equivalents) {
                 o.setChildExpression(new LocalVariableReference(let));
             }

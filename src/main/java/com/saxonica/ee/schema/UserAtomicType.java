@@ -672,7 +672,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      *         in its transitive membership
      */
     @Override
-    @CSharpReplaceBody(code="return java.util.Collections.singletonList<net.sf.saxon.type.PlainType>(this);")
+    @CSharpReplaceBody(code="return Saxon.Ejava.util.Collections.singletonList<Saxon.Hej.type.PlainType>(this);")
     public List<? extends PlainType> getPlainMemberTypes() {
         return Collections.singletonList(this);
     }

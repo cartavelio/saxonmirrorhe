@@ -47,9 +47,9 @@ public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
     }
 
     @Override
-    @CSharpInnerClass(outer=true, extra={"net.sf.saxon.om.Sequence[] argValues",
-                                         "net.sf.saxon.expr.Component targetComponent",
-                                         "net.sf.saxon.expr.instruct.UserFunction target"})
+    @CSharpInnerClass(outer=true, extra={"Saxon.Hej.om.Sequence[] argValues",
+                                         "Saxon.Hej.expr.Component targetComponent",
+                                         "Saxon.Hej.expr.instruct.UserFunction target"})
     public ItemFeed makeItemFeed(WatchManager watchManager, final ItemFeed resultFeed, final XPathContext context) throws XPathException {
         UserFunctionCall exp = (UserFunctionCall) getExpression();
         final Component targetComponent = exp.getTargetComponent(context);

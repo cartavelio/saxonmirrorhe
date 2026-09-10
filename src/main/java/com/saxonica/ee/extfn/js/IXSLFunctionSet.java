@@ -206,7 +206,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     public static class Call extends SystemFunction {
 
         @Override
-        @CSharpReplaceBody(code="return net.sf.saxon.value.EmptySequence.getInstance();")
+        @CSharpReplaceBody(code="return Saxon.Hej.value.EmptySequence.getInstance();")
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             ScriptEngine engine = obtainEngine();
             Object target = convertToJavaScript(arguments[0]);
@@ -230,7 +230,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     public static class Eval extends SystemFunction {
 
         @Override
-        @CSharpReplaceBody(code = "return net.sf.saxon.value.EmptySequence.getInstance();")
+        @CSharpReplaceBody(code = "return Saxon.Hej.value.EmptySequence.getInstance();")
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             ScriptEngine engine = obtainEngine();
             try {

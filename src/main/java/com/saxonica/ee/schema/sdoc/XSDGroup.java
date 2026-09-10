@@ -210,7 +210,7 @@ public class XSDGroup extends SchemaElement {
                     if (foundMaxOccurs) {
                         mutuallyExclusiveElementAndAttribute("all", "maxOccurs");
                     }
-                    CSharp.emitCode("goto case net.sf.saxon.om.StandardNames.XS_SEQUENCE;");
+                    CSharp.emitCode("goto case Saxon.Hej.om.StandardNames.XS_SEQUENCE;");
                     // fall through
                 case StandardNames.XS_SEQUENCE:
                 case StandardNames.XS_CHOICE:

@@ -3,6 +3,7 @@ package com.saxonica.functions.extfn;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
+import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StringCollator;
@@ -38,7 +39,7 @@ import java.util.Properties;
  * <p>returns true if the sequences are deep equal, otherwise false</p>
  */
 
-public class DeepEqual extends SystemFunction {
+public class SaxonDeepEqual extends SystemFunction {
 
 
     /**
@@ -80,39 +81,39 @@ public class DeepEqual extends SystemFunction {
         GenericAtomicComparer comparer = new GenericAtomicComparer(collator, context);
         int flag = 0;
         if (flags.contains("N")) {
-            flag |= net.sf.saxon.functions.DeepEqual.INCLUDE_NAMESPACES;
+            flag |= DeepEqual.INCLUDE_NAMESPACES;
         }
         if (flags.contains("J")) {
-            flag |= net.sf.saxon.functions.DeepEqual.JOIN_ADJACENT_TEXT_NODES;
+            flag |= DeepEqual.JOIN_ADJACENT_TEXT_NODES;
         }
         if (flags.contains("C")) {
-            flag |= net.sf.saxon.functions.DeepEqual.INCLUDE_COMMENTS;
+            flag |= DeepEqual.INCLUDE_COMMENTS;
         }
         if (flags.contains("P")) {
-            flag |= net.sf.saxon.functions.DeepEqual.INCLUDE_PROCESSING_INSTRUCTIONS;
+            flag |= DeepEqual.INCLUDE_PROCESSING_INSTRUCTIONS;
         }
         if (flags.contains("F")) {
-            flag |= net.sf.saxon.functions.DeepEqual.INCLUDE_PREFIXES;
+            flag |= DeepEqual.INCLUDE_PREFIXES;
         }
         if (flags.contains("S")) {
-            flag |= net.sf.saxon.functions.DeepEqual.COMPARE_STRING_VALUES;
+            flag |= DeepEqual.COMPARE_STRING_VALUES;
         }
         if (flags.contains("A")) {
-            flag |= net.sf.saxon.functions.DeepEqual.COMPARE_ANNOTATIONS;
+            flag |= DeepEqual.COMPARE_ANNOTATIONS;
         }
         if (flags.contains("I")) {
-            flag |= net.sf.saxon.functions.DeepEqual.COMPARE_ID_FLAGS;
+            flag |= DeepEqual.COMPARE_ID_FLAGS;
         }
         if (flags.contains("v")) {
-            flag |= net.sf.saxon.functions.DeepEqual.EXCLUDE_VARIETY;
+            flag |= DeepEqual.EXCLUDE_VARIETY;
         }
         if (flags.contains("w")) {
-            flag |= net.sf.saxon.functions.DeepEqual.EXCLUDE_WHITESPACE_TEXT_NODES;
+            flag |= DeepEqual.EXCLUDE_WHITESPACE_TEXT_NODES;
         }
         if (flags.contains("?")) {
-            flag |= net.sf.saxon.functions.DeepEqual.WARNING_IF_FALSE;
+            flag |= DeepEqual.WARNING_IF_FALSE;
         }
-        boolean result = net.sf.saxon.functions.DeepEqual.deepEqual(
+        boolean result = DeepEqual.deepEqual(
                 arguments[0].iterate(), arguments[1].iterate(), comparer, context, flag);
         return BooleanValue.get(result);
 

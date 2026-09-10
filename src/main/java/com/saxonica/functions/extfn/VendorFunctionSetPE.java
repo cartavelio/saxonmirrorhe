@@ -153,7 +153,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, NodeKindTest.DOCUMENT, OPT, null);
 
 
-        register("deep-equal", 4, DeepEqual.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("deep-equal", 4, SaxonDeepEqual.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null)

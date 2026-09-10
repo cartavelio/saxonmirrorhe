@@ -305,7 +305,7 @@ public abstract class SchemaReader {
         return e instanceof SAXParseException;
     }
 
-    @CSharpReplaceBody(code="net.sf.saxon.@event.Sender.send(source, valve, options);")
+    @CSharpReplaceBody(code="Saxon.Hej.@event.Sender.send(source, valve, options);")
     private static void sendSchemaSource(Source source, SchemaCompiler compiler, PipelineConfiguration pipe, Valve valve, Configuration config, ParseOptions options) throws XPathException {
         if (Version.platform.isJava() && options.getXMLReader() == null && options.getXMLReaderMaker() == null
                 && !(source instanceof NodeInfo || source instanceof DOMSource)) {

@@ -226,7 +226,7 @@ public class StreamingAdjunct {
         return new StreamingAdjunct();
     }
 
-    @CSharpInnerClass(outer=false, extra={"com.saxonica.ee.stream.StreamInstr stream"})
+    @CSharpInnerClass(outer=false, extra={"Saxon.Eej.ee.stream.StreamInstr stream"})
     private static StreamingAdjunct adjunctForStreamInstr(final StreamInstr stream) {
         return new StreamingAdjunct() {
             @Override

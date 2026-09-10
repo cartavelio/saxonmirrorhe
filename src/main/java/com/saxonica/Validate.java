@@ -10,6 +10,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.ValidationException;
 import org.xml.sax.InputSource;
@@ -72,8 +73,8 @@ public class Validate {
      *
      * @param options the CommandLineOptions in which the recognized options are to be registered.
      */
-
-    public void setPermittedOptions(/*@NotNull*/ CommandLineOptions options) {
+    @CSharpModifiers(code = {"internal"})
+    protected void setPermittedOptions(/*@NotNull*/ CommandLineOptions options) {
         options.addRecognizedOption("config", (CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED),
                 "Use specified configuration file");
         options.addRecognizedOption("catalog", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
@@ -531,6 +532,7 @@ public class Validate {
      */
 
     @SuppressWarnings({"UnusedDeclaration"})
+    @CSharpModifiers(code = {"internal"})
     protected void applyLocalOptions(CommandLineOptions options, Configuration config) {
         // no action: provided for subclasses to override
     }
@@ -614,6 +616,7 @@ public class Validate {
      * @throws SaxonApiException If the validation fails (or if validation could not be attempted)
      */
 
+    @CSharpModifiers(code = {"internal"})
     public void processFile(/*@NotNull*/ Source source, SchemaValidator validator)
             throws SaxonApiException {
 
