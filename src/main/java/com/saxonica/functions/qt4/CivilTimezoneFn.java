@@ -4,6 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.value.DayTimeDurationValue;
 import net.sf.saxon.value.StringValue;
@@ -37,7 +38,7 @@ public class CivilTimezoneFn extends SystemFunction {
             StringValue placeVal = (StringValue) arguments[1].head();
             if (placeVal != null) {
                 String place = placeVal.getStringValue();
-                if (!Set.of(TimeZone.getAvailableIDs()).contains(place)) {
+                if (!isAvailableTimeZone(place)) {
                     throw new XPathException("Unknown timezone " + place, "FODT0004");
                 }
                 tz = TimeZone.getTimeZone(place);
@@ -45,7 +46,12 @@ public class CivilTimezoneFn extends SystemFunction {
         }
         BigDecimal seconds = time.toDateTime().secondsSinceEpoch();
         int millisOffset = tz.getOffset(seconds.longValue() * 1000);
-        return new DayTimeDurationValue(new BigDecimal(millisOffset/1000));
+        return new DayTimeDurationValue(BigDecimal.valueOf(millisOffset/1000));
+    }
+
+    @CSharpReplaceBody(code="return Saxon.Ejava.util.TimeZone.isAvailableID(place);")
+    private boolean isAvailableTimeZone(String place) {
+        return Set.of(TimeZone.getAvailableIDs()).contains(place);
     }
 
 
