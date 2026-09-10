@@ -1644,7 +1644,7 @@
 
             <tr>
                <td>
-                  <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon/XdmValue</a>
+                  <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a>
                </td>
                <td>
                   <span class="signature">runQueryToValue()</span>
@@ -2167,7 +2167,7 @@
             <tr>
                <td>
                   <a class="bodylink code"
-                           href="../saxon_c_php_xsdschema">XsdSchema</a>
+                           href="../saxon_c_php_xsdschema">Saxon\XsdSchema</a>
                </td>
                <td>
                   <span class="signature">compileFromString(string $schema)</span>
@@ -2177,7 +2177,7 @@
             <tr>
                <td>
                   <a class="bodylink code"
-                           href="../saxon_c_php_xsdschema">XsdSchema</a>
+                     href="../saxon_c_php_xsdschema">Saxon\XsdSchema</a>
                </td>
                <td>
                   <span class="signature">compileFromFile(string $filename)</span>
@@ -2188,7 +2188,7 @@
             <tr>
                <td>
                   <a class="bodylink code"
-                           href="../saxon_c_php_xsdschema">XsdSchema</a>
+                     href="../saxon_c_php_xsdschema">Saxon\XsdSchema</a>
                </td>
                <td>
                   <span class="signature">compileFromNode(<a class="bodylink code"
@@ -2200,7 +2200,7 @@
             <tr>
                <td>
                   <a class="bodylink code"
-                     href="../saxon_c_php_xsdschema">XsdSchema</a>
+                     href="../saxon_c_php_xsdschema">Saxon\XsdSchema</a>
                </td>
                <td>
                   <span class="signature">combine(array $schemas)</span>
@@ -2229,7 +2229,7 @@
             <tr>
                <td>
                   <a class="bodylink code"
-                     href="../saxon_c_php_xsdschema">XsdSchema</a>
+                     href="../saxon_c_php_xsdschema">Saxon\XsdSchema</a>
                </td>
                <td>
                   <span class="signature">emptySchema()</span>
@@ -2239,7 +2239,7 @@
             <tr>
                <td>
                   <a class="bodylink code"
-                     href="../saxon_c_php_xsdschema">XsdSchema</a>
+                     href="../saxon_c_php_xsdschema">Saxon\XsdSchema</a>
                </td>
                <td>
                   <span class="signature">importComponentsFromNode(XdmNode $node)</span>
@@ -2249,7 +2249,7 @@
             <tr>
                <td>
                   <a class="bodylink code"
-                     href="../saxon_c_php_xsdschema">XsdSchema</a>
+                     href="../saxon_c_php_xsdschema">Saxon\XsdSchema</a>
                </td>
                <td>
                   <span class="signature">importComponents(string $filename)</span>
@@ -2337,7 +2337,7 @@
             <tr>
                <td>
                   <a class="bodylink code"
-                     href="../saxon_c_php_xsdschema">XsdSchema</a>
+                     href="../saxon_c_php_xsdschema">Saxon\XsdSchema</a>
                </td>
                <td>
                   <span class="signature">combine(XsdSchema $other)</span>
@@ -2353,7 +2353,7 @@
             <tr>
                <td>
                   <a class="bodylink code"
-                     href="../saxon_c_php_xsdschema">XsdSchema</a>
+                     href="../saxon_c_php_xsdschema">Saxon\XsdSchema</a>
                </td>
                <td>
                   <span class="signature">exportComponents(string $filename)</span>
@@ -3333,7 +3333,7 @@
                <td>
                   <code>
                      <a class="bodylink code" href="../saxon_c_php_xdmfunctionitem"
-                     >Saxon/XdmFunctionItem</a>
+                     >Saxon\XdmFunctionItem</a>
                   </code>
                </td>
                <td>
@@ -3356,7 +3356,7 @@
                <td>
                   <code>
                      <a class="bodylink code" href="../saxon_c_php_xdmvalue"
-                     >Saxon/XdmValue</a>
+                     >Saxon\XdmValue</a>
                   </code>
                </td>
                <td>
@@ -3418,7 +3418,7 @@
                <td>
                   <code>
                      <a class="bodylink code" href="../saxon_c_php_xdmvalue"
-                     >Saxon/XdmValue</a>
+                     >Saxon\XdmValue</a>
                   </code>
                </td>
                <td>
@@ -3431,12 +3431,12 @@
                <td>
                   <code>
                      <a class="bodylink code" href="../saxon_c_php_xdmarray"
-                     >Saxon/XdmArray</a>
+                     >Saxon\XdmArray</a>
                   </code>
                </td>
                <td>
                   <span class="signature">put(int $n, <a class="bodylink code"
-                                                         href="../saxon_c_php_xdmvalue">Saxon/XdmValue</a> $value)</span>
+                                                         href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a> $value)</span>
                   <div class="fcomment">Create a new array in which one member is replaced
                      with a new value. The argument $n is the position of the member that is
                      to be replaced, counting the first member in the array as member zero.
@@ -3449,12 +3449,12 @@
                <td>
                   <code>
                      <a class="bodylink code" href="../saxon_c_php_xdmarray"
-                     >Saxon/XdmArray</a>
+                     >Saxon\XdmArray</a>
                   </code>
                </td>
                <td>
                   <span class="signature">addMember(<a class="bodylink code"
-                                                       href="../saxon_c_php_xdmvalue">Saxon/XdmValue</a> $value)</span>
+                                                       href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a> $value)</span>
                   <div class="fcomment">Append a new member to an array. The returned new
                      array is one item longer than the original. Note: if the value is lazily
                      evaluated, and evaluation fails then return null.</div>
@@ -3466,7 +3466,7 @@
                </td>
                <td>
                   <span class="signature">concat(<a class="bodylink code"
-                                                    href="../saxon_c_php_xdmarray">Saxon/XdmArray</a> $value)</span>
+                                                    href="../saxon_c_php_xdmarray">Saxon\XdmArray</a> $value)</span>
                   <div class="fcomment">Concatenate another array. Returns a new array,
                      containing the members of this array followed by the members of the
                      array supplied in the $value argument.</div>
@@ -3526,12 +3526,12 @@
                <td>
                   <code>
                      <a class="bodylink code" href="../saxon_c_php_xdmvalue"
-                     >Saxon/XdmValue</a>
+                     >Saxon\XdmValue</a>
                   </code>
                </td>
                <td>
                   <span class="signature">get(<a class="bodylink code"
-                                                 href="../saxon_c_php_xdmatomicvalue">Saxon/XdmAtomicValue</a>
+                                                 href="../saxon_c_php_xdmatomicvalue">Saxon\XdmAtomicValue</a>
                      $key)</span>
                   <div class="fcomment">Returns the value to which the specified key is
                      mapped, or null if this map contains no mapping for the key. The
@@ -3544,7 +3544,7 @@
                <td>
                   <code>
                      <a class="bodylink code" href="../saxon_c_php_xdmvalue"
-                     >Saxon/XdmValue</a>
+                     >Saxon\XdmValue</a>
                   </code>
                </td>
                <td>
@@ -3559,7 +3559,7 @@
                <td>
                   <code>
                      <a class="bodylink code" href="../saxon_c_php_xdmvalue"
-                     >Saxon/XdmValue</a>
+                     >Saxon\XdmValue</a>
                   </code>
                </td>
                <td>
@@ -3573,12 +3573,12 @@
             <tr>
                <td>
                   <code>
-                     <a class="bodylink code" href="../saxon_c_php_xdmmap">Saxon/XdmMap</a>
+                     <a class="bodylink code" href="../saxon_c_php_xdmmap">Saxon\XdmMap</a>
                   </code>
                </td>
                <td>
                   <span class="signature">put(<a class="bodylink code"
-                                                 href="../saxon_c_php_xdmatomicvalue">Saxon/XdmAtomicValue</a> $key,
+                                                 href="../saxon_c_php_xdmatomicvalue">Saxon\XdmAtomicValue</a> $key,
                      <a class="bodylink code" href="../saxon_c_php_xdmvalue">XdmValue</a>
                      $value)</span>
                   <div class="fcomment">Create a new map containing an additional (key, value)
@@ -3590,7 +3590,7 @@
             <tr>
                <td>
                   <code>
-                     <a class="bodylink code" href="../saxon_c_php_xdmmap">Saxon/XdmMap</a>
+                     <a class="bodylink code" href="../saxon_c_php_xdmmap">Saxon\XdmMap</a>
                   </code>
                </td>
                <td>
