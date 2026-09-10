@@ -10,7 +10,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
@@ -161,7 +160,7 @@ public class FieldChecker extends AbstractReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         // buffer the value, because it may be split by comments and PIs
         //System.err.println("FieldChecker " + this + ".characters() " + chars);
         if (active && matchElements && depth == 1) {

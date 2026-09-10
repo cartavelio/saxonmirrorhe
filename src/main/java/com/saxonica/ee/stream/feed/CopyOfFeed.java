@@ -23,7 +23,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.XmlProcessingError;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -248,17 +248,17 @@ public class CopyOfFeed extends AbsorptionFeed {
     }
 
     @Override
-    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location location, int properties) throws XPathException {
         getNextOutputter().characters(chars, location, properties);
     }
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
+    public void processingInstruction(String name, UnicodeString data, Location location, int properties) throws XPathException {
         getNextOutputter().processingInstruction(name, data, location, properties);
     }
 
     @Override
-    public void comment(CodePoints content, Location location, int properties) throws XPathException {
+    public void comment(UnicodeString content, Location location, int properties) throws XPathException {
         getNextOutputter().comment(content, location, properties);
     }
 

@@ -10,7 +10,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 
 import net.sf.saxon.transpile.CSharpDelegate;
@@ -93,7 +92,7 @@ public class EntityValidator extends ValidatingFilter {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (currentElementChecker != null) {
             buffer.accept(chars);
         }

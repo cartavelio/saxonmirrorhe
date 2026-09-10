@@ -8,7 +8,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.util.Orphan;
@@ -117,7 +116,7 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
         allocateStatic(compiler, expr.getLocation());
         ga.push(expr.getOptions());
         //public void characters(CodePoints chars, Location location, int properties)
-        ga.invokeInstanceMethod(Outputter.class, "characters", CodePoints.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "characters", UnicodeString.class, Location.class, Integer.TYPE);
     }
 }
 

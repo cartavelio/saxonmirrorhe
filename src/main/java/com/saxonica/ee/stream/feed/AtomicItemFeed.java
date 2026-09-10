@@ -4,7 +4,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -71,17 +71,17 @@ public abstract class AtomicItemFeed extends ItemFeed {
     }
 
     @Override
-    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location location, int properties) throws XPathException {
         notAllowed();
     }
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
+    public void processingInstruction(String name, UnicodeString data, Location location, int properties) throws XPathException {
         notAllowed();
     }
 
     @Override
-    public void comment(CodePoints content, Location location, int properties) throws XPathException {
+    public void comment(UnicodeString content, Location location, int properties) throws XPathException {
         notAllowed();
     }
 

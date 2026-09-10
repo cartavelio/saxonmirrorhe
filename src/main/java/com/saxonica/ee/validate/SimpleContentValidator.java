@@ -10,7 +10,6 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -145,7 +144,7 @@ public class SimpleContentValidator extends AttributeValidator {
 
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         buffer.accept(chars);
         if (getNillability() == Nillability.ALLOWED) {

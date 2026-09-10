@@ -6,7 +6,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -263,7 +262,7 @@ public abstract class UserSimpleType extends UserDefinedType
                         if (!(facet instanceof EnumerationFacet || facet instanceof EnumerationFacetSet ||
                                 facet instanceof AssertionFacet || facet instanceof WhitespaceFacet)) {
                             if (!facet.testAtomicValue(atom)) {
-                                CodePoints value = atom.getUnicodeStringValue();
+                                UnicodeString value = atom.getUnicodeStringValue();
                                 String message = "Enumeration value " + Err.wrap(value, Err.VALUE) +
                                         " is not a valid instance of the type: " +
                                         "it contravenes the " + facet.getName() + " facet";
@@ -284,7 +283,7 @@ public abstract class UserSimpleType extends UserDefinedType
                 if (pf == null) {
                     pf = (PatternFacet) facetList.get(i);
                 } else {
-                    CodePoints pat = facetList.get(i).getValue();
+                    UnicodeString pat = facetList.get(i).getValue();
                     pf.addBranch(pat);
                     facetList.remove(i);
                 }

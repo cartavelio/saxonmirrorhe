@@ -8,7 +8,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.Comment;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeString;
 
 
@@ -50,7 +49,7 @@ public class CommentCompiler extends SimpleNodeConstructorCompiler {
         Generator ga = compiler.getCurrentGenerator();
         allocateStatic(compiler, Loc.NONE);
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "comment", CodePoints.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "comment", UnicodeString.class, Location.class, Integer.TYPE);
     }
 }
 

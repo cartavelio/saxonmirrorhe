@@ -21,7 +21,6 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -493,7 +492,7 @@ public class ValidationStack extends ValidatingFilter {
     }
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
 //        if (!contentStarted) {
 //            startContent();
 //        }

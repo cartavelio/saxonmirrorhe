@@ -5,7 +5,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.Whitespace;
 
@@ -64,7 +63,7 @@ public class NormalizeSpaceCompiler extends ToStringCompiler {
                         compiler.getCurrentMethod());
 
         //return !Whitespace.isWhite(cs);
-        ga.invokeStaticMethod(Whitespace.class, "isAllWhite", CodePoints.class);
+        ga.invokeStaticMethod(Whitespace.class, "isAllWhite", UnicodeString.class);
         ga.not();
     }
 }

@@ -18,7 +18,6 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import org.objectweb.asm.Label;
@@ -567,7 +566,7 @@ public class CopyCompiler extends ToPushCompiler {
         LabelInfo nonEmptyFi = mi.newLabel("nonEmptyFi");
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "characters", CodePoints.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "characters", UnicodeString.class, Location.class, Integer.TYPE);
 
     }
 
@@ -581,7 +580,7 @@ public class CopyCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(NodeInfo.class, "getUnicodeStringValue");
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "comment", CodePoints.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "comment", UnicodeString.class, Location.class, Integer.TYPE);
 
     }
 
@@ -599,7 +598,7 @@ public class CopyCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(NodeInfo.class, "getUnicodeStringValue");
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "processingInstruction", String.class, CodePoints.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "processingInstruction", String.class, UnicodeString.class, Location.class, Integer.TYPE);
 
     }
 

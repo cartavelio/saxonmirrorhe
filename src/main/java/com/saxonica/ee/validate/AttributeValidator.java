@@ -12,7 +12,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.AttributeLocation;
@@ -444,13 +443,13 @@ public abstract class AttributeValidator extends ContentValidator {
 
     /**
      * Handle character data appearing as a child of the element being validated
-     *  @param chars      The character content
+     * @param chars      The character content
      * @param locationId the location of the node in the source, or of the instruction that created it
      * @param properties Additional properties  @throws net.sf.saxon.trans.XPathException
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         nextReceiver.characters(chars, locationId, properties);
     }

@@ -15,8 +15,8 @@ import net.sf.saxon.expr.instruct.OnNonEmptyExpr;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -299,7 +299,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
         }
 
         @Override
-        public void characters(CodePoints chars, Location location, int properties) throws XPathException {
+        public void characters(UnicodeString chars, Location location, int properties) throws XPathException {
             if (ReceiverOption.contains(properties,ReceiverOption.SEPARATOR) && isEmpty() && chars.toString().equals(" ")) {
                 // A whitespace separator between atomic values does not constitute significant
                 // content for assessing xsl:on-empty and xsl:on-non-empty. Treat it as if generated
@@ -312,7 +312,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
         }
 
         @Override
-        public void comment(CodePoints content, Location location, int properties) throws XPathException {
+        public void comment(UnicodeString content, Location location, int properties) throws XPathException {
             action();
             getNextOutputter().comment(content, location, properties);
         }

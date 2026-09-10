@@ -6,7 +6,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.UnfailingPullProvider;
 import net.sf.saxon.pull.UnparsedEntity;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -260,7 +260,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      */
 
     @Override
-    public CodePoints getStringValue() throws XPathException {
+    public UnicodeString getStringValue() throws XPathException {
         if (treeWalker != null) {
             return treeWalker.getStringValue();
         } else {

@@ -2,11 +2,13 @@ package com.saxonica.serialize;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.XMLEmitter;
 import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -23,7 +25,7 @@ public class OuterNewlineInserter extends ProxyReceiver {
     private int level = 0;
     private boolean beforeFirstElement = true;
 
-    private static final CodePoints NEWLINE = BMPString.of("\n");
+    private static final UnicodeString NEWLINE = BMPString.of("\n");
 
     /**
      * Create an XML Indenter
@@ -73,7 +75,7 @@ public class OuterNewlineInserter extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (level == 0 && !beforeFirstElement) {
             characters(NEWLINE, locationId, ReceiverOption.NONE);
         }
@@ -88,7 +90,7 @@ public class OuterNewlineInserter extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (level == 0 && !beforeFirstElement) {
             characters(NEWLINE, locationId, ReceiverOption.NONE);
         }

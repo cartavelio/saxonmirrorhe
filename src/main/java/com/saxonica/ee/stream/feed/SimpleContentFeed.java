@@ -7,12 +7,12 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.str.UnicodeBuilder;
 
 
 /**
@@ -46,7 +46,7 @@ public class SimpleContentFeed extends AbsorptionFeed {
     protected Sequence processGroundedItem(Item item) throws XPathException {
         if (item instanceof NodeInfo && ((NodeInfo)item).getNodeKind() == Type.TEXT) {
             // discard zero-length text nodes
-            CodePoints cs = item.getUnicodeStringValue();
+            UnicodeString cs = item.getUnicodeStringValue();
             if (cs.isEmpty()) {
                 return EmptySequence.getInstance();
             } else {

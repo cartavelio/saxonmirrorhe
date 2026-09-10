@@ -12,8 +12,8 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -262,7 +262,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
     }
 
     @Override
-    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location location, int properties) throws XPathException {
         if (!hasFailed()) {
             try {
                 next.characters(chars, location, properties);
@@ -274,7 +274,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
     }
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
+    public void processingInstruction(String name, UnicodeString data, Location location, int properties) throws XPathException {
         if (!hasFailed()) {
             try {
                 next.processingInstruction(name, data, location, properties);
@@ -286,7 +286,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
     }
 
     @Override
-    public void comment(CodePoints content, Location location, int properties) throws XPathException {
+    public void comment(UnicodeString content, Location location, int properties) throws XPathException {
         if (!hasFailed()) {
             try {
                 next.comment(content, location, properties);

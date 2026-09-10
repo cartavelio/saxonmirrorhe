@@ -8,7 +8,7 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.SchemaType;
@@ -126,7 +126,7 @@ public class Projector extends ProxyReceiver {
     }
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         inputNodes++;
         if (level >= copyAllLevel) {
             super.characters(chars, locationId, properties);
@@ -148,7 +148,7 @@ public class Projector extends ProxyReceiver {
     }
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         inputNodes++;
         if (level > copyAllLevel) {
             super.comment(chars, locationId, properties);
@@ -170,7 +170,7 @@ public class Projector extends ProxyReceiver {
     }
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         inputNodes++;
         if (level > copyAllLevel) {
             super.processingInstruction(target, data, locationId, properties);

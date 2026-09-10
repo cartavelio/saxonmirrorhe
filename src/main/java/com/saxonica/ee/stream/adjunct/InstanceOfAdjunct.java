@@ -11,7 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.ItemType;
@@ -133,21 +133,21 @@ public class InstanceOfAdjunct extends InspectionAdjunct implements FeedMaker {
         }
 
         @Override
-        public void characters(CodePoints chars, Location location, int properties) throws XPathException {
+        public void characters(UnicodeString chars, Location location, int properties) throws XPathException {
             if (level == 0) {
                 super.characters(chars, location, properties);
             }
         }
 
         @Override
-        public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
+        public void processingInstruction(String name, UnicodeString data, Location location, int properties) throws XPathException {
             if (level == 0) {
                 super.processingInstruction(name, data, location, properties);
             }
         }
 
         @Override
-        public void comment(CodePoints content, Location location, int properties) throws XPathException {
+        public void comment(UnicodeString content, Location location, int properties) throws XPathException {
             if (level == 0) {
                 super.comment(content, location, properties);
             }

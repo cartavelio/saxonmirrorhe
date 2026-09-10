@@ -7,10 +7,7 @@ import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.str.AbstractUniStringConsumer;
-import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.str.UniStringConsumer;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -73,7 +70,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
             return new AbstractUniStringConsumer() {
                 @Override
                 @CSharpModifiers(code={"public", "override"})
-                public UniStringConsumer accept(CodePoints chars) throws XPathException {
+                public UniStringConsumer accept(UnicodeString chars) throws XPathException {
                     try {
                         getNextOutputter().characters(chars, Loc.NONE, ReceiverOption.NONE);
                     } catch (XPathException e) {

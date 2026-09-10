@@ -6,7 +6,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -103,7 +103,7 @@ public class CatchingReceiver extends ProxyReceiver {
     }
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) {
+    public void characters(UnicodeString chars, Location locationId, int properties) {
         if (!failed) {
             try {
                 super.characters(chars, locationId, properties);
@@ -115,7 +115,7 @@ public class CatchingReceiver extends ProxyReceiver {
     }
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) {
         if (!failed) {
             try {
                 super.processingInstruction(target, data, locationId, properties);
@@ -127,7 +127,7 @@ public class CatchingReceiver extends ProxyReceiver {
     }
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) {
+    public void comment(UnicodeString chars, Location locationId, int properties) {
         if (!failed) {
             try {
                 super.comment(chars, locationId, properties);

@@ -5,10 +5,10 @@ import net.sf.saxon.dom.DOMSender;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -283,7 +283,7 @@ public class Erector implements Receiver {
      */
 
     @Override
-    public void characters(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(/*@NotNull*/ UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (!chars.isEmpty()) {
             nodeNr = makeTextNode(chars);
         }
@@ -298,7 +298,7 @@ public class Erector implements Receiver {
      * this text has been appended.
      */
 
-    protected int makeTextNode(CodePoints chars) {
+    protected int makeTextNode(UnicodeString chars) {
         DominoTree tt = tree;
 
         int n = tt.numberOfNodes - 1;
@@ -326,7 +326,7 @@ public class Erector implements Receiver {
      */
 
     @Override
-    public void processingInstruction(String piname, /*@NotNull*/ CodePoints remainder, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String piname, /*@NotNull*/ UnicodeString remainder, Location locationId, int properties) throws XPathException {
         DominoTree tt = tree;
         int fp = namePool.allocateFingerprint("", piname);
 
@@ -347,7 +347,7 @@ public class Erector implements Receiver {
      */
 
     @Override
-    public void comment(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(/*@NotNull*/ UnicodeString chars, Location locationId, int properties) throws XPathException {
 
         DominoTree tt = tree;
         nodeNr = tt.addNode(Type.COMMENT, currentDepth, NULL_FP, sender.getCurrentNode());

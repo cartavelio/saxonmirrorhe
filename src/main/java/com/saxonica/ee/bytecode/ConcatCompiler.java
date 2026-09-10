@@ -6,7 +6,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.SystemFunctionCall;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -52,7 +51,7 @@ public class ConcatCompiler extends ToStringCompiler {
                 // this path is particularly useful for literal arguments
                 ga.loadLocal(sbVar);
                 compiler.compileToPrimitive(fnc.getArg(i), requiredClass, OnEmpty.RETURN_EMPTY_STRING);
-                ga.invokeInstanceMethod(builderClass, "append", requiredClass==String.class ? String.class : CodePoints.class);
+                ga.invokeInstanceMethod(builderClass, "append", requiredClass==String.class ? String.class : UnicodeString.class);
             } else {
                 compiler.compileToItem(fnc.getArg(i));
                 ga.checkClass(AtomicValue.class);
@@ -66,7 +65,7 @@ public class ConcatCompiler extends ToStringCompiler {
                 ga.loadLocal(sbVar);
                 ga.loadLocal(valVar);
                 ga.invokeInstanceMethod(AtomicValue.class, requiredClass == String.class ? "getStringValue" : "getUnicodeStringValue");
-                ga.invokeInstanceMethod(builderClass, "append", requiredClass == String.class ? String.class : CodePoints.class);
+                ga.invokeInstanceMethod(builderClass, "append", requiredClass == String.class ? String.class : UnicodeString.class);
                 if (nullLab != null) {
                     methodInfo.placeLabel(nullLab);
                 }

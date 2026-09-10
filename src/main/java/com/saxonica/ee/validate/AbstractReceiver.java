@@ -4,10 +4,10 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -21,7 +21,7 @@ public abstract class AbstractReceiver implements Receiver {
     private String systemId;
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         //
     }
 
@@ -31,7 +31,7 @@ public abstract class AbstractReceiver implements Receiver {
     }
 
     @Override
-    public void comment(CodePoints content, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString content, Location locationId, int properties) throws XPathException {
         //
     }
 
@@ -61,7 +61,7 @@ public abstract class AbstractReceiver implements Receiver {
     }
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String name, UnicodeString data, Location locationId, int properties) throws XPathException {
         //
     }
 

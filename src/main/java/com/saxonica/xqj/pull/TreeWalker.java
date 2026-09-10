@@ -7,7 +7,7 @@ import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.UnfailingPullProvider;
 import net.sf.saxon.pull.UnparsedEntity;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -349,7 +349,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      */
 
     @Override
-    public CodePoints getStringValue() {
+    public UnicodeString getStringValue() {
         if (currentNode == null) {
             throw new IllegalStateException("No current node");
         }

@@ -1,6 +1,6 @@
 package com.saxonica.ee.bytecode.simtype;
 
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.ValidationFailure;
 
 /**
@@ -14,7 +14,7 @@ public abstract class AtomicTypeValidator {
      * @return null if the value is valid; otherwise a ValidationFailure containing details of the invalidity
      */
 
-    public abstract ValidationFailure validate(CodePoints value);
+    public abstract ValidationFailure validate(UnicodeString value);
 }
 
 // Copyright (c) 2018-2020 Saxonica Limited

@@ -12,7 +12,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -112,7 +111,7 @@ public class DocumentInstrCompiler extends ToPushCompiler {
                 ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
                 ga.loadLocal(fsbVar);
                 ga.swap();
-                ga.invokeInstanceMethod(UnicodeBuilder.class, "append", CodePoints.class);
+                ga.invokeInstanceMethod(UnicodeBuilder.class, "append", UnicodeString.class);
                 ga.goTo(loop);
 
                 methodInfo.placeLabel(loopDone);

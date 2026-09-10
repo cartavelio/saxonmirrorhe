@@ -5,7 +5,6 @@ import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.regex.RegularExpression;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -109,7 +108,7 @@ public class PatternFacet extends Facet {
      * @param pat the new branch, which must be a valid regular expression
      */
 
-    public void addBranch(CodePoints pat) {
+    public void addBranch(UnicodeString pat) {
         try {
             setValue('(' + getValue().toString() + ")|(" + pat + ')');
             compile(null);

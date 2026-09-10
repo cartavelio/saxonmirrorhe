@@ -8,7 +8,6 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -91,7 +90,7 @@ public class EmptyContentValidator extends AttributeValidator {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         if (allowTextNodes) {
             ElementDecl decl = getElementDeclaration();

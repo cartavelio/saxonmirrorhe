@@ -13,7 +13,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
@@ -430,7 +430,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
 
         try {
             //trace("text: " + Err.wrap(chars));
@@ -442,7 +442,6 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
             for (Watch watch : watchList) {
                 if (watch.matchesNodesOfKind(UType.TEXT)) {  // optimization: most patterns match element nodes only
                     if (node == null) {
-                        chars = chars.save(); // Until now, the characters are in a mutable buffer supplied by the XML parser
                         node = new FleetingNode();
                         node.setNodeKind(Type.TEXT);
                         node.setParent(parent);
@@ -601,7 +600,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
 
         ensureStackSpace();
 
@@ -639,7 +638,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         ensureStackSpace();
 
         FleetingNode node = new FleetingNode();

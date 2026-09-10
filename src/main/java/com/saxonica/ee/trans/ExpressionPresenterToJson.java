@@ -6,7 +6,7 @@ import net.sf.saxon.event.Sink;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.JSONEmitter;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.StringValue;
@@ -65,7 +65,7 @@ public class ExpressionPresenterToJson extends ProxyReceiver {
     }
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         // Used to output the checksum
         out.writeKey(target);
         out.writeAtomicValue(new StringValue(data.tidy()));

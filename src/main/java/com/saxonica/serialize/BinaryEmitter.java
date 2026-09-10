@@ -7,7 +7,6 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.Emitter;
 import net.sf.saxon.serialize.ExpandedStreamResult;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -57,7 +56,7 @@ public abstract class BinaryEmitter extends Emitter {
     }
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         assert outputStream != null;
         byte[] bytes = textNodeToBinary(chars.tidy());
         try {
@@ -70,12 +69,12 @@ public abstract class BinaryEmitter extends Emitter {
     protected abstract byte[] textNodeToBinary(UnicodeString chars) throws XPathException;
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String name, UnicodeString data, Location locationId, int properties) throws XPathException {
 
     }
 
     @Override
-    public void comment(CodePoints content, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString content, Location locationId, int properties) throws XPathException {
 
     }
 

@@ -9,7 +9,6 @@ import net.sf.saxon.expr.number.Numberer_en;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -99,7 +98,7 @@ public class IdValidator extends ValidatingFilter {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (currentElementChecker != null) {
             buffer.accept(chars);
         }

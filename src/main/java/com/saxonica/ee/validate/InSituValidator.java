@@ -7,7 +7,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.SchemaType;
@@ -131,7 +131,7 @@ public class InSituValidator {
         }
 
         @Override
-        public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
             if (ReceiverOption.contains(properties, ReceiverOption.DEFAULTED_VALUE)) {
                 Orphan child = new Orphan(getConfiguration());
                 child.setNodeKind(Type.TEXT);

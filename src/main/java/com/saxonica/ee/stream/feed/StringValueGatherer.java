@@ -1,8 +1,8 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.validate.AbstractReceiver;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.str.UnicodeBuilder;
 
@@ -21,7 +21,7 @@ public class StringValueGatherer extends AbstractReceiver {
     }
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         buffer.accept(chars);
     }
 

@@ -7,7 +7,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.ProcessingInstruction;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
@@ -112,7 +111,7 @@ public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler
         Generator ga = compiler.getCurrentGenerator();
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "processingInstruction", String.class, CodePoints.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "processingInstruction", String.class, UnicodeString.class, Location.class, Integer.TYPE);
     }
 
 

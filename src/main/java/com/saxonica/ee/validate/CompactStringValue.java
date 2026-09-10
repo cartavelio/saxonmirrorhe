@@ -2,7 +2,6 @@ package com.saxonica.ee.validate;
 
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -30,7 +29,7 @@ public class CompactStringValue implements AtomicSequence {
     // using this class, but is problematic in the more general case. For the moment, getting the storage down to a
     // single char[] is a big win over 9.5 and earlier releases.
 
-    public CompactStringValue(CodePoints content) {
+    public CompactStringValue(UnicodeString content) {
         this.value = content.toString().toCharArray();
     }
 
