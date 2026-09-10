@@ -4137,9 +4137,10 @@
                 <p>Alternatively, it is possible to resolve package names and versions
                     programmatically by setting up a <code>PackageLibrary</code>.</p>
                 <p>Packages are available in all Saxon editions. However, only Saxon-EE can be used
-                    to export a package in compiled (SEF) form to filestore, and only Saxon-PE or
-                    -EE can be used to load a compiled package from filestore. With Saxon-HE,
-                    packages must be compiled from source code every time they are used.</p>
+                    to export a package in compiled (SEF) form to filestore. From Saxon 9.9 (or from
+                    11.1 for SaxonC), loading a compiled package from filestore is possible using
+                    any Saxon edition. (In Saxon-HE 9.7 and 9.8, packages must be compiled from
+                    source code every time they are used.)</p>
                 <p class="qt4">The XSLT 4.0 attributes <code>fixed-namespaces</code> and
                     <code>schema-role</code> are implemented since Saxon 13.</p>
             </status>
@@ -5644,10 +5645,10 @@
                     in Saxon 9.8. If the configuration file defines multiple versions of the same
                     package, the first one that satisfied the required version specified in the
                         <code>xsl:use-package</code> declaration is chosen.</p>
-                <p>In Saxon-HE, the requested package must already exist in compiled form in memory.
-                    With Saxon-PE and Saxon-EE it can be loaded from a SEF file in filestore (or
-                    accessible from the web via a URI).</p>
-
+                <p>From Saxon 9.9 (or from 11.1 for SaxonC), the requested package can be loaded
+                    from a SEF file in filestore (or accessible from the web via a URI) using any
+                    Saxon edition. (In Saxon-HE 9.7 and 9.8, the requested package must already
+                    exist in compiled form in memory.)</p>
             </status>
             <see-also name="accept" type="xsl-elements"/>
             <see-also name="override" type="xsl-elements"/>
