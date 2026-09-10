@@ -45,7 +45,7 @@
             select = "?*?cities?*"/>
       </xsl:variable>
       <out>
-         <xsl:value-of select="serialize(array{$table}, map{'method':'json'})"/>
+         <xsl:value-of select="serialize(array{$table}, map{'method':'json', xs:QName('saxon:property-order'): 'name population _keys'})"/>
       </out>
    </xsl:template>
 
