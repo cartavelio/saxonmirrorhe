@@ -196,6 +196,9 @@
         <p>The function <code>fn:iterate-while</code> is renamed <code>fn:while-do</code>, and the function
         <code>fn:do-until</code> is implemented.</p>
         
+        <p>The function <code>fn:round</code> acquires a third argument that can be used to control
+        the rounding mode.</p>
+        
         <p>The functions <code>map:values</code> and <code>array:values</code> are implemented.</p>
         
         <p>The functions <code>map:empty</code> and <code>map:keys-where</code> are implemented.</p>
@@ -244,8 +247,8 @@
         
         <p>The ItemType syntax <code>union(a, b)</code> has been dropped from the 4.0 specification,
         but remains supported in Saxon for the time being. The replacement syntax is <code>(a|b)</code>
-        (the parentheses are mandatory). The new syntax is currently supported only for atomic types
-        or NodeTests.</p>
+        (the parentheses are mandatory). This allows, for example, <code>as="(map(*)|array(*))"</code>
+        for a function or variable that accepts either a map or an array.</p>
         
         <p>The adaptive serialization method has changed to output maps as <code>{...}</code>
         rather than <code>map{...}</code>.</p>
