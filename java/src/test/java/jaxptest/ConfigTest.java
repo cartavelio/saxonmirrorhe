@@ -39,225 +39,11 @@ import static org.junit.jupiter.api.Assertions.fail;
  *  Test use of configuration files
  */
 public class ConfigTest {
-    private String DATA_DIR = null;
-    private String TEMP_DIR = null;
-    private String BUGS_DIR = null;
-    private String XMARK_DIR = null;
-    private String QT4_TESTS_DIR = null;
-    private String QT4_SPECS_DIR = null;
-
-    public ConfigTest() {
-        // The directories above used to be static final, but that had the nasty consequence
-        // that a failure of those methods caused the ConfigTest constructor to fail which
-        // in turn was quite tricky to debug, especially in a remote CI environment.
-        // Norm reworked this class, and related classes, so that the values are constructed
-        // once, but not during the constructor.
-    }
-
-    public String getDataDir() {
-        if (DATA_DIR == null) {
-            DATA_DIR = Testdata.dir().toString() + "/";
-        }
-        return DATA_DIR;
-    }
-
-    public String getTempDir() {
-        if (TEMP_DIR == null) {
-            TEMP_DIR = junitTempDirectory();
-        }
-        return TEMP_DIR;
-    }
-
-    public String getBugsDir() {
-        if (BUGS_DIR == null) {
-            BUGS_DIR = junitBugsDirectory();
-        }
-        return BUGS_DIR;
-    }
-
-    public String getXMarkDir() {
-        if (XMARK_DIR == null) {
-            XMARK_DIR = junitXMarkDirectory();
-        }
-        return XMARK_DIR;
-    }
-
-    public String getQt4TestsDir() {
-        if (QT4_TESTS_DIR == null) {
-            QT4_TESTS_DIR = qt4TestsDirectory();
-        }
-        return QT4_TESTS_DIR;
-    }
-
-     public String getQt4SpecsDir() {
-         if (QT4_SPECS_DIR == null) {
-             QT4_SPECS_DIR = qt4SpecsDirectory();
-         }
-         return QT4_SPECS_DIR;
-    }
-
-    private static String junitDataDirectory() {
-        File dir = null;
-        String envar = "SAXON_TEST_DATA";
-        String env = System.getenv(envar);
-        if (env == null) {
-            // Assume the current directory is the root of the project
-            dir = new File(System.getProperty("user.dir") + "/src/test/testdata");
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
-            }
-        } else {
-            dir = new File(env);
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
-            }
-        }
-        String path = dir.getAbsolutePath().replace("\\", "/");
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
-        return path;
-    }
-
-    private static String junitTempDirectory() {
-        File dir = null;
-        try {
-            dir = null;
-            String envar = "SAXON_TEMP_DATA";
-            String env = System.getenv(envar);
-            if (env == null) {
-                // Assume the current directory is the root of the project
-                dir = new File(System.getProperty("user.dir") + "/build");
-                if (!dir.exists() || !dir.isDirectory()) {
-                    throw new RuntimeException("Failed to find build in " + dir.getAbsolutePath() + "; set " + envar);
-                }
-                dir = new File(System.getProperty("user.dir") + "/build/temp");
-                if (!dir.exists()) {
-                    if (!dir.mkdir()) {
-                        throw new RuntimeException("Failed to create " + dir.getAbsolutePath() + "; set " + envar);
-                    }
-                }
-                dir = new File(System.getProperty("user.dir") + "/build/temp");
-                if (!dir.exists() || !dir.isDirectory()) {
-                    throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
-                }
-            } else {
-                dir = new File(env);
-                if (!dir.exists() || !dir.isDirectory()) {
-                    throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
-                }
-            }
-        } catch (RuntimeException e) {
-            System.err.println(e.getMessage()); // otherwise we somehow lose the diagnostics
-            throw e;
-        }
-        String path = dir.getAbsolutePath().replace("\\", "/");
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
-        return path;
-    }
-
-    private static String junitBugsDirectory() {
-        File dir = null;
-        String envar = "SAXON_BUGS_DATA";
-        String env = System.getenv(envar);
-        if (env == null) {
-            // Assume the current directory is the root of the project
-            dir = new File(System.getProperty("user.dir") + "/src/test/bugs");
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
-            }
-        } else {
-            dir = new File(env);
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
-            }
-        }
-        String path = dir.getAbsolutePath().replace("\\", "/");
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
-        return path;
-    }
-
-    private static String junitXMarkDirectory() {
-        File dir = null;
-        String envar = "SAXON_XMARK_DATA";
-        String env = System.getenv(envar);
-        if (env == null) {
-            // Assume the current directory is the root of the project
-            dir = new File(System.getProperty("user.dir") + "/src/test/xmark");
-            if (!dir.exists() || !dir.isDirectory()) {
-                Properties p = System.getProperties();
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
-            }
-        } else {
-            dir = new File(env);
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
-            }
-        }
-        String path = dir.getAbsolutePath().replace("\\", "/");
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
-        return path;
-    }
-
-    private static String qt4TestsDirectory() {
-        File dir = null;
-        String envar = "W3C_QT4_TEST_SUITE_DIR";
-        String env = System.getenv(envar);
-        if (env == null) {
-            // Assume the current directory is the root of the project
-            throw new RuntimeException("Environment variable W3C_QT4_TEST_SUITE_DIR is not set");
-        } else {
-            dir = new File(env);
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
-            }
-        }
-        String path = dir.getAbsolutePath().replace("\\", "/");
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
-        return path;
-    }
-
-    private static String qt4SpecsDirectory() {
-        File dir = null;
-        String envar = "W3C_QT4_SPECS_DIR";
-        String env = System.getenv(envar);
-        if (env == null) {
-            // Assume that the specs live as a sibling of the qt4 tests
-            Path qt4TestsPath = Paths.get(qt4TestsDirectory());
-            Path assumedQt4SpecsPath = qt4TestsPath.resolve("../qtspecs");
-
-            if (!assumedQt4SpecsPath.toFile().isDirectory()) {
-                // Assume the current directory is the root of the project
-                throw new RuntimeException("Environment variable " + envar + " is not set, and there is no 'qtspecs' dir sibling of the W3C_QT4_TEST_DIR dir");
-            }
-            dir = assumedQt4SpecsPath.toAbsolutePath().toFile();
-        }
-        else {
-            dir = new File(env);
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
-            }
-        }
-        String path = dir.getAbsolutePath().replace("\\", "/");
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
-        return path;
-    }
-
     @Test
     public void testGeneralConfiguration() {
         try {
             Configuration config = new ConfigurationReader().makeConfiguration(
-                    new StreamSource(getDataDir() + "config.xml"));
+                    new StreamSource(Testdata.file("config.xml")));
             assertTrue(config.isLineNumbering(), "lineNumbering?");
             assertEquals(Boolean.TRUE, config.getConfigurationProperty(Feature.USE_TYPED_VALUE_CACHE), "tvc?");
         } catch (XPathException e) {
@@ -331,7 +117,7 @@ public class ConfigTest {
     public void testJaxpConfiguration() {
         try {
             TransformerFactoryImpl factory = new TransformerFactoryImpl();
-            factory.setAttribute(FeatureKeys.CONFIGURATION_FILE, getDataDir() + "config.xml");
+            factory.setAttribute(FeatureKeys.CONFIGURATION_FILE, Testdata.pathString("config.xml"));
             Configuration config = factory.getConfiguration();
             assertTrue(config.isLineNumbering(), "lineNumbering?");
             assertEquals(Boolean.TRUE, config.getConfigurationProperty(Feature.USE_TYPED_VALUE_CACHE), "tvc?");
@@ -441,14 +227,14 @@ public class ConfigTest {
                             "<global timing='true'/>\n" +
                             "<xsd useXsiSchemaLocation='false'/>\n" +
                             "<resources>\n" +
-                                "<schemaDocument>file:///" + getDataDir() + "books.xsd</schemaDocument>\n" +
+                                "<schemaDocument>file:///" + Testdata.file("books.xsd") + "</schemaDocument>\n" +
                             "</resources>\n" +
                         "</configuration>";
             Processor proc = new Processor(new StreamSource(new StringReader(config)));
             SchemaManager sm = proc.getSchemaManager();
             try {
                 SchemaValidator v = sm.newSchemaValidator();
-                v.validate(new StreamSource(new File(getDataDir() + "books.xml")));
+                v.validate(new StreamSource(Testdata.file("books.xml")));
                 fail("invalidity not detected");
             } catch (SaxonApiException|IllegalStateException verr) {
                 System.err.println("Failed as expected: " + verr.getMessage());
@@ -521,8 +307,8 @@ public class ConfigTest {
         try {
             javax.xml.transform.TransformerFactory tf = new com.saxonica.config.ProfessionalTransformerFactory();
             tf.setAttribute(FeatureKeys.XSLT_VERSION, "3.0");
-            tf.setAttribute(net.sf.saxon.lib.FeatureKeys.CONFIGURATION_FILE, getDataDir() + "config-sql.xml");
-            tf.newTemplates(new StreamSource(new File(getDataDir() + "books-sql.xsl")));
+            tf.setAttribute(net.sf.saxon.lib.FeatureKeys.CONFIGURATION_FILE, Testdata.pathString("config-sql.xml"));
+            tf.newTemplates(new StreamSource(Testdata.file("books-sql.xsl")));
         } catch (TransformerException err) {
             fail(err.getMessage());
         }
@@ -535,9 +321,9 @@ public class ConfigTest {
             tf.setAttribute(FeatureKeys.XSLT_VERSION, "2.0");
 
             ConfigurationReaderPE reader = new ConfigurationReaderPE();
-            Configuration config = reader.makeConfiguration(new StreamSource(new File(getDataDir() + "config-sql.xml")));
+            Configuration config = reader.makeConfiguration(new StreamSource(Testdata.file("config-sql.xml")));
             tf.setAttribute(FeatureKeys.CONFIGURATION, config);
-            tf.newTemplates(new StreamSource(new File(getDataDir() + "books-sql.xsl")));
+            tf.newTemplates(new StreamSource(Testdata.file("books-sql.xsl")));
         } catch (TransformerException err) {
             fail(err.getMessage());
         }
@@ -604,7 +390,7 @@ public class ConfigTest {
                 "<xsl:template match='/'><xsl:value-of select='doc(static-base-uri())'/>" +
                 "</xsl:template></xsl:transform>";
         String xml = "<a/>";
-        String base = new File(getDataDir() + "config.xml").toURI().toASCIIString();
+        String base = Testdata.fileUri("config.xml").toASCIIString();
         testXsltSecureProcessing(new StreamSource(new StringReader(xml), base),
                                  new StreamSource(new StringReader(xsl), base), false);
     }
@@ -618,8 +404,5 @@ public class ConfigTest {
             return null;
         }
     }
-
-
-
 }
 
