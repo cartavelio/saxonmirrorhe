@@ -30,3 +30,6 @@ java_*.hprof
 
 # Binaries built by Rider and friends
 /src/samples/cs/bin/
+
+# SaxonC Python genrated library file
+/src/main/c/Saxon.C.API/python-saxon/saxonc.cpp
