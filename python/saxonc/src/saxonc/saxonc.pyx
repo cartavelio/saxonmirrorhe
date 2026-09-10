@@ -2299,7 +2299,7 @@ cdef class PyXsltExecutable:
         """
         cdef char * c_file_name = NULL
         cdef bool c_show
-        c_raw = show
+        c_show = show
         py_string_string = file_name.encode('utf-8') if file_name is not None else None
         c_file_name = py_string_string if file_name is not None else ""
         if file_name is None:

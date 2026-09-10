@@ -1137,7 +1137,7 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
                         (void *)saxonMessageListenerRef);
     }
     saxonMessageListenerRef = SXN_UNSET;
-    setProperty("m", "off");
+    setProperty("m", "-:off");
   }
 }
 
