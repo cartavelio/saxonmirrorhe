@@ -7,6 +7,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
@@ -119,31 +120,35 @@ public class DeleteExpression extends BasicUpdatingExpression {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        SequenceIterator iter = getTargetExp().iterate(context);
-        NodeInfo node;
-        while ((node = (NodeInfo) iter.next()) != null) {
-            if (!(node instanceof MutableNodeInfo)) {
-                XPathException err = new XPathException("Node to be deleted is not an updateable node",
-                        SaxonErrorCode.SXUP0081);
-                err.setLocation(getLocation());
-                throw err;
-            }
-            if (node.getParent() == null) {
-                // now a no-op - see spec bug 5702
-//                XPathException err = new XPathException("Node to be deleted has no parent node", "XUDY0020");
-//                err.setLocation(getLocation());
-//                throw err;
-            } else {
-                try {
-                    DeleteAction action = new DeleteAction(node);
-                    action.setOriginator(this);
-                    ((PendingUpdateListImpl) pul).add(action);
-                } catch (XPathException e) {
-                    e.maybeSetLocation(getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
+        try {
+            SequenceIterator iter = getTargetExp().iterate(context);
+            NodeInfo node;
+            while ((node = (NodeInfo) iter.next()) != null) {
+                if (!(node instanceof MutableNodeInfo)) {
+                    XPathException err = new XPathException("Node to be deleted is not an updateable node",
+                            SaxonErrorCode.SXUP0081);
+                    err.setLocation(getLocation());
+                    throw err;
+                }
+                if (node.getParent() == null) {
+                    // now a no-op - see spec bug 5702
+    //                XPathException err = new XPathException("Node to be deleted has no parent node", "XUDY0020");
+    //                err.setLocation(getLocation());
+    //                throw err;
+                } else {
+                    try {
+                        DeleteAction action = new DeleteAction(node);
+                        action.setOriginator(this);
+                        ((PendingUpdateListImpl) pul).add(action);
+                    } catch (XPathException e) {
+                        e.maybeSetLocation(getLocation());
+                        e.maybeSetContext(context);
+                        throw e;
+                    }
                 }
             }
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
 
     }
