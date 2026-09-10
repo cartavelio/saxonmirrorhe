@@ -7,7 +7,11 @@ using Saxon.Api;
 using static Saxon.Api.Steps;
 
 namespace SaxonCS_NUnit {
+    
+    
     class TestXQueryEvaluator {
+        
+ 
         [Test]
         public void TestXdmNodeResult() {
             try {
@@ -116,11 +120,11 @@ namespace SaxonCS_NUnit {
                 XdmDestination dest = new ();
                 eval.Run(dest);
                 XdmNode doc = dest.XdmNode;
-                Assert.AreSame(doc.NodeKind, XdmNodeKind.Document, "Push result is document");
+                Assert.That((object)doc.NodeKind, Is.SameAs(XdmNodeKind.Document), "Push result is document");
 
                 // Now run in pull mode
                 XdmNode doc2 = (XdmNode) eval.Evaluate();
-                Assert.AreSame(doc2.NodeKind, XdmNodeKind.Document, "Pull result is document");
+                Assert.That((object)doc2.NodeKind, Is.SameAs(XdmNodeKind.Document), "Pull result is document");
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -148,7 +152,7 @@ namespace SaxonCS_NUnit {
                 ser.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
                 eval.Run(ser);
                 //System.out.println(sw.ToString());
-                Assert.AreEqual("15", sw.ToString(), "linenumber");
+                Assert.That((object)"15", Is.EqualTo(sw.ToString()), "linenumber");
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -166,8 +170,9 @@ namespace SaxonCS_NUnit {
                 XdmDestination dest = new();
                 eval.Run(dest);
                 XdmNode doc = dest.XdmNode;
-                Assert.AreEqual(doc.NodeKind, XdmNodeKind.Document, "kind");
-                Assert.AreEqual(3, doc.Select(Child()).Count(), "child-count");
+                Assert.That((object)doc.NodeKind, Is.EqualTo(XdmNodeKind.Document), "kind");
+                object b = doc.Select(Child()).Count();
+                Assert.That((object)3, Is.EqualTo(b), "child-count");
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -189,9 +194,10 @@ namespace SaxonCS_NUnit {
                 XdmDestination dest = new XdmDestination();
                 eval.Run(dest);
                 XdmNode doc = dest.XdmNode;
-                Assert.AreEqual(XdmNodeKind.Document, doc.NodeKind, "kind");
-                Assert.AreEqual(3, doc.Select(Child()).Count(), "child-count");
-                Assert.AreEqual(expected, doc.ToString(), "content");
+                Assert.That((object)XdmNodeKind.Document, Is.EqualTo(doc.NodeKind), "kind");
+                object b = doc.Select(Child()).Count();
+                Assert.That((object)3, Is.EqualTo(b), "child-count");
+                Assert.That((object)expected, Is.EqualTo(doc.ToString()), "content");
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -221,9 +227,11 @@ namespace SaxonCS_NUnit {
                 XdmDestination dest = new ();
                 s.Run(dest);
                 XdmNode doc = dest.XdmNode;
-                Assert.AreEqual(XdmNodeKind.Document, doc.NodeKind, "kind");
-                Assert.AreEqual(1, doc.Select(Child()).Count(), "child-count");
-                Assert.AreEqual(XdmNodeKind.Text, doc.Select(Child()).First().NodeKind, "child-kind");
+                Assert.That((object)XdmNodeKind.Document, Is.EqualTo(doc.NodeKind), "kind");
+                object b = doc.Select(Child()).Count();
+                Assert.That((object)1, Is.EqualTo(b), "child-count");
+                object b1 = doc.Select(Child()).First().NodeKind;
+                Assert.That((object)XdmNodeKind.Text, Is.EqualTo(b1), "child-kind");
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -242,8 +250,9 @@ namespace SaxonCS_NUnit {
                 RawDestination dest = new();
                 eval.Run(dest);
                 XdmValue result = dest.XdmValue;
-                Assert.AreEqual(XdmNodeKind.Document, ((XdmNode) result.ItemAt(0)).NodeKind, "kind");
-                Assert.AreEqual(3, result.Count, "count");
+                object b = ((XdmNode) result.ItemAt(0)).NodeKind;
+                Assert.That((object)XdmNodeKind.Document, Is.EqualTo(b), "kind");
+                Assert.That((object)3, Is.EqualTo(result.Count), "count");
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -261,10 +270,13 @@ namespace SaxonCS_NUnit {
                 RawDestination dest = new RawDestination();
                 eval.Run(dest);
                 XdmValue result = dest.XdmValue;
-                Assert.AreEqual(XdmNodeKind.Element, ((XdmNode) result.ItemAt(0)).NodeKind, "kind");
-                Assert.AreEqual("2", ((XdmNode) result.ItemAt(1)).GetAttributeValue("x"), "att");
-                Assert.AreEqual("y", result.ItemAt(2).Select(Child("y")).First().NodeName.LocalName, "child");
-                Assert.AreEqual(3, result.Count, "count");
+                object b = ((XdmNode) result.ItemAt(0)).NodeKind;
+                Assert.That((object)XdmNodeKind.Element, Is.EqualTo(b), "kind");
+                object b1 = ((XdmNode) result.ItemAt(1)).GetAttributeValue("x");
+                Assert.That((object)"2", Is.EqualTo(b1), "att");
+                object b2 = result.ItemAt(2).Select(Child("y")).First().NodeName.LocalName;
+                Assert.That((object)"y", Is.EqualTo(b2), "child");
+                Assert.That((object)3, Is.EqualTo(result.Count), "count");
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -282,10 +294,13 @@ namespace SaxonCS_NUnit {
                 RawDestination dest = new();
                 eval.Run(dest);
                 XdmValue result = dest.XdmValue;
-                Assert.AreEqual(XdmNodeKind.Attribute, ((XdmNode) result.ItemAt(0)).NodeKind, "kind");
-                Assert.AreEqual("2", result.ItemAt(1).StringValue, "att");
-                Assert.AreEqual("a", ((XdmNode) result.ItemAt(2)).NodeName.LocalName, "child");
-                Assert.AreEqual(3, result.Count, "count");
+                object b = ((XdmNode) result.ItemAt(0)).NodeKind;
+                Assert.That((object)XdmNodeKind.Attribute, Is.EqualTo(b), "kind");
+                object b1 = result.ItemAt(1).StringValue;
+                Assert.That((object)"2", Is.EqualTo(b1), "att");
+                object b2 = ((XdmNode) result.ItemAt(2)).NodeName.LocalName;
+                Assert.That((object)"a", Is.EqualTo(b2), "child");
+                Assert.That((object)3, Is.EqualTo(result.Count), "count");
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -307,7 +322,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Unexpected success");
             }
             catch (SaxonApiException e) {
-                Assert.AreEqual(errorCount, 1);
+                Assert.That((object)errorCount, Is.EqualTo(1));
             }
         }
 
@@ -321,8 +336,9 @@ namespace SaxonCS_NUnit {
                 RawDestination dest = new ();
                 eval.Run(dest);
                 XdmValue result = dest.XdmValue;
-                Assert.AreEqual(10, result.Count);
-                Assert.AreEqual(1, ((XdmAtomicValue) result.ItemAt(0)).AsLong());
+                Assert.That((object)10, Is.EqualTo(result.Count));
+                object b = ((XdmAtomicValue) result.ItemAt(0)).AsLong();
+                Assert.That((object)1, Is.EqualTo(b));
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -342,7 +358,7 @@ namespace SaxonCS_NUnit {
                 Serializer sz = p.NewSerializer(writer);
                 sz.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
                 eval.Run(sz);
-                Assert.AreEqual("1~2~3~4~5~6~7~8~9~10", writer.ToString());
+                Assert.That((object)"1~2~3~4~5~6~7~8~9~10", Is.EqualTo(writer.ToString()));
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -362,7 +378,7 @@ namespace SaxonCS_NUnit {
                 Serializer sz = p.NewSerializer(writer);
                 sz.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
                 eval.Run(sz);
-                Assert.AreEqual("1~2~3~4~5~6~7~8~9~10", writer.ToString());
+                Assert.That((object)"1~2~3~4~5~6~7~8~9~10", Is.EqualTo(writer.ToString()));
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -379,10 +395,12 @@ namespace SaxonCS_NUnit {
                 comp.CompileLibrary(new FileStream(ConfigTest.DATA_DIR + "module-one.xq", FileMode.Open));
                 string q1 = "import module namespace m='http://www.example.com/module-one'; m:add(2,2)";
                 XQueryEvaluator ev = comp.Compile(q1).Load();
-                Assert.AreEqual("4", ev.Evaluate().ToString(), "2+2");
+                object b = ev.Evaluate().ToString();
+                Assert.That((object)"4", Is.EqualTo(b), "2+2");
                 string q2 = "import module namespace m='http://www.example.com/module-one'; m:add($m:ten,5)";
                 ev = comp.Compile(q2).Load();
-                Assert.AreEqual("15", ev.Evaluate().ToString(), "10+5");
+                object b1 = ev.Evaluate().ToString();
+                Assert.That((object)"15", Is.EqualTo(b1), "10+5");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -409,7 +427,7 @@ namespace SaxonCS_NUnit {
                 XdmValue v2 = new XdmAtomicValue("5", XdmAtomicType.UntypedAtomic);
                 XdmValue result = ev.CallFunction(new QName("f.ns", "f:t1"), v1, v2);
                 Assert.That(result is XdmAtomicValue, "isAtomic");
-                Assert.AreEqual("2", result.ToString(), "equals2");
+                Assert.That((object)"2", Is.EqualTo(result.ToString()), "equals2");
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -437,7 +455,7 @@ namespace SaxonCS_NUnit {
                 XdmValue v2 = new XdmAtomicValue("5", XdmAtomicType.UntypedAtomic);
                 XdmValue result = ev.CallFunction(new QName("f.ns", "f:t1"), v1, v2);
                 Assert.That(result is XdmAtomicValue, "isAtomic");
-                Assert.AreEqual("91", result.ToString(), "equals2");
+                Assert.That((object)"91", Is.EqualTo(result.ToString()), "equals2");
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -465,9 +483,11 @@ namespace SaxonCS_NUnit {
                 XdmValue v2 = new XdmAtomicValue("5e0", XdmAtomicType.UntypedAtomic);
                 XdmValue result = ev.CallFunction(new QName("f.ns", "f:t1"), new XdmValue[] {v1, v2});
                 Assert.That(result is XdmAtomicValue, "isAtomic");
-                Assert.AreEqual("double", ((XdmAtomicValue) result).TypeName.LocalName);
-                Assert.AreEqual("double", ((XdmAtomicValue) result).PrimitiveTypeName.LocalName);
-                Assert.AreEqual("2", result.ToString(), "equals2");
+                object b = ((XdmAtomicValue) result).TypeName.LocalName;
+                Assert.That((object)"double", Is.EqualTo(b));
+                object b1 = ((XdmAtomicValue) result).PrimitiveTypeName.LocalName;
+                Assert.That((object)"double", Is.EqualTo(b1));
+                Assert.That((object)"2", Is.EqualTo(result.ToString()), "equals2");
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -523,11 +543,11 @@ namespace SaxonCS_NUnit {
                 XdmValue v1 = new XdmAtomicValue(10);
                 XdmValue result = ev.CallFunction(new QName("f.ns", "f:t1"), v1);
                 Assert.That(result is XdmAtomicValue);
-                Assert.AreEqual("44", result.ToString());
+                Assert.That((object)"44", Is.EqualTo(result.ToString()));
                 v1 = new XdmAtomicValue(20);
                 result = ev.CallFunction(new QName("f.ns", "f:t1"), v1);
                 Assert.That(result is XdmAtomicValue);
-                Assert.AreEqual("49", result.ToString());
+                Assert.That((object)"49", Is.EqualTo(result.ToString()));
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -558,12 +578,12 @@ namespace SaxonCS_NUnit {
                 QName foo = new QName("http://example.com/library", "foo");
                 XdmValue result = ev.CallFunction(foo, v1);
                 Assert.That(result is XdmAtomicValue);
-                Assert.AreEqual("Hello!", result.ToString());
+                Assert.That((object)"Hello!", Is.EqualTo(result.ToString()));
                 v1 = new XdmAtomicValue("Goodbye");
                 ev.SetExternalVariable(new QName("http://example.com/library", "bang"), new XdmAtomicValue("?"));
                 result = ev.CallFunction(foo, v1);
                 Assert.That(result is XdmAtomicValue);
-                Assert.AreEqual("Goodbye?", result.ToString());
+                Assert.That((object)"Goodbye?", Is.EqualTo(result.ToString()));
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -595,7 +615,8 @@ namespace SaxonCS_NUnit {
                 QName foo = new QName("http://example.com/library", "foo");
                 XdmValue result = ev.CallFunction(foo, Array.Empty<XdmValue>());
                 Assert.That(result is XdmAtomicValue);
-                Assert.AreEqual("AZAZ", ((XdmAtomicValue) result).StringValue);
+                object b = ((XdmAtomicValue) result).StringValue;
+                Assert.That((object)"AZAZ", Is.EqualTo(b));
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
@@ -675,32 +696,32 @@ namespace SaxonCS_NUnit {
         //                     case 4:
         //                     case 5:
         //                         Assert.That(instruction instanceof ClauseInfo, "isClauseInfo0");
-        //                         Assert.AreEqual("http://a/",
+        //                         assertAreEqual("http://a/",
         //                             ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false),
         //                             "rightPrefix0");
         //                         Assert.That(((ClauseInfo) instruction).getClause() instanceof ForClause,
         //                             "isForClause0");
-        //                         Assert.AreEqual(2, instruction.getLocation().getLineNumber(), "lineNumber0");
+        //                         assertAreEqual(2, instruction.getLocation().getLineNumber(), "lineNumber0");
         //                         break;
         //                     case 3:
         //                     case 6:
         //                         Assert.That(instruction instanceof ClauseInfo, "isClauseInfo1");
-        //                         Assert.AreEqual("http://a/",
+        //                         assertAreEqual("http://a/",
         //                             ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false),
         //                             "rightPrefix1");
         //                         Assert.That(((ClauseInfo) instruction).getClause() instanceof WhereClause,
         //                             "isWhereClause1");
-        //                         Assert.AreEqual(3, instruction.getLocation().getLineNumber(), "lineNumber1");
+        //                         assertAreEqual(3, instruction.getLocation().getLineNumber(), "lineNumber1");
         //                         break;
         //                     case 7:
         //                     case 8:
         //                         Assert.That(instruction instanceof ClauseInfo, "isClauseInfo4");
-        //                         Assert.AreEqual("http://a/",
+        //                         assertAreEqual("http://a/",
         //                             ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false),
         //                             "rightPrefix4");
         //                         Assert.That(((ClauseInfo) instruction).getClause() instanceof OrderByClause,
         //                             "isOrderBy4");
-        //                         Assert.AreEqual(4, instruction.getLocation().getLineNumber(), "lineNumber4");
+        //                         assertAreEqual(4, instruction.getLocation().getLineNumber(), "lineNumber4");
         //                         break;
         //                     default:
         //                 }
@@ -758,7 +779,7 @@ namespace SaxonCS_NUnit {
                 ser.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
                 eval.RunStreamed(File.Open(ConfigTest.DATA_DIR + "books.xml", FileMode.Open), ConfigTest.DataDirUri,
                     ser);
-                Assert.AreEqual("128.67", sw.ToString());
+                Assert.That((object)"128.67", Is.EqualTo(sw.ToString()));
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -781,7 +802,7 @@ namespace SaxonCS_NUnit {
             }
             catch (SaxonApiException e) {
                 //e.printStackTrace();
-                Assert.AreEqual("XTSE3430", e.ErrorCode.LocalName);
+                Assert.That((object)"XTSE3430", Is.EqualTo(e.ErrorCode.LocalName));
             }
         }
 
@@ -830,13 +851,15 @@ namespace SaxonCS_NUnit {
                 eval.ContextItem = (foo);
                 XdmItem result = eval.EvaluateSingle();
                 Assert.That(result is XdmNode);
-                Assert.AreEqual("foo", ((XdmNode) result).NodeName.LocalName);
+                object b1 = ((XdmNode) result).NodeName.LocalName;
+                Assert.That((object)"foo", Is.EqualTo(b1));
 
                 // Now with no supplied arg
                 eval = exec.Load();
                 result = eval.EvaluateSingle();
                 Assert.That(result is XdmNode);
-                Assert.AreEqual("bar", ((XdmNode) result).NodeName.LocalName);
+                object b2 = ((XdmNode) result).NodeName.LocalName;
+                Assert.That((object)"bar", Is.EqualTo(b2));
 
                 // Now with arg of wrong type
                 try {
@@ -846,7 +869,7 @@ namespace SaxonCS_NUnit {
                     Assert.Fail();
                 }
                 catch (SaxonApiException e) {
-                    Assert.AreEqual("XPTY0004", e.ErrorCode.LocalName);
+                    Assert.That((object)"XPTY0004", Is.EqualTo(e.ErrorCode.LocalName));
                 }
             }
             catch (SaxonApiException e) {
@@ -882,7 +905,8 @@ namespace SaxonCS_NUnit {
                 eval = exec.Load();
                 result = eval.EvaluateSingle();
                 Assert.That(result is XdmNode);
-                Assert.AreEqual("bar", ((XdmNode) result).NodeName.LocalName);
+                object b1 = ((XdmNode) result).NodeName.LocalName;
+                Assert.That((object)"bar", Is.EqualTo(b1));
 
                 // Now with arg of wrong type
                 try {
@@ -916,7 +940,8 @@ namespace SaxonCS_NUnit {
                 eval.ContextItem = (foo);
                 XdmItem result = eval.EvaluateSingle();
                 Assert.That(result is XdmNode);
-                Assert.AreEqual("foo", ((XdmNode) result).NodeName.LocalName);
+                object b1 = ((XdmNode) result).NodeName.LocalName;
+                Assert.That((object)"foo", Is.EqualTo(b1));
 
                 // Now with no supplied arg
                 try {
@@ -926,7 +951,7 @@ namespace SaxonCS_NUnit {
                 }
                 catch (SaxonApiException e) {
                     // expected failure
-                    Assert.AreEqual("XPDY0002", e.ErrorCode.LocalName);
+                    Assert.That((object)"XPDY0002", Is.EqualTo(e.ErrorCode.LocalName));
                     //Console.Error.WriteLine(e.Message);
                 }
 
@@ -938,7 +963,7 @@ namespace SaxonCS_NUnit {
                     Assert.Fail();
                 }
                 catch (SaxonApiException e) {
-                    Assert.AreEqual("XPTY0004", e.ErrorCode.LocalName);
+                    Assert.That((object)"XPTY0004", Is.EqualTo(e.ErrorCode.LocalName));
                 }
             }
             catch (SaxonApiException e) {
@@ -955,7 +980,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail();
             }
             catch (SaxonApiException e) {
-                Assert.AreEqual("XPST0003", e.ErrorCode.LocalName);
+                Assert.That((object)"XPST0003", Is.EqualTo(e.ErrorCode.LocalName));
             }
         }
 
@@ -989,7 +1014,7 @@ namespace SaxonCS_NUnit {
                 eval.XmlDocumentResolver = request => new TextResource("<z>17</z>", request.Uri);
 
                 XdmItem result = eval.First();
-                Assert.AreEqual("17", result.StringValue);
+                Assert.That((object)"17", Is.EqualTo(result.StringValue));
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -1004,7 +1029,7 @@ namespace SaxonCS_NUnit {
         //         XQueryCompiler c = p.NewXQueryCompiler();
         //         XQueryEvaluator eval = c.Compile("doc('file:///a.xml')/z").Load();
         //         XdmItem result = eval.First();
-        //         Assert.AreEqual("17", result.StringValue);
+        //         assertAreEqual("17", result.StringValue);
         //     }
         //     catch (SaxonApiException e) {
         //         Assert.Fail(e.Message);

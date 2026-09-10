@@ -24,6 +24,8 @@ using XsltExecutable = Saxon.Api.XsltExecutable;
 
 namespace SaxonCS_NUnit {
     public class TestDom {
+        
+
 
         private void CopyDomNodeToDestination(Processor proc, XmlDocument node, IDestination destination) {
             XQueryEvaluator copy = proc.NewXQueryCompiler().Compile(".").Load();
@@ -250,9 +252,12 @@ namespace SaxonCS_NUnit {
                          + "</root>";
 
             void Check(XdmNode node, string prefix, string uri, string local) {
-                Assert.AreEqual( prefix,node.NodeName == null ? "" : node.NodeName.Prefix);
-                Assert.AreEqual(local, node.NodeName == null ? "" : node.NodeName.LocalName);
-                Assert.AreEqual(uri, node.NodeName == null ? "" : node.NodeName.Uri);
+                object b = node.NodeName == null ? "" : node.NodeName.Prefix;
+                Assert.That((object)prefix, Is.EqualTo(b));
+                object b1 = node.NodeName == null ? "" : node.NodeName.LocalName;
+                Assert.That((object)local, Is.EqualTo(b1));
+                object b2 = node.NodeName == null ? "" : node.NodeName.Uri;
+                Assert.That((object)uri, Is.EqualTo(b2));
             }
             
             Processor proc = new();
@@ -415,8 +420,8 @@ namespace SaxonCS_NUnit {
                 StringWriter sw = new StringWriter();
                 Serializer serializer = proc.NewSerializer(sw);
                 serializer.SerializeXdmNode(wrapper);
-                Assert.AreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><top/>", sw.ToString(),
-                    "wrong output " + sw);
+                string label = "wrong output " + sw;
+                Assert.That((object)"<?xml version=\"1.0\" encoding=\"UTF-8\"?><top/>", Is.EqualTo(sw.ToString()), label);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -433,7 +438,7 @@ namespace SaxonCS_NUnit {
         //         try (StringWriter sw = new StringWriter()) {
         //             Receiver output = config.getSerializerFactory().getReceiver(new StreamResult(sw));
         //             wrapper.copy(output, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, Loc.NONE);
-        //             Assert.AreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><top/>", sw.ToString(), "wrong output " + sw);
+        //             assertAreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><top/>", sw.ToString(), "wrong output " + sw);
         //         }
         //     } catch (ParserConfigurationException | XPathException e) {
         //         Assert.Fail(e.getMessage());
@@ -480,19 +485,19 @@ namespace SaxonCS_NUnit {
             XdmNode top = docNode.Select(Steps.Child()).First();
 
             long count = top.Select(Steps.Child()).Count();
-            Assert.AreEqual(1, count, "t0");
+            Assert.That((object)1, Is.EqualTo(count), "t0");
             XdmNode text = top.Select(Steps.Child()).First();
-            Assert.AreEqual("text1text2", text.StringValue, "t1");
+            Assert.That((object)"text1text2", Is.EqualTo(text.StringValue), "t1");
 
             count = docNode.Select(Steps.Descendant()).Count();
-            Assert.AreEqual(2, count, "t2");
+            Assert.That((object)2, Is.EqualTo(count), "t2");
             text = docNode.Select(Steps.Descendant(Predicates.IsText())).First();
-            Assert.AreEqual("text1text2", text.StringValue, "t3");
+            Assert.That((object)"text1text2", Is.EqualTo(text.StringValue), "t3");
 
             count = top.Select(Steps.Descendant()).Count();
-            Assert.AreEqual(1, count, "t4");
+            Assert.That((object)1, Is.EqualTo(count), "t4");
             text = top.Select(Steps.Descendant()).First();
-            Assert.AreEqual("text1text2", text.StringValue, "t5");
+            Assert.That((object)"text1text2", Is.EqualTo(text.StringValue), "t5");
 
         }
 
@@ -500,38 +505,40 @@ namespace SaxonCS_NUnit {
             XdmNode top = docNode.Select(Steps.Child()).First();
 
             long count = top.Select(Steps.Child()).Count();
-            Assert.AreEqual(3, count);
+            Assert.That((object)3, Is.EqualTo(count));
             XdmNode text = top.Select(Steps.Child(Predicates.IsText())).First();
-            Assert.AreEqual("text1text2", text.StringValue, "t1");
+            Assert.That((object)"text1text2", Is.EqualTo(text.StringValue), "t1");
 
             count = docNode.Select(Steps.Descendant()).Count();
-            Assert.AreEqual(4, count);
+            Assert.That((object)4, Is.EqualTo(count));
             text = docNode.Select(Steps.Descendant(Predicates.IsText())).First();
-            Assert.AreEqual("text1text2", text.StringValue, "t2");
+            Assert.That((object)"text1text2", Is.EqualTo(text.StringValue), "t2");
 
             count = top.Select(Steps.Descendant()).Count();
-            Assert.AreEqual(3, count);
+            Assert.That((object)3, Is.EqualTo(count));
             text = top.Select(Steps.Descendant(Predicates.IsText())).First();
-            Assert.AreEqual("text1text2", text.StringValue, "t3");
+            Assert.That((object)"text1text2", Is.EqualTo(text.StringValue), "t3");
 
             XdmNode alpha = text.Select(Steps.PrecedingSibling()).First();
-            Assert.AreEqual("alpha", alpha.NodeName.LocalName, "t4");
+            Assert.That((object)"alpha", Is.EqualTo(alpha.NodeName.LocalName), "t4");
 
             XdmNode omega = text.Select(Steps.FollowingSibling()).First();
-            Assert.AreEqual("omega", omega.NodeName.LocalName, "t5");
+            Assert.That((object)"omega", Is.EqualTo(omega.NodeName.LocalName), "t5");
 
             XdmNode preOmega = omega.Select(Steps.PrecedingSibling()).First();
-            Assert.AreEqual("text1text2", preOmega.StringValue, "t6");
+            Assert.That((object)"text1text2", Is.EqualTo(preOmega.StringValue), "t6");
 
             XdmNode prePreOmega = preOmega.Select(Steps.PrecedingSibling()).First();
-            Assert.AreEqual("alpha", prePreOmega.NodeName.LocalName, "t7");
+            Assert.That((object)"alpha", Is.EqualTo(prePreOmega.NodeName.LocalName), "t7");
 
             NodeInfo omegaInfo = omega.Implementation;
             if (omegaInfo is SteppingNode omegaNode) {
                 NodeInfo preOmegaInfo = omegaNode.getPreviousSibling();
-                Assert.AreEqual("text1text2", preOmegaInfo.getStringValue(), "t8");
+                object b = preOmegaInfo.getStringValue();
+                Assert.That((object)"text1text2", Is.EqualTo(b), "t8");
                 NodeInfo prePreOmegaInfo = ((SteppingNode) preOmegaInfo).getPreviousSibling();
-                Assert.AreEqual("alpha", prePreOmegaInfo.getLocalPart(), "t9");
+                object b1 = prePreOmegaInfo.getLocalPart();
+                Assert.That((object)"alpha", Is.EqualTo(b1), "t9");
             }
 
         }
@@ -578,12 +585,12 @@ namespace SaxonCS_NUnit {
         //         StringWriter sw = new StringWriter();
         //         Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw));
         //         wrapper.copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, Loc.NONE);
-        //         Assert.AreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><top>text1text2</top>", sw.ToString(), "wrong output " + sw);
+        //         assertAreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><top>text1text2</top>", sw.ToString(), "wrong output " + sw);
         //         XPathFactoryImpl xf = new net.sf.saxon.xpath.XPathFactoryImpl();
         //         xf.setConfiguration(config);
         //         XPath xp = xf.newXPath();
         //         string result = xp.evaluate("count(.//text())", wrapper);
-        //         Assert.AreEqual("1", result, "number of text nodes ");
+        //         assertAreEqual("1", result, "number of text nodes ");
         //     } catch (ParserConfigurationException | XPathException e) {
         //         Assert.Faile.getMessage());
         //     } catch (Exception err) {
@@ -629,7 +636,7 @@ namespace SaxonCS_NUnit {
                 XPathSelector xpe = proc.NewXPathCompiler().Compile("/*/*").Load();
                 xpe.ContextItem = proc.NewDocumentBuilder().Wrap(doc);
                 XdmValue isList = xpe.Evaluate();
-                Assert.AreEqual(3, isList.Count(), "length");
+                Assert.That((object)3, Is.EqualTo(isList.Count()), "length");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -653,7 +660,7 @@ namespace SaxonCS_NUnit {
         //         DOMSource source = proc.NewDocumentBuilder().Wrap(doc);
         //         XPathEvaluator xpe = new XPathEvaluator();
         //         NodeList isList = (NodeList) xpe.evaluate("/*/*", source, XPathConstants.NODESET);
-        //         Assert.AreEqual(3, isList.getLength(), "length");
+        //         assertAreEqual(3, isList.getLength(), "length");
         //     } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
         //         Assert.Faile.getMessage());
         //     }
@@ -734,11 +741,15 @@ namespace SaxonCS_NUnit {
                 XPathSelector xpe = xpc.Compile(exp).Load();
                 xpe.ContextItem = proc.NewDocumentBuilder().Wrap(doc);
                 XdmValue isList = xpe.Evaluate();
-                Assert.AreEqual(4, isList.Count, "length");
-                Assert.AreEqual("anne", isList[0].StringValue);
-                Assert.AreEqual("fred", isList[1].StringValue);
-                Assert.AreEqual("jane", isList[2].StringValue);
-                Assert.AreEqual("sue", isList[3].StringValue);
+                Assert.That((object)4, Is.EqualTo(isList.Count), "length");
+                object b = isList[0].StringValue;
+                Assert.That((object)"anne", Is.EqualTo(b));
+                object b1 = isList[1].StringValue;
+                Assert.That((object)"fred", Is.EqualTo(b1));
+                object b2 = isList[2].StringValue;
+                Assert.That((object)"jane", Is.EqualTo(b2));
+                object b3 = isList[3].StringValue;
+                Assert.That((object)"sue", Is.EqualTo(b3));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -765,11 +776,11 @@ namespace SaxonCS_NUnit {
         //         XPath xpath = getXPath();
         //         NodeList isList = (NodeList) xpath.evaluate(
         //                 "ext:sortArrayToSequence(//book)", doc, XPathConstants.NODESET);
-        //         Assert.AreEqual(4, isList.getLength(), "length");
+        //         assertAreEqual(4, isList.getLength(), "length");
         //
         //         isList = (NodeList) xpath.evaluate("ext:sortArrayToNodeList(//book)", doc, XPathConstants.NODESET);
         //
-        //         Assert.AreEqual(4, isList.getLength(), "length");
+        //         assertAreEqual(4, isList.getLength(), "length");
         //
         //     } catch (ParserConfigurationException | SAXException | IOException e) {
         //         Assert.Faile.getMessage());
@@ -835,7 +846,7 @@ namespace SaxonCS_NUnit {
                 StringReader source = new StringReader("<doc/>");
                 XmlDocument document = new();
                 transformer.ApplyTemplates(source, new DomDestination(document));
-                Assert.AreEqual("a", document.DocumentElement.LocalName, "result");
+                Assert.That((object)"a", Is.EqualTo(document.DocumentElement.LocalName), "result");
             }
             catch (TransformerException e) {
                 Assert.Fail(e.getMessage());
@@ -896,17 +907,17 @@ namespace SaxonCS_NUnit {
             DocumentBuilder builder = proc.NewDocumentBuilder();
             XdmNode wrappedDoc = builder.Wrap(document);
             transformer.ApplyTemplates(builder.Wrap(wrappedDoc, textNode), serializer);
-            Assert.AreEqual("some text", sw.ToString(), "text node");
+            Assert.That((object)"some text", Is.EqualTo(sw.ToString()), "text node");
 
             sw = new StringWriter();
             serializer.OutputWriter = sw;
             transformer.ApplyTemplates(builder.Wrap(wrappedDoc, commentNode), serializer);
-            Assert.AreEqual("<!--a comment-->", sw.ToString(), "comment");
+            Assert.That((object)"<!--a comment-->", Is.EqualTo(sw.ToString()), "comment");
 
             sw = new StringWriter();
             serializer.OutputWriter = sw;
             transformer.ApplyTemplates(builder.Wrap(wrappedDoc, piNode), serializer);
-            Assert.AreEqual("<?tgt some data?>", sw.ToString(), "processing instruction");
+            Assert.That((object)"<?tgt some data?>", Is.EqualTo(sw.ToString()), "processing instruction");
         }
 
         [Test]
@@ -922,7 +933,7 @@ namespace SaxonCS_NUnit {
             serializer.SetOutputProperty(Serializer.METHOD, "xml");
 
             transformer.ApplyTemplates(proc.NewDocumentBuilder().Wrap(document), serializer);
-            Assert.AreEqual("", sw.ToString());
+            Assert.That((object)"", Is.EqualTo(sw.ToString()));
         }
 
         /**
@@ -1028,17 +1039,18 @@ namespace SaxonCS_NUnit {
 
                 XmlNode node = doc.DocumentElement.GetElementsByTagName("foo")[0];
                 if (namespaceAware) {
-                    Assert.AreEqual("http://foo", node.NamespaceURI);
+                    Assert.That((object)"http://foo", Is.EqualTo(node.NamespaceURI));
                 }
                 else {
-                    Assert.Null(node.NamespaceURI);
+                    Assert.That(node.NamespaceURI, Is.Null);
                 }
 
                 xq.ContextItem = builder.Wrap(builder.Wrap(doc), node);
 
                 XdmValue result = xq.Evaluate();
-                Assert.AreEqual(1, result.Count);
-                Assert.AreEqual("http://foo", ((XdmNode) result[0]).NodeName.Uri);
+                Assert.That((object)1, Is.EqualTo(result.Count));
+                object b = ((XdmNode) result[0]).NodeName.Uri;
+                Assert.That((object)"http://foo", Is.EqualTo(b));
 
 
             }
@@ -1090,10 +1102,10 @@ namespace SaxonCS_NUnit {
 
                 XmlNode node = doc.DocumentElement.GetElementsByTagName("foo")[0];
                 if (namespaceAware) {
-                    Assert.AreEqual("http://foo", node.NamespaceURI);
+                    Assert.That((object)"http://foo", Is.EqualTo(node.NamespaceURI));
                 }
                 else {
-                    Assert.Null(node.NamespaceURI);
+                    Assert.That(node.NamespaceURI, Is.Null);
                 }
 
                 Xslt30Transformer t = IdentityTransformer(proc);
@@ -1240,7 +1252,7 @@ namespace SaxonCS_NUnit {
                 XdmValue result = xp.Evaluate();
 
                 Console.WriteLine(result.Count);
-                Assert.AreEqual(1, result.Count);
+                Assert.That((object)1, Is.EqualTo(result.Count));
                 for (int i = 0; i < result.Count; i++) {
                     XdmNode n = (XdmNode) result[i];
                     Console.WriteLine(n);
@@ -1285,7 +1297,7 @@ namespace SaxonCS_NUnit {
                 XdmValue result = xp.Evaluate();
 
                 Console.WriteLine(result.Count);
-                Assert.AreEqual(1, result.Count);
+                Assert.That((object)1, Is.EqualTo(result.Count));
                 for (int i = 0; i < result.Count; i++) {
                     XdmNode n = (XdmNode) result[i];
                     Console.WriteLine(n);
@@ -1316,7 +1328,7 @@ namespace SaxonCS_NUnit {
         //         domWriter.endElement();
         //         domWriter.endDocument();
         //         domWriter.close();
-        //         Assert.AreEqual("", domWriter.getCurrentRoot().getStringValue());
+        //         assertAreEqual("", domWriter.getCurrentRoot().getStringValue());
         //     } catch (Exception err) {
         //         err.printStackTrace();
         //         Assert.Fail(();
@@ -1334,7 +1346,7 @@ namespace SaxonCS_NUnit {
                     "<z xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xsl:version='2.0' count='{count(//*)}'/>";
                 Xslt30Transformer transformer = proc.NewXsltCompiler().Compile(new StringReader(ss)).Load30();
                 transformer.ApplyTemplates(proc.NewDocumentBuilder().Wrap(sourceDoc), proc.NewSerializer(sw));
-                Assert.AreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><z count=\"0\"/>", sw.ToString());
+                Assert.That((object)"<?xml version=\"1.0\" encoding=\"UTF-8\"?><z count=\"0\"/>", Is.EqualTo(sw.ToString()));
             }
             catch (Exception e1) {
                 Assert.Fail(e1.Message);
@@ -1352,7 +1364,8 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer transformer = proc.NewXsltCompiler().Compile(new StringReader(ss)).Load30();
                 DomDestination result = new DomDestination();
                 transformer.ApplyTemplates(new StringReader(ss), result);
-                Assert.AreEqual("1", (result.XmlDocument).DocumentElement.GetAttribute("count"));
+                object b = (result.XmlDocument).DocumentElement.GetAttribute("count");
+                Assert.That((object)"1", Is.EqualTo(b));
             }
             catch (TransformerException e1) {
                 Assert.Fail(e1.Message);
@@ -1391,7 +1404,8 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer transformer = proc.NewXsltCompiler().Compile(new StringReader(ss)).Load30();
                 DomDestination result = new DomDestination();
                 transformer.ApplyTemplates(xdmNode, result);
-                Assert.AreEqual("4", result.XmlDocument.DocumentElement.GetAttribute("count"));
+                object b = result.XmlDocument.DocumentElement.GetAttribute("count");
+                Assert.That((object)"4", Is.EqualTo(b));
             }
             catch (Exception e1) {
                 Assert.Fail(e1.Message);
@@ -1474,7 +1488,7 @@ namespace SaxonCS_NUnit {
                 identityTransformer.ApplyTemplates(builder.Wrap(document), serializer);
                 string output = new UTF8Encoding().GetString(baos.GetBuffer(), 0, (int)baos.Length);
                 Console.Error.WriteLine(output);
-                Assert.AreEqual(output, input);
+                Assert.That((object)output, Is.EqualTo(input));
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -1491,11 +1505,11 @@ namespace SaxonCS_NUnit {
                 XmlElement root = doc.DocumentElement;
                 Assert.That(root.HasAttribute("xmlns"));
                 XmlElement a = (XmlElement) root.ChildNodes[0];
-                Assert.False(a.HasAttribute("xmlns"));
-                Assert.AreEqual(0, a.Attributes.Count);
+                Assert.That(a.HasAttribute("xmlns"), Is.False);
+                Assert.That((object)0, Is.EqualTo(a.Attributes.Count));
                 XmlElement b = (XmlElement) root.ChildNodes[1];
-                Assert.False(b.HasAttribute("xmlns"));
-                Assert.AreEqual(0, b.Attributes.Count);
+                Assert.That(b.HasAttribute("xmlns"), Is.False);
+                Assert.That((object)0, Is.EqualTo(b.Attributes.Count));
             }
             catch (SaxonApiException err) {
                 Assert.Fail(err.Message);
@@ -1514,11 +1528,11 @@ namespace SaxonCS_NUnit {
                 XmlElement root = doc.DocumentElement;
                 Assert.That(root.HasAttribute("xmlns"));
                 XmlElement a = (XmlElement) root.ChildNodes[0];
-                Assert.False(a.HasAttribute("xmlns"));
-                Assert.AreEqual(0, a.Attributes.Count);
+                Assert.That(a.HasAttribute("xmlns"), Is.False);
+                Assert.That((object)0, Is.EqualTo(a.Attributes.Count));
                 XmlElement b = (XmlElement) root.ChildNodes[1];
-                Assert.False(b.HasAttribute("xmlns"));
-                Assert.AreEqual(0, b.Attributes.Count);
+                Assert.That(b.HasAttribute("xmlns"), Is.False);
+                Assert.That((object)0, Is.EqualTo(b.Attributes.Count));
             }
             catch (SaxonApiException err) {
                 Assert.Fail(err.Message);
@@ -1597,8 +1611,9 @@ namespace SaxonCS_NUnit {
 
                 XmlDocument doc2 = new();
                 doc2.Load(new StringReader(transformed));
-                Assert.AreEqual("someNS", doc2.DocumentElement.NamespaceURI);
-                Assert.AreEqual("", doc2.GetElementsByTagName("b")[0].NamespaceURI);
+                Assert.That((object)"someNS", Is.EqualTo(doc2.DocumentElement.NamespaceURI));
+                object b = doc2.GetElementsByTagName("b")[0].NamespaceURI;
+                Assert.That((object)"", Is.EqualTo(b));
             }
             catch (Exception err) {
                 Assert.Fail(err.Message);

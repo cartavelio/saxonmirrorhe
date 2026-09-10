@@ -7,6 +7,11 @@ using NUnit.Framework;
 
 namespace SaxonCS_NUnit {
     public class CatalogResolverTest {
+        
+        private void assertAreEqual(Object a, Object b) {
+            Assert.That(a, Is.EqualTo(b));
+        }
+
         [Test]
         public void noResolverFail() {
             Processor processor = new ();
@@ -35,7 +40,7 @@ namespace SaxonCS_NUnit {
             builder.DtdValidation = (true);
             try {
                 XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri, "resolvers/ok.xml"));
-                Assert.NotNull(doc);
+                Assert.That((object)doc, Is.Not.Null);
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -52,7 +57,7 @@ namespace SaxonCS_NUnit {
                 DocumentBuilder builder = processor.NewDocumentBuilder();
                 builder.DtdValidation = (true);
                 XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri,"resolvers/input.xml"));
-                Assert.NotNull(doc);
+                Assert.That((object)doc, Is.Not.Null);
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.Message);

@@ -25,7 +25,25 @@ using XsltCompiler = Saxon.Api.XsltCompiler;
 namespace SaxonCS_NUnit {
     internal class TestValidator {
         
+        private void assertAreEqual(Object a, Object b) {
+            Assert.That(a, Is.EqualTo(b));
+        }
         
+        private void assertAreEqual(Object a, Object b, String label) {
+            Assert.That(a, Is.EqualTo(b), label);
+        }
+
+        private void assertNotNull(Object a) {
+            Assert.That(a, Is.Not.Null);
+        }
+
+        private void assertFalse(Object a) {
+            Assert.That(a, Is.False);
+        }
+        
+        private void assertFalse(Object a, string label) {
+            Assert.That(a, Is.False, label);
+        }
 
         
         [Test]
@@ -70,7 +88,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Validation errors not detected");
             }
             catch (SaxonApiException sapie) {
-                Assert.AreEqual(2, errorList.Count);
+                Assert.That((object)2, Is.EqualTo(errorList.Count));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -91,7 +109,7 @@ namespace SaxonCS_NUnit {
                 Processor proc = new();
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri, "book-wrapper.xml"));
-                Assert.AreEqual(3, GetAllBaseUris(doc).Count, "3 distinct base URIs in input");
+                assertAreEqual(3, GetAllBaseUris(doc).Count, "3 distinct base URIs in input");
                 Assert.That(doc.BaseUri.ToString().EndsWith("book-wrapper.xml"), "input doc base URI");
 
                 SchemaManager mgr = proc.SchemaManager;
@@ -104,7 +122,7 @@ namespace SaxonCS_NUnit {
 
                 XdmNode validDoc = dest.XdmNode;
 
-                Assert.AreEqual(3, GetAllBaseUris(validDoc).Count, "3 distinct base URIs in output");
+                assertAreEqual(3, GetAllBaseUris(validDoc).Count, "3 distinct base URIs in output");
                 Assert.That(validDoc.BaseUri.ToString().EndsWith("book-wrapper.xml"), "validated doc base URI");
             }
             catch (Exception e) {
@@ -373,7 +391,8 @@ namespace SaxonCS_NUnit {
                 XPathCompiler xp = proc.NewXPathCompiler();
                 xp.SchemaAware = true;
                 XdmAtomicValue result = (XdmAtomicValue)xp.Evaluate("count(//comment())", destination.XdmNode);
-                Assert.AreEqual(1, result.AsLong());
+                object b = result.AsLong();
+                Assert.That((object)1, Is.EqualTo(b));
 
                 try {
                     sv.Validate(new StringReader(invalid_xml));
@@ -427,7 +446,8 @@ namespace SaxonCS_NUnit {
                 XPathCompiler xp = proc.NewXPathCompiler();
                 xp.SchemaAware = (true);
                 XdmAtomicValue result = (XdmAtomicValue)xp.Evaluate("count(//comment())", destination.XdmNode);
-                Assert.AreEqual(1, result.AsLong());
+                object b = result.AsLong();
+                Assert.That((object)1, Is.EqualTo(b));
 
                 try {
                     sv.Validate(new StringReader(invalid_xml));
@@ -723,8 +743,8 @@ namespace SaxonCS_NUnit {
             }
             finally {
                 XdmNode reportDoc = report.XdmNode;
-                Assert.AreEqual(1,
-                    reportDoc.Children("http://saxon.sf.net/ns/validation", "validation-report").Count());
+                object b = reportDoc.Children("http://saxon.sf.net/ns/validation", "validation-report").Count();
+                Assert.That((object)1, Is.EqualTo(b));
                 Assert.That(reportDoc.Select(Steps.Descendant("error")).Count() == 2);
                 Assert.That(reportDoc.Select(Steps.Descendant("meta-data")).Count() == 1);
                 Assert.That(reportDoc.Select(Steps.Descendant("schema")).First().GetAttributeValue("xsd-version") ==
@@ -847,18 +867,21 @@ namespace SaxonCS_NUnit {
             finally {
                 XdmNode reportDoc = report.XdmNode;
                 Console.WriteLine(reportDoc.OuterXml);
-                Assert.AreEqual(1, reportDoc.Children("validation-reports").Count());
-                Assert.AreEqual(2,
-                    reportDoc.Select(Steps.Descendant("http://saxon.sf.net/ns/validation", "validation-report"))
-                        .Count());
-                Assert.AreEqual(2, reportDoc.Select(
+                object b = reportDoc.Children("validation-reports").Count();
+                Assert.That((object)1, Is.EqualTo(b));
+                object b1 = reportDoc.Select(Steps.Descendant("http://saxon.sf.net/ns/validation", "validation-report"))
+                    .Count();
+                Assert.That((object)2, Is.EqualTo(b1));
+                object b2 = reportDoc.Select(
                     Steps.Descendant("validation-report")
                         .Where(Predicates.AttributeEq("system-id", "http://invalid.xml/"))
-                        .Then(Steps.Child("error"))).Count());
-                Assert.AreEqual(0, reportDoc.Select(
+                        .Then(Steps.Child("error"))).Count();
+                Assert.That((object)2, Is.EqualTo(b2));
+                object b3 = reportDoc.Select(
                     Steps.Descendant("validation-report")
                         .Where(Predicates.AttributeEq("system-id", "http://valid.xml/"))
-                        .Then(Steps.Child("error"))).Count());
+                        .Then(Steps.Child("error"))).Count();
+                Assert.That((object)0, Is.EqualTo(b3));
             }
         }
 
@@ -1094,8 +1117,8 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Validation errors not detected");
             }
             catch (SaxonApiException sapie) {
-                Assert.AreEqual(3, errors.Count, "No of errors"); // 3 validation errors
-                //Assert.AreEqual("/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
+                assertAreEqual(3, errors.Count, "No of errors"); // 3 validation errors
+                //assertAreEqual("/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -1214,8 +1237,8 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Validation errors not detected");
             }
             catch (SaxonApiException sapie) {
-                Assert.AreEqual(3, errors.Count, "No of errors"); // 3 validation errors
-                //Assert.AreEqual("/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
+                assertAreEqual(3, errors.Count, "No of errors"); // 3 validation errors
+                //assertAreEqual("/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -1259,7 +1282,7 @@ namespace SaxonCS_NUnit {
                     Assert.Fail();
                 }
 
-                Assert.AreEqual(1, instanceErrors.Count);
+                Assert.That((object)1, Is.EqualTo(instanceErrors.Count));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);

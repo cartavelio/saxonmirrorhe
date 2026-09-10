@@ -13,7 +13,7 @@ namespace SaxonCS_NUnit {
             try {
                 DateTime now1 = DateTime.Now;
                 XdmAtomicValue now2 = new (now1);
-                Assert.AreEqual(now1.ToString("yyyy-MM-ddTHH:mm:ss"), now2.StringValue[..19]);
+                Assert.That(now1.ToString("yyyy-MM-ddTHH:mm:ss"), Is.EqualTo(now2.StringValue[..19]));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -25,7 +25,7 @@ namespace SaxonCS_NUnit {
             try {
                 DateTimeOffset now1 = new(new DateTime(2022, 5, 7, 19, 39, 23), TimeSpan.FromHours(-5));
                 XdmAtomicValue now2 = new (now1);
-                Assert.AreEqual("2022-05-07T19:39:23-05:00", now2.StringValue);
+                Assert.That("2022-05-07T19:39:23-05:00", Is.EqualTo(now2.StringValue));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);

@@ -8,6 +8,7 @@ using NamespaceConstant = Saxon.Api.NamespaceConstant;
 
 namespace SaxonCS_NUnit {
     public class TestSerializer {
+        
 
         [Test]
         public void testXQuerySerialization() {
@@ -33,7 +34,7 @@ namespace SaxonCS_NUnit {
                 xqeval.Run(serializer);
 
                 string result = ReadMemoryStream(os);
-                Assert.False(result.Contains("<?xml"), "XML declaration exists");
+                Assert.That(result.Contains("<?xml"), Is.False, "XML declaration exists");
                 Assert.That(result.Contains("doc><e"), "Indented");
                 Assert.That(result.Contains("<e><![CDATA"), "Cdata section");
 
@@ -77,7 +78,7 @@ namespace SaxonCS_NUnit {
                 trans.Run(serializer);
 
                 string result = ReadMemoryStream(os);
-                Assert.False(result.Contains("<?xml"), "XML declaration exists");
+                Assert.That(result.Contains("<?xml"), Is.False, "XML declaration exists");
                 Assert.That(result.Contains("doc><e"), "Indented");
                 Assert.That(result.Contains("<e><![CDATA"), "Cdata section");
 
@@ -253,7 +254,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Unexpected success");
             }
             catch (SaxonApiException e) {
-                Assert.AreEqual(e.Message, "Cannot serialize a map using this output method");
+                Assert.That((object)e.Message, Is.EqualTo("Cannot serialize a map using this output method"));
             }
         }
 
@@ -349,11 +350,15 @@ namespace SaxonCS_NUnit {
             }
 
             byte[] x = ms.ToArray();
-            Assert.AreEqual(137, x[0]);
-            Assert.AreEqual(80, x[1]);
-            Assert.AreEqual(78, x[2]);
-            Assert.AreEqual(71, x[3]);
-            Assert.AreEqual(247, x.Length);
+            object b = x[0];
+            Assert.That((object)137, Is.EqualTo(b));
+            object b1 = x[1];
+            Assert.That((object)80, Is.EqualTo(b1));
+            object b2 = x[2];
+            Assert.That((object)78, Is.EqualTo(b2));
+            object b3 = x[3];
+            Assert.That((object)71, Is.EqualTo(b3));
+            Assert.That((object)247, Is.EqualTo(x.Length));
         }
 
 
@@ -385,11 +390,15 @@ namespace SaxonCS_NUnit {
             }
 
             byte[] x = ms.ToArray();
-            Assert.AreEqual(202, x[0]);
-            Assert.AreEqual(254, x[1]);
-            Assert.AreEqual(186, x[2]);
-            Assert.AreEqual(190, x[3]);
-            Assert.AreEqual(4, x.Length);
+            object b = x[0];
+            Assert.That((object)202, Is.EqualTo(b));
+            object b1 = x[1];
+            Assert.That((object)254, Is.EqualTo(b1));
+            object b2 = x[2];
+            Assert.That((object)186, Is.EqualTo(b2));
+            object b3 = x[3];
+            Assert.That((object)190, Is.EqualTo(b3));
+            Assert.That((object)4, Is.EqualTo(x.Length));
         }
 
         [Test]
@@ -411,7 +420,7 @@ namespace SaxonCS_NUnit {
                 Serializer ser = processor.NewSerializer();
                 ser.OutputWriter = (ms);
                 transformer.CallTemplate(null, ser);
-                Assert.AreEqual("<a>{$a < '&lt;'}</a>", ms.ToString());
+                Assert.That((object)"<a>{$a < '&lt;'}</a>", Is.EqualTo(ms.ToString()));
             }
             catch (SaxonApiException e) {
                 //System.err.println(e.Message);
@@ -419,7 +428,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(e.Message);
             }
 
-            Assert.AreEqual("<a>{$a < '&lt;'}</a>", ms.ToString());
+            Assert.That((object)"<a>{$a < '&lt;'}</a>", Is.EqualTo(ms.ToString()));
 
         }
 
@@ -528,13 +537,17 @@ namespace SaxonCS_NUnit {
                 xqeval.Run(serializer);
 
                 string result = ReadMemoryStream(os);
-                Assert.False(result.Contains("<?xml"), "XML declaration exists");
-                Assert.True(result.Contains("&#x378;&#x15b38"), "character references");
-                Assert.True(result.Contains("=&gt;"), "Ordinary chars");
-                Assert.AreEqual(0xC0, os.GetBuffer()[9]);
-                Assert.AreEqual(0xC1, os.GetBuffer()[10]);
-                Assert.AreEqual(0xC2, os.GetBuffer()[11]);
-                Assert.AreEqual(0xC3, os.GetBuffer()[12]);
+                Assert.That(result.Contains("<?xml"), Is.False, "XML declaration exists");
+                Assert.That(result.Contains("&#x378;&#x15b38"), "character references");
+                Assert.That(result.Contains("=&gt;"), "Ordinary chars");
+                object b = os.GetBuffer()[9];
+                Assert.That((object)0xC0, Is.EqualTo(b));
+                object b1 = os.GetBuffer()[10];
+                Assert.That((object)0xC1, Is.EqualTo(b1));
+                object b2 = os.GetBuffer()[11];
+                Assert.That((object)0xC2, Is.EqualTo(b2));
+                object b3 = os.GetBuffer()[12];
+                Assert.That((object)0xC3, Is.EqualTo(b3));
 
             }
             catch (SaxonApiException e) {

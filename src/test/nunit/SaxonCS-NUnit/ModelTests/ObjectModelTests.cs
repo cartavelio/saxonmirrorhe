@@ -17,6 +17,9 @@ namespace SaxonCS_NUnit.ModelTests;
      */
     
 public abstract class ObjectModelTests {
+        
+
+
     abstract protected string getTreeModel();
 
     abstract protected XdmNode buildExternalDocument(Processor processor, String fileName);
@@ -79,46 +82,65 @@ public abstract class ObjectModelTests {
     public void testChildAxis1() {
         Processor proc = new Processor(true);
         XdmNode doc = buildExternalDocument(proc, "books.xml");
-        Assert.AreEqual(2, count(doc.Children()));
-        Assert.AreEqual(1, count(doc.Children(Predicates.IsProcessingInstruction())));
-        Assert.AreEqual(1, count(doc.Children("BOOKLIST")));
+        object b = count(doc.Children());
+        Assert.That((object)2, Is.EqualTo(b));
+        object b1 = count(doc.Children(Predicates.IsProcessingInstruction()));
+        Assert.That((object)1, Is.EqualTo(b1));
+        object b2 = count(doc.Children("BOOKLIST"));
+        Assert.That((object)1, Is.EqualTo(b2));
         XdmNode booklist = doc.Select(Steps.Child("BOOKLIST")).First();
-        Assert.AreEqual(2, count(booklist.Children("*")));
+        object b3 = count(booklist.Children("*"));
+        Assert.That((object)2, Is.EqualTo(b3));
         XdmNode books = booklist.Select(Steps.Child("BOOKS")).First();
-        Assert.AreEqual(6, count(books.Children("*")));
-        Assert.AreEqual(13, count(books.Children()));
+        object b4 = count(books.Children("*"));
+        Assert.That((object)6, Is.EqualTo(b4));
+        object b5 = count(books.Children());
+        Assert.That((object)13, Is.EqualTo(b5));
     }
 
     [Test]
     public void testChildAxis2() {
         Processor proc = new Processor(true);
         XdmNode doc = buildExternalDocument(proc, "books-with-dtd.xml");
-        Assert.AreEqual(1, count(doc.Children()));
-        Assert.AreEqual(1, count(doc.Children("BOOKLIST")));
+        object b = count(doc.Children());
+        Assert.That((object)1, Is.EqualTo(b));
+        object b1 = count(doc.Children("BOOKLIST"));
+        Assert.That((object)1, Is.EqualTo(b1));
         XdmNode booklist = doc.Select(Steps.Child("BOOKLIST")).First();
-        Assert.AreEqual(2, count(booklist.Children("*")));
+        object b2 = count(booklist.Children("*"));
+        Assert.That((object)2, Is.EqualTo(b2));
         XdmNode books = booklist.Select(Steps.Child("BOOKS")).First();
-        Assert.AreEqual(6, count(books.Children("*")));
-        Assert.AreEqual(stripsIgnorableWhitespace() ? 6 : 13, count(books.Children()));
+        object b3 = count(books.Children("*"));
+        Assert.That((object)6, Is.EqualTo(b3));
+        object b4 = count(books.Children());
+        Assert.That((object)(stripsIgnorableWhitespace() ? 6 : 13), Is.EqualTo(b4));
     }
 
     [Test]
     public void testChildAxis3() {
         Processor proc = new Processor(true);
         XdmNode doc = buildExternalDocument(proc, "books-sql.xsl");
-        Assert.AreEqual(3, count(doc.Children()));
-        Assert.AreEqual(1, count(doc.Children(Predicates.IsElement())));
-        Assert.AreEqual(0, count(doc.Children(Predicates.IsText())));
-        Assert.AreEqual(2, count(doc.Children(Predicates.IsComment())));
-        Assert.AreEqual(1, count(doc.Children(NamespaceConstant.XSLT, "stylesheet")));
-        Assert.AreEqual(1, count(doc.Children("stylesheet")));
+        object b = count(doc.Children());
+        Assert.That((object)3, Is.EqualTo(b));
+        object b1 = count(doc.Children(Predicates.IsElement()));
+        Assert.That((object)1, Is.EqualTo(b1));
+        object b2 = count(doc.Children(Predicates.IsText()));
+        Assert.That((object)0, Is.EqualTo(b2));
+        object b3 = count(doc.Children(Predicates.IsComment()));
+        Assert.That((object)2, Is.EqualTo(b3));
+        object b4 = count(doc.Children(NamespaceConstant.XSLT, "stylesheet"));
+        Assert.That((object)1, Is.EqualTo(b4));
+        object b5 = count(doc.Children("stylesheet"));
+        Assert.That((object)1, Is.EqualTo(b5));
         XdmNode cDataElement = doc.Select(Steps.Child("stylesheet")
             .Then(Steps.Child("template")
                 .Where(Predicates.AttributeEq("name", "UNUSED")))).First();
-        Assert.AreEqual("(This is CDATA)", cDataElement.StringValue);
+        Assert.That((object)"(This is CDATA)", Is.EqualTo(cDataElement.StringValue));
         if (mergesAdjacentTextNodes()) {
-            Assert.AreEqual(1, count(cDataElement.Children()));
-            Assert.AreEqual("(This is CDATA)", cDataElement.Select(Steps.Child()).First().StringValue);
+            object b6 = count(cDataElement.Children());
+            Assert.That((object)1, Is.EqualTo(b6));
+            object b7 = cDataElement.Select(Steps.Child()).First().StringValue;
+            Assert.That((object)"(This is CDATA)", Is.EqualTo(b7));
         }
     }
 
@@ -127,17 +149,22 @@ public abstract class ObjectModelTests {
         Processor proc = new Processor(true);
         XdmNode doc = buildExternalDocument(proc, "books.xml");
         XdmNode booklist = doc.Select(Steps.Child("BOOKLIST")).First();
-        Assert.AreEqual(1, booklist.Select(
-            Steps.Attribute()).Count());
-        Assert.AreEqual(1, booklist.Select(
-            Steps.Attribute(Predicates.HasLocalName("noNamespaceSchemaLocation"))).Count());
-        Assert.AreEqual(1, booklist.Select(
+        object b = booklist.Select(
+            Steps.Attribute()).Count();
+        Assert.That((object)1, Is.EqualTo(b));
+        object b1 = booklist.Select(
+            Steps.Attribute(Predicates.HasLocalName("noNamespaceSchemaLocation"))).Count();
+        Assert.That((object)1, Is.EqualTo(b1));
+        object b2 = booklist.Select(
                 Steps.Attribute(Predicates.HasName(NamespaceConstant.SCHEMA_INSTANCE, "noNamespaceSchemaLocation")))
-            .Count());
-        Assert.AreEqual(6, booklist.Select(
-            Steps.Descendant("ITEM").Then(Steps.Attribute("CAT"))).Count());
-        Assert.AreEqual(6, booklist.Select(
-            Steps.Descendant("ITEM").Then(Steps.Attribute("", "CAT"))).Count());
+            .Count();
+        Assert.That((object)1, Is.EqualTo(b2));
+        object b3 = booklist.Select(
+            Steps.Descendant("ITEM").Then(Steps.Attribute("CAT"))).Count();
+        Assert.That((object)6, Is.EqualTo(b3));
+        object b4 = booklist.Select(
+            Steps.Descendant("ITEM").Then(Steps.Attribute("", "CAT"))).Count();
+        Assert.That((object)6, Is.EqualTo(b4));
     }
 
     [Test]
@@ -213,7 +240,7 @@ public abstract class ObjectModelTests {
 
             selection = selection.Append(doc);
             selection = selection.DocumentOrder();
-            Assert.AreEqual(21, selection.Count());
+            Assert.That((object)21, Is.EqualTo(selection.Count()));
             System.Text.StringBuilder builder = new();
             foreach (XdmItem v in selection) {
                 builder.Append(((XdmNode)v).NodeKind.ToString()).Append(':');
@@ -226,9 +253,7 @@ public abstract class ObjectModelTests {
                 builder.Append('|');
             }
 
-            Assert.AreEqual(
-                "document-node():~:|element():ITEM:|attribute():CAT:P|text():~:Charlotte Brontë|attribute():UNIT:in|element():ITEM:|attribute():CAT:P|text():~:Thomas Hardy|attribute():UNIT:in|element():ITEM:|attribute():CAT:P|text():~:Thomas Hardy|attribute():UNIT:in|element():ITEM:|attribute():CAT:H|text():~:Jasper Fforde|attribute():UNIT:cm|element():ITEM:|attribute():CAT:P|text():~:Jasper Fforde|attribute():UNIT:in|",
-                builder.ToString());
+            Assert.That((object)"document-node():~:|element():ITEM:|attribute():CAT:P|text():~:Charlotte Brontë|attribute():UNIT:in|element():ITEM:|attribute():CAT:P|text():~:Thomas Hardy|attribute():UNIT:in|element():ITEM:|attribute():CAT:P|text():~:Thomas Hardy|attribute():UNIT:in|element():ITEM:|attribute():CAT:H|text():~:Jasper Fforde|attribute():UNIT:cm|element():ITEM:|attribute():CAT:P|text():~:Jasper Fforde|attribute():UNIT:in|", Is.EqualTo(builder.ToString()));
         }
         catch (SaxonApiException e) {
             Assert.Fail(e.Message);
@@ -249,7 +274,7 @@ public abstract class ObjectModelTests {
                 bindingsFound.Add(binding);
             }
 
-            Assert.AreEqual(5, bindingsFound.Count);
+            Assert.That((object)5, Is.EqualTo(bindingsFound.Count));
             Assert.That(bindingsFound.Contains("sql=http://saxon.sf.net/sql"));
             Assert.That(bindingsFound.Contains("xsl=http://www.w3.org/1999/XSL/Transform"));
             Assert.That(bindingsFound.Contains("saxon=http://saxon.sf.net/"));
@@ -285,7 +310,7 @@ public abstract class ObjectModelTests {
 
             result = doCopyTransform(proc, trans, p1, "t2");
             Assert.That(result.Contains("xmlns:p=\"http://namespace.p.com/\""));
-            Assert.False(result.Contains("xmlns:q=\"http://namespace.q.com/\""));
+            Assert.That(result.Contains("xmlns:q=\"http://namespace.q.com/\""), Is.False);
 
             result = doCopyTransform(proc, trans, p2, "t1");
             Assert.That(result.Contains("xmlns=\"http://namespace.p2.com/\""));
@@ -295,7 +320,7 @@ public abstract class ObjectModelTests {
             result = doCopyTransform(proc, trans, p2, "t2");
             Assert.That(result.Contains("xmlns=\"http://namespace.p2.com/\""));
             Assert.That(result.Contains("xmlns:my=\"http://namespace.my.com/\""));
-            Assert.False(result.Contains("xmlns:q=\"http://namespace.q.com/\""));
+            Assert.That(result.Contains("xmlns:q=\"http://namespace.q.com/\""), Is.False);
         }
         catch (Exception e) {
             //e.printStackTrace();
@@ -350,7 +375,7 @@ public abstract class ObjectModelTests {
     //         XdmFunctionItem id = proc.GetSystemFunction(new QName(NamespaceConstant.FN, "id"), 2);
     //         XdmValue val = id.Invoke(new XdmValue[] { new XdmAtomicValue("MMP"), doc }, proc);
     //         Assert.That(val is XdmNode);
-    //         Assert.AreEqual("Mass-market Paperback", ((XdmNode)val).GetAttributeValue("DESC"));
+    //         assertAreEqual("Mass-market Paperback", ((XdmNode)val).GetAttributeValue("DESC"));
     //     }
     //     catch (SaxonApiException e) {
     //         //e.printStackTrace();
@@ -368,7 +393,8 @@ public abstract class ObjectModelTests {
             XPathSelector xp = xpc.Compile(getExtensionFunctionCall()).Load();
             xp.ContextItem = (doc);
             XdmValue result = xp.Evaluate();
-            Assert.AreEqual("Jane Austen", ((XdmAtomicValue)result).StringValue);
+            object b = ((XdmAtomicValue)result).StringValue;
+            Assert.That((object)"Jane Austen", Is.EqualTo(b));
         }
         catch (SaxonApiException e) {
             //e.printStackTrace();
@@ -386,7 +412,8 @@ public abstract class ObjectModelTests {
             XPathSelector xp = xpc.Compile("string((//AUTHOR)[1])").Load();
             xp.ContextItem = (doc);
             XdmValue result = xp.Evaluate();
-            Assert.AreEqual("Jane Austen", ((XdmAtomicValue)result).StringValue);
+            object b = ((XdmAtomicValue)result).StringValue;
+            Assert.That((object)"Jane Austen", Is.EqualTo(b));
         }
         catch (SaxonApiException e) {
             //e.printStackTrace();

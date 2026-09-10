@@ -5,6 +5,9 @@ using NUnit.Framework;
 
 namespace SaxonCS_NUnit {
     class TestPackage {
+        
+ 
+
         [Test]
         public void TestSimple() {
             try {
@@ -29,7 +32,7 @@ namespace SaxonCS_NUnit {
 
                 file1.Close();
                 file2.Close();
-                Assert.True(true);
+                Assert.That(true);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -68,7 +71,7 @@ namespace SaxonCS_NUnit {
 
                 transf.CallTemplate(null, serializer);
                 string res = sw.ToString();
-                Assert.NotNull(res);
+                Assert.That(res, Is.Not.Null);
             }
             catch (Exception e) {
                 Console.WriteLine(e.Message);

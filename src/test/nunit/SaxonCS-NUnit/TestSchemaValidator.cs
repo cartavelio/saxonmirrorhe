@@ -11,6 +11,8 @@ using SchemaValidator = Saxon.Api.SchemaValidator;
 
 namespace SaxonCS_NUnit {
     internal class TestSchemaValidator {
+        
+
 
         [Ignore("Uses files on OND machine?")]
         public void TestSimpleValidation() {
@@ -212,8 +214,8 @@ namespace SaxonCS_NUnit {
 
             }
             catch (SaxonApiException sapie) {
-                Assert.AreEqual(1, errorList.Count());
-                Assert.True(sapie.Message.Contains("Far too many errors"));
+                Assert.That((object)1, Is.EqualTo(errorList.Count()));
+                Assert.That(sapie.Message.Contains("Far too many errors"));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -247,8 +249,8 @@ namespace SaxonCS_NUnit {
 
             }
             catch (SaxonApiException sapie) {
-                Assert.AreEqual(1, errorList.Count);
-                Assert.True(sapie.Message.Contains("Far too many errors"));
+                Assert.That((object)1, Is.EqualTo(errorList.Count));
+                Assert.That(sapie.Message.Contains("Far too many errors"));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);

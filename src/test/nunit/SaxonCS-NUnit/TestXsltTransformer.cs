@@ -7,6 +7,7 @@ using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
+using Saxon.Eej.config;
 #if EE
 using Saxon.Eej.config;
 #endif
@@ -32,6 +33,23 @@ namespace SaxonCS_NUnit {
      * JUnit tests for the s9api XsltTransformer
      */
     public class TestXsltTransformer {
+        
+        private void assertAreEqual(Object a, Object b) {
+            Assert.That(a, Is.EqualTo(b));
+        }
+
+        private void assertNotNull(Object a) {
+            Assert.That(a, Is.Not.Null);
+        }
+
+        private void assertFalse(Object a) {
+            Assert.That(a, Is.False);
+        }
+        
+        private void assertFalse(Object a, string label) {
+            Assert.That(a, Is.False, label);
+        }
+
         /**
          * Simple test
          */
@@ -115,7 +133,7 @@ namespace SaxonCS_NUnit {
                 trans.Run(serializer);
 
                 string result = stringFromMemoryStream(os);
-                Assert.True(result.Equals("<output1/><output2/>"), "output");
+                Assert.That(result.Equals("<output1/><output2/>"), "output");
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -151,15 +169,15 @@ namespace SaxonCS_NUnit {
                     trans.InitialContextNode = e;
                     trans.Run(serializer);
                     QName q = trans.InitialContextNode.NodeName;
-                    Assert.AreEqual(q.LocalName, "e");
+                    Assert.That((object)q.LocalName, Is.EqualTo("e"));
                 }
                 else {
                     Assert.Fail("No input node found");
                 }
 
                 string result = stringFromMemoryStream(os);
-                Assert.False(result.Contains("errorA"), "matched root");
-                Assert.True(result.Contains("[]"), "matched e");
+                Assert.That((object)result.Contains("errorA"), Is.False, "matched root");
+                Assert.That(result.Contains("[]"), "matched e");
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -194,7 +212,7 @@ namespace SaxonCS_NUnit {
                 XdmDestination dest = new();
                 transformer.Run(dest);
                 XdmNode result = dest.XdmNode;
-                Assert.True(result.ToString().Contains("H_25_B"),
+                Assert.That(result.ToString().Contains("H_25_B"),
                     "Result should H_25_B:" + result.ToString());
             }
             catch (SaxonApiException ex) {
@@ -264,7 +282,7 @@ namespace SaxonCS_NUnit {
             }
             catch (SaxonApiException e) {
                 int line = e.LineNumber;
-                Assert.True(line >= 2 && line <= 6, "line=5");
+                Assert.That(line >= 2 && line <= 6, "line=5");
             }
         }
         
@@ -295,8 +313,8 @@ namespace SaxonCS_NUnit {
                 trans.Destination = new RawDestination();
                 trans.InitialContextNode = node;
                 trans.Run();
-                Assert.True(((RawDestination)trans.Destination).XdmValue[0] is XdmNode);
-                Assert.True(((XdmNode)((RawDestination)trans.Destination).XdmValue[0]).NodeName.LocalName.Equals("e1"));
+                Assert.That(((RawDestination)trans.Destination).XdmValue[0] is XdmNode);
+                Assert.That(((XdmNode)((RawDestination)trans.Destination).XdmValue[0]).NodeName.LocalName.Equals("e1"));
             }
             catch (Exception exc) {
                 Assert.Fail(exc.Message);
@@ -339,8 +357,8 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Transformation should fail");
             }
             catch (SaxonApiException e) {
-                Assert.True(warnings.Count == 0, "warnings");
-                Assert.False(errors.Count == 0, "errors");
+                Assert.That(warnings.Count == 0, "warnings");
+                Assert.That((object)(errors.Count == 0), Is.False, "errors");
             }
         }
 
@@ -376,8 +394,8 @@ namespace SaxonCS_NUnit {
                 }
 
                 string result = stringFromMemoryStream(os);
-                Assert.False(result.Contains("errorA"), "matched root");
-                Assert.True(result.Contains("[]"), "matched e");
+                Assert.That((object)result.Contains("errorA"), Is.False, "matched root");
+                Assert.That(result.Contains("[]"), "matched e");
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -411,7 +429,7 @@ namespace SaxonCS_NUnit {
                 Serializer outt = proc.NewSerializer(writer);
                 xsl.Destination = outt;
                 xsl.Run(outt);
-                Assert.False(writer.ToString().Contains("///"), "started at element node");
+                Assert.That((object)writer.ToString().Contains("///"), Is.False, "started at element node");
             }
             catch (Exception e) {
                 Console.Error.WriteLine(e.StackTrace);
@@ -438,7 +456,7 @@ namespace SaxonCS_NUnit {
                 xsl.Destination = outt;
                 xsl.Run(outt);
                 XdmNode root = outt.XdmNode;
-                Assert.True(root.NodeKind == XdmNodeKind.Document, "result is document node");
+                Assert.That(root.NodeKind == XdmNodeKind.Document, "result is document node");
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -491,8 +509,8 @@ namespace SaxonCS_NUnit {
                 Serializer serializer = proc.NewSerializer(sw);
                 serializer.SetOutputProperty(Serializer.INDENT, "yes");
                 transformer.Run(serializer);
-                Assert.True(sw.ToString().Contains("TITLE"));
-                Assert.False(sw.ToString().Contains("AUTHOR"));
+                Assert.That(sw.ToString().Contains("TITLE"));
+                assertFalse(sw.ToString().Contains("AUTHOR"));
             }
             catch (SaxonApiException e) {
                 Console.Error.WriteLine(e.Message);
@@ -538,7 +556,7 @@ namespace SaxonCS_NUnit {
                 stage2.Destination = outt;
                 stage1.InitialContextNode = inn;
                 stage1.Run(stage2);
-                Assert.True(sw.ToString().Contains("<a><a><z/></a></a>"), "output");
+                Assert.That(sw.ToString().Contains("<a><a><z/></a></a>"), "output");
             }
             catch (SaxonApiException err) {
                 Assert.Fail(err.Message);
@@ -570,7 +588,7 @@ namespace SaxonCS_NUnit {
                 stage5.Destination = (outt);
                 stage1.InitialContextNode = (inn);
                 stage1.Run(stage2);
-                Assert.True(sw.ToString().Contains("<a><a><a><a><a><z/></a></a></a></a></a>"), "output");
+                Assert.That(sw.ToString().Contains("<a><a><a><a><a><z/></a></a></a></a></a>"), "output");
             }
             catch (SaxonApiException err) {
                 Assert.Fail(err.Message);
@@ -604,7 +622,7 @@ namespace SaxonCS_NUnit {
                 Serializer serializer = proc.NewSerializer(sw);
                 serializer.SetOutputProperty(Serializer.INDENT, "no");
                 transformer.Run(serializer);
-                Assert.True(sw.ToString().Contains("<e>"));
+                Assert.That(sw.ToString().Contains("<e>"));
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -681,7 +699,7 @@ namespace SaxonCS_NUnit {
             transformer.Run(result);
 
             XdmNode xformed = result.XdmNode;
-            Assert.AreEqual("file://tmp/out.xml", xformed.BaseUri.ToString(), "output base uri");
+            Assert.That((object)"file://tmp/out.xml", Is.EqualTo(xformed.BaseUri.ToString()), "output base uri");
         }
 
         /**
@@ -714,7 +732,7 @@ namespace SaxonCS_NUnit {
             //     System.out.println("Parameter n." + ++i + ": " + key);
             // }
             // System.out.println();
-            // Assert.AreEqual(2, 2);
+            // assertAreEqual(2, 2);
         }
 
  
@@ -746,7 +764,7 @@ namespace SaxonCS_NUnit {
             Dictionary<string, XdmDestination> results = new ();
             transformer.ResultDocumentHandler = (href, bace) => {
                 XdmDestination dest = new();
-                Assert.True(bace.ToString().StartsWith("http://base.output.com/"));
+                Assert.That(bace.ToString().StartsWith("http://base.output.com/"));
                 Uri abs = new Uri(bace, href);
                 dest.BaseUri = abs;
                 string key = abs.ToString().Replace("http://base.output.com/", "");
@@ -757,12 +775,12 @@ namespace SaxonCS_NUnit {
             transformer.InitialTemplate = new QName("main");
             transformer.Run(result);
 
-            Assert.AreEqual(6, results.Count());
-            Assert.NotNull(results[("out1.xml")]);
+            Assert.That((object)6, Is.EqualTo(results.Count()));
+            Assert.That((object)results[("out1.xml")], Is.Not.Null);
             //System.err.println(results.get("out1.xml").getXdmNode().ToString());
-            Assert.True(results[("out1.xml")].XdmNode.ToString().Contains("<out nr=\"5\"/>"));
-            Assert.AreEqual("http://base.output.com/out1.xml",
-                results["out1.xml"].XdmNode.BaseUri.ToString(), "base URI incorrect");
+            Assert.That(results[("out1.xml")].XdmNode.ToString().Contains("<out nr=\"5\"/>"));
+            object b = results["out1.xml"].XdmNode.BaseUri.ToString();
+            Assert.That((object)"http://base.output.com/out1.xml", Is.EqualTo(b), "base URI incorrect");
         }
 
 
@@ -792,9 +810,11 @@ namespace SaxonCS_NUnit {
             RawDestination outt = new();
             t.Run(outt);
             XdmValue val = outt.XdmValue;
-            Assert.AreEqual(2, val.Count());
-            Assert.AreEqual(13, ((XdmAtomicValue)val.ItemAt(0)).AsLong());
-            Assert.AreEqual(6, ((XdmAtomicValue)val.ItemAt(1)).AsLong());
+            Assert.That((object)2, Is.EqualTo(val.Count()));
+            object b = ((XdmAtomicValue)val.ItemAt(0)).AsLong();
+            Assert.That((object)13, Is.EqualTo(b));
+            object b1 = ((XdmAtomicValue)val.ItemAt(1)).AsLong();
+            Assert.That((object)6, Is.EqualTo(b1));
         }
 
 
@@ -822,7 +842,7 @@ namespace SaxonCS_NUnit {
                 outt.SetOutputProperty(Serializer.METHOD, "text");
                 transformer.SetParameter(new QName("x"), new XdmAtomicValue(2));
                 transformer.Run(outt);
-                Assert.AreEqual("4", sw.ToString());
+                Assert.That((object)"4", Is.EqualTo(sw.ToString()));
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);

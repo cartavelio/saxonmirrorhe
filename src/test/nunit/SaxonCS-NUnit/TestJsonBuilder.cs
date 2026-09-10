@@ -8,6 +8,7 @@ namespace SaxonCS_NUnit {
     * NUnit tests for the s9api JsonBuilder
     */
     class TestJsonBuilder {
+        
 
         [Test]
         public void TestStringSource() {
@@ -17,9 +18,9 @@ namespace SaxonCS_NUnit {
                 XdmValue d = builder.ParseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
-                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
-                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
-                Assert.AreEqual(m.Size, 2);
+                Assert.That((object)((XdmAtomicValue) m.Get("one")).AsLong(), Is.EqualTo(1));
+                Assert.That((object)((XdmAtomicValue) m.Get("two")).AsLong(), Is.EqualTo(2));
+                Assert.That((object)m.Size, Is.EqualTo(2));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -34,9 +35,9 @@ namespace SaxonCS_NUnit {
                 XdmValue d = builder.ParseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
-                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
-                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
-                Assert.AreEqual(m.Size, 2);
+                Assert.That((object)((XdmAtomicValue) m.Get("one")).AsLong(), Is.EqualTo(1));
+                Assert.That((object)((XdmAtomicValue) m.Get("two")).AsLong(), Is.EqualTo(2));
+                Assert.That((object)m.Size, Is.EqualTo(2));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -67,9 +68,9 @@ namespace SaxonCS_NUnit {
                 XdmValue d = builder.ParseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
-                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
-                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
-                Assert.AreEqual(m.Size, 2);
+                Assert.That((object)((XdmAtomicValue) m.Get("one")).AsLong(), Is.EqualTo(1));
+                Assert.That((object)((XdmAtomicValue) m.Get("two")).AsLong(), Is.EqualTo(2));
+                Assert.That((object)m.Size, Is.EqualTo(2));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);

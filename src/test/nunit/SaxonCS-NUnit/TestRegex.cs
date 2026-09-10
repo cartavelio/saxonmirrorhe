@@ -9,6 +9,9 @@ namespace SaxonCS_NUnit {
     /// (and syntax) in place of the XPath syntax.
     /// </summary>
     class TestRegex {
+        
+
+
         [Test]
         public void TestMatches() {
             try {
@@ -32,8 +35,8 @@ namespace SaxonCS_NUnit {
                 XPathCompiler c = p.NewXPathCompiler();
                 XdmValue v = c.Evaluate(@"tokenize('dole0021', '\W+|(?<=\D)(?=\d)|(?<=\d)(?=\D)', ';n')", null);
                 Assert.That(v.Count == 2);
-                Assert.AreEqual(v[0].StringValue, "dole");
-                Assert.AreEqual(v[1].StringValue, "0021");
+                Assert.That((object)v[0].StringValue, Is.EqualTo("dole"));
+                Assert.That((object)v[1].StringValue, Is.EqualTo("0021"));
             }
             catch (Exception e) {
                 Console.WriteLine(e.StackTrace);
@@ -50,7 +53,8 @@ namespace SaxonCS_NUnit {
                 XPathCompiler c = p.NewXPathCompiler();
                 XdmValue v = c.Evaluate("replace('3/20/1986', " +
                                         "'(?<mm>[0-9]+)/(?<dd>[0-9]+)/(?<yy>[0-9]+)', '${yy}/${mm}/${dd}$$', ';n')", null);
-                Assert.AreEqual("1986/3/20$", ((XdmAtomicValue)v).StringValue);
+                object b = ((XdmAtomicValue)v).StringValue;
+                Assert.That((object)"1986/3/20$", Is.EqualTo(b));
             }
             catch (Exception e) {
                 Console.WriteLine(e.StackTrace);

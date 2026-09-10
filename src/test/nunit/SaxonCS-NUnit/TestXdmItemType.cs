@@ -5,11 +5,14 @@ using Saxon.Api;
 
 namespace SaxonCS_NUnit {
     class TestXdmItemType {
+        
+                
+ 
         [Test]
         public void testParseSimpleItemType() {
             Processor proc = new();
             XdmItemType xs_string = proc.ParseItemType("xs:string");
-            Assert.AreEqual(xs_string, XdmAtomicType.String);
+            Assert.That((object)xs_string, Is.EqualTo(XdmAtomicType.String));
             Assert.That(xs_string.Matches(new XdmAtomicValue("banana")));
             XdmSequenceType xs_string_plus = xs_string.Occurs('+');
             Assert.That(xs_string_plus.Matches(new XdmAtomicValue("banana")));
@@ -82,7 +85,7 @@ namespace SaxonCS_NUnit {
                 v = new XdmAtomicValue("-31000", XdmAtomicType.Short);
                 Assert.That(XdmAtomicType.Short.Matches(v), "short");
                 Assert.That(XdmAtomicType.Integer.Matches(v), "int");
-                Assert.False(XdmAtomicType.Byte.Matches(v), "byte");
+                Assert.That(XdmAtomicType.Byte.Matches(v), Is.False, "byte");
                 v = new XdmAtomicValue("banana", XdmAtomicType.UntypedAtomic);
                 Assert.That(XdmAtomicType.UntypedAtomic.Matches(v), "untyped");
             }
@@ -103,7 +106,7 @@ namespace SaxonCS_NUnit {
                 result = result.Append(it);
             }
 
-            Assert.AreEqual(3, result.Count);
+            Assert.That((object)3, Is.EqualTo(result.Count));
         }
 
         [Test]
@@ -112,10 +115,10 @@ namespace SaxonCS_NUnit {
             XdmItemType mapType1 = proc.ParseItemType("map(xs:string, element()*)");
             XdmItemType mapType2 = proc.ParseItemType("map ( xs:string , element(*) *)");
             XdmItemType mapType3 = proc.ParseItemType("map ( xs:string , element(*)+)");
-            Assert.AreEqual(mapType1, mapType2);
-            Assert.AreNotEqual(mapType1, mapType3);
-            Assert.AreEqual(mapType1.OneOrMore, mapType2.OneOrMore);
-            Assert.AreNotEqual(mapType1.OneOrMore, mapType1.ZeroOrMore);
+            Assert.That((object)mapType1, Is.EqualTo(mapType2));
+            Assert.That(mapType1, Is.Not.EqualTo(mapType3));
+            Assert.That((object)mapType1.OneOrMore, Is.EqualTo(mapType2.OneOrMore));
+            Assert.That(mapType1.OneOrMore, Is.Not.EqualTo(mapType1.ZeroOrMore));
         }
 
         [Test]
@@ -146,20 +149,20 @@ namespace SaxonCS_NUnit {
         public void testItemTypeToString() {
             try {
                 Processor p = new Processor(true);
-                Assert.AreEqual("xs:boolean", XdmAtomicType.Boolean.ToString());
-                Assert.AreEqual("xs:QName", XdmAtomicType.QName.ToString());
-                Assert.AreEqual("item()", XdmAnyItemType.Instance.ToString());
-                Assert.AreEqual("xs:anyAtomicType", XdmAtomicType.Instance.ToString());
-                Assert.AreEqual("node()", XdmAnyNodeType.Instance.ToString());
-                Assert.AreEqual("element()", XdmNodeKind.Element.ToString());
-                Assert.AreEqual("comment()", XdmNodeKind.Comment.ToString());
-                Assert.AreEqual("map(*)", XdmAnyMapType.Instance.ToString());
-                Assert.AreEqual("array(*)", XdmAnyArrayType.Instance.ToString());
-                Assert.AreEqual("function(*)", XdmAnyFunctionType.Instance.ToString());
+                Assert.That((object)"xs:boolean", Is.EqualTo(XdmAtomicType.Boolean.ToString()));
+                Assert.That((object)"xs:QName", Is.EqualTo(XdmAtomicType.QName.ToString()));
+                Assert.That((object)"item()", Is.EqualTo(XdmAnyItemType.Instance.ToString()));
+                Assert.That((object)"xs:anyAtomicType", Is.EqualTo(XdmAtomicType.Instance.ToString()));
+                Assert.That((object)"node()", Is.EqualTo(XdmAnyNodeType.Instance.ToString()));
+                Assert.That((object)"element()", Is.EqualTo(XdmNodeKind.Element.ToString()));
+                Assert.That((object)"comment()", Is.EqualTo(XdmNodeKind.Comment.ToString()));
+                Assert.That((object)"map(*)", Is.EqualTo(XdmAnyMapType.Instance.ToString()));
+                Assert.That((object)"array(*)", Is.EqualTo(XdmAnyArrayType.Instance.ToString()));
+                Assert.That((object)"function(*)", Is.EqualTo(XdmAnyFunctionType.Instance.ToString()));
                 XdmFunctionItem nameFn = p.GetSystemFunction(new QName(NamespaceConstant.FN, "name"), 1);
-                Assert.NotNull(nameFn);
+                Assert.That(nameFn, Is.Not.Null);
                 XdmItemType nameFnType = XdmItemType.ForItem(nameFn, p);
-                Assert.AreEqual("(function(node()?) as xs:string)", nameFnType.ToString());
+                Assert.That((object)"(function(node()?) as xs:string)", Is.EqualTo(nameFnType.ToString()));
             }
             catch (Exception e) {
                 Assert.Fail();
@@ -170,14 +173,14 @@ namespace SaxonCS_NUnit {
         public void testSequenceTypeToString() {
             try {
                 Processor p = new Processor(true);
-                Assert.AreEqual("xs:boolean", XdmAtomicType.Boolean.One.ToString());
-                Assert.AreEqual("xs:QName*", XdmAtomicType.QName.ZeroOrMore.ToString());
-                Assert.AreEqual("item()+", XdmAnyItemType.Instance.OneOrMore.ToString());
-                Assert.AreEqual("element()?", XdmNodeKind.Element.ZeroOrOne.ToString());
+                Assert.That((object)"xs:boolean", Is.EqualTo(XdmAtomicType.Boolean.One.ToString()));
+                Assert.That((object)"xs:QName*", Is.EqualTo(XdmAtomicType.QName.ZeroOrMore.ToString()));
+                Assert.That((object)"item()+", Is.EqualTo(XdmAnyItemType.Instance.OneOrMore.ToString()));
+                Assert.That((object)"element()?", Is.EqualTo(XdmNodeKind.Element.ZeroOrOne.ToString()));
                 XdmFunctionItem nameFn = p.GetSystemFunction(new QName(NamespaceConstant.FN, "name"), 1);
-                Assert.NotNull(nameFn);
+                Assert.That(nameFn, Is.Not.Null);
                 XdmItemType nameFnType = XdmItemType.ForItem(nameFn, p);
-                Assert.AreEqual("(function(node()?) as xs:string)*", nameFnType.ZeroOrMore.ToString());
+                Assert.That((object)"(function(node()?) as xs:string)*", Is.EqualTo(nameFnType.ZeroOrMore.ToString()));
             }
             catch (Exception e) {
                 Assert.Fail();

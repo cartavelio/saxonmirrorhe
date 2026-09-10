@@ -9,16 +9,17 @@ namespace SaxonCS_NUnit
     class TestXdmMap
     {
 
+
         [Test]
         public void TestMapOperations() {
             XdmMap map = new XdmMap();
             map = map.Put(new XdmAtomicValue("a"), new XdmAtomicValue(1));
             map = map.Put(new XdmAtomicValue("b"), new XdmAtomicValue(2));
             map = map.Put(new XdmAtomicValue("c"), new XdmAtomicValue(3));
-            Assert.True(3== map.Size, "Map has correct size");
+            Assert.That(3== map.Size, "Map has correct size");
             try
             {
-                Assert.True(((XdmAtomicValue)map.Get(new XdmAtomicValue("b"))).AsLong()== 2);
+                Assert.That(((XdmAtomicValue)map.Get(new XdmAtomicValue("b"))).AsLong()== 2);
             }
             catch (Exception e)
             {
@@ -27,10 +28,10 @@ namespace SaxonCS_NUnit
             map = map.Remove(new XdmAtomicValue("c"));
             map = map.Remove(new XdmAtomicValue("d"));
             map = map.Put(new XdmAtomicValue("a"), new XdmAtomicValue(4));
-            Assert.True(map.Size== 2);
+            Assert.That(map.Size== 2);
             try
             {
-                Assert.True(((XdmAtomicValue)map.Get(new XdmAtomicValue("a"))).AsLong()== 4);
+                Assert.That(((XdmAtomicValue)map.Get(new XdmAtomicValue("a"))).AsLong()== 4);
             }
             catch (Exception e)
             {
@@ -47,10 +48,10 @@ namespace SaxonCS_NUnit
             jam.Add(new XdmAtomicValue("b"), new XdmAtomicValue(2));
             jam.Add(new XdmAtomicValue("c"), new XdmAtomicValue(3));
             XdmMap map = XdmMap.MakeMap(jam);
-            Assert.AreEqual(3, map.Size);
-            try
-            {
-                Assert.AreEqual(2, ((XdmAtomicValue)map.Get(new XdmAtomicValue("b"))).AsLong());
+            Assert.That((object)3, Is.EqualTo(map.Size));
+            try {
+                object b = ((XdmAtomicValue)map.Get(new XdmAtomicValue("b"))).AsLong();
+                Assert.That((object)2, Is.EqualTo(b));
             }
             catch (Exception e)
             {
@@ -59,10 +60,10 @@ namespace SaxonCS_NUnit
             map = map.Remove(new XdmAtomicValue("c"));
             map = map.Remove(new XdmAtomicValue("d"));
             map = map.Put(new XdmAtomicValue("a"), new XdmAtomicValue(4));
-            Assert.True(map.Size== 2);
-            try
-            {
-                Assert.AreEqual(4, ((XdmAtomicValue)map.Get(new XdmAtomicValue("a"))).AsLong());
+            Assert.That(map.Size== 2);
+            try {
+                object b = ((XdmAtomicValue)map.Get(new XdmAtomicValue("a"))).AsLong();
+                Assert.That((object)4, Is.EqualTo(b));
             }
             catch (Exception e)
             {
@@ -77,13 +78,13 @@ namespace SaxonCS_NUnit
             map = map.Put(new XdmAtomicValue("a"), new XdmAtomicValue(1));
             map = map.Put(new XdmAtomicValue("b"), new XdmAtomicValue(2));
             map = map.Put(new XdmAtomicValue("c"), new XdmAtomicValue(3));
-            Assert.True(3 == map.Size);
+            Assert.That(3 == map.Size);
             Processor proc = new Processor(true);
             try
             {
                 XdmValue result = map.Get(new XdmAtomicValue("c"));
-                Assert.True(result is XdmAtomicValue);
-                Assert.True(((XdmAtomicValue)result).AsLong() == 3);
+                Assert.That(result is XdmAtomicValue);
+                Assert.That(((XdmAtomicValue)result).AsLong() == 3);
             }
             catch (Exception e)
             {
@@ -109,7 +110,7 @@ namespace SaxonCS_NUnit
                 XQueryEvaluator q = comp.Compile(query).Load();
                 q.SetExternalVariable(new QName("a"), map);
                 XdmAtomicValue result = (XdmAtomicValue)q.EvaluateSingle();
-                Assert.True(3 == result.AsLong());
+                Assert.That(3 == result.AsLong());
             }
             catch (Exception e)
             {
@@ -127,7 +128,7 @@ namespace SaxonCS_NUnit
                 XQueryCompiler comp = proc.NewXQueryCompiler();
                 XQueryEvaluator q = comp.Compile(query).Load();
                 XdmMap result = (XdmMap)q.EvaluateSingle();
-                Assert.True(3== result.Size);
+                Assert.That(3== result.Size);
             }
             catch (Exception e)
             {
@@ -148,9 +149,9 @@ namespace SaxonCS_NUnit
                 XQueryEvaluator q = comp.Compile(query).Load();
                 XdmMap result = (XdmMap)q.EvaluateSingle();
                 Dictionary<XdmAtomicValue, XdmValue> jmap = result.AsDictionary();
-                Assert.True(3 == jmap.Count);
+                Assert.That(3 == jmap.Count);
                 object output = jmap[new XdmAtomicValue(3)];
-                Assert.True(4 == ((XdmAtomicValue)output).AsLong());
+                Assert.That(4 == ((XdmAtomicValue)output).AsLong());
             }
             catch (Exception e)
             {
@@ -169,11 +170,11 @@ namespace SaxonCS_NUnit
             dictionary.Add(1, "a");
             dictionary.Add(2, "b");
             XdmMap map = XdmMap.MakeMap(dictionary);
-            Assert.True(2 == map.Size);
+            Assert.That(2 == map.Size);
             XdmAtomicValue val1 = (XdmAtomicValue)XdmValue.MakeValue("b");
             XdmAtomicValue val2 = (XdmAtomicValue)map.Get(2);
-            Assert.True(val1.Equals(val2));
-                //Assert.True(ItemType.ANY_MAP.matches(map));
+            Assert.That(val1.Equals(val2));
+                //Assert.That(ItemType.ANY_MAP.matches(map));
             }
             catch (Exception e)
             {
@@ -191,7 +192,7 @@ namespace SaxonCS_NUnit
             map = map.Put(new XdmAtomicValue("c"), new XdmAtomicValue(3));
             string result = map.ToString();
             //Console.WriteLine(result);
-            Assert.AreEqual(result, "map{\"a\":1,\"b\":2,\"c\":3}"); // Could change
+            Assert.That((object)result, Is.EqualTo("map{\"a\":1,\"b\":2,\"c\":3}")); // Could change
         }
     }
 }

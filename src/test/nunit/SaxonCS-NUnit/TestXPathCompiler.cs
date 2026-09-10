@@ -18,6 +18,14 @@ using XPathSelector = Saxon.Api.XPathSelector;
 
 namespace SaxonCS_NUnit {
     class TestXPathCompiler {
+
+        private void assertAreEqual(Object a, Object b) {
+            Assert.That(a, Is.EqualTo(b));
+        }
+
+        private void assertNotNull(Object a) {
+            Assert.That(a, Is.Not.Null);
+        }
         [Test]
         public void TestSimple() {
             try {
@@ -29,7 +37,8 @@ namespace SaxonCS_NUnit {
                 XdmNode foo = b.Build(new StringReader("<foo><bar/></foo>"));
                 XPathSelector s = e.Load();
                 s.ContextItem = foo;
-                Assert.AreEqual(2, ((XdmAtomicValue) s.EvaluateSingle()).AsLong());
+                object b1 = ((XdmAtomicValue) s.EvaluateSingle()).AsLong();
+                Assert.That((object)2, Is.EqualTo(b1));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -71,28 +80,28 @@ namespace SaxonCS_NUnit {
             //     //         Predicates.Eq<XdmItem>(XdmAtomicValue.MakeAtomicValue("test1")),
             //     //         Predicates.Eq(XdmAtomicValue.MakeAtomicValue("test2")))));
             //     // string text1 = ((XdmAtomicValue) value2.ItemAt(0)).GetStringValue();
-            //     // Assert.AreEqual("test1", text1);
-            //     // Assert.AreEqual("test2", ((XdmAtomicValue) value2.ItemAt(1)).GetStringValue());
+            //     // assertAreEqual("test1", text1);
+            //     // assertAreEqual("test2", ((XdmAtomicValue) value2.ItemAt(1)).GetStringValue());
             //
             //     //test 1a
             //     IEnumerable<XdmNode> valueNodes = value.Where<XdmNode>(Predicates.HasLocalName("foo"));
             //
             //     // test 2
             //     XdmValue value3 = new XdmValue(value.Where(i => i is XdmAtomicValue));
-            //     Assert.AreEqual(2, value3.Count);
+            //     assertAreEqual(2, value3.Count);
             //
             //
             //     // test 3
             //     IEnumerable<XdmItem> value4 = value.Where(i => i is XdmAtomicValue);
-            //     Assert.AreEqual(2, value4.Count());
+            //     assertAreEqual(2, value4.Count());
             //
             //     // test 3a
-            //     Assert.True(value.AnyMatch(Predicates.IsNode()), "XdmValue contains a Node");
+            //     Assert.That(value.AnyMatch(Predicates.IsNode()), "XdmValue contains a Node");
             //
             //     // test 3b
-            //     Assert.True(!value.AllMatch(Predicates.IsAtomic()), "XdmValue All Atomic");
+            //     Assert.That(!value.AllMatch(Predicates.IsAtomic()), "XdmValue All Atomic");
             //
-            //     Assert.True(value.Where(Predicates.IsAtomic()).All(Predicates.IsAtomic()),
+            //     Assert.That(value.Where(Predicates.IsAtomic()).All(Predicates.IsAtomic()),
             //         "Should only contain Atomic values");
             //     //test3
             //     var iterx = foo.Select(Steps.Root());
@@ -113,13 +122,13 @@ namespace SaxonCS_NUnit {
             //
             //
             //     //test 4b
-            //     Assert.True(Predicates.IsElement(foo), "Check that node is an element node");
+            //     Assert.That(Predicates.IsElement(foo), "Check that node is an element node");
             //     moved = textNodes.MoveNext();
             //
             //     //test 4c
-            //     Assert.True(Predicates.IsText().Func(textNodes.Current), "Check that node is a text node");
+            //     Assert.That(Predicates.IsText().Func(textNodes.Current), "Check that node is a text node");
             //     string text = textNodes.Current.StringValue;
-            //     Assert.AreEqual("text", text);
+            //     assertAreEqual("text", text);
             // }
             // catch (Exception e) {
             //     Assert.Fail(e.Message);
@@ -140,7 +149,8 @@ namespace SaxonCS_NUnit {
                 XPathSelector s = e.Load();
                 s.SetVariable(new QName("a"), new XdmAtomicValue(2));
                 s.SetVariable(new QName("b"), new XdmAtomicValue(2));
-                Assert.AreEqual(4, ((XdmAtomicValue) s.EvaluateSingle()).AsLong());
+                object b = ((XdmAtomicValue) s.EvaluateSingle()).AsLong();
+                Assert.That((object)4, Is.EqualTo(b));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -163,7 +173,8 @@ namespace SaxonCS_NUnit {
                     s.SetVariable(q, new XdmAtomicValue(2));
                 }
 
-                Assert.AreEqual(4, ((XdmAtomicValue) s.EvaluateSingle()).AsLong());
+                object b = ((XdmAtomicValue) s.EvaluateSingle()).AsLong();
+                Assert.That((object)4, Is.EqualTo(b));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -189,7 +200,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("No error reported for undeclared variables");
             }
             catch (Exception e) {
-                Assert.True(true);
+                Assert.That(true);
             }
         }
         
@@ -202,7 +213,8 @@ namespace SaxonCS_NUnit {
                 Processor p = new ();
                 XPathCompiler c = p.NewXPathCompiler();
                 XPathExecutable e = c.Compile("compare('A', 'a', 'http://saxon.sf.net/collation?ignore-case=yes')");
-                Assert.AreEqual(0, ((XdmAtomicValue) e.Load().EvaluateSingle()).AsLong());
+                object b = ((XdmAtomicValue) e.Load().EvaluateSingle()).AsLong();
+                Assert.That((object)0, Is.EqualTo(b));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -220,7 +232,8 @@ namespace SaxonCS_NUnit {
                 XPathExecutable e = c.Compile("compare('A', 'a',  " +
                                               "if (string(current-date()) eq '1900-01-01') then 'rubbish' else 'http://saxon.sf.net/collation?ignore-case=yes')");
                 XdmAtomicValue result = ((XdmAtomicValue) e.Load().EvaluateSingle());
-                Assert.AreEqual(0, result.AsLong());
+                object b = result.AsLong();
+                Assert.That((object)0, Is.EqualTo(b));
             }
             catch (Exception e) {
                 Console.Error.WriteLine(e.Message + '\n' + e.StackTrace);
@@ -239,7 +252,8 @@ namespace SaxonCS_NUnit {
                 XPathExecutable e =
                     c.Compile(
                         "year-from-date(function-lookup(QName('http://www.w3.org/2001/XMLSchema', 'date'), 1)('2001-12-31'))");
-                Assert.AreEqual(2001, ((XdmAtomicValue) e.Load().EvaluateSingle()).AsLong());
+                object b = ((XdmAtomicValue) e.Load().EvaluateSingle()).AsLong();
+                Assert.That((object)2001, Is.EqualTo(b));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -257,7 +271,8 @@ namespace SaxonCS_NUnit {
                 c.XPathLanguageVersion = ("3.0");
                 XPathExecutable e = c.Compile("Q{http://www.w3.org/2001/XMLSchema}integer('1234')");
                 XPathSelector s = e.Load();
-                Assert.AreEqual(1234, ((XdmAtomicValue) s.EvaluateSingle()).AsLong());
+                object b = ((XdmAtomicValue) s.EvaluateSingle()).AsLong();
+                Assert.That((object)1234, Is.EqualTo(b));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -276,7 +291,7 @@ namespace SaxonCS_NUnit {
                 XPathExecutable e = c.Compile("data(/Q{urn:a}doc)");
                 XPathSelector s = e.Load();
                 s.ContextItem = (root);
-                Assert.True(s.GetEnumerator().MoveNext(), "element not found");
+                Assert.That(s.GetEnumerator().MoveNext(), "element not found");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -329,7 +344,8 @@ namespace SaxonCS_NUnit {
                 c.XPathLanguageVersion = ("3.0");
                 XPathExecutable e = c.Compile("let $n := 5 return 1229 + $n");
                 XPathSelector s = e.Load();
-                Assert.AreEqual(1234, ((XdmAtomicValue) s.EvaluateSingle()).AsLong());
+                object b = ((XdmAtomicValue) s.EvaluateSingle()).AsLong();
+                Assert.That((object)1234, Is.EqualTo(b));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -366,7 +382,8 @@ namespace SaxonCS_NUnit {
                 c.DeclareVariable(new QName("vvv"));
                 XPathExecutable e = c.Compile("2+2");
                 XPathSelector s = e.Load();
-                Assert.AreEqual(4, ((XdmAtomicValue) s.EvaluateSingle()).AsLong());
+                object b = ((XdmAtomicValue) s.EvaluateSingle()).AsLong();
+                Assert.That((object)4, Is.EqualTo(b));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -406,7 +423,7 @@ namespace SaxonCS_NUnit {
                 XPathSelector s = e.Load();
                 s.ContextItem = new XdmAtomicValue(2);
                 XdmAtomicValue result = (XdmAtomicValue) s.Evaluate();
-                Assert.AreEqual(result.AsLong(), 5);
+                Assert.That((object)result.AsLong(), Is.EqualTo(5));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -504,8 +521,9 @@ namespace SaxonCS_NUnit {
                     throw saue;
                 }
 
-                Assert.AreEqual(1, results.Count);
-                Assert.AreEqual("true", results[0].ToString());
+                Assert.That((object)1, Is.EqualTo(results.Count));
+                object b = results[0].ToString();
+                Assert.That((object)"true", Is.EqualTo(b));
             }
             catch (Exception e) {
                 Console.Error.WriteLine(e.StackTrace);
@@ -518,7 +536,7 @@ namespace SaxonCS_NUnit {
         public void TestSchemaAwareEqualityGood() {
             try {
                 bool result = trySchemaAwareEquality(true);
-                Assert.True(result, "result");
+                Assert.That(result, "result");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -598,13 +616,32 @@ namespace SaxonCS_NUnit {
                 XPathExecutable e = c.Compile("file:exists('//crayfish/team/xmark/results8-8.xml')");
                 XPathSelector s = e.Load();
                 bool result = s.EffectiveBooleanValue();
-                Assert.True(result);
+                Assert.That(result);
             }
             catch (Exception e) {
                 //Console.WriteLine(e + "\n" + e.StackTrace);
                 Assert.Fail(e.Message);
             }
  
+        }
+
+        [Test]
+        public void TestDefaultDecimalFormat() {
+            try {
+                Processor p = new ();
+                XPathCompiler c = p.NewXPathCompiler();
+                c.XPathLanguageVersion = ("3.1");
+                c.SetDecimalFormatProperty( "decimal-separator", "~");
+                c.SetDecimalFormatProperty( "grouping-separator", "|");
+                c.SetDecimalFormatProperty( "exponent-separator", "E");
+                XPathExecutable e = c.Compile("format-number(123.4, '0|000~0E0')");
+                XPathSelector s = e.Load();
+                String result = s.EvaluateSingle().StringValue;
+                Assert.That(result.Equals("1|234~0E-1"));
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
         }
 
 
@@ -620,7 +657,7 @@ namespace SaxonCS_NUnit {
                 XPathExecutable e = c.Compile("format-number(123.4, '0|000~0E0', 'deci')");
                 XPathSelector s = e.Load();
                 String result = s.EvaluateSingle().StringValue;
-                Assert.True(result.Equals("1|234~0E-1"));
+                Assert.That(result.Equals("1|234~0E-1"));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -657,9 +694,9 @@ namespace SaxonCS_NUnit {
                     "http://www.nltaxonomie.nl/nt11/ocw/20170301.b/dictionary/ocw-axes");
 
                 XdmValue result = xpathCompiler.Evaluate(xpathString, contextItem);
-                Assert.True(result is XdmNode);
-                Assert.AreEqual(((XdmNode) result).NodeKind, XdmNodeKind.Element);
-                Assert.True("context".Equals(((XdmNode) result).NodeName.LocalName));
+                Assert.That(result is XdmNode);
+                Assert.That((object)((XdmNode) result).NodeKind, Is.EqualTo(XdmNodeKind.Element));
+                Assert.That("context".Equals(((XdmNode) result).NodeName.LocalName));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -680,7 +717,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("unexpected success");
             }
             catch (Saxon.Api.SaxonApiException e) {
-                Assert.AreEqual("XPST0017", e.ErrorCode.LocalName);
+                Assert.That((object)"XPST0017", Is.EqualTo(e.ErrorCode.LocalName));
             }
         }
         
@@ -695,17 +732,17 @@ namespace SaxonCS_NUnit {
                 XPathCompiler c = p.NewXPathCompiler();
                 c.XPathLanguageVersion = ("3.1");
                 XdmItem result = c.EvaluateSingle("string-join(//p)", doc);
-                Assert.AreEqual("one", result.StringValue);
+                Assert.That((object)"one", Is.EqualTo(result.StringValue));
                 c.UnprefixedElementMatchingPolicy = UnprefixedElementMatchingPolicy.AnyNamespace;
                 result = c.EvaluateSingle("string-join(//p)", doc);
-                Assert.AreEqual("onetwothree", result.StringValue);
+                Assert.That((object)"onetwothree", Is.EqualTo(result.StringValue));
                 c.UnprefixedElementMatchingPolicy = UnprefixedElementMatchingPolicy.DefaultNamespace;
                 c.DeclareNamespace("", "n2");
                 result = c.EvaluateSingle("string-join(//p)", doc);
-                Assert.AreEqual("two", result.StringValue);
+                Assert.That((object)"two", Is.EqualTo(result.StringValue));
                 c.UnprefixedElementMatchingPolicy = UnprefixedElementMatchingPolicy.DefaultNamespaceOrNone;
                 result = c.EvaluateSingle("string-join(//p)", doc);
-                Assert.AreEqual("onetwo", result.StringValue);
+                Assert.That((object)"onetwo", Is.EqualTo(result.StringValue));
             }
             catch (Exception e) {
                 Assert.Fail();

@@ -2,9 +2,12 @@ using System;
 using System.Linq;
 using NUnit.Framework;
 using Saxon.Api;
+using Saxon.Ejava.lang;
 
 namespace SaxonCS_NUnit {
     public class TestXdmValue {
+
+        
 
         [Test]
         public void TestGetRange() {
@@ -15,11 +18,11 @@ namespace SaxonCS_NUnit {
             v = v.Append(new XdmAtomicValue(13));
             v = v.Append(new XdmAtomicValue(14));
             XdmValue v1 = v.GetRange(1, 4);
-            Assert.AreEqual(v1.Count(), 4);
-            Assert.AreEqual(v1.ItemAt(0).StringValue, "11");
+            Assert.That((object)v1.Count(), Is.EqualTo(4));
+            Assert.That((object)v1.ItemAt(0).StringValue, Is.EqualTo("11"));
             XdmValue v2 = v.GetRange(0, 4);
-            Assert.AreEqual(v2.Count(), 4);
-            Assert.AreEqual(v2.ItemAt(0).StringValue, "10");
+            Assert.That((object)v2.Count(), Is.EqualTo(4));
+            Assert.That((object)v2.ItemAt(0).StringValue, Is.EqualTo("10"));
             try {
                 XdmValue v3 = v.GetRange(-1, 3);
                 Assert.Fail("Unexpected success");
@@ -44,8 +47,8 @@ namespace SaxonCS_NUnit {
                     return false;
                 }
             }).GetEnumerator());
-            Assert.AreEqual(w.Count, 2);
-            Assert.AreEqual(w.ItemAt(0).StringValue, "13");
+            Assert.That((object)w.Count, Is.EqualTo(2));
+            Assert.That((object)w.ItemAt(0).StringValue, Is.EqualTo("13"));
         }
 
         [Test]
@@ -57,16 +60,16 @@ namespace SaxonCS_NUnit {
             v = v.Append(new XdmAtomicValue(13.1));
             v = v.Append(new XdmAtomicValue(14));
             XdmValue w = new (v.Where(it => XdmAtomicType.Integer.Matches(it)).GetEnumerator());
-            Assert.AreEqual(3, w.Count());
-            Assert.AreEqual("10\n12\n14", w.ToString());
-            Assert.AreEqual("10", w.ItemAt(0).StringValue, "10");
+            Assert.That((object)3, Is.EqualTo(w.Count()));
+            Assert.That((object)"10\n12\n14", Is.EqualTo(w.ToString()));
+            Assert.That(w.ItemAt(0).StringValue, Is.EqualTo("10"), "10");
         }
 
         [Test]
         public void testDecimalDivide() {
             Processor p = new();
             XdmValue result = p.NewXPathCompiler().Compile("1 div 7").Load().Evaluate();
-            Assert.AreEqual(((XdmAtomicValue)result).StringValue, "0.142857142857142857");
+            Assert.That((object)((XdmAtomicValue)result).StringValue, Is.EqualTo("0.142857142857142857"));
         }
 
 

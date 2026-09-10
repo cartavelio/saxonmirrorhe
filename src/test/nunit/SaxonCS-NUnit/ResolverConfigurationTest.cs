@@ -16,7 +16,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void defaultCatalogResourceResolver() {
             Configuration config = new EnterpriseConfiguration();
-            Assert.NotNull(config.getResourceResolver());
+            Assert.That((object)config.getResourceResolver(), Is.Not.Null);
             Assert.That(config.getResourceResolver() is ConfigurableResourceResolver);
         }
         
@@ -25,7 +25,7 @@ namespace SaxonCS_NUnit {
             Processor proc = new();
             proc.SetProperty(Feature.RESOURCE_RESOLVER, new Saxon.Callbacks.CatalogResourceResolver());
             Configuration config = proc.Implementation;
-            Assert.NotNull(config.getResourceResolver());
+            Assert.That((object)config.getResourceResolver(), Is.Not.Null);
             Assert.That(config.getResourceResolver() is CatalogResourceResolver);
         }
         
@@ -39,7 +39,7 @@ namespace SaxonCS_NUnit {
             MyResolver resolver = new MyResolver(underlyingResolver);
         
             config.setResourceResolver(resolver);
-            Assert.NotNull(config.getResourceResolver());
+            Assert.That((object)config.getResourceResolver(), Is.Not.Null);
             Assert.That(config.getResourceResolver() is CatalogResourceResolver);
             Assert.That(config.getResourceResolver() is MyResolver);
         }
