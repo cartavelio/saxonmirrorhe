@@ -214,7 +214,9 @@ public class Controller implements ContextOriginator {
      */
 
     protected synchronized void clearPerTransformationData() {
-        userDataTable = new HashMap<>(20);
+        if (userDataTable == null || !userDataTable.isEmpty()) {
+            userDataTable = new HashMap<>(20);
+        }
         principalResult = null;
         tracingPaused = false;
         lastRememberedNode = null;

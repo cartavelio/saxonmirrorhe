@@ -12,6 +12,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.functions.ArityTwoFunction;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
@@ -33,6 +34,7 @@ import net.sf.saxon.value.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in the map
@@ -301,12 +303,16 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     /**
      * Implementation of the XPath 3.1 function map:contains(Map, key) =&gt; boolean
      */
-    public static class MapContains extends SystemFunction {
+    public static class MapContains extends SystemFunction implements ArityTwoFunction {
 
         @Override
         public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-            MapItem map = (MapItem) arguments[0].head();
-            AtomicValue key = (AtomicValue) arguments[1].head();
+            return call2(context, arguments[0], arguments[1]);
+        }
+
+        public BooleanValue call2(XPathContext context, Sequence arg0, Sequence arg1) throws XPathException {
+            MapItem map = (MapItem) arg0.head();
+            AtomicValue key = (AtomicValue) arg1.head();
             return BooleanValue.get(map.get(key) != null);
         }
 
@@ -336,7 +342,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     /**
      * Implementation of the XPath 3.1 function map:get(Map, key) =&gt; value
      */
-    public static class MapGet extends SystemFunction {
+    public static class MapGet extends SystemFunction implements ArityTwoFunction {
 
         public MapGet(){};
 
@@ -470,6 +476,23 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             }
         }
 
+        /**
+         * Call a function with two arguments
+         *
+         * @param context the dynamic evaluation context
+         * @param arg0    the first argument
+         * @param arg1    the second argument
+         * @return the result of the function call
+         * @throws XPathException if the call fails with a dynamic error
+         */
+        @Override
+        public Sequence call2(XPathContext context, Sequence arg0, Sequence arg1) throws XPathException {
+            MapItem map = (MapItem) arg0.head();
+            assert map != null;
+            AtomicValue key = (AtomicValue) arg1.head();
+            Sequence value = map.get(key);
+            return Objects.requireNonNullElse(value, EmptySequence.INSTANCE);
+        }
     }
 
     /**

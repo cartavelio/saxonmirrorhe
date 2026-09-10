@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.om.*;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -36,7 +35,6 @@ public final class DocumentOrderIterator implements SequenceIterator {
      */
 
     public DocumentOrderIterator(SequenceIterator base, Comparator<? super GNode> comparer) {
-        Instrumentation.count("DocumentOrderIterator");
         int len = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 50;
         sequence = new ArrayList<>(len);
         SequenceTool.supply(base, (ItemConsumer<? super Item>) item -> {
@@ -48,7 +46,6 @@ public final class DocumentOrderIterator implements SequenceIterator {
         });
 
         //System.err.println("SORT into document order: sequence length = " + sequence.size());
-        Instrumentation.count("Sort size " + sequence.size());
         if (sequence.size() > 1) {
             sequence.sort(comparer);
         }

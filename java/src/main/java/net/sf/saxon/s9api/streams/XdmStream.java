@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api.streams;
 
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
 
 import java.util.*;
 import java.util.function.*;
@@ -684,6 +685,18 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
 
     public List<T> asList() {
         return base.collect(Collectors.toList());
+    }
+
+    /**
+     * Return the contents of the stream as an <code>Iterable&lt;XdmItem&gt;</code>, allowing
+     * its use in a for-each loop. This is a terminal operation.
+     *
+     * @return the contents of the stream, as a <code>Tterable&lt;XdmItem&gt;</code>
+     * @since 13.0
+     */
+
+    public Iterable<T> asIterable() {
+        return new IterableUsingIteratorSupplier<>(this::iterator);
     }
 
     /**

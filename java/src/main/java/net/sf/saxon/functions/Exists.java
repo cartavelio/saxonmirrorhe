@@ -23,7 +23,7 @@ import net.sf.saxon.value.Cardinality;
 /**
  * Implementation of the fn:exists function
  */
-public class Exists extends Aggregate {
+public class Exists extends Aggregate implements ArityOneFunction {
 
     @Override
     public Expression makeOptimizedFunctionCall(
@@ -81,6 +81,18 @@ public class Exists extends Aggregate {
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return BooleanValue.get(exists(arguments[0].iterate()));
+    }
+
+    /**
+     * Call a function with one argument
+     *
+     * @param context the dynamic evaluation context
+     * @param arg0    the first argument
+     * @return the result of the function call
+     */
+    @Override
+    public Sequence call1(XPathContext context, Sequence arg0) {
+        return BooleanValue.get(exists(arg0.iterate()));
     }
 
     @Override

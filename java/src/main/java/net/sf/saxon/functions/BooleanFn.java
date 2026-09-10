@@ -30,7 +30,7 @@ import net.sf.saxon.value.BooleanValue;
  */
 
 
-public class BooleanFn extends SystemFunction {
+public class BooleanFn extends SystemFunction implements ArityOneFunction {
 
     @Override
     public void supplyTypeInformation(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType, Expression[] arguments) throws XPathException {
@@ -95,6 +95,12 @@ public class BooleanFn extends SystemFunction {
     @Override
     public BooleanValue call(XPathContext c, Sequence[] arguments) throws XPathException {
         boolean bValue = ExpressionTool.effectiveBooleanValue(arguments[0].iterate());
+        return BooleanValue.get(bValue);
+    }
+
+    @Override
+    public BooleanValue call1(XPathContext c, Sequence arg0) throws XPathException {
+        boolean bValue = ExpressionTool.effectiveBooleanValue(arg0.iterate());
         return BooleanValue.get(bValue);
     }
 

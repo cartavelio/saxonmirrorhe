@@ -19,7 +19,7 @@ import net.sf.saxon.trans.XPathException;
  * This class implements the function fn:head(), which is a standard function in XPath 3.0
  */
 
-public class HeadFn extends SystemFunction {
+public class HeadFn extends SystemFunction implements ArityOneFunction {
 
     @Override
     public Expression makeFunctionCall(Expression[] arguments) {
@@ -38,6 +38,12 @@ public class HeadFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item head = arguments[0].head();
+        return SequenceTool.itemOrEmpty(head);
+    }
+
+    @Override
+    public Sequence call1(XPathContext context, Sequence arg0) throws XPathException {
+        Item head = arg0.head();
         return SequenceTool.itemOrEmpty(head);
     }
 }

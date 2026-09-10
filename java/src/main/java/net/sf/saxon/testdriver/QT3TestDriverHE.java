@@ -131,7 +131,7 @@ public class QT3TestDriverHE extends TestDriver {
     @Override
     protected void createGlobalEnvironments(XdmNode catalog, XPathCompiler xpc) throws SaxonApiException {
         Environment environment = null;
-        for (XdmNode env : catalog.select(descendant("environment")).asList()) {
+        for (XdmNode env : catalog.select(descendant("environment")).asIterable()) {
             try {
                 environment = Environment.processEnvironment(
                         this, xpc, env, globalEnvironments, localEnvironments.get("default"));

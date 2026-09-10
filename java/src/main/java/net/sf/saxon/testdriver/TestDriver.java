@@ -343,7 +343,7 @@ public abstract class TestDriver {
                 e1.printStackTrace();
             }
         } else {
-            for (XdmNode testSet : catalog.select(descendant("test-set")).asList()) {
+            for (XdmNode testSet : catalog.select(descendant("test-set")).asIterable()) {
                 processTestSet(catbuilder, xpc, testSet);
             }
         }
@@ -544,7 +544,7 @@ public abstract class TestDriver {
                 }
                 if (env == null) {
                     try {
-                        for (XdmNode e : testCase.getParent().select(descendant("environment").where(attributeEq("name", envName))).asList()) {
+                        for (XdmNode e : testCase.getParent().select(descendant("environment").where(attributeEq("name", envName))).asIterable()) {
                             Environment.processEnvironment(this, xpc, e, localEnvironments, localEnvironments.get("default"));
                         }
                         env = localEnvironments.get(envName);
@@ -652,9 +652,9 @@ public abstract class TestDriver {
         boolean run = true;
         // pick up any test-set level dependencies in the QT3 catalog
         if (testSetDocNode.select("test-set").select("dependency").exists()) {
-            for (XdmNode dependency : testSetDocNode.select("test-set").select("dependency").asList()) {
+            for (XdmNode dependency : testSetDocNode.select("test-set").select("dependency").asIterable()) {
                 if (!ensureDependencySatisfied(dependency, localEnvironments.get("default"))) {
-                    for (XdmNode testCase : testSetDocNode.select(descendant("test-case")).asList()) {
+                    for (XdmNode testCase : testSetDocNode.select(descendant("test-case")).asIterable()) {
                         String testCaseName = testCase.attribute("name");
                         resultsDoc.writeTestcaseElement(testCaseName, "n/a", "test-set dependencies not satisfied");
                         notrun++;
@@ -668,7 +668,7 @@ public abstract class TestDriver {
         if (testSetDocNode.select("test-set").select("dependencies").exists()) {
             for (XdmNode dependency : testSetDocNode.select(path("test-set", "dependencies", "*")).asListOfNodes()) {
                 if (!ensureDependencySatisfied(dependency, localEnvironments.get("default"))) {
-                    for (XdmNode testCase : testSetDocNode.select(descendant("test-case")).asList()) {
+                    for (XdmNode testCase : testSetDocNode.select(descendant("test-case")).asIterable()) {
                         String type = dependency.getNodeName().getLocalName();
                         String value = dependency.attribute("value");
                         if (value == null) {
@@ -690,7 +690,7 @@ public abstract class TestDriver {
         }
         if (run) {
             if (testPattern == null) {
-                for (XdmNode env : testSetDocNode.select(descendant("environment").where(hasAttribute("name"))).asList()) {
+                for (XdmNode env : testSetDocNode.select(descendant("environment").where(hasAttribute("name"))).asIterable()) {
                     String envName = env.attribute("name");
                     if (!unsharedEnvironments.contains(envName)) {
                         try {
@@ -723,6 +723,8 @@ public abstract class TestDriver {
                         ex.printStackTrace();
                         System.err.println("*** Crashed while running testcase: " + ex.getMessage());
                     }
+//                    Instrumentation.report();
+//                    Instrumentation.reset();
                 }
             });
         }

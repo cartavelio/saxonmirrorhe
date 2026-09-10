@@ -230,7 +230,7 @@ public class Environment implements ResourceResolver {
         }
 
         // XSLT3 - dependencies as sibling of environment
-        for (XdmNode dependency : env.getParent().select(child("dependencies").then(child("*"))).asList()) {
+        for (XdmNode dependency : env.getParent().select(child("dependencies").then(child("*"))).asIterable()) {
                 //xpc.evaluate("../dependencies/*", env)) {
             if (!driver.ensureDependencySatisfied(dependency, environment)) {
                 environment.usable = false;
@@ -290,7 +290,7 @@ public class Environment implements ResourceResolver {
         // Support this only in EE - an unusable environment in PE/HE
         for (XdmNode stylesheet : env.select(child("package")
                                      .where(attributeEq("role", "secondary")))
-                                     .asList()) {
+                                     .asIterable()) {
             String fileName = stylesheet.attribute("file");
             Source styleSource = new StreamSource(env.getBaseURI().resolve(fileName).toString());
             try {
@@ -313,7 +313,7 @@ public class Environment implements ResourceResolver {
 
         // compile any stylesheet defined as part of the environment (only one allowed)
         // use the XSLT processor version associated with the stylesheet/@version attribute
-        for (XdmNode stylesheet : env.select(child("stylesheet").where(not(attributeEq("role", "secondary")))).asList()) {
+        for (XdmNode stylesheet : env.select(child("stylesheet").where(not(attributeEq("role", "secondary")))).asIterable()) {
             String fileName = stylesheet.attribute("file");
             Source styleSource = new StreamSource(env.getBaseURI().resolve(fileName).toString());
             try {

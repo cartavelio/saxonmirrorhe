@@ -7,7 +7,6 @@
 
 package net.sf.saxon.ma.map;
 
-import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -27,12 +26,10 @@ import java.util.Collections;
 public class SingleEntryMap extends MapItem {
     private final AtomicValue key;
     private final GroundedValue value;
-    private final AtomicMatchKey matchKey;
 
     public SingleEntryMap(AtomicValue key, GroundedValue value, int specVersion) {
         this.key = key;
         this.value = value;
-        this.matchKey = key.asMapKey(specVersion);
         setSpecVersion(specVersion);
     }
 
@@ -63,7 +60,8 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        return this.matchKey.equals(key.asMapKey(getSpecVersion())) ? value : null;
+        int vn = getSpecVersion();
+        return this.key.asMapKey(vn).equals(key.asMapKey(vn)) ? value : null;
     }
 
     /**
@@ -117,9 +115,9 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        int specVersion = getSpecVersion();
-        if (this.matchKey.equals(key.asMapKey(specVersion))) {
-            return new SingleEntryMap(key, value, specVersion);
+        int vn = getSpecVersion();
+        if (this.key.asMapKey(vn).equals(key.asMapKey(vn))) {
+            return new SingleEntryMap(key, value, vn);
         }
         return toGeneralMap().put(key, value);
     }

@@ -541,7 +541,38 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
 
         public PullEvaluator elaborateForPull() {
             final SystemFunctionCall expr = (SystemFunctionCall) getExpression();
+            final int arity = expr.getArity();
             final SystemFunction fn = expr.getTargetFunction();
+            if (arity == 0 && fn instanceof ArityZeroFunction fn0) {
+                return context -> {
+                    try {
+                        return fn0.call0(context).iterate();
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+            } else if (arity == 1 && fn instanceof ArityOneFunction fn1) {
+                final SequenceEvaluator eval0 = argumentEvaluators[0];
+                return context -> {
+                    try {
+                        return fn1.call1(context, eval0.evaluate(context)).iterate();
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+            } else if (arity == 2 && fn instanceof ArityTwoFunction fn2) {
+                final SequenceEvaluator eval0 = argumentEvaluators[0];
+                final SequenceEvaluator eval1 = argumentEvaluators[1];
+                return context -> {
+                    try {
+                        return fn2.call2(context,
+                                         eval0.evaluate(context),
+                                         eval1.evaluate(context)).iterate();
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+            }
             return switch (argumentEvaluators.length) {
                 case 0 -> context -> {
                     try {
@@ -551,18 +582,21 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                     }
                 };
                 case 1 -> context -> {
+                    final SequenceEvaluator eval0 = argumentEvaluators[0];
                     try {
-                        return fn.call(context, new Sequence[]{argumentEvaluators[0].evaluate(context)}).iterate();
+                        return fn.call(context, new Sequence[]{eval0.evaluate(context)}).iterate();
                     } catch (XPathException err) {
                         throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                     }
                 };
                 case 2 -> context -> {
+                    final SequenceEvaluator eval0 = argumentEvaluators[0];
+                    final SequenceEvaluator eval1 = argumentEvaluators[1];
                     try {
                         return fn.call(context,
                                        new Sequence[]{
-                                               argumentEvaluators[0].evaluate(context),
-                                               argumentEvaluators[1].evaluate(context)
+                                               eval0.evaluate(context),
+                                               eval1.evaluate(context)
                                        }).iterate();
                     } catch (XPathException err) {
                         throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
@@ -582,6 +616,37 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         public ItemEvaluator elaborateForItem() {
             final SystemFunctionCall expr = (SystemFunctionCall) getExpression();
             final SystemFunction fn = expr.getTargetFunction();
+            final int arity = expr.getArity();
+            if (arity == 0 && fn instanceof ArityZeroFunction fn0) {
+                return context -> {
+                    try {
+                        return fn0.call0(context).head();
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+            } else if (arity == 1 && fn instanceof ArityOneFunction fn1) {
+                final SequenceEvaluator eval0 = argumentEvaluators[0];
+                return context -> {
+                    try {
+                        return fn1.call1(context, eval0.evaluate(context)).head();
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+            } else if (arity == 2 && fn instanceof ArityTwoFunction fn2) {
+                final SequenceEvaluator eval0 = argumentEvaluators[0];
+                final SequenceEvaluator eval1 = argumentEvaluators[1];
+                return context -> {
+                    try {
+                        return fn2.call2(context,
+                                         eval0.evaluate(context),
+                                         eval1.evaluate(context)).head();
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+            }
             return switch (argumentEvaluators.length) {
                 case 0 -> context -> {
                     try {
@@ -593,20 +658,23 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
 
                 };
                 case 1 -> context -> {
+                    final SequenceEvaluator eval0 = argumentEvaluators[0];
                     try {
                         return fn.call(context, new Sequence[]{
-                                argumentEvaluators[0].evaluate(context)
+                                eval0.evaluate(context)
                         }).head();
                     } catch (XPathException e) {
                         throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                     }
                 };
                 case 2 -> context -> {
+                    final SequenceEvaluator eval0 = argumentEvaluators[0];
+                    final SequenceEvaluator eval1 = argumentEvaluators[1];
                     try {
                         return fn.call(context,
                                        new Sequence[]{
-                                               argumentEvaluators[0].evaluate(context),
-                                               argumentEvaluators[1].evaluate(context)
+                                               eval0.evaluate(context),
+                                               eval1.evaluate(context)
                                        }).head();
                     } catch (XPathException e) {
                         throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);

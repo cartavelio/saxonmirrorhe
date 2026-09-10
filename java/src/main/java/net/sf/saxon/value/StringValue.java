@@ -270,6 +270,18 @@ public class StringValue extends AtomicValue {
     }
 
     /**
+     * Get a value whose equals() method follows the "same key" rules for comparing the keys of a map.
+     *
+     * @param specVersion
+     * @return a value with the property that the equals() and hashCode() methods follow the rules for comparing
+     * keys in maps.
+     */
+    @Override
+    public AtomicMatchKey asMapKey(int specVersion) {
+        return getUnicodeStringValue();
+    }
+
+    /**
      * Get an atomic value that encapsulates this match key. Needed to support the collation-key() function.
      *
      * @return an atomic value that encapsulates this match key

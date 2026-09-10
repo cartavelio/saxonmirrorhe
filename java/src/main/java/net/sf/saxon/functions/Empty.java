@@ -23,7 +23,7 @@ import net.sf.saxon.value.Cardinality;
 /**
  * Implementation of the fn:empty function
  */
-public class Empty extends Aggregate {
+public class Empty extends Aggregate implements ArityOneFunction {
 
     @Override
     public Expression makeOptimizedFunctionCall(
@@ -69,6 +69,18 @@ public class Empty extends Aggregate {
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return BooleanValue.get(empty(arguments[0].iterate()));
+    }
+
+    /**
+     * Call a function with one argument
+     *
+     * @param context the dynamic evaluation context
+     * @param arg0    the first argument
+     * @return the result of the function call
+     */
+    @Override
+    public Sequence call1(XPathContext context, Sequence arg0) {
+        return BooleanValue.get(empty(arg0.iterate()));
     }
 
     private static boolean empty(SequenceIterator iter) {

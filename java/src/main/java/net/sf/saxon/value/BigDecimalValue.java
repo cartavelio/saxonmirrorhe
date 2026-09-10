@@ -14,6 +14,7 @@ import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -66,6 +67,7 @@ public final class BigDecimalValue extends DecimalValue {
 
     public BigDecimalValue(BigDecimal value) {
         super(BuiltInAtomicType.DECIMAL);
+        Instrumentation.count("new BigDecimal#1");
         this.value = value.stripTrailingZeros();
     }
 
@@ -78,7 +80,22 @@ public final class BigDecimalValue extends DecimalValue {
 
     public BigDecimalValue(BigDecimal value, AtomicMetadata typeLabel) {
         super(typeLabel);
+        Instrumentation.count("new BigDecimal#2");
         this.value = value.stripTrailingZeros();
+    }
+
+    /**
+     * Internal constructor bypassing the `stripTrailingZeros` when it is known to be unnecessary
+     *
+     * @param value     the value of the DecimalValue
+     * @param typeLabel the type label, which must be a subtype of DECIMAL
+     * @param alreadyScaled should be set to true (but the value is ignored)
+     */
+
+    private BigDecimalValue(BigDecimal value, AtomicMetadata typeLabel, boolean alreadyScaled) {
+        super(typeLabel);
+        Instrumentation.count("new BigDecimal#3");
+        this.value = value;
     }
 
     private static final Pattern decimalPattern = Pattern.compile("(\\-|\\+)?((\\.[0-9]+)|([0-9]+(\\.[0-9]*)?))");
@@ -126,37 +143,25 @@ public final class BigDecimalValue extends DecimalValue {
         for (int i = 0; i < len; i++) {
             char c = in.charAt(i);
             switch (c) {
-                case ' ':
-                case '\t':
-                case '\r':
-                case '\n':
+                case ' ', '\t', '\r', '\n' -> {
                     if (state != 0) {
                         state = 5;
                     }
-                    break;
-                case '+':
+                }
+                case '+' -> {
                     if (state != 0) {
                         throw new NumberFormatException("unexpected sign");
                     }
                     state = 1;
-                    break;
-                case '-':
+                }
+                case '-' -> {
                     if (state != 0) {
                         throw new NumberFormatException("unexpected sign");
                     }
                     state = 1;
                     digits.append(c);
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
+                }
+                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
                     if (state == 0) {
                         state = 1;
                     } else if (state >= 3) {
@@ -167,8 +172,8 @@ public final class BigDecimalValue extends DecimalValue {
                     }
                     digits.append(c);
                     foundDigit = true;
-                    break;
-                case '.':
+                }
+                case '.' -> {
                     if (state == 5) {
                         throw new NumberFormatException("contains embedded whitespace");
                     }
@@ -177,9 +182,8 @@ public final class BigDecimalValue extends DecimalValue {
                     }
                     foundDot = true;
                     state = 3;
-                    break;
-                default:
-                    throw new NumberFormatException("invalid character '" + c + "'");
+                }
+                default -> throw new NumberFormatException("invalid character '" + c + "'");
             }
 
         }
@@ -231,9 +235,9 @@ public final class BigDecimalValue extends DecimalValue {
     public BigDecimalValue(double in) throws ValidationException {
         super(BuiltInAtomicType.DECIMAL);
         try {
-            BigDecimal d = new BigDecimal(in);
+            value = new BigDecimal(in);
             // Note, this gives a different result from BigDecimal.valueOf(in) - it retains more precision.
-            value = d.stripTrailingZeros();
+            //d.stripTrailingZeros();
         } catch (Exception err) {
             // Must be a special value such as NaN or infinity
             ValidationFailure e = new ValidationFailure(
@@ -266,7 +270,7 @@ public final class BigDecimalValue extends DecimalValue {
         if (metadata.getType().getPrimitiveItemType() == BuiltInAtomicType.INTEGER) {
             return IntegerValue.makeIntegerValue(value.toBigInteger()).withMetadata(metadata);
         } else {
-            return new BigDecimalValue(value, metadata);
+            return new BigDecimalValue(value, metadata, true);
         }
     }
 
@@ -610,6 +614,7 @@ public final class BigDecimalValue extends DecimalValue {
                 scaledValue = value.setScale(scale, RoundingMode.HALF_EVEN);
                 break;
         }
+        Instrumentation.count("BigDecimalValue.round");
         return new BigDecimalValue(scaledValue.stripTrailingZeros());
     }
 

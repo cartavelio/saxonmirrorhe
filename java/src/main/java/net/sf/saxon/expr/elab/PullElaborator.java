@@ -13,6 +13,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.Cardinality;
 
 /**
  * Abstract implementation of {@link Elaborator} for expressions that primarily evaluate in pull mode,
@@ -62,16 +63,29 @@ public abstract class PullElaborator extends Elaborator {
 
     public BooleanEvaluator elaborateForBoolean() {
         Expression expr = getExpression();
-        PullEvaluator pull = elaborateForPull();
-        return context -> {
-            try {
-                return ExpressionTool.effectiveBooleanValue(pull.iterate(context));
-            } catch (UncheckedXPathException err) {
-                throw err.getXPathException().maybeWithLocation(expr.getLocation());
-            } catch (XPathException err) {
-                throw err.maybeWithLocation(expr.getLocation());
-            }
-        };
+        if (Cardinality.allowsMany(expr.getCardinality())) {
+            PullEvaluator pull = elaborateForPull();
+            return context -> {
+                try {
+                    return ExpressionTool.effectiveBooleanValue(pull.iterate(context));
+                } catch (UncheckedXPathException err) {
+                    throw err.getXPathException().maybeWithLocation(expr.getLocation());
+                } catch (XPathException err) {
+                    throw err.maybeWithLocation(expr.getLocation());
+                }
+            };
+        } else {
+            ItemEvaluator pull = elaborateForItem();
+            return context -> {
+                try {
+                    return ExpressionTool.effectiveBooleanValue(pull.eval(context));
+                } catch (UncheckedXPathException err) {
+                    throw err.getXPathException().maybeWithLocation(expr.getLocation());
+                } catch (XPathException err) {
+                    throw err.maybeWithLocation(expr.getLocation());
+                }
+            };
+        }
     }
 
     @Override

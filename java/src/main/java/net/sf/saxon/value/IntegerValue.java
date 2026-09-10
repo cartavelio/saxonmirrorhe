@@ -542,7 +542,7 @@ public abstract class IntegerValue extends DecimalValue {
 
     @Override
     public AtomicMatchKey asMapKey(int specVersion) {
-        return new BigDecimalValue(getDecimalValue());
+        return this;
     }
 
     /**
