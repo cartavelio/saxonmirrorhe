@@ -1,5 +1,6 @@
 package net.sf.saxon.str;
 
+import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.Arrays;
@@ -42,7 +43,13 @@ public abstract class TwineBuilder {
     public final TwineBuilder append(CharSequence chars) {
         TwineBuilder tb = this;
         for (int i = 0; i < chars.length(); i++) {
-            tb = tb.append(chars.charAt(i));
+            char c = chars.charAt(i);
+            if (UTF16CharacterSet.isHighSurrogate(c)) {
+                char d = chars.charAt(++i);
+                tb = tb.append(UTF16CharacterSet.combinePair(c, d));
+            } else {
+                tb = tb.append(c);
+            }
         }
         return tb;
     }
