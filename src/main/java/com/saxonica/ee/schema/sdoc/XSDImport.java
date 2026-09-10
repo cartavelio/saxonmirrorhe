@@ -100,6 +100,11 @@ public class XSDImport extends AnnotationParent {
             }
         }
 
+        if (namespace.equals(thisSchemaDocument.getTargetNamespace())) {
+            error("The namespace attribute in the xs:import element cannot be the same as the targetNamespace of the containing schema");
+            return;
+        }
+
         Source source = null;
         if (schemaLocation != null) {
             try {
@@ -111,11 +116,6 @@ public class XSDImport extends AnnotationParent {
                 processSchemaException(schemaLocation, namespace, e);
                 return;
             }
-        }
-
-        if (namespace.equals(thisSchemaDocument.getTargetNamespace())) {
-            error("The namespace attribute in the xs:import element cannot be the same as the targetNamespace of the containing schema");
-            return;
         }
 
         if (source != null) {
@@ -156,6 +156,14 @@ public class XSDImport extends AnnotationParent {
                 }
                 warning(message);
             }
+            return;
+        }
+
+        if (source == null && schemaLocation != null) {
+            // This path is used on SaxonCS
+            warning("Failed to locate imported schema document: " + schemaLocation);
+            // create a dummy imported schema for error recovery
+            importedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), namespace);
             return;
         }
 

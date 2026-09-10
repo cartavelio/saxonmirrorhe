@@ -21,7 +21,6 @@ import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.tree.iter.TextLinesIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -327,7 +326,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
 
     public static class FileAppendText extends SystemFunction {
         @Override
-        @CSharpReplaceException(from = "java.io.UnsupportedEncodingException", to = "System.ArgumentException")
+        //@CSharpReplaceException(from = "java.io.UnsupportedEncodingException", to = "System.ArgumentException")
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             String path = arguments[0].head().getStringValue();
             String contents = arguments[1].head().getStringValue();

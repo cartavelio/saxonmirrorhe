@@ -67,11 +67,11 @@ public abstract class SchemaReader {
             if (r != null) {
                 sources = r.resolve(targetNamespace, baseURI, locations);
             }
-            if (sources == null) {
+            if (sources == null || (sources.length == 1 && sources[0] == null)) {
                 r = new StandardSchemaResolver((EnterpriseConfiguration) compiler.getConfiguration());
                 sources = r.resolve(targetNamespace, baseURI, locations);
             }
-            if (sources.length == 0) {
+            if (sources.length == 0 || sources[0] == null) {
                 // No action required
                 return null;
             } else if (sources.length == 1) {

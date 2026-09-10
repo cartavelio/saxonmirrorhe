@@ -70,7 +70,10 @@ public class XSDInclude extends AnnotationParent {
         } catch (SchemaException e) {
             handleSchemaException(schemaLocation, e);
         }
-        if (source != null) {
+        if (source == null) {
+            warning("Failed to locate included schema document " + schemaLocation);
+            includedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
+        } else {
 
             //-- Has this schema location been processed?
 

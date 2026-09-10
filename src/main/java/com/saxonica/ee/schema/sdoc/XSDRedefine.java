@@ -58,6 +58,10 @@ public class XSDRedefine extends SchemaElement {
         } catch (SchemaException e) {
             handleSchemaException(schemaLocation, e);
         }
+        if (source == null) {
+            warning("Failed to locate redefined schema document " + schemaLocation);
+            externalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
+        }
 
         //-- Have we already imported this XML Schema file? We can't handle
         //   this at present.
