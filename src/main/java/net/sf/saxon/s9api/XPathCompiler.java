@@ -370,7 +370,7 @@ public class XPathCompiler {
         if (cache != null) {
             cache.clear();
         }
-        env.declareVariable(qname.getNamespaceURI(), qname.getLocalName());
+        env.declareVariable(qname.getNamespaceUri(), qname.getLocalName());
     }
 
     /**
@@ -390,7 +390,7 @@ public class XPathCompiler {
         if (cache != null) {
             cache.clear();
         }
-        XPathVariable var = env.declareVariable(qname.getNamespaceURI(), qname.getLocalName());
+        XPathVariable var = env.declareVariable(qname.getNamespaceUri(), qname.getLocalName());
         var.setRequiredType(
                 SequenceType.makeSequenceType(
                         itemType.getUnderlyingItemType(), occurrences.getCardinality()));

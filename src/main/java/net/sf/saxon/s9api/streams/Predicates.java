@@ -189,7 +189,7 @@ public class Predicates {
             QName name = item.getNodeName();
             return name != null &&
                     name.getLocalName().equals(localName) &&
-                    name.getNamespaceURI().equals(nsUri);
+                    name.getNamespaceUri().equals(nsUri);
         };
     }
 
@@ -226,7 +226,7 @@ public class Predicates {
         return item -> {
             QName name = item.getNodeName();
             return name != null &&
-                    name.getNamespaceURI().equals(nsUri);
+                    name.getNamespaceUri().equals(nsUri);
         };
     }
 

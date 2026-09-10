@@ -12,6 +12,8 @@ import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.ObjectValue;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,11 +23,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * an extension function, or supplied as an external variable/parameter.
  */
 
+@CSharpInjectMembers(code={"private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Type, Saxon.Hej.type.JavaExternalObjectType> cache = new (16, 20);"})
 public class JavaExternalObjectType extends ExternalObjectType {
 
     protected Class<?> javaClass;
 
+    //#if CSHARP==false
     private static final ConcurrentHashMap<Class<?>, JavaExternalObjectType> cache = new ConcurrentHashMap<>(20);
+    //#endif
 
     /**
      * Create an external object type. Private constructor; to create an instance,
@@ -45,6 +50,7 @@ public class JavaExternalObjectType extends ExternalObjectType {
      * @return the corresponding {@code JavaExternalObjectType}
      */
 
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.MapUtils.ComputeIfAbsent(cache, javaClass, jc => new Saxon.Hej.type.JavaExternalObjectType(jc));")
     public static JavaExternalObjectType of(Class<?> javaClass) {
         return cache.computeIfAbsent(javaClass, JavaExternalObjectType::new);
     }

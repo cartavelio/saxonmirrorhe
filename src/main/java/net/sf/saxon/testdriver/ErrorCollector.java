@@ -60,7 +60,7 @@ public class ErrorCollector extends StandardErrorReporter {
         String code;
         QName errorCode = exception.getErrorCode();
         if (errorCode != null) {
-            NamespaceUri ns = errorCode.getNamespaceURI();
+            NamespaceUri ns = errorCode.getNamespaceUri();
             if (ns == null || NamespaceUri.ERR.equals(ns)) {
                 code = errorCode.getLocalName();
             } else {

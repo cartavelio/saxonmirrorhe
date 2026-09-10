@@ -111,7 +111,7 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
             Properties localOutputProperties = getLocalOutputProperties();
             for (String key : localOutputProperties.stringPropertyNames()) {
                 QName propertyName = QName.fromClarkName(key);
-                if (!(propertyName.getNamespaceURI().equals(NamespaceUri.SAXON) && propertyName.getLocalName().equals("next-in-chain"))) {
+                if (!(propertyName.getNamespaceUri().equals(NamespaceUri.SAXON) && propertyName.getLocalName().equals("next-in-chain"))) {
                     ((Serializer) destination).setOutputProperty(QName.fromClarkName(key),
                                                                  localOutputProperties.getProperty(key));
                 }

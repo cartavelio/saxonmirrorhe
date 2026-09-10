@@ -42,7 +42,7 @@ public class MappingJavaIterable<S, T> implements Iterable<T> {
      */
     @Override
     public Iterator<T> iterator() {
-        return new MappingJavaIterator<>(input.iterator(), mapper);
+        return new MappingJavaIterator<S, T>(input.iterator(), mapper);
     }
 }
 

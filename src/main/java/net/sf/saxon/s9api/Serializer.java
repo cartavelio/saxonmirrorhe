@@ -496,7 +496,7 @@ public class Serializer extends AbstractDestination {
 
     public void setOutputProperty(QName property, String value) {
         SerializerFactory sf = processor.getUnderlyingConfiguration().getSerializerFactory();
-        NamespaceUri uri = property.getNamespaceURI();
+        NamespaceUri uri = property.getNamespaceUri();
         if (uri.isEmpty() || uri.equals(NamespaceUri.SAXON)) {
             try {
                 value = sf.checkOutputProperty(property.getClarkName(), value);

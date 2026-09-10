@@ -192,7 +192,7 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
 
     protected Iterable<Operand> operandSparseList(Operand... a) {
         // The mapping function op -> op causes null operands to be dropped from the result
-        return new MappingJavaIterable<>(Arrays.asList(a), op -> op);
+        return new MappingJavaIterable<Operand, Operand>(Arrays.asList(a), op -> op);
     }
 
     /**
