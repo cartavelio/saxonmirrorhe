@@ -2,7 +2,7 @@ package com.saxonica.ee.schema;
 
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.sort.CustomMap;
-import net.sf.saxon.expr.sort.SimpleTypeComparison;
+import net.sf.saxon.expr.sort.SimpleTypeIdentityComparison;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.AtomicArray;
@@ -26,11 +26,12 @@ import java.util.List;
 public class EnumerationFacetSet extends Facet {
 
     /**
-     * The set of allowed values, indexed by the result of calling getSchemaComparable()
+     * The set of allowed values, held in a map where values are compared
+     * using the XSD-defined "equal or identical" comparison semantics.
      */
 
     private final CustomMap<AtomicSequence, AtomicSequence> typedValues =
-            new CustomMap<>(SimpleTypeComparison.getInstance());
+            new CustomMap<>(SimpleTypeIdentityComparison.getInstance());
 
     /**
      * The allowed values, as strings
@@ -66,9 +67,6 @@ public class EnumerationFacetSet extends Facet {
      */
 
     public void addEnumerationValue(AtomicSequence val, String stringValue) {
-//        if (val instanceof StringItem) {
-//            val = new StringItem(val.getUnicodeStringValue().economize());
-//        }
         typedValues.put(val, val);
         stringValues.add(stringValue);
 

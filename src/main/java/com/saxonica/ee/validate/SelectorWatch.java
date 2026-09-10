@@ -346,7 +346,7 @@ public abstract class SelectorWatch extends PatternWatch {
             if (val0 == null) {
                 return val1 == null;
             } else {
-                return val1 != null && SimpleTypeComparison.getInstance().equal(val0, val1);
+                return val1 != null && SimpleTypeComparison.getInstance().equalOrIdentical(val0, val1);
             }
         }
 

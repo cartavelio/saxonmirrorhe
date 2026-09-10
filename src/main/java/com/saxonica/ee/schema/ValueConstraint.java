@@ -15,7 +15,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.value.Whitespace;
 
 import static com.saxonica.ee.schema.ValueConstraint.Variety.FIXED;
@@ -61,7 +60,7 @@ public class ValueConstraint {
         this.variety = variety;
         this.lexicalForm = lexicalForm;
         if (lexicalForm != null) {
-            this.typedValue = new UntypedAtomicValue(lexicalForm);
+            this.typedValue = new StringValue(lexicalForm);
         }
     }
 
@@ -183,7 +182,7 @@ public class ValueConstraint {
             } else if (stype.isAtomicType()) {
                 setValue(Converter.convert(new StringValue(lexicalForm), (AtomicType) stype, rules));
             } else if (stype instanceof AnySimpleType) {
-                setValue(new UntypedAtomicValue(lexicalForm));
+                setValue(new StringValue(lexicalForm));
             } else if (getValue().getLength() == 1) { // MHK 2018-11-14 - I don't understand this
                 setValue(stype.getTypedValue(lexicalForm, null, rules));
             }
