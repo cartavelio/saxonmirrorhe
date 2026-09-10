@@ -415,7 +415,7 @@ cdef class PySaxonProcessor:
         Args:
             str_ (str): The value given in a string form in clark notation {uri}local
         Returns:
-            PyXdmAtomicValue: The corresponding value
+            PyXdmAtomicValue: The corresponding XDM value
         """
         py_value_string = str_.encode('UTF-8') if str_ is not None else None
         cdef char * c_str_ = py_value_string if str_ is not None else ""
@@ -425,11 +425,13 @@ cdef class PySaxonProcessor:
     def make_atomic_value(self, value_type, value):
         """
         make_atomic_value(self, value_type, value)
-        Create an QName XDM value from string representation in clark notation
+        Create an XDM atomic value from string representation
         Args:
-            str_ (str): The value given in a string form in clark notation {uri}local
+            value_type (str): Local name of a type in the XML Schema namespace
+            value (str): The value given in a string form. In the case of a QName the value supplied must be
+                in clark notation {uri}local.
         Returns:
-            PyXdmAtomicValue: The corresponding value
+            PyXdmAtomicValue: The corresponding XDM value
         """
         py_valueType_string = value_type.encode('UTF-8') if value_type is not None else None
         cdef char * c_valueType_string = py_valueType_string if value_type is not None else ""
@@ -624,11 +626,11 @@ cdef class PySaxonProcessor:
     def get_string_value(self, PyXdmItem item):
         """
         get_string_value(self, PyXdmItem item)
-        Create an QName XDM value from string representation in clark notation
+        Get the string value of the supplied PyXdmItem, as defined in the XPath data model
         Args:
-            str_ (str): The value given in a string form in clark notation {uri}local
+            item (PyXdmItem): An XDM item
         Returns:
-            PyXdmAtomicValue: The corresponding value
+            str: The string value of this XDM item
         """
         return make_py_str(self.thisptr.getStringValue(item.derivedptr))
 
@@ -761,11 +763,14 @@ cdef class PyDocumentBuilder:
         self.thisdbptr.setDTDValidation(c_dtd)
 
     def set_schema_validator(self, PySchemaValidator val):
-       """Set the source document for the transformation.
+       """Set the PySchemaValidator to be used. This determines whether schema validation is applied to an input
+       document and whether type annotations in a supplied document are retained. If no PySchemaValidator is supplied,
+       then schema validation does not take place.
+       This option requires the schema-aware version of the Saxon product (Saxon-EE).
+       Since a PySchemaValidator is serially reusable but not thread-safe, using this method is not appropriate when
+       the PyDocumentBuilder is shared between threads.
        Args:
-           **kwds: Possible keyword arguments: must be one of the following (file_name|xdm_node)
-       Raises:
-           Exception: Exception is raised if keyword argument is not one of file_name or node.
+           val (PySchemaValidator): the schema validator to be used
         """
        self.thisdbptr.setSchemaValidator(val.thissvptr)
 
@@ -773,7 +778,7 @@ cdef class PyDocumentBuilder:
     def get_schema_validator(self):
        """
        get_schema_validator(self)
-       Get the SchemaValidator used to validate documents loaded using this DocumentBuilder
+       Get the PySchemaValidator used to validate documents loaded using this PyDocumentBuilder
        Returns:
            PySchemaValidator: if one has been set; otherwise None.
        """
@@ -787,19 +792,19 @@ cdef class PyDocumentBuilder:
     def base_uri(self):
        """
        base_uri(self)
-       Base URI property. Get the Base URI for the node, that is, the URI used for resolving a relative URI
-       contained in the node. This will be the same as the System ID unless xml:base has been used. Where the
-       node does not have a base URI of its own, the base URI of its parent node is returned.
+       Get the base URI of documents loaded using this PyDocumentBuilder when no other URI is available.
        Returns:
-           str: String value of the base uri for this node. This may be NULL if the base URI is unknown, including
-           the case where the node has no parent.
+           str: String value of the base URI to be used. This may be NULL if no value has been set.
        """
        return make_py_str(self.thisdbptr.getBaseUri())
 
     def set_base_uri(self, base_uri):
        """
        set_base_uri(self, base_uri)
-       Get the base URI of documents loaded using this PyDocumentBuilder when no other URI is available.
+       Set the base URI of a document loaded using this PyDocumentBuilder. This is used for resolving any relative
+       URIs appearing within the document, for example in references to DTDs and external entities. This information
+       is required when the document is loaded from a source that does not provide an intrinsic URI, notably when
+       loading from a String. The value is ignored when loading from a source that does have an intrinsic base URI.
        Args:
            base_uri (str): the base output URI
        """
@@ -1635,7 +1640,7 @@ cdef class PyXsltExecutable:
         Clear all properties set on the processor
         """
         self.thisxptr.clearProperties()
-     def set_initial_template_parameters(self, bool tunnel, dict kwds):
+     def set_initial_template_parameters(self, bool tunnel, dict parameters):
         """
         set_initial_template_parameters(self, bool tunnel, dict kwds)
         Set parameters to be passed to the initial template. These are used
@@ -1650,7 +1655,7 @@ cdef class PyXsltExecutable:
         Args:
         	tunnel (bool): True if these values are to be used for setting tunnel parameters;
         	    False if they are to be used for non-tunnel parameters. The default is false.
-            kwds (dict): the parameters to be used for the initial template supplied as key-value pairs.
+            parameters (dict): the parameters to be used for the initial template supplied as key-value pairs.
         Example:
         	1) paramArr = {'a':saxonproc.make_integer_value(12), 'b':saxonproc.make_integer_value(5)}
                xsltproc.set_initial_template_parameters(False, paramArr)
