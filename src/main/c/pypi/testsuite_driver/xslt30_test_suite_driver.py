@@ -10,8 +10,8 @@ catalog = None
 saxon_version = ""
 
 driver_proc = PySaxonProcessor(license=True)
-driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
-                                       "/Users/ond1/work/development/git/private/saxon-license.lic")
+'''driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+                                       "/Users/ond1/work/development/git/private/saxon-license.lic")'''
 driver_proc.set_cwd(os.getcwd())
 cat_builder = None
 
