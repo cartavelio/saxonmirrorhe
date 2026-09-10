@@ -64,10 +64,7 @@ XdmValue::XdmValue(int64_t valRef) {
 }
 
 XdmValue::XdmValue(int64_t val, bool arr) {
-  xdmSize = 0;
-  jValues = -1;
-  valueType = nullptr;
-  toStringValue = nullptr;
+  initialize();
   allocFn fn = operator new;
   long long *results = makeArrayFromXdmValue2(
       SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)val);
@@ -127,13 +124,14 @@ XdmValue::~XdmValue() {
     }
     delete [] values;
     delete [] relinquished_values;
+    values = nullptr;
     relinquished_values = nullptr;
     values_cap =0;
   }
   if (valueType != nullptr) {
     delete valueType;
   }
-  if (jValues > 0 && getRefCount() < 1) {
+  if (jValues > 0 && (this)->getRefCount() < 1) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)jValues);
     jValues = -1;
   }
