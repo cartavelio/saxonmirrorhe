@@ -14,7 +14,9 @@ import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
@@ -83,12 +85,15 @@ public class PartialApply extends Expression {
 
         ItemType baseType = getBaseExpression().getItemType();
 
-
-        SequenceType requiredFunctionType;
-        SequenceType[] argTypes = new SequenceType[boundArgumentsOp.length];
-        Arrays.fill(argTypes, SequenceType.ANY_SEQUENCE);
-
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+        String baseName = "saxon:call";
+        if (getBaseExpression() instanceof FunctionLiteral) {
+            StructuredQName name = ((FunctionLiteral)getBaseExpression()).getGroundedValue().getFunctionName();
+            if (name != null && !name.hasURI(NamespaceUri.ANONYMOUS)) {
+                baseName = name.getDisplayName();
+            }
+        }
+        final String diagnosticName = baseName;
         for (int i = 0; i < boundArgumentsOp.length; i++) {
             final Operand op = boundArgumentsOp[i];
             if (op != null) {
@@ -96,9 +101,8 @@ public class PartialApply extends Expression {
                 if (baseType instanceof SpecificFunctionType && i < ((SpecificFunctionType) baseType).getArity()) {
                     final int pos = i;
                     Supplier<RoleDiagnostic> argRole =
-                            () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "saxon:call", pos);
+                            () -> new RoleDiagnostic(RoleDiagnostic.PARTIAL_APPLY, diagnosticName, pos);
                     SequenceType requiredArgType = ((SpecificFunctionType) baseType).getArgumentTypes()[i];
-                    argTypes[i] = requiredArgType;
                     Expression a3 = tc.staticTypeCheck(
                             arg, requiredArgType, argRole, visitor);
                     if (a3 != arg) {
@@ -107,16 +111,6 @@ public class PartialApply extends Expression {
                 }
             }
         }
-
-
-//        requiredFunctionType = SequenceType.makeSequenceType(
-//                new SpecificFunctionType(argTypes,
-//                        (baseType instanceof AnyFunctionType) ? ((AnyFunctionType) baseType).getResultType() : SequenceType.ANY_SEQUENCE),
-//                        StaticProperty.EXACTLY_ONE);
-//
-//        Supplier<RoleDiagnostic> role =
-//                () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "saxon:call", 0);
-//        setBaseExpression(tc.staticTypeCheck(getBaseExpression(), requiredFunctionType, role, visitor));
 
         Supplier<RoleDiagnostic> role = () ->
                 new RoleDiagnostic(RoleDiagnostic.DYNAMIC_FUNCTION, getBaseExpression().toShortString(), 0);
@@ -287,7 +281,7 @@ public class PartialApply extends Expression {
         StringBuilder buff = new StringBuilder(64);
         boolean par = getBaseExpression().operands().iterator().hasNext();
         if (par) {
-            buff.append("(" + getBaseExpression().toString() + ")");
+            buff.append("(").append(getBaseExpression().toString()).append(")");
         } else {
             buff.append(getBaseExpression().toString());
         }

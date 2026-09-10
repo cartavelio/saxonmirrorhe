@@ -332,13 +332,10 @@ public class AtomicSequenceConverter extends UnaryExpression {
             return new ItemMappingIterator(base, TO_STRING_MAPPER, true);
         } else {
             AtomicSequenceMappingFunction mapper = new AtomicSequenceMappingFunction();
+            mapper.setXPathContext(context);
             mapper.setConverter(conv);
-            if (roleSupplier != null) {
-                String errorCode = roleSupplier.get().getErrorCode();
-                if (!"XPTY0004".equals(errorCode)) {
-                    mapper.setErrorCode(errorCode);
-                }
-            }
+            mapper.setRoleSupplier(roleSupplier);
+            mapper.setRequiredItemType(requiredItemType);
             return new ItemMappingIterator(base, mapper, true);
         }
     }
@@ -350,9 +347,26 @@ public class AtomicSequenceConverter extends UnaryExpression {
     public static class AtomicSequenceMappingFunction implements ItemMappingFunction {
         private Converter converter;
         private String errorCode;
+        private Supplier<RoleDiagnostic> roleSupplier;
+        private XPathContext context;
+        private ItemType requiredItemType;
+
+        public AtomicSequenceMappingFunction() {}
 
         public void setConverter(Converter converter) {
             this.converter = converter;
+        }
+
+        public void setRoleSupplier(Supplier<RoleDiagnostic> roleSupplier) {
+            this.roleSupplier = roleSupplier;
+        }
+
+        public void setXPathContext(XPathContext context) {
+            this.context = context;
+        }
+
+        public void setRequiredItemType(ItemType required) {
+            this.requiredItemType = required;
         }
 
         public void setErrorCode(String code) {
@@ -361,8 +375,16 @@ public class AtomicSequenceConverter extends UnaryExpression {
 
         public AtomicValue mapItem(Item item) throws XPathException {
             ConversionResult result = converter.convert((AtomicValue)item);
-            if (errorCode != null && result instanceof ValidationFailure) {
-                ((ValidationFailure)result).setErrorCode(errorCode);
+            if (result instanceof ValidationFailure) {
+                if (roleSupplier != null && context != null) {
+                    RoleDiagnostic role = roleSupplier.get();
+                    TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+                    String message = role.composeErrorMessage(requiredItemType, item, th);
+                    String code = errorCode != null ? errorCode : role.getErrorCode();
+                    throw new XPathException(message, code);
+                } else if (errorCode != null) {
+                    ((ValidationFailure) result).setErrorCode(errorCode);
+                }
             }
             return result.asAtomic();
         }
@@ -397,8 +419,11 @@ public class AtomicSequenceConverter extends UnaryExpression {
         Converter conv = getConverterDynamically(context);
         ConversionResult result = conv.convert(item);
         if (result instanceof ValidationFailure && roleSupplier != null) {
-            // TODO: use more of the information in the roleDiagnostic to form the error message
-            ((ValidationFailure)result).setErrorCode(roleSupplier.get().getErrorCode());
+            RoleDiagnostic role = roleSupplier.get();
+            TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+            String message = role.composeErrorMessage(requiredItemType, item, th);
+            String code = role.getErrorCode();
+            throw new XPathException(message, code);
         }
         return result.asAtomic();
     }

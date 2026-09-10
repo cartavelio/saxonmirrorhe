@@ -57,6 +57,7 @@ public class RoleDiagnostic {
     public static final int MATCH_PATTERN = 19;
     public static final int MISC = 20;
     public static final int DYNAMIC_FUNCTION = 21;
+    public static final int PARTIAL_APPLY = 22;
 
 
     /**
@@ -190,6 +191,17 @@ public class RoleDiagnostic {
                 return "target of a dynamic function call {" + name + "}";
             case MISC:
                 return operation;
+            case PARTIAL_APPLY:
+                if (name.equals("saxon:call") || name.equals("saxon:apply")) {
+                    if (operand == 0) {
+                        return "target of the partial function application";
+                    } else {
+                        return ordinal(operand) + " argument of the partial function application";
+                    }
+                } else {
+                    return ordinal(operand + 1) + " argument of the partial application of " +
+                            (name.isEmpty() ? "the anonymous function" : name + "()");
+                }
             default:
                 return "";
         }
