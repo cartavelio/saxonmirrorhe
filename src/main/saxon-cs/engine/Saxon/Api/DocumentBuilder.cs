@@ -71,7 +71,7 @@ namespace Saxon.Api {
         /// resolve any relative URI passed to the <c>DocumentBuilder.Build()</c> method.</para>
         /// </remarks>
 
-        public XmlResolver XmlResolver { get; set; }
+        public XmlResolver.XmlResolver XmlResolver { get; set; }
 
         /// <summary>
         /// Determines whether line numbering is enabled for documents loaded using this
@@ -350,7 +350,7 @@ namespace Saxon.Api {
             };
 
             if (XmlResolver != null) {
-                settings.XmlResolver = XmlResolver;
+                settings.XmlResolver = XmlResolver.GetXmlResolver();
             }
             else {
                 settings.XmlResolver = new XmlResolverWrappingResourceResolver(config.getResourceResolver());
@@ -406,8 +406,9 @@ namespace Saxon.Api {
                 DtdProcessing = DtdProcessing.Parse // must expand entity references
             };
 
-            if (XmlResolver != null) {
-                settings.XmlResolver = XmlResolver;
+            if (XmlResolver != null)
+            {
+                settings.XmlResolver = XmlResolver.GetXmlResolver();
             } else {
                 settings.XmlResolver = new XmlResolverWrappingResourceResolver(config.getResourceResolver());
             }

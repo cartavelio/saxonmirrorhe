@@ -381,6 +381,32 @@ task eecs_generateCSharp(
   }
 }
 
+/*
+// This is the start of building the csproj and sln files automatically but
+// I've decided it's not the best use of my time today.
+tasks.register('eecs_solution_csproj') {
+  //dependsOn = ['eecs_generateCSharp', 'processResources']
+  //inputs.dir layout.buildDirectory.file("cs/Saxon")
+  //inputs.dir layout.projectDirectory.file("src/main/saxon-cs/engine/Saxon")
+
+  doLast {
+    fileTree(dir: layout.buildDirectory.file("cs/Saxon")).each { fn ->
+      println(fn)
+    }
+  }
+
+  doLast {
+    javaexec {
+      classpath = configurations.transpiler + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
+      mainClass = "net.sf.saxon.Transform"
+      args "-it", "-xsl:${projectDir}/tools/saxon-cs/csproj.xsl",
+        "-o:${buildDir}/test.csproj"
+    }
+  }
+}
+*/
+  
+
 task eecs_project_files (
   type: Copy,
   dependsOn: ["eecs_generateCSharp", "processResources"],

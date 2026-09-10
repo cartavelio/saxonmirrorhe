@@ -240,12 +240,14 @@ public class ResolveURI extends SystemFunction {
             }
         }
 
-        if (relativeURI.startsWith("classpath:")) {
+        if (relativeURI.startsWith("classpath:") || relativeURI.startsWith("data:")) {
             // Resolving a classpath: URI involves searching the classpath.
             // There's no sense in which it makes sense to attempt to make one absolute
             // against some base URI. They're effectively absolute already.
             // (If we don't do this, passing them to java.net.URL causes an exception
             // anyway.)
+            //
+            // Similarly, a data: URI is absolute even though java.net.URL doesn't recognize that.
             return new URI(relativeURI);
         }
 

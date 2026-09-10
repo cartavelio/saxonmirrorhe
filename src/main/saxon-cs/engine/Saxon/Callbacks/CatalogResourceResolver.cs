@@ -2,25 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Xml;
-using Org.XmlResolver;
-using Org.XmlResolver.Features;
-using Org.XmlResolver.Utils;
+using XmlResolver;
+using XmlResolver.Features;
+using XmlResolver.Utils;
 using Saxon.Api;
 using Saxon.Ejava.io;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.resource;
 using Saxon.Hej.trans;
+using ResourceRequest = XmlResolver.ResourceRequest;
 
 namespace Saxon.Callbacks {
 
     /// <summary>
-    /// This object provides an interface between Saxon and the <c>Org.XmlResolver</c> catalog-based
+    /// This object provides an interface between Saxon and the <c>XmlResolver</c> catalog-based
     /// resource resolver, which is incorporated into SaxonCS as a dependency. It provides its own
     /// API for resolving URIs, as well as implementing the (highly fragile) .NET XmlResolver interface.
     /// </summary>
     public class CatalogResourceResolver : Saxon.Hej.lib.JJ_ResourceResolver, Saxon.Callbacks.ConfigurableResourceResolver {
-        private readonly Org.XmlResolver.Resolver catalogBasedResolver;
+        private readonly XmlResolver.XmlResolver? catalogBasedResolver;
 
         /// <summary>
         /// Create a CatalogResourceResolver using a default catalog resolver
@@ -30,7 +31,7 @@ namespace Saxon.Callbacks {
             // Enable searching of the XmlResolverData library, which holds copies of well-known W3C resources such as DTDs
             resolverConfig.SetFeature(ResolverFeature.ASSEMBLY_CATALOGS, "XmlResolverData.dll");
             //catalogBasedResolver.GetConfiguration().SetFeature(ResolverFeature.THROW_URI_EXCEPTIONS, true);
-            catalogBasedResolver = new(resolverConfig);
+            catalogBasedResolver = new XmlResolver.XmlResolver(resolverConfig);
         }
         
         /// <summary>
@@ -38,8 +39,8 @@ namespace Saxon.Callbacks {
         /// resolvers using different catalog configurations.
         /// </summary>
 
-        public CatalogResourceResolver(Org.XmlResolver.Resolver resolver) {
-            this.catalogBasedResolver = resolver;
+        public CatalogResourceResolver(XmlResolver.XmlResolver resolver) {
+            catalogBasedResolver = resolver;
         }
 
         /// <summary>
@@ -52,24 +53,26 @@ namespace Saxon.Callbacks {
         /// resource.</returns>
         public virtual Saxon.Ejavax.xml.transform.Source resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
             if (catalogBasedResolver != null) {
-                try {
-                    ResolvedResource rr;
+                try
+                {
+                    ResourceRequest? req = null;
                     if (request.uriIsNamespace) {
-                        CatalogResolver cat = catalogBasedResolver.CatalogResolver;
-                        IResolverConfiguration catConfig = cat.GetConfiguration();
+                        IResolverConfiguration catConfig = catalogBasedResolver.Config;
                         CatalogManager catalog = (CatalogManager) catConfig.GetFeature(ResolverFeature.CATALOG_MANAGER);
                         Uri attempt = catalog.LookupNamespaceUri(request.uri, request.nature, request.purpose);
                         if (attempt == null) {
                             return null;
                         }
-                        rr = cat.ResolveNamespace(
-                            request.uri, null, request.nature, request.purpose);
+
+                        req = catalogBasedResolver.GetRequest(request.uri, null, request.nature, request.purpose);
                     }
                     else if (request.nature == Saxon.Hej.lib.JJ_ResourceRequest.DTD_NATURE || request.nature == Saxon.Hej.lib.JJ_ResourceRequest.EXTERNAL_ENTITY_NATURE) {
                         string href = request.relativeUri ?? request.uri;
                         string baseUri = request.baseUri ?? request.uri;
-                        rr = catalogBasedResolver.CatalogResolver.ResolveEntity(
-                            request.entityName, request.publicId, href, baseUri);
+
+                        req = catalogBasedResolver.GetRequest(href, baseUri, request.nature, request.purpose);
+                        req.EntityName = request.entityName;
+                        req.PublicId = request.publicId;
                     }
                     else {
                         string href = request.relativeUri ?? request.uri;
@@ -77,14 +80,23 @@ namespace Saxon.Callbacks {
                         if (string.IsNullOrEmpty(baseUri)) {
                             baseUri = Saxon.Ejava.io.File.CurrentDirectoryUri().AbsoluteUri;
                         }
-                        rr = catalogBasedResolver.CatalogResolver.ResolveUri(href, baseUri);
-                        
+
+                        req = catalogBasedResolver.GetRequest(href, baseUri, ResolverConstants.ANY_NATURE,
+                            ResolverConstants.ANY_PURPOSE);
                     }
-                    if (rr != null) {
+
+                    ResourceResponse? rr = catalogBasedResolver.Resolve(req);
+                    if (rr.IsResolved && rr.ResolvedUri != null) {
                         TypedStreamSource result = new TypedStreamSource();
-                        result.setSystemId(rr.GetResolvedUri().ToString());
-                        result.setInputStream(rr.GetInputStream());
-                        result.setContentType(rr.GetContentType());
+                        result.setSystemId(rr.ResolvedUri.ToString());
+                        if (rr.Stream != null)
+                        {
+                            result.setInputStream(rr.Stream);
+                        }
+                        if (rr.ContentType != null)
+                        {
+                            result.setContentType(rr.ContentType);
+                        }
                         return result;
                     }
                 }
@@ -102,7 +114,6 @@ namespace Saxon.Callbacks {
                 catch (System.IO.FileNotFoundException) {
                     // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent file
                 }
-          
             }
 
             return null;
@@ -113,14 +124,14 @@ namespace Saxon.Callbacks {
                 throw new NullReferenceException();
             }
 
-            catalogBasedResolver.GetConfiguration().SetFeature(feature, value);
+            catalogBasedResolver.Config.SetFeature(feature, value);
         }
 
         public virtual object getFeature(ResolverFeature resolverFeature) {
-            return catalogBasedResolver?.GetConfiguration().GetFeature(resolverFeature);
+            return catalogBasedResolver?.Config.GetFeature(resolverFeature)!;
         }
 
-        public virtual XmlResolver GetEntityResolver() {
+        public virtual XmlResolver.XmlResolver GetEntityResolver() {
             return catalogBasedResolver;
         }
     }

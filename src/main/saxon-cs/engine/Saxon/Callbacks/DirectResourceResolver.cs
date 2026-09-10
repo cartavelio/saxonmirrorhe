@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using Org.XmlResolver;
-using Org.XmlResolver.Features;
-using Org.XmlResolver.Utils;
+using XmlResolver;
+using XmlResolver.Features;
+using XmlResolver.Utils;
 using Saxon.Api;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
@@ -14,7 +14,7 @@ namespace Saxon.Callbacks {
     /// <summary>
     /// This implementation of <c>CommonResourceResolver</c> attempts direct resolution of requested
     /// URIs using standard .NET mechanisms. It uses the services of the <c>UriUtils</c> class in the
-    /// <c>Org.XmlResolver</c> package, which should be able to handle standard file URIs, http and https
+    /// <c>XmlResolver</c> package, which should be able to handle standard file URIs, http and https
     /// URIs, as well as more specialized schemes such as <c>data</c> and <c>pack</c>. 
     /// </summary>
     /// <remarks>
@@ -22,9 +22,13 @@ namespace Saxon.Callbacks {
     /// appear at the end of a chain of resolvers.
     /// </para>
     /// </remarks>
-    public class DirectResourceResolver : Saxon.Hej.lib.JJ_ResourceResolver {
+    public class DirectResourceResolver : Saxon.Hej.lib.JJ_ResourceResolver
+    {
+        private Saxon.Hej.Configuration config;
 
-        public DirectResourceResolver(Saxon.Hej.Configuration config) {
+        public DirectResourceResolver(Saxon.Hej.Configuration config)
+        {
+            this.config = config;
 
         }
 
@@ -60,7 +64,9 @@ namespace Saxon.Callbacks {
                     tss.setSystemId(abs.ToString());
                     return tss;
                 }
-                Stream stream = UriUtils.GetStream(abs);
+
+                
+                Stream stream = ResourceAccess.GetStream(((XmlResolver.XmlResolver) config.getResourceResolver()).Config, abs);
                 return new StreamSource(stream, abs.ToString());
             }
 

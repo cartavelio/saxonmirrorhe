@@ -14,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
-using Org.XmlResolver.Features;
+using XmlResolver.Features;
 using Saxon.Hej.om;
 using Saxon.Hej.trans;
 using Saxon.Hej.type;
@@ -311,7 +311,7 @@ namespace Saxon.Impl.Helpers {
         
         public static System.Xml.XmlResolver getXmlResolverFromResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resourceResolver) {
             if (resourceResolver is CatalogResourceResolver catalogResolver) {
-                return catalogResolver.GetEntityResolver();
+                return catalogResolver.GetEntityResolver().GetXmlResolver();
             }
 
             return new XmlResolverWrappingResourceResolver(resourceResolver);

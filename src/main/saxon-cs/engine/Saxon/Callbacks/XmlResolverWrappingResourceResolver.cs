@@ -1,6 +1,7 @@
 using System;
 using System.Security.AccessControl;
 using Saxon.Hej.lib;
+using XmlResolver;
 
 namespace Saxon.Callbacks {
     
@@ -18,7 +19,7 @@ namespace Saxon.Callbacks {
         
         public override object GetEntity(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) {
             if (resolver is CatalogResourceResolver crr) {
-                return crr.GetEntityResolver().GetEntity(absoluteUri, role, ofObjectToReturn);
+                return crr.GetEntityResolver().GetXmlResolver().GetEntity(absoluteUri, role, ofObjectToReturn);
             }
 
             return null; // TODO: implement me
@@ -47,7 +48,7 @@ namespace Saxon.Callbacks {
 
             return new Uri(baseUri, relativeUri);
 
-            // Org.XmlResolver.Resolver resolver = _commonResourceResolver.catalogBasedResolver;
+            // XmlResolver.Resolver resolver = _commonResourceResolver.catalogBasedResolver;
             // if (resolver != null) {
             //     result = resolver.ResolveUri(baseUri, relativeUri);
             // }

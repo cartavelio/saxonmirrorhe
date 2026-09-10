@@ -326,6 +326,11 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
                 break;
             case XMLConstants.ACCESS_EXTERNAL_DTD:
                 getConfiguration().setConfigurationProperty(FeatureKeys.XML_PARSER_PROPERTY + XMLConstants.ACCESS_EXTERNAL_DTD, value);
+                ResourceResolver dtdResolver = getConfiguration().getResourceResolver();
+                if (dtdResolver instanceof CatalogResourceResolver) {
+                    CatalogResourceResolver catres = (CatalogResourceResolver) dtdResolver;
+                    catres.setFeature(ResolverFeature.ACCESS_EXTERNAL_ENTITY, value.toString());
+                }
                 break;
             case XMLConstants.ACCESS_EXTERNAL_STYLESHEET:
                 getConfiguration().setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, value.toString());
@@ -333,7 +338,6 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
                 if (resolver instanceof CatalogResourceResolver) {
                     CatalogResourceResolver catres = (CatalogResourceResolver) resolver;
                     catres.setFeature(ResolverFeature.ACCESS_EXTERNAL_DOCUMENT, value.toString());
-                    catres.setFeature(ResolverFeature.ACCESS_EXTERNAL_ENTITY, value.toString());
                 }
                 break;
             default:

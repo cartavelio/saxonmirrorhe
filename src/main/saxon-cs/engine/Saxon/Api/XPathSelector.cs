@@ -122,7 +122,7 @@ namespace Saxon.Api {
         /// <para>If no <c>TextResolver</c> is supplied, or if the supplied <c>TextResolver</c> returns null
         /// when called, the <c>CommonResourceResolver</c> for the Saxon <c>Configuration</c> is invoked,
         /// with a <c>ResourceRequest</c> having <c>Nature == ResourceRequest.TEXT_NATURE</c>. If this
-        /// returns null, then the "direct" URI resolution provided by <c>Org.XmlResolver.UriUtils</c> is
+        /// returns null, then the "direct" URI resolution provided by <c>XmlResolver.UriUtils</c> is
         /// invoked: this is capable of handling regular <c>file:</c>, <c>http:</c>, and <c>https:</c>
         /// URIs, as well as the <c>data:</c> and <c>pack:</c> schemes.
         /// </para>
