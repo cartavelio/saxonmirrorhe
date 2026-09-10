@@ -187,7 +187,7 @@ public class ModelGroupParticle extends Particle {
 
     /*@Nullable*/
     @Override
-    public SchemaType getElementParticleType(int elementName, PreparedSchema schema) throws MissingComponentException {
+    public SchemaType getElementParticleType(int elementName, Schema schema) throws MissingComponentException {
         return getGroup().getElementParticleType(elementName, schema);
     }
 
@@ -203,7 +203,7 @@ public class ModelGroupParticle extends Particle {
      */
 
     @Override
-    public int getElementParticleCardinality(int elementName, PreparedSchema schema) throws MissingComponentException {
+    public int getElementParticleCardinality(int elementName, Schema schema) throws MissingComponentException {
         int card = getGroup().getElementParticleCardinality(elementName, schema);
         return Cardinality.multiply(card,
                 computeParticleCardinality(getMinOccurs(), getMaxOccurs()));
@@ -223,13 +223,15 @@ public class ModelGroupParticle extends Particle {
     /**
      * Find the set of all element particles allowed within the content model of this particle, identified
      * by their integer fingerprints. Ignore wildcards.
+     *
+     * @param schema
      * @param result          an initially-empty integer set in which the results are accumulated
      * @param ignoreWildcards true if wildcard particles are to be ignored. If false, the resulting set
      */
 
     @Override
-    public void gatherAllPermittedElements(IntHashSet result, boolean ignoreWildcards) throws SchemaException {
-        getGroup().gatherAllPermittedElements(result, ignoreWildcards);
+    public void gatherAllPermittedElements(Schema schema, IntHashSet result, boolean ignoreWildcards) throws SchemaException {
+        getGroup().gatherAllPermittedElements(schema, result, ignoreWildcards);
     }
 
     /**

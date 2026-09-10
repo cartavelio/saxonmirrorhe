@@ -42,9 +42,7 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Saxon implementation of the XQJ interface XQDataFactory. This is an abstract superclass for SaxonXQDataSource
@@ -62,6 +60,8 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
 
     /*@NotNull*/ private static final IntToIntMap XQJtoSaxonTypeTranslation = new IntToIntHashMap(80);
     /*@NotNull*/ private static final IntToIntMap saxonToXQJTypeTranslation = new IntToIntHashMap(80);
+
+    private Map<URI, Schema> schemaCache = new HashMap<>(4);
 
     private static void map(int x, int y) {
         XQJtoSaxonTypeTranslation.put(x, y);
@@ -222,13 +222,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             }
         }
         StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
-        Configuration configuration1 = getConfiguration();
-        SchemaType st = configuration1.getSchema().getSchemaType(sqName);
-        if (st == null) {
-            loadSchema(schemaURI);
-            Configuration configuration = getConfiguration();
-            st = configuration.getSchema().getSchemaType(sqName);
-        }
+        SchemaType st = loadSchema(schemaURI).getSchemaType(sqName);
         if (st == null) {
             throw new XQException("Type " + typename + " not found in schema");
         } else if (st instanceof AtomicType) {
@@ -268,13 +262,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         Configuration config = getConfiguration();
 
         StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
-        Configuration configuration1 = getConfiguration();
-        SchemaType st = configuration1.getSchema().getSchemaType(sqName);
-        if (st == null) {
-            loadSchema(schemaURI);
-            Configuration configuration = getConfiguration();
-            st = configuration.getSchema().getSchemaType(sqName);
-        }
+        SchemaType st = loadSchema(schemaURI).getSchemaType(sqName);
         if (st == null) {
             throw new XQException("Type " + typename + " not found in schema");
         } else if (!st.isSimpleType()) {
@@ -383,13 +371,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         Configuration config = getConfiguration();
 
         StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
-        Configuration configuration1 = getConfiguration();
-        SchemaType st = configuration1.getSchema().getSchemaType(sqName);
-        if (st == null) {
-            loadSchema(schemaURI);
-            Configuration configuration = getConfiguration();
-            st = configuration.getSchema().getSchemaType(sqName);
-        }
+        SchemaType st = loadSchema(schemaURI).getSchemaType(sqName);
         if (st == null) {
             throw new XQException("Type " + typename + " not found in schema");
         }
@@ -936,18 +918,15 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         checkNotClosed();
         Configuration config = getConfiguration();
         StructuredQName nn = new StructuredQName(name.getPrefix(), NamespaceUri.of(name.getNamespaceURI()), name.getLocalPart());
-        SchemaDeclaration attributeDecl = config.getSchema().getAttributeDecl(nn);
-        if (attributeDecl == null && schemaURI != null) {
-            loadSchema(schemaURI);
-            attributeDecl = config.getSchema().getAttributeDecl(nn);
-        }
+        Schema schema = loadSchema(schemaURI);
+        SchemaDeclaration attributeDecl = schema.getAttributeDecl(nn);
         if (attributeDecl == null) {
             throw new XQException("Attribute declaration " + nn.getDisplayName() + " not found in schema");
         }
         try {
-            NodeTest nameTest = attributeDecl.makeSchemaNodeTest();
+            NodeTest nameTest = schema.makeSchemaAttributeTest(attributeDecl.getFingerprint());
             return new SaxonXQItemType(nameTest, config);
-        } catch (MissingComponentException e) {
+        } catch (MissingComponentException|SchemaException e) {
             throw new XQException(e.getMessage());
         }
     }
@@ -958,18 +937,15 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         checkNotClosed();
         Configuration config = getConfiguration();
         int fp = getFingerprint(nodename);
-        SchemaDeclaration elementDecl = config.getSchema().getElementDecl(fp);
-        if (elementDecl == null && schemaURI != null) {
-            loadSchema(schemaURI);
-            elementDecl = config.getSchema().getElementDecl(fp);
-        }
+        Schema schema = loadSchema(schemaURI);
+        SchemaDeclaration elementDecl = schema.getElementDecl(fp);
         if (elementDecl == null) {
             throw new XQException("Element declaration " + nodename + " not found in schema");
         }
         try {
-            NodeTest nameTest = elementDecl.makeSchemaNodeTest();
+            NodeTest nameTest = schema.makeSchemaElementTest(elementDecl.getFingerprint());
             return new SaxonXQItemType(nameTest, config);
-        } catch (MissingComponentException e) {
+        } catch (MissingComponentException|SchemaException e) {
             throw new XQException(e.getMessage());
         }
 
@@ -1083,24 +1059,29 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
      * Attempt to load the schema document at a given location into the Configuration
      *
      * @param schemaURI the absolute URI of the location of the schema document. If null is supplied,
-     *                  the method is a no-op.
+     *                  the method returns null.
+     * @return the schema that has been loaded.
      * @throws XQException if the URI is not absolute, or if no schema is found at the location,
      *                     or if the schema is invalid, or if it is inconsistent with existing schema components present
      *                     in the Configuration.
      */
 
-    private void loadSchema(/*@Nullable*/ URI schemaURI) throws XQException {
+    private Schema loadSchema(/*@Nullable*/ URI schemaURI) throws XQException {
         if (schemaURI == null) {
-            return;
+            return null;
         }
         if (!schemaURI.isAbsolute()) {
             throw new XQException("Schema URI must be an absolute URI");
         }
-        try {
-            getConfiguration().loadSchema(schemaURI.toString());
-        } catch (SchemaException err) {
-            throw newXQException(err);
+        Schema schema = schemaCache.get(schemaURI);
+        if (schema == null) {
+            try {
+                schema = getConfiguration().loadSchema(schemaURI.toString());
+            } catch (SchemaException err) {
+                throw newXQException(err);
+            }
         }
+        return schema;
     }
 
 }

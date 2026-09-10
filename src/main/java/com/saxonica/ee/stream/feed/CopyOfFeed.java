@@ -29,6 +29,7 @@ import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
 import net.sf.saxon.tree.util.Orphan;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
@@ -157,7 +158,8 @@ public class CopyOfFeed extends AbsorptionFeed {
                     if (type != null && !type.isSimpleType()) {
                         throw new XPathException("When copying an attribute with schema validation, the requested type must not be a complex type", "XTTE1535", getExpression().getLocation());
                     }
-                    SchemaType annotation = CopyOf.validateAttribute(node, (SimpleType) type, validation, getContext());
+                    Schema schema = getExpression().getRetainedStaticContext().getPackageData().getImportedSchema();
+                    SchemaType annotation = CopyOf.validateAttribute(schema, node, (SimpleType) type, validation, getContext());
                     orphan.setTypeAnnotation(annotation);
                 }
                 return orphan;
@@ -172,14 +174,14 @@ public class CopyOfFeed extends AbsorptionFeed {
                     ParseOptions validationOptions = new ParseOptions()
                             .withSchemaValidationMode(validation)
                             .withTopLevelType(type);
-                    Configuration config = getPipelineConfiguration().getConfiguration();
+                    Schema schema = getExpression().getRetainedStaticContext().getPackageData().getImportedSchema();
                     SequenceCollector writer = new SequenceCollector(getPipelineConfiguration());
                     Receiver copier;
                     if (kind == Type.DOCUMENT) {
-                        copier = config.getDocumentValidator(writer, node.getBaseURI(), validationOptions, loc);
+                        copier = schema.getDocumentValidator(writer, node.getBaseURI(), validationOptions, loc);
                     } else {
                         validationOptions = validationOptions.withTopLevelElement(NameOfNode.makeName(node).getStructuredQName());
-                        copier = config.getElementValidator(writer, validationOptions, loc);
+                        copier = schema.getElementValidator(writer, validationOptions, loc);
                     }
                     node.copy(copier, CopyOptions.ALL_NAMESPACES, loc);
                     return writer.getFirstItem();
@@ -352,17 +354,17 @@ public class CopyOfFeed extends AbsorptionFeed {
                 ParseOptions validationOptions = new ParseOptions()
                         .withSchemaValidationMode(feed.validation)
                         .withTopLevelType(feed.type);
-                Configuration config = feed.getPipelineConfiguration().getConfiguration();
+                Schema schema = feed.getExpression().getRetainedStaticContext().getPackageData().getImportedSchema();
                 Location loc = feed.getExpression() == null ? Loc.NONE : feed.getExpression().getLocation();
                 if (rootOfCopy.getNodeKind() == Type.DOCUMENT) {
                     copier = new ComplexContentOutputter(
-                            config.getDocumentValidator(copier, rootOfCopy.getBaseURI(), validationOptions, loc));
+                            schema.getDocumentValidator(copier, rootOfCopy.getBaseURI(), validationOptions, loc));
                 } else {
                     validationOptions = validationOptions
                             .withTopLevelElement(NameOfNode.makeName(rootOfCopy).getStructuredQName());
                     try {
                         copier = new ComplexContentOutputter(
-                                config.getElementValidator(copier, validationOptions, loc));
+                                schema.getElementValidator(copier, validationOptions, loc));
                     } catch (XPathException e) {
                         feed.dynamicError(e);
                         return null;

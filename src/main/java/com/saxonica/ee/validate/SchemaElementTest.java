@@ -1,6 +1,7 @@
 package com.saxonica.ee.validate;
 
 import com.saxonica.ee.schema.ElementDecl;
+import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.SchemaNodeTest;
@@ -37,9 +38,9 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
      * @param element The element declaration of the named element
      */
 
-    public SchemaElementTest(ElementDecl element) throws MissingComponentException {
+    public SchemaElementTest(PreparedSchema schema, ElementDecl element) throws MissingComponentException {
         head = element;
-        Collection<ElementDecl> subsGroup = element.getSubstitutionGroupMembers();
+        Collection<ElementDecl> subsGroup = schema.getSubstitutionGroupMembers(element);
         groupByFingerprint = new IntHashMap<>(subsGroup.size());
         groupByName = new HashMap<>(subsGroup.size());
         for (ElementDecl decl : subsGroup) {

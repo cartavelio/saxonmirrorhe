@@ -114,13 +114,13 @@ public class UserComplexType extends UserDefinedType
      * The finite state machine for validating against this complex type
      */
 
-    private FiniteStateMachine machine;
+    private FiniteStateMachine machine;  // TODO: this belongs at schema level
 
     /**
      * Flag to indicate that the type has been compiled
      */
 
-    private boolean compiled = false;
+    private boolean compiled = false; // TODO: this belongs at schema level
 
     /**
      * The set of all the assertions that are defined on this complex type
@@ -151,13 +151,13 @@ public class UserComplexType extends UserDefinedType
      * Table of context-determined types for element children
      */
 
-    private Map<StructuredQName, SchemaType> contextDeterminedTypesForElements;
+    private Map<StructuredQName, SchemaType> contextDeterminedTypesForElements; // TODO: this belongs at schema level
 
     /**
      * Table of context-determined types for attributes
      */
 
-    private Map<StructuredQName, SimpleType> contextDeterminedTypesForAttributes;
+    private Map<StructuredQName, SimpleType> contextDeterminedTypesForAttributes; // TODO: this belongs at schema level
 
     /**
      * Creates a new user-defined Complextype
@@ -1119,11 +1119,6 @@ public class UserComplexType extends UserDefinedType
             }
         }
 
-//        SchemaType existing = getConfiguration().getSchemaType(getStructuredQName());
-//        if (existing != null && existing.isSameType(this)) {
-//            return true;
-//        }
-
         // Don't allow derivation by extension from a type that has already been used for validation
         // or for compiling schemas or stylesheets
 
@@ -1337,13 +1332,6 @@ public class UserComplexType extends UserDefinedType
                         // clause 1.4.3.2.2.4
                         if (openContentWildcard != null) {
                             openContentWildcard = Wildcard.makeUnion(openContentWildcard, baseOpenWildcard, getNamePool());
-//                            if (!baseOpenWildcard.isSubset(openContentWildcard, getNamePool())) {
-//                                String err = "Invalid extension. The open content wildcard of the base type of type " + getDescription() +
-//                                    " is not a subset of the open content wildcard of the extended type";
-//                                compiler.error(err, this);
-//                                setValidationStatus(INVALID);
-//                                return false;
-//                            }
                         }
                     }
                 }
@@ -1410,7 +1398,7 @@ public class UserComplexType extends UserDefinedType
 
             if (particle != null) {
                 IntHashSet extensionElements = new IntHashSet(10);
-                particle.gatherAllPermittedElements(extensionElements, true);
+                particle.gatherAllPermittedElements(schema, extensionElements, true);
                 IntIterator extensionElementIter = extensionElements.iterator();
                 while (extensionElementIter.hasNext()) {
                     int fp = extensionElementIter.next();
@@ -1420,7 +1408,7 @@ public class UserComplexType extends UserDefinedType
                             int derivation = particleBaseType.getDerivationMethod();
                             SchemaType g = particleBaseType.getBaseType();
                             if (g instanceof UserComplexType && derivation == Derivation.DERIVATION_RESTRICTION) {
-                                SchemaType original = ((UserComplexType) g).getElementParticleType(fp, null, false);
+                                SchemaType original = ((UserComplexType) g).getElementParticleType(fp, schema, false);
                                 if (original != null) {
                                     SchemaType derived = particle.getElementParticleType(fp, schema);
                                     try {
@@ -2044,7 +2032,7 @@ public class UserComplexType extends UserDefinedType
      */
 
     @Override
-    public SchemaType getElementParticleType(int elementName, PreparedSchema schema, boolean considerExtensions) throws MissingComponentException {
+    public SchemaType getElementParticleType(int elementName, Schema schema, boolean considerExtensions) throws MissingComponentException {
         Particle p = getParticle();
         SchemaType child = p == null ? null : p.getElementParticleType(elementName, schema);
         if (child != null) {
@@ -2089,7 +2077,7 @@ public class UserComplexType extends UserDefinedType
      */
 
     @Override
-    public int getElementParticleCardinality(int elementName, PreparedSchema schema, boolean considerExtensions) throws MissingComponentException {
+    public int getElementParticleCardinality(int elementName, Schema schema, boolean considerExtensions) throws MissingComponentException {
         int baseCardinality;
         Particle p = getParticle();
         if (p == null) {
@@ -2295,7 +2283,7 @@ public class UserComplexType extends UserDefinedType
         if (p != null) {
             // This is a bit inefficient, but we only do it once.
             IntHashSet children = new IntHashSet();
-            p.gatherAllPermittedElements(children, true);
+            p.gatherAllPermittedElements(schema, children, true);
             IntIterator kids = children.iterator();
             while (kids.hasNext()) {
                 int fp = kids.next();
@@ -2370,24 +2358,26 @@ public class UserComplexType extends UserDefinedType
      * complex type, as integer fingerprints. If the list is unbounded (because of wildcards or the use
      * of xs:anyType), return null. The result includes elements defined in types that are defined by
      * extension from this type.
+     *
+     * @param schema
      * @param children        a set, initially empty, which on return will hold the names of all permitted
      *                        child elements; if the result contains the value XS_INVALID_NAME, this indicates that it is not possible to enumerate
      *                        all the children, typically because of wildcards. In this case the other contents of the set should
-     *                         be ignored
+     *                        be ignored
      * @param ignoreWildcards if set to true, wildcards are ignored; only the elements that match explicit
      */
 
     @Override
-    public void gatherAllPermittedChildren(IntHashSet children, boolean ignoreWildcards) throws SchemaException {
+    public void gatherAllPermittedChildren(Schema schema, IntHashSet children, boolean ignoreWildcards) throws SchemaException {
         Particle p = getParticle();
         if (p == null) {
             return;
         }
-        p.gatherAllPermittedElements(children, ignoreWildcards);
+        p.gatherAllPermittedElements(schema, children, ignoreWildcards);
         if (extendedTypes != null) {
             for (Object extendedType : extendedTypes) {
                 UserComplexType uct = (UserComplexType) extendedType;
-                uct.gatherAllPermittedChildren(children, ignoreWildcards);
+                uct.gatherAllPermittedChildren(schema, children, ignoreWildcards);
             }
         }
     }
@@ -2398,6 +2388,7 @@ public class UserComplexType extends UserDefinedType
      * of xs:anyType), return null. The result includes elements defined in types that are defined by
      * extension from this type or other types processed
      *
+     * @param schema
      * @param descendants an integer set, initially empty, which on return will hold the fingerprints of all permitted
      *                    descendant elements; if the result contains the value -1, this indicates that it is not possible to enumerate
      *                    all the descendants, typically because of wildcards. In this case the other contents of the set should
@@ -2405,13 +2396,13 @@ public class UserComplexType extends UserDefinedType
      */
 
     @Override
-    public void gatherAllPermittedDescendants(IntHashSet descendants) throws SchemaException {
+    public void gatherAllPermittedDescendants(Schema schema, IntHashSet descendants) throws SchemaException {
         Particle p = getParticle();
         if (p == null) {
             return;
         }
         IntHashSet permittedChildren = new IntHashSet(16);
-        gatherAllPermittedChildren(permittedChildren, false);
+        gatherAllPermittedChildren(schema, permittedChildren, false);
 
         StructuredQName wildcardDummy = StandardNames.SQ_XS_INVALID_NAME;
         if (permittedChildren.contains(-1)) {
@@ -2422,13 +2413,13 @@ public class UserComplexType extends UserDefinedType
         while (kids.hasNext()) {
             int c = kids.next();
             if (descendants.add(c)) {
-                SchemaType childType = getElementParticleType(c, null, true);
+                SchemaType childType = getElementParticleType(c, schema, true);
                 if (childType == null) {
                     throw new AssertionError("Child particle " + c + " not found");
                 }
                 if (childType instanceof ComplexType) {
                     if (childType instanceof UserComplexType) {
-                        ((UserComplexType) childType).gatherAllPermittedDescendants(descendants);
+                        ((UserComplexType) childType).gatherAllPermittedDescendants(schema, descendants);
                     } else {
                         descendants.add(-1);
                         return;
@@ -2443,16 +2434,17 @@ public class UserComplexType extends UserDefinedType
      * the type of the element when it appears as a descendant. If it appears with more than one type,
      * return xs:anyType.
      *
+     * @param schema
      * @param elementName the name of the required descendant element
      * @return the type of the descendant element; null if the element cannot appear as a descendant;
-     *         anyType if it can appear with several different types
+     * anyType if it can appear with several different types
      */
 
     @Override
-    public SchemaType getDescendantElementType(int elementName) throws SchemaException {
+    public SchemaType getDescendantElementType(Schema schema, int elementName) throws SchemaException {
         Set<SchemaType> parentsConsidered = new HashSet<>();
         Set<SchemaType> foundTypes = new HashSet<>();
-        getDescendantElementTypes(elementName, parentsConsidered, foundTypes);
+        getDescendantElementTypes(schema, elementName, parentsConsidered, foundTypes);
         if (foundTypes.isEmpty()) {
             return null;
         }
@@ -2465,7 +2457,8 @@ public class UserComplexType extends UserDefinedType
         return AnyType.getInstance();
     }
 
-    private void getDescendantElementTypes(int elementName,
+    private void getDescendantElementTypes(Schema schema,
+                                           int elementName,
                                            Set<SchemaType> parentsConsidered,
                                            Set<SchemaType> foundTypes) throws SchemaException {
         Particle p = getParticle();
@@ -2474,7 +2467,7 @@ public class UserComplexType extends UserDefinedType
         }
 
         // See if the requested element can appear as a child
-        SchemaType targetType = getElementParticleType(elementName, null, true);
+        SchemaType targetType = getElementParticleType(elementName, schema, true);
         if (targetType != null) {
             foundTypes.add(targetType);
             if (targetType == AnyType.getInstance()) {
@@ -2483,7 +2476,7 @@ public class UserComplexType extends UserDefinedType
         }
 
         IntHashSet permittedChildren = new IntHashSet(16);
-        gatherAllPermittedChildren(permittedChildren, false);
+        gatherAllPermittedChildren(schema, permittedChildren, false);
 
         if (permittedChildren.contains(-1)) {
             foundTypes.add(AnyType.getInstance());
@@ -2492,7 +2485,7 @@ public class UserComplexType extends UserDefinedType
         IntIterator kids = permittedChildren.iterator();
         while (kids.hasNext()) {
             int c = kids.next();
-            SchemaType childType = getElementParticleType(c, null, true);
+            SchemaType childType = getElementParticleType(c, schema, true);
             if (childType == null) {
                 throw new AssertionError("Child particle " + c + " not found");
             }
@@ -2500,7 +2493,7 @@ public class UserComplexType extends UserDefinedType
                 parentsConsidered.add(childType);
                 if (childType instanceof ComplexType) {
                     if (childType instanceof UserComplexType) {
-                        ((UserComplexType) childType).getDescendantElementTypes(elementName, parentsConsidered, foundTypes);
+                        ((UserComplexType) childType).getDescendantElementTypes(schema, elementName, parentsConsidered, foundTypes);
                     } else {
                         foundTypes.add(childType);
                     }
@@ -2513,15 +2506,16 @@ public class UserComplexType extends UserDefinedType
      * Assuming an element is a permitted descendant in the content model of this type, determine
      * the cardinality of the element when it appears as a descendant.
      *
+     * @param schema
      * @param elementFingerprint the name of the required descendant element
      * @return the cardinality of the descendant element within this complex type
      */
 
     @Override
-    public int getDescendantElementCardinality(int elementFingerprint) throws SchemaException {
+    public int getDescendantElementCardinality(Schema schema, int elementFingerprint) throws SchemaException {
         int cardinality = StaticProperty.EMPTY;
         IntHashSet children = new IntHashSet();
-        gatherAllPermittedChildren(children, false);
+        gatherAllPermittedChildren(schema, children, false);
         if (children.contains(-1)) {
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
@@ -2539,14 +2533,14 @@ public class UserComplexType extends UserDefinedType
             SchemaType childType = getElementParticleType(child, null, true);
             if (childType != null && childType.isComplexType()) {
                 IntHashSet childDescendants = new IntHashSet();
-                ((ComplexType) childType).gatherAllPermittedDescendants(childDescendants);
+                ((ComplexType) childType).gatherAllPermittedDescendants(schema, childDescendants);
                 if (childDescendants.contains(-1)) {
                     // The content model includes a wildcard
                     return StaticProperty.ALLOWS_ZERO_OR_MORE;
                 }
                 if (childDescendants.contains(elementFingerprint)) {
                     cardinality = Cardinality.sum(cardinality,
-                        Cardinality.multiply(childCard, ((ComplexType) childType).getDescendantElementCardinality(elementFingerprint)));
+                        Cardinality.multiply(childCard, ((ComplexType) childType).getDescendantElementCardinality(schema, elementFingerprint)));
                     if (cardinality == StaticProperty.ALLOWS_ZERO_OR_MORE) {
                         // take an early bath
                         return cardinality;
@@ -3396,7 +3390,7 @@ public class UserComplexType extends UserDefinedType
      * xdm-to-json function. The result is a layout name, such as "record", "list", "mixed", "sequence"
      */
 
-    public String getPreferredJsonLayout() {
+    public String getPreferredJsonLayout(Schema schema) {
         if (isSimpleContent()) {
             return "simple-plus";
         } else if (isEmptyContent()) {
@@ -3416,7 +3410,7 @@ public class UserComplexType extends UserDefinedType
         } else {
             IntHashSet children = new IntHashSet();
             try {
-                gatherAllPermittedChildren(children, false);
+                gatherAllPermittedChildren(schema, children, false);
             } catch (SchemaException e) {
                 return "mixed";
             }

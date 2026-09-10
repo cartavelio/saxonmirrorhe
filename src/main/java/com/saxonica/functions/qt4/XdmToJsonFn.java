@@ -58,6 +58,7 @@ public class XdmToJsonFn extends SystemFunction {
     private static class JsonConversionContext {
         public Configuration config;
         public JSONEmitter emitter;
+        public Schema schema;
         public IntToIntHashMap uniformityData = null;
         public IntHashMap<String> layoutMap = new IntHashMap<>();
         public Stack<StructuredQName> elementNameStack = new Stack<>();
@@ -79,6 +80,7 @@ public class XdmToJsonFn extends SystemFunction {
         GroundedValue val = arguments[0].materialize();
         JsonConversionContext jcc = new JsonConversionContext();
         jcc.config = context.getConfiguration();
+        jcc.schema = getRetainedStaticContext().getPackageData().getImportedSchema();
         // Initialise the element name stack with a dummy no-namespace name
         jcc.elementNameStack.push(new StructuredQName("", NamespaceUri.NULL, "dummy"));
         // Process the supplied options
@@ -505,7 +507,7 @@ public class XdmToJsonFn extends SystemFunction {
                     emitSimpleElementContent(element, jcc);
                 } else {
                     ComplexType cType = (ComplexType) type;
-                    String layout = cType.getPreferredJsonLayout();
+                    String layout = cType.getPreferredJsonLayout(jcc.schema);
                     String suffix = "";
                     int sep = layout.indexOf("/");
                     if (sep > 0) {

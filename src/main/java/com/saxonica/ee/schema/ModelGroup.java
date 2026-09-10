@@ -316,6 +316,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
 
     protected boolean checkElements(IntHashMap<ElementDecl> map, SchemaCompiler compiler)
             throws SchemaException, MissingComponentException {
+        PreparedSchema schema = compiler.getPreparedSchema();
         Set<ElementWildcard> wildcards = new HashSet<>();
         for (Particle p : getParticles()) {
             if (p instanceof ModelGroupParticle) {
@@ -373,7 +374,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
         while (iterM.hasNext()) {
             ElementDecl e = iterM.next();
             if (e.isGlobal()) {
-                for (ElementDecl member : e.getSubstitutionGroupMembers()) {
+                for (ElementDecl member : schema.getSubstitutionGroupMembers(e)) {
                     ElementDecl local = map.get(member.getFingerprint());
                     if (local != null && local != member) {
                         if (!e.getType().isSameType(local.getType())) {
@@ -453,7 +454,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
      */
 
     /*@Nullable*/
-    public SchemaType getElementParticleType(int elementName, PreparedSchema schema) throws MissingComponentException {
+    public SchemaType getElementParticleType(int elementName, Schema schema) throws MissingComponentException {
         for (Particle p : getParticles()) {
             SchemaType t = p.getElementParticleType(elementName, schema);
             if (t != null) {
@@ -475,7 +476,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
      * @return the cardinality of the element particle within this content model
      */
 
-    public int getElementParticleCardinality(int elementName, PreparedSchema schema) throws MissingComponentException {
+    public int getElementParticleCardinality(int elementName, Schema schema) throws MissingComponentException {
         int card = StaticProperty.EMPTY;
         for (Particle p : getParticles()) {
             int t = p.getElementParticleCardinality(elementName, schema);
@@ -517,9 +518,9 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
      *          if the schema is found to be invalid
      */
 
-    public void gatherAllPermittedElements(IntHashSet result, boolean ignoreWildcards) throws SchemaException {
+    public void gatherAllPermittedElements(Schema schema, IntHashSet result, boolean ignoreWildcards) throws SchemaException {
         for (Particle p : getParticles()) {
-            p.gatherAllPermittedElements(result, ignoreWildcards);
+            p.gatherAllPermittedElements(schema, result, ignoreWildcards);
         }
     }
 

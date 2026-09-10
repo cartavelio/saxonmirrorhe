@@ -590,6 +590,7 @@ public class SchemaTestSuiteDriver {
 
     private boolean loadSchemasDirect(XPathCompiler xpath, Processor processor, XdmNode schemaTest, boolean success)
             throws SaxonApiException, URISyntaxException {
+        List<Source> sources = new ArrayList<>(4);
         for (XdmItem schemaDocRefItem : xpath.evaluate("schemaDocument", schemaTest)) {
             XdmNode schemaDocumentRef = (XdmNode) schemaDocRefItem;
             println("Loading schema at " + schemaDocumentRef.getAttributeValue(QN_xlink_href));
@@ -607,13 +608,14 @@ public class SchemaTestSuiteDriver {
                 // own is losing the substitution group membership that was defined in the
                 // importing document.
             } else {
-                try {
-                    processor.getSchemaManager().load(schemaDoc.asSource()); // TODO: use an ErrorListener
-                } catch (SaxonApiException err) {
-                    println(err.getMessage());
-                    success = false;
-                }
+                 sources.add(schemaDoc.asSource());
             }
+        }
+        try {
+            processor.getSchemaManager().load(sources.toArray(new Source[0])); // TODO: use an ErrorListener
+        } catch (SaxonApiException err) {
+            println(err.getMessage());
+            success = false;
         }
         return success;
     }

@@ -153,7 +153,7 @@ public class SchemaManagerImpl extends SchemaManager {
      */
 
     @Override
-    public synchronized void load(Source... sources) throws SaxonApiException {
+    public synchronized XsdSchema load(Source... sources) throws SaxonApiException {
         if (sealed) {
             throw new SaxonApiException("The schema for this SchemaManager has already been loaded");
         }
@@ -183,6 +183,7 @@ public class SchemaManagerImpl extends SchemaManager {
             if (!schemaName.equals("#local")) {
                 config.registerNamedSchema(schemaName, schema);
             }
+            return new XsdSchemaImpl(schema);
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
@@ -197,16 +198,17 @@ public class SchemaManagerImpl extends SchemaManager {
      */
 
     @Override
-    public synchronized void importComponents(Source source) throws SaxonApiException {
+    public synchronized XsdSchema importComponents(Source source) throws SaxonApiException {
         if (sealed) {
             throw new SaxonApiException("The schema for this SchemaManager has already been loaded");
         }
         sealed = true;
         try {
-            processor.getUnderlyingConfiguration().importComponents(source);
+            processor.getUnderlyingConfiguration().importComponents(source);    // TODO: make it local
         } catch (XPathException err) {
             throw new SaxonApiException(err);
         }
+        return new XsdSchemaImpl(schema);
     }
 
     /**

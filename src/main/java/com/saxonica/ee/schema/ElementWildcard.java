@@ -105,12 +105,12 @@ public class ElementWildcard extends Particle {
 
     /*@Nullable*/
     @Override
-    public SchemaType getElementParticleType(int elementName, PreparedSchema schema) {
+    public SchemaType getElementParticleType(int elementName, Schema schema) {
         if (wildcard.matches(elementName, true, schema, null)) {
             if (wildcard.getProcessContents().equals("skip")) {
                 return AnyType.getInstance();
             } else if (wildcard.getProcessContents().equals("strict")) {
-                ElementDecl decl = schema.getElementDecl(elementName);
+                ElementDecl decl = (ElementDecl)schema.getElementDecl(elementName);
                 if (decl == null) {
                     return null;
                 } else {
@@ -121,7 +121,7 @@ public class ElementWildcard extends Particle {
                     }
                 }
             } else { // processContents = "lax"
-                ElementDecl decl = schema.getElementDecl(elementName);
+                ElementDecl decl = (ElementDecl)schema.getElementDecl(elementName);
                 if (decl == null) {
                     return AnyType.getInstance();
                 } else {
@@ -148,8 +148,7 @@ public class ElementWildcard extends Particle {
      */
 
     @Override
-    public int getElementParticleCardinality(int elementName, PreparedSchema schema) {
-        EnterpriseConfiguration config = getConfiguration();
+    public int getElementParticleCardinality(int elementName, Schema schema) {
         if (wildcard.matches(elementName, true, schema, null)) {
             return Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
         }
@@ -170,12 +169,14 @@ public class ElementWildcard extends Particle {
     /**
      * Find the set of all element particles allowed within the content model of this particle, identified
      * by their integer fingerprints.
+     *
+     * @param schema
      * @param result          an initially-empty integer set in which the results are accumulated
      * @param ignoreWildcards true if wildcards are to be ignored. If false, the value XS_INVALID_NAME is added
      */
 
     @Override
-    public void gatherAllPermittedElements(IntHashSet result, boolean ignoreWildcards) throws SchemaException {
+    public void gatherAllPermittedElements(Schema schema, IntHashSet result, boolean ignoreWildcards) throws SchemaException {
         if (!ignoreWildcards) {
             result.add(-1);
         }

@@ -11,6 +11,7 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
 
@@ -41,15 +42,14 @@ public class ElementCreatorFeed extends ComplexNodeEventFeed {
         ElementCreator instr = (ElementCreator) getExpression();
         ElementCreator.ElementCreationDetails details = instr.makeElementCreationDetails();
         try {
+            Schema schema = instr.getRetainedStaticContext().getPackageData().getImportedSchema();
             NodeName elemName = details.getNodeName(context);
             SchemaType typeCode = instr.getValidationAction() == Validation.PRESERVE ? AnyType.getInstance() : Untyped.getInstance();
 
             if (!instr.isPreservingTypes()) {
-//                Controller controller = context.getController();
-//                assert controller != null;
                 ParseOptions options = instr.getValidationOptions()
                         .withTopLevelElement(elemName.getStructuredQName());
-                Receiver validator = context.getConfiguration().getElementValidator(
+                Receiver validator = schema.getElementValidator(
                         next, options, instr.getLocation());
                 next = new ComplexContentOutputter(validator);
             }

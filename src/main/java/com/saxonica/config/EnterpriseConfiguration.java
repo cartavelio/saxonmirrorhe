@@ -533,6 +533,27 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
+     * Simple interface to load a schema document
+     *
+     * @param absoluteURI the absolute URI of the location of the schema document
+     * @throws net.sf.saxon.type.SchemaException if the schema document at the given location cannot be read or is invalid
+     */
+
+    public Schema loadSchema(String absoluteURI) throws SchemaException {
+        return new PreparedSchema(this, new StreamSource(absoluteURI));
+    }
+
+    /**
+     * Load an empty schema. This may be useful as a basis for validating a document using a schema loaded
+     * using xsi:schemaLocation and xsi:noNamespaceSchemaLocation attributes.
+     *
+     * @return an empty schema containing only the built-in components.
+     */
+    public Schema emptySchema() {
+        return new PreparedSchema(this);
+    }
+
+    /**
      * Read a schema from a given schema location
      *
      * @param pipe           the PipelineConfiguration
@@ -973,20 +994,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Ask whether a given notation has been declared in the schema
-     *
-     * @param uri   the targetNamespace of the notation
-     * @param local the local part of the notation name
-     * @return true if the notation has been declared, false if not
-     * @since 9.3
-     */
-
-    @Override
-    public boolean isDeclaredNotation(NamespaceUri uri, String local) {
-        return unnamedSchema.getNotation(new StructuredQName("", uri, local)) != null;
-    }
-
-    /**
      * Check that a type is validly derived from another type, following the rules for the Schema Component
      * Constraint "Is Type Derivation OK (Simple)" (3.14.6) or "Is Type Derivation OK (Complex)" (3.4.6) as
      * appropriate.
@@ -1027,25 +1034,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 //        }
     }
 
-    /**
-     * Get a document-level validator to add to a Receiver pipeline
-     *
-     * @param receiver           The receiver to which events should be sent after validation
-     * @param systemId           the base URI of the document being validated
-     * @param validationOptions  Supplies options relevant to XSD validation
-     * @param initiatingLocation (optional) Location in query or stylesheet of instruction
-     *                           that requested validation
-     * @return A Receiver to which events can be sent for validation
-     */
-
-    @Override
-    public Receiver getDocumentValidator(Receiver receiver,
-                                         String systemId,
-                                         ParseOptions validationOptions,
-                                         Location initiatingLocation) {
-        return getUnnamedSchema().getDocumentValidator(receiver, systemId, validationOptions, initiatingLocation);
-    }
-
     private void allocateInvalidityHandler(ParseOptions validationOptions, ValidationContext vc) {
         if (validationOptions.getInvalidityHandler() == null) {
             ErrorReporter reporter = validationOptions.getErrorReporter();
@@ -1061,126 +1049,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         } else {
             vc.setInvalidityHandler(validationOptions.getInvalidityHandler());
         }
-    }
-
-    /**
-     * Get a Receiver that can be used to validate an element, and that passes the validated
-     * element on to a target receiver. If validation is not supported, the returned receiver
-     * will be the target receiver.
-     *
-     * @param receiver the target receiver to receive the validated element; its pipelineConfiguration
-     *                 must be initialized.
-     * @param options  options affecting the way schema validation is done
-     * @param location identifies the location of the element within its source document (or, if
-     *                 preferred, the location of the instruction requesting validation), relative to the LocationProvider
-     *                 in the PipelineConfiguration of the receiver
-     * @return The newly created receiver, which performs the validation and passes the validated
-     * elements on to the target receiver.
-     */
-
-    @Override
-    public Receiver getElementValidator(Receiver receiver,
-                                        ParseOptions options,
-                                        Location location) throws XPathException {
-
-//        if (isLicenseNotFound()) {
-//            return receiver;
-//        }
-
-        int validation = options.getSchemaValidationMode();
-        SchemaType schemaType = options.getTopLevelType();
-        StructuredQName elemName = options.getTopLevelElement();
-
-        if (validation == Validation.STRIP) {
-            if (receiver.usesTypeAnnotations()) {
-                return new SkipValidator(receiver);
-            } else {
-                return receiver;
-            }
-        }
-
-        Receiver destination = receiver;
-
-        PipelineConfiguration pipe = receiver.getPipelineConfiguration();
-        pipe.setRecoverFromValidationErrors(isValidationWarnings() || options.isContinueAfterValidationErrors());
-
-        ValidationContext vc = new ValidationContext(getConversionRules());
-        vc.setErrorLimit(options.getValidationErrorLimit());
-        vc.setController(pipe.getController());
-        vc.setValidationParams(options.getValidationParams());
-        vc.setInitiatingLocation(location);
-        allocateInvalidityHandler(options, vc);
-
-        // Checker for uniqueness constraints added in Saxon 9.3: see bug 4353
-        ConstraintChecker checker = new ConstraintChecker(pipe /*destination*/);
-        checker.setValidationContext(vc);
-        destination = new TeeOutputter(destination, checker);
-        vc.setConstraintChecker(checker);
-        //destination = new TracingFilter(destination);
-
-        // If running XSD 1.1, add an assertion tree builder before the constraint checker
-        destination = allocateAssertionTreeBuilder(destination, pipe, vc);
-
-        // Add a validator to the output pipeline if required
-
-        ContentValidator contentValidator = null;
-        if (validation == Validation.BY_TYPE) {
-            List<ValidationFailure> failures = new ArrayList<>(1);
-            contentValidator = ContentValidator.makeValidatorForType(null, schemaType, pipe, destination, failures);
-            if (!failures.isEmpty()) {
-                throw failures.get(0).makeException();
-            }
-            assert contentValidator != null;
-            contentValidator.setContainingElement(options.getTopLevelElement(), location);
-            contentValidator.setValidationContext(vc);
-
-        } else if (validation != Validation.PRESERVE) {
-            if (elemName == null) {
-                throw new IllegalArgumentException("When validating an element, either a type or an element name must be supplied");
-            }
-            ElementDecl decl = (ElementDecl) getSchema().getElementDecl(elemName);
-            if (decl == null || !decl.hasTypeAlternatives()) {
-                List<ValidationFailure> failures = new ArrayList<>(1);
-                contentValidator = ContentValidator.makeValidator(decl, elemName, location,
-                                                                  vc, schemaType,
-                                                                  validation,
-                                                                  pipe, destination, failures);
-                if (!failures.isEmpty()) {
-                    throw failures.get(0).makeException();
-                }
-            }
-        }
-
-        ValidationStack vs = new ValidationStack(vc, destination, Validation.STRICT, null);
-        vs.setPipelineConfiguration(pipe);
-        HostLanguage hostLanguage = pipe.getHostLanguage();
-        if (hostLanguage == HostLanguage.XSLT) {
-            if (validation == Validation.BY_TYPE) {
-                vc.setErrorCode("XTTE1540");
-            } else if (validation == Validation.STRICT) {
-                vc.setErrorCode("XTTE1510");
-            } else {
-                vc.setErrorCode("XTTE1515");
-            }
-        } else if (hostLanguage == HostLanguage.XQUERY) {
-            vc.setErrorCode("XQDY0027");
-        } else if (hostLanguage == HostLanguage.XML_SCHEMA) {
-            vc.setErrorCode(null);
-        }
-
-        if (contentValidator != null) {
-            vs.setInitialValidator(contentValidator);
-        }
-
-        XSIAttributeHandler xsi = new XSIAttributeHandler(vs);
-        AttributeInheritor inheritor = new AttributeInheritor(xsi);
-
-        vc.setAttributeInheritor(inheritor);
-        xsi.setValidationContext(vc);
-
-        destination = inheritor;
-        vc.startValidation(location.getSystemId());
-        return destination;
     }
 
     private Receiver allocateAssertionTreeBuilder(Receiver destination, PipelineConfiguration pipe, ValidationContext vc) {

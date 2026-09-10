@@ -12,6 +12,7 @@ import net.sf.saxon.expr.instruct.DummyNamespaceResolver;
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -117,6 +118,12 @@ public class PreparedSchema implements Schema, NotationSet {
     private IntHashMap<ElementDecl> elementsByFingerprint = null;
 
     /**
+     * A table of substitution group members for each element, indexed by fingerprint
+     */
+
+    private IntHashMap<Set<ElementDecl>> substitutionGroupsByFingerprint = new IntHashMap<>();
+
+    /**
      * Index of identity constraints (indexed by their name)
      */
 
@@ -189,6 +196,30 @@ public class PreparedSchema implements Schema, NotationSet {
         elementsByFingerprint = new IntHashMap<>(100);
         anonymousTypesByName = new HashMap<>(100);
         params = new HashMap<>(10);
+    }
+
+    /**
+     * Create a new Schema definition, loading a supplied schema
+     *
+     * @param config The configuration object holding system configuration information
+     */
+
+    public PreparedSchema(EnterpriseConfiguration config, Source schemaSource) throws SchemaException {
+        this(config);
+        addSchemaSource(schemaSource, null, new SchemaCompiler(config));
+    }
+
+    /**
+     * Create a new Schema definition, loading a supplied schema
+     *
+     * @param config The configuration object holding system configuration information
+     */
+
+    public PreparedSchema(EnterpriseConfiguration config, Source schemaSource, ErrorReporter reporter) throws SchemaException {
+        this(config);
+        SchemaCompiler compiler = new SchemaCompiler(config);
+        compiler.setErrorReporter(reporter);
+        addSchemaSource(schemaSource, null, compiler);
     }
 
     /**
@@ -299,6 +330,36 @@ public class PreparedSchema implements Schema, NotationSet {
         return namespace.equals(NamespaceUri.XML) ||
                 namespace.equals(NamespaceUri.FN) ||
                 namespace.equals(NamespaceUri.SCHEMA_INSTANCE);
+    }
+
+    /**
+     * Make a {@code schema-element} node test for a given element name
+     *
+     * @param fp the integer fingerprint of the element name
+     * @return a node test corresponding to the XPath item type syntax schema-element(E)
+     */
+
+    public NodeTest makeSchemaElementTest(int fp) throws SchemaException {
+        ElementDecl decl = getElementDecl(fp);
+        if (decl == null) {
+            throw new SchemaException("No element declaration found for the required element name");
+        }
+        return new SchemaElementTest(this, decl);
+    }
+
+    /**
+     * Make a {@code schema-attribute} node test for a given attribute name
+     *
+     * @param fp the integer fingerprint of the attribute name
+     * @return a node test corresponding to the XPath item type syntax schema-attribute(E)
+     */
+
+    public NodeTest makeSchemaAttributeTest(int fp) throws SchemaException {
+        AttributeDecl decl = getAttributeDecl(fp);
+        if (decl == null) {
+            throw new SchemaException("No element declaration found for the required element name");
+        }
+        return new SchemaAttributeTest(this, decl);
     }
 
     /**
@@ -624,6 +685,26 @@ public class PreparedSchema implements Schema, NotationSet {
 
     public ElementDecl getElementDecl(int fingerprint) {
         return elementsByFingerprint.get(fingerprint);
+    }
+
+    /**
+     * Get the members of the substitution group of an element
+     * @param owner the element declaration owning the substitution group
+     * @return the set of element declarations in this schema that are members of the substitution
+     * group. Note that an element declaration may appear in multiple schemas and have different
+     * substitution group membership in each one.
+     */
+
+    public synchronized Set<ElementDecl> getSubstitutionGroupMembers(ElementDecl owner) {
+        Set<ElementDecl> members = substitutionGroupsByFingerprint.get(owner.getFingerprint());
+        if (members == null) {
+            return new HashSet<>();
+        }
+        return members;
+    }
+
+    public synchronized void setSubstitutionGroupMembers(ElementDecl owner, Set<ElementDecl> members) {
+        substitutionGroupsByFingerprint.put(owner.getFingerprint(), members);
     }
 
     /**
@@ -1522,6 +1603,128 @@ public class PreparedSchema implements Schema, NotationSet {
             return receiver;
         }
     }
+
+    /**
+     * Get a Receiver that can be used to validate an element, and that passes the validated
+     * element on to a target receiver. If validation is not supported, the returned receiver
+     * will be the target receiver.
+     *
+     * @param receiver the target receiver to receive the validated element; its pipelineConfiguration
+     *                 must be initialized.
+     * @param options  options affecting the way schema validation is done
+     * @param location identifies the location of the element within its source document (or, if
+     *                 preferred, the location of the instruction requesting validation), relative to the LocationProvider
+     *                 in the PipelineConfiguration of the receiver
+     * @return The newly created receiver, which performs the validation and passes the validated
+     * elements on to the target receiver.
+     */
+
+    @Override
+    public Receiver getElementValidator(Receiver receiver,
+                                        ParseOptions options,
+                                        Location location) throws XPathException {
+
+//        if (isLicenseNotFound()) {
+//            return receiver;
+//        }
+
+        int validation = options.getSchemaValidationMode();
+        SchemaType schemaType = options.getTopLevelType();
+        StructuredQName elemName = options.getTopLevelElement();
+
+        if (validation == Validation.STRIP) {
+            if (receiver.usesTypeAnnotations()) {
+                return new SkipValidator(receiver);
+            } else {
+                return receiver;
+            }
+        }
+
+        Receiver destination = receiver;
+
+        PipelineConfiguration pipe = receiver.getPipelineConfiguration();
+        pipe.setRecoverFromValidationErrors(config.isValidationWarnings() || options.isContinueAfterValidationErrors());
+
+        ValidationContext vc = new ValidationContext(config.getConversionRules());
+        vc.setErrorLimit(options.getValidationErrorLimit());
+        vc.setController(pipe.getController());
+        vc.setValidationParams(options.getValidationParams());
+        vc.setInitiatingLocation(location);
+        allocateInvalidityHandler(options, vc);
+
+        // Checker for uniqueness constraints added in Saxon 9.3: see bug 4353
+        ConstraintChecker checker = new ConstraintChecker(pipe /*destination*/);
+        checker.setValidationContext(vc);
+        destination = new TeeOutputter(destination, checker);
+        vc.setConstraintChecker(checker);
+        //destination = new TracingFilter(destination);
+
+        // If running XSD 1.1, add an assertion tree builder before the constraint checker
+        destination = allocateAssertionTreeBuilder(destination, pipe, vc);
+
+        // Add a validator to the output pipeline if required
+
+        ContentValidator contentValidator = null;
+        if (validation == Validation.BY_TYPE) {
+            List<ValidationFailure> failures = new ArrayList<>(1);
+            contentValidator = ContentValidator.makeValidatorForType(null, schemaType, pipe, destination, failures);
+            if (!failures.isEmpty()) {
+                throw failures.get(0).makeException();
+            }
+            assert contentValidator != null;
+            contentValidator.setContainingElement(options.getTopLevelElement(), location);
+            contentValidator.setValidationContext(vc);
+
+        } else if (validation != Validation.PRESERVE) {
+            if (elemName == null) {
+                throw new IllegalArgumentException("When validating an element, either a type or an element name must be supplied");
+            }
+            ElementDecl decl = getElementDecl(elemName);
+            if (decl == null || !decl.hasTypeAlternatives()) {
+                List<ValidationFailure> failures = new ArrayList<>(1);
+                contentValidator = ContentValidator.makeValidator(decl, elemName, location,
+                                                                  vc, schemaType,
+                                                                  validation,
+                                                                  pipe, destination, failures);
+                if (!failures.isEmpty()) {
+                    throw failures.get(0).makeException();
+                }
+            }
+        }
+
+        ValidationStack vs = new ValidationStack(vc, destination, Validation.STRICT, null);
+        vs.setPipelineConfiguration(pipe);
+        HostLanguage hostLanguage = pipe.getHostLanguage();
+        if (hostLanguage == HostLanguage.XSLT) {
+            if (validation == Validation.BY_TYPE) {
+                vc.setErrorCode("XTTE1540");
+            } else if (validation == Validation.STRICT) {
+                vc.setErrorCode("XTTE1510");
+            } else {
+                vc.setErrorCode("XTTE1515");
+            }
+        } else if (hostLanguage == HostLanguage.XQUERY) {
+            vc.setErrorCode("XQDY0027");
+        } else if (hostLanguage == HostLanguage.XML_SCHEMA) {
+            vc.setErrorCode(null);
+        }
+
+        if (contentValidator != null) {
+            vs.setInitialValidator(contentValidator);
+        }
+
+        XSIAttributeHandler xsi = new XSIAttributeHandler(vs);
+        AttributeInheritor inheritor = new AttributeInheritor(xsi);
+
+        vc.setAttributeInheritor(inheritor);
+        xsi.setValidationContext(vc);
+
+        destination = inheritor;
+        vc.startValidation(location.getSystemId());
+        return destination;
+    }
+
+
 
     private void allocateInvalidityHandler(ParseOptions validationOptions, ValidationContext vc) {
         if (validationOptions.getInvalidityHandler() == null) {

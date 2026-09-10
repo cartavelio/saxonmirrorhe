@@ -325,17 +325,6 @@ public final class AttributeDecl extends SchemaStructure
     }
 
     /**
-     * Create a NodeTest that implements the semantics of schema-element(name) or
-     * schema-attribute(name) applied to this element or attribute declaration.
-     * @throws MissingComponentException if the type of the declaration is not present in the schema.
-     */
-
-    @Override
-    public NodeTest makeSchemaNodeTest() throws MissingComponentException {
-        return new SchemaAttributeTest(this);
-    }
-
-    /**
      * Say whether this attribute is inheritable
      *
      * @param inherit true if it is inheritable

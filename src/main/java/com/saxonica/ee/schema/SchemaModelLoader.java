@@ -1656,15 +1656,10 @@ public class SchemaModelLoader extends ProxyReceiver {
     private static class FiniteStateMachineHandler extends SCMNodeHandler {
 
         private final FiniteStateMachine fsm;
-        //private IntHashMap forwardReferences = new IntHashMap();
 
         public FiniteStateMachineHandler(UserComplexType complexType) {
             fsm = new FiniteStateMachine(complexType, true);
             complexType.setFiniteStateMachine(fsm);
-//            if (complexType.getOpenContentWildcard() != null) {
-//                fsm.setOpenContentWildcard(complexType.getOpenContentWildcard(),
-//                        complexType.getOpenContentMode() == UserComplexType.OPEN_CONTENT_INTERLEAVE);
-//            }
         }
 
         @Override

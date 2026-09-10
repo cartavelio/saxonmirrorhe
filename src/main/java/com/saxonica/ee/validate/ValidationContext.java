@@ -38,6 +38,7 @@ public class ValidationContext extends ConversionRules {
 
     public void setSchema(PreparedSchema ps) {
         this.schema = ps;
+        this.setNotationSet(ps);
     }
 
     public PreparedSchema getSchema() {

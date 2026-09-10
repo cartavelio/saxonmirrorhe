@@ -5,6 +5,7 @@ import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
@@ -162,14 +163,16 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * @return true if the wildcard allows this name, false if not.
      */
 
-    public boolean matches(StructuredQName name, boolean isElement, PreparedSchema schema, /*@Nullable*/ UserComplexType parentType) {
-        NodeName nn = new FingerprintedQName(name, schema.getNamePool());
-        return matches(nn, isElement, schema, parentType);
+    public boolean matches(StructuredQName name, boolean isElement, Schema schema, UserComplexType parentType) {
+        PreparedSchema ps = (PreparedSchema)schema;
+        NodeName nn = new FingerprintedQName(name, ps.getNamePool());
+        return matches(nn, isElement, ps, parentType);
     }
 
-    public boolean matches(int fp, boolean isElement, PreparedSchema schema, /*@Nullable*/ UserComplexType parentType) {
-        NodeName nn = new CodedName(fp, "", schema.getNamePool());
-        return matches(nn, isElement, schema, parentType);
+    public boolean matches(int fp, boolean isElement, Schema schema, UserComplexType parentType) {
+        PreparedSchema ps = (PreparedSchema) schema;
+        NodeName nn = new CodedName(fp, "", ps.getNamePool());
+        return matches(nn, isElement, ps, parentType);
     }
 
     /**
@@ -185,9 +188,10 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * @return true if the wildcard allows this name, false if not.
      */
 
-    public boolean matches(NodeName name, boolean isElement, PreparedSchema schema, /*@Nullable*/ UserComplexType parentType) {
+    public boolean matches(NodeName name, boolean isElement, Schema schema, /*@Nullable*/ UserComplexType parentType) {
         int fingerprint = -1;
-        NamePool namePool = schema.getNamePool();
+        PreparedSchema ps = (PreparedSchema) schema;
+        NamePool namePool = ps.getNamePool();
         if (disallowedQNames != null && disallowedQNames.contains(fingerprint)) {
             return false;
         }
@@ -210,7 +214,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         if (parentType != null && disallowsDefinedSiblings) {
             IntHashSet siblings = new IntHashSet();
             try {
-                parentType.gatherAllPermittedChildren(siblings, true);
+                parentType.gatherAllPermittedChildren(schema, siblings, true);
             } catch (SchemaException e) {
                 throw new IllegalStateException(e);
             }
@@ -253,7 +257,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         if (parentType != null && disallowsDefinedSiblings) {
             IntHashSet siblings = new IntHashSet();
             try {
-                parentType.gatherAllPermittedChildren(siblings, true);
+                parentType.gatherAllPermittedChildren(schema, siblings, true);
             } catch (SchemaException e) {
                 throw new IllegalStateException(e);
             }

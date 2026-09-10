@@ -1,11 +1,13 @@
 package com.saxonica.ee.jaxp;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.PreparedSchema;
+import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.event.*;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NoElementsSpaceStrippingRule;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.type.SchemaException;
 import org.xml.sax.*;
 
@@ -24,6 +26,7 @@ public class ValidatingReader implements XMLReader {
     private final EnterpriseConfiguration config;
     private final XMLReader parser;
     private ContentHandler contentHandler;
+    private PreparedSchema schema;
 
     /**
      * Create a ValidatingReader. When this option is used, the only way to supply the
@@ -33,6 +36,7 @@ public class ValidatingReader implements XMLReader {
 
     public ValidatingReader() {
         this(new EnterpriseConfiguration());
+        this.schema = new PreparedSchema(getConfiguration());
         //config.getParseOptions().setContinueAfterValidationErrors(true);
     }
 
@@ -46,6 +50,7 @@ public class ValidatingReader implements XMLReader {
 
     public ValidatingReader(EnterpriseConfiguration config) {
         this(config, config.getSourceParser());
+        this.schema = new PreparedSchema(config);
     }
 
     /**
@@ -61,7 +66,7 @@ public class ValidatingReader implements XMLReader {
     public ValidatingReader(EnterpriseConfiguration config, XMLReader parser) {
         this.config = config;
         this.parser = parser;
-
+        this.schema = new PreparedSchema(config);
     }
 
     /**
@@ -177,7 +182,7 @@ public class ValidatingReader implements XMLReader {
             }
         } else if (name.equals("http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation")) {
             try {
-                config.addSchemaSource(new StreamSource((String) value));
+                schema.addSchemaSource(new StreamSource((String) value), config.makeErrorReporter(), new SchemaCompiler(config));
             } catch (SchemaException err) {
                 throw new SAXNotSupportedException("Error in no-namespace schema document: " + err.getMessage());
             }
@@ -189,7 +194,7 @@ public class ValidatingReader implements XMLReader {
             }
             String locationURI = value.toString().substring(space + 1);
             try {
-                config.addSchemaSource(new StreamSource(locationURI));
+                schema.addSchemaSource(new StreamSource(locationURI), config.makeErrorReporter(), new SchemaCompiler(config));
             } catch (SchemaException err) {
                 throw new SAXNotSupportedException("Error in schema document: " + err.getMessage());
             }
@@ -414,7 +419,7 @@ public class ValidatingReader implements XMLReader {
                 .withTopLevelType(config.getParseOptions().getTopLevelType())
                 .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
 
-        Receiver receiver = config.getDocumentValidator(output, systemId, options, null);
+        Receiver receiver = config.getSchema().getDocumentValidator(output, systemId, options, null);
 
         ReceivingContentHandler rch = new ReceivingContentHandler();
         rch.setPipelineConfiguration(output.getPipelineConfiguration());

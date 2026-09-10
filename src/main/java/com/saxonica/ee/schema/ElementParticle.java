@@ -4,10 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.MissingComponentException;
-import net.sf.saxon.type.SchemaComponent;
-import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntHashSet;
 
 import javax.xml.transform.SourceLocator;
@@ -263,13 +260,13 @@ public class ElementParticle extends Particle {
      */
 
     @Override
-    public SchemaType getElementParticleType(int elementFingerprint, PreparedSchema schema) {
+    public SchemaType getElementParticleType(int elementFingerprint, Schema schema) {
         try {
             ElementDecl decl = (ElementDecl) getTarget();
             if (elementFingerprint == getTargetFingerprint()) {
                 return decl.getType();
             } else {
-                Collection<ElementDecl> subsGroup = decl.getSubstitutionGroupMembers();
+                Collection<ElementDecl> subsGroup = ((PreparedSchema)schema).getSubstitutionGroupMembers(decl);
                 for (ElementDecl mem : subsGroup) {
                     if (mem.getFingerprint() == elementFingerprint) {
                         return mem.getType();
@@ -294,12 +291,12 @@ public class ElementParticle extends Particle {
      */
 
     @Override
-    public int getElementParticleCardinality(int elementName, PreparedSchema schema) throws MissingComponentException {
+    public int getElementParticleCardinality(int elementName, Schema schema) throws MissingComponentException {
         if (elementName == getTargetFingerprint()) {
             return Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
         }
         ElementDecl decl = (ElementDecl) getTarget();
-        Collection<ElementDecl> subsGroup = decl.getSubstitutionGroupMembers();
+        Collection<ElementDecl> subsGroup = ((PreparedSchema)schema).getSubstitutionGroupMembers(decl);
         for (ElementDecl mem : subsGroup) {
             if (mem.getFingerprint() == elementName) {
                 return Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
@@ -322,16 +319,18 @@ public class ElementParticle extends Particle {
     /**
      * Find the set of all element particles allowed within the content model of this particle, identified
      * by their integer fingerprints. Ignore wildcards.
+     *
+     * @param schema
      * @param result          an initially-empty integer set in which the results are accumulated
      * @param ignoreWildcards if true, wildcards are ignored. If false, the result will be
      *                        a set containing the value XS_INVALID, meaning that it is not possible to enumerate
      */
 
     @Override
-    public void gatherAllPermittedElements(IntHashSet result, boolean ignoreWildcards) throws MissingComponentException {
+    public void gatherAllPermittedElements(Schema schema, IntHashSet result, boolean ignoreWildcards) throws MissingComponentException {
         ElementDecl decl = (ElementDecl) getTarget();
         result.add(decl.getFingerprint());
-        Collection<ElementDecl> subsGroup = decl.getSubstitutionGroupMembers();
+        Collection<ElementDecl> subsGroup = ((PreparedSchema)schema).getSubstitutionGroupMembers(decl);
         for (ElementDecl mem : subsGroup) {
             result.add(mem.getFingerprint());
         }

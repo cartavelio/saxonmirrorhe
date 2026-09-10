@@ -552,7 +552,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
                     Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, null);
                     output.setPipelineConfiguration(pipe);
 
-                    Receiver receiver = config.getDocumentValidator(output, source.getSystemId(), options, null);
+                    Receiver receiver = schema.getDocumentValidator(output, source.getSystemId(), options, null);
                     Sender.send(source, receiver, options);
                 } catch (XPathException | SaxonApiException e1) {
                     //e1.printStackTrace();

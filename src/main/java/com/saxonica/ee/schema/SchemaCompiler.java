@@ -14,10 +14,8 @@ import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.XmlProcessingException;
-import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.trans.*;
+import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AnyURIValue;
@@ -715,6 +713,93 @@ public class SchemaCompiler {
                 error(message, sub);
                 throw new SchemaException(message);
             }
+        }
+    }
+
+    /**
+     * Add a member of the substitution group that has this element as its head.
+     * For internal use only.
+     * <p>This method may be called at any time, for example when a new schema is loaded as a result
+     * of validating an instance document. The method is therefore synchronized, since the
+     * schema may be used in several threads concurrently. Adding a new member to a substitution group
+     * means that all complex type definitions that include this element in their content model
+     * must be recompiled.</p>
+     * <p>It is not possible to add to a substitution group once the element declaration has been used,
+     * either for validating a source document or for compiling stylesheets or schemas.</p>
+     *
+     * @param owner the owner of the substitution group
+     * @param member   The element declaration to be added to the substitution group of which this
+     *                 element declaration is the head. Elements are added to each ancestor in the substitution
+     *                 group hierarchy.
+     * @throws net.sf.saxon.type.SchemaException if a fatal error occurs
+     */
+
+    public synchronized void addSubstitutionGroupMember(ElementDecl owner, ElementDecl member)
+            throws SchemaException {
+        Set<ElementDecl> substitutionGroupMembers = preparedSchema.getSubstitutionGroupMembers(owner);
+        if (!substitutionGroupMembers.contains(member)) {
+            EnterpriseConfiguration config = getConfiguration();
+            if (member != owner) {
+                member.fixup(this);
+                String reason = member.isValidlySubstitutable(owner);
+                // If the member is not validly substitutable, this is not in general an error,
+                // but we report it as a warning.
+                if (reason != null) {
+                    boolean isError = false;
+                    // In XSD 1.1 this becomes an error if the reason it's not validly substitutable
+                    // is to do with the element's type.
+                    if (xsdVersion == Configuration.XSD11 &&
+                            reason.startsWith("required type derivation method")) {
+                        isError = true;
+                    }
+                    String memberName = member.getDisplayName();
+                    String msg = "Element " + Err.wrap(memberName, Err.ELEMENT) +
+                            " cannot participate in the substitution group of element " +
+                            Err.wrap(owner.getName(), Err.ELEMENT) + ": " + reason;
+                    try {
+                        Set<ElementDecl> grandFathers = owner.getSubstitutionGroupOwners();
+                        for (ElementDecl grandFather : grandFathers) {
+                            if (member.isValidlySubstitutable(grandFather) == null) {
+                                msg += ". However, element " + Err.wrap(memberName, Err.ELEMENT) +
+                                        " can substitute for element " +
+                                        Err.wrap(grandFather.getDisplayName(), Err.ELEMENT);
+                                break;
+                            }
+                        }
+                    } catch (MissingComponentException err) {
+                        // ignore
+                    }
+
+                    if (isError) {
+                        error(msg, member);
+                        throw new SchemaException("Disallowed substitution group membership");
+                    } else {
+                        warning(msg, SaxonErrorCode.SXSD1002, member);
+                    }
+                    return;
+                }
+            }
+
+            if (member != owner && config.isSealedNamespace(owner.getTargetNamespace())) {
+                String msg = "It is not possible to add to the substitution group of element " + owner.getName() +
+                        " in namespace '" + owner.getTargetNamespace() +
+                        "', because the schema for that namespace has already been used for validating instance documents," +
+                        " or for compiling queries or stylesheets";
+                SchemaException err = new SchemaException(msg);
+                err.setLocator(member);
+                throw err;
+            }
+            substitutionGroupMembers.add(member);
+            if (substitutionGroupMembers.size() > 10) {
+                substitutionGroupMembers = new HashSet<>(substitutionGroupMembers);
+            }
+            preparedSchema.setSubstitutionGroupMembers(owner, substitutionGroupMembers);
+            // This invalidates the compiled form of all complex types using this element
+//            if (member != this) {
+//                for (UserComplexType type : complexTypesUsingThisElement) {
+//                    type.recompile(compiler);
+//                }
+//            }
         }
     }
 

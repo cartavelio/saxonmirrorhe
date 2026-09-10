@@ -234,6 +234,7 @@ public class FiniteStateMachine {
                                                     UserComplexType subjectType,
                                                     FiniteStateMachine machine)
             throws SchemaException, MissingComponentException {
+        PreparedSchema schema  = compiler.getPreparedSchema();
         Term term = particle.getTerm();
         if (term instanceof Wildcard) {
             machine.alphabet.add(new TermParticlePair(term, particle));
@@ -259,8 +260,8 @@ public class FiniteStateMachine {
 
             int fp = ((ElementDecl) term).getFingerprint();
 
-            for (ElementDecl elem : ((ElementDecl) term).getSubstitutionGroupMembers()) {
-                if (elem.getFingerprint() != fp /*&& !elem.isAbstract() */) {
+            for (ElementDecl elem : schema.getSubstitutionGroupMembers(((ElementDecl) term))) {
+                if (elem.getFingerprint() != fp) {
                     edge = new Edge();
                     edge.setTerm(elem);
                     machine.alphabet.add(new TermParticlePair(elem, particle));
@@ -322,12 +323,12 @@ public class FiniteStateMachine {
             NonDeterminizedState countingState,
             int min,
             int max,
-            //int startFrom,
             UserComplexType subjectType,
             SchemaCompiler compiler,
             FiniteStateMachine machine)
             throws SchemaException, MissingComponentException {
 
+        PreparedSchema schema = compiler.getPreparedSchema();
         Term term = particle.getTerm();
         machine.alphabet.add(new TermParticlePair(term, particle));
 
@@ -344,7 +345,7 @@ public class FiniteStateMachine {
             countingState.addSpecificTransition(edge, compiler);
             int fp = ((ElementDecl) term).getFingerprint();
 
-            for (ElementDecl elem : ((ElementDecl) term).getSubstitutionGroupMembers()) {
+            for (ElementDecl elem : schema.getSubstitutionGroupMembers(((ElementDecl) term))) {
                 if (elem.getFingerprint() != fp /*&& !elem.isAbstract() */) {
                     machine.alphabet.add(new TermParticlePair(elem, particle));
                     edge = new Edge();

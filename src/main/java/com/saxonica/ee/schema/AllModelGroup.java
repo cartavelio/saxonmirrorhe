@@ -26,6 +26,7 @@ public class AllModelGroup extends ModelGroup {
     private int[] maxima;       // maxOccurs values for the particles
     private StructuredQName[] elementNames;     // names of the element particles (for diagnostics)
     private int numberOfElementParticles = 0;
+    // TODO: following fields should be properties specific to a schema, because they depend on expanding substitution groups.
     private IntToIntMap counterMap;
     // mapping from fingerprints of element particles to positions in minima/maxima
     private IntHashMap<ElementDecl> declarationMap;
@@ -119,6 +120,7 @@ public class AllModelGroup extends ModelGroup {
     protected boolean checkElements(IntHashMap<ElementDecl> map, SchemaCompiler compiler)
             throws SchemaException, MissingComponentException {
 
+        PreparedSchema schema = compiler.getPreparedSchema();
         if (map.size() > 0) {
             // This check is probably redundant: other compositors already check that they don't contain xs:all
             compiler.error("<xs:all> cannot appear within the content model of another compositor", this);
@@ -150,9 +152,8 @@ public class AllModelGroup extends ModelGroup {
         Iterator<ElementDecl> iterM = map.valueIterator();
         while (iterM.hasNext()) {
             ElementDecl e = iterM.next();
-            //implicitMembers.put(e.getFingerprint(), );
             if (e.isGlobal()) {
-                for (ElementDecl member : e.getSubstitutionGroupMembers()) {
+                for (ElementDecl member : schema.getSubstitutionGroupMembers(e)) {
                     ElementDecl existing = implicitMembers.put(member.getFingerprint(), e);
                     if (existing != null) {
                         String err = "An element " + Err.wrap(member.getDisplayName(), Err.ELEMENT) +
@@ -279,6 +280,7 @@ public class AllModelGroup extends ModelGroup {
 
     @Override
     public void elaborate(SchemaCompiler compiler) throws SchemaException {
+        PreparedSchema schema = compiler.getPreparedSchema();
         List<Particle> particles = getSimplifiedContentModel();
         int len = particles.size();
         minima = new int[len];
@@ -289,7 +291,7 @@ public class AllModelGroup extends ModelGroup {
         } else {
             counterMap = new IntToIntHashMap(particles.size() + 1);
         }
-        declarationMap = new IntHashMap<ElementDecl>(particles.size() + 1);
+        declarationMap = new IntHashMap<>(particles.size() + 1);
         int wildcardIndex = 0;
         int elementIndex = wildcards == null ? 0 : wildcards.size();   // first n counter positions are reserved for wildcards
         for (Particle particle : particles) {
@@ -301,7 +303,7 @@ public class AllModelGroup extends ModelGroup {
                 elementNames[elementIndex] = particle.getTargetComponentName();
                 counterMap.put(key, elementIndex);
                 declarationMap.put(key, decl);
-                Collection<ElementDecl> group = decl.getSubstitutionGroupMembers();
+                Collection<ElementDecl> group = schema.getSubstitutionGroupMembers(decl);
                 for (ElementDecl substituteDecl : group) {
                     int fp = substituteDecl.getFingerprint();
                     counterMap.put(fp, elementIndex);

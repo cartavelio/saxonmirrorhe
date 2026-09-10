@@ -1,6 +1,7 @@
 package com.saxonica.ee.jaxp;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.sdoc.LSSchemaResolver;
 import net.sf.saxon.Configuration;
@@ -281,14 +282,15 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
     @Override
     public Schema newSchema(Source[] sources) throws SAXException {
         SchemaCompiler compiler = config.newSchemaCompiler();
+        PreparedSchema ps = new PreparedSchema(config);
         try {
             for (Source source : sources) {
-                config.addSchemaSource(source, errorReporter, compiler);
+                ps.addSchemaSource(source, errorReporter, compiler);
             }
         } catch (SchemaException e) {
             throw toSAXException(e);
         }
-        return new SchemaReference(config.getUnnamedSchema());
+        return new SchemaReference(ps);
     }
 
     /**

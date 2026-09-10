@@ -178,6 +178,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
      * Find the set of all element particles allowed within the content model of this particle.
      * Ignore wildcards.
      *
+     * @param schema
      * @param result          an initially-empty set in which the results are accumulated
      * @param ignoreWildcards if true, wildcards are ignored. If false, the result will contain the name
      *                        XS_INVALID, meaning that it is not possible to enumerate
@@ -185,7 +186,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
      * @throws SchemaException if an error is found in the schema
      */
 
-    public abstract void gatherAllPermittedElements(IntHashSet result, boolean ignoreWildcards) throws SchemaException;
+    public abstract void gatherAllPermittedElements(Schema schema, IntHashSet result, boolean ignoreWildcards) throws SchemaException;
 
     /**
      * Find an element particle within this complex type definition having a given element name
@@ -199,7 +200,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
      * @return the computed cardinality of this child element within the complex type
      */
 
-    public abstract int getElementParticleCardinality(int elementName, PreparedSchema schema) throws MissingComponentException;
+    public abstract int getElementParticleCardinality(int elementName, Schema schema) throws MissingComponentException;
 
     /**
      * Determine if empty content is allowed
@@ -224,7 +225,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
      */
 
     /*@Nullable*/
-    public abstract SchemaType getElementParticleType(int fingerprint, PreparedSchema schema) throws MissingComponentException;
+    public abstract SchemaType getElementParticleType(int fingerprint, Schema schema) throws MissingComponentException;
 
     /**
      * Check references from this component to other components

@@ -73,8 +73,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
 
         eMap.put("acFnRef", (loader, element) -> {
             StructuredQName name = loader.getQNameAttribute(element, "name");
-            Configuration configuration = loader.getConfiguration();
-            SchemaType type = configuration.getSchema().getSchemaType(name);
+            SchemaType type = loader.getSchema().getSchemaType(name);
             if (!(type instanceof AtomicType)) {
                 throw new XPathException("No atomic type " + name.getEQName() + " found");
             }

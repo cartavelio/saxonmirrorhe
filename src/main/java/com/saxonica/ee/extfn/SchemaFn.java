@@ -10,6 +10,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -55,34 +56,36 @@ public class SchemaFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         final EnterpriseConfiguration config = (EnterpriseConfiguration) context.getConfiguration();
+        final Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
         if (arguments.length == 0) {
-            return schemaInfo(config);
+            return schemaInfo(config, schema);
 
         } else if (arguments.length == 2) {
             String kind = arguments[0].head().getStringValue();
             QNameValue name = (QNameValue) arguments[1].head();
-            return schemaComponentInfo(config, kind, name.getStructuredQName());
+            return schemaComponentInfo(config, schema, kind, name.getStructuredQName());
         } else {
             throw new XPathException("Call to saxon:schema() requires either 0 or 2 arguments");
         }
     }
 
-    private Sequence schemaInfo(EnterpriseConfiguration config) {
+    private Sequence schemaInfo(EnterpriseConfiguration config, Schema schema) {
         CallableDelegate schemaFunction = new CallableDelegate((context, arguments) -> {
+            PreparedSchema ps = (PreparedSchema)schema;
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Schema");
                 case "type definitions": {
                     List<Item> list = new ArrayList<>();
-                    for (SchemaType st : config.getUnnamedSchema().getAllTypes()) {
+                    for (SchemaType st : ps.getAllTypes()) {
                         list.add(st.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
                 }
                 case "attribute declarations": {
                     List<Item> list = new ArrayList<>();
-                    for (AttributeDecl decl : config.getUnnamedSchema().getAttributeDeclarations()) {
+                    for (AttributeDecl decl : ps.getAttributeDeclarations()) {
                         list.add(decl.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -90,14 +93,14 @@ public class SchemaFn extends SystemFunction {
                 }
                 case "element declarations": {
                     List<Item> list = new ArrayList<>();
-                    for (ElementDecl decl : config.getUnnamedSchema().getElementDeclarations()) {
+                    for (ElementDecl decl : ps.getElementDeclarations()) {
                         list.add(decl.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
                 }
                 case "attribute group definitions": {
                     List<Item> list = new ArrayList<>();
-                    for (AttributeGroupDecl group : config.getUnnamedSchema().getAllAttributeGroups()) {
+                    for (AttributeGroupDecl group : ps.getAllAttributeGroups()) {
                         list.add(group.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -105,7 +108,7 @@ public class SchemaFn extends SystemFunction {
                 }
                 case "model group definitions": {
                     List<Item> list = new ArrayList<>();
-                    for (ModelGroupDefinition group : config.getUnnamedSchema().getAllModelGroups()) {
+                    for (ModelGroupDefinition group : ps.getAllModelGroups()) {
                         list.add(group.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -113,7 +116,7 @@ public class SchemaFn extends SystemFunction {
                 }
                 case "notation declarations": {
                     List<Item> list = new ArrayList<>();
-                    for (Notation notation : config.getUnnamedSchema().getAllNotations()) {
+                    for (Notation notation : ps.getAllNotations()) {
                         list.add(notation.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -121,7 +124,7 @@ public class SchemaFn extends SystemFunction {
                 }
                 case "identity-constraint definitions": {
                     List<Item> list = new ArrayList<>();
-                    for (IdentityConstraint constraint : config.getUnnamedSchema().getIdentityConstraints()) {
+                    for (IdentityConstraint constraint : ps.getIdentityConstraints()) {
                         list.add(constraint.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -135,35 +138,36 @@ public class SchemaFn extends SystemFunction {
         return new CallableFunction(1, schemaFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
-    private Sequence schemaComponentInfo(EnterpriseConfiguration config, String kind, StructuredQName name)
+    private Sequence schemaComponentInfo(EnterpriseConfiguration config, Schema schema, String kind, StructuredQName name)
             throws XPathException {
+        PreparedSchema ps = (PreparedSchema) schema;
         switch (kind) {
             case "attribute declaration": {
-                AttributeDecl decl = (AttributeDecl) config.getSchema().getAttributeDecl(name);
+                AttributeDecl decl = (AttributeDecl) ps.getAttributeDecl(name);
                 return getComponentInfo(config, decl);
             }
             case "element declaration": {
-                ElementDecl decl = (ElementDecl) config.getSchema().getElementDecl(name);
+                ElementDecl decl = (ElementDecl) ps.getElementDecl(name);
                 return getComponentInfo(config, decl);
             }
             case "attribute group definition": {
-                AttributeGroupDecl decl = config.getUnnamedSchema().getAttributeGroup(name);
+                AttributeGroupDecl decl = ps.getAttributeGroup(name);
                 return getComponentInfo(config, decl);
             }
             case "model group definition": {
-                ModelGroupDefinition decl = config.getUnnamedSchema().getGroup(name);
+                ModelGroupDefinition decl = ps.getGroup(name);
                 return getComponentInfo(config, decl);
             }
             case "notation declarations": {
-                Notation decl = config.getUnnamedSchema().getNotation(name);
+                Notation decl = ps.getNotation(name);
                 return getComponentInfo(config, decl);
             }
             case "identity-constraint definitions": {
-                IdentityConstraint decl = config.getUnnamedSchema().getIdentityConstraint(name);
+                IdentityConstraint decl = ps.getIdentityConstraint(name);
                 return getComponentInfo(config, decl);
             }
             case "type definition":
-                SchemaType type = config.getSchema().getSchemaType(name);
+                SchemaType type = ps.getSchemaType(name);
                 return getComponentInfo(config, type);
             default:
                 throw new XPathException("Unknown component kind " + kind);

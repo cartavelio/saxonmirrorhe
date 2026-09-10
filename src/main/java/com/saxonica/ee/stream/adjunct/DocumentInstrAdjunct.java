@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.DocumentInstr;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 
 
 /**
@@ -45,33 +46,12 @@ public class DocumentInstrAdjunct extends ParentConstructorAdjunct implements Fe
             DocumentInstr exp = (DocumentInstr)getExpression();
             try {
                 if (!exp.isPreservingTypes()) {
-                    Receiver validator = context.getConfiguration().getDocumentValidator(
+                    Schema schema = exp.getRetainedStaticContext().getPackageData().getImportedSchema();
+                    Receiver validator = schema.getDocumentValidator(
                             next, exp.getStaticBaseURIString(), exp.getValidationOptions(), exp.getLocation());
                     next = new ComplexContentOutputter(validator);
                 }
                 next.startDocument(ReceiverOption.NONE);
-//                Controller controller = context.getController();
-//                Configuration config = controller.getConfiguration();
-//                builder = controller.makeBuilder();
-//                if (builder instanceof TinyBuilder) {
-//                    ((TinyBuilder) builder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
-//                }
-//
-//                builder.setBaseURI(exp.getStaticBaseURIString());
-//                builder.setTiming(false);
-//
-//                PipelineConfiguration pipe = controller.makePipelineConfiguration();
-//                pipe.setXPathContext(context);
-//                pipe.setHostLanguage(HostLanguage.XSLT);
-//                builder.setPipelineConfiguration(pipe);
-//
-//                Receiver tracer = builder; //new TracingFilter(builder);
-//                ComplexContentOutputter out = ComplexContentOutputter.makeComplexContentReceiver(tracer, exp.getValidationOptions());
-//                //context.setReceiver(out);
-//                out.open();
-//                out.startDocument(ReceiverOption.NONE);
-//                setComplexContentOutputter(out);
-
             } catch (XPathException e) {
                 dynamicError(e.maybeWithLocation(exp.getLocation()).maybeWithContext(context));
             }

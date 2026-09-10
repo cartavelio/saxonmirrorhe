@@ -6,6 +6,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
@@ -177,18 +178,16 @@ public abstract class AttributeValidator extends ContentValidator {
                         multipleIdAttributes(attName, location);
                     }
                 }
-                if (declaredType.getFingerprint() == StandardNames.XS_NOTATION) {
-                    notationIsAbstract(location);
+                ConversionRules rules = getValidationContext();
+                if (declaredType.getBuiltInBaseType().getFingerprint() == StandardNames.XS_NOTATION) {
+                    if (declaredType.getFingerprint() == StandardNames.XS_NOTATION) {
+                        notationIsAbstract(location);
+                    }
                 }
                 ValidationFailure err = declaredType.validateContent(
-                        StringView.of(value).tidy(), getNamespaceResolver(), getConfiguration().getConversionRules());
+                        StringView.of(value).tidy(), getNamespaceResolver(), rules);
                 if (err != null) {
                     err.setConstraintReference(2, "cvc-complex-type", "3");
-                    //                String elName = getContainingElement() != null ? getContainingElement() + "/" : "";
-                    //                String message =
-                    //                        "Validating " + elName + "@" + attName.getDisplayName() + ": " + err.getMessage();
-                    //                err.setMessage(message);
-                    //                err.setSchemaType(getSchemaType());
                     Location attLocation = makeAttributeLocation(attName, location);
                     reportValidationError(err, false, attLocation);
                 } else {

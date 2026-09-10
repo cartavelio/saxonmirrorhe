@@ -63,7 +63,7 @@ public class ValidateFn extends SystemFunction {
         boolean returnTreeOnFailure = false;
         NodeInfo resultNode = null;
         Configuration config = context.getConfiguration();
-        //try {
+        Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
         NodeInfo input = (NodeInfo) arguments[0].head();
         if (input == null) {
             return EmptySequence.getInstance();
@@ -94,7 +94,7 @@ public class ValidateFn extends SystemFunction {
             if (val != null) {
                 if (val instanceof QNameValue) {
                     StructuredQName name = ((QNameValue) val).getStructuredQName();
-                    schemaType = config.getSchema().getSchemaType(name);
+                    schemaType = schema.getSchemaType(name);
                     if (schemaType == null) {
                         throw new XPathException("Unknown type " + val, "XPTY0004");
                     }
@@ -186,7 +186,7 @@ public class ValidateFn extends SystemFunction {
 
             case Type.DOCUMENT: {
                 Receiver out = buildTree ? new SequenceCollector(pipe) : new Sink(pipe);
-                Receiver val = config.getDocumentValidator(out, input.getBaseURI(), parseOptions, null);
+                Receiver val = schema.getDocumentValidator(out, input.getBaseURI(), parseOptions, null);
                 val.setPipelineConfiguration(out.getPipelineConfiguration());
                 val.setSystemId(input.getBaseURI());
                 input.copy(val, CopyOptions.ALL_NAMESPACES, Loc.NONE);
@@ -196,7 +196,7 @@ public class ValidateFn extends SystemFunction {
             case Type.ELEMENT: {
                 SequenceReceiver out = buildTree ? new SequenceCollector(pipe) : new Sink(pipe);
                 parseOptions = parseOptions.withTopLevelElement(NameOfNode.makeName(input).getStructuredQName());
-                Receiver val = config.getElementValidator(out, parseOptions, Loc.NONE);
+                Receiver val = schema.getElementValidator(out, parseOptions, Loc.NONE);
                 val.setPipelineConfiguration(out.getPipelineConfiguration());
                 val.setSystemId(input.getBaseURI());
                 input.copy(val, CopyOptions.ALL_NAMESPACES, Loc.NONE);
@@ -224,7 +224,7 @@ public class ValidateFn extends SystemFunction {
                 } else if (validation == Validation.STRICT ||
                         validation == Validation.LAX) {
                     try {
-                        simpleType = config.validateAttribute(
+                        simpleType = schema.validateAttribute(
                                 NameOfNode.makeName(input).getStructuredQName(), input.getUnicodeStringValue(), validation);
 
                     } catch (ValidationException e) {

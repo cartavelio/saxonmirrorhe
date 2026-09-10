@@ -85,7 +85,7 @@ public class SchemaReference extends Schema {
         pipe.setRecoverFromValidationErrors(true);
 
 
-        Receiver realValidator = config.getDocumentValidator(proxy, proxy.getSystemId(), options, null);
+        Receiver realValidator = schema.getDocumentValidator(proxy, proxy.getSystemId(), options, null);
 
         ReceivingContentHandler rch = new ReceivingContentHandler();
         rch.setReceiver(realValidator);

@@ -62,10 +62,10 @@ public class InSituValidator {
                 .withSpaceStrippingRule(null);
         Receiver validator;
         if (root.getNodeKind() == Type.DOCUMENT) {
-            validator = config.getDocumentValidator(endPoint, root.getSystemId(), options, null);
+            validator = config.getSchema().getDocumentValidator(endPoint, root.getSystemId(), options, null);
         } else {
             options = options.withTopLevelElement(NameOfNode.makeName(root).getStructuredQName());
-            validator = config.getElementValidator(endPoint, options, Loc.NONE);
+            validator = config.getSchema().getElementValidator(endPoint, options, Loc.NONE);
         }
         NodeCounter nodeCounter = new NodeCounter(nodeBuffer);
         pipe.setCopyInformee(CSharp.methodRef(nodeCounter::notifyElementNode));
