@@ -164,7 +164,7 @@ public class XMLIndenter extends ProxyReceiver {
                         + 4 + (prefix.isEmpty() ? 4 : prefix.length() + 5);
             }
             if (len > getLineLength()) {
-                int indent = (level - 1) * getIndentation() + 3;
+                int indent = (level - 1) * getIndentation() + 2;
                 emitter.setIndentForNextAttribute(indent);
             }
         }
@@ -269,7 +269,7 @@ public class XMLIndenter extends ProxyReceiver {
      * Output white space to reflect the current indentation level
      *
      * @throws XPathException if a downstream error occurs doing the output
-     * @param doubleSpace
+     * @param doubleSpace true if double-spacing is requested for this element
      */
 
     private void indent(boolean doubleSpace) throws XPathException {
