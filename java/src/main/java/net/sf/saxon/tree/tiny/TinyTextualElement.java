@@ -15,6 +15,7 @@ import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
@@ -281,6 +282,8 @@ public class TinyTextualElement extends TinyElementImpl {
             if (other.equals(this)) {
                 return 0;
             } else if (other.equals(getParent())) {
+                return 1;
+            } else if (other instanceof NamespaceNode nn && nn.getParent() == element) {
                 return 1;
             } else {
                 return getParent().compareOrder(other);
