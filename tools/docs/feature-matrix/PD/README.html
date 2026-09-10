@@ -1,0 +1,118 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:H="http://www.w3.org/1999/xhtml">
+   <head>
+      <title>Saxon Datasheets</title>
+      <link rel="stylesheet" href="saxondocs_new.css" type="text/css"></link>
+   </head>
+   <body><img src="saxonica_logo.gif"></img><p>23rd July 2015 @ 15:01</p>
+      <h1>Generate Product Variant Datasheets</h1>
+      <p>This stylesheet generates HTML and FO versions of the product variant datasheets.</p>
+      <h2>Directions for use</h2>
+      <p>Define the product variant components in the main XML file (currently a file named
+         'prod-desc-<em>version</em>.xml').
+      </p>
+      <p>Edit the main styling required in the CSS stylesheet (default <code>saxondocs_new.css</code>). This will be mostly sizing, colours, fonting, space
+         before/after, indenting etc.
+      </p>
+      <p>Change the page size and header/footer sizes in the file <code>config.xml</code>. (In future we could also add additional sections that could be added
+         for example to the header.]
+      </p>
+      <p>Run this stylesheet (<code>prod-desc-to-fo.xsl</code>) in Saxon (either independently or under Oxygen) under XSLT 3.0 mode, with the product
+         details file
+         as input.
+      </p>
+      <p>The results will appear as a set of HTML and FO files. The HTML files are all in a
+         directory html/, the FO in an fo/ directory.
+      </p>
+      <p>Use FOP (e.g. under Oxygen) to convert FO to PDF files. [Note - make sure the PDF
+         file isn't open in Acrobat - it's a common problem.]
+      </p>
+      <p><strong>If you run under Oxygen, then you may be able do a batch conversion of the FO files
+            to PDF by selecting each of them, right click, and
+            'Transform/Apply Transformation Scenario' - the default for FO files is to generate
+            the PDF.</strong> I may also be able to include the last two as a
+         single step if this is required. 
+      </p>
+      <h2>Technical details</h2>
+      <p>This stylesheet is designed as follows:</p>
+      <ul>
+         <li>
+            <p>The variants required are a sequence of string names as the parameter $variants, e.g.
+               <code>'HE','PE'</code> etc. The default value is the current
+               set of product variants.
+            </p>
+         </li>
+         <li>
+            <p>The input is a product details XML structure, where each section that is variant-specific
+               is decorated with a <code>@variant</code> attribute
+               containing a whitespace-separated list of the variants it relevant to, e.g. <code>variant="PE EE"</code>.
+            </p>
+            <p>Top level sections of this structure can be decorated <code>@class="header|footer"</code>, which will collect them into a header and a footer section
+               respectively.
+            </p>
+         </li>
+         <li>
+            <p>A set of datasheets is collected for each variant, using mode <code>variant</code>. These are stored in a map, as are all results.
+            </p>
+         </li>
+         <li>
+            <p>Each definition is converted into an HTML document using mode <code>doc</code>. The overall template for these documents is defined in an XSLT
+               template (stored separately in <code>prod-desc-template.xsl</code>) . These HTML documents are styled though a CSS stylesheet, whose name is a
+               parameter <code>$CSS</code>, which, if relative, is resolved relative to the input data.
+            </p>
+         </li>
+         <li>
+            <p>The bodies of these documents are converted into XSL-FO sources, first by styling
+               (using a function <code>jwl:applyCSS($stylesheet.URI,$doc)</code>
+               that applies CSS properties to an XML tree leaving the results as attributes), then
+               by using the mode <code>FO</code> to produce XSL-FO instructions,
+               which is defined in the stylesheet <code>prod-fo.xsl</code></p>
+         </li>
+         <li>
+            <p>The results appear in '<em>variant</em>-prod-desc.xml' files for the HTML and '<em>variant</em>-prod-desc.fo' files for the FO source
+            </p>
+         </li>
+         <li>
+            <p>Use FOP to convert the FO files.</p>
+         </li>
+      </ul>
+      <h3>Required resources</h3>
+      <ul>
+         <li>
+            <p><code>prod-desc-to-fo.xsl</code> - the main stylesheet to be evaluated over the product description.
+            </p>
+         </li>
+         <li>
+            <p><code>prod-desc-template.xsl</code> - the overall HTML template used to define the outer shell of the HTMLresults.
+            </p>
+         </li>
+         <li>
+            <p><code>prod-fo.xsl</code> - converts (styled) HTML to FO 
+            </p>
+         </li>
+         <li>
+            <p><code>css2xslt.xsl</code> - applies CSS to an XML tree, leaving results as attributes. This resource is now
+               held in
+               <code><i>{repository}</i>/src/he/data/lib</code>, and linked to by a relative path from the stylesheet <code>prod-desc-to-fo.xsl</code>. <b>If you move this directory, you'll need to change teh path</b></p>
+         </li>
+         <li>
+            <p><code>self-doc.xsl</code> - self-documents a document.
+            </p>
+         </li>
+         <li>
+            <p><code>config.xml</code> - configuration file for things like page size and headers and footers.
+            </p>
+         </li>
+         <!--  <xsl:for-each select="$this.document/xsl:include">
+        <li>{@href}</li>
+      </xsl:for-each>-->
+      </ul>
+      <h2>Restrictions &amp; shortcomings</h2>
+      <ul>
+         <li>
+            <p>Relative column widths can be used by styling <code>width:75%</code> through CSS onto table cells. Currently this will work for styling just
+               <i>one</i> column, but is erroneous beyond that.
+            </p>
+         </li>
+      </ul>
+   </body>
+</html>

@@ -1,0 +1,429 @@
+/* styling definitions */
+
+/* 
+Text blue: #3D5B96
+Dark blue: #c1cede
+Mid blue: #e4eef0 
+Light blue: #f6fffb
+mid green #B1CCC7
+rust #96433D
+*/
+
+p,
+h1,
+h2,
+h3{
+    font-family:Verdana, Arial, Helvetica, sans-serif;
+    color:#3D5B96;
+    font-style:normal;
+    font-weight:normal;
+    text-decoration:none;
+
+}
+/* used for frameset holders */
+.bgnd{
+    margin-top:0;
+    margin-left:0;
+    background:#f6fffb;
+}
+
+/* used for menu */
+
+.menu{
+    background:#f6fffb;
+    margin-top:20px;
+    margin-left:40px;
+}
+
+/* used for content pages */
+
+.main{
+    background:#e4eef0;
+    margin-top:10px;
+    margin-left:5px;
+    margin-right:5px;
+    margin-bottom:20px;
+
+}
+
+/* used for menu links */
+
+a{
+    font-size:8pt;
+}
+
+/* used for in body links */
+
+a.bodylink{
+    font-size:9pt;
+    text-decoration:underline;
+}
+
+/* used for table of contents level 1 */
+/*
+a.toc1 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+	font-style:normal;
+	color: #3D5B96;
+	font-weight: bold;
+	text-decoration: none;
+}*/
+
+/* used for table of contents level 2 */
+
+a.toc2{
+    font-size:10pt;
+}
+
+/* used for menu heading */
+.title{
+    font-size:10pt;
+    font-weight:bold;
+    /*line-height:1.3em;*/
+}
+
+
+body{
+    counter-reset:h1;
+    counter-reset:h2;
+}
+/*h1{
+  counter-reset:h2;
+}*/
+h2{
+    counter-reset:h3;
+}
+h3{
+    counter-reset:h4;
+}
+
+/*h1:before{
+  counter-increment:h1;
+  content:counter(h1) ".  ";
+  counter-reset:h2;
+}*/
+h2:before{
+    counter-increment:h2;
+    content:counter(h2) ".  ";
+    counter-reset:h3;
+}
+h3:before{
+    counter-increment:h3;
+    content:counter(h2) "." counter(h3) "  ";
+    counter-reset:h4;
+}
+/* used for main page headings */
+
+h1,
+h2,
+h3{
+    font-size:10pt;
+    font-weight:bold;
+    padding-top:4pt;
+    padding-bottom:4pt;
+}
+
+h1{
+    font-size:14pt;
+    padding-top:14pt;
+}
+
+h2{
+    font-size:12pt;
+    padding-top:8pt;
+}
+
+h3{
+}
+/* used for subheads in pref. to H2 etc, to limit underlining width */
+
+.subhead{
+    font-size:10pt;
+    font-weight:bold;
+    border-bottom:thin dashed #3D5B96;
+    padding-right:5px;
+}
+
+/* used for standard text */
+
+p{
+    font-size:9pt;
+    line-height:1.3em;
+    padding-right:15px;
+    margin-top:0em;
+    margin-bottom:1.3em;
+}
+ital{
+    font-size:9pt;
+    font-style:italic;
+    line-height:1.3em;
+}
+
+italb{
+    font-size:9pt;
+    font-style:italic;
+    font-weight:bold;
+    text-decoration:none;
+    line-height:1.3em;
+}
+
+code{
+    font-family:"lucida sans typewriter", courier, monospace;
+    font-size:8pt;
+    font-style:normal;
+    font-weight:normal;
+    text-decoration:none;
+    line-height:1.3em;
+}
+
+ul{
+    font-size:9pt;
+    font-style:normal;
+    font-weight:normal;
+    text-decoration:none;
+    line-height:80%;
+}
+/* try changing spacing between list items ss 170615 */
+
+li{
+    font-size:9pt;
+    font-style:normal;
+    font-weight:normal;
+
+
+}
+
+th{
+    font-size:11pt;
+    font-style:normal;
+    color:#3D5B96;
+    font-weight:bold;
+    text-decoration:none;
+    /*line-height:1.3em;*/
+    padding-left:15px;
+    /* text-indent: -15px;*/
+    padding-right:15px;
+    padding-top:0px;
+    padding-bottom:0px;
+}
+table{
+    width:100%
+}
+td{
+    font-size:9pt;
+    font-style:normal;
+    color:#3D5B96;
+    font-weight:normal;
+    text-decoration:none;
+    vertical-align:top;
+   /* line-height:1.3em;*/
+    padding-left:15px;
+    /* text-indent: -15px;*/
+    padding-right:15px;
+
+}
+
+
+
+/* used for text in boxed areas */
+
+.boxed{
+    font-size:8pt;
+    font-style:normal;
+    color:#96433D;
+    font-weight:bold;
+    text-decoration:none;
+    margin-top:5px;
+    margin-bottom:5px;
+}
+
+/* used for example code */
+
+.codeblock{
+    background:#B1CCC7;
+    /*background: #e4eef0;*/
+    font-family:"lucida sans typewriter", courier, monospace;
+    font-size:8pt;
+    font-style:normal;
+    color:#96433D;
+    font-weight:normal;
+    text-decoration:none;
+    padding-right:15px;
+}
+
+/* used for example commands */
+
+.command{
+    font-size:8pt;
+    font-style:normal;
+    color:#96433D;
+    font-weight:bold;
+    text-decoration:none;
+    padding-right:15px;
+}
+
+
+
+/* used for links in boxed areas */
+
+a.rust{
+    font-size:8pt;
+    font-style:normal;
+    color:#96433D;
+    font-weight:bold;
+    text-decoration:underline;
+}
+
+/* used for links at the end of a page */
+
+a.nav{
+    font-size:8pt;
+    font-style:normal;
+    color:#96433D;
+    font-weight:bold;
+}
+
+table.feature-matrix{
+    margin:5px;
+    padding:3px;
+    border-collapse:collapse;
+}
+
+td.feature-matrix{
+    border-style:solid;
+    border-width:1px;
+    border-color:#C0C0C0;
+    vertical-align:middle;
+    padding-top:5px;
+    padding-bottom:5px;
+}
+
+td.important{
+    padding-left:0px;
+    padding-top:0px;
+    width:60%;
+}
+td.important h1{
+    padding-top:4pt;
+}
+
+td.feature-body{
+    width:75%;
+    padding-top:4pt;
+    padding-bottom:4pt;
+}
+
+/* used for licenses */
+
+h1.license{
+    color:#96433D;
+    line-height:15pt;
+}
+
+h1.inline{
+    font-size:12pt;
+    font-weight:bold;
+    display:inline;
+}
+
+h1.short{
+    font-size:12pt;
+    line-height:0%;
+}
+
+h1.proddesc_blue{
+    font-size:12pt;
+    margin-bottom:1%;
+    margin-top:0%;
+    line-height:1.2;
+}
+
+h1.proddesc_rust{
+    font-size:12pt;
+    color:#96433D;
+    font-weight:bold;
+    margin-bottom:0%;
+    margin-top:0%;
+    line-height:1.2;
+}
+
+h2.proddesc_rust{
+    font-size:11pt;
+    color:#96433D;
+    font-weight:bold;
+    margin-bottom:0%;
+    margin-top:0%;
+    line-height:1.2;
+}
+
+h2.license{
+    color:#96433D;
+    font-weight:bold;
+    /*  line-height:12pt;*/
+    line-height:1.5;
+}
+
+/* This sets up a hanging indent */
+h3{
+    margin-left:2em;
+    text-indent:-2em;
+}
+
+.licence{
+    font-size:8pt;
+    line-height:11pt;
+    margin-top:8px;
+    margin-bottom:8px;
+}
+.licencelink{
+    font-size:8pt;
+    text-decoration:underline;
+    line-height:11pt;
+}
+.space{
+    line-height:0.3em;
+}
+
+
+div.footer *{
+    color:black;
+}
+div.header p{
+    text-align:right;
+    padding-right:0px;
+}
+div.headerZZ img{
+    float:right;
+}
+div.header img{
+/* Stylings required for the FO version, but bad for HTML version! */
+    width:100%;
+    content-width:scale-to-fit;
+}
+
+.footer td {
+   padding-left:0px;
+   padding-right:0px;
+}
+td.footerName{
+    width:75%;
+}
+
+.page-number{
+    font-style:italic;
+    font-size:70%;
+    color:black;
+}
+table.feature-set col:nth-child(1){
+    width:30%;
+}
+table.feature-set col:nth-child(2){
+    width:70%;
+}
+.left{
+    text-align:left;
+}
+.right{
+    text-align:right;
+}
