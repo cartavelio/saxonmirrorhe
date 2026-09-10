@@ -75,5 +75,19 @@ public class XSLFallback extends StyleElement {
         return null;
     }
 
+    /**
+     * Get the effective version of this element. xsl:fallback has special rules in XSLT 4.0, which
+     * we use even when running as a 3.0 processor. See XSLT 4.0 issue 649.
+     *
+     * @return the version number times ten as an integer
+     */
+    @Override
+    int getEffectiveVersion() {
+        if (getAttributeValue("version") != null) {
+            return super.getEffectiveVersion();
+        } else {
+            return getCompilation().getCompilerInfo().getXsltVersion();
+        }
+    }
 }
 
