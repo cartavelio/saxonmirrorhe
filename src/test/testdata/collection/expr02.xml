@@ -4,9 +4,13 @@
   <!ENTITY hatch-pic
          SYSTEM "../grafix/OpenHatch.gif"
          NDATA gif >
+  <!ENTITY thatch-pic
+         PUBLIC "-//SAXONICA//TEST//EN" 
+                "../grafix/OpenThatch.gif"
+         NDATA gif >
   <!ELEMENT doc (#PCDATA)>
 ]>
 
          
 <doc>
-</doc>
+</doc>
