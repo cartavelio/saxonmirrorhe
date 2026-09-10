@@ -103,8 +103,11 @@ public class TypeChecker {
         int reqCardinality = req.getCardinality();
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
 
-        if (th.isSubType(supplied.getItemType(), reqItemType) &&
-                !(reqItemType instanceof SpecificFunctionType)) {
+        // Function coercion is necessary even if the supplied function conforms to the required type;
+        // but it's not needed if the supplied expression is already a function coercer.
+        boolean forceCoercion = (reqItemType instanceof SpecificFunctionType && !(supplied instanceof SequenceCoercer));
+
+        if (th.isSubType(supplied.getItemType(), reqItemType) && !forceCoercion) {
             // The item type is OK
             if (Cardinality.subsumes(reqCardinality, supplied.getCardinality())) {
                 // The cardinality is OK
