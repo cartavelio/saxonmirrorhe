@@ -644,7 +644,7 @@
 
             </details>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
+            <saxon-edition>PE/EE 13 11_EXPERIMENTAL</saxon-edition>
             <status>
                 <p>The <code>xsl:array</code> instruction is available from Saxon 13 for XSLT 4.0
                     stylesheets.</p>
@@ -677,6 +677,8 @@
                     sequence.</attribute>
             </attributes>
             <details>
+                <p>TODO FIXME: the QT4 specifications are yet to settle on how array members are
+                    represented: parcels or value records.</p>
                 <p>The intended usage is to deliver a single member of an array being constructed
                     using <code>&lt;xsl:array composite="yes"&gt;</code>. However, the result of the
                     instruction is well-defined whether or not it is used in this way.</p>
@@ -687,7 +689,7 @@
             </details>
             <in-spec>xslt40</in-spec>
 
-            <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
+            <saxon-edition>PE/EE 13 11_EXPERIMENTAL</saxon-edition>
             <status>
                 <p>Available from Saxon 11; requires syntax extensions to be enabled. Also available
                     in earlier releases under the synonym <a class="bodylink code"
@@ -2436,7 +2438,7 @@
                 </example>
             </examples>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
+            <saxon-edition>PE/EE 11</saxon-edition>
             <status>
                 <p>The <code>xsl:item-type</code> declaration is available from Saxon 13 for XSLT
                     4.0 stylesheets; it is available in Saxon 11 and 12 provided that syntax
@@ -5198,7 +5200,7 @@
                 </example>
             </examples>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
+            <saxon-edition>PE/EE 11</saxon-edition>
             <status>
                 <p>The <code>xsl:switch</code> instruction is available from Saxon 13 for XSLT 4.0
                     stylesheets; it is available in Saxon 11 and 12 provided that syntax extensions
