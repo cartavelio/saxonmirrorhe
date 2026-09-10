@@ -150,8 +150,11 @@ public class TypeChecker {
                         RoleDiagnostic role = roleSupplier.get();
                         throw new XPathException(
                                 "An atomic value is required for the " + role.getMessage() +
-                                        ", but the supplied type is " + shortItemType + ", which cannot be atomized", "FOTY0013", supplied.getLocation())
-                                .asTypeError().withFailingExpression(supplied);
+                                        ", but the supplied type is " + shortItemType + ", which cannot be atomized")
+                                .withErrorCode("FOTY0013")
+                                .withLocation(supplied.getLocation())
+                                .asTypeError()
+                                .withFailingExpression(supplied);
                     }
 
                     if (exp.getRetainedStaticContext() == null) {
@@ -178,11 +181,12 @@ public class TypeChecker {
                     if (((PlainType) reqItemType).isNamespaceSensitive()) {
                         // See spec bug 11964
                         RoleDiagnostic role = roleSupplier.get();
-                        XPathException err = new XPathException(
+                        throw new XPathException(
                                 "An untyped atomic value cannot be converted to a QName or NOTATION as required for the " +
-                                role.getMessage(), "XPTY0117", supplied.getLocation());
-                        err.setIsTypeError(true);
-                        throw err;
+                                        role.getMessage())
+                                .withErrorCode("XPTY0117")
+                                .withLocation(supplied.getLocation())
+                                .withFailingExpression(supplied);
                     }
                     UntypedSequenceConverter cexp = UntypedSequenceConverter.makeUntypedSequenceConverter(config, exp, (PlainType) reqItemType);
                     cexp.setRoleDiagnostic(roleSupplier);
@@ -384,7 +388,9 @@ public class TypeChecker {
         // If the supplied value is () and () isn't allowed, fail now
         if (suppliedCard == StaticProperty.EMPTY && ((reqCard & StaticProperty.ALLOWS_ZERO) == 0)) {
             RoleDiagnostic role = roleSupplier.get();
-            throw new XPathException("An empty sequence is not allowed as the " + role.getMessage(), role.getErrorCode(), supplied.getLocation())
+            throw new XPathException("An empty sequence is not allowed as the " + role.getMessage())
+                    .withErrorCode(role.getErrorCode())
+                    .withLocation(supplied.getLocation())
                     .asTypeErrorIf(role.isTypeError())
                     .withFailingExpression(supplied);
         }
@@ -411,7 +417,9 @@ public class TypeChecker {
                 }
             } else {
                 String msg = role.composeErrorMessage(reqItemType, supplied, th);
-                throw new XPathException(msg, role.getErrorCode(), supplied.getLocation())
+                throw new XPathException(msg)
+                        .withErrorCode(role.getErrorCode())
+                        .withLocation(supplied.getLocation())
                         .asTypeErrorIf(role.isTypeError())
                         .withFailingExpression(supplied);
             }
@@ -429,9 +437,11 @@ public class TypeChecker {
                 }
                 RoleDiagnostic role = roleSupplier.get();
                 String msg = role.composeErrorMessage(reqItemType, supplied, th);
-                XPathException err = new XPathException(msg, role.getErrorCode(), supplied.getLocation());
-                err.setIsTypeError(role.isTypeError());
-                throw err;
+                throw new XPathException(msg)
+                        .withErrorCode(role.getErrorCode())
+                        .withLocation(supplied.getLocation())
+                        .asTypeErrorIf(role.isTypeError())
+                        .withFailingExpression(supplied);
             } else {
                 Expression cexp = new ItemChecker(exp, reqItemType, roleSupplier);
                 ExpressionTool.copyLocationInfo(exp, cexp);
@@ -442,12 +452,14 @@ public class TypeChecker {
         if (!cardOK) {
             if (exp instanceof Literal) {
                 RoleDiagnostic role = roleSupplier.get();
-                XPathException err = new XPathException("Required cardinality of " + role.getMessage() +
+                throw new XPathException("Required cardinality of " + role.getMessage() +
                                                                 " is " + Cardinality.describe(reqCard) +
                                                                 "; supplied value has cardinality " +
-                                                                Cardinality.describe(suppliedCard), role.getErrorCode(), supplied.getLocation());
-                err.setIsTypeError(role.isTypeError());
-                throw err;
+                                                                Cardinality.describe(suppliedCard))
+                        .withErrorCode(role.getErrorCode())
+                        .withLocation(supplied.getLocation())
+                        .withFailingExpression(supplied)
+                        .asTypeErrorIf(role.isTypeError());
             } else {
                 Expression cexp = CardinalityChecker.makeCardinalityChecker(exp, reqCard, roleSupplier);
                 ExpressionTool.copyLocationInfo(exp, cexp);

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.trans;
 
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ErrorReporter;
@@ -93,6 +94,11 @@ public class XmlProcessingException implements XmlProcessingError {
     @Override
     public Throwable getCause() {
         return exception.getCause();
+    }
+
+    @Override
+    public Expression getFailingExpression() {
+        return exception.getFailingExpression();
     }
 
     public void setWarning(boolean warning) {
