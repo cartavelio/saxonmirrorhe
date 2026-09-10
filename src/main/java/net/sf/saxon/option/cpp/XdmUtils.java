@@ -157,6 +157,45 @@ public class XdmUtils {
         return a;
     }
 
+
+    /**
+         * convert EQName to ClarkName
+         * @param thread - Graalvm runtime data structure for the thread
+         * @param alloc - Allocator function to create C memory space passed from the C++ application
+         * @param c_eqname - the the eqname string to convert to Clarkname
+         * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
+         */
+        @CEntryPoint(name = "j_EQNameToClarkName", exceptionHandler = SaxonCExceptionCCharHandler.class)
+        public static CCharPointer j_EQNameToClarkName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer c_eqname) {
+            if(c_eqname == WordFactory.nullPointer()) {
+                return WordFactory.nullPointer();
+            }
+            String eqname = CTypeConversion.toJavaString(c_eqname);
+            QName qname = QName.fromEQName(eqname);
+            String clarkname_result = qname.getClarkName();
+            CCharPointer a = SaxonCAPI.stringToNative2(alloc, clarkname_result);
+            return a;
+        }
+
+    /**
+         * convert ClarkName to EQName
+         * @param thread - Graalvm runtime data structure for the thread
+         * @param alloc - Allocator function to create C memory space passed from the C++ application
+         * @param c_clarkname - the the clarkname string to convert to EQName
+         * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
+         */
+        @CEntryPoint(name = "j_clarkNameToEQName", exceptionHandler = SaxonCExceptionCCharHandler.class)
+        public static CCharPointer j_clarkNameToEQName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer c_clarkname) {
+            if(c_clarkname == WordFactory.nullPointer()) {
+                return WordFactory.nullPointer();
+            }
+            String clarkname = CTypeConversion.toJavaString(c_clarkname);
+            QName qname = QName.fromClarkName(clarkname);
+            String eqname_result = qname.getEQName();
+            CCharPointer a = SaxonCAPI.stringToNative2(alloc, eqname_result);
+            return a;
+        }
+
     /**
      * call to the XdmNode.toString() method
      * @param thread - Graalvm runtime data structure for the thread

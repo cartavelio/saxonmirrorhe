@@ -193,17 +193,17 @@ public:
     */
     //int exceptionCount();
 
-     //! Get the ith error message if there are any validation errors
+     //! Get the error message if there are any validation errors
     /**
      *  May have a number of validation errors reported against it the source.
-     * @return char* - The message of the i'th exception 
+     * @return char* - The message of the exception thrown
     */
-    const char * getErrorMessage(int i);
+    const char * getErrorMessage();
 
-     //! Get the i'th error code if errors are reported
+     //! Get error code if an error is reported
     /**
      * Validation error are reported as exceptions. All errors can be retrieved.
-     * @return char* - The error code of the i'th exception.
+     * @return char* - The error code of the exception.
     */
     const char * getErrorCode(int i);
 

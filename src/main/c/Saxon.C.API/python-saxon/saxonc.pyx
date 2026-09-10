@@ -3659,27 +3659,25 @@ cdef class PySchemaValidator:
         """
         self.thissvptr.exceptionClear()
 
-     def get_error_message(self, index):
+     def get_error_message(self):
         """
-        get_error_message(self, index)
-        A validation may have a number of errors reported against it. Get the ith error message if there
+        get_error_message(self)
+        A validation may have a number of errors reported against it. Get the error message if there
         are any errors.
         Args:
-            index (int): The i'th exception
         Returns:
             str: The message of the exception. Returns None if the exception does not exist.
         """
-        return make_py_str(self.thissvptr.getErrorMessage(index))
-     def get_error_code(self, index):
+        return make_py_str(self.thissvptr.getErrorMessage())
+     def get_error_code(self):
         """
-        get_error_code(self, index)
+        get_error_code(self)
         A validation may have a number of errors reported against it. Get the error code if there was an error.
         Args:
-            index (int): The i'th exception
         Returns:
             str: The error code associated with the exception thrown. Returns None if the exception does not exist.
         """
-        return make_py_str(self.thissvptr.getErrorCode(index))
+        return make_py_str(self.thissvptr.getErrorCode())
      def set_lax(self, lax):
         """
         set_lax(self, lax)
@@ -3969,8 +3967,8 @@ cdef class PyXdmItem(PyXdmValue):
             PyXdmNode: Subclass this object to PyXdmNode or error
         """
         cdef PyXdmNode val = None
-        if self.is_atomic:
-          raise Exception("The PyXdmItem is a PyXdmAtomicValue therefore cannot be sub-classed to a PyXdmNode")
+        if self.is_node == False:
+          raise Exception("The PyXdmItem is not an PyXdmNode therefore cannot be sub-classed to a PyXdmNode")
         val = PyXdmNode()
         val.derivednptr = val.derivedptr = <saxoncClasses.XdmNode*> self.derivedptr
         '''val.derivednptr.incrementRefCount()'''
@@ -3984,12 +3982,43 @@ cdef class PyXdmItem(PyXdmValue):
             PyXdmNode: Subclass this object to PyXdmMap or error
         """
         cdef PyXdmMap val = None
-        if self.is_atomic:
-          raise Exception("The PyXdmItem is a PyXdmAtomicValue therefore cannot be sub-classed to a PyXdmMap")
+        if self.is_map == False:
+          raise Exception("The PyXdmItem is not an PyXdmMap therefore cannot be sub-classed to a PyXdmMap")
         val = PyXdmMap()
-        val.derivedmmptr = val.derivedptr = <saxoncClasses.XdmMap*> self.derivedptr
+        val.derivedmmptr = val.derivedfptr = val.derivedptr = <saxoncClasses.XdmMap*> self.derivedptr
         '''val.derivednptr.incrementRefCount()'''
         return val
+
+     def get_function_value(self):
+        """
+        get_function_value(self)
+        Get the subclass PyXdmFunctionItem for this current PyXdmItem object if it is a function item
+        Returns:
+            PyXdmFunctionItem: Subclass this object to PyXdmFunctionItem or error
+        """
+        cdef PyXdmFunctionItem val = None
+        if self.is_function == False:
+          raise Exception("The PyXdmItem is not an PyXdmFunctionItem therefore cannot be sub-classed to a PyXdmFunctionItem")
+        val = PyXdmFunctionItem()
+        val.derivedfptr = val.derivedptr = <saxoncClasses.XdmFunctionItem*> self.derivedptr
+        '''val.derivednptr.incrementRefCount()'''
+        return val
+
+     def get_array_value(self):
+        """
+        get_array_value(self)
+        Get the subclass PyXdmArray for this current PyXdmItem object if it is an array item
+        Returns:
+            PyXdmArray: Subclass this object to PyXdmArray or error
+        """
+        cdef PyXdmArray val = None
+        if self.is_array == False:
+          raise Exception("The PyXdmItem is not an PyXdmArray therefore cannot be sub-classed to a PyXdmArray")
+        val = PyXdmArray()
+        val.derivedaaptr = val.derivedfptr = val.derivedptr = <saxoncClasses.XdmArray*> self.derivedptr
+        '''val.derivednptr.incrementRefCount()'''
+        return val
+
      @property
      def head(self):
         """

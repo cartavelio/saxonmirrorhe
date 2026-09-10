@@ -877,7 +877,7 @@ def testReusability(saxonproc):
     assert item2.integer_value == 18
 
 
-def testQueryKeyWords(saxonproc):
+def testQueryKeyWords(saxonproc, data_dir):
     queryproc = saxonproc.new_xquery_processor()
     queryproc.clear_properties()
     queryproc.clear_parameters()
@@ -891,6 +891,20 @@ def testQueryKeyWords(saxonproc):
     assert result is not None
     assert item.is_atomic
     assert item.boolean_value
+    queryproc.clear_parameters()
+    queryproc.clear_properties()
+
+def testQueryKeyWords_string(saxonproc, data_dir):
+    queryproc = saxonproc.new_xquery_processor()
+    queryproc.clear_properties()
+    queryproc.clear_parameters()
+    input_ =  saxonproc.parse_xml(xml_text="<foo xmlns='http://one.uri/'><bar xmlns='http://two.uri'>12</bar></foo>")
+    queryproc.declare_namespace("", "http://one.uri/")
+    value1 = saxonproc.make_boolean_value(True)
+    queryproc.set_parameter("p",value1)
+    foo_file = data_dir+"/foo.xq"
+    result = queryproc.run_query_to_string(query_file=foo_file, input_xdm_item=input_)
+    assert result is not None
     queryproc.clear_parameters()
     queryproc.clear_properties()
 

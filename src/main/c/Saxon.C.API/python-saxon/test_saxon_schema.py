@@ -42,7 +42,7 @@ def testValdiator3(data_dir, saxonproc2):
     val.validate(file_name=data_dir + "family.xml")
     nodea = val.validation_report
     if val.exception_occurred:
-        print(val.get_error_message(0))
+        print(val.get_error_message())
     assert not val.exception_occurred
     assert nodea is None
     val.exception_clear()

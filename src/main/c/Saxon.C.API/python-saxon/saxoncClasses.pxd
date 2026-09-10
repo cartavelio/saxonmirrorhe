@@ -413,9 +413,9 @@ cdef extern from "../SaxonProcessor.h":
         int exceptionCount()
 
     
-        const char * getErrorMessage(int i)
+        const char * getErrorMessage()
      
-        const char * getErrorCode(int i)
+        const char * getErrorCode()
 
         void setLax(bool l)
 
