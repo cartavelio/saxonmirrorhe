@@ -163,6 +163,7 @@ task rejar_Xerces(
         from("${projectDir}/src/main/c") {
           include "Saxon.C.API/*.h"
           include "Saxon.C.API/*.cpp"
+          include "Saxon.C.API/readme.md"
           exclude "Saxon.C.API/config.m4"
           exclude "Saxon.C.API/HEC"
           exclude "Saxon.C.API/PEC"
@@ -175,7 +176,12 @@ task rejar_Xerces(
           exclude "Saxon.C.API/dllmain.cpp"
           exclude "Saxon.C.API/readme.txt"
           exclude "Saxon.C.API/targetver.h"
-
+          include "Saxon.C.API/python-saxon/*.py
+          include "Saxon.C.API/python-saxon/cat.xml
+          include "Saxon.C.API/python-saxon/test.xsl
+          include "Saxon.C.API/python-saxon/*.pxd
+          include "Saxon.C.API/python-saxon/*.pyx
+          include "Saxon.C.API/python-saxon/readme.txt
           include "samples/cppTests/*.cpp"
           include "samples/cppTests/*.h"
           include "samples/cTests/*.h"
