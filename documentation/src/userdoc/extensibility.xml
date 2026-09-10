@@ -63,7 +63,8 @@
     
     <p>Saxon allows the use of any function (including core functions, Saxon-supplied extension functions,
     user-supplied extension functions, and others) to be disabled using the method
-    <code>Configuration.disableFunction()</code>.</p>
+    <code>Configuration.disableFunction()</code>. This can be useful where untrusted queries or
+    stylesheets are being executed.</p>
  
     
   </section>
