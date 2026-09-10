@@ -898,44 +898,16 @@
     <feature>
         <featureCode>41</featureCode>
         <name>MESSAGE_EMITTER_CLASS</name>
-        <type>Name of a class implementing <link>net.sf.saxon.event.Receiver</link></type>
+        <type>String</type>
         <uri>http://saxon.sf.net/feature/messageEmitterClass</uri>
         <editions>HE PE EE</editions>
         <platforms>J</platforms>
-        <setter class="net.sf.saxon.Configuration">setMessageEmitterClass</setter>
-        <getter class="net.sf.saxon.Configuration">getMessageEmitterClass</getter>
-        <commandline for="T">-m:classname</commandline>
         <configfile>xslt/@messageEmitter</configfile>
         <configfiledesc>
-            <p>Destination of <a class="bodylink code" href="/xsl-elements/message">xsl:message</a>
-                output.</p>
+            <p>From Saxon 11.1, this option has no effect.</p>
         </configfiledesc>
         <desc>
             <p>From Saxon 11.1, this option has no effect.</p>
-            <!--<p>Use the specified <code>Receiver</code> to process the output from
-                    <code>xsl:message</code>. The class must implement the
-                    <code>net.sf.saxon.event.Receiver</code> interface. This interface is similar to
-                a SAX <code>ContentHandler</code>, in that it takes a stream of events to generate
-                output.</p>
-            <p>By default the standard XML emitter is used, configured to write to the standard
-                error stream, and to include no XML declaration. </p>
-            <p>In general the content of a message is an XML fragment. Each message is output as a
-                new document. The sequence of calls to this <code>Receiver</code> is as follows:
-                there is a single <code>open()</code> call at the start of the transformation, and a
-                single <code>close()</code> call at the end; and each evaluation of an
-                    <code>xsl:message</code> instruction starts with a <code>startDocument()</code>
-                call and ends with <code>endDocument()</code>. </p>
-            <p>The <code>startDocument()</code> event has a <code>properties</code> argument
-                indicating whether <code>terminate="yes"</code> was specified, and the
-                    <code>locationId</code> on calls such as <code>startElement()</code> and
-                    <code>characters()</code> can be used to identify the location in the stylesheet
-                where the message data originated (this is achieved by passing the supplied
-                    <code>locationId</code> in a call to
-                    <code>getPipelineConfiguration().getLocator().getSystemId(locationId)</code>, or
-                to <code>getLineNumber()</code> on the same object). </p>
-            <p>Select the class <code>net.sf.saxon.event.MessageWarner</code> to have
-                    <code>xsl:message</code> output notified to the JAXP <code>ErrorListener</code>,
-                as described in the JAXP documentation.</p>-->
         </desc>
     </feature>
     <feature>
