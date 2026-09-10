@@ -6,21 +6,16 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 package net.sf.saxon.option.cpp;
 
-import com.oracle.svm.core.jni.headers.JNIFunctionPointerTypes;
 import com.saxonica.functions.extfn.cpp.NativeCall;
-import net.sf.saxon.*;
-
+import net.sf.saxon.Configuration;
+import net.sf.saxon.Gizmo;
+import net.sf.saxon.Query;
+import net.sf.saxon.Transform;
 import net.sf.saxon.expr.parser.XPathParser;
-import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.ResourceRequest;
-import net.sf.saxon.lib.Validation;
-
 import net.sf.saxon.lib.*;
-
 import net.sf.saxon.om.*;
-import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.SequenceType;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.XPathException;
@@ -47,13 +42,14 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 
 /**

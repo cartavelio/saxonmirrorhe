@@ -515,7 +515,7 @@ public class JsonParser {
      * @return the representation (for example 255 becomes 00FF)
      */
     public static String toPaddedHex(int i) {
-        return String.format("0x%04X", i);
+        return String.format("%04X", i);
     }
 
     /**

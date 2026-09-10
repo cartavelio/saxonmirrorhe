@@ -10,6 +10,7 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.ma.json.JsonParser;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.Instrumentation;
@@ -74,45 +75,62 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
             } else if (keys.size() == 1) {
                 return new SingleEntryMap(new StringValue(keys.get(0)),values.get(0));
             }
-            // look for duplicates
-            BitSet bloom = new BitSet(1000);
-            boolean reverseOrder = (flags & JsonParser.DUPLICATES_LAST) != 0;
+            // quick scan for possible duplicates using a bloom filter
+            boolean possibleDuplicates = false;
+            int filterSize = keys.size() < 50 ? 1024 : 65536;
+            int mask = filterSize - 1;
+            BitSet bloom = new BitSet(filterSize);
+            for (UnicodeString key : keys) {
+                long hash = StringTool.longHashCode(key);
+                int hash0 = (int)(hash >> 40 & mask);
+                int hash1 = (int)(hash >> 20 & mask);
+                int hash2 = (int)hash & mask;
+                if (bloom.get(hash0) && bloom.get(hash1) && bloom.get(hash2)) {
+                    Instrumentation.count("Bloom clash");
+                    possibleDuplicates = true;
+                    break;
+                }
+                bloom.set(hash0);
+                bloom.set(hash1);
+                bloom.set(hash2);
+            }
+            if (possibleDuplicates) {
+                // look for duplicates more thoroughly
+                boolean reverseOrder = (flags & JsonParser.DUPLICATES_LAST) != 0;
 
-            for (UnicodeString key : (reverseOrder ? new ReverseListIterable<>(keys) : keys)) {
-                boolean duplicate = false;
-                if (keySet == null) {
-                    int hash = key.hashCode();
-                    int hash0 = hash >> 20 & 0x7ff;
-                    int hash1 = hash >> 10 & 0x7ff;
-                    int hash2 = hash & 0x7ff;
-                    if (bloom.get(hash0) && bloom.get(hash1) && bloom.get(hash2)) {
-                        // This is a possible duplicate
-                        Instrumentation.count("Bloom clash");
-                        if (keySet == null) {
-                            keySet = new HashSet<>(keys);
+                List<UnicodeString> retainedKeys = new ArrayList<>(keys.size());
+                List<GroundedValue> retainedValues = new ArrayList<>(keys.size());
+
+                Iterator<UnicodeString> keyIter =
+                        (reverseOrder ? new ReverseListIterable<>(keys) : keys).iterator();
+                Iterator<GroundedValue> valueIter =
+                        (reverseOrder ? new ReverseListIterable<>(values) : values).iterator();
+                keySet = new HashSet<>();
+                while (keyIter.hasNext() && valueIter.hasNext()) {
+                    UnicodeString key = keyIter.next();
+                    GroundedValue value = valueIter.next();
+                    boolean duplicate = !keySet.add(key);
+                    if (duplicate) {
+                        // Duplicate key found
+                        Instrumentation.count("Duplicate key");
+                        if ((flags & JsonParser.DUPLICATES_REJECTED) != 0) {
+                            Instrumentation.count("Duplicate rejected");
+                            throw new XPathException("Duplicate key value '" + key + "' in JSON object", "FOJS0003");
+                        } else {
+                            // ignore this entry
+                            Instrumentation.count("Duplicate ignored");
+                            break;
                         }
-                        if (keySet.contains(key)) {
-                            duplicate = true;
-                        }
-                    }
-                    bloom.set(hash0);
-                    bloom.set(hash1);
-                    bloom.set(hash2);
-                } else {
-                    duplicate = !keySet.add(key);
-                }
-                if (duplicate) {
-                    // Duplicate key found
-                    Instrumentation.count("Duplicate key");
-                    if ((flags & JsonParser.DUPLICATES_REJECTED) != 0) {
-                        Instrumentation.count("Duplicate rejected");
-                        throw new XPathException("Duplicate key value '" + key + "' in JSON object", "FOJS0003");
                     } else {
-                        // ignore this entry
-                        Instrumentation.count("Duplicate ignored");
-                        break;
+                        retainedKeys.add(key);
+                        retainedValues.add(value);
                     }
                 }
+                if (reverseOrder) {
+                    Collections.reverse(retainedKeys);
+                    Collections.reverse(retainedValues);
+                }
+                return new LazyStringMap(retainedKeys, retainedValues);
             }
             return new LazyStringMap(keys, values);
         }

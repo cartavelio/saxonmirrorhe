@@ -398,5 +398,20 @@ public class StringTool {
             dest[j++] = (byte) (c & 0xff);
         }
     }
+
+    /**
+     * Get a long hash code for a string
+     * @return a hash code as a long. This is unrelated to the result of the normal int hashCode() method
+     */
+
+    public static long longHashCode(UnicodeString string) {
+        long h = 0;
+        IntIterator iter = string.codePoints();
+        while (iter.hasNext()) {
+            int cp = iter.next();
+            h = 31L * h + cp;
+        }
+        return h;
+    }
 }
 
