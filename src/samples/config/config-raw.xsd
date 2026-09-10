@@ -70,7 +70,6 @@
       <xs:attribute name="environmentVariableResolver" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="errorListener" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="expandAttributeDefaults" use="optional" type="xs:boolean"/>
-      <xs:attribute name="commonResourceResolver" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="generateByteCode" use="optional" type="xs:boolean"/>
       <xs:attribute name="ignoreSAXSourceParser" use="optional" type="xs:boolean"/>
       <xs:attribute name="lazyConstructionMode" use="optional" type="xs:boolean"/>
@@ -83,6 +82,7 @@
       <xs:attribute name="preEvaluateDoc" use="optional" type="xs:boolean"/>
       <xs:attribute name="recognizeUriQueryParameters" use="optional" type="xs:boolean"/>
       <xs:attribute name="regexBacktrackingLimit" use="optional" type="xs:integer"/>
+      <xs:attribute name="resourceResolver" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="retainNodeForDiagnostics" use="optional" type="xs:boolean"/>
       <xs:attribute name="schemaValidation" use="optional" type="c:schemaValidationType"/>
       <xs:attribute name="serializerFactory" use="optional" type="c:javaClassNameType"/>

@@ -1195,6 +1195,12 @@
                 will reload the document from disk.</p>
             <p>In XSLT 3.0 a better way of having external documents pre-loaded at stylesheet
                 compile time is to use the new facility of static global variables.</p>
+            <p>This feature should not be enabled when stylesheets are exported to a SEF file,
+               since embedded source documents within a SEF file cannot always be accurately
+               reconstructed.</p>
+            <p>When URIs are pre-evaluated, neither the <code>ResourceResolver</code> associated
+                with the relevant <code>Compiler</code>, nor the relevant run-time <code>ResourceResolver</code>
+                are used to resolve the URI. Only the Configuration-level <code>ResourceResolver</code> is used.</p>
         </desc>
     </feature>
     <!-- 52 was PREFER_JAXP_PARSER -->
@@ -1207,20 +1213,17 @@
         <platforms>J CS</platforms>
         <configfile>global/@recognizeUriQueryParameters</configfile>
         <configfiledesc>
-            <p>If true, and the standard <code>URIResolver</code> is in use, query parameters such
+            <p>If true, query parameters such
                 as <code>validation=strict</code> will be recognized on URIs supplied to the <a
                     class="bodylink code" href="/functions/fn/doc">doc()</a> or <a
                     class="bodylink code" href="/functions/fn/document">document()</a>
                 functions.</p>
         </configfiledesc>
         <desc>
-            <p>True if the standard URI resolver is to recognize query parameters included in the
-                URI (for example, <code>?validation=strict</code>). Such parameters can then be used
-                in URIs passed to the <code>doc()</code> or <code>document()</code> functions. The
+            <p>True if the <code>doc()</code> or <code>document()</code> are to recognize query parameters included in the
+                URI (for example, <code>?validation=strict</code>). The
                 default is false.</p>
-            <p>This option has no effect if a user-supplied <code>URIResolver</code> is in use,
-                unless the user-supplied <code>URIResolver</code> chooses to inherit this
-                functionality from the standard <code>URIResolver</code>.</p>
+ 
             <p>The allowed parameters are: <code>validation=strict|lax|strip</code> to perform schema
                 validation (see <a class="bodylink" href="/sourcedocs/validation">Validation of
                     Source Documents</a>); <code>strip-space=yes|ignorable|no</code> to control whitespace
@@ -2985,9 +2988,12 @@
         <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setResourceResolver</setter>
         <getter class="net.sf.saxon.Configuration">getResourceResolver</getter>
-        <configfile>global/@commonResourceResolver</configfile>
+        <configfile>global/@resourceResolver</configfile>
         <configfiledesc>
-            <p>User-supplied class used to perform URI resolution.</p>
+            <p>User-supplied class used to perform URI resolution. This resolver
+            is used at Configuration level, and may be supplemented by local
+            resolvers defined at task level, for example on an <code>XsltCompiler</code>,
+            <code>XQueryCompiler</code>, <code>XsltTransformer</code>, or <code>XQueryEvaluator</code>.</p>
         </configfiledesc>
         <desc>
             <p>The supplied class is instantiated and the resulting instance is used as the value of
