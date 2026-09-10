@@ -21,7 +21,9 @@ import net.sf.saxon.value.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.zip.CRC32;
 
 /**
  * This class implements the function fn:sort-with#2, introduced in XPath 4.0
@@ -67,10 +69,27 @@ public class HashFn extends SystemFunction {
             Map<String, GroundedValue> checkedOptions =
                     getDetails().optionDetails.processSuppliedOptions(options, context);
             String algorithm = checkedOptions.get("algorithm").getStringValue().trim().toUpperCase();
+            if (algorithm.equals("CRC-32")) {
+                CRC32 hasher = new CRC32();
+                hasher.update(binaryInput);
+                long hash = hasher.getValue();
+                return new HexBinaryValue(Arrays.copyOfRange(longToBytes(hash), 4, 8));
+            }
             byte[] hash = MessageDigest.getInstance(algorithm).digest(binaryInput);
             return new HexBinaryValue(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new XPathException(e.getMessage(), "FOHA0001");
         }
     }
+
+    public static byte[] longToBytes(long l) {
+        // https://stackoverflow.com/a/29132118/415448
+        byte[] result = new byte[Long.BYTES];
+        for (int i = Long.BYTES - 1; i >= 0; i--) {
+            result[i] = (byte) (l & 0xFF);
+            l >>= Byte.SIZE;
+        }
+        return result;
+    }
+
 }
