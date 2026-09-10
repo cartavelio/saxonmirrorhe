@@ -12,6 +12,7 @@ import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.*;
+import org.graalvm.nativeimage.ObjectHandle;
 
 import javax.xml.transform.Source;
 import java.net.URI;
@@ -168,11 +169,11 @@ public class XPathProcessor extends SaxonCAPI {
         this.contextItem = item;
     }
 
-    public void setProperties(String[] params, Object[] values) throws SaxonApiException {
+    public void setProperties(ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         if (selector != null) {
             try {
                 Map<QName, XdmValue> parameters = new HashMap<>();
-                Map<String, Object> map = setupConfigurationAndBuildMap(params, values, null, parameters, null, null, null, false);
+                Map<String, Object> map = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
                 applyXPathProperties(this, "", processor, selector, map, parameters);
             } catch (SaxonApiException e) {
                 throw e;
@@ -200,7 +201,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
-    public XdmValue[] evaluate(String cwd, String xpathStr, String[] params, Object[] values) throws SaxonApiException {
+    public XdmValue[] evaluate(String cwd, String xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         if (SaxonCAPI.debug) {
             if (xpathStr != null) {
@@ -208,7 +209,7 @@ public class XPathProcessor extends SaxonCAPI {
             }
         }
         Map<QName, XdmValue> parameters = new HashMap<>();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(params, values, null, parameters, null, null, null, false);
+        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
         setupXPathCompiler(optionsMap);
         compiler.setSchemaAware(schemaAware);
 
@@ -278,14 +279,14 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
-    public XdmItem evaluateSingle(String cwd, String xpathStr, String[] params, Object[] values) throws SaxonApiException {
+    public XdmItem evaluateSingle(String cwd, String xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         if (debug) {
             if (xpathStr != null) {
                 System.err.println("xpathString: " + xpathStr);
             }
         }
         Map<QName, XdmValue> parameters = new HashMap<>();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(params, values, null, parameters, null, null, null, false);
+        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
         setupXPathCompiler(optionsMap);
         selector = compiler.compile(xpathStr).load();
         applyXPathProperties(this, cwd, processor, selector, optionsMap, parameters);
@@ -305,10 +306,10 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
-    public boolean effectiveBooleanValue(String cwd, String xpathStr, String[] params, Object[] values) throws SaxonApiException {
+    public boolean effectiveBooleanValue(String cwd, String xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Map<QName, XdmValue> parameters = new HashMap<>();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(params, values, null, parameters, null, null, null, false);
+        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
         setupXPathCompiler(optionsMap);
         selector = compiler.compile(xpathStr).load();
 
