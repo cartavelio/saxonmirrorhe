@@ -260,7 +260,7 @@ task rejar_Xerces(
       commandLine "${excelsiorJetHome}/bin/xpack",
         "-backend", "excelsior-installer",
         "-source", "${buildDir}/c/${release}c",
-        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C.exe",
+        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}.exe",
         "-company", "Saxonica",
         "-product", "SaxonC ${RELEASE}",
         "-version", saxonVersion
@@ -297,7 +297,7 @@ task rejar_Xerces(
     ) {
       commandLine "${excelsiorJetHome}/bin/xpack",
         "-source", "${buildDir}/c/${release}c",
-        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C"
+        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}"
     }
 
     task "${release}cRelease"(
@@ -305,7 +305,7 @@ task rejar_Xerces(
       dependsOn: ["${release}c_releaseSetup"],
       description: "Make the ${RELEASE} release ZIP file for SaxonC"
     ) {
-      from("${buildDir}/releases/libsaxon-${RELEASE}C")
+      from("${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}")
       archiveFileName = "libsaxon-${RELEASE}C-mac-setup-v${saxonVersion}.zip"
     }
   } else if (systemOs.isLinux()) {
@@ -340,7 +340,7 @@ task rejar_Xerces(
     ) {
       commandLine "${excelsiorJetHome}/bin/xpack",
         "-source", "${buildDir}/c/${release}c",
-        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C"
+        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}"
     }
 
     task "${release}cRelease"(
@@ -348,7 +348,7 @@ task rejar_Xerces(
       dependsOn: ["${release}c_releaseSetup"],
       description: "Make the ${RELEASE} release ZIP file for SaxonC"
     ) {
-      from ("${buildDir}/releases/libsaxon-${RELEASE}C") {
+      from ("${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}") {
         include "**/*"
       }
       archiveFileName = "libsaxon-${RELEASE}C-setup64-v${saxonVersion}.zip"
