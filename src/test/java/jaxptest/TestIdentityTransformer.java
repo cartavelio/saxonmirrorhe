@@ -21,6 +21,7 @@ import java.io.*;
 import java.lang.management.ManagementFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -135,6 +136,18 @@ public class TestIdentityTransformer {
             fail(e.getMessage());
         } catch (TransformerException e) {
             fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDefaultErrorListener() {
+        try {
+            System.setProperty("javax.xml.transform.TransformerFactory",
+                               "net.sf.saxon.TransformerFactoryImpl");
+            Transformer transformer = makeFactory().newTransformer();
+            assertNotNull(transformer.getErrorListener());
+        } catch (TransformerConfigurationException e) {
+            fail();
         }
     }
 
