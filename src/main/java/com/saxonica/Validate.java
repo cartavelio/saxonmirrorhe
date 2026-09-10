@@ -3,10 +3,7 @@ package com.saxonica;
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.InvalidityReportGenerator;
-import net.sf.saxon.lib.ResourceRequest;
-import net.sf.saxon.lib.StandardInvalidityHandler;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.CommandLineOptions;
@@ -244,7 +241,11 @@ public class Validate {
 
             value = options.getOptionValue("s");
             if (value != null) {
-                StringTokenizer tokenizer = new StringTokenizer(value, File.pathSeparator);
+                String delim = File.pathSeparator;
+                if (useURLs || CommandLineOptions.isImplicitURI(value)) {
+                    delim = " \t\n\r\f";
+                }
+                StringTokenizer tokenizer = new StringTokenizer(value, delim);
                 while (tokenizer.hasMoreTokens()) {
                     sourceFileNames.add(tokenizer.nextToken());
                 }
@@ -314,7 +315,7 @@ public class Validate {
                     request.uri = cwd.resolve(schemaFileName).toString();
                     request.nature = ResourceRequest.XSD_NATURE;
                     request.purpose = "schema validation";
-                    schemaSource = request.resolve(config.getResourceResolver());
+                    schemaSource = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
                 } else if (schemaFileName.equals("-")) {
                     // take input from stdin
                     //#if CSHARP==false
@@ -602,7 +603,7 @@ public class Validate {
             request.uri = cwd.resolve(sourceFileName).toString();
             request.nature = ResourceRequest.XML_NATURE;
             request.purpose = "source document";
-            sourceInput = request.resolve(config.getResourceResolver());
+            sourceInput = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
         } else if (sourceFileName.equals("-")) {
             //#if CSHARP==false
             // take input from stdin
