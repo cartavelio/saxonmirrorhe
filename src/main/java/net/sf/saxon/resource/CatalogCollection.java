@@ -37,13 +37,38 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A resource collection implemented by means of a catalog file.
+ *
+ * <p>An example catalog file would be:</p>
+ *
+ * <pre>
+ * {@code
+ * <collection stable="true">
+ *    <doc href="dir/contents.json"/>
+ *    <doc href="dir/chap1.xml"/>
+ *    <doc href="dir/chap2.xml"/>
+ *    <doc href="dir/chap3.xml"/>
+ *    <doc href="dir/chap4.xml"/>
+ *    <doc href="dir/index.json"/>
+ * </collection>
+ * }
+ * </pre>
+ */
 
 public class CatalogCollection extends AbstractResourceCollection {
 
     private boolean stable;
     private SpaceStrippingRule whitespaceRules;
 
-    //TODO we might know the catalog File already
+    /**
+     * Create a catalog collection
+     *
+     * @param config        the Saxon Configuration
+     * @param collectionURI the collection URI, which represents the location
+     *                      of the catalog file
+     */
+
     public CatalogCollection(Configuration config, String collectionURI) {
         super(config);
         this.collectionURI = collectionURI;
