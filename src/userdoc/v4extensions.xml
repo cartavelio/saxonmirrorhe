@@ -721,6 +721,17 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>Produces a sequence containing <code>$count</code> copies of <code>$input</code>.</p>
       
+      <kbd>fn:slice (
+         $input as item()*,	
+         $start as xs:integer? := (),
+         $end   as xs:integer? := (),
+         $step  as xs:integer? := (),
+         ) as item()*</kbd>
+      
+      <p>Selects items from a sequence. <code>$start</code> and <code>$end</code> can be positive integers for 1-based
+      positions counting from the start of the sequence, or negative integers to count from the end; <code>$step</code>
+      can be a positive integer to select every Nth item, or a negative integer to count backwards.</p>
+      
       <kbd>fn:some(
          $input	as item()*,	
          $predicate	as function(item()) as xs:boolean	:= fn:identity#1

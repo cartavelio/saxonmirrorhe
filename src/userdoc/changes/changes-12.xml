@@ -374,6 +374,8 @@
             a map from a set of key-value pairs.</p></li>
             <li><p>The <code>fn:remove</code> function allows several items to be removed from a sequence
             at the same time.</p></li>
+            <li><p>The <code>fn:slice</code> function is implemented; it allows selection of part of a sequence
+            with capability for numbering from the end, counting backwards, selecting every Nth item, etc.</p></li>
             
         </ul>
 
