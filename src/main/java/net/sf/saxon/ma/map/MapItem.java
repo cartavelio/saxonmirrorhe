@@ -557,17 +557,35 @@ public abstract class MapItem implements FunctionItem {
     public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
-            for (KeyValuePair kvp : keyValuePairs()) {
-                GroundedValue otherValue = ((MapItem) other).get(kvp.key);
-                if (otherValue == null) {
-                    return false;
+            if (options.mapOrderSignificant) {
+                Iterator<KeyValuePair> it1 = keyValuePairs().iterator();
+                Iterator<KeyValuePair> it2 = ((MapItem)other).keyValuePairs().iterator();
+                while (it1.hasNext() && it2.hasNext()) {
+                    KeyValuePair kvp1 = it1.next();
+                    KeyValuePair kvp2 = it2.next();
+                    if (!kvp1.key.asMapKey().equals(kvp2.key.asMapKey())) {
+                        return false;
+                    }
+                    if (!DeepEqual.deepEqual(kvp1.value.iterate(),
+                                             kvp2.value.iterate(),
+                                             context, options)) {
+                        return false;
+                    }
                 }
-                if (!DeepEqual.deepEqual(otherValue.iterate(),
-                                         kvp.value.iterate(), context, options)) {
-                    return false;
+                return true;
+            } else {
+                for (KeyValuePair kvp : keyValuePairs()) {
+                    GroundedValue otherValue = ((MapItem) other).get(kvp.key);
+                    if (otherValue == null) {
+                        return false;
+                    }
+                    if (!DeepEqual.deepEqual(otherValue.iterate(),
+                                             kvp.value.iterate(), context, options)) {
+                        return false;
+                    }
                 }
+                return true;
             }
-            return true;
         }
         return false;
     }

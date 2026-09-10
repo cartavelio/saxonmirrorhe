@@ -87,6 +87,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         o.addAllowedOption("idrefs-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("in-scope-namespaces", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("items-equal", itemsEqualFn, BooleanValue.FALSE);
+        o.addAllowedOption("map-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("namespace-prefixes", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("nilled-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         //o.addAllowedOption("normalize-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -132,6 +133,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         public boolean idSignificant = false;
         public boolean idrefSignificant = false;
         public boolean inScopeNamespacesSignificant = false;
+        public boolean mapOrderSignificant = false;
         public boolean namespacePrefixesSignificant = false;
         public String normalizationForm = null;
         public boolean nilledSignificant = false;
@@ -153,7 +155,8 @@ public class DeepEqual extends CollatingFunctionFixed {
 
         private static final String[] booleanOptions = new String[]{
                 "base-uri", "comments", "debug", "id-property", "idrefs-property",
-                "in-scope-namespaces", "namespace-prefixes", "nilled-property", "normalize-space",
+                "in-scope-namespaces", "map-order",
+                "namespace-prefixes", "nilled-property", "normalize-space",
                 "ordered", "processing-instructions", "text-boundaries", "timezones",
                 "type-annotations", "type-variety", "typed-values"};
 
@@ -255,6 +258,9 @@ public class DeepEqual extends CollatingFunctionFixed {
                         return;
                     case "in-scope-namespaces":
                         inScopeNamespacesSignificant = booleanValue;
+                        return;
+                    case "map-order":
+                        mapOrderSignificant = booleanValue;
                         return;
                     case "namespace-prefixes":
                         namespacePrefixesSignificant = booleanValue;
