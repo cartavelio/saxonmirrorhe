@@ -62,6 +62,20 @@ namespace SaxonCS_NUnit {
         }
         
         [Test]
+        public void TestOutermostElement() {
+            Processor proc = new();
+            DocumentBuilder builder = proc.NewDocumentBuilder();
+            XdmNode doc = builder.Build(new StringReader("<in xmlns='http://ns.com/' foo='bar'><baz/></in>"));
+            Assert.AreEqual("in", doc.OutermostElement.NodeName.LocalName);
+            XdmNode el1 = doc.OutermostElement;
+            Assert.AreEqual("in", el1.OutermostElement.NodeName.LocalName);
+            XdmNode baz = el1.Select(Steps.Child("baz")).First();
+            Assert.AreEqual("in", baz.OutermostElement.NodeName.LocalName);
+            XdmNode foo = el1.Select(Steps.Attribute("foo")).First();
+            Assert.AreEqual("in", foo.OutermostElement.NodeName.LocalName);
+        }
+        
+        [Test]
         public void TestChildrenRepeatable() {
             // Children() returns an Enumerable so we need to be able to process it more than once...
             Processor proc = new();
