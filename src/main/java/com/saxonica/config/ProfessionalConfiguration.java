@@ -228,10 +228,10 @@ public class ProfessionalConfiguration extends Configuration {
 
     public void setConfigurationProperty(String name, Object value) {
         if (name.equals("http://saxonica.com/oem-data")) {
-            supplyLicenseKey(new BufferedReader(new StringReader((String) value)));
+            supplyLicenseKey(new BufferedReader(new StringReader(requireString(name, value))));
         } else if (name.equals(Feature.LICENSE_FILE_LOCATION.name)) {
             synchronized(verifier) {
-                verifier.loadLicense((String) value);
+                verifier.loadLicense(requireString(name, value));
                 licenseFound = true;
                 licenseNotFound = false;
                 setLicensedFeatures();
