@@ -243,8 +243,8 @@ need to mix use of the .NET API with the internal classes converted from the ori
          </tbody>
       </table>
    </section>
-   <section id="xmlparsing" title="XML Parsing in SaxonCS" class="csonly">
-      <h1>XML Parsing in SaxonCS</h1>
+   <section id="xmlparsing" title="XML parsing in SaxonCS" class="csonly">
+      <h1>XML parsing in SaxonCS</h1>
       
 
       <p>XML parsing in SaxonCS is delegated to
@@ -322,16 +322,16 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <p>Normal HTML elements (such as <code>&lt;p&gt;</code>, <code>&lt;div&gt;</code>, etc) are delivered
       as element nodes whose local name is in lower-case, with the XHTML namespace URI.</p>
    </section>
-   <section id="saxon-cs-extension-functions" title="Writing Extension Functions" class="csonly">
-      <h1>Writing Extension Functions</h1>
+   <section id="saxon-cs-extension-functions" title="Writing extension functions" class="csonly">
+      <h1>Writing extension functions</h1>
       <p>Reflexive extension functions are not available in SaxonCS.</p>
       <p>There are two interfaces that allow extension functions to be written: a simple interface where the function
       is written as a lambda expression, and a richer interface that gives access to the static and dynamic processing
       context of the function call. Both interfaces are described at 
          <a class="bodylink" href="/extensibility/extension-functions-CS">Extension Functions (C#)</a>.</p>
    </section>
-   <section id="saxon-extensions" title="Built-in Extensions" class="csonly">
-      <h1>Built-in Extensions</h1>
+   <section id="saxon-extensions" title="Built-in extensions" class="csonly">
+      <h1>Built-in extensions</h1>
       <p>Nearly all the <a class="bodylink" href="/extensions/functions">extension functions</a> provided in the Java product in the <code>saxon</code> namespace are available.
          The exceptions are:</p>
       <ul>

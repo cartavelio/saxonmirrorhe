@@ -847,8 +847,8 @@
    </section>
 
    
-   <section id="xpath31" title="XPath 3.1 Conformance">
-      <h1>XPath 3.1 Conformance</h1>
+   <section id="xpath31" title="XPath 3.1 conformance">
+      <h1>XPath 3.1 conformance</h1>
 
       <p>Saxon implements the final XPath 3.1 Recommendation in its entirety.</p>
       
@@ -1012,8 +1012,8 @@
    </section>
 
   
-   <section id="xquery31" title="XQuery 3.1 Conformance">
-      <h1>XQuery 3.1 Conformance</h1>
+   <section id="xquery31" title="XQuery 3.1 conformance">
+      <h1>XQuery 3.1 conformance</h1>
 
 
       <p>Saxon fully implements the final XQuery 3.1 <a
@@ -1450,8 +1450,8 @@
    </section>
 
  
-   <section id="schema" title="XML Schema 1.0 Conformance">
-      <h1>XML Schema 1.0 Conformance</h1>
+   <section id="schema" title="XML Schema 1.0 conformance">
+      <h1>XML Schema 1.0 conformance</h1>
 
 
       <p>Saxon Enterprise Edition (Saxon-EE) includes a complete implementation of XML Schema
@@ -1510,8 +1510,8 @@
 
       </ul>
    </section>
-   <section id="schema11" title="XML Schema 1.1 Conformance">
-      <h1>XML Schema 1.1 Conformance</h1>
+   <section id="schema11" title="XML Schema 1.1 conformance">
+      <h1>XML Schema 1.1 conformance</h1>
 
 
       <p>Saxon Enterprise Edition (Saxon-EE) includes a complete implementation of the XSD 1.1
@@ -1996,8 +1996,8 @@
             nodes.</i></p>
       </div>
    </section>
-   <section id="encodings" title="Character Encodings Supported">
-      <h1>Character Encodings Supported</h1>
+   <section id="encodings" title="Character encodings supported">
+      <h1>Character encodings supported</h1>
 
 
       <p>The encodings supported on input depend entirely on your choice of XML parser.</p>
@@ -2009,8 +2009,8 @@
          command <code>java net.sf.saxon.charcode.CharacterSetFactory</code>, with no
          parameters.</p>
    </section>
-   <section id="jaxp" title="JAXP Conformance" class="javaonly">
-      <h1>JAXP Conformance</h1>
+   <section id="jaxp" title="JAXP conformance" class="javaonly">
+      <h1>JAXP conformance</h1>
 
 
       <p>Saxon on the Java platform implements the JAXP 1.3 API, and selected features of later
@@ -2106,8 +2106,8 @@
          internal tree model than when using the DOM (sometimes by a factor of ten). Therefore
          Saxon's <b>s9api</b> interface is recommended in preferance to JAXP.</aside>
    </section>
-   <section id="xqj" title="XQJ Conformance" class="javaonly">
-      <h1>XQJ Conformance</h1>
+   <section id="xqj" title="XQJ conformance" class="javaonly">
+      <h1>XQJ conformance</h1>
 
 
       <p>Saxon implements XQJ, the XQuery API for Java defined in <a
