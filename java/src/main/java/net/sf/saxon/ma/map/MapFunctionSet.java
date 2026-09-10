@@ -226,11 +226,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             register("untyped-contains", 2, e -> e.populate(MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
-
-            // TODO: drop this, renamed map:items
-            register("values", 1, e -> e.populate(MapItems::new, AnyItemType.INSTANCE, STAR, 0)
-                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
-
+            
             SpecificFunctionType FILTER_TYPE = new SpecificFunctionType(
                     SequenceType.SINGLE_ATOMIC,
                     SequenceType.ANY_SEQUENCE,
