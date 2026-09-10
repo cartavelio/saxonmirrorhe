@@ -66,9 +66,9 @@ public class EnumerationFacetSet extends Facet {
      */
 
     public void addEnumerationValue(AtomicSequence val, String stringValue) {
-        if (val instanceof StringItem) {
-            val = new StringItem(val.getUnicodeStringValue().economize());
-        }
+//        if (val instanceof StringItem) {
+//            val = new StringItem(val.getUnicodeStringValue().economize());
+//        }
         typedValues.put(val, val);
         stringValues.add(stringValue);
 
