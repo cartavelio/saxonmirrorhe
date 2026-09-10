@@ -129,6 +129,26 @@ void testUserExtensionFunction(SaxonProcessor *processor, XPathProcessor *xpath,
   delete input;
 }
 
+
+void testNullSetBaseURI(SaxonProcessor *processor, sResultCount *sresult) {
+
+  cout << endl << "Test testNullSetBaseURI:" << endl;
+
+
+  try {
+    XPathProcessor * xpathProc = processor->newXPathProcessor();
+
+    xpathProc->setBaseURI(NULL);
+    delete xpathProc;
+    sresult->success++;
+  } catch (SaxonApiException &e) {
+    cout << "Error Message = " << e.what() << endl;
+    sresult->failure++;
+    sresult->failureList.push_back("testNullSetBaseURI");
+  }
+
+
+}
 XdmNode *getRoot(XdmNode *document)
 {
   XdmNode *root = nullptr;
@@ -1226,6 +1246,14 @@ int main() {
        << "============================================================="
        << endl
        << endl;
+
+  testNullSetBaseURI(processor, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
   testIsLicensed(sresult);
   cout << endl
        << "============================================================="
