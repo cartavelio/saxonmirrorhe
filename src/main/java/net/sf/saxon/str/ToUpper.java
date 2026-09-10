@@ -14,7 +14,8 @@ import net.sf.saxon.z.IntRangeToIntMap;
 /**
  * Class to perform uppercase conversion.
  * <p>Note we could use the built-in Java function (the rules are compatible with the XPath rules), but
- * we would then need to convert the UnicodeString to a Java String.</p>
+ * we would then need to convert the UnicodeString to a Java String; and using our own implementation
+ * is the best approach on .NET.</p>
  */
 public class ToUpper {
 
