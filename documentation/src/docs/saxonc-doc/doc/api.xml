@@ -678,6 +678,18 @@
             </tr>
             <tr>
                <td>
+                  <a class="bodylink code" href="../saxon_c_php_schemavalidator"
+                  >Saxon\XsdCompiler</a>
+               </td>
+               <td>
+                  <span class="signature">newXsdCompiler()</span>
+                  <div class="fcomment">Create an <a class="bodylink code"
+                                                    href="../saxon_c_php_xsdcompiler">XsdCompiler</a>.
+                     This provides capabilities to load XML schema definitions.<br/></div>
+               </td>
+            </tr>
+            <tr>
+               <td>
                   <code>bool</code>
                </td>
                <td>
@@ -2370,7 +2382,7 @@
                                                                     href="../saxon_c_php_xdmnode">XdmNode</a> $node)</span>
                   <div class="fcomment">Register a schema document supplied as an <a
                           class="bodylink code" href="../saxon_c_php_xdmnode">XdmNode</a>, as
-                     specified by the $node argument.
+                     specified by the $node argument.<br/>
                      Deprecated: from 13.0. This method is still available for backward compatibility, but users
                      should now use the XsdCompiler available via SaxonProcessor.newXsdCompiler() to compile a XSD Schema.</div>
                </td>
@@ -2384,7 +2396,7 @@
                   <div class="fcomment">Register a schema file supplied as a file name as
                      specified by the $fileName argument. The document may be either a schema
                      document in source XSD format, or a compiled schema in Saxon-defined SCM
-                     format (as produced using the <code>exportSchema()</code> method).
+                     format (as produced using the <code>exportSchema()</code> method).<br/>
                      Deprecated: from 13.0. This method is still available for backward compatibility, but users
                      should now use the XsdCompiler available via SaxonProcessor.newXsdCompiler() to compile a XSD Schema.</div>
                </td>
@@ -2395,7 +2407,7 @@
                </td>
                <td>
                   <span class="signature">registerSchemaFromString(string $schemaStr)</span>
-                  <div class="fcomment">Register a schema supplied as a string.
+                  <div class="fcomment">Register a schema supplied as a string.<br/>
                      Deprecated: from 13.0. This method is still available for backward compatibility, but users
                      should now use the XsdCompiler available via SaxonProcessor.newXsdCompiler() to compile a XSD Schema.</div>
                </td>
