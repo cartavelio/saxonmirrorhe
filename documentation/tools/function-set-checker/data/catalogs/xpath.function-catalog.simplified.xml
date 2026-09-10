@@ -1,1868 +1,339 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="../../schemas/simplified_catalog.rnc" type="application/relax-ng-compact-syntax" ?>
 <catalog spec="xpath" version="4.0" maintained-by="QT4 CG">
-   <function prefix="fn"
-             local-name="uri-structure-record"
-             name="fn:uri-structure-record">
-      <signature>
-         <args total="14" required="0"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="element-conversion-plan-record"
-             name="fn:element-conversion-plan-record">
-      <signature>
-         <args total="3" required="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="attribute-conversion-plan-record"
-             name="fn:attribute-conversion-plan-record">
-      <signature>
-         <args total="1" required="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="schema-type-record"
-             name="fn:schema-type-record">
-      <signature>
-         <args total="9" required="3"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="load-xquery-module-record"
-             name="fn:load-xquery-module-record">
-      <signature>
-         <args total="2" required="2"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="dateTime-record" name="fn:dateTime-record">
-      <signature>
-         <args total="7" required="0"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="parsed-csv-structure-record"
-             name="fn:parsed-csv-structure-record">
-      <signature>
-         <args total="4" required="4"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="random-number-generator-record"
-             name="fn:random-number-generator-record">
-      <signature>
-         <args total="3" required="3"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="node-name" name="fn:node-name">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="type-of" name="fn:type-of">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="nilled" name="fn:nilled">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="string" name="fn:string">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="data" name="fn:data">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="base-uri" name="fn:base-uri">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="document-uri" name="fn:document-uri">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="error" name="fn:error">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="trace" name="fn:trace">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="message" name="fn:message">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op" local-name="numeric-add" name="op:numeric-add">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="numeric-subtract"
-             name="op:numeric-subtract">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="numeric-multiply"
-             name="op:numeric-multiply">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op" local-name="numeric-divide" name="op:numeric-divide">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="numeric-integer-divide"
-             name="op:numeric-integer-divide">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op" local-name="numeric-mod" name="op:numeric-mod">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="numeric-unary-plus"
-             name="op:numeric-unary-plus">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="numeric-unary-minus"
-             name="op:numeric-unary-minus">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="abs" name="fn:abs">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="ceiling" name="fn:ceiling">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="floor" name="fn:floor">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="round" name="fn:round">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="round-half-to-even"
-             name="fn:round-half-to-even">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="divide-decimals" name="fn:divide-decimals">
-      <signature>
-         <args total="3" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="format-integer" name="fn:format-integer">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="format-number" name="fn:format-number">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="parse-integer" name="fn:parse-integer">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="pi" name="math:pi">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="e" name="math:e">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="exp" name="math:exp">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="exp10" name="math:exp10">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="log" name="math:log">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="log10" name="math:log10">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="sqrt" name="math:sqrt">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="pow" name="math:pow">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="sin" name="math:sin">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="cos" name="math:cos">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="tan" name="math:tan">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="asin" name="math:asin">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="acos" name="math:acos">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="atan" name="math:atan">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="atan2" name="math:atan2">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="sinh" name="math:sinh">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="cosh" name="math:cosh">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="math" local-name="tanh" name="math:tanh">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="codepoints-to-string"
-             name="fn:codepoints-to-string">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="string-to-codepoints"
-             name="fn:string-to-codepoints">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="compare" name="fn:compare">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="codepoint-equal" name="fn:codepoint-equal">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="concat" name="fn:concat">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="string-join" name="fn:string-join">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="substring" name="fn:substring">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="string-length" name="fn:string-length">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="normalize-space" name="fn:normalize-space">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="normalize-unicode"
-             name="fn:normalize-unicode">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="upper-case" name="fn:upper-case">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="lower-case" name="fn:lower-case">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="translate" name="fn:translate">
-      <signature>
-         <args total="3" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="hash" name="fn:hash">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="encode-for-uri" name="fn:encode-for-uri">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="decode-from-uri" name="fn:decode-from-uri">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="iri-to-uri" name="fn:iri-to-uri">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="escape-html-uri" name="fn:escape-html-uri">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="contains" name="fn:contains">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="starts-with" name="fn:starts-with">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="ends-with" name="fn:ends-with">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="substring-before"
-             name="fn:substring-before">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="substring-after" name="fn:substring-after">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="matches" name="fn:matches">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="replace" name="fn:replace">
-      <signature>
-         <args total="4" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="tokenize" name="fn:tokenize">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="analyze-string" name="fn:analyze-string">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="contains-token" name="fn:contains-token">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="resolve-uri" name="fn:resolve-uri">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="true" name="fn:true">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="false" name="fn:false">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="boolean" name="fn:boolean">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="not" name="fn:not">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="seconds" name="fn:seconds">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="years-from-duration"
-             name="fn:years-from-duration">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="months-from-duration"
-             name="fn:months-from-duration">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="days-from-duration"
-             name="fn:days-from-duration">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="hours-from-duration"
-             name="fn:hours-from-duration">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="minutes-from-duration"
-             name="fn:minutes-from-duration">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="seconds-from-duration"
-             name="fn:seconds-from-duration">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="add-yearMonthDurations"
-             name="op:add-yearMonthDurations">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="subtract-yearMonthDurations"
-             name="op:subtract-yearMonthDurations">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="multiply-yearMonthDuration"
-             name="op:multiply-yearMonthDuration">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="divide-yearMonthDuration"
-             name="op:divide-yearMonthDuration">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="divide-yearMonthDuration-by-yearMonthDuration"
-             name="op:divide-yearMonthDuration-by-yearMonthDuration">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="add-dayTimeDurations"
-             name="op:add-dayTimeDurations">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="subtract-dayTimeDurations"
-             name="op:subtract-dayTimeDurations">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="multiply-dayTimeDuration"
-             name="op:multiply-dayTimeDuration">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="divide-dayTimeDuration"
-             name="op:divide-dayTimeDuration">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="divide-dayTimeDuration-by-dayTimeDuration"
-             name="op:divide-dayTimeDuration-by-dayTimeDuration">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="dateTime" name="fn:dateTime">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="unix-dateTime" name="fn:unix-dateTime">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="year-from-dateTime"
-             name="fn:year-from-dateTime">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="month-from-dateTime"
-             name="fn:month-from-dateTime">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="day-from-dateTime"
-             name="fn:day-from-dateTime">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="hours-from-dateTime"
-             name="fn:hours-from-dateTime">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="minutes-from-dateTime"
-             name="fn:minutes-from-dateTime">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="seconds-from-dateTime"
-             name="fn:seconds-from-dateTime">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="timezone-from-dateTime"
-             name="fn:timezone-from-dateTime">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="parts-of-dateTime"
-             name="fn:parts-of-dateTime">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="build-dateTime" name="fn:build-dateTime">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="year-from-date" name="fn:year-from-date">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="month-from-date" name="fn:month-from-date">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="day-from-date" name="fn:day-from-date">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="timezone-from-date"
-             name="fn:timezone-from-date">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="hours-from-time" name="fn:hours-from-time">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="minutes-from-time"
-             name="fn:minutes-from-time">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="seconds-from-time"
-             name="fn:seconds-from-time">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="timezone-from-time"
-             name="fn:timezone-from-time">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="adjust-dateTime-to-timezone"
-             name="fn:adjust-dateTime-to-timezone">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="adjust-date-to-timezone"
-             name="fn:adjust-date-to-timezone">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="adjust-time-to-timezone"
-             name="fn:adjust-time-to-timezone">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="civil-timezone" name="fn:civil-timezone">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="subtract-dateTimes"
-             name="op:subtract-dateTimes">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op" local-name="subtract-dates" name="op:subtract-dates">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op" local-name="subtract-times" name="op:subtract-times">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="add-yearMonthDuration-to-dateTime"
-             name="op:add-yearMonthDuration-to-dateTime">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="add-dayTimeDuration-to-dateTime"
-             name="op:add-dayTimeDuration-to-dateTime">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="subtract-yearMonthDuration-from-dateTime"
-             name="op:subtract-yearMonthDuration-from-dateTime">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="subtract-dayTimeDuration-from-dateTime"
-             name="op:subtract-dayTimeDuration-from-dateTime">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="add-yearMonthDuration-to-date"
-             name="op:add-yearMonthDuration-to-date">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="add-dayTimeDuration-to-date"
-             name="op:add-dayTimeDuration-to-date">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="subtract-yearMonthDuration-from-date"
-             name="op:subtract-yearMonthDuration-from-date">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="subtract-dayTimeDuration-from-date"
-             name="op:subtract-dayTimeDuration-from-date">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="add-dayTimeDuration-to-time"
-             name="op:add-dayTimeDuration-to-time">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="op"
-             local-name="subtract-dayTimeDuration-from-time"
-             name="op:subtract-dayTimeDuration-from-time">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="format-dateTime" name="fn:format-dateTime">
-      <signature>
-         <args total="5" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="format-date" name="fn:format-date">
-      <signature>
-         <args total="5" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="format-time" name="fn:format-time">
-      <signature>
-         <args total="5" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="parse-ietf-date" name="fn:parse-ietf-date">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="resolve-QName" name="fn:resolve-QName">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="QName" name="fn:QName">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="parse-QName" name="fn:parse-QName">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="expanded-QName" name="fn:expanded-QName">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="prefix-from-QName"
-             name="fn:prefix-from-QName">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="local-name-from-QName"
-             name="fn:local-name-from-QName">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="namespace-uri-from-QName"
-             name="fn:namespace-uri-from-QName">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="namespace-uri-for-prefix"
-             name="fn:namespace-uri-for-prefix">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="in-scope-namespaces"
-             name="fn:in-scope-namespaces">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="in-scope-prefixes"
-             name="fn:in-scope-prefixes">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="name" name="fn:name">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="local-name" name="fn:local-name">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="namespace-uri" name="fn:namespace-uri">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="number" name="fn:number">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="lang" name="fn:lang">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="path" name="fn:path">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="root" name="fn:root">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="has-children" name="fn:has-children">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="distinct-ordered-nodes"
-             name="fn:distinct-ordered-nodes">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="innermost" name="fn:innermost">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="outermost" name="fn:outermost">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="index-of" name="fn:index-of">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="empty" name="fn:empty">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="siblings" name="fn:siblings">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="exists" name="fn:exists">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="distinct-values" name="fn:distinct-values">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="duplicate-values"
-             name="fn:duplicate-values">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="identity" name="fn:identity">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="insert-before" name="fn:insert-before">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="remove" name="fn:remove">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="head" name="fn:head">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="tail" name="fn:tail">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="trunk" name="fn:trunk">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="replicate" name="fn:replicate">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="insert-separator"
-             name="fn:insert-separator">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="foot" name="fn:foot">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="reverse" name="fn:reverse">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="subsequence" name="fn:subsequence">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="subsequence-where"
-             name="fn:subsequence-where">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="items-at" name="fn:items-at">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="slice" name="fn:slice">
-      <signature>
-         <args total="4" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="starts-with-subsequence"
-             name="fn:starts-with-subsequence">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="ends-with-subsequence"
-             name="fn:ends-with-subsequence">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="contains-subsequence"
-             name="fn:contains-subsequence">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="unordered" name="fn:unordered">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="void" name="fn:void">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="zero-or-one" name="fn:zero-or-one">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="one-or-more" name="fn:one-or-more">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="exactly-one" name="fn:exactly-one">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="deep-equal" name="fn:deep-equal">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="count" name="fn:count">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="avg" name="fn:avg">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="max" name="fn:max">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="min" name="fn:min">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="sum" name="fn:sum">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="id" name="fn:id">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="element-with-id" name="fn:element-with-id">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="idref" name="fn:idref">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="doc" name="fn:doc">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="doc-available" name="fn:doc-available">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="collection" name="fn:collection">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="uri-collection" name="fn:uri-collection">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="unparsed-text" name="fn:unparsed-text">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="unparsed-text-lines"
-             name="fn:unparsed-text-lines">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="unparsed-text-available"
-             name="fn:unparsed-text-available">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="unparsed-binary" name="fn:unparsed-binary">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="environment-variable"
-             name="fn:environment-variable">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="available-environment-variables"
-             name="fn:available-environment-variables">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="system-properties"
-             name="fn:system-properties">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="generate-id" name="fn:generate-id">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="parse-xml" name="fn:parse-xml">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="parse-xml-fragment"
-             name="fn:parse-xml-fragment">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="xsd-validator" name="fn:xsd-validator">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="serialize" name="fn:serialize">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="parse-html" name="fn:parse-html">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="html-doc" name="fn:html-doc">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="position" name="fn:position">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="last" name="fn:last">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="current-dateTime"
-             name="fn:current-dateTime">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="current-date" name="fn:current-date">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="current-time" name="fn:current-time">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="implicit-timezone"
-             name="fn:implicit-timezone">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="default-collation"
-             name="fn:default-collation">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="default-language"
-             name="fn:default-language">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="static-base-uri" name="fn:static-base-uri">
-      <signature>
-         <args total="0" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="function-lookup" name="fn:function-lookup">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="function-name" name="fn:function-name">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="function-arity" name="fn:function-arity">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="function-identity"
-             name="fn:function-identity">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="function-annotations"
-             name="fn:function-annotations">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="for-each" name="fn:for-each">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="filter" name="fn:filter">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="fold-left" name="fn:fold-left">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="fold-right" name="fn:fold-right">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="while-do" name="fn:while-do">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="do-until" name="fn:do-until">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="for-each-pair" name="fn:for-each-pair">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="sort" name="fn:sort">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="sort-by" name="fn:sort-by">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="sort-with" name="fn:sort-with">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="transitive-closure"
-             name="fn:transitive-closure">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="apply" name="fn:apply">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="partial-apply" name="fn:partial-apply">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="op" name="fn:op">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="atomic-type-annotation"
-             name="fn:atomic-type-annotation">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="node-type-annotation"
-             name="fn:node-type-annotation">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="schema-type" name="fn:schema-type">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="atomic-equal" name="fn:atomic-equal">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="merge" name="map:merge">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="keys" name="map:keys">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="items" name="map:items">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="entries" name="map:entries">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="contains" name="map:contains">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="empty" name="map:empty">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="get" name="map:get">
-      <signature>
-         <args total="3" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="find" name="map:find">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="put" name="map:put">
-      <signature>
-         <args total="3" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="entry" name="map:entry">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="remove" name="map:remove">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="for-each" name="map:for-each">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="filter" name="map:filter">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="build" name="map:build">
-      <signature>
-         <args total="4" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="map" local-name="size" name="map:size">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="collation" name="fn:collation">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="collation-available"
-             name="fn:collation-available">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="collation-key" name="fn:collation-key">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="json-to-xml" name="fn:json-to-xml">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="xml-to-json" name="fn:xml-to-json">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="element-to-map-plan"
-             name="fn:element-to-map-plan">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="element-to-map" name="fn:element-to-map">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="parse-csv" name="fn:parse-csv">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="csv-doc" name="fn:csv-doc">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="csv-to-arrays" name="fn:csv-to-arrays">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="csv-to-xml" name="fn:csv-to-xml">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="parse-json" name="fn:parse-json">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="json-doc" name="fn:json-doc">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="size" name="array:size">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="empty" name="array:empty">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="get" name="array:get">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-      <signature>
-         <args total="3" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="put" name="array:put">
-      <signature>
-         <args total="3" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="append" name="array:append">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="join" name="array:join">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="subarray" name="array:subarray">
-      <signature>
-         <args total="3" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="index-of" name="array:index-of">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="index-where" name="array:index-where">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="slice" name="array:slice">
-      <signature>
-         <args total="4" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="remove" name="array:remove">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array"
-             local-name="insert-before"
-             name="array:insert-before">
-      <signature>
-         <args total="3" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="head" name="array:head">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="foot" name="array:foot">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="tail" name="array:tail">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="trunk" name="array:trunk">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="reverse" name="array:reverse">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="for-each" name="array:for-each">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="filter" name="array:filter">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="fold-left" name="array:fold-left">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="fold-right" name="array:fold-right">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array"
-             local-name="for-each-pair"
-             name="array:for-each-pair">
-      <signature>
-         <args total="3" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="build" name="array:build">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="members" name="array:members">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="split" name="array:split">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="of-members" name="array:of-members">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="sort" name="array:sort">
-      <signature>
-         <args total="3" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="sort-by" name="array:sort-by">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="sort-with" name="array:sort-with">
-      <signature>
-         <args total="2" required="2" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="flatten" name="array:flatten">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="array" local-name="items" name="array:items">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="load-xquery-module"
-             name="fn:load-xquery-module">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="transform" name="fn:transform">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn"
-             local-name="random-number-generator"
-             name="fn:random-number-generator">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="every" name="fn:every">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="char" name="fn:char">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="characters" name="fn:characters">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="graphemes" name="fn:graphemes">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="highest" name="fn:highest">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="index-where" name="fn:index-where">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="is-NaN" name="fn:is-NaN">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="take-while" name="fn:take-while">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="lowest" name="fn:lowest">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="some" name="fn:some">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="all-equal" name="fn:all-equal">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="all-different" name="fn:all-different">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="parse-uri" name="fn:parse-uri">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="build-uri" name="fn:build-uri">
-      <signature>
-         <args total="2" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="partition" name="fn:partition">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="scan-left" name="fn:scan-left">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="scan-right" name="fn:scan-right">
-      <signature>
-         <args total="3" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="invisible-xml" name="fn:invisible-xml">
-      <signature>
-         <args total="2" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="jtree" name="fn:jtree">
-      <signature>
-         <args total="1" required="1" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="jkey" name="fn:jkey">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="jposition" name="fn:jposition">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
-   <function prefix="fn" local-name="jvalue" name="fn:jvalue">
-      <signature>
-         <args total="1" required="0" default="1"/>
-      </signature>
-   </function>
+   <function name="fn:uri-structure-record"/>
+   <function name="fn:element-conversion-plan-record"/>
+   <function name="fn:attribute-conversion-plan-record"/>
+   <function name="fn:schema-type-record"/>
+   <function name="fn:load-xquery-module-record"/>
+   <function name="fn:dateTime-record"/>
+   <function name="fn:parsed-csv-structure-record"/>
+   <function name="fn:random-number-generator-record"/>
+   <function name="fn:node-name"/>
+   <function name="fn:type-of"/>
+   <function name="fn:nilled"/>
+   <function name="fn:string"/>
+   <function name="fn:data"/>
+   <function name="fn:base-uri"/>
+   <function name="fn:document-uri"/>
+   <function name="fn:error"/>
+   <function name="fn:trace"/>
+   <function name="fn:message"/>
+   <function name="op:numeric-add"/>
+   <function name="op:numeric-subtract"/>
+   <function name="op:numeric-multiply"/>
+   <function name="op:numeric-divide"/>
+   <function name="op:numeric-integer-divide"/>
+   <function name="op:numeric-mod"/>
+   <function name="op:numeric-unary-plus"/>
+   <function name="op:numeric-unary-minus"/>
+   <function name="fn:abs"/>
+   <function name="fn:ceiling"/>
+   <function name="fn:floor"/>
+   <function name="fn:round"/>
+   <function name="fn:round-half-to-even"/>
+   <function name="fn:divide-decimals"/>
+   <function name="fn:format-integer"/>
+   <function name="fn:format-number"/>
+   <function name="fn:parse-integer"/>
+   <function name="math:pi"/>
+   <function name="math:e"/>
+   <function name="math:exp"/>
+   <function name="math:exp10"/>
+   <function name="math:log"/>
+   <function name="math:log10"/>
+   <function name="math:sqrt"/>
+   <function name="math:pow"/>
+   <function name="math:sin"/>
+   <function name="math:cos"/>
+   <function name="math:tan"/>
+   <function name="math:asin"/>
+   <function name="math:acos"/>
+   <function name="math:atan"/>
+   <function name="math:atan2"/>
+   <function name="math:sinh"/>
+   <function name="math:cosh"/>
+   <function name="math:tanh"/>
+   <function name="fn:codepoints-to-string"/>
+   <function name="fn:string-to-codepoints"/>
+   <function name="fn:compare"/>
+   <function name="fn:codepoint-equal"/>
+   <function name="fn:concat"/>
+   <function name="fn:string-join"/>
+   <function name="fn:substring"/>
+   <function name="fn:string-length"/>
+   <function name="fn:normalize-space"/>
+   <function name="fn:normalize-unicode"/>
+   <function name="fn:upper-case"/>
+   <function name="fn:lower-case"/>
+   <function name="fn:translate"/>
+   <function name="fn:hash"/>
+   <function name="fn:encode-for-uri"/>
+   <function name="fn:decode-from-uri"/>
+   <function name="fn:iri-to-uri"/>
+   <function name="fn:escape-html-uri"/>
+   <function name="fn:contains"/>
+   <function name="fn:starts-with"/>
+   <function name="fn:ends-with"/>
+   <function name="fn:substring-before"/>
+   <function name="fn:substring-after"/>
+   <function name="fn:matches"/>
+   <function name="fn:replace"/>
+   <function name="fn:tokenize"/>
+   <function name="fn:analyze-string"/>
+   <function name="fn:contains-token"/>
+   <function name="fn:resolve-uri"/>
+   <function name="fn:true"/>
+   <function name="fn:false"/>
+   <function name="fn:boolean"/>
+   <function name="fn:not"/>
+   <function name="fn:seconds"/>
+   <function name="fn:years-from-duration"/>
+   <function name="fn:months-from-duration"/>
+   <function name="fn:days-from-duration"/>
+   <function name="fn:hours-from-duration"/>
+   <function name="fn:minutes-from-duration"/>
+   <function name="fn:seconds-from-duration"/>
+   <function name="op:add-yearMonthDurations"/>
+   <function name="op:subtract-yearMonthDurations"/>
+   <function name="op:multiply-yearMonthDuration"/>
+   <function name="op:divide-yearMonthDuration"/>
+   <function name="op:divide-yearMonthDuration-by-yearMonthDuration"/>
+   <function name="op:add-dayTimeDurations"/>
+   <function name="op:subtract-dayTimeDurations"/>
+   <function name="op:multiply-dayTimeDuration"/>
+   <function name="op:divide-dayTimeDuration"/>
+   <function name="op:divide-dayTimeDuration-by-dayTimeDuration"/>
+   <function name="fn:dateTime"/>
+   <function name="fn:unix-dateTime"/>
+   <function name="fn:year-from-dateTime"/>
+   <function name="fn:month-from-dateTime"/>
+   <function name="fn:day-from-dateTime"/>
+   <function name="fn:hours-from-dateTime"/>
+   <function name="fn:minutes-from-dateTime"/>
+   <function name="fn:seconds-from-dateTime"/>
+   <function name="fn:timezone-from-dateTime"/>
+   <function name="fn:parts-of-dateTime"/>
+   <function name="fn:build-dateTime"/>
+   <function name="fn:year-from-date"/>
+   <function name="fn:month-from-date"/>
+   <function name="fn:day-from-date"/>
+   <function name="fn:timezone-from-date"/>
+   <function name="fn:hours-from-time"/>
+   <function name="fn:minutes-from-time"/>
+   <function name="fn:seconds-from-time"/>
+   <function name="fn:timezone-from-time"/>
+   <function name="fn:adjust-dateTime-to-timezone"/>
+   <function name="fn:adjust-date-to-timezone"/>
+   <function name="fn:adjust-time-to-timezone"/>
+   <function name="fn:civil-timezone"/>
+   <function name="op:subtract-dateTimes"/>
+   <function name="op:subtract-dates"/>
+   <function name="op:subtract-times"/>
+   <function name="op:add-yearMonthDuration-to-dateTime"/>
+   <function name="op:add-dayTimeDuration-to-dateTime"/>
+   <function name="op:subtract-yearMonthDuration-from-dateTime"/>
+   <function name="op:subtract-dayTimeDuration-from-dateTime"/>
+   <function name="op:add-yearMonthDuration-to-date"/>
+   <function name="op:add-dayTimeDuration-to-date"/>
+   <function name="op:subtract-yearMonthDuration-from-date"/>
+   <function name="op:subtract-dayTimeDuration-from-date"/>
+   <function name="op:add-dayTimeDuration-to-time"/>
+   <function name="op:subtract-dayTimeDuration-from-time"/>
+   <function name="fn:format-dateTime"/>
+   <function name="fn:format-date"/>
+   <function name="fn:format-time"/>
+   <function name="fn:parse-ietf-date"/>
+   <function name="fn:resolve-QName"/>
+   <function name="fn:QName"/>
+   <function name="fn:parse-QName"/>
+   <function name="fn:expanded-QName"/>
+   <function name="fn:prefix-from-QName"/>
+   <function name="fn:local-name-from-QName"/>
+   <function name="fn:namespace-uri-from-QName"/>
+   <function name="fn:namespace-uri-for-prefix"/>
+   <function name="fn:in-scope-namespaces"/>
+   <function name="fn:in-scope-prefixes"/>
+   <function name="fn:name"/>
+   <function name="fn:local-name"/>
+   <function name="fn:namespace-uri"/>
+   <function name="fn:number"/>
+   <function name="fn:lang"/>
+   <function name="fn:path"/>
+   <function name="fn:root"/>
+   <function name="fn:has-children"/>
+   <function name="fn:distinct-ordered-nodes"/>
+   <function name="fn:innermost"/>
+   <function name="fn:outermost"/>
+   <function name="fn:index-of"/>
+   <function name="fn:empty"/>
+   <function name="fn:siblings"/>
+   <function name="fn:exists"/>
+   <function name="fn:distinct-values"/>
+   <function name="fn:duplicate-values"/>
+   <function name="fn:identity"/>
+   <function name="fn:insert-before"/>
+   <function name="fn:remove"/>
+   <function name="fn:head"/>
+   <function name="fn:tail"/>
+   <function name="fn:trunk"/>
+   <function name="fn:replicate"/>
+   <function name="fn:insert-separator"/>
+   <function name="fn:foot"/>
+   <function name="fn:reverse"/>
+   <function name="fn:subsequence"/>
+   <function name="fn:subsequence-where"/>
+   <function name="fn:items-at"/>
+   <function name="fn:slice"/>
+   <function name="fn:starts-with-subsequence"/>
+   <function name="fn:ends-with-subsequence"/>
+   <function name="fn:contains-subsequence"/>
+   <function name="fn:unordered"/>
+   <function name="fn:void"/>
+   <function name="fn:zero-or-one"/>
+   <function name="fn:one-or-more"/>
+   <function name="fn:exactly-one"/>
+   <function name="fn:deep-equal"/>
+   <function name="fn:count"/>
+   <function name="fn:avg"/>
+   <function name="fn:max"/>
+   <function name="fn:min"/>
+   <function name="fn:sum"/>
+   <function name="fn:id"/>
+   <function name="fn:element-with-id"/>
+   <function name="fn:idref"/>
+   <function name="fn:doc"/>
+   <function name="fn:doc-available"/>
+   <function name="fn:collection"/>
+   <function name="fn:uri-collection"/>
+   <function name="fn:unparsed-text"/>
+   <function name="fn:unparsed-text-lines"/>
+   <function name="fn:unparsed-text-available"/>
+   <function name="fn:unparsed-binary"/>
+   <function name="fn:environment-variable"/>
+   <function name="fn:available-environment-variables"/>
+   <function name="fn:system-properties"/>
+   <function name="fn:generate-id"/>
+   <function name="fn:parse-xml"/>
+   <function name="fn:parse-xml-fragment"/>
+   <function name="fn:xsd-validator"/>
+   <function name="fn:serialize"/>
+   <function name="fn:parse-html"/>
+   <function name="fn:html-doc"/>
+   <function name="fn:position"/>
+   <function name="fn:last"/>
+   <function name="fn:current-dateTime"/>
+   <function name="fn:current-date"/>
+   <function name="fn:current-time"/>
+   <function name="fn:implicit-timezone"/>
+   <function name="fn:default-collation"/>
+   <function name="fn:default-language"/>
+   <function name="fn:static-base-uri"/>
+   <function name="fn:function-lookup"/>
+   <function name="fn:function-name"/>
+   <function name="fn:function-arity"/>
+   <function name="fn:function-identity"/>
+   <function name="fn:function-annotations"/>
+   <function name="fn:for-each"/>
+   <function name="fn:filter"/>
+   <function name="fn:fold-left"/>
+   <function name="fn:fold-right"/>
+   <function name="fn:while-do"/>
+   <function name="fn:do-until"/>
+   <function name="fn:for-each-pair"/>
+   <function name="fn:sort"/>
+   <function name="fn:sort-by"/>
+   <function name="fn:sort-with"/>
+   <function name="fn:transitive-closure"/>
+   <function name="fn:apply"/>
+   <function name="fn:partial-apply"/>
+   <function name="fn:op"/>
+   <function name="fn:atomic-type-annotation"/>
+   <function name="fn:node-type-annotation"/>
+   <function name="fn:schema-type"/>
+   <function name="fn:atomic-equal"/>
+   <function name="map:merge"/>
+   <function name="map:keys"/>
+   <function name="map:items"/>
+   <function name="map:entries"/>
+   <function name="map:contains"/>
+   <function name="map:empty"/>
+   <function name="map:get"/>
+   <function name="map:find"/>
+   <function name="map:put"/>
+   <function name="map:entry"/>
+   <function name="map:remove"/>
+   <function name="map:for-each"/>
+   <function name="map:filter"/>
+   <function name="map:build"/>
+   <function name="map:size"/>
+   <function name="fn:collation"/>
+   <function name="fn:collation-available"/>
+   <function name="fn:collation-key"/>
+   <function name="fn:json-to-xml"/>
+   <function name="fn:xml-to-json"/>
+   <function name="fn:element-to-map-plan"/>
+   <function name="fn:element-to-map"/>
+   <function name="fn:parse-csv"/>
+   <function name="fn:csv-doc"/>
+   <function name="fn:csv-to-arrays"/>
+   <function name="fn:csv-to-xml"/>
+   <function name="fn:parse-json"/>
+   <function name="fn:json-doc"/>
+   <function name="array:size"/>
+   <function name="array:empty"/>
+   <function name="array:get"/>
+   <function name="array:put"/>
+   <function name="array:append"/>
+   <function name="array:join"/>
+   <function name="array:subarray"/>
+   <function name="array:index-of"/>
+   <function name="array:index-where"/>
+   <function name="array:slice"/>
+   <function name="array:remove"/>
+   <function name="array:insert-before"/>
+   <function name="array:head"/>
+   <function name="array:foot"/>
+   <function name="array:tail"/>
+   <function name="array:trunk"/>
+   <function name="array:reverse"/>
+   <function name="array:for-each"/>
+   <function name="array:filter"/>
+   <function name="array:fold-left"/>
+   <function name="array:fold-right"/>
+   <function name="array:for-each-pair"/>
+   <function name="array:build"/>
+   <function name="array:members"/>
+   <function name="array:split"/>
+   <function name="array:of-members"/>
+   <function name="array:sort"/>
+   <function name="array:sort-by"/>
+   <function name="array:sort-with"/>
+   <function name="array:flatten"/>
+   <function name="array:items"/>
+   <function name="fn:load-xquery-module"/>
+   <function name="fn:transform"/>
+   <function name="fn:random-number-generator"/>
+   <function name="fn:every"/>
+   <function name="fn:char"/>
+   <function name="fn:characters"/>
+   <function name="fn:graphemes"/>
+   <function name="fn:highest"/>
+   <function name="fn:index-where"/>
+   <function name="fn:is-NaN"/>
+   <function name="fn:take-while"/>
+   <function name="fn:lowest"/>
+   <function name="fn:some"/>
+   <function name="fn:all-equal"/>
+   <function name="fn:all-different"/>
+   <function name="fn:parse-uri"/>
+   <function name="fn:build-uri"/>
+   <function name="fn:partition"/>
+   <function name="fn:scan-left"/>
+   <function name="fn:scan-right"/>
+   <function name="fn:invisible-xml"/>
+   <function name="fn:jtree"/>
+   <function name="fn:jkey"/>
+   <function name="fn:jposition"/>
+   <function name="fn:jvalue"/>
 </catalog>

@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="../../schemas/simplified_catalog.rnc" type="application/relax-ng-compact-syntax" ?>
 <catalog spec="exslt" version="1.0" maintained-by="EXSLT GG">
-	<function prefix="exsl" local-name="node-set" name="exsl:node-set">
-		<signature>
-			<args total="1" required="1" />
-		</signature>
-	</function>
-	<function prefix="exsl" local-name="object-type" name="exsl:object-type">
-		<signature>
-			<args total="1" required="1" />
-		</signature>
-	</function>
+	<function name="exsl:node-set"/>
+	<function name="exsl:object-type"/>
 </catalog>

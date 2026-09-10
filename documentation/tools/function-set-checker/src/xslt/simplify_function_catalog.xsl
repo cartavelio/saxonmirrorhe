@@ -27,21 +27,13 @@
 	</xsl:template>
 	
 	<xsl:template match="fos:record-type">
-		<function prefix="{local:get-prefix(self::*)}" local-name="{@id}" name="{string-join((local:get-prefix(self::*), @id), ':')}">
-			<signature>
-				<args total="{count(fos:field)}" required="{count(fos:field[@required = 'true'])}" />
-			</signature>
-		</function>			
+		<xsl:variable name="prefix" select="local:get-prefix(self::*)" as="xs:string?" />
+		<function name="{if (normalize-space($prefix) = '') then @id else string-join(($prefix, @id), ':')}" />
 	</xsl:template>
 	
 	<xsl:template match="fos:function">
-		<function prefix="{local:get-prefix(self::*)}" local-name="{@name}" name="{string-join((local:get-prefix(self::*), @name), ':')}">			
-			<xsl:for-each select="fos:signatures/fos:proto">
-				<signature>
-					<args total="{count(fos:arg)}" required="{count(fos:arg[not(ends-with(@type, '?')) and not(ends-with(@type, '*'))])}" default="{count(fos:arg/@default != '')}" />
-				</signature>
-			</xsl:for-each>
-		</function>			
+		<xsl:variable name="prefix" select="local:get-prefix(self::*)" as="xs:string?" />
+		<function name="{if (normalize-space($prefix) = '') then @name else string-join(($prefix, @name), ':')}" />
 	</xsl:template>
 	
 	<xsl:template match="comment() | processing-instruction()" />
