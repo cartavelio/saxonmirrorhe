@@ -188,7 +188,7 @@ public class SlashExpression extends BinaryExpression
         int version = visitor.getStaticContext().getXPathVersion();
 
         Configuration config = visitor.getConfiguration();
-        //TypeHierarchy th = config.getTypeHierarchy();
+
 
         // The first operand must be of type gnode()*. This is a specific coercion,
         // that wraps arrays and maps in gnodes: it's not something that falls out
@@ -223,8 +223,8 @@ public class SlashExpression extends BinaryExpression
 
         ItemType startType = getStart().getItemType();
         if (startType == ErrorType.getInstance()) {
-            // implies the start expression will return an empty sequence, so the whole expression is void
-            return Literal.makeEmptySequence();
+            // start expression is either empty or error
+            return getStart();
         }
 
         ContextItemStaticInfo cit = config.makeContextItemStaticInfo(startType)

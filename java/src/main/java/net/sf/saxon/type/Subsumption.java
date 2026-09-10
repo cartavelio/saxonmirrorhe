@@ -540,8 +540,10 @@ public abstract class Subsumption {
             cardRel = OVERLAPS;
         }
 
-        if (s1 == SequenceType.EMPTY_SEQUENCE || s2 == SequenceType.EMPTY_SEQUENCE) {
-            return cardRel;
+        boolean e1 = isEmptySequenceType(s1);
+        boolean e2 = isEmptySequenceType(s2);
+        if (e1 || e2) {
+            return e1 && e2 ? SAME_TYPE : cardRel;
         }
 
         Affinity itemRel = computeRelationship(s1.getPrimaryType(), s2.getPrimaryType());
@@ -559,6 +561,11 @@ public abstract class Subsumption {
         }
 
         return OVERLAPS;
+    }
+
+    private static boolean isEmptySequenceType(SequenceType s) {
+        return s == SequenceType.EMPTY_SEQUENCE
+                || s.getPrimaryType() == ErrorType.getInstance() && Cardinality.allowsZero(s.getCardinality());
     }
 
     @CSharpReplaceBody(code="Affinity[][] result = new Affinity[rows][];\n"
