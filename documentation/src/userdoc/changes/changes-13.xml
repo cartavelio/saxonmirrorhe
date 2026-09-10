@@ -251,6 +251,11 @@ TODO: rethink redefines and override
         If set to true, text is output within a CDATA section only when (a) the containing element
         is named in the <code>cdata-section-elements</code> property, and (b) the text contains
         at least one special character, specifically a less-than or ampersand character.</p>
+        
+        <p>When generating HTML5 output including a <code>meta</code> element, the <code>meta</code>
+        element now uses the form mandated by the HTML5 living standard (with a <code>charset</code>
+        attribute). Technically this is a non-conformance with the XSLT 3.0 / XQuery 3.1 specifications,
+        but compliance with HTML5 clearly takes precedence here.</p>
   
     </category>
     
