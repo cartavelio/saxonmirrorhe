@@ -198,6 +198,9 @@
       'javax.xml.transform.TransformerFactoryConfigurationError'
       "/>
    
+   <!-- A list of generic types for which type parameters should be dropped on conversion.
+        Currrently only contains one type name
+   -->
    <xsl:variable name="dropTypeParameters" as="xs:string*" select="tokenize('System.Type')"/>
  
    <xsl:function name="f:qualifiedName" as="xs:string">
@@ -353,7 +356,35 @@
    <xsl:function name="f:renameType" as="xs:string">
       <xsl:param name="identifier" as="xs:string"/>
       <xsl:variable name="degen" select="f:degenerify($identifier)" as="xs:string"/>
-      <xsl:sequence select="($specialTypes($degen), $degen)[1]"/>
+      <xsl:choose>
+         <xsl:when test="exists($specialTypes($degen))">
+            <xsl:sequence select="$specialTypes($degen)"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:sequence select="f:adjustTypeNamespace($degen)"/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:function>
+   
+   <xsl:function name="f:adjustTypeNamespace" as="xs:string">
+      <xsl:param name="typeName" as="xs:string"/>
+      <xsl:choose>
+         <xsl:when test="starts-with($typeName, 'java.')">
+            <xsl:sequence select="'Saxon.Ejava.' || substring($typeName, 6)"/>
+         </xsl:when>
+         <xsl:when test="starts-with($typeName, 'javax.')">
+            <xsl:sequence select="'Saxon.Ejavax.' || substring($typeName, 7)"/>
+         </xsl:when>
+         <xsl:when test="starts-with($typeName, 'com.saxonica.')">
+            <xsl:sequence select="'Saxon.Eej.' || substring-after($typeName, 'com.saxonica.')"/>
+         </xsl:when>
+         <xsl:when test="starts-with($typeName, 'net.sf.saxon.')">
+            <xsl:sequence select="'Saxon.Hej.' || substring-after($typeName, 'net.sf.saxon.')"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:sequence select="$typeName"/>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:function>
    
    <xsl:function name="f:renameGenericType" as="xs:string">
@@ -402,10 +433,10 @@
       <xsl:sequence select="tokenize($nameOfType, '\.') ! f:escapeSimpleName(.) => string-join('.')"/>
    </xsl:function>
    
-   <!-- Convert first character of a string to upper-case -->
+   <!-- Convert first character of a string, and any character immediately following an underscore, to upper-case -->
    <xsl:function name="f:capitalize" as="xs:string">
       <xsl:param name="in" as="xs:string"/>
-      <xsl:sequence select="upper-case(substring($in, 1, 1)) || substring($in, 2)"/>
+      <xsl:sequence select="tokenize($in, '_') ! (upper-case(substring(., 1, 1)) || substring(., 2)) => string-join('')"/>
    </xsl:function>
    
  
