@@ -152,7 +152,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
             final Controller controller = context.getController();
 
             final ErrorReporter oldErrorReporter =
-                    controller == null ? new StandardErrorReporter() : controller.getErrorReporter();
+                    controller == null ? context.getConfiguration().makeErrorReporter() : controller.getErrorReporter();
 
             setupErrorHandlingForCollection(options, onError, oldErrorReporter);
         }
