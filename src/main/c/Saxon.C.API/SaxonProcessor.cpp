@@ -283,7 +283,7 @@ void SaxonProcessor::initialize(bool l) {
 #endif
 
     }
-    procRef = createSaxonProcessor2((SaxonProcessor::sxn_environ->thread), 0);
+    procRef = createSaxonProcessor2((SaxonProcessor::sxn_environ->thread), (int)l);
 
 
 #ifdef DEBUG
@@ -713,7 +713,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator 
     //SaxonProcessor::attachCurrentThread();
 
 
-    int64_t xdmNodeRef = parseXmlStringWithValidator(sxn_environ->thread, (void*)procRef, (void *)(validator != nullptr ? validator->getUnderlyingValidator() : -1), (char *)source);
+    int64_t xdmNodeRef = parseXmlStringWithValidator(sxn_environ->thread, (void*)procRef, (validator != nullptr ? (void *)validator->getUnderlyingValidator() : (void *)nullptr), (char *)source);
     if (xdmNodeRef != -1) {
         XdmNode *value = nullptr;
         value = new XdmNode(xdmNodeRef);

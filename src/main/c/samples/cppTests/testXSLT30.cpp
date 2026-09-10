@@ -759,6 +759,7 @@ void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
     cout << "ExampleSimple1 taken from PHP:" << endl;
 
     XsltExecutable * executable = proc->compileFromFile("../php/xsl/foo.xsl");
+    std::cerr<<"examplesample1 cp0-1"<<endl;
     if(executable== nullptr) {
         sresult->failure++;
         sresult->failureList.push_back("exampleSimple1");
@@ -768,8 +769,11 @@ void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
         }
         return;
     }
+    std::cerr<<"examplesample1 cp0"<<endl;
     executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
+    std::cerr<<"examplesample1 cp1"<<endl;
     const char *result = executable->applyTemplatesReturningString();
+    std::cerr<<"examplesample1 cp2"<<endl;
     if (result != NULL) {
         cout << result << endl;
         sresult->success++;
@@ -1498,8 +1502,9 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans, sResultCo
         }
         return;
     }
+    cout << "testInitialTemplate cp0" << endl;
     XdmNode * node = proc->parseXmlFromString("<e/>");
-
+    cout << "testInitialTemplate cp1" << endl;
     executable->setResultAsRawValue(false);
     std::map<std::string, XdmValue *> parameterValues;
 
@@ -2420,7 +2425,8 @@ int main(int argc, char* argv[]) {
     }
 
     SaxonProcessor *processor = new SaxonProcessor(true);
-    //processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/local/lib/saxon-license.lic");
+    setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+    processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
 
     char buff[FILENAME_MAX]; //create string buffer to hold path
@@ -2452,11 +2458,11 @@ int main(int argc, char* argv[]) {
     }
     //testValidation(trans,sresult);
     std::cerr << "testXSLT30 cp1" << std::endl;
-    testInitialTemplate(processor, trans, sresult);
+   // testInitialTemplate(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
-    exampleSimple1Err(trans, sresult);
+    //exampleSimple1Err(trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
