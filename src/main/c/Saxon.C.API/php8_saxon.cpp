@@ -1514,7 +1514,7 @@ zval makePHPValue(XdmValue * value){
 
   return retval;
 
-} else if (xdm_type == XDM_ARRAY) {
+  } else if (xdm_type == XDM_ARRAY) {
 
 
 
@@ -1573,19 +1573,19 @@ zval makePHPValue(XdmValue * value){
     idx++;
   }
 
-  std::cerr<<"PHP internal: makePHPValue created an array cp0 - now ArrayIterator"<< std::endl;
-
   zval arrval;
   ZVAL_ARR(&arrval, ret);
     ///// create PHP ArrayIterator
   if (object_init_ex(&retval,spl_ce_ArrayIterator) != SUCCESS) {
 
  } else {
-std::cerr<<"PHP internal: makePHPValue created an array cp1 - before ArrayIterator"<< std::endl;
+
    zend_call_method_with_1_params(Z_OBJ(retval), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL, &arrval);
 
-std::cerr<<"PHP internal: makePHPValue created an array cp2 - done ArrayIterator"<< std::endl;
-        }
+   if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr<<"PHP internal: makePHPValue ArrayIterator called"<< std::endl;
+    }
+  }
 
 
   return retval;
@@ -1595,6 +1595,172 @@ std::cerr<<"PHP internal: makePHPValue created an array cp2 - done ArrayIterator
 
 
 
+}
+
+
+XdmValue * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
+
+       if(Z_TYPE_P(retval) ==0){
+            //zend_error(E_ERROR, "Function returned null");
+            zend_throw_exception(zend_ce_exception, "Function returned null", 0);
+        }
+
+        XdmValue * resultValue = nullptr;
+
+        const char * objName = NULL;
+        xdmNode_object* nooth = NULL;
+        xdmAtomicValue_object* aooth = NULL;
+        xdmValue_object* vooth = NULL;
+        xdmArray_object* arrooth = NULL;
+        xdmMap_object* mooth = NULL;
+        xdmFunctionItem_object* f_ooth = NULL;
+
+        char * sVal = NULL;
+        int len = 0;
+
+        zend_object* zend_vobj2;
+
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"PHP internal: makeXdmValueFromPHPZVal returnType value = "<<((int)(Z_TYPE_P(retval)))<< std::endl;
+
+        }
+
+
+        HashTable *rv_arr_hash;
+        int rv_arr_length = 0;
+        zend_string *rv_key;
+  		zval *arr_val;
+  		long num_key;
+        XdmValue ** arrItems = nullptr;
+
+        switch (Z_TYPE_P(retval)) {
+            case IS_FALSE:
+                resultValue = nprocessor->makeBooleanValue(false);
+                break;
+            case IS_TRUE:
+                resultValue = nprocessor->makeBooleanValue(true);
+                break;
+
+            case IS_LONG:
+                resultValue = nprocessor->makeIntegerValue(Z_LVAL_P(retval));
+                break;
+
+            case IS_STRING:
+                sVal = Z_STRVAL_P(retval);
+                len = Z_STRLEN_P(retval);
+                resultValue = nprocessor->makeStringValue(estrndup(sVal,len));
+                break;
+            case IS_NULL:
+
+                return nullptr;
+            case IS_DOUBLE:
+                resultValue = nprocessor->makeDoubleValue((double)Z_DVAL_P(retval));
+                break;
+
+            case IS_ARRAY:
+              if (getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr<<"PHP internal: call_user_function return is an array"<< std::endl;
+              }
+              rv_arr_hash = Z_ARRVAL_P(retval);
+      		  rv_arr_length = zend_hash_num_elements(rv_arr_hash);
+
+              arrItems = new XdmValue*[rv_arr_length]; // TODO delete pointer array when finished
+
+              ZEND_HASH_FOREACH_KEY_VAL(rv_arr_hash, num_key, rv_key, arr_val) {
+                	arrItems[num_key] = makeXdmValueFromPHPZVal(nprocessor, arr_val);
+              }
+              ZEND_HASH_FOREACH_END();
+              resultValue = nprocessor->makeArray(arrItems, rv_arr_length);
+              break;
+
+            case IS_OBJECT:
+
+               if(Z_OBJCE_P(retval) != nullptr && instanceof_function(Z_OBJCE_P(retval), spl_ce_ArrayIterator)) {
+                 	zend_vobj2 =  Z_OBJ_P(retval);
+                  	vooth = (xdmValue_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmValue_object, std));
+
+                  	if(vooth != NULL) {
+                          //get items from ArrayIterator
+                    	//resultValue = vooth->xdmValue;
+                  	}
+                 } else {
+
+                objName =ZSTR_VAL(Z_OBJCE_P(retval)->name);
+
+                if(objName == NULL) {
+                  zend_throw_exception(zend_ce_exception, "Unknown type specified in extension function", 0);
+                }
+
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                  std::cerr<<"PHP internal: call_user_function returnType obj = "<<objName<< std::endl;
+                }
+
+                if(strcmp(objName, "Saxon\\XdmNode")==0) {
+
+                    zend_vobj2 =  Z_OBJ_P(retval);
+                    nooth = (xdmNode_object *)((char *)zend_vobj2 -
+                                              XtOffsetOf(xdmNode_object, std));
+
+                    if(nooth != NULL) {
+                        resultValue = nooth->xdmNode;
+                    }
+                } else if(strcmp(objName, "Saxon\\XdmAtomicValue")==0) {
+
+                  zend_vobj2 =  Z_OBJ_P(retval);
+                  aooth = (xdmAtomicValue_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmAtomicValue_object, std));
+
+                  if(aooth != NULL) {
+                    resultValue = aooth->xdmAtomicValue;
+                  }
+                } else if(strcmp(objName, "Saxon\\XdmMap")==0) {
+
+                  zend_vobj2 =  Z_OBJ_P(retval);
+                  mooth = (xdmMap_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmMap_object, std));
+
+                  if(mooth != NULL) {
+                    resultValue = mooth->xdmMap;
+                  }
+                } else if(strcmp(objName, "Saxon\\XdmArray")==0) {
+
+                  zend_vobj2 =  Z_OBJ_P(retval);
+                  arrooth = (xdmArray_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmArray_object, std));
+
+                  if(arrooth != NULL) {
+                    resultValue = arrooth->xdmArray;
+                  }
+                } else if(strcmp(objName, "Saxon\\XdmFunctionItem")==0) {
+
+                  zend_vobj2 =  Z_OBJ_P(retval);
+                  f_ooth = (xdmFunctionItem_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmFunctionItem_object, std));
+
+                  if(f_ooth != NULL) {
+                    resultValue = f_ooth->xdmFunctionItem;
+                  }
+                } else if(strcmp(objName, "Saxon\\XdmValue")==0) {
+
+                  zend_vobj2 =  Z_OBJ_P(retval);
+                  vooth = (xdmValue_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmValue_object, std));
+
+                  if(vooth != NULL) {
+                    resultValue = vooth->xdmValue;
+                  }
+                }
+                }
+                break;
+            default:
+                zend_throw_exception(zend_ce_exception, "Unknown type specified in extension function", 0);
+        }
+
+      if(resultValue == nullptr){
+        zend_throw_exception(zend_ce_exception, "Error in converting PHP return type to XdmValue from user extension function", 0);
+      }
+      return resultValue;
 }
 
 
@@ -1789,418 +1955,24 @@ void * phpNativeCall(char * functionName, void * proc, XdmValue * returnValueTyp
 
 
     }
-
-        const char * objName = NULL;
-
-        zval* callOnObj = NULL;
-
-        ZVAL_STRING(&function_name, nativeString2.c_str());
-        if (getenv("SAXONC_DEBUG_FLAG")) {
-          std::cerr<<"PHP internal: call_user_function on = "<<nativeString2<< std::endl;
-        }
-
-        if(call_user_function(CG(function_table), (zval*)callOnObj,
-                                 &function_name, &retval, argLength, params) != SUCCESS)
-        {
-            zend_throw_exception(zend_ce_exception, "Function call failed", 0);
-        }
-
-
-        if(Z_TYPE(retval) ==0){
-            //zend_error(E_ERROR, "Function returned null");
-            zend_throw_exception(zend_ce_exception, "Function returned null", 0);
-        }
-
-        XdmValue * resultValue = nullptr;
-
-        xdmNode_object* nooth = NULL;
-        xdmAtomicValue_object* aooth = NULL;
-        xdmValue_object* vooth = NULL;
-        xdmArray_object* arrooth = NULL;
-        xdmMap_object* mooth = NULL;
-        xdmFunctionItem_object* f_ooth = NULL;
-
-        char * sVal = NULL;
-        int len = 0;
-
-        zend_object* zend_vobj2;
-
-        if (getenv("SAXONC_DEBUG_FLAG")) {
-          std::cerr<<"PHP internal: call_user_function returnType value = "<<((int)(Z_TYPE_P(&retval)))<< std::endl;
-
-          if(Z_TYPE_P(&retval) == IS_OBJECT && Z_OBJCE(retval) != nullptr &&
-instanceof_function(Z_OBJCE_P(&retval), spl_ce_ArrayIterator)) {
-
-            std::cerr<<"PHP internal: call_user_function returnType value is an ArrayIterator"<< std::endl;
-           } else {
-
-             std::cerr<<"PHP internal: call_user_function returnType value not an object"<< std::endl;
-           }
-
-
-        }
-
-         /*  if (Z_TYPE_P(&retval) == 0 && Z_OBJCE_P(&retval) != NULL && Z_OBJCE_P(&retval)->name != NULL) {
-        const char *objName = ZSTR_VAL(Z_OBJCE_P(&retval)->name);
-        if(objName != NULL) {
-         std::cerr<<"PHP internal: call_user_function returnType value name = "<<objName<< std::endl;
-         } else {
-           std::cerr<<"PHP internal: call_user_function returnType value name is null "<< std::endl;
-           }
-        } */
-
-        switch (Z_TYPE_P(&retval)) {
-            case IS_FALSE:
-                resultValue = nprocessor->makeBooleanValue(false);
-                break;
-            case IS_TRUE:
-                resultValue = nprocessor->makeBooleanValue(true);
-                break;
-
-            case IS_LONG:
-                resultValue = nprocessor->makeIntegerValue(Z_LVAL_P(&retval));
-                break;
-
-            case IS_STRING:
-                sVal = Z_STRVAL_P(&retval);
-                len = Z_STRLEN_P(&retval);
-                resultValue = nprocessor->makeStringValue(estrndup(sVal,len));
-                break;
-            case IS_NULL:
-
-                return (void *)nullptr;
-            case IS_DOUBLE:
-                resultValue = nprocessor->makeDoubleValue((double)Z_DVAL_P(&retval));
-                break;
-
-            case IS_ARRAY:
-              if (getenv("SAXONC_DEBUG_FLAG")) {
-                std::cerr<<"PHP internal: call_user_function return is an array"<< std::endl;
-              }
-              /**
-                  ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-      if (Z_TYPE_P(val) != NULL) {
-        const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
-
-        if (strcmp(objName, "Saxon\\XdmNode") == 0) {
-          zend_object *ooth = Z_OBJ_P(val);
-          xdmNode_object *nobj =
-              (xdmNode_object *)((char *)ooth -
-                                 XtOffsetOf(xdmNode_object, std));
-          if (nobj != nullptr) {
-            XdmValue *value = (XdmValue *)nobj->xdmNode;
-            arguments[num_key] = value;
-          }
-        } else if (strcmp(objName, "Saxon\\XdmAtomicValue") == 0) {
-          zend_object *ooth = Z_OBJ_P(val);
-          xdmAtomicValue_object *nobj =
-              (xdmAtomicValue_object *)((char *)ooth -
-                                        XtOffsetOf(xdmAtomicValue_object, std));
-          if (nobj != nullptr) {
-            XdmValue *value = (XdmValue *)nobj->xdmAtomicValue;
-            arguments[num_key] = value;
-          }
-        } else if (strcmp(objName, "Saxon\\XdmValue") == 0) {
-          zend_object *ooth = Z_OBJ_P(val);
-          xdmValue_object *nobj =
-              (xdmValue_object *)((char *)ooth -
-                                  XtOffsetOf(xdmValue_object, std));
-          if (nobj != nullptr) {
-            XdmValue *value = nobj->xdmValue;
-            arguments[num_key] = value;
-          }
-        } else if (strcmp(objName, "Saxon\\XdmFunctionItem") == 0) {
-          zend_object *ooth = Z_OBJ_P(val);
-          xdmFunctionItem_object *nobj =
-              (xdmFunctionItem_object *)((char *)ooth -
-                                         XtOffsetOf(xdmFunctionItem_object,
-                                                    std));
-          if (nobj != nullptr) {
-            XdmValue *value = (XdmValue *)nobj->xdmFunctionItem;
-            arguments[num_key] = value;
-          }
-
-        } else if (strcmp(objName, "Saxon\\XdmMap") == 0) {
-          zend_object *ooth = Z_OBJ_P(val);
-          xdmMap_object *nobj =
-              (xdmMap_object *)((char *)ooth - XtOffsetOf(xdmMap_object, std));
-          if (nobj != nullptr) {
-            XdmValue *value = (XdmValue *)nobj->xdmMap;
-            arguments[num_key] = value;
-          }
-
-        } else if (strcmp(objName, "Saxon\\XdmArray") == 0) {
-          zend_object *ooth = Z_OBJ_P(val);
-          xdmArray_object *nobj =
-              (xdmArray_object *)((char *)ooth -
-                                  XtOffsetOf(xdmArray_object, std));
-          if (nobj != nullptr) {
-            XdmValue *value = (XdmValue *)nobj->xdmArray;
-            arguments[num_key] = value;
-          }
-
-        } else { // TODO error warning}
-        }
-      } else {
-        // TODO error warning
-      }
-    }
-    ZEND_HASH_FOREACH_END();
-
-            */
-
-              break;
-            case IS_OBJECT:
-
-               if(Z_OBJCE(retval) != nullptr && instanceof_function(Z_OBJCE_P(&retval), spl_ce_ArrayIterator)) {
-                 	zend_vobj2 =  Z_OBJ_P(&retval);
-                  	vooth = (xdmValue_object *)((char *)zend_vobj2 -
-                                            XtOffsetOf(xdmValue_object, std));
-
-                  	if(vooth != NULL) {
-                          //get items from ArrayIterator
-                    	resultValue = vooth->xdmValue;
-                  	}
-                 } else {
-
-                objName =ZSTR_VAL(Z_OBJCE_P(&retval)->name);
-
-                if(objName == NULL) {
-                  zend_throw_exception(zend_ce_exception, "Unknown type specified in extension function", 0);
-                }
-
-                if (getenv("SAXONC_DEBUG_FLAG")) {
-                  std::cerr<<"PHP internal: call_user_function returnType obj = "<<objName<< std::endl;
-                }
-
-                if(strcmp(objName, "Saxon\\XdmNode")==0) {
-
-                    zend_vobj2 =  Z_OBJ_P(&retval);
-                    nooth = (xdmNode_object *)((char *)zend_vobj2 -
-                                              XtOffsetOf(xdmNode_object, std));
-
-                    if(nooth != NULL) {
-                        resultValue = nooth->xdmNode;
-                    }
-                } else if(strcmp(objName, "Saxon\\XdmAtomicValue")==0) {
-
-                  zend_vobj2 =  Z_OBJ_P(&retval);
-                  aooth = (xdmAtomicValue_object *)((char *)zend_vobj2 -
-                                            XtOffsetOf(xdmAtomicValue_object, std));
-
-                  if(aooth != NULL) {
-                    resultValue = aooth->xdmAtomicValue;
-                  }
-                } else if(strcmp(objName, "Saxon\\XdmMap")==0) {
-
-                  zend_vobj2 =  Z_OBJ_P(&retval);
-                  mooth = (xdmMap_object *)((char *)zend_vobj2 -
-                                            XtOffsetOf(xdmMap_object, std));
-
-                  if(mooth != NULL) {
-                    resultValue = mooth->xdmMap;
-                  }
-                } else if(strcmp(objName, "Saxon\\XdmArray")==0) {
-
-                  zend_vobj2 =  Z_OBJ_P(&retval);
-                  arrooth = (xdmArray_object *)((char *)zend_vobj2 -
-                                            XtOffsetOf(xdmArray_object, std));
-
-                  if(arrooth != NULL) {
-                    resultValue = arrooth->xdmArray;
-                  }
-                } else if(strcmp(objName, "Saxon\\XdmFunctionItem")==0) {
-
-                  zend_vobj2 =  Z_OBJ_P(&retval);
-                  f_ooth = (xdmFunctionItem_object *)((char *)zend_vobj2 -
-                                            XtOffsetOf(xdmFunctionItem_object, std));
-
-                  if(f_ooth != NULL) {
-                    resultValue = f_ooth->xdmFunctionItem;
-                  }
-                } else if(strcmp(objName, "Saxon\\XdmValue")==0) {
-
-                  zend_vobj2 =  Z_OBJ_P(&retval);
-                  vooth = (xdmValue_object *)((char *)zend_vobj2 -
-                                            XtOffsetOf(xdmValue_object, std));
-
-                  if(vooth != NULL) {
-                    resultValue = vooth->xdmValue;
-                  }
-                }
-                }
-                break;
-            default:
-                zend_throw_exception(zend_ce_exception, "Unknown type specified in extension function", 0);
-        }
-
-      if(resultValue == nullptr){
-        return (void *)nullptr;
-      }
-      return (void *)resultValue->getUnderlyingValue();
-  /*  for(int i=0; i<argLength;i++){
- 
-
-        const char * str = null; //senv->GetStringUTFChars(argType,NULL);
-        const char *stri = NULL;
-        double dnumber = 0;
-        long lnumber = 0;
-        bool bvalue = false;
-        float fnumber = 0;
-
-
-
-        struct xdmNode_object* vobj;
-        zend_object* zend_vobj;
-        XdmNode * node = NULL;
-        std::map<std::string, saxonTypeEnum>::iterator it = typeMap.find(str);
-        if (it != typeMap.end()){
-            switch (it->second)
-            {
-                case enumNode:
-
-if(!nprocessor->proc){
-nprocessor->proc =
-(jobject)SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmValueForCppClass,
-procForNodeMID, argObj);
-                    }
-                    if (object_init_ex(&params[i], xdmNode_ce) != SUCCESS) {
-                        //error
-
-                        //php_error(E_WARNING,"error phpNative xdmNode creation
-failed"); break;
-                    }
-                    node = new XdmNode(argObj);
-
-                    //MAKE_STD_ZVAL(php_argv[i]._val);
-                    zend_vobj = Z_OBJ_P(&params[i]);
-                    vobj = (xdmNode_object *)((char *)zend_vobj -
-XtOffsetOf(xdmNode_object, std)); assert (vobj != NULL);
-
-                    vobj->xdmNode = node;
-                    break;
-                case enumString:
-                    //sresult->xdmvalue = argObj;
-                    stri = stringValue(SaxonProcessor::sxn_environ, argObj);
-                    //stri = getStringValue(SaxonProcessor::sxn_environ,
-*sresult);
-                    //stri = senv->GetStringUTFChars((jstring)argObj, 0);
-                    //ZVAL_STRING(php_argv[i]._val);
-                    ZVAL_STRING(&params[i], stri);
-                    break;
-                case enumInteger:
-                    sresult->xdmvalue = argObj;
-                    lnumber = getLongValue(SaxonProcessor::sxn_environ,
-*sresult, 0);
-
-                    //MAKE_STD_ZVAL(php_argv[i]._val);
-                    ZVAL_LONG(&params[i], lnumber);
-                    break;
-                case enumDouble:
-                    sresult->xdmvalue = argObj;
-                    dnumber = getDoubleValue(SaxonProcessor::sxn_environ,
-*sresult, 0); //MAKE_STD_ZVAL(php_argv[i]._val); ZVAL_DOUBLE(&params[i],
-dnumber); break; case enumFloat: sresult->xdmvalue = argObj; fnumber =
-getFloatValue(SaxonProcessor::sxn_environ, *sresult, 0);
-                    //MAKE_STD_ZVAL(php_argv[i]._val);
-                    ZVAL_DOUBLE(&params[i], fnumber);
-                    break;
-                case enumBool:
-                    sresult->xdmvalue = argObj;
-                    bvalue = getBooleanValue(SaxonProcessor::sxn_environ,
-*sresult);
-                    //MAKE_STD_ZVAL(php_argv[i]._val);
-                    ZVAL_BOOL(&params[i], bvalue);
-                    break;
-                case enumArrXdmValue:
-                    //TODO - not currently supported
-                    argLength--;
-                    break;
-            }
-            senv->ReleaseStringUTFChars(argType, str);
-        }
-
-    }
-
-
-    free(sresult);
-
-
-    zval *argvv = NULL;
     zval* callOnObj = NULL;
-    MAKE_STD_ZVAL(function_name);
-    //nativeString[nativeStrLen] = '\0';
 
     ZVAL_STRING(&function_name, nativeString2.c_str());
-    //zend_error(E_ERROR, "user-function not implemented in PHP8");
-    if(call_user_function_ex(CG(function_table), (zval*)callOnObj,
-&function_name, &retval, argLength, params, 0, NULL) != SUCCESS)
-    {
-        zend_error(E_ERROR, "Function call failed");
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"PHP internal: call_user_function on = "<<nativeString2<< std::endl;
     }
 
-    if(Z_TYPE(retval) ==0){
-        zend_error(E_ERROR, "Function returned null");
+    if(call_user_function(CG(function_table), (zval*)callOnObj,
+                                 &function_name, &retval, argLength, params) != SUCCESS){
+       zend_throw_exception(zend_ce_exception, "Function call failed", 0);
     }
 
-    char * sVal = NULL;
-    int len = 0;
-    int64_t obj = 0;
-//TODO handle XdmValue wrapped object
-    const char * objName = NULL;
-    xdmNode_object* ooth = NULL;
-    zend_object* zend_vobj2;
-    bool bVal;
-    switch (Z_TYPE_P(&retval)) {
-        case IS_FALSE:
-                obj= booleanValue(SaxonProcessor::sxn_environ, false);
-                break;
-        case IS_TRUE:
-            obj= booleanValue(SaxonProcessor::sxn_environ, true);
-            break;
+    XdmValue * resultValue = makeXdmValueFromPHPZVal(nprocessor, &retval);
 
-        case IS_LONG:
-            obj= longValue(SaxonProcessor::sxn_environ, Z_LVAL_P(&retval));
-            break;
-        case IS_STRING:
-            sVal = Z_STRVAL_P(&retval);
-            len = Z_STRLEN_P(&retval);
-            obj = makeStringValue(estrndup(sVal,len));
-            break;
-        case IS_NULL:
-
-            break;
-        case IS_DOUBLE:
-            obj = doubleValue(SaxonProcessor::sxn_environ,
-(double)Z_DVAL_P(&retval)); break;
-
-        case IS_ARRAY:
-            //break;
-        case IS_OBJECT:
-
-            objName =ZSTR_VAL(Z_OBJCE_P(&retval)->name);
-
-
-            if(strcmp(objName, "Saxon\\XdmNode")==0) {
-
-                zend_vobj2 =  Z_OBJ_P(&retval);
-                ooth = (xdmNode_object *)((char *)zend_vobj2 -
-XtOffsetOf(xdmNode_object, std));
-
-                if(ooth != NULL) {
-                    obj = ooth->xdmNode->getUnderlyingValue();
-                }
-            }
-            break;
-        default:
-            obj = NULL;
-            zend_throw_exception(zend_ce_exception, "Unknown type specified in
-extension function", 0);
+    if(resultValue == nullptr){
+      return (void *)nullptr;
     }
-
-    delete nprocessor;
-    zval_ptr_dtor(&retval);
-    return (void *)obj; */
+    return (void *)resultValue->getUnderlyingValue();
 }
 
 /*     ============== PHP Interface of   XdmValue =============== */
@@ -3555,11 +3327,11 @@ PHP_METHOD(XdmFunctionItem, call) {
   HashTable *arr_hash;
 
   zval *arguments_zval;
-  zval *val;
-  long num_key;
   XdmValue **arguments = nullptr;
   int argument_length = 0;
   zend_string *key;
+  zval *val;
+  long num_key;
 
   if (ZEND_NUM_ARGS() != 3) {
     WRONG_PARAM_COUNT;

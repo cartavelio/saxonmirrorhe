@@ -37,7 +37,7 @@ function simpleUserFunction2($input){
 }
 
 function twoSequenceParam2($arr1, $arr2){
-  echo("twoSequenceParam called\n");
+  echo("twoSequenceParam2 called\n");
 
     return $arr2;
 }
@@ -48,6 +48,20 @@ function implode_all($arr) {
             $arr[$i] = implode_all ($arr[$i]);
     }
     return implode(' ', $arr);
+}
+
+function twoSequenceParam3($arr1, $arr2){
+  echo("twoSequenceParam3 called\n");
+  if(is_array($arr1) and is_array($arr2)){
+    $out1 = implode_all($arr1);
+    $out2 = implode_all($arr2);
+    echo $out1."\n";
+    echo $out2."\n";
+    return $arr2;
+  } else {
+    echo("twoSequenceParam3 array not found\n");
+    return NULL;
+  }
 }
 
 function twoSequenceParam($arrIter1, $arrIter2){
@@ -93,7 +107,7 @@ function sequenceOfArraysParamB($arrIter){
     while( $arrIter->valid() ){
         $arri = $arrIter->current();
         if(is_array($arri)){
-            $out1 = implode_all($arris);
+            $out1 = implode_all($arri);
             echo $out1."\n";
         }
         $arrIter->next();
@@ -255,6 +269,15 @@ function testTwoSequence($saxonProc) {
                                                         "    }".
                                                         "}", False);
 
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"twoSequenceParam3\": {".
+                                                        "      \"as\": \"array(xs:integer*)\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"array(*)\", \"array(*)\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", True);
+
          $xpath = $saxonProc->newXPathProcessor();
 
 
@@ -269,6 +292,12 @@ function testTwoSequence($saxonProc) {
 
              $result2 = $xpath->evaluate("ms:twoSequenceParam2(('a','b','c'), (1,2,3))");
              if($result2 != null) {
+                $size = $result2->size();
+                $value = $result2->itemAt(0)->getStringValue();
+                echo 'Output size='.$size." Result for 1st item = ".$value;
+             }
+             $result3 = $xpath->evaluate("ms:twoSequenceParam3(['a','b','c'], [1,2,3])");
+             if($result3 != null) {
                 $size = $result2->size();
                 $value = $result2->itemAt(0)->getStringValue();
                 echo 'Output size='.$size." Result for 1st item = ".$value;
