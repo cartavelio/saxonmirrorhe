@@ -668,8 +668,6 @@ TODO: rethink redefines and override
         <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
             flag is set. A '#' character can be escaped as <code>\#</code> or <code>[#]</code>. (PR 1022)</p>
         
-        <p>PR2492 - The <code>fn:collation-available</code> function IS implemented, and the $usage parameter has been dropped.</p>
-        
         
         <p>The following functions are new in 4.0 (some of these were already implemented in Saxon 12):</p>
         
@@ -873,8 +871,8 @@ TODO: rethink redefines and override
             Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
         
         <ul>
-            <li><p>PR957 - scan-left and scan-right functions</p></li>
-            <li><p>PR2552 - system-properties function</p></li>
+            <li><p>PR957 - <code>scan-left</code> and <code>scan-right</code> functions</p></li>
+            <li><p>PR2552 - <code>system-properties</code> function</p></li>
             <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
             <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. This is due to limitations in the ICU4N library.</p></li>
         </ul>

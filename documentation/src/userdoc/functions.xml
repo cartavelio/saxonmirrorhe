@@ -556,13 +556,10 @@
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>TODO FIXME: check implementation conforms to latest spec.</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Asks whether a collation URI is recognized by the implementation, and whether it has
-          required properties.</p>
+        <p>Asks whether a collation URI is recognized by the implementation.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2069,19 +2066,16 @@
         <p>From Saxon 9.3 this function becomes available for XPath/XQuery as well as XSLT. The
           query prolog declarations for defining a decimal format in XQuery become available in
           Saxon 9.4.</p>
-        <p>
-          <i>The function rules have been enhanced to allow formatting using exponential notation in
+        <p>The function rules were enhanced to allow formatting using exponential notation in
             the XPath 3.1 version of the specification. These changes are implemented since Saxon
-            9.7, and are available provided XPath 3.1 is enabled.</i>
-        </p>
+            9.7, and are available provided XPath 3.1 is enabled.</p>
         <div class="qt4">
-          <p>TODO work required</p>
-          <p>In XPath 4.0, from Saxon 13, changes to <code>fn:format-number</code>:</p>
+          <p>Changes for this function in the XPath 4.0 specification are available from Saxon 13:</p>
           <ul>
             <li>
               <p>The decimal format name can now be supplied as a value of type
                 <code>xs:QName</code>, as an alternative to supplying a lexical QName as an
-                instance of <code>xs:string</code></p>
+                instance of <code>xs:string</code>.</p>
             </li>
             <li>
               <p>Decimal format parameters can now be supplied directly as a map in the third
@@ -7807,13 +7801,13 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};</code></pre>
 
           <p>For example, the call:</p>
           
-          <pre><code class="language-xpath">saxon:generate-sequence(20, fn{.+1}) [1 to 10]</code></pre>
+          <pre><code class="language-xquery">saxon:generate-sequence(20, fn{.+1}) [1 to 10]</code></pre>
           
-          <p>returns the first 10 numbers in the infinite sequence <code>(10, 11, 12, ...)</code>.</p>
+          <p>returns the first 10 numbers in the infinite sequence (10, 11, 12, ...).</p>
           
           <p>Similarly, </p>
           
-          <pre><code class="language-xpath">(saxon:generate-sequence([1,1], fn{[?2, ?1+?2]}) ?1) [ 1 to $N ]</code></pre>
+          <pre><code class="language-xquery">(saxon:generate-sequence([1,1], fn{[?2, ?1+?2]}) ?1) [ 1 to $N ]</code></pre>
 
           <p>generates the first <code>$N</code> numbers in the Fibonacci sequence (1, 1, 2, 3, 5, 8, 13, ...).</p>
           
