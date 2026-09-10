@@ -7,10 +7,10 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.type.SchemaException;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 
 /**
  * The SchemaManager is used to load schema documents, and to set options for the way in which they are loaded.
@@ -130,25 +130,42 @@ public class SchemaManagerImpl extends SchemaManager {
 
     /**
      * Load a schema document from a given Source. The schema components derived from this schema
-     * document are added to the cache of schema components maintained by this SchemaManager
+     * document are added to the cache of schema components maintained by this SchemaManager.
+     *
+     * <p>If the source is a {@link StreamSource} containing a systemId but no {@link java.io.InputStream}
+     * or {@link java.io.Reader}, then an attempt is made to resolve the systemId using the resource
+     * resolver registered with the {@code Configuration}. It is NOT resolved using the {@link SchemaURIResolver} (this
+     * is used only for included and imported modules).</p>
      *
      * @param source the document containing the schema. The getSystemId() method applied to this Source
      *               must return a base URI suitable for resolving <code>xs:include</code> and <code>xs:import</code>
      *               directives. The document may be either a schema document in source XSD format, or a compiled
      *               schema in Saxon-defined SCM format (as produced using the -export option)
      * @throws net.sf.saxon.s9api.SaxonApiException if the schema document is not valid, or if its contents are inconsistent
-     *                           with the schema components already held by this SchemaManager.
+     *                                              with the schema components already held by this SchemaManager.
      */
 
     @Override
     public void load(Source source) throws SaxonApiException {
         try {
+            if (source instanceof StreamSource) {
+                if (((StreamSource) source).getInputStream() == null &&
+                        ((StreamSource) source).getReader() == null &&
+                        source.getSystemId() != null) {
+                    ResourceRequest request = new ResourceRequest();
+                    request.uri = source.getSystemId();
+                    request.nature = ResourceRequest.XSD_NATURE;
+                    Source s2 = processor.getUnderlyingConfiguration().getResourceResolver().resolve(request);
+                    if (s2 != null) {
+                        source = s2;
+                    }
+                }
+            }
             processor.getUnderlyingConfiguration().addSchemaSource(source, errorReporter);
-        } catch (SchemaException e) {
+        } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
     }
-
     /**
      * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
      * document are added to the cache of schema components maintained by this SchemaManager
