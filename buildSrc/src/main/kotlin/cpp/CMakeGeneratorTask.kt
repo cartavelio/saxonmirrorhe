@@ -17,6 +17,9 @@ abstract class CMakeGeneratorTask @Inject constructor(private val ex: ExecOperat
   @get:Input
   abstract val cmakeFilenames: ListProperty<String>
 
+  @get:Internal
+  abstract val extraCMakeArgs: Property<() -> List<String>>
+
   @get:Input
   abstract val platformIsWindows: Property<Boolean>
 
@@ -41,6 +44,7 @@ abstract class CMakeGeneratorTask @Inject constructor(private val ex: ExecOperat
       workingDir = layout.projectDirectory.asFile
       executable = "cmake"
       args("-G", generatorName.get(), "-B", buildPath.map { it.asFile.toString() }.get(), "-D", version.map { "SAXON_VERSION:STRING=${it}" }.get())
+      if (extraCMakeArgs.isPresent) args(extraCMakeArgs.get().invoke())
     }
   }
 }

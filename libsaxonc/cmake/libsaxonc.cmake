@@ -1,66 +1,33 @@
-cmake_minimum_required(VERSION 3.27)
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
-if(NOT CMAKE_DEBUG_POSTFIX)
-    if(APPLE)
-        set(CMAKE_DEBUG_POSTFIX _debug)
-    elseif(WIN32)
-        # Do nothing for now
-    else()
-        set(CMAKE_DEBUG_POSTFIX d)
-    endif()
-endif()
-
-string(TOUPPER ${SaxonC_EDITION} SAXON_EDITION)
-
-# set(SaxonCCore_PackagePrefix CACHE PATH) Path to Graal native-image output; must be set on command line with -D
-# set(SaxonCCore_IncludePath CACHE PATH) Path to Graal native-image output; must be set on command line with -D
 # set(SAXON_VERSION CACHE STRING) Main Saxon J version; must be set on command line with -D
-
-# Always use `lib` instead of sometimes `lib64`
-set(SAXON_CMAKE_INSTALL_LIBDIR "lib")
-
-Include(FetchContent)
-FetchContent_Declare(
-        Catch2
-        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG        v3.8.1 # or a later release
-)
-FetchContent_MakeAvailable(Catch2)
-list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
-include(CTest)
-include(Catch)
 
 set(saxonc "saxonc-${SaxonC_EDITION}")
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-configure_file(../src/lib/saxonc_version.c.in saxonc_version.c @ONLY)
 add_library(${saxonc} SHARED
-    ${CMAKE_CURRENT_BINARY_DIR}/saxonc_version.c
-    ../src/lib/CPPUserFunctionHandler.cpp
-    ../src/lib/DocumentBuilder.cpp
-    ../src/lib/SaxonApiException.cpp
-    ../src/lib/SaxonCGlue.c
-    ../src/lib/SaxonCProcessor.c
-    ../src/lib/SaxonCXPath.c
-    ../src/lib/SaxonProcessor.cpp
-    ../src/lib/SchemaValidator.cpp
-    ../src/lib/XPathProcessor.cpp
-    ../src/lib/XQueryProcessor.cpp
-    ../src/lib/XdmArray.cpp
-    ../src/lib/XdmAtomicValue.cpp
-    ../src/lib/XdmFunctionItem.cpp
-    ../src/lib/XdmItem.cpp
-    ../src/lib/XdmMap.cpp
-    ../src/lib/XdmNode.cpp
-    ../src/lib/XdmValue.cpp
-    ../src/lib/Xslt30Processor.cpp
-    ../src/lib/XsltExecutable.cpp
+    ${SAXONC_VERSION_SRC_DIR}/saxonc_version.c
+    ${SAXONC_SRC_DIR}/lib/CPPUserFunctionHandler.cpp
+    ${SAXONC_SRC_DIR}/lib/DocumentBuilder.cpp
+    ${SAXONC_SRC_DIR}/lib/SaxonApiException.cpp
+    ${SAXONC_SRC_DIR}/lib/SaxonCGlue.c
+    ${SAXONC_SRC_DIR}/lib/SaxonCProcessor.c
+    ${SAXONC_SRC_DIR}/lib/SaxonCXPath.c
+    ${SAXONC_SRC_DIR}/lib/SaxonProcessor.cpp
+    ${SAXONC_SRC_DIR}/lib/SchemaValidator.cpp
+    ${SAXONC_SRC_DIR}/lib/XPathProcessor.cpp
+    ${SAXONC_SRC_DIR}/lib/XQueryProcessor.cpp
+    ${SAXONC_SRC_DIR}/lib/XdmArray.cpp
+    ${SAXONC_SRC_DIR}/lib/XdmAtomicValue.cpp
+    ${SAXONC_SRC_DIR}/lib/XdmFunctionItem.cpp
+    ${SAXONC_SRC_DIR}/lib/XdmItem.cpp
+    ${SAXONC_SRC_DIR}/lib/XdmMap.cpp
+    ${SAXONC_SRC_DIR}/lib/XdmNode.cpp
+    ${SAXONC_SRC_DIR}/lib/XdmValue.cpp
+    ${SAXONC_SRC_DIR}/lib/Xslt30Processor.cpp
+    ${SAXONC_SRC_DIR}/lib/XsltExecutable.cpp
 )
+add_library(SaxonC${SAXON_EDITION}::${saxonc} ALIAS ${saxonc})
 set_target_properties(${saxonc} PROPERTIES
     SOVERSION ${SaxonC_VERSION_MAJOR}
     VERSION ${SaxonC_VERSION}
@@ -74,37 +41,37 @@ target_sources(${saxonc}
         FILE_SET common_headers
         TYPE HEADERS
         BASE_DIRS
-            ../src/include
+            ${SAXONC_SRC_DIR}/include
         FILES
-            ../src/include/saxonc/saxonc_version.h
-            ../src/include/saxonc/DocumentBuilder.h
-            ../src/include/saxonc/SaxonApiException.h
-            ../src/include/saxonc/SaxonCGlue.h
-            ../src/include/saxonc/SaxonCProcessor.h
-            ../src/include/saxonc/SaxonCXPath.h
-            ../src/include/saxonc/SaxonProcessor.h
-            ../src/include/saxonc/SchemaValidator.h
-            ../src/include/saxonc/UserFunctionHandler.h
-            ../src/include/saxonc/XPathProcessor.h
-            ../src/include/saxonc/XQueryProcessor.h
-            ../src/include/saxonc/XdmArray.h
-            ../src/include/saxonc/XdmAtomicValue.h
-            ../src/include/saxonc/XdmFunctionItem.h
-            ../src/include/saxonc/XdmItem.h
-            ../src/include/saxonc/XdmMap.h
-            ../src/include/saxonc/XdmNode.h
-            ../src/include/saxonc/XdmValue.h
-            ../src/include/saxonc/Xslt30Processor.h
-            ../src/include/saxonc/XsltExecutable.h
+            ${SAXONC_SRC_DIR}/include/saxonc/saxonc_version.h
+            ${SAXONC_SRC_DIR}/include/saxonc/DocumentBuilder.h
+            ${SAXONC_SRC_DIR}/include/saxonc/SaxonApiException.h
+            ${SAXONC_SRC_DIR}/include/saxonc/SaxonCGlue.h
+            ${SAXONC_SRC_DIR}/include/saxonc/SaxonCProcessor.h
+            ${SAXONC_SRC_DIR}/include/saxonc/SaxonCXPath.h
+            ${SAXONC_SRC_DIR}/include/saxonc/SaxonProcessor.h
+            ${SAXONC_SRC_DIR}/include/saxonc/SchemaValidator.h
+            ${SAXONC_SRC_DIR}/include/saxonc/UserFunctionHandler.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XPathProcessor.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XQueryProcessor.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XdmArray.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XdmAtomicValue.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XdmFunctionItem.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XdmItem.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XdmMap.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XdmNode.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XdmValue.h
+            ${SAXONC_SRC_DIR}/include/saxonc/Xslt30Processor.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XsltExecutable.h
 )
 target_sources(${saxonc}
     PUBLIC
         FILE_SET edition_headers
         TYPE HEADERS
         BASE_DIRS
-            src/include
+            ${SAXONC_EDITION_SRC_DIR}/include
         FILES
-            src/include/saxonc/saxonc-core.h
+            ${SAXONC_EDITION_SRC_DIR}/include/saxonc/saxonc-core.h
 )
 target_sources(${saxonc}
     PUBLIC
@@ -115,116 +82,8 @@ target_sources(${saxonc}
         FILES
             ${CMAKE_CURRENT_BINARY_DIR}/saxonc_export.h
 )
-set(SaxonCCore${SAXON_EDITION}_DIR "${SaxonCCore_PackageDir}/${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}")
 
+list(APPEND CMAKE_PREFIX_PATH ${SAXONC_CORE_PACKAGE_DIR})
 find_package(SaxonCCore${SAXON_EDITION} ${SaxonC_VERSION} EXACT REQUIRED)
 
 target_link_libraries(${saxonc} PUBLIC SaxonC${SAXON_EDITION}::saxonc-core-${SaxonC_EDITION})
-
-add_executable(Transform ../src/bin/Transform.c)
-target_link_libraries(Transform PRIVATE ${saxonc})
-
-add_executable(Query ../src/bin/Query.c)
-target_link_libraries(Query PRIVATE ${saxonc})
-
-# Tests
-add_executable(CTestXPath ../samples/cTests/testXPath.c)
-target_link_libraries(CTestXPath PRIVATE ${saxonc})
-
-add_executable(CTestXQuery ../samples/cTests/testXQuery.c)
-target_link_libraries(CTestXQuery PRIVATE ${saxonc})
-
-add_executable(CTestXslt ../samples/cTests/testXSLT.c)
-target_link_libraries(CTestXslt PRIVATE ${saxonc})
-
-add_test(NAME cXPath COMMAND CTestXPath "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
-add_test(NAME cXQuery COMMAND CTestXQuery "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
-add_test(NAME cXslt COMMAND CTestXslt "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
-
-add_executable(CppTestXPath ../samples/cppTests/testXPath.cpp)
-target_link_libraries(CppTestXPath PRIVATE ${saxonc})
-
-add_executable(CppTestXQuery ../samples/cppTests/testXQuery.cpp)
-target_link_libraries(CppTestXQuery PRIVATE ${saxonc})
-
-add_executable(CppTestXslt ../samples/cppTests/testXSLT30.cpp)
-target_link_libraries(CppTestXslt PRIVATE ${saxonc})
-target_link_libraries(CppTestXslt PRIVATE Threads::Threads)
-
-add_test(NAME cppXPath COMMAND CppTestXPath "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
-add_test(NAME cppXQuery COMMAND CppTestXQuery "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
-add_test(NAME cppXslt COMMAND CppTestXslt "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
-
-set_tests_properties(
-    cXPath cXQuery cXslt cppXPath cppXQuery cppXslt
-    PROPERTIES
-    ENVIRONMENT_MODIFICATION
-        "PATH=path_list_append:$<TARGET_RUNTIME_DLL_DIRS:${saxonc}>"
-)
-
-
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-
-configure_package_config_file(../cmake/SaxonCConfig.cmake.in
-       ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}Config.cmake
-       INSTALL_DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
-)
-write_basic_package_version_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}ConfigVersion.cmake
-        VERSION ${SaxonC_VERSION}
-        COMPATIBILITY SameMajorVersion
-)
-
-install(TARGETS ${saxonc}
-        EXPORT "SaxonC${SAXON_EDITION}"
-        LIBRARY DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}
-        FILE_SET common_headers
-        FILE_SET edition_headers
-        FILE_SET export_header
-)
-
-install(TARGETS Transform Query)
-
-install(EXPORT "SaxonC${SAXON_EDITION}"
-        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
-        NAMESPACE "SaxonC${SAXON_EDITION}::"
-)
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}Config.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}ConfigVersion.cmake
-        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
-)
-
-# Files from saxonc-core
-install(FILES
-        ${SaxonCCore_PackageDir}/include/graal_isolate.h
-        ${SaxonCCore_PackageDir}/include/saxonc-core-${SaxonC_EDITION}.h
-        TYPE INCLUDE
-)
-
-install(DIRECTORY ${SaxonCCore_PackageDir}/${SAXON_CMAKE_INSTALL_LIBDIR}/
-        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}
-        USE_SOURCE_PERMISSIONS
-        FILES_MATCHING
-        PATTERN cmake EXCLUDE
-        PATTERN *.dylib
-        PATTERN *.lib
-        PATTERN *.so
-        PATTERN *.so.*
-)
-install(DIRECTORY ${SaxonCCore_PackageDir}/bin/
-        TYPE BIN
-        USE_SOURCE_PERMISSIONS
-        FILES_MATCHING
-        PATTERN cmake EXCLUDE
-        PATTERN *.dll
-)
-
-install(DIRECTORY ${SaxonCCore_PackageDir}/${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}/
-        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
-        PATTERN *Config.cmake EXCLUDE
-        PATTERN *ConfigVersion.cmake EXCLUDE
-)
-
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
