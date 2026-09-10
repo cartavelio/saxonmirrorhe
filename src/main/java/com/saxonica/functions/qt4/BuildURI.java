@@ -16,19 +16,6 @@ import net.sf.saxon.value.StringValue;
  */
 public class BuildURI extends URIFunctions {
     @Override
-    public Expression makeFunctionCall(Expression... arguments) {
-        Expression[] newArgs = new Expression[2];
-        newArgs[0] = arguments[0];
-        if (arguments.length < 2 || arguments[1] instanceof DefaultedArgumentExpression) {
-            newArgs[1] = Literal.makeLiteral(new DictionaryMap());
-        } else {
-            newArgs[1] = arguments[1];
-        }
-        setArity(2);
-        return super.makeFunctionCall(newArgs);
-    }
-
-    @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         MapItem parts = (MapItem) arguments[0].head();
 

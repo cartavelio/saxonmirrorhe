@@ -23,19 +23,6 @@ import java.util.regex.Pattern;
  */
 public class ParseURI extends URIFunctions {
     @Override
-    public Expression makeFunctionCall(Expression... arguments) {
-        Expression[] newArgs = new Expression[2];
-        newArgs[0] = arguments[0];
-        if (arguments.length < 2 || arguments[1] instanceof DefaultedArgumentExpression) {
-            newArgs[1] = Literal.makeLiteral(new DictionaryMap());
-        } else {
-            newArgs[1] = arguments[1];
-        }
-        setArity(2);
-        return super.makeFunctionCall(newArgs);
-    }
-
-    @Override
     public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         String uristr = arguments[0].head().getStringValue();
         MapItem map = new HashTrieMap();
@@ -61,10 +48,14 @@ public class ParseURI extends URIFunctions {
             query = null;
         }
 
+        String filepath = null;
         final String scheme;
-        if (uristr.matches("^[A-Za-z]:.*$")) {
+        if (uristr.matches("^[A-Za-z][:|].*$")) {
             scheme = "file";
+            // Force the second character to be a colon
+            uristr = uristr.charAt(0) + ":" + uristr.substring(2);
             map = map.addEntry(SCHEME, new StringValue(scheme));
+            filepath = uristr;
             uristr = "/" + uristr;
         } else {
             if (uristr.matches("^[A-Za-z]+:.*$")) {
@@ -73,7 +64,13 @@ public class ParseURI extends URIFunctions {
                 map = map.addEntry(SCHEME, new StringValue(scheme));
                 uristr = uristr.substring(pos + 1);
             } else {
-                scheme = null;
+                if (uncPath && uristr.matches("^//[^/].*$")) {
+                    scheme = "file";
+                    map = map.addEntry(SCHEME, new StringValue(scheme));
+                    filepath = uristr;
+                } else {
+                    scheme = null;
+                }
             }
         }
 
@@ -91,9 +88,10 @@ public class ParseURI extends URIFunctions {
         }
 
         final String authority;
-        if (uristr.matches("^//*[a-zA-Z]:.*$")) {
+        if (uristr.matches("^//*[a-zA-Z][:|].*$")) {
             authority = null;
-            uristr = uristr.replaceAll("^/+", "/");
+            uristr = uristr.replaceAll("^/+([a-zA-Z]).", "/$1:");
+            filepath = uristr.substring(1);
         } else {
             Pattern pattern = Pattern.compile("^(///*)([^/]+)(/.*)?$");
             Matcher matcher = pattern.matcher(uristr);
@@ -162,6 +160,9 @@ public class ParseURI extends URIFunctions {
         }
 
         if (!"".equals(uristr)) {
+            if (filepath == null && (scheme == null || "file".equals(scheme))) {
+                filepath = uristr;
+            }
             map = map.addEntry(PATH, new StringValue(uristr));
             final ArrayList<GroundedValue> pathSegments = new ArrayList<>();
             // Can't use string split here because it collapses leading, trailing, and repeated delimiters
@@ -177,6 +178,11 @@ public class ParseURI extends URIFunctions {
             }
             pathSegments.add(new StringValue(decodeString(uristr)));
             map = map.addEntry(PATH_SEGMENTS, new SimpleArrayItem(pathSegments));
+        }
+
+        if (filepath != null) {
+            filepath = decodeString(filepath);
+            map = map.addEntry(FILEPATH, new StringValue(filepath));
         }
 
         if (query != null) {

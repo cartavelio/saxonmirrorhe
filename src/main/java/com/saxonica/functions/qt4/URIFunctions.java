@@ -1,6 +1,10 @@
 package com.saxonica.functions.qt4;
 
+import net.sf.saxon.expr.DefaultedArgumentExpression;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
@@ -35,12 +39,14 @@ abstract public class URIFunctions extends SystemFunction {
     protected static final AtomicValue QUERY_SEPARATOR = new StringValue("query-separator");
     protected static final AtomicValue ALLOW_DEPRECATED_FEATURES = new StringValue("allow-deprecated-features");
     protected static final AtomicValue OMIT_DEFAULT_PORTS = new StringValue("omit-default-ports");
+    protected static final AtomicValue UNC_PATH = new StringValue("unc-path");
     protected static final AtomicValue SCHEME = new StringValue("scheme");
     protected static final AtomicValue AUTHORITY = new StringValue("authority");
     protected static final AtomicValue USERINFO = new StringValue("userinfo");
     protected static final AtomicValue HOST = new StringValue("host");
     protected static final AtomicValue PORT = new StringValue("port");
     protected static final AtomicValue PATH = new StringValue("path");
+    protected static final AtomicValue FILEPATH = new StringValue("filepath");
     protected static final AtomicValue PATH_SEGMENTS = new StringValue("path-segments");
     protected static final AtomicValue QUERY_SEGMENTS = new StringValue("query-segments");
     protected static final AtomicValue QUERY = new StringValue("query");
@@ -54,6 +60,20 @@ abstract public class URIFunctions extends SystemFunction {
     protected boolean allowDeprecatedFeatures = false;
     protected boolean omitDefaultPorts = false;
     protected boolean hierarchical = true;
+    protected boolean uncPath = false;
+
+    @Override
+    public Expression makeFunctionCall(Expression... arguments) {
+        Expression[] newArgs = new Expression[2];
+        newArgs[0] = arguments[0];
+        if (arguments.length < 2 || arguments[1] instanceof DefaultedArgumentExpression) {
+            newArgs[1] = Literal.makeLiteral(new DictionaryMap());
+        } else {
+            newArgs[1] = arguments[1];
+        }
+        setArity(2);
+        return super.makeFunctionCall(newArgs);
+    }
 
     protected void checkOptions(Sequence[] arguments) throws XPathException {
         if (getArity() == 2) {
@@ -66,6 +86,7 @@ abstract public class URIFunctions extends SystemFunction {
             }
             allowDeprecatedFeatures = options.get(ALLOW_DEPRECATED_FEATURES) != null && options.get(ALLOW_DEPRECATED_FEATURES).effectiveBooleanValue();
             omitDefaultPorts = options.get(OMIT_DEFAULT_PORTS) != null && options.get(OMIT_DEFAULT_PORTS).effectiveBooleanValue();
+            uncPath = options.get(UNC_PATH) != null && options.get(UNC_PATH).effectiveBooleanValue();
         }
     }
 
