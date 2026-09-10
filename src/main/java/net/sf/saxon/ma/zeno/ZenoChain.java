@@ -217,6 +217,126 @@ public class ZenoChain<T> implements Iterable<T> {
         return new ZenoChain<T>(newMaster).reorganize();
     }
 
+
+    /**
+     * Replace the item at position n, zero-based
+     *
+     * @param n     the requested index
+     * @param value the replacement value
+     * @return the new ZenoChain
+     * @throws IndexOutOfBoundsException if n is negative or beyond the end of the list
+     */
+
+    public ZenoChain<T> replace(int n, T value) {
+        if (n < 0) {
+            throw new IndexOutOfBoundsException("Index " + n + " is negative");
+        }
+        int offset = 0;
+        ArrayList<ArrayList<T>> masterList2 = new ArrayList<>(masterList.size());
+        boolean done = false;
+        for (ArrayList<T> segment : masterList) {
+            if (offset + segment.size() > n && !done) {
+                ArrayList<T> replacementSegment = new ArrayList<>(segment.size());
+                replacementSegment.addAll(segment.subList(0, n - offset));
+                replacementSegment.add(value);
+                replacementSegment.addAll(segment.subList(n - offset + 1, segment.size()));
+                masterList2.add(replacementSegment);
+                done = true;
+            } else {
+                masterList2.add(segment);
+            }
+            offset += segment.size();
+        }
+        if (!done) {
+            throw new IndexOutOfBoundsException("Index " + n + " is too large");
+        }
+        return new ZenoChain<>(masterList2);
+    }
+
+    /**
+     * Remove the item at position n, zero-based
+     *
+     * @param n the requested index
+     * @return the new ZenoChain
+     * @throws IndexOutOfBoundsException if n is negative or beyond the end of the list
+     */
+
+    public ZenoChain<T> remove(int n) {
+        if (n < 0) {
+            throw new IndexOutOfBoundsException("Index " + n + " is negative");
+        }
+        int offset = 0;
+        ArrayList<ArrayList<T>> masterList2 = new ArrayList<>(masterList.size());
+        boolean done = false;
+        for (ArrayList<T> segment : masterList) {
+            if (offset + segment.size() > n && !done) {
+                if (segment.size() > 1) {
+                    ArrayList<T> replacementSegment = new ArrayList<>(segment.size() - 1);
+                    replacementSegment.addAll(segment.subList(0, n - offset));
+                    replacementSegment.addAll(segment.subList(n - offset + 1, segment.size()));
+                    masterList2.add(replacementSegment);
+                }
+                done = true;
+            } else {
+                masterList2.add(segment);
+            }
+            offset += segment.size();
+        }
+        if (!done) {
+            throw new IndexOutOfBoundsException("Index " + n + " is too large");
+        }
+        return new ZenoChain<>(masterList2);
+    }
+
+
+    /**
+     * Insert an item at position n, zero-based
+     *
+     * @param n     the requested index
+     * @param value the replacement value
+     * @return the new ZenoChain
+     * @throws IndexOutOfBoundsException if n is negative or beyond the end of the list
+     */
+
+    public ZenoChain<T> insert(int n, T value) {
+        if (n < 0) {
+            throw new IndexOutOfBoundsException("Index " + n + " is negative");
+        }
+        if (n == 0) {
+            return prepend(value);
+        }
+        int length = size();
+        if (n == length) {
+            return add(value);
+        }
+        if (n > length) {
+            throw new IndexOutOfBoundsException("Index " + n + " is too large");
+        }
+
+        int offset = 0;
+        ArrayList<ArrayList<T>> masterList2 = new ArrayList<>(masterList.size());
+        boolean done = false;
+        for (ArrayList<T> segment : masterList) {
+            if (offset + segment.size() > n && !done) {
+                ArrayList<T> replacementSegment = new ArrayList<>(segment.size() + 1);
+                replacementSegment.addAll(segment.subList(0, n - offset));
+                replacementSegment.add(value);
+                replacementSegment.addAll(segment.subList(n - offset, segment.size()));
+                masterList2.add(replacementSegment);
+                done = true;
+            } else {
+                masterList2.add(segment);
+            }
+            offset += segment.size();
+        }
+        if (!done) {
+            // Shouldn't happen
+            throw new IndexOutOfBoundsException("Index " + n + " is too large");
+        }
+        return new ZenoChain<>(masterList2);
+    }
+
+
     /**
      * Internal method to reduce fragmentation in a ZenoChain
      * @return a new ZenoChain with identical contents to the supplied ZenoChain,
