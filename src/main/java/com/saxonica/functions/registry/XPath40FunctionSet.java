@@ -111,7 +111,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         ItemType schemaTypeRecord = SchemaTypeFn.schemaTypeRecord;
 
-        register("atomic-type-annotation", 1, e -> e.populate(AtomicTypeAnnotationFn::new, BuiltInAtomicType.QNAME, ONE, 0)
+        register("atomic-type-annotation", 1, e -> e.populate(AtomicTypeAnnotationFn::new, schemaTypeRecord, ONE, 0)
                          .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
         //#if EE==true || PE==true
@@ -475,7 +475,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("node-kind", 1, e -> e.populate(NodeKind_1::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, Type.NODE_TYPE, OPT | INS, EMPTY));
 
-        register("node-type-annotation", 1, e -> e.populate(NodeTypeAnnotationFn::new, BuiltInAtomicType.QNAME, ONE, 0)
+        register("node-type-annotation", 1, e -> e.populate(NodeTypeAnnotationFn::new, schemaTypeRecord, ONE, 0)
                 .arg(0, AnyNodeTest.getInstance(), ONE, null));
         
         register("normalize-unicode", 2, e -> e.populate(NormalizeUnicode::new, BuiltInAtomicType.STRING, ONE, 0)
