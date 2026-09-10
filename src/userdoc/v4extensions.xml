@@ -895,8 +895,6 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <ul>
                <li><code>fn:concat()</code></li>
                <li><code>fn:codepoints-to-string()</code></li>
-               <li><code>array:of()</code></li>
-               <li><code>array:members()</code></li>
             </ul>
          </section>
          
