@@ -44,11 +44,7 @@ public class StringTool {
 
     public static int[] expand(UnicodeString s) {
         int[] array = new int[s.length32()];
-        IntIterator iter = s.codePoints();
-        int i = 0;
-        while (iter.hasNext()) {
-            array[i++] = iter.next();
-        }
+        s.copy32bit(array, 0);
         return array;
     }
 

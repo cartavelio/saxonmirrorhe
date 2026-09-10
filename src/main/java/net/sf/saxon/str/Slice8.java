@@ -161,6 +161,13 @@ public class Slice8 extends UnicodeString {
         }
     }
 
+    @Override
+    void copy32bit(int[] target, int offset) {
+        for (int i = start, j = offset; i < end; ) {
+            target[j++] = bytes[i++] & 0xff;
+        }
+    }
+
     /**
      * Compute a hashCode. All implementations of {@code UnicodeString} use compatible hash codes and the
      * hashing algorithm is therefore identical to that for {@code java.lang.String}. This means

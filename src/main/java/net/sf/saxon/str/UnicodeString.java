@@ -474,6 +474,20 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Copy this string, as a sequence of 32-bit codepoints, to a specified array
+     *
+     * @param target the target array: the caller must ensure there is sufficient capacity
+     * @param offset the position in the target array as a codepoint offset
+     */
+
+    void copy32bit(int[] target, int offset) {
+        IntIterator iter = codePoints();
+        while (iter.hasNext()) {
+            target[offset++] = iter.next();
+        }
+    }
+
 
 }
 

@@ -101,7 +101,7 @@ public class CommentStripper extends ProxyReceiver {
 
     private void flush() throws XPathException {
         if (currentTextNode != null) {
-            nextReceiver.characters(currentTextNode.economize(), Loc.NONE, ReceiverOption.NONE);
+            nextReceiver.characters(currentTextNode, Loc.NONE, ReceiverOption.NONE);
         }
         currentTextNode = null;
     }

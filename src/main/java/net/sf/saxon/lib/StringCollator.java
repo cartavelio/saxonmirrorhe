@@ -8,6 +8,7 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 
 /**
@@ -45,6 +46,15 @@ public interface StringCollator {
      */
 
     boolean comparesEqual(UnicodeString s1, UnicodeString s2);
+
+    /**
+     * Test if a supplied string compares equal to the empty string
+     * @param s1 the supplied string
+     */
+
+    default boolean isEqualToEmpty(UnicodeString s1) {
+        return comparesEqual(s1, EmptyUnicodeString.getInstance());
+    }
 
     /**
      * Get a collation key for a String. The essential property of collation keys

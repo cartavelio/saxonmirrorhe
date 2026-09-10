@@ -126,7 +126,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public UnicodeBuilder append(CharSequence str) {
-        return append(StringTool.codePoints(str));
+        return append(StringTool.fromCharSequence(str));
     }
 
     /**
@@ -142,10 +142,9 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
             return this;
         }
         ensureCapacity(len);
-        IntIterator iter = str.codePoints();
-        while (iter.hasNext()) {
-            codepoints[used++] = iter.next();
-        }
+        str.copy32bit(codepoints, used);
+        used += len;
+
         int width = str.getWidth();
         if (width > 8) {
             if (width > 16) {

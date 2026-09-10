@@ -72,7 +72,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
         if (!prepared) {
             prepared = true;
             sourceBinding.setProperty(SourceBinding.BindingProperty.PARAM, true);
-            if (getParent() instanceof XSLFunction) {
+            if (getParent() instanceof XSLFunction && getCompilation().getCompilerInfo().getXsltVersion() != 40) {
                 permittedAttributes.remove(SourceBinding.BindingProperty.SELECT);
                 sourceBinding.setProperty(SourceBinding.BindingProperty.DISALLOWS_CONTENT, true);
             }
@@ -81,7 +81,8 @@ public class XSLLocalParam extends XSLGeneralVariable {
                 compileError("For attribute 'tunnel' within an " + getParent().getDisplayName() +
                         " parameter, the only permitted value is 'no'", "XTSE0020");
             }
-            if (getParent() instanceof XSLFunction && getAttributeValue(NamespaceUri.NULL, "required") != null) {
+            if (getParent() instanceof XSLFunction && getAttributeValue(NamespaceUri.NULL, "required") != null
+                    && getCompilation().getCompilerInfo().getXsltVersion() != 40) {
                 if (!sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
                     compileError("For attribute 'required' within an " + getParent().getDisplayName() +
                         " parameter, the only permitted value is 'yes'", "XTSE0020");
@@ -108,7 +109,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
             compileError("xsl:param must be immediately within a template, function or stylesheet", "XTSE0010");
         }
 
-        if (hasChildNodes() && getParent() instanceof XSLFunction) {
+        if (hasChildNodes() && getParent() instanceof XSLFunction && getCompilation().getCompilerInfo().getXsltVersion() != 40) {
             compileError("Function parameters cannot have a default value", "XTSE0760");
         }
 

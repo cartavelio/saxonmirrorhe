@@ -379,6 +379,15 @@ public class ZenoString extends UnicodeString {
         }
     }
 
+
+    @Override
+    void copy32bit(int[] target, int offset) {
+        for (UnicodeString us : segments) {
+            us.copy32bit(target, offset);
+            offset += us.length32();
+        }
+    }
+
     private ZenoString consolidate() {
         // internal, so works in-situ
 

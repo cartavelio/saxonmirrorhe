@@ -134,6 +134,19 @@ public class Slice16 extends UnicodeString {
         }
     }
 
+    /**
+     * Copy this string, as a sequence of 32-bit codepoints, to a specified array
+     *
+     * @param target the target array: the caller must ensure there is sufficient capacity
+     * @param offset the position in the target array as a codepoint offset
+     */
+    @Override
+    void copy32bit(int[] target, int offset) {
+        for (int i = start, j = offset; i < end;) {
+            target[j++] = chars[i++];
+        }
+    }
+
     @Override
     public IntIterator codePoints() {
         return new IntIterator() {

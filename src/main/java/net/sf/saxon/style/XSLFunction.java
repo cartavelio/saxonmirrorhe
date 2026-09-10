@@ -574,6 +574,9 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                 param.setRequiredType(((XSLLocalParam) node).getRequiredType());
                 param.setVariableQName(((XSLLocalParam) node).getVariableQName());
                 param.setSlotNumber(((XSLLocalParam) node).getSlotNumber());
+                if (!((XSLLocalParam) node).isRequiredParam()) {
+                    param.setDefaultValueExpression(((XSLLocalParam) node).getSourceBinding().getSelectExpression());
+                }
                 if (count == 0 && streamability != FunctionStreamability.UNCLASSIFIED) {
                     param.setFunctionStreamability(streamability);
                 }

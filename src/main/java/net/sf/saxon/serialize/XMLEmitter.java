@@ -683,12 +683,9 @@ public class XMLEmitter extends Emitter {
      */
 
     protected int testCharacters(UnicodeString chars) {
-        IntIterator iter = chars.codePoints();
-        while (iter.hasNext()) {
-            int ch = iter.next();
-            if (ch > 127 && !characterSet.inCharset(ch)) {
-                return ch;
-            }
+        long foundInvalid = chars.indexWhere(ch -> ch > 127 && !characterSet.inCharset(ch), 0);
+        if (foundInvalid >= 0) {
+            return chars.codePointAt(foundInvalid);
         }
         return 0;
     }

@@ -122,21 +122,13 @@ public class CharacterMap {
         // First scan the string to see if there are any possible mapped
         // characters; if not, don't bother creating the new buffer
 
-        boolean move = false;
-        IntIterator iter = in.codePoints();
-        while (iter.hasNext()) {
-            int c = iter.next();
-            if (c >= min && c <= max) {
-                move = true;
-                break;
-            }
-        }
+        boolean move = in.indexWhere(c -> (c >= min && c <= max), 0) >= 0;
         if (!move) {
             return in;
         }
 
         UnicodeBuilder buffer = new UnicodeBuilder();
-        iter = in.codePoints();
+        IntIterator iter = in.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();
             if (c >= min && c <= max) {

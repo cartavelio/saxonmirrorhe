@@ -158,5 +158,10 @@ public class UnicodeChar extends UnicodeString {
         target[offset+1] = (byte) (codepoint >> 8);
         target[offset+2] = (byte) (codepoint & 0xff);
     }
+
+    @Override
+    void copy32bit(int[] target, int offset) {
+        target[offset] = codepoint;
+    }
 }
 

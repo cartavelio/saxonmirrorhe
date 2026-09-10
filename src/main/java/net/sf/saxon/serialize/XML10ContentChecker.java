@@ -20,7 +20,6 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.z.IntIterator;
 
 /**
  * This class is used on the serialization pipeline to check that the document conforms
@@ -118,16 +117,14 @@ public class XML10ContentChecker extends ProxyReceiver {
      */
 
     private void checkString(UnicodeString in, Location locationId) throws XPathException {
-        IntIterator iter = in.codePoints();
-        while (iter.hasNext()) {
-            int ch32 = iter.next();
-            if (!XMLCharacterData.isValid10(ch32)) {
-                XPathException err = new XPathException("The result tree contains a character not allowed by XML 1.0 (hex " +
-                        Integer.toHexString(ch32) + ')');
-                err.setErrorCode("SERE0006");
-                err.setLocator(locationId);
-                throw err;
-            }
+        long foundInvalid = in.indexWhere(c -> !XMLCharacterData.isValid10(c), 0);
+        if (foundInvalid >= 0) {
+            int ch32 = in.codePointAt(foundInvalid);
+            XPathException err = new XPathException("The result tree contains a character not allowed by XML 1.0 (hex " +
+                    Integer.toHexString(ch32) + ')');
+            err.setErrorCode("SERE0006");
+            err.setLocator(locationId);
+            throw err;
         }
     }
 

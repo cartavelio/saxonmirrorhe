@@ -34,7 +34,6 @@ import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.Whitespace;
-import net.sf.saxon.z.IntIterator;
 
 import java.util.function.BiConsumer;
 
@@ -73,16 +72,8 @@ public final class ValueOf extends SimpleNodeConstructor {
         // If value is fixed, test whether there are any special characters that might need to be
         // escaped when the time comes for serialization
         if (select instanceof StringLiteral) {
-            boolean special = false;
             UnicodeString val = ((StringLiteral) select).getString();
-            IntIterator iter = val.codePoints();
-            while (iter.hasNext()) {
-                int c = iter.next();
-                if (c < 33 || c > 126 || c == '<' || c == '>' || c == '&') {
-                    special = true;
-                    break;
-                }
-            }
+            boolean special = val.indexWhere(c -> c < 33 || c > 126 || c == '<' || c == '>' || c == '&', 0) >= 0;
             if (!special) {
                 options |= ReceiverOption.NO_SPECIAL_CHARS;
             }
