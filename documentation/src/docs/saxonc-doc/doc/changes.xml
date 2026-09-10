@@ -71,13 +71,7 @@
                C++</a>, and improved the C++ API documentation for relevant methods when the caller
                must deallocate the memory used.</p></li>
             <li><p>we have introduced a built C++ API library (.dll / .so / .dylib) along with
-               accompanying CMake files to simplify integration into C++ applications.The SaxonC
-               C/C++ libraries can be imported into your application using the provided CMake files located:
-               <code>lib/cmake/SaxonCEE/</code>.</p>
-               <p>To use SaxonC in a C++ project, users now only need the two compiled library files and the
-                  header files—greatly reducing setup complexity. Integrating with a project already using
-                  CMake is as simple as using FindPackage(SaxonCHE 12.6.0) (Or SaxonCEE, or SaxonCPE,
-                  if using the EE or PE editions). A sample CMake project is provided with the samples in the download ZIP.</p>
+               accompanying CMake files to simplify integration into C++ applications.</p>
             </li>
          </ul>
          
@@ -277,6 +271,43 @@
             </li>
             <li>From 12.3, GLIBC 2.32 is no longer a minimum prerequisite for SaxonC. SaxonC now now works on
                older versions of GLIBC, allowing users to run the product on these systems.</li>
+         </ul>
+         <p>From SaxonC 12.6:</p>
+         <ul>
+            <li>
+               <p>SaxonC has moved to using CMake, and a CMake Config package is provided to allow
+                  users to quickly and simply integrate it into their existing CMake-using project.
+                  The SaxonC C/C++ libraries can be imported into your application using the
+                  provided CMake files located in: <code>lib/cmake/SaxonCEE/</code>.</p>
+               <p>To use SaxonC in a C++ project, users now only need the two shared library files
+                  and the header files—greatly reducing setup complexity. Integrating with a project
+                  already using CMake is as simple as using <code>FindPackage(SaxonCHE 12.6.0)</code> (Or
+                  SaxonCEE, or SaxonCPE, if using the EE or PE editions). A sample CMake project is
+                  provided with the samples in the download ZIP.</p>
+            </li>
+            <li>
+               <p>As a result of the move to supplying a pre-built shared library for both the core
+                  library, we have file and directory names in the download .ZIP to align with CMake
+                  package conventions adjusted the library filenames to make their relationship
+                  clear.</p>
+               <p>The core library file, <code>libsaxon-<i>X</i>ec-12.6.0.so</code>, (where <i>X</i>
+                  is <code>e</code>, <code>p</code> or <code>h</code> depending on the edition)
+                  becomes <code>libsaxonc-<i>X</i>e-core.so.12.6.0</code>, and on windows
+                        <code>saxonc-<i>X</i>e-core.dll</code>, and the new library containing the
+                  user-facing API is <code>libsaxonc-<i>X</i>e.so.12.6.0</code>.</p>
+               <p>The proper Soname and linker-name symlinks are now being created on macOS and
+                  Linux too, with, for example <code>libsaxonc-ee.so</code> being and symlink to
+                     <code>libsaxonc-ee.so.12</code>, which in turn is a symlink to the actual
+                  library file <code>libsaxonc-ee.so.12.6.0</code>. (On macOS this is
+                     <code>libsaxonc-ee.dylib -> libsaxonc-ee.12.dylib ->
+                     libsaxonc-ee.12.6.0.dylib</code>.)</p>
+               <p>On Windows the filename is simply <code>saxonc-<i>X</i>e.dll</code>.</p>
+            </li>
+            <li>The changes to Soname and library filenames also mean that it's now possible to link
+               to SaxonC with <code>-lsaxonc-ee</code> instead of <code>-llibsaxon-eec-12.6.0</code>.</li>
+            <li>A CMake Config-file package is provided as part of the download, supports inclusion
+               of the library in a CMake-using project with <code>find_package()</code>. A sample
+               CMake project is included in the download demonstrating this.</li>
          </ul>
       </category>
    </release>
