@@ -662,12 +662,12 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
             // level because we have more information now.
             ContextItemStaticInfo info = ContextItemStaticInfo.ABSENT;
             exp2 = exp.typeCheck(visitor, info);
-            if (resultType != null) {
+            if (declaredResultType != null && !declaredResultType.equals(SequenceType.ANY_SEQUENCE)) {
                 Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT,
                                            functionName == null ? "" : functionName.getDisplayName() + "#" + getArity(), 0,
                                            getPackageData().isXSLT() && getFunctionName() != null ? "XTTE0780" : "XPTY0004");
-                exp2 = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(exp2, resultType, role, visitor);
+                exp2 = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(exp2, declaredResultType, role, visitor);
             }
         } catch (XPathException err) {
             throw err.maybeWithLocation(getLocation());
