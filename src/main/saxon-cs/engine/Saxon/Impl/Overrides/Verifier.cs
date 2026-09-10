@@ -33,7 +33,7 @@ namespace Saxon.Impl.Overrides {
             return valid;
         }
 
-        protected internal override bool verify2(string data, string signature)
+        protected internal bool verify2(string data, string signature)
         {
             var algorithm = SignatureAlgorithm.Ed25519;
             var publicKeyBytes = Convert.FromBase64String(ed25519Pem);

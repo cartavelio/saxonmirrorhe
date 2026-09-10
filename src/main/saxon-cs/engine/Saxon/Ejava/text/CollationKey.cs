@@ -1,6 +1,9 @@
 using Sys = System;
 namespace Saxon.Ejava.text {
-    public class CollationKey : Saxon.Ejava.lang.Comparable<CollationKey> {
+    public class CollationKey : Saxon.Ejava.lang.Comparable<CollationKey>
+    {
+        
+        
         public CollationKey(string s) {
             
         }

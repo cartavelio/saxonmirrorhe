@@ -278,9 +278,11 @@ namespace Saxon.Api {
                     return xNode;
                 }
             }
+#if EE            
             if (value is Saxon.Impl.XDoc.XNodeWrapper wrapper) {
                 return (XNode) wrapper.getRealNode();
             }
+#endif
 
             return null;
         }

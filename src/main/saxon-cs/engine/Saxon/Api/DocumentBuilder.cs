@@ -17,7 +17,9 @@ using Saxon.Hej.pull;
 using Saxon.Hej.serialize;
 using Saxon.Hej.trans;
 using Saxon.Impl.Dom;
+#if EE
 using Saxon.Impl.XDoc;
+#endif
 
 namespace Saxon.Api {
     /// <summary>
@@ -92,6 +94,10 @@ namespace Saxon.Api {
             set => s9Builder.setLineNumbering(value);
         }
 
+
+
+        
+
         /// <summary>
         /// Determines whether schema validation is applied to documents loaded using this
         /// <c>DocumentBuilder</c>, and if so, whether it is strict or lax. If schema validation
@@ -153,6 +159,7 @@ namespace Saxon.Api {
             }
         }
 
+        
         /// <summary>
         /// The required name of the top level element in a document instance being validated
         /// against a schema.
@@ -575,6 +582,8 @@ namespace Saxon.Api {
             return new XdmNode(wrappedNode);
         }
         
+#if EE        
+        
         /// <summary>
         /// Wrap a Linq document node, supplied as an <c>System.Linq.XDocument</c>, as a Saxon <c>XdmNode</c>.
         /// </summary>
@@ -617,6 +626,7 @@ namespace Saxon.Api {
             XNodeWrapper wrappedNode = tree.wrap(node);
             return new XdmNode(wrappedNode);
         }
+#endif
         
     }
 }
