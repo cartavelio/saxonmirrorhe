@@ -11,6 +11,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.*;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.*;
@@ -158,7 +159,19 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
         return false;
     }
 
-
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath langauge version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        if (isNamespaceSensitive()) {
+            return QNameCoercionPlan.INSTANCE;
+        }
+        return version >= 40 ? DerivedAtomicCoercionPlan.INSTANCE : AtomicCoercionPlan.INSTANCE;
+    }
 
     /**
      * Get an alphabetic code representing the type, or at any rate, the nearest built-in type
