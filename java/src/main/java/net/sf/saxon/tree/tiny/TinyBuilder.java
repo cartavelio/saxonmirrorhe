@@ -21,6 +21,7 @@ import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.Untyped;
 
 import java.util.Arrays;
 import java.util.Stack;
@@ -48,9 +49,9 @@ public class TinyBuilder extends Builder {
     private boolean ended = false;
     private boolean noNewNamespaces = true;
     private Statistics statistics;
-    private boolean markDefaultedAttributes = false;
+    private final boolean markDefaultedAttributes;
     private Eligibility textualElementEligibilityState = Eligibility.INELIGIBLE;
-    private UnicodeBuilder commentBuilder = new UnicodeBuilder();
+    private final UnicodeBuilder commentBuilder = new UnicodeBuilder();
 
     /**
      * Create a TinyTree builder
@@ -140,8 +141,8 @@ public class TinyBuilder extends Builder {
         }
         if (useEventLocation) {
             Object copier = getPipelineConfiguration().getComponent(CopyInformee.class.getName());
-            if (copier instanceof LocationCopier) {
-                setSystemId(((LocationCopier) copier).getSystemId());
+            if (copier instanceof LocationCopier locCopier) {
+                setSystemId(locCopier.getSystemId());
             }
         }
         super.open();
@@ -283,9 +284,16 @@ public class TinyBuilder extends Builder {
 //            tree.markTopWithinEntity(nodeNr);
 //        }
 //        //#endif
-        for (AttributeInfo att : attributes) {
-            attribute2(att.getNodeName(), att.getType(),
-                      getAttValue(att), location, att.getProperties());
+        if (attributes instanceof SingletonAttributeMap) {
+            // Common enough to handle specially
+            AttributeInfo att = (AttributeInfo)attributes;
+            addAttributeToTree(att.getNodeName(), att.getType(),
+                               getAttValue(att), att.getProperties());
+        } else {
+            for (AttributeInfo att : attributes) {
+                addAttributeToTree(att.getNodeName(), att.getType(),
+                                   getAttValue(att), att.getProperties());
+            }
         }
         textualElementEligibilityState = (noNewNamespaces && !lineNumbering) ? Eligibility.PRIMED : Eligibility.INELIGIBLE;
         tree.addNamespaces(nodeNr, namespaceStack.peek());
@@ -293,14 +301,8 @@ public class TinyBuilder extends Builder {
     }
 
     private void startElementSetupNamespaces(NamespaceMap namespaces) {
-        noNewNamespaces = true;
-        if (namespaceStack.isEmpty()) {
-            noNewNamespaces = false;
-            namespaceStack.push(namespaces);
-        } else {
-            noNewNamespaces = namespaces == namespaceStack.peek();
-            namespaceStack.push(namespaces);
-        }
+        noNewNamespaces = !namespaceStack.isEmpty() && namespaces == namespaceStack.peek();
+        namespaceStack.push(namespaces);
     }
 
     private void startElementSetupSiblings() {
@@ -329,9 +331,7 @@ public class TinyBuilder extends Builder {
         nodeNr = tree.addNode(Type.ELEMENT, currentDepth, -1, -1, nameCode);
 
         isIDElement = ReceiverOption.contains(properties, ReceiverOption.IS_ID);
-        int typeCode = type.getFingerprint();
-        if (typeCode != StandardNames.XS_UNTYPED) {
-
+        if (type != Untyped.INSTANCE) {
             tree.setElementAnnotation(nodeNr, type);
             if (ReceiverOption.contains(properties, ReceiverOption.NILLED_ELEMENT)) {
                 tree.setNilled(nodeNr);
@@ -385,8 +385,7 @@ public class TinyBuilder extends Builder {
     }
 
 
-    private void attribute2(/*@NotNull*/ NodeName attName, SimpleType type, String value, Location locationId, int properties)
-            throws XPathException {
+    private void addAttributeToTree(NodeName attName, SimpleType type, String value, int properties) {
         // System.err.println("attribute " + nameCode + "=" + value);
         int fp = attName.obtainFingerprint(namePool);
         String prefix = attName.getPrefix();
@@ -422,11 +421,11 @@ public class TinyBuilder extends Builder {
             // we're relying on the fact that an ID element has no element children!
             tree.indexIDElement(currentRoot, prevAtDepth[currentDepth]);
             isIDElement = false;
-        } else if (eligibleAsTextualElement &&
+        } else if (noNewNamespaces &&
+                eligibleAsTextualElement &&
                 tree.nodeKind[nodeNr] == Type.TEXT &&
                 tree.nodeKind[nodeNr-1] == Type.ELEMENT &&
-                tree.alpha[nodeNr-1] == -1 &&
-                noNewNamespaces) {
+                tree.alpha[nodeNr-1] == -1) {
             // Collapse a simple element with text content and no attributes or namespaces into a single node
             // of type TRIVIAL_ELEMENT
             //System.err.println("Created textual element");

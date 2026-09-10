@@ -88,7 +88,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             MapItem suppliedOptions = (MapItem) args[1].head();
             int hostVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             if (suppliedOptions == null) {
-                suppliedOptions = EmptyMap.getInstance(40);
+                suppliedOptions = EmptyMap.INSTANCE_40;
             }
             Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context, hostVersion);
             xqueryVersionOption = checkedOptions.get("xquery-version");
@@ -260,7 +260,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             }
         };
 
-        MapItem functionsMap = EmptyMap.getInstance(40);
+        MapItem functionsMap = EmptyMap.INSTANCE_40;
         final List<XQueryFunction> list = new ArrayList<>();
         functionLib.processAllFunctions(fn -> list.add(fn));
         for (XQueryFunction function : list) {

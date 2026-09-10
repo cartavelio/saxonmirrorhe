@@ -483,7 +483,7 @@ public abstract class AbstractXsltTransformer {
 
     public void setSchemaValidationMode(ValidationMode mode) {
         if (mode != null) {
-            controller.setSchemaValidationMode(mode.getNumber());
+            controller.setSchemaValidationMode(Validation.fromValidationMode(mode));
         }
     }
 
@@ -498,7 +498,7 @@ public abstract class AbstractXsltTransformer {
      */
 
     public ValidationMode getSchemaValidationMode() {
-        return ValidationMode.get(controller.getSchemaValidationMode());
+        return XQueryEvaluator.getSchemaValidationMode(controller.getSchemaValidationMode());
     }
 
     /**

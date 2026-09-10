@@ -31,18 +31,12 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.jiter.WrappingJavaIterator;
-import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.tree.tiny.TinyElementImpl;
-import net.sf.saxon.tree.tiny.TinyNodeImpl;
-import net.sf.saxon.tree.tiny.TinyTextualElement;
+import net.sf.saxon.tree.tiny.*;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
-import net.sf.saxon.type.gnode.XNodeType;
-import net.sf.saxon.z.IntPredicateLambda;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -50,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 
@@ -533,9 +528,17 @@ public final class Navigator {
         int num = 0;
         NodePredicate countTest;
         if (count == null) {
-            countTest = NodePredicateLambda.of(
-                    n -> node.getQName().equals(((NodeInfo) n).getQName()));
-            num = 1;
+            if (node.hasFingerprint()) {
+                int reqFp = node.getFingerprint();
+                countTest = NodePredicateLambda.of(
+                        n -> reqFp == ((NodeInfo)n).getFingerprint());
+                num = 1;
+            }  else {
+                StructuredQName req = node.getQName();
+                countTest = NodePredicateLambda.of(
+                        n -> req.equals(((NodeInfo) n).getQName()));
+                num = 1;
+            }
         } else {
             countTest = NodePredicateLambda.of(n -> {
                 try {
@@ -696,16 +699,16 @@ public final class Navigator {
         switch (node.getNodeKind()) {
             case Type.DOCUMENT: {
                 out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
-                for (NodeInfo child : node.children()) {
+                SequenceIterator children = node.iterateChildAxis(null);
+                for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     child.copy(out, copyOptions, locationId);
                 }
                 out.endDocument();
                 break;
             }
             case Type.ELEMENT: {
-                SchemaType annotation = (copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0 ?
-                        node.getSchemaType() :
-                        Untyped.getInstance();
+                SchemaType annotation;
+                annotation = (copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0 ? node.getSchemaType() : Untyped.INSTANCE;
 
                 NodeName elementName = NameOfNode.makeName(node);
                 NamespaceMap nsMap;
@@ -732,7 +735,8 @@ public final class Navigator {
 
                 // output the children
 
-                for (NodeInfo child : node.children()) {
+                SequenceIterator children = node.iterateChildAxis(null);
+                for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     child.copy(out, copyOptions, locationId);
                 }
 
@@ -794,14 +798,16 @@ public final class Navigator {
         switch (node.getNodeKind()) {
             case Type.DOCUMENT: {
                 out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
-                for (NodeInfo child : node.children()) {
+                SequenceIterator children = node.iterateChildAxis(null);
+                for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     copy(child, out, copyOptions, locationId);
                 }
                 out.endDocument();
                 break;
             }
             case Type.ELEMENT: {
-                SchemaType annotation = keepTypes ? node.getSchemaType() : Untyped.getInstance();
+                SchemaType annotation;
+                annotation = keepTypes ? node.getSchemaType() : Untyped.INSTANCE;
 
                 out.startElement(NameOfNode.makeName(node), annotation,
                                  locationId, ReceiverOption.DISINHERIT_NAMESPACES | ReceiverOption.NAMESPACE_OK);
@@ -819,7 +825,8 @@ public final class Navigator {
 
                 // output the children
 
-                for (NodeInfo child : node.children()) {
+                SequenceIterator children = node.iterateChildAxis(null);
+                for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     copy(child, out, copyOptions, locationId);
                 }
 
@@ -1193,20 +1200,19 @@ public final class Navigator {
      * the tree has a large fan-out.
      */
 
-    public static IntPredicateProxy getNumberedNodeMatcher(NodePredicate predicate, NodeVectorTree tree) {
+    public static IntPredicate getNumberedNodeMatcher(NodePredicate predicate, NodeVectorTree tree) {
         if (predicate == null || predicate == AnyGNode.TEST) {
             final byte[] nodeKind = tree.getNodeKindArray();
-            return IntPredicateLambda.of(
-                    nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER);
+            return nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER;
         }
         if (predicate instanceof NodeVectorMatchMaker) {
             return ((NodeVectorMatchMaker)predicate).getMatcher(tree);
         } else {
             final byte[] nodeKind = tree.getNodeKindArray();
-            return IntPredicateLambda.of(
-                    nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER && predicate.test(tree.getNode(nodeNr)));
+            return nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER && predicate.test(tree.getNode(nodeNr));
         }
     }
+
 
     /**
      * Get a UType indicating the kind of nodes that can potentially be matched by a NodePredicate,
@@ -1217,9 +1223,6 @@ public final class Navigator {
         // TODO: refine this
         if (predicate instanceof NodeTest) {
             return ((NodeTest)predicate).getUType();
-        }
-        if (predicate instanceof XNodeType) {
-            return ((XNodeType) predicate).getUType();
         }
         return UType.XNODE;
     }
@@ -1236,14 +1239,14 @@ public final class Navigator {
     /*@NotNull*/
     public static SequenceIterator filteredSingleton(GNode node, NodePredicate nodeTest) {
         if (node != null && (nodeTest == null || nodeTest.test(node))) {
-            return SingletonIterator.makeIterator(node);
+            return new SingletonIterator(node);
         } else {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
     }
 
     public static SequenceIterator orSelf(GNode origin, SequenceIterator iter, NodePredicate predicate) {
-        if (iter == EmptyIterator.getInstance()) {
+        if (iter == EmptyIterator.INSTANCE) {
             return filteredSingleton(origin, predicate);
         } else if (predicate == null || predicate.test(origin)) {
             return new PrependIterator(origin, iter);
@@ -1566,7 +1569,7 @@ public final class Navigator {
                         children = Reverse.getReverseIterator(children);
                     }
                 } else {
-                    children = EmptyIterator.getInstance();
+                    children = EmptyIterator.INSTANCE;
                 }
                 if (forwards && includeSelf) {
                     return start;
@@ -1611,13 +1614,13 @@ public final class Navigator {
                     // gets children of the attribute's parent node
                     NodeInfo parent = (NodeInfo)start.getParent();
                     if (parent == null) {
-                        siblingEnum = EmptyIterator.getInstance();
+                        siblingEnum = EmptyIterator.INSTANCE;
                     } else {
                         siblingEnum = parent.iterateChildAxis(AnyGNode.TEST);
                     }
                     break;
                 default:
-                    siblingEnum = EmptyIterator.getInstance();
+                    siblingEnum = EmptyIterator.INSTANCE;
                     break;
             }
         }
@@ -1649,7 +1652,7 @@ public final class Navigator {
             GNode nexta = (GNode)ancestorEnum.next();
             if (nexta != null) {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
-                    siblingEnum = EmptyIterator.getInstance();
+                    siblingEnum = EmptyIterator.INSTANCE;
                 } else {
                     siblingEnum = nexta.iterateFollowingSiblingAxis(AnyGNode.TEST);
                 }
@@ -1668,6 +1671,10 @@ public final class Navigator {
      */
 
     public static SequenceIterator iteratePrecedingOrAncestorAxis(GNode origin, NodePredicate predicate) {
+        if (origin instanceof TinyNodeImpl n && !(origin instanceof TinyAttributeImpl)) {
+            // Fast path for tinytree
+            return new net.sf.saxon.tree.tiny.PrecedingIterator(n.getTree(), n, predicate, true);
+        }
         PrecedingIterator iter = new PrecedingIterator(origin, true);
         if (predicate != null && predicate != AnyGNode.TEST) {
             return new AxisFilter(iter, predicate);
@@ -1700,19 +1707,12 @@ public final class Navigator {
         public PrecedingIterator(/*@NotNull*/ GNode start, boolean includeAncestors) {
             this.includeAncestors = includeAncestors;
             ancestorEnum = new AncestorIterator(start, false);
-            switch (start.getNodeKind()) {
-                case Type.ELEMENT:
-                case Type.TEXT:
-                case Type.COMMENT:
-                case Type.PROCESSING_INSTRUCTION:
-                case Type.JNODE:
+            siblingEnum = switch (start.getNodeKind()) {
+                case Type.ELEMENT, Type.TEXT, Type.COMMENT, Type.PROCESSING_INSTRUCTION, Type.JNODE ->
                     // get preceding-sibling enumeration
-                    siblingEnum = start.iteratePrecedingSiblingAxis(AnyGNode.TEST);
-                    break;
-                default:
-                    siblingEnum = EmptyIterator.getInstance();
-                    break;
-            }
+                    start.iteratePrecedingSiblingAxis(AnyGNode.TEST);
+                default -> EmptyIterator.INSTANCE;
+            };
         }
 
         @Override
@@ -1743,7 +1743,7 @@ public final class Navigator {
             GNode nexta = (GNode)ancestorEnum.next();
             if (nexta != null) {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
-                    siblingEnum = EmptyIterator.getInstance();
+                    siblingEnum = EmptyIterator.INSTANCE;
                 } else {
                     siblingEnum = nexta.iteratePrecedingSiblingAxis(AnyGNode.TEST);
                 }

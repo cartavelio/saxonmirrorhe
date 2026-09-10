@@ -51,7 +51,6 @@ public class SingletonClosure extends Closure implements Sequence {
         savedXPathContext = context.newContext();
         savedXPathContext.setOrigin(this);
         saveContext(exp, context);
-        //Instrumentation.count("SingletonClosure.new()");
     }
 
     /**
@@ -64,7 +63,7 @@ public class SingletonClosure extends Closure implements Sequence {
         try {
             Item item = asItem();
             if (item == null) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             } else if (learningEvaluator != null) {
                 return new ReportingSingletonIterator(item, learningEvaluator, serialNumber);
             } else {

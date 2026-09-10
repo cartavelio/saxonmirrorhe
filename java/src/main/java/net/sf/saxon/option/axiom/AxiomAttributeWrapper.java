@@ -389,7 +389,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
      */
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**
@@ -401,7 +401,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**
@@ -413,7 +413,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
 

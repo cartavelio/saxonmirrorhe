@@ -314,8 +314,9 @@ public class ConditionalSorter extends Expression {
         public PullEvaluator elaborateForPull() {
             final ConditionalSorter expr = (ConditionalSorter) getExpression();
             final BooleanEvaluator condition = expr.getCondition().makeElaborator().elaborateForBoolean();
-            final PullEvaluator sorter = expr.getDocumentSorter().makeElaborator().elaborateForPull();
-            final PullEvaluator nonSorter = expr.getDocumentSorter().getBaseExpression().makeElaborator().elaborateForPull();
+            final DocumentSorter docSorter = expr.getDocumentSorter();
+            final PullEvaluator sorter = docSorter.makeElaborator().elaborateForPull();
+            final PullEvaluator nonSorter = docSorter.getBaseExpression().makeElaborator().elaborateForPull();
             return context -> {
                 boolean b = condition.eval(context);
                 if (b) {

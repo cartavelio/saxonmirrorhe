@@ -26,10 +26,9 @@ import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.z.IntPredicateLambda;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Optional;
+import java.util.function.IntPredicate;
 
 /**
  * A SelectorTest represents an axis step written as {@code ./NNN} or {@code ./axis::NNN}
@@ -114,11 +113,11 @@ public class SelectorTest implements NodeTest, NodeVectorMatchMaker, NamedXNodeP
      * matches the node test.
      */
 
-    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
+    public IntPredicate getMatcher(final NodeVectorTree tree) {
         // Default implementation materialises the node
         // TODO: we need to do better than this
-        return IntPredicateLambda.of(nodeNr -> tree.getNodeKind(nodeNr) != Type.PARENT_POINTER
-                && test(tree.getNode(nodeNr)));
+        return nodeNr -> tree.getNodeKind(nodeNr) != Type.PARENT_POINTER
+                && test(tree.getNode(nodeNr));
     }
 
     /**

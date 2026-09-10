@@ -403,7 +403,7 @@ public class NamespaceNode implements NodeInfo {
      */
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**
@@ -451,7 +451,7 @@ public class NamespaceNode implements NodeInfo {
      */
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**
@@ -463,7 +463,7 @@ public class NamespaceNode implements NodeInfo {
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**
@@ -475,7 +475,7 @@ public class NamespaceNode implements NodeInfo {
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**

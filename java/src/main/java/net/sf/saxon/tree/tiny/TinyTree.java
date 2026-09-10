@@ -359,7 +359,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         next[numberOfNodes] = -1;      // safety precaution
 
         if (typeArray != null) {
-            typeArray[numberOfNodes] = Untyped.getInstance();
+            typeArray[numberOfNodes] = Untyped.INSTANCE;
         }
 
         if (numberOfNodes == 0) {
@@ -454,10 +454,10 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     void setElementAnnotation(int nodeNr, SchemaType type) {
-        if (!type.equals(Untyped.getInstance())) {
+        if (!type.equals(Untyped.INSTANCE)) {
             if (typeArray == null) {
                 typeArray = new SchemaType[nodeKind.length];
-                Arrays.fill(typeArray, 0, nodeKind.length, Untyped.getInstance());
+                Arrays.fill(typeArray, 0, nodeKind.length, Untyped.INSTANCE);
             }
             assert typeArray != null;
             typeArray[nodeNr] = type;
@@ -489,7 +489,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     public SchemaType getSchemaType(int nodeNr) {
         if (typeArray == null) {
-            return Untyped.getInstance();
+            return Untyped.INSTANCE;
         }
         return typeArray[nodeNr];
     }
@@ -904,29 +904,28 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     @Override
-    public final TinyNodeImpl getNode(int nr) {
-        switch ((short)nodeKind[nr]) {
-            case Type.DOCUMENT:
-                return (TinyDocumentImpl) getRootNode();
-            case Type.ELEMENT:
-                return new TinyElementImpl(this, nr);
-            case Type.TEXTUAL_ELEMENT:
-                return new TinyTextualElement(this, nr);
-            case Type.TEXT:
-                return new TinyTextImpl(this, nr);
-            case Type.WHITESPACE_TEXT:
-                return new WhitespaceTextImpl(this, nr);
-            case Type.COMMENT:
-                return new TinyCommentImpl(this, nr);
-            case Type.PROCESSING_INSTRUCTION:
-                return new TinyProcInstImpl(this, nr);
-            case Type.PARENT_POINTER:
-                throw new IllegalArgumentException("Attempting to treat a parent pointer as a node");
-            case Type.STOPPER:
-                throw new IllegalArgumentException("Attempting to treat a stopper entry as a node");
-            default:
-                throw new IllegalStateException("Unknown node kind " + nodeKind[nr]);
-        }
+    public TinyNodeImpl getNode(int nr) {
+        return switch ((short) nodeKind[nr]) {
+            case Type.DOCUMENT
+                    -> (TinyDocumentImpl) getRootNode();
+            case Type.ELEMENT
+                    -> new TinyElementImpl(this, nr);
+            case Type.TEXTUAL_ELEMENT
+                    -> new TinyTextualElement(this, nr);
+            case Type.TEXT
+                    -> new TinyTextImpl(this, nr);
+            case Type.WHITESPACE_TEXT
+                    -> new WhitespaceTextImpl(this, nr);
+            case Type.COMMENT
+                    -> new TinyCommentImpl(this, nr);
+            case Type.PROCESSING_INSTRUCTION
+                    -> new TinyProcInstImpl(this, nr);
+            case Type.PARENT_POINTER ->
+                    throw new IllegalArgumentException("Attempting to treat a parent pointer as a node");
+            case Type.STOPPER
+                    -> throw new IllegalArgumentException("Attempting to treat a stopper entry as a node");
+            default -> throw new IllegalStateException("Unknown node kind " + nodeKind[nr]);
+        };
     }
 
     /**

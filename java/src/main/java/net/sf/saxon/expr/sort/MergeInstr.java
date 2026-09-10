@@ -581,7 +581,7 @@ public class MergeInstr extends Instruction {
     private SequenceIterator getMergedInputIterator(XPathContext context, AtomicComparer[] comps) throws XPathException {
         // Now construct a tree of merge iterators, one for each merge sequence, for each merge source.
 
-        SequenceIterator inputIterator = EmptyIterator.getInstance();
+        SequenceIterator inputIterator = EmptyIterator.INSTANCE;
         for (final MergeSource ms : mergeSources) {
 
             SequenceIterator anchorsIter;

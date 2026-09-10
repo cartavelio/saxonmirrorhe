@@ -89,7 +89,7 @@ public class UnicodeBlocks {
         ParseOptions options = new ParseOptions()
                 .withSchemaValidationMode(Validation.SKIP)
                 .withDTDValidationMode(Validation.SKIP)
-                .withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance())
+                .withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE)
                 .withPleaseCloseAfterUse(true);
         TreeInfo doc;
         try {

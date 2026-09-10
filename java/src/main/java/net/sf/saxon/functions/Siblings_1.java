@@ -57,7 +57,7 @@ public class Siblings_1 extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         GNode node = (GNode) arguments[0].head();
         if (node == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         GNode parent = node.getParent();
         if (parent == null || node.getNodeKind() == Type.ATTRIBUTE || node.getNodeKind() == Type.NAMESPACE) {

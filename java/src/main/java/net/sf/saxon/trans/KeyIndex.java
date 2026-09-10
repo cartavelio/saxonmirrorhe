@@ -21,6 +21,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
+import net.sf.saxon.transpile.CSharpUsing;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.type.*;
@@ -46,6 +47,7 @@ import java.util.*;
  * can happen for an arbitrary number of data types, though it is unlikely in practice because not many
  * types have overlapping lexical spaces.</p>
  */
+@CSharpUsing(code="Saxon.Hej.type")
 public class KeyIndex {
 
     @CSharpSimpleEnum
@@ -350,7 +352,7 @@ public class KeyIndex {
             List<NodeInfo> resultNodes = new ArrayList<>();
             int counter = 0;
             for (PrimitiveUType type : keyTypesPresent.decompose()) {
-                AtomicType targetType = (AtomicType) type.toItemType();
+                AtomicType targetType = (AtomicType) UType.toItemType(type);
                 AtomicValue converted = Converter.convert(soughtValue, targetType, rules);
                 Object value = index.get(getCollationKey(converted, collation, implicitTimezone));
                 if (value != null) {
@@ -375,7 +377,7 @@ public class KeyIndex {
 
     private SequenceIterator entryIterator(Object value) {
         if (value == null) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else if (value instanceof NodeInfo) {
             return SingletonIterator.makeIterator((NodeInfo) value);
         } else {

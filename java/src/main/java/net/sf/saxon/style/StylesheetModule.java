@@ -159,7 +159,7 @@ public class StylesheetModule {
         options = options.withSchemaValidationMode(Validation.STRIP)
                 .withDTDValidationMode(Validation.STRIP)
                 .withLineNumbering(true)
-                .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance())
+                .withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE)
                 .withErrorReporter(pipe.getErrorReporter());
         return options;
     }

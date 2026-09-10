@@ -18,13 +18,14 @@ import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -107,7 +108,7 @@ public class XQueryEngine extends SaxonCAPI {
                     if (prop == null) {
                         throw new SaxonApiException("Property name " + name + " not found");
                     }
-                    props.put(prop.getQName().getClarkName(),  values[i]);
+                    props.put(Serializer.propertyClarkName(prop),  values[i]);
                 } else if (params[i].startsWith("--") && values[i] != null) {
                     try {
                         processor.setConfigurationProperty("http://saxon.sf.net/feature/" + params[i].substring(2), (String) values[i]);

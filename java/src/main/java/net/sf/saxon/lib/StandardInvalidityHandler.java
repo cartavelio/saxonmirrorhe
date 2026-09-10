@@ -195,7 +195,7 @@ public class StandardInvalidityHandler extends StandardDiagnostics implements In
      */
     @Override
     public Sequence endReporting() throws XPathException {
-        return EmptySequence.getInstance();
+        return EmptySequence.INSTANCE;
     }
 }
 

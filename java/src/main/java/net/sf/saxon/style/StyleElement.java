@@ -588,9 +588,9 @@ public abstract class StyleElement extends ElementImpl {
         NodeImpl parent = getParent();
         return parent == null
                 || !ExpressionTool.equalOrNull(getBaseURI(), parent.getBaseURI())
-                || getNamespaceUri() == NamespaceUri.XSLT
+                || (getNamespaceUri() == NamespaceUri.XSLT
                     ? getAttributeValue("schema-role") != null
-                    : getAttributeValue(NamespaceUri.XSLT, "schema-role") != null
+                    : getAttributeValue(NamespaceUri.XSLT, "schema-role") != null)
                 || defaultCollationName != null
                 || defaultXPathNamespace != null
                 || !(parent instanceof StyleElement)

@@ -1329,7 +1329,7 @@ public class SaxonCAPI {
                     throw new SaxonApiException("Property name " + name + " not found");
                 }
                 if (props != null) {
-                    props.put(prop.getQName().getClarkName(), values[i]);
+                    props.put(Serializer.propertyClarkName(prop), values[i]);
                 } else {
                     if (debug) {
                         System.err.println("Error Java property option found but Java Property object is null: Probably XPathProcessor in use");

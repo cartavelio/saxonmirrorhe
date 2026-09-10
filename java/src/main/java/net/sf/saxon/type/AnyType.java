@@ -32,17 +32,6 @@ public enum AnyType implements ComplexType {
     INSTANCE;
 
     /**
-     * Get the singular instance of this class
-     *
-     * @return the singular object representing xs:anyType
-     */
-
-    /*@NotNull*/
-    public static AnyType getInstance() {
-        return INSTANCE;
-    }
-
-    /**
      * Get the local name of this type
      *
      * @return the local name of this type definition, if it has one. Return null in the case of an
@@ -521,7 +510,7 @@ public enum AnyType implements ComplexType {
     /*@NotNull*/
     @Override
     public SimpleType getAttributeUseType(StructuredQName attributeName, Schema schema) {
-        return AnySimpleType.getInstance();
+        return AnySimpleType.INSTANCE;
     }
 
     /**

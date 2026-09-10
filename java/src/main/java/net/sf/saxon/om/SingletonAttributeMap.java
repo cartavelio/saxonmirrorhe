@@ -79,7 +79,7 @@ public class SingletonAttributeMap extends AttributeInfo implements AttributeMap
     @Override
     public AttributeMap remove(NodeName name) {
         if (name.equals(getNodeName())) {
-            return EmptyAttributeMap.getInstance();
+            return EmptyAttributeMap.INSTANCE;
         } else {
             return this;
         }

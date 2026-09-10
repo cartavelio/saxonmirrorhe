@@ -46,8 +46,8 @@ public class Path_1 extends SystemFunction {
         OptionsParameter pathOptions = new OptionsParameter(40);
         pathOptions.addAllowedOption("indexes", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         pathOptions.addAllowedOption("lexical", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        pathOptions.addAllowedOption("origin", SequenceType.OPTIONAL_GNODE, EmptySequence.getInstance());
-        pathOptions.addAllowedOption("namespaces", SequenceType.optional(inScopeNamespacesResult), EmptySequence.getInstance());
+        pathOptions.addAllowedOption("origin", SequenceType.OPTIONAL_GNODE, EmptySequence.INSTANCE);
+        pathOptions.addAllowedOption("namespaces", SequenceType.optional(inScopeNamespacesResult), EmptySequence.INSTANCE);
         return pathOptions;
     }
 
@@ -63,7 +63,7 @@ public class Path_1 extends SystemFunction {
                 GroundedValue val = ((Parcel)item).getValue();
                 switch (val.getLength()) {
                     case 0:
-                        return EmptySequence.getInstance();
+                        return EmptySequence.INSTANCE;
                     case 1:
                         item = ((Parcel)item).getValue().head();
                         break;
@@ -81,7 +81,7 @@ public class Path_1 extends SystemFunction {
         } else {
             node = (GNode)arguments[0].head();
             if (node == null) {
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
             }
         }
         boolean withIndexes = true;

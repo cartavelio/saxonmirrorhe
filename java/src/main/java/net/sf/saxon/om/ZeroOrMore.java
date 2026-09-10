@@ -190,7 +190,7 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
             start = 0;
         }
         if (start > value.size()) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         return new SequenceExtent.Of<T>(value.subList(start, start+length)).reduce();
     }
@@ -218,7 +218,7 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
     public GroundedValue reduce() {
         int len = getLength();
         if (len == 0) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         } else if (len == 1) {
             return itemAt(0);
         } else {

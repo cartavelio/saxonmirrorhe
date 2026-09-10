@@ -7,9 +7,9 @@
 
 package net.sf.saxon.ma.map;
 
+import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.PlainType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -20,15 +20,19 @@ import java.util.Collections;
 
 /**
  * A map with no entries.
+ *
+ * <p>There are two empty maps, a 3.1 version and a 4.0 version. This is because maps constructed by adding entries
+ * inherit the version of the original. The difference is that in a 3.1 map, hexBinary and base64Binary values are
+ * always distinct, whereas in a 4.0 map, they may be duplicates.</p>
  */
 
 public class EmptyMap extends MapItem {
 
-    private final static EmptyMap THE_INSTANCE_31 = new EmptyMap(31);
-    private final static EmptyMap THE_INSTANCE_40 = new EmptyMap(40);
+    public final static EmptyMap INSTANCE_31 = new EmptyMap(31);
+    public final static EmptyMap INSTANCE_40 = new EmptyMap(40);
 
     public static EmptyMap getInstance(int version) {
-        return version >= 40 ? THE_INSTANCE_40 : THE_INSTANCE_31;
+        return version >= 40 ? INSTANCE_40 : INSTANCE_31;
     }
 
     private EmptyMap(int specVersion) {
@@ -73,7 +77,7 @@ public class EmptyMap extends MapItem {
      */
     @Override
     public AtomicIterator keys() {
-        return EmptyIterator.ofAtomic();
+        return AtomicArray.EMPTY_ATOMIC_ARRAY.iterate();
     }
 
     /**

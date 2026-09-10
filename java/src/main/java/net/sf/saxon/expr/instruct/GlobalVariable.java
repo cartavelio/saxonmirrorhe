@@ -468,7 +468,7 @@ public class GlobalVariable extends Actor
             Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(
                     RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
             ContextItemStaticInfo cit = getConfiguration().makeContextItemStaticInfo(
-                    AnyItemType.getInstance(), Optionality.OPTIONAL);
+                    AnyItemType.INSTANCE, Optionality.OPTIONAL);
             Expression value2 = TypeChecker.strictTypeCheck(
                     value.simplify().typeCheck(visitor, cit),
                     getRequiredType(), role, visitor.getStaticContext());

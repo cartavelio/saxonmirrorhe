@@ -92,7 +92,7 @@ public class TwoItemIterator implements SequenceIterator, LookaheadIterator, Gro
             case 1:
                 return two;
             default:
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
         }
     }
 }

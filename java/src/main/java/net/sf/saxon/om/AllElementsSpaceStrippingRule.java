@@ -19,13 +19,9 @@ import net.sf.saxon.type.SchemaType;
  * should be preserved.
  */
 
-public class AllElementsSpaceStrippingRule implements SpaceStrippingRule {
+public enum AllElementsSpaceStrippingRule implements SpaceStrippingRule {
 
-    private final static AllElementsSpaceStrippingRule THE_INSTANCE = new AllElementsSpaceStrippingRule();
-
-    public static AllElementsSpaceStrippingRule getInstance() {
-        return THE_INSTANCE;
-    }
+    INSTANCE;
 
     /**
      * Decide whether an element is in the set of white-space preserving element types

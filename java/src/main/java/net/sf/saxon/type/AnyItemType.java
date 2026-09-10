@@ -21,17 +21,14 @@ import java.util.Optional;
  * An implementation of ItemType that matches any item (node or atomic value)
  */
 
-public class AnyItemType implements ItemTypeWithSequenceTypeCache {
+public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
+
+    INSTANCE;
 
     private SequenceType _one;
     private SequenceType _oneOrMore;
     private SequenceType _zeroOrOne;
     private SequenceType _zeroOrMore;
-
-    private AnyItemType() {
-    }
-
-    /*@NotNull*/ private static final AnyItemType theInstance = new AnyItemType();
 
     /**
      * Factory method to get the singleton instance
@@ -40,7 +37,7 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
 
     /*@NotNull*/
     public static AnyItemType getInstance() {
-        return theInstance;
+        return INSTANCE;
     }
 
     /**
@@ -86,6 +83,16 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
         return "";
     }
 
+    @Override
+    public String getFullAlphaCode() {
+        return "";
+    }
+
+    @Override
+    public String toExportString() {
+        return toString();
+    }
+
     /**
      * Determine whether this item type is atomic (that is, whether it can ONLY match
      * atomic values)
@@ -100,9 +107,6 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
 
     /**
      * Test whether a given item conforms to this type
-     *
-     *
-     *
      * @param item    The item to be tested
      * @param th  The type hierarchy cache
      * @return true if the item is an instance of this type; false otherwise
@@ -134,7 +138,7 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
 
     /*@NotNull*/
     @Override
-    public AtomicType getAtomizedItemType() {
+    public PlainType getAtomizedItemType() {
         return BuiltInAtomicType.ANY_ATOMIC;
     }
 
@@ -156,17 +160,14 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
         return -2;
     }
 
-    /*@NotNull*/
+    @Override
+    public double getNormalizedDefaultPriority() {
+        return 0;
+    }
+    
+    @Override
     public String toString() {
         return "item()";
-    }
-
-    /**
-     * Returns a hash code value for the object.
-     */
-
-    public int hashCode() {
-        return "AnyItemType".hashCode();
     }
 
     /**
@@ -244,6 +245,8 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         return Optional.empty();
     }
+
+
 
 }
 

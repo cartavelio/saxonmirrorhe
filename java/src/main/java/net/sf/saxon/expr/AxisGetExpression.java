@@ -555,13 +555,13 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                         GroundedValue content = ((JNode) origin).getContent();
                         if (content instanceof MapItem) {
                             if (selection.getLength() == 0) {
-                                return EmptyIterator.getInstance();
+                                return EmptyIterator.INSTANCE;
                             }
                             if (selection.getLength() == 1) {
                                 AtomicValue key = (AtomicValue) selection.head(); // for now
                                 GroundedValue val = ((MapItem) content).get(key);
                                 if (val == null) {
-                                    return EmptyIterator.getInstance();
+                                    return EmptyIterator.INSTANCE;
                                 }
                                 JNode j = new JNodeForMapEntry(((JNode) origin), 1, key, val, -1);
                                 return new SingletonIterator(j);
@@ -582,7 +582,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                             return new ListIterator.Of<>(result);
                         } else if (content instanceof ArrayItem) {
                             if (selection.getLength() == 0) {
-                                return EmptyIterator.getInstance();
+                                return EmptyIterator.INSTANCE;
                             }
                             if (selection.getLength() == 1) {
                                 AtomicValue key = (AtomicValue)selection.head();
@@ -593,7 +593,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                                     } else if (((NumericValue) key).isWholeNumber()) {
                                         subscript = (int) ((NumericValue) key).longValue();
                                     } else {
-                                        return EmptyIterator.getInstance();
+                                        return EmptyIterator.INSTANCE;
                                     }
                                     if (subscript >= 1 && subscript <= ((ArrayItem) content).arrayLength()) {
                                         GroundedValue val = ((ArrayItem) content).get(subscript - 1);
@@ -601,7 +601,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                                         return new SingletonIterator(j);
                                     }
                                 }
-                                return EmptyIterator.getInstance();
+                                return EmptyIterator.INSTANCE;
                             }
                             IntSet matchKeys = new IntHashSet(selection.getLength());
                             for (Item it : selection.asIterable()) {
@@ -621,12 +621,14 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                             }
                             return new ListIterator.Of<>(result);
                         } else {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                     } else if (origin instanceof NodeInfo) {
-                        return EmptyIterator.getInstance();  // TODO - for now
+                        // TODO - for now
+                        return EmptyIterator.INSTANCE;
                     } else {
-                        return EmptyIterator.getInstance();  // TODO - for now
+                        // TODO - for now
+                        return EmptyIterator.INSTANCE;
                     }
                 };
             }
@@ -661,7 +663,8 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                         }
                     });
                 } else {
-                    return EmptyIterator.getInstance();  // TODO - for now
+                    // TODO - for now
+                    return EmptyIterator.INSTANCE;
                 }
             };
 

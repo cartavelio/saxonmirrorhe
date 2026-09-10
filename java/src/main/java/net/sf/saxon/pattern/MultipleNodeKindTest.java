@@ -12,6 +12,8 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpUsing;
 import net.sf.saxon.type.*;
 
 import java.util.ArrayList;
@@ -25,6 +27,8 @@ import java.util.function.Function;
  * node kinds, for example element and document nodes, or attribute and namespace nodes
  */
 
+@CSharpUsing(code="Saxon.Hej.type")
+@CSharpInjectMembers
 public final class MultipleNodeKindTest implements NodeTest {
 
     public final static MultipleNodeKindTest PARENT_NODE =
@@ -82,7 +86,7 @@ public final class MultipleNodeKindTest implements NodeTest {
     public ItemType getItemType() {
         List<ItemType> memberTypes = new ArrayList<>();
         for (PrimitiveUType u : uType.decompose()) {
-            memberTypes.add(u.toItemType());
+            memberTypes.add(UType.toItemType(u));
         }
         return new ChoiceItemType(memberTypes);
     }
@@ -175,13 +179,13 @@ public final class MultipleNodeKindTest implements NodeTest {
 
     private void format(LinkedList<PrimitiveUType> list, StringBuilder fsb, Function<ItemType, String> show) {
         if (list.size() == 1) {
-            fsb.append(show.apply(list.getFirst().toItemType()));
+            fsb.append(show.apply(UType.toItemType(list.getFirst())));
         } else {
             boolean first = true;
             for (PrimitiveUType pu : list) {
                 fsb.append(first ? '(' : '|');
                 first = false;
-                fsb.append(show.apply(pu.toItemType()));
+                fsb.append(show.apply(UType.toItemType(pu)));
             }
             fsb.append(')');
         }

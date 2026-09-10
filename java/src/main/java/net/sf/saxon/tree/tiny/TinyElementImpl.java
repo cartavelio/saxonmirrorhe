@@ -10,10 +10,12 @@ package net.sf.saxon.tree.tiny;
 import com.saxonica.ee.validate.SkipValidator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.CopyNamespaceSensitiveException;
+import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodePredicateLambda;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
@@ -25,11 +27,9 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.z.IntHashMap;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -230,6 +230,25 @@ public class TinyElementImpl extends TinyParentNodeImpl {
     }
 
     /**
+     * Get the attribute node with a given name, if it exists, or null otherwise
+     */
+
+    public TinyAttributeImpl getAttributeNode(int fp) {
+        int index = tree.alpha[nodeNr];
+        if (index < 0) {
+            return null;
+        }
+        int[] attNames = tree.getAttributeNameCodeArray();
+        while (index < tree.numberOfAttributes && tree.attParent[index] == nodeNr) {
+            if (fp == (attNames[index] & NamePool.FP_MASK)) {
+                return tree.getAttributeNode(index);
+            }
+            index++;
+        }
+        return null;
+    }
+
+    /**
      * Get an iterator over the attribute axis, starting at this node; the nodes will
      * be in document order.
      *
@@ -239,10 +258,9 @@ public class TinyElementImpl extends TinyParentNodeImpl {
     @Override
     public SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
         if (tree.alpha[nodeNr] < 0) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
-        if (predicate instanceof NamedXNodePredicate) {
-            NamedXNodePredicate fpTest = (NamedXNodePredicate) predicate;
+        if (predicate instanceof NamedXNodePredicate fpTest) {
             int fp = fpTest.getRequiredFingerprint();
             if (fp != -1 && fpTest.getNodeKind() == Type.ATTRIBUTE) {
                 int index = tree.alpha[nodeNr];
@@ -253,13 +271,16 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                         if (fpTest.isFingerprintSufficient() || predicate.test(att)) {
                             return new SingletonIterator(att);
                         } else {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                     }
                     index++;
                 }
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
+        }
+        if (predicate == NodeKindType.ATTRIBUTE) {
+            predicate = NodePredicateLambda.of(node -> true);
         }
         return new AttributeIterator(tree, nodeNr, predicate);
     }
@@ -288,9 +309,11 @@ public class TinyElementImpl extends TinyParentNodeImpl {
         Configuration config = tree.getConfiguration();
         NamePool pool = config.getNamePool();
         int next = nodeNr;
-        java.util.function.Function<NodeInfo, Object> informee = receiver.getPipelineConfiguration().getCopyInformee();
-        SchemaType elementType = Untyped.getInstance();
+        PipelineConfiguration pipe = receiver.getPipelineConfiguration();
+        java.util.function.Function<NodeInfo, Object> informee = pipe.getCopyInformee();
+        SchemaType elementType = Untyped.INSTANCE;
         SimpleType attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
+        AttributeMap emptyAttributes = EmptyAttributeMap.INSTANCE;
 
 
         do {
@@ -314,9 +337,9 @@ public class TinyElementImpl extends TinyParentNodeImpl {
             // output depends on node kind
             int kind = tree.nodeKind[next];
             switch (kind) {
-                case Type.ELEMENT:
-                case Type.TEXTUAL_ELEMENT: {
+                case Type.ELEMENT, Type.TEXTUAL_ELEMENT -> {
 
+                    boolean isTextualElement = kind == Type.TEXTUAL_ELEMENT;
                     int receiverOptions = ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY;
                     if (copyForUpdate) {
                         receiverOptions |= ReceiverOption.MUTABLE_TREE;
@@ -328,12 +351,12 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                             try {
                                 checkNotNamespaceSensitiveElement(elementType, next);
                             } catch (CopyNamespaceSensitiveException e) {
-                                throw e.withErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
+                                throw e.withErrorCode(pipe.isXSLT() ? "XTTE0950" : "XQTY0086");
                             }
                         }
                     }
                     if (informee != null) {
-                        Location loc = (Location)informee.apply(tree.getNode(next));
+                        Location loc = (Location) informee.apply(tree.getNode(next));
                         if (loc != null) {
                             location = loc;
                         }
@@ -351,7 +374,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     boolean addAttributeNamespaces = false;
                     if (tree.usesNamespaces) {
                         if ((copyOptions & CopyOptions.ALL_NAMESPACES) != 0) {
-                            if (kind == Type.TEXTUAL_ELEMENT) {
+                            if (isTextualElement) {
                                 int parent = getParentNodeNr(tree, next);
                                 namespaces = tree.namespaceMaps[tree.beta[parent]];
                             } else {
@@ -366,11 +389,12 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                         }
                     }
 
-                    if (kind == Type.TEXTUAL_ELEMENT) {
+
+                    if (isTextualElement) {
                         closePending = false;
                         receiver.startElement(new CodedName(fp, prefix, pool),
                                               elementType,
-                                              EmptyAttributeMap.getInstance(),
+                                              emptyAttributes,
                                               namespaces,
                                               location,
                                               receiverOptions);
@@ -383,7 +407,6 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                         closePending = true;
 
 
-
                         // output attributes
                         //AttributeMap attributes = tree.alpha[nodeNr] < 0 ? EmptyAttributeMap.getInstance() : new LocalAttributeMap(copyTypes);
 
@@ -391,8 +414,10 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
                         int att = tree.alpha[next];
                         if (att >= 0) {
-                            List<AttributeInfo> attributeInfoList = new ArrayList<>(8);
-                            while (att < tree.numberOfAttributes && tree.attParent[att] == next) {
+                            attributes = EmptyAttributeMap.INSTANCE;
+                            //List<AttributeInfo> attributeInfoList = new ArrayList<>(8);
+                            int[] attParent = tree.attParent;
+                            while (att < tree.numberOfAttributes && attParent[att] == next) {
                                 int attCode = tree.attCode[att];
                                 int attfp = attCode & NamePool.FP_MASK;
                                 if (copyTypes) {
@@ -401,7 +426,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                         try {
                                             checkNotNamespaceSensitiveAttribute(attributeType, att);
                                         } catch (CopyNamespaceSensitiveException e) {
-                                            throw e.withErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
+                                            throw e.withErrorCode(pipe.isXSLT() ? "XTTE0950" : "XQTY0086");
                                         }
                                     }
                                 }
@@ -413,17 +438,17 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                 if (tree.isIdrefAttribute(att)) {
                                     attProps |= ReceiverOption.IS_IDREF;
                                 }
-                                attributeInfoList.add(new AttributeInfo(new CodedName(attfp, attPrefix, pool),
-                                                        attributeType, tree.attValue[att],
-                                                        location, attProps));
+                                attributes = attributes.put(new AttributeInfo(new CodedName(attfp, attPrefix, pool),
+                                                                        attributeType, tree.attValue[att],
+                                                                        location, attProps));
                                 if (addAttributeNamespaces && !attPrefix.isEmpty()) {
-                                    namespaces = namespaces.put(attPrefix,pool.getURI(attCode));
+                                    namespaces = namespaces.put(attPrefix, pool.getURI(attCode));
                                 }
                                 att++;
                             }
-                            attributes = SequenceTool.attributeMapFromList(attributeInfoList);
+                            //attributes = SequenceTool.attributeMapFromList(attributeInfoList);
                         } else {
-                            attributes = EmptyAttributeMap.getInstance();
+                            attributes = emptyAttributes;
                         }
 
                         // see bug 2209
@@ -434,10 +459,8 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                               receiverOptions);
 
                     }
-                    break;
                 }
-
-                case Type.TEXT: {
+                case Type.TEXT -> {
 
                     // don't close text nodes
                     closePending = false;
@@ -445,10 +468,8 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     // output characters
                     final UnicodeString value = TinyTextImpl.getStringValue(tree, next);
                     receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
-                    break;
                 }
-
-                case Type.WHITESPACE_TEXT: {
+                case Type.WHITESPACE_TEXT -> {
 
                     // don't close text nodes
                     closePending = false;
@@ -457,10 +478,8 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     long compressedValue = ((long) tree.alpha[next] << 32) | ((long) tree.beta[next] & 0xffffffffL);
                     final UnicodeString value = new CompressedWhitespace(compressedValue);
                     receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
-                    break;
                 }
-
-                case Type.COMMENT: {
+                case Type.COMMENT -> {
 
                     // don't close text nodes
                     closePending = false;
@@ -473,9 +492,8 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     } else {
                         receiver.comment(EmptyUnicodeString.getInstance(), Loc.NONE, ReceiverOption.NONE);
                     }
-                    break;
                 }
-                case Type.PROCESSING_INSTRUCTION: {
+                case Type.PROCESSING_INSTRUCTION -> {
 
                     // don't close text nodes
                     closePending = false;
@@ -483,12 +501,9 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     // output copy of PI
                     NodeInfo pi = tree.getNode(next);
                     receiver.processingInstruction(pi.getLocalPart(), pi.getUnicodeStringValue(), location, ReceiverOption.NONE);
-                    break;
                 }
-
-                case Type.PARENT_POINTER: {
+                case Type.PARENT_POINTER -> {
                     closePending = false;
-                    break;
                 }
             }
 

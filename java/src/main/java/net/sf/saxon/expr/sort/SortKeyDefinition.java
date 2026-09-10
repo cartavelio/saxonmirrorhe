@@ -437,7 +437,7 @@ public class SortKeyDefinition extends PseudoExpression {
             // Otherwise rely on the containing SortExpression to type-check the sort key
         }
         Expression lang = getLanguage();
-        if (lang instanceof StringLiteral && !((StringLiteral) lang).getString().isEmpty()) {
+        if (lang instanceof StringLiteral && !((StringLiteral) lang).getUnicodeString().isEmpty()) {
             ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(
                     ((StringLiteral) lang).getGroundedValue().getUnicodeStringValue());
             if (vf != null) {

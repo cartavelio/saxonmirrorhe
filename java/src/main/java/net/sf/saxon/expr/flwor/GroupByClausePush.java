@@ -50,12 +50,12 @@ public class GroupByClausePush extends TuplePush {
         TupleExpression retainedTupleExpr = groupByClause.getRetainedTupleExpression();
 
 
-        GroupByClause.ObjectToBeGrouped otbg = new GroupByClause.ObjectToBeGrouped();
         AtomicValue[] groupingValues = groupingTupleExpr.evaluateItemAllAtomic(context).getValues();
-        //checkGroupingValues(groupingValues);
-        otbg.groupingValues = new FlworTuple<>(groupingValues);
-        otbg.retainedValues = retainedTupleExpr.evaluateItem(context);
-        GroupByClause.TupleComparisonKey key = groupByClause.getComparisonKey(otbg.groupingValues, context);
+        GroupByClause.ObjectToBeGrouped otbg = new GroupByClause.ObjectToBeGrouped(
+                new FlworTuple<AtomicValue>(groupingValues),
+                retainedTupleExpr.evaluateItem(context)
+        );
+        GroupByClause.TupleComparisonKey key = groupByClause.getComparisonKey(otbg.groupingValues(), context);
         List<GroupByClause.ObjectToBeGrouped> group = map.get(key);
         addToGroup(key, otbg, group, map);
     }

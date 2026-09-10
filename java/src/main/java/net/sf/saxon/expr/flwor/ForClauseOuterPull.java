@@ -47,7 +47,7 @@ public class ForClauseOuterPull extends ForClausePull {
                 next = currentIteration.next();
                 if (next == null) {
                     context.setLocalVariable(forClause.getRangeVariable().getLocalSlotNumber(),
-                            EmptySequence.getInstance());
+                                             EmptySequence.INSTANCE);
                     if (forClause.getPositionVariable() != null) {
                         context.setLocalVariable(
                                 forClause.getPositionVariable().getLocalSlotNumber(),

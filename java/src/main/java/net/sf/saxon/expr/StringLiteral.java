@@ -9,8 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.str.StringTool;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
@@ -21,6 +20,8 @@ import net.sf.saxon.value.StringValue;
  */
 public class StringLiteral extends Literal {
 
+    private final String valueAsString;
+
     /**
      * Create a StringLiteral that wraps a StringValue
      *
@@ -28,7 +29,18 @@ public class StringLiteral extends Literal {
      */
 
     public StringLiteral(StringValue value) {
-        super(value);
+        super(entwine(value));
+        valueAsString = value.getStringValue();
+    }
+
+    private static StringValue entwine(StringValue in) {
+        UnicodeString us = in.getUnicodeStringValue();
+        if (us instanceof Twine8 || us instanceof Twine16 || us instanceof Twine24
+                || us instanceof EmptyUnicodeString || us instanceof UnicodeChar) {
+            return in;
+        }
+        UnicodeString twine = TwineBuilder.make(in.length32()).append(us).toUnicodeString();
+        return new StringValue(twine, in.getItemType());
     }
 
     /**
@@ -67,7 +79,7 @@ public class StringLiteral extends Literal {
      * @return the underlying string
      */
 
-    public UnicodeString getString() {
+    public UnicodeString getUnicodeString() {
         return getGroundedValue().getUnicodeStringValue();
     }
 
@@ -78,7 +90,7 @@ public class StringLiteral extends Literal {
      */
 
     public String stringify() {
-        return getGroundedValue().getStringValue();
+        return valueAsString;
     }
 
     /*@NotNull*/
@@ -112,7 +124,7 @@ public class StringLiteral extends Literal {
      */
     @Override
     public String toShortString() {
-        return '"' + Err.truncate30(getString()).toString() + '"';
+        return '"' + Err.truncate30(getUnicodeString()).toString() + '"';
     }
 }
 

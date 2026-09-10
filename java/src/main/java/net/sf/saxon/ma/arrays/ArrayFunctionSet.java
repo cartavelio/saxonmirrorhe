@@ -59,21 +59,27 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     private void init(int version) {
 
 
-        register("append", 2, e -> e.populate( ArrayAppend::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, AnyItemType.getInstance(), STAR | NAV, null));
+        register("append", 2, e -> {
+            return e.populate(ArrayAppend::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, AnyItemType.getInstance(), STAR | NAV, null);
+        });
 
         //#if EE==true || PE==true
-        register("build", 1, e -> e.populate(ArrayBuild::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR | NAV, null));
+        register("build", 1, e -> {
+            return e.populate(ArrayBuild::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, AnyItemType.getInstance(), STAR | NAV, null);
+        });
 
         ItemType buildFunctionType = new SpecificFunctionType(
                 SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE);
 
-        register("build", 2, e -> e.populate(ArrayBuild::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR | NAV, null)
-                .arg(1, buildFunctionType, OPT | INS, null));
+        register("build", 2, e -> {
+            return e.populate(ArrayBuild::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, AnyItemType.getInstance(), STAR | NAV, null)
+                    .arg(1, buildFunctionType, OPT | INS, null);
+        });
         //#endif
 
         SpecificFunctionType filterFunctionType31 = new SpecificFunctionType(
@@ -90,8 +96,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, filterFunctionType, ONE | INS, null));
 
-        register("flatten", 1, e -> e.populate( ArrayFlatten::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR | ABS, null));
+        register("flatten", 1, e -> {
+            return e.populate(ArrayFlatten::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, AnyItemType.getInstance(), STAR | ABS, null);
+        });
 
         SpecificFunctionType foldFunctionType31 = new SpecificFunctionType(
                 SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
@@ -103,16 +111,20 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         SpecificFunctionType foldFunctionType = version >= 40 ? foldFunctionType40 : foldFunctionType31;
 
-        register("fold-left", 3, e -> e.populate( ArrayFoldLeft::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
-                .arg(2, foldFunctionType, ONE | INS, null));
+        register("fold-left", 3, e -> {
+            return e.populate(ArrayFoldLeft::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
+                    .arg(2, foldFunctionType, ONE | INS, null);
+        });
 
 
-        register("fold-right", 3, e -> e.populate( ArrayFoldRight::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
-                .arg(2, foldFunctionType, ONE | INS, null));
+        register("fold-right", 3, e -> {
+            return e.populate(ArrayFoldRight::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
+                    .arg(2, foldFunctionType, ONE | INS, null);
+        });
 
 
         SpecificFunctionType forEachFunctionType31 = new SpecificFunctionType(
@@ -147,25 +159,33 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(2, forEachPairFunctionType, ONE | INS, null));
 
-        register("get", 2, e -> e.populate( ArrayGet::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null));
+        register("get", 2, e -> {
+            return e.populate(ArrayGet::new, AnyItemType.INSTANCE, STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null);
+        });
 
-        register("head", 1, e -> e.populate( ArrayHead::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+        register("head", 1, e -> {
+            return e.populate(ArrayHead::new, AnyItemType.INSTANCE, STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
+        });
 
-        register("insert-before", 3, e -> e.populate( ArrayInsertBefore::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
-                .arg(2, AnyItemType.getInstance(), STAR | NAV, null));
+        register("insert-before", 3, e -> {
+            return e.populate( ArrayInsertBefore::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
+                    .arg(2, AnyItemType.INSTANCE, STAR | NAV, null);
+        });
 
         register("join", 1, e -> e.populate( ArrayJoin::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR | INS, null));
 
-        register("put", 3, e -> e.populate( ArrayPut::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.INTEGER, ONE | INS, null)
-                .arg(2, AnyItemType.getInstance(), STAR | NAV, null));
+        register("put", 3, e -> {
+            return e.populate( ArrayPut::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.INTEGER, ONE | INS, null)
+                    .arg(2, AnyItemType.INSTANCE, STAR | NAV, null);
+        });
 
         register("remove", 2, e -> e.populate( ArrayRemove::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
@@ -209,20 +229,26 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         // TODO: the following functions should be private
 
-        register("_to-sequence", 1, e -> e.populate(ArrayToSequence::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+        register("_to-sequence", 1, e -> {
+            return e.populate(ArrayToSequence::new, AnyItemType.INSTANCE, STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
+        });
 
-        register("_from-sequence", 1, e -> e.populate(ArrayFromSequence::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR | INS, null));
+        register("_from-sequence", 1, e -> {
+            return e.populate(ArrayFromSequence::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, AnyItemType.INSTANCE, STAR | INS, null);
+        });
 
 
         //#if EE==true || PE==true
         if (version >= 40) {
 
-            register("get", 3, e -> e.populate(ArrayGet::new, AnyItemType.getInstance(), STAR, 0)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                    .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
-                    .arg(2, AnyItemType.getInstance(), STAR | INS, null));
+            register("get", 3, e -> {
+                return e.populate(ArrayGet::new, AnyItemType.INSTANCE, STAR, 0)
+                        .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                        .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
+                        .arg(2, AnyItemType.INSTANCE, STAR | INS, null);
+            });
 
             register("empty", 1, e -> e.populate(ArrayEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
@@ -230,20 +256,26 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("exists", 1, e -> e.populate(ArrayExists::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-            register("foot", 1, e -> e.populate(ArrayFoot::new, AnyItemType.getInstance(), STAR, 0)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+            register("foot", 1, e -> {
+                return e.populate(ArrayFoot::new, AnyItemType.INSTANCE, STAR, 0)
+                        .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
+            });
 
-            register("index-of", 2, 3, e -> e.populate(ArrayIndexOf::new, BuiltInAtomicType.INTEGER, STAR, 0)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                    .arg(1, AnyItemType.getInstance(), STAR, null)
-                    .arg(2, BuiltInAtomicType.STRING, OPT, null));
+            register("index-of", 2, 3, e -> {
+                return e.populate(ArrayIndexOf::new, BuiltInAtomicType.INTEGER, STAR, 0)
+                        .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                        .arg(1, AnyItemType.INSTANCE, STAR, null)
+                        .arg(2, BuiltInAtomicType.STRING, OPT, null);
+            });
 
             register("index-where", 2, e -> e.populate(ArrayIndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE | INS, null));
 
-            register("items", 1, e -> e.populate(ArrayItems::new, AnyItemType.getInstance(), STAR, 0)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
+            register("items", 1, e -> {
+                return e.populate(ArrayItems::new, AnyItemType.INSTANCE, STAR, 0)
+                        .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
+            });
 
             register("join", 1, 2, e -> e.populate(ArrayJoin::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR | INS, null)
@@ -263,9 +295,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
                     SequenceType.SINGLE_INTEGER);
 
-            register("sort-with", 2, e -> e.populate(ArraySortWith::new, AnyItemType.getInstance(), STAR, LATE)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                    .arg(1, comparator, PLUS, null));
+            register("sort-with", 2, e -> {
+                return e.populate(ArraySortWith::new, AnyItemType.INSTANCE, STAR, LATE)
+                        .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                        .arg(1, comparator, PLUS, null);
+            });
 
             register("split", 1, 1, e -> e.populate(ArraySplit::new, ArrayItemType.ANY_ARRAY_TYPE, STAR, 0)
                              .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
@@ -285,8 +319,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
             // TODO: drop this, renamed array:items
-            register("values", 1, e -> e.populate(ArrayItems::new, AnyItemType.getInstance(), STAR, 0)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
+            register("values", 1, e -> {
+                return e.populate(ArrayItems::new, AnyItemType.INSTANCE, STAR, 0)
+                        .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
+            });
 
 
 

@@ -52,6 +52,18 @@ public class JsonReceiver implements Receiver {
     private final Stack<Set<UnicodeString>> keyChecker = new Stack<>();
     private static final String ERR_INPUT = "FOJS0006";
 
+    private final static UnicodeString U_LSQB_SPACE = Latin1.of("[ ");
+    private final static UnicodeString U_LSQB = new UnicodeChar('[');
+    private final static UnicodeString U_SPACE_RSQB = Latin1.of(" ]");
+    private final static UnicodeString U_RSQB = new UnicodeChar(']');
+    private final static UnicodeString U_LCURLY_SPACE = Latin1.of("{ ");
+    private final static UnicodeString U_LCURLY = new UnicodeChar('{');
+    private final static UnicodeString U_SPACE_RCURLY = Latin1.of(" }");
+    private final static UnicodeString U_RCURLY = new UnicodeChar('}');
+    private final static UnicodeString U_NULL = Latin1.of("null");
+    private final static UnicodeString U_QUOT = new UnicodeChar('"');
+    private final static UnicodeString U_NL = StringConstants.NEWLINE;
+
     public JsonReceiver(PipelineConfiguration pipe, XPathContext context, UniStringConsumer output) {
         Objects.requireNonNull(pipe);
         Objects.requireNonNull(output);
@@ -172,7 +184,7 @@ public class JsonReceiver implements Receiver {
         }
 
         if (!atStart) {
-            output.accept(BMPString.of(","));
+            output.accept(StringConstants.COMMA);
             if (indenting) {
                 indent(stack.size());
             }
@@ -211,25 +223,25 @@ public class JsonReceiver implements Receiver {
             case "array":
                 if (indenting) {
                     indent(stack.size());
-                    output.accept(BMPString.of("[ "));
+                    output.accept(U_LSQB_SPACE);
                 } else {
-                    output.accept(BMPString.of("["));
+                    output.accept(U_LSQB);
                 }
                 atStart = true;
                 break;
             case "map":
                 if (indenting) {
                     indent(stack.size());
-                    output.accept(BMPString.of("{ "));
+                    output.accept(U_LCURLY_SPACE);
                 } else {
-                    output.accept(BMPString.of("{"));
+                    output.accept(U_LCURLY);
                 }
                 atStart = true;
                 keyChecker.push(new HashSet<>());
                 break;
             case "null":
                 //checkParent(local, parent);
-                output.accept(BMPString.of("null"));
+                output.accept(U_NULL);
                 atStart = false;
                 break;
             case "string":
@@ -274,8 +286,7 @@ public class JsonReceiver implements Receiver {
         if (local.equals("boolean")) {
             try {
                 boolean b = StringConverter.StringToBoolean.INSTANCE.convertString(uContent).asAtomic().effectiveBooleanValue();
-                String base = b ? "true" : "false";
-                output.accept(BMPString.of(base));
+                output.accept(b ? StringConstants.TRUE : StringConstants.FALSE);
             } catch (XPathException e) {
                 throw new XPathException("xml-to-json: Value of <boolean> element is not a valid xs:boolean", ERR_INPUT);
             }
@@ -333,25 +344,23 @@ public class JsonReceiver implements Receiver {
             }
 
         } else if (local.equals("string")) {
-            output.accept(BMPString.of("\""));
+            output.accept(U_QUOT);
             if (escaped) {
                 output.accept(handleEscapedString(content));
             } else {
                 output.accept(escape(content, false, !escapeSolidus, isControlChar));
             }
-            output.accept(BMPString.of("\""));
+            output.accept(U_QUOT);
         } else if (!Whitespace.isAllWhite(uContent)) {
             throw new XPathException("xml-to-json: Element " + name.getDisplayName() + " must have no text content", ERR_INPUT);
         }
         textBuffer.clear();
         escaped = false;
         if (local.equals("array")) {
-            String base = indenting ? " ]" : "]";
-            output.accept(BMPString.of(base));
+            output.accept(indenting ? U_SPACE_RSQB : U_RSQB);
         } else if (local.equals("map")) {
             keyChecker.pop();
-            String base = indenting ? " }" : "}";
-            output.accept(BMPString.of(base));
+            output.accept(indenting ? U_SPACE_RCURLY : U_RCURLY);
         }
         atStart = false;
     }
@@ -526,7 +535,7 @@ public class JsonReceiver implements Receiver {
      */
 
     private void indent(int depth) throws XPathException {
-        output.accept(BMPString.of("\n"));
+        output.accept(StringConstants.NEWLINE);
         for (int i = 0; i < depth; i++) {
             output.accept(StringConstants.SINGLE_SPACE);
         }

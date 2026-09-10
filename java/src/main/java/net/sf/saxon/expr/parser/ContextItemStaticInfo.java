@@ -134,8 +134,11 @@ public class ContextItemStaticInfo {
      * Default information when nothing else is known
      */
 
-    public final static ContextItemStaticInfo DEFAULT =
-            new ContextItemStaticInfo(AnyItemType.getInstance(), Optionality.OPTIONAL);
+    public final static ContextItemStaticInfo DEFAULT;
+
+    static {
+        DEFAULT = new ContextItemStaticInfo(AnyItemType.getInstance(), Optionality.OPTIONAL);
+    }
 
     public final static ContextItemStaticInfo ABSENT =
             new ContextItemStaticInfo(ErrorType.getInstance(), Optionality.PROHIBITED);

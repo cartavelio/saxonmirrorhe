@@ -271,12 +271,12 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
 
     @Override
     protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     @Override
     protected SequenceIterator iterateChildren(NodePredicate nodeTest) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     @Override

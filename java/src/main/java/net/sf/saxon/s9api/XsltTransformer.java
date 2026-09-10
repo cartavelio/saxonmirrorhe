@@ -14,6 +14,7 @@ import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeSource;
@@ -346,7 +347,8 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
                     initialSelection = node.asActiveSource();
                     //#endif
                 } else {
-                    NodeInfo node = controller.makeSourceTree(initialSelection, getSchemaValidationMode().getNumber());
+                    NodeInfo node = controller.makeSourceTree(initialSelection,
+                                                              Validation.fromValidationMode(getSchemaValidationMode()));
                     reset = maybeSetGlobalContextItem(node);
                     initialSelection = node.asActiveSource();
                 }

@@ -97,13 +97,13 @@ public class URIQueryParameters {
         } else if (keyword.equals("strip-space")) {
             switch (value) {
                 case "yes":
-                    strippingRule = Optional.of(AllElementsSpaceStrippingRule.getInstance());
+                    strippingRule = Optional.of(AllElementsSpaceStrippingRule.INSTANCE);
                     break;
                 case "ignorable":
-                    strippingRule = Optional.of(IgnorableSpaceStrippingRule.getInstance());
+                    strippingRule = Optional.of(IgnorableSpaceStrippingRule.INSTANCE);
                     break;
                 case "no":
-                    strippingRule = Optional.of(NoElementsSpaceStrippingRule.getInstance());
+                    strippingRule = Optional.of(NoElementsSpaceStrippingRule.INSTANCE);
                     break;
             }
         } else if (keyword.equals("stable")) {

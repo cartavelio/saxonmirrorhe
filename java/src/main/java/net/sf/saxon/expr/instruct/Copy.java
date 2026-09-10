@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
@@ -21,7 +20,7 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.MultipleNodeKindTest;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
@@ -268,7 +267,7 @@ public class Copy extends ElementCreator {
                 case Validation.STRIP: {
                     Affinity e = th.relationship(selectItemType, NodeKindType.ELEMENT);
                     if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.getInstance(), false, config);
+                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.INSTANCE, false, config);
                     }
                     Affinity a = th.relationship(selectItemType, NodeKindType.ATTRIBUTE);
                     if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
@@ -296,11 +295,11 @@ public class Copy extends ElementCreator {
                                     try {
                                         return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), elem.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
+                                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.INSTANCE, false, config);
                                     }
                                 } else {
                                     // No element declaration now, but there might be one at run-time
-                                    return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
+                                    return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.INSTANCE, false, config);
                                 }
                             }
                             Affinity a = th.relationship(selectItemType, NodeKindType.ATTRIBUTE);
@@ -311,11 +310,11 @@ public class Copy extends ElementCreator {
                                     try {
                                         return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), attr.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
+                                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.INSTANCE, false, config);
                                     }
                                 } else {
                                     // No attribute declaration now, but there might be one at run-time
-                                    return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
+                                    return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.INSTANCE, false, config);
                                 }
                             }
                         } else {
@@ -332,7 +331,7 @@ public class Copy extends ElementCreator {
                     } else if (selectItemType instanceof AtomicType) {
                         return selectItemType;
                     } else {
-                        return AnyItemType.getInstance();
+                        return AnyItemType.INSTANCE;
                     }
                 default:
                     throw new IllegalStateException();
@@ -526,9 +525,8 @@ public class Copy extends ElementCreator {
             Schema schema = expr.getRetainedStaticContext().getImportedSchema();
             PushEvaluator contentPush = expr.getContentExpression().makeElaborator().elaborateForPush();
 
-            SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
-                    ? AnyType.getInstance()
-                    : Untyped.getInstance();
+            SchemaType typeCode;
+            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.INSTANCE;
 
             int properties = ReceiverOption.NONE;
             if (!expr.bequeathNamespacesToChildren) {
@@ -539,9 +537,9 @@ public class Copy extends ElementCreator {
             }
             properties |= ReceiverOption.ALL_NAMESPACES;
             final int finalProperties = properties;
+            Configuration config = expr.getConfiguration();
 
             return (output, context) -> {
-                Controller controller = context.getController();
                 Item item = context.getContextItem();
                 if (item == null) {
                     throw new XPathException("There is no context item for xsl:copy", "XTTE0945")
@@ -566,7 +564,7 @@ public class Copy extends ElementCreator {
                             if (!expr.preservingTypes) {
                                 ParseOptions options = expr.getValidationOptions()
                                         .withTopLevelElement(elemName.getStructuredQName());
-                                context.getConfiguration().prepareValidationReporting(context, options);
+                                config.prepareValidationReporting(context, options);
                                 Receiver validator = schema.getElementValidator(
                                         elemOut, options, expr.getLocation());
 
@@ -640,8 +638,8 @@ public class Copy extends ElementCreator {
                     case Type.DOCUMENT:
                         if (!expr.preservingTypes) {
                             ParseOptions options = expr.getValidationOptions()
-                                    .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-                            controller.getConfiguration().prepareValidationReporting(context, options);
+                                    .withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE);
+                            config.prepareValidationReporting(context, options);
                             Receiver val = schema.getDocumentValidator(output, source.getBaseURI(), options, expr.getLocation());
                             output = new ComplexContentOutputter(val);
                         }

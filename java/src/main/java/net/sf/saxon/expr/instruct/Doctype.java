@@ -255,7 +255,8 @@ public class Doctype extends Instruction {
                             write(output, "NDATA " + notation + ' ');
                         }
 
-                        for (NodeInfo content : child.children()) {
+                        SequenceIterator grandChildren = child.iterateChildAxis(null);
+                        for (NodeInfo content; (content = (NodeInfo) grandChildren.next()) != null; ) {
                             content.copy(output, 0, expr.getLocation());
                         }
 

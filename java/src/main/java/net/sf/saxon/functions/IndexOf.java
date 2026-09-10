@@ -52,7 +52,7 @@ public class IndexOf extends CollatingFunctionFixed  {
         SequenceIterator seq = arguments[0].iterate();
         AtomicValue val = (AtomicValue) arguments[1].head();
         if (val.isNaN()) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         return SequenceTool.toLazySequence(new IndexIterator(seq, val, getStringCollator(),
                                                              context.getImplicitTimezone(),

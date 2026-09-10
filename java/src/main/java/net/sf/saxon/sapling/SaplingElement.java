@@ -250,7 +250,7 @@ public class SaplingElement extends SaplingNode {
         if (!nodeName.hasURI(NamespaceUri.NULL)) {
             ns = ns.put(nodeName.getPrefix(), nodeName.getNamespaceUri());
         }
-        AttributeMap atts = EmptyAttributeMap.getInstance();
+        AttributeMap atts = EmptyAttributeMap.INSTANCE;
         for (TrieKVP<StructuredQName, String> attribute : attributes) {
             StructuredQName qName = attribute.getKey();
             atts = atts.put(new AttributeInfo(new FingerprintedQName(qName, namePool), BuiltInAtomicType.UNTYPED_ATOMIC,
@@ -259,7 +259,7 @@ public class SaplingElement extends SaplingNode {
                 ns = ns.put(qName.getPrefix(), qName.getNamespaceUri());
             }
         }
-        receiver.startElement(new FingerprintedQName(nodeName, namePool), Untyped.getInstance(),
+        receiver.startElement(new FingerprintedQName(nodeName, namePool), Untyped.INSTANCE,
                               atts, ns,
                               Loc.NONE, ReceiverOption.NONE);
 

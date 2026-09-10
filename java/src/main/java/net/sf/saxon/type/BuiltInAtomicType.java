@@ -10,7 +10,6 @@ package net.sf.saxon.type;
 import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.MapItem;
@@ -50,9 +49,9 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
 
     private static final Map<String, BuiltInAtomicType> byAlphaCode = new HashMap<>(60);
 
-    public final static BuiltInAtomicType ANY_ATOMIC =
-            makeAtomicType(StandardNames.XS_ANY_ATOMIC_TYPE, AnySimpleType.getInstance(),
-                           "A", true);
+    public final static BuiltInAtomicType ANY_ATOMIC
+            = makeAtomicType(StandardNames.XS_ANY_ATOMIC_TYPE, AnySimpleType.INSTANCE,
+                             "A", true);
 
     public final static BuiltInAtomicType STRING =
             makeAtomicType(StandardNames.XS_STRING, ANY_ATOMIC,
@@ -517,10 +516,11 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     @Override
     public SequenceType one() {
         if (_one == null) {
-            _one = new SequenceType(this, StaticProperty.EXACTLY_ONE);
+            _one = SequenceType.one(this);
         }
         return _one;
     }
+
 
     /**
      * Get a sequence type representing zero or one instances of this atomic type
@@ -532,7 +532,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     @Override
     public SequenceType zeroOrOne() {
         if (_zeroOrOne == null) {
-            _zeroOrOne = new SequenceType(this, StaticProperty.ALLOWS_ZERO_OR_ONE);
+            _zeroOrOne = SequenceType.optional(this);
         }
         return _zeroOrOne;
     }
@@ -547,7 +547,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     @Override
     public SequenceType oneOrMore() {
         if (_oneOrMore == null) {
-            _oneOrMore = new SequenceType(this, StaticProperty.ALLOWS_ONE_OR_MORE);
+            _oneOrMore = SequenceType.oneOrMore(this);
         }
         return _oneOrMore;
     }
@@ -562,7 +562,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     @Override
     public SequenceType zeroOrMore() {
         if (_zeroOrMore == null) {
-            _zeroOrMore = new SequenceType(this, StaticProperty.ALLOWS_ZERO_OR_MORE);
+            _zeroOrMore = SequenceType.zeroOrMore(this);
         }
         return _zeroOrMore;
     }
@@ -928,7 +928,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
 
     @Override
     public void checkTypeDerivationIsOK(SchemaType type, int block) throws SchemaException {
-        if (type == AnySimpleType.getInstance()) {
+        if (type == AnySimpleType.INSTANCE) {
             // OK
         } else if (isSameType(type)) {
             // OK

@@ -12,14 +12,15 @@ import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.UnboundFunctionLibrary;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.SymbolicName;
-import net.sf.saxon.trans.Visibility;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharpUsing;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -34,7 +35,7 @@ import java.util.List;
 /**
  * This class represents a call to a user-defined function in the stylesheet or query.
  */
-
+@CSharpUsing(code="Saxon.Hej.trans")
 public class UserFunctionCall extends FunctionCall implements UserFunctionResolvable, ComponentInvocation, ContextOriginator {
 
     private SequenceType staticType;
@@ -231,7 +232,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 arg = target.getDefaultValueExpression(i).get();
                 o.setChildExpression(arg);
             }
-            if (i == 0 && target.getDeclaredStreamability().isConsuming()) {
+            if (i == 0 && FunctionStreamabilityHelper.isConsuming(target.getDeclaredStreamability())) {
                 argumentEvaluators[i] = new StreamingArgumentEvaluator(arg);
             } else if (target.getParameterDefinitions()[i].isIndexedVariable()) {
                 PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
@@ -324,7 +325,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     public ItemType getItemType() {
         if (staticType == null) {
             // the actual type is not known yet, so we return an approximation
-            return AnyItemType.getInstance();
+            return AnyItemType.INSTANCE;
         } else {
             return staticType.getPrimaryType();
         }
@@ -670,7 +671,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     }
                     Sequence[] actualArgs = expr.evaluateArguments(context, false);
                     ((XPathContextMajor) context).requestTailCall(info, actualArgs);
-                    return EmptyIterator.getInstance();
+                    return EmptyIterator.INSTANCE;
                 };
             } else {
                 TailCallLoop.TailCallFunction info = new TailCallLoop.TailCallFunction();
@@ -678,7 +679,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 return context -> {
                     Sequence[] actualArgs = expr.evaluateArguments(context, false);
                     ((XPathContextMajor) context).requestTailCall(info, actualArgs);
-                    return EmptyIterator.getInstance();
+                    return EmptyIterator.INSTANCE;
                 };
             }
         }

@@ -161,7 +161,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
         try {
             Object result = function.evaluate(convertedArgs);
             if (result == null) {
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
             }
             JPConverter converter = JPConverter.allocate(result.getClass(), null, config);
             return converter.convert(result, context);

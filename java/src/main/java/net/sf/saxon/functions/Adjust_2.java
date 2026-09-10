@@ -36,7 +36,7 @@ public class Adjust_2 extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         CalendarValue in = (CalendarValue) arguments[0].head();
         if (in == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         } else {
             DayTimeDurationValue tz = (DayTimeDurationValue) arguments[1].head();
             if (tz == null) {

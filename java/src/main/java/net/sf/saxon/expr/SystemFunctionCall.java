@@ -542,92 +542,84 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         public PullEvaluator elaborateForPull() {
             final SystemFunctionCall expr = (SystemFunctionCall) getExpression();
             final SystemFunction fn = expr.getTargetFunction();
-            switch (argumentEvaluators.length) {
-                case 0:
-                    return context -> {
-                        try {
-                            return fn.call(context, StackFrame.EMPTY_ARRAY_OF_SEQUENCE).iterate();
-                        } catch (XPathException err) {
-                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
-                        }
-                    };
-                case 1:
-                    return context -> {
-                        try {
-                            return fn.call(context, new Sequence[]{argumentEvaluators[0].evaluate(context)}).iterate();
-                        } catch (XPathException err) {
-                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
-                        }
-                    };
-                case 2:
-                    return context -> {
-                        try {
-                            return fn.call(context,
-                                           new Sequence[]{
-                                                   argumentEvaluators[0].evaluate(context),
-                                                   argumentEvaluators[1].evaluate(context)
-                                           }).iterate();
-                        } catch (XPathException err) {
-                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
-                        }
-                    };
-                default:
-                    return context -> {
-                        try {
-                            return fn.call(context, evaluateArguments(context)).iterate();
-                        } catch (XPathException err) {
-                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
-                        }
-                    };
-            }
+            return switch (argumentEvaluators.length) {
+                case 0 -> context -> {
+                    try {
+                        return fn.call(context, StackFrame.EMPTY_ARRAY_OF_SEQUENCE).iterate();
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+                case 1 -> context -> {
+                    try {
+                        return fn.call(context, new Sequence[]{argumentEvaluators[0].evaluate(context)}).iterate();
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+                case 2 -> context -> {
+                    try {
+                        return fn.call(context,
+                                       new Sequence[]{
+                                               argumentEvaluators[0].evaluate(context),
+                                               argumentEvaluators[1].evaluate(context)
+                                       }).iterate();
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+                default -> context -> {
+                    try {
+                        return fn.call(context, evaluateArguments(context)).iterate();
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+            };
         }
 
         @Override
         public ItemEvaluator elaborateForItem() {
             final SystemFunctionCall expr = (SystemFunctionCall) getExpression();
             final SystemFunction fn = expr.getTargetFunction();
-            switch (argumentEvaluators.length) {
-                case 0:
-                    return context -> {
-                        try {
-                            return fn.call(context,
-                                           StackFrame.EMPTY_ARRAY_OF_SEQUENCE).head();
-                        } catch (XPathException e) {
-                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
-                        }
+            return switch (argumentEvaluators.length) {
+                case 0 -> context -> {
+                    try {
+                        return fn.call(context,
+                                       StackFrame.EMPTY_ARRAY_OF_SEQUENCE).head();
+                    } catch (XPathException e) {
+                        throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
 
-                    };
-                case 1:
-                    return context -> {
-                        try {
-                            return fn.call(context, new Sequence[]{
-                                    argumentEvaluators[0].evaluate(context)
-                            }).head();
-                        } catch (XPathException e) {
-                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
-                        }
-                    };
-                case 2:
-                    return context -> {
-                        try {
-                            return fn.call(context,
-                                    new Sequence[]{
-                                            argumentEvaluators[0].evaluate(context),
-                                            argumentEvaluators[1].evaluate(context)
-                                    }).head();
-                        } catch (XPathException e) {
-                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
-                        }
-                    };
-                default:
-                    return context -> {
-                        try {
-                            return fn.call(context, evaluateArguments(context)).head();
-                        } catch (XPathException e) {
-                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
-                        }
-                    };
-            }
+                };
+                case 1 -> context -> {
+                    try {
+                        return fn.call(context, new Sequence[]{
+                                argumentEvaluators[0].evaluate(context)
+                        }).head();
+                    } catch (XPathException e) {
+                        throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+                case 2 -> context -> {
+                    try {
+                        return fn.call(context,
+                                       new Sequence[]{
+                                               argumentEvaluators[0].evaluate(context),
+                                               argumentEvaluators[1].evaluate(context)
+                                       }).head();
+                    } catch (XPathException e) {
+                        throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+                default -> context -> {
+                    try {
+                        return fn.call(context, evaluateArguments(context)).head();
+                    } catch (XPathException e) {
+                        throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                    }
+                };
+            };
         }
 
         @Override

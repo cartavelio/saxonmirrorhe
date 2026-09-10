@@ -42,22 +42,22 @@ public class FormatDate extends SystemFunction implements Callable {
     static final String[] knownCalendars = {"AD", "AH", "AME", "AM", "AP", "AS", "BE", "CB", "CE", "CL", "CS", "EE", "FE", "ISO", "JE",
             "KE", "KY", "ME", "MS", "NS", "OS", "RS", "SE", "SH", "SS", "TE", "VE", "VS"};
 
-    private final static UnicodeString STR_0 = BMPString.of("0");
-    private final static UnicodeString STR_01 = BMPString.of("01");
-    private final static UnicodeString STR_1 = BMPString.of("1");
-    private final static UnicodeString STR_f = BMPString.of("f");
-    private final static UnicodeString STR_F = BMPString.of("F");
-    private final static UnicodeString STR_i = BMPString.of("i");
-    private final static UnicodeString STR_I = BMPString.of("I");
-    private final static UnicodeString STR_J = BMPString.of("J");
-    private final static UnicodeString STR_M = BMPString.of("M");
-    private final static UnicodeString STR_N = BMPString.of("N");
-    private final static UnicodeString STR_Nn = BMPString.of("Nn");
-    private final static UnicodeString STR_n = BMPString.of("n");
-    private final static UnicodeString STR_P = BMPString.of("P");
-    private final static UnicodeString STR_s = BMPString.of("s");
-    private final static UnicodeString STR_Y = BMPString.of("Y");
-    private final static UnicodeString STR_Z = BMPString.of("Z");
+    private final static UnicodeString STR_0 = StringConstants.ZERO;
+    private final static UnicodeString STR_01 = Latin1.of("01");
+    private final static UnicodeString STR_1 = StringConstants.ONE;
+    private final static UnicodeString STR_f = new UnicodeChar('f');
+    private final static UnicodeString STR_F = new UnicodeChar('F');
+    private final static UnicodeString STR_i = new UnicodeChar('i');
+    private final static UnicodeString STR_I = new UnicodeChar('I');
+    private final static UnicodeString STR_J = new UnicodeChar('J');
+    private final static UnicodeString STR_M = new UnicodeChar('M');
+    private final static UnicodeString STR_N = new UnicodeChar('N');
+    private final static UnicodeString STR_Nn = Latin1.of("Nn");
+    private final static UnicodeString STR_n = new UnicodeChar('n');
+    private final static UnicodeString STR_P = new UnicodeChar('P');
+    private final static UnicodeString STR_s = new UnicodeChar('s');
+    private final static UnicodeString STR_Y = new UnicodeChar('Y');
+    private final static UnicodeString STR_Z = new UnicodeChar('Z');
 
     private String adjustCalendar(String calendarVal, String result, XPathContext context) throws XPathException {
         StructuredQName cal;
@@ -761,7 +761,7 @@ public class FormatDate extends SystemFunction implements Callable {
             }
 
             return StringTool.fromCodePoints(buffer, used);
-        } else if (format.equals(BMPString.of("Z"))) {
+        } else if (format.equals(STR_Z)) {
             // military timezone formatting
             int hour = tz / 60;
             int minute = tz % 60;
@@ -810,7 +810,7 @@ public class FormatDate extends SystemFunction implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         CalendarValue value = (CalendarValue) arguments[0].head();
         if (value == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         String format = arguments[1].head().getStringValue();
 

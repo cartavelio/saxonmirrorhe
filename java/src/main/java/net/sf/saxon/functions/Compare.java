@@ -85,7 +85,7 @@ public class Compare extends CollatingFunctionFixed {
         AtomicValue arg0 = (AtomicValue) arguments[0].head();
         AtomicValue arg1 = (AtomicValue) arguments[1].head();
         if (arg0 == null || arg1 == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         int p0 = getTypeCategory(arg0.getPrimitiveType());
         int p1 = getTypeCategory(arg1.getPrimitiveType());

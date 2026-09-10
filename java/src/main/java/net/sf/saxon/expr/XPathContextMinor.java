@@ -236,9 +236,9 @@ public class XPathContextMinor implements XPathContext {
         if (currentIterator == null) {
             return null;
         }
-        if (currentIterator instanceof FocusTrackingIterator) {
+        if (currentIterator instanceof FocusTrackingIterator mfti) {
             // Common case extracted to reduce overhead of megamorphism
-            return ((FocusTrackingIterator)currentIterator).current();
+            return mfti.current();
         } else {
             return currentIterator.current();
         }

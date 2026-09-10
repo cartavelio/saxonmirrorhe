@@ -46,7 +46,7 @@ public class Serialize extends SystemFunction implements Callable {
         OptionsParameter op = new OptionsParameter(version);
         op.addAllowedOption("allow-duplicate-names", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("byte-order-mark", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        op.addAllowedOption("cdata-section-elements", listOfQNames, EmptySequence.getInstance());
+        op.addAllowedOption("cdata-section-elements", listOfQNames, EmptySequence.INSTANCE);
         //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
         op.addAllowedOption("doctype-public", SequenceType.SINGLE_STRING); //doctype-public-param-type pubid-char-string-type
         op.addAllowedOption("doctype-system", SequenceType.SINGLE_STRING); //doctype-system-param-type system-id-string-type

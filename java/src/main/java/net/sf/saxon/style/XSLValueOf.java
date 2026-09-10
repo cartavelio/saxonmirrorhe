@@ -20,7 +20,7 @@ import net.sf.saxon.value.Whitespace;
 
 
 /**
- * An xsl:value-of element in the stylesheet. <br>
+ * An xsl:value-of element in the stylesheet. In 4.0 this also supports the xsl:text instruction.<br>
  * The xsl:value-of element takes attributes:<ul>
  * <li>a mandatory attribute select="expression".
  * This must be a valid String expression</li>
@@ -47,20 +47,20 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
             String f = attName.getDisplayName();
             String value = att.getValue();
             switch (f) {
-                case "disable-output-escaping":
+                case "disable-output-escaping" -> {
                     disableAtt = Whitespace.trim(value);
-                    break;
-                case "select":
+                }
+                case "select" -> {
                     selectAtt = value;
                     select = makeExpression(selectAtt, att);
-                    break;
-                case "separator":
+                }
+                case "separator" -> {
                     separatorAtt = value;
                     separator = makeAttributeValueTemplate(separatorAtt, att);
-                    break;
-                default:
+                }
+                default -> {
                     checkUnknownAttribute(attName);
-                    break;
+                }
             }
         }
 
@@ -91,7 +91,7 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Configuration config = getConfiguration();
         final TypeHierarchy th = config.getTypeHierarchy();
-        if (separator == null && select != null && xPath10ModeIsEnabled()) {
+        if (separator == null && select != null && getLocalPart().equals("value-of") && xPath10ModeIsEnabled()) {
             // Handle XSLT 1.0 backwards compatibility
             select = config.getTypeChecker(true).processValueOf(select, config);
         } else {

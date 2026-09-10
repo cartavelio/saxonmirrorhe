@@ -135,7 +135,7 @@ public class SQLDelete extends ExtensionInstruction {
             } catch (SQLException ex) {
                 dynamicError("SQL DELETE failed: " + ex.getMessage(), SaxonErrorCode.SXSQ0004, context);
             }
-            return EmptyAtomicSequence.getInstance();
+            return AtomicArray.EMPTY_ATOMIC_ARRAY;
         }
 
     }

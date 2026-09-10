@@ -101,10 +101,10 @@ public class DeepEqual extends CollatingFunctionFixed {
         o.addAllowedOption("type-variety", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("typed-values", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
 
-        o.addAllowedOption("normalization-form", SequenceType.OPTIONAL_STRING, EmptySequence.getInstance());
+        o.addAllowedOption("normalization-form", SequenceType.OPTIONAL_STRING, EmptySequence.INSTANCE);
         o.setAllowedValues("normalization-form", "FOJS0005", "NFC", "NFD", "NFKC", "NFKD");
 
-        o.addAllowedOption("unordered-elements", BuiltInAtomicType.QNAME.zeroOrMore(), EmptySequence.getInstance());
+        o.addAllowedOption("unordered-elements", BuiltInAtomicType.QNAME.zeroOrMore(), EmptySequence.INSTANCE);
 
         o.addAllowedOption("whitespace", SequenceType.OPTIONAL_STRING, new StringValue("preserve"));
         o.setAllowedValues("whitespace", "FOJS0005", "preserve", "strip", "normalize");
@@ -892,13 +892,15 @@ public class DeepEqual extends CollatingFunctionFixed {
         List<NodeInfo> children0 = new ArrayList<>();
         List<NodeInfo> children1 = new ArrayList<>();
 
-        for (NodeInfo c0 : e0.children()) {
+        SequenceIterator children0iter = e0.iterateChildAxis(null);
+        for (NodeInfo c0; (c0 = (NodeInfo) children0iter.next()) != null; ) {
             if (!isIgnorable(c0, options)) {
                 children0.add(c0);
             }
         }
 
-        for (NodeInfo c1 : e1.children()) {
+        SequenceIterator children1iter = e1.iterateChildAxis(null);
+        for (NodeInfo c1; (c1 = (NodeInfo) children1iter.next()) != null; ) {
             if (!isIgnorable(c1, options)) {
                 children1.add(c1);
             }

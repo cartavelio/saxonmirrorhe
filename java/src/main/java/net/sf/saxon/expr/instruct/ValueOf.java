@@ -72,7 +72,7 @@ public final class ValueOf extends SimpleNodeConstructor {
         // If value is fixed, test whether there are any special characters that might need to be
         // escaped when the time comes for serialization
         if (select instanceof StringLiteral) {
-            UnicodeString val = ((StringLiteral) select).getString();
+            UnicodeString val = ((StringLiteral) select).getUnicodeString();
             boolean special = val.indexWhere(c -> c < 33 || c > 126 || c == '<' || c == '>' || c == '&', 0) >= 0;
             if (!special) {
                 options |= ReceiverOption.NO_SPECIAL_CHARS;

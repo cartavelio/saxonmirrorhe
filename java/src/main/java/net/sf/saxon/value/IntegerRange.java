@@ -139,7 +139,7 @@ public class IntegerRange implements AtomicSequence {
     @Override
     public GroundedValue subsequence(int start, int length) {
         if (length <= 0) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         long newStart = this.start + Math.max(start, 0);
         long newEnd = newStart + ((long)length * step) - 1L;
@@ -149,7 +149,7 @@ public class IntegerRange implements AtomicSequence {
         if (newEnd >= newStart) {
             return new IntegerRange(newStart, step, newEnd);
         } else {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
     }
 

@@ -45,7 +45,10 @@ public class GDayValue extends GDateValue {
         String date = "2000-01-" + base + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_DAY;
         setLexicalValue(g, BMPString.of(date), true);
-        return g.error == null ? new GDayValue(g) : g.error;
+        if (g.error != null) {
+            return g.error;
+        }
+        return new GDayValue(g);
     }
 
     public GDayValue(byte day, int tz) {

@@ -476,10 +476,13 @@ public class TypeChecker {
      *
      * @param exp the given expression
      * @param visitor  the expression visitor
-     * @return null if the expression is OK (optimistically), an exception object if not
+     * @throws XPathException if the expression cannot deliver an effective boolean value
      */
 
     public static void ebvTypeCheck(Expression exp, ExpressionVisitor visitor) throws XPathException {
+        if (Cardinality.allowsZero(exp.getCardinality())) {
+            return;
+        }
         UType t = exp.getItemType().getUType();
         if (!t.overlaps(EBV_ITEM_TYPES)) {
             String message = "Effective boolean value is defined only for sequences containing " +

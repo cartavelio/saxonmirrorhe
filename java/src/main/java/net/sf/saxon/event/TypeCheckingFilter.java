@@ -39,7 +39,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
     private Location locator;
     private int count = 0;
     private int level = 0;
-    private boolean allowAnyElement = false;
+    private boolean allowAnyNode = false;
     private final HashSet<Long> checkedElements = new HashSet<>(10);
     // used to avoid repeated checking when a template creates large numbers of elements of the same type
     // The key is a (namecode, typecode) pair, packed into a single long
@@ -57,7 +57,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
         this.roleDiagnostic = roleDiagnostic;
         this.locator = locator;
         Affinity aff = typeHierarchy.relationship(requiredType, NodeKindType.ELEMENT);
-        allowAnyElement = aff == Affinity.SAME_TYPE || aff == Affinity.SUBSUMES;
+        allowAnyNode = aff == Affinity.SAME_TYPE || aff == Affinity.SUBSUMES;
     }
 
     /**
@@ -200,7 +200,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
             if (++count == 2) {
                 checkAllowsMany(location);
             }
-            if (!allowAnyElement) {
+            if (!allowAnyNode) {
                 Orphan node = new Orphan(getConfiguration());
                 node.setNodeKind(Type.ELEMENT);
                 node.setNodeName(elemName);

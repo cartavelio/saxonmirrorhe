@@ -135,7 +135,7 @@ public class Average extends FoldingFunction {
         @Override
         public Sequence result() throws XPathException {
             if (atStart) {
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
             } else if (data instanceof NumericValue) {
                 return ArithmeticExpression.compute(data, Calculator.DIV, new Int64Value(count), context);
             } else {

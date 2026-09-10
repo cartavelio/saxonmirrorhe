@@ -151,7 +151,7 @@ public class MetaTagAdjuster extends ProxyReceiver {
             String headPrefix = elemName.getPrefix();
             NamespaceUri headURI = elemName.getNamespaceUri();
             FingerprintedQName metaCode = new FingerprintedQName(headPrefix, headURI, "meta");
-            AttributeMap atts = EmptyAttributeMap.getInstance();
+            AttributeMap atts = EmptyAttributeMap.INSTANCE;
             if (htmlVersion == 5) {
                 atts = atts.put(new AttributeInfo(new NoNamespaceName("charset"),
                                                   BuiltInAtomicType.UNTYPED_ATOMIC, encoding, Loc.NONE, ReceiverOption.NONE));
@@ -161,7 +161,7 @@ public class MetaTagAdjuster extends ProxyReceiver {
                 atts = atts.put(new AttributeInfo(new NoNamespaceName("content"),
                                                   BuiltInAtomicType.UNTYPED_ATOMIC, mediaType + "; charset=" + encoding, Loc.NONE, ReceiverOption.NONE));
             }
-            nextReceiver.startElement(metaCode, Untyped.getInstance(), atts, namespaces, location, ReceiverOption.NONE);
+            nextReceiver.startElement(metaCode, Untyped.INSTANCE, atts, namespaces, location, ReceiverOption.NONE);
             droppingMetaTags = level;
             seekingHead = false;
             nextReceiver.endElement();

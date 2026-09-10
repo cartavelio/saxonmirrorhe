@@ -46,7 +46,10 @@ public class GYearMonthValue extends GDateValue {
         String date = base + "-01" + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_YEAR_MONTH;
         setLexicalValue(g, BMPString.of(date), rules.isAllowYearZero());
-        return g.error == null ? new GYearMonthValue(g) : g.error;
+        if (g.error != null) {
+            return g.error;
+        }
+        return new GYearMonthValue(g);
     }
 
     public GYearMonthValue(int year, byte month, int tz, boolean xsd10) {

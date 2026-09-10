@@ -811,7 +811,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         contextItemType = match.getItemType();
         if (contextItemType.equals(ErrorType.getInstance())) {
             // if the match pattern can't match anything, we produce a warning, not a hard error
-            contextItemType = AnyItemType.getInstance();
+            contextItemType = AnyItemType.INSTANCE;
         }
         cisi = config.makeContextItemStaticInfo(contextItemType, contextItemOptionality);
         body = refineTemplateBody(body, cisi);
@@ -976,7 +976,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                         }
                         if (localPattern2 != match) {
                             ContextItemStaticInfo info =
-                                    getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), contextItemOptionality);
+                                    getConfiguration().makeContextItemStaticInfo(AnyItemType.INSTANCE, contextItemOptionality);
                             ExpressionTool.copyLocationInfo(match, localPattern2);
                             localPattern2.setOriginalText(match.toString());
                             localPattern2 = localPattern2.typeCheck(visitor, info);
@@ -1001,7 +1001,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                             }
                             if (localSubPattern2 != localSubPattern1) {
                                 ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(
-                                        AnyItemType.getInstance(), contextItemOptionality);
+                                        AnyItemType.INSTANCE, contextItemOptionality);
                                 ExpressionTool.copyLocationInfo(match, localSubPattern2);
                                 localSubPattern2.setOriginalText(match.toString());
                                 localSubPattern2 = localSubPattern2.typeCheck(visitor, info);
@@ -1148,9 +1148,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         ItemType contextItemType = match.getItemType();
         if (contextItemType.equals(ErrorType.getInstance())) {
             // if the match pattern can't match anything, we produce a warning, not a hard error
-            contextItemType = AnyItemType.getInstance();
+            contextItemType = AnyItemType.INSTANCE;
         }
-        if (requiredContextItemType != AnyItemType.getInstance()) {
+        if (requiredContextItemType != AnyItemType.INSTANCE) {
             Affinity rel = config.getTypeHierarchy().relationship(contextItemType, requiredContextItemType);
             switch (rel) {
                 case DISJOINT:

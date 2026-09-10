@@ -50,8 +50,10 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 .arg(0, NumericType.getInstance(), OPT, EMPTY));
 
         // Evaluate the value of a try-catch variable such as $err:code
-        register("dynamic-error-info", 1, e -> e.populate(DynamicErrorInfoFn::new, AnyItemType.getInstance(), STAR, FOCUS | LATE | SIDE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("dynamic-error-info", 1, e -> {
+            return e.populate(DynamicErrorInfoFn::new, AnyItemType.getInstance(), STAR, FOCUS | LATE | SIDE)
+                    .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        });
 
         // Variant of the doc() function with an options parameter
         register("doc", 2, e -> e.populate(SaxonDoc::new, NodeKindType.DOCUMENT, ONE, LATE)
@@ -75,9 +77,11 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
         register("yes-no-boolean", 1, e -> e.populate(YesNoBoolean::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("concatenate-sequences", 2, e -> e.populate(ConcatenateSequences::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, AnyItemType.getInstance(), STAR, null));
+        register("concatenate-sequences", 2, e -> {
+            return e.populate(ConcatenateSequences::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, AnyItemType.getInstance(), STAR, null)
+                    .arg(1, AnyItemType.getInstance(), STAR, null);
+        });
 
     }
 
@@ -202,7 +206,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
             @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
             XPathException error = context.getCurrentException();
             if (error == null) {
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
             }
             SourceLocator locator = error.getLocator();
             switch (var) {
@@ -223,7 +227,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 case "value": {
                     Sequence value = error.getErrorObject();
                     if (value == null) {
-                        return EmptySequence.getInstance();
+                        return EmptySequence.INSTANCE;
                     } else {
                         return value;
                     }
@@ -231,7 +235,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 case "module": {
                     String module = locator == null ? null : locator.getSystemId();
                     if (module == null) {
-                        return EmptySequence.getInstance();
+                        return EmptySequence.INSTANCE;
                     } else {
                         return new StringValue(module);
                     }
@@ -239,7 +243,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 case "line-number": {
                     int line = locator == null ? -1 : locator.getLineNumber();
                     if (line == -1) {
-                        return EmptySequence.getInstance();
+                        return EmptySequence.INSTANCE;
                     } else {
                         return new Int64Value(line);
                     }
@@ -248,14 +252,14 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     // Bug 4144
                     int column = -1;
                     if (locator == null) {
-                        return EmptySequence.getInstance();
+                        return EmptySequence.INSTANCE;
                     } else if (locator instanceof XPathParser.NestedLocation) {
                         column = ((XPathParser.NestedLocation) locator).getContainingLocation().getColumnNumber();
                     } else {
                         column = locator.getColumnNumber();
                     }
                     if (column == -1) {
-                        return EmptySequence.getInstance();
+                        return EmptySequence.INSTANCE;
                     } else {
                         return new Int64Value(column);
                     }
@@ -263,7 +267,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 case "stack-trace": {
                     final XPathContext errorContext = error.getXPathContext();
                     if (errorContext == null) {
-                        return EmptySequence.getInstance();
+                        return EmptySequence.INSTANCE;
                     } else {
                         return new LazyString(() -> StandardDiagnostics.stackTrace(errorContext));
                     }
@@ -284,7 +288,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
 
                     Sequence errorObject = error.getErrorObject();
                     if (errorObject == null) {
-                        errorObject = EmptySequence.getInstance();
+                        errorObject = EmptySequence.INSTANCE;
                     } 
 
                     String module = locator == null ? null : locator.getSystemId();
@@ -295,7 +299,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
 
                     int column = -1;
                     if (locator == null) {
-                        return EmptySequence.getInstance();
+                        return EmptySequence.INSTANCE;
                     } else if (locator instanceof XPathParser.NestedLocation) {
                         column = ((XPathParser.NestedLocation) locator).getContainingLocation().getColumnNumber();
                     } else {
@@ -305,7 +309,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     final XPathContext errorContext = error.getXPathContext();
                     GroundedValue stackTrace;
                     if (errorContext == null) {
-                        stackTrace = EmptySequence.getInstance();
+                        stackTrace = EmptySequence.INSTANCE;
                     } else {
                         stackTrace = new LazyString(
                                 () -> StandardDiagnostics.stackTrace(errorContext));
@@ -318,12 +322,12 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                                            new StringValue(module),
                                            new Int64Value(line),
                                            new Int64Value(column),
-                                           EmptySequence.getInstance(),
+                                         EmptySequence.INSTANCE,
                                            stackTrace
                                         );
                 }
                 default:
-                    return EmptySequence.getInstance();
+                    return EmptySequence.INSTANCE;
             }
 
         }

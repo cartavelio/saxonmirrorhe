@@ -219,7 +219,7 @@ public class SQLUpdate extends ExtensionInstruction {
                 dynamicError("SQL UPDATE failed: " + ex.getMessage(), SaxonErrorCode.SXSQ0004, context);
             }
 
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
 
     }

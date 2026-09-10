@@ -101,7 +101,11 @@ public abstract class Type {
 
     public static final short ITEM = 88;
 
-    /*@NotNull*/ public static final ItemType ITEM_TYPE = AnyItemType.getInstance();
+    /*@NotNull*/ public static final ItemType ITEM_TYPE;
+
+    static {
+        ITEM_TYPE = AnyItemType.getInstance();
+    }
 
     /**
      * A type number for function()
@@ -156,7 +160,8 @@ public abstract class Type {
                 case Type.DOCUMENT:
                     // Need to know whether the document is well-formed and if so what the element type is
                     ItemType elementType = null;
-                    for (NodeInfo n : node.children()) {
+                    SequenceIterator children = node.iterateChildAxis(null);
+                    for (NodeInfo n; (n = (NodeInfo) children.next()) != null; ) {
                         int kind = n.getNodeKind();
                         if (kind == Type.TEXT) {
                             elementType = null;
@@ -416,8 +421,8 @@ public abstract class Type {
         if (t2 instanceof ErrorType) {
             return t1;
         }
-        if (t1 == AnyItemType.getInstance() || t2 == AnyItemType.getInstance()) {
-            return AnyItemType.getInstance();
+        if (t1 == AnyItemType.INSTANCE || t2 == AnyItemType.INSTANCE) {
+            return AnyItemType.INSTANCE;
         }
         ItemType p1 = t1.getPrimitiveItemType();
         ItemType p2 = t2.getPrimitiveItemType();
@@ -451,7 +456,7 @@ public abstract class Type {
             return JavaExternalObjectType.of(leastCommonSuperClass(c1, c2));
         }
         //#endif
-        return AnyItemType.getInstance();
+        return AnyItemType.INSTANCE;
 
         // Note: for function items, the result is always AnyFunctionType, since all functions have the same primitive type
 

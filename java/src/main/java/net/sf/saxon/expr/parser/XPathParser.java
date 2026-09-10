@@ -124,10 +124,17 @@ public class XPathParser {
 
 
 
-    public static class InlineFunctionDetails {
-        public IndexedStack<LocalBinding> outerVariables;    // Local variables defined in the immediate outer scope (the father scope)
-        public List<LocalBinding> outerVariablesUsed; // Local variables from the outer scope that are actually used
-        public List<UserFunctionParameter> implicitParams; // Parameters corresponding (1:1) with the above
+    public record InlineFunctionDetails (
+        IndexedStack<LocalBinding> outerVariables,    // Local variables defined in the immediate outer scope (the father scope)
+        List<LocalBinding> outerVariablesUsed,        // Local variables from the outer scope that are actually used
+        List<UserFunctionParameter> implicitParams    // Parameters corresponding (1:1) with the above
+    ){
+        public InlineFunctionDetails() {
+             this(new IndexedStack<LocalBinding>(),
+                  new ArrayList<LocalBinding>(4),
+                  new ArrayList<UserFunctionParameter>(4));
+        }
+
     }
 
     public interface Accelerator {
@@ -511,20 +518,14 @@ public class XPathParser {
      */
 
     protected String getLanguage() {
-        switch (language) {
-            case XPATH:
-                return "XPath";
-            case XSLT_PATTERN:
-                return "XSLT Pattern";
-            case SEQUENCE_TYPE:
-                return "SequenceType";
-            case XQUERY:
-                return "XQuery";
-            case EXTENDED_ITEM_TYPE:
-                return "Extended ItemType";
-            default:
-                return "XPath";
-        }
+        return switch (language) {
+            case XPATH -> "XPath";
+            case XSLT_PATTERN -> "XSLT Pattern";
+            case SEQUENCE_TYPE -> "SequenceType";
+            case XQUERY -> "XQuery";
+            case EXTENDED_ITEM_TYPE -> "Extended ItemType";
+            default -> "XPath";
+        };
     }
 
     /**
@@ -1961,7 +1962,7 @@ public class XPathParser {
                 theClass = config.getClass(className, false);
             } catch (XPathException err) {
                 grumble("Unknown Java class " + local, "XPST0051");
-                return AnyItemType.getInstance();
+                return AnyItemType.INSTANCE;
             }
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized(config) {
@@ -2192,7 +2193,7 @@ public class XPathParser {
                 nextToken();
                 readToken(Token.LPAREN);
                 readToken(Token.RPAREN);
-                return AnyItemType.getInstance();
+                return AnyItemType.INSTANCE;
             case "gnode":
                 checkLanguageVersion40("gnode() item type");
                 nextToken();
@@ -2471,7 +2472,7 @@ public class XPathParser {
             nextToken();
             readToken(Token.RPAREN);
             if (annotations.isEmpty()) {
-                return AnyFunctionType.getInstance();
+                return AnyFunctionType.INSTANCE;
             } else {
                 return new AnyFunctionTypeWithAssertions(annotations, getStaticContext().getConfiguration());
             }
@@ -4446,7 +4447,7 @@ public class XPathParser {
                             FunctionCall operand = (FunctionCall) expression;
                             Literal keyExp = (Literal) operand.getArguments()[0];
                             Literal valueExp = (Literal) operand.getArguments()[1];
-                            UnicodeString key = ((StringLiteral) keyExp).getString();
+                            UnicodeString key = ((StringLiteral) keyExp).getUnicodeString();
                             GroundedValue val = valueExp.getGroundedValue();
                             mapBuilder.put(key, val);
                         }
@@ -5214,13 +5215,11 @@ public class XPathParser {
 
         int offset = t.currentTokenStartOffset;
 
+
         InlineFunctionDetails details = new InlineFunctionDetails();
-        details.outerVariables = new IndexedStack<>();
         for (LocalBinding lb : getRangeVariables()) {
-            details.outerVariables.push(lb);
+            details.outerVariables().push(lb);
         }
-        details.outerVariablesUsed = new ArrayList<>(4);
-        details.implicitParams = new ArrayList<>(4);
         inlineFunctionStack.push(details);
         //noinspection Convert2Diamond
         setRangeVariables(new IndexedStack<LocalBinding>());
@@ -5253,7 +5252,7 @@ public class XPathParser {
             undeclareRangeVariable();
         }
         // restore the previous stack of range variables
-        setRangeVariables(details.outerVariables);
+        setRangeVariables(details.outerVariables());
         inlineFunctionStack.pop();
         return result;
     }
@@ -5412,15 +5411,15 @@ public class XPathParser {
     private static LocalBinding findOuterXPathRangeVariable(StructuredQName qName, IndexedStack<InlineFunctionDetails> inlineFunctionStack) {
         for (int s = inlineFunctionStack.size() - 1; s >= 0; s--) {
             InlineFunctionDetails details = inlineFunctionStack.get(s);
-            IndexedStack<LocalBinding> outerVariables = details.outerVariables;
+            IndexedStack<LocalBinding> outerVariables = details.outerVariables();
             for (int v = outerVariables.size() - 1; v >= 0; v--) {
                 LocalBinding b2 = outerVariables.get(v);
                 if (b2.getVariableQName().equals(qName)) {
                     for (int bs = s; bs <= inlineFunctionStack.size() - 1; bs++) {
                         details = inlineFunctionStack.get(bs);
                         boolean found = false;
-                        for (int p = 0; p < details.outerVariablesUsed.size() - 1; p++) {
-                            if (details.outerVariablesUsed.get(p) == b2) {
+                        for (int p = 0; p < details.outerVariablesUsed().size() - 1; p++) {
+                            if (details.outerVariablesUsed().get(p) == b2) {
                                 // the inner function already uses the outer variable
                                 b2 = details.implicitParams.get(p);
                                 found = true;
@@ -5589,12 +5588,9 @@ public class XPathParser {
         int offset = t.currentTokenStartOffset;
 
         InlineFunctionDetails details = new InlineFunctionDetails();
-        details.outerVariables = new IndexedStack<>();
         for (LocalBinding lb : getRangeVariables()) {
-            details.outerVariables.push(lb);
+            details.outerVariables().push(lb);
         }
-        details.outerVariablesUsed = new ArrayList<>(4);
-        details.implicitParams = new ArrayList<>(4);
         inlineFunctionStack.push(details);
         setRangeVariables(new IndexedStack<>());
         nextToken();
@@ -5625,7 +5621,7 @@ public class XPathParser {
 
         setLocation(result, offset);
         // restore the previous stack of range variables
-        setRangeVariables(details.outerVariables);
+        setRangeVariables(details.outerVariables());
         inlineFunctionStack.pop();
         return result;
     }

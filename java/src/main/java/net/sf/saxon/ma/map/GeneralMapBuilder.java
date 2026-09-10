@@ -7,6 +7,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
 
@@ -107,6 +108,7 @@ public class GeneralMapBuilder {
      * @throws XPathException if duplicate keys were found, and not detected earlier
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public MapItem getCompletedMap(XPathContext context) throws XPathException {
         if (keys.size() == 0) {
             return EmptyMap.getInstance(specVersion);
@@ -162,6 +164,7 @@ public class GeneralMapBuilder {
      * @return the constructed map
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public MapItem getCompletedMapConfidently() {
         if (keys.size() == 0) {
             return EmptyMap.getInstance(specVersion);

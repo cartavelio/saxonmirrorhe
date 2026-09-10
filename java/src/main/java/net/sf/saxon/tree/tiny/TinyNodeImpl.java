@@ -374,8 +374,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
         if (hasChildNodes()) {
-            if (predicate instanceof NamedXNodePredicate) {
-                NamedXNodePredicate fpTest = (NamedXNodePredicate) predicate;
+            if (predicate instanceof NamedXNodePredicate fpTest) {
                 int fp = ((NamedXNodePredicate) predicate).getRequiredFingerprint();
                 if (fp != -1 && fpTest.getNodeKind() == Type.ELEMENT) {
                     // fast path for common case
@@ -389,7 +388,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
             }
             return new SiblingIterator(tree, this, predicate, true);
         } else {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
     }
 
@@ -402,7 +401,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
                 return new DescendantIteratorSansText(tree, this, predicate);
             }
         } else {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
     }
 
@@ -422,7 +421,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
             return new FollowingIterator(tree, getParent(), nodeTest, true);
         } else if (tree.depth[nodeNr] == 0) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else {
             return new FollowingIterator(tree, this, nodeTest, false);
         }
@@ -432,7 +431,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate nodeTest) {
         int type = getNodeKind();
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else {
             return new SiblingIterator(tree, this, nodeTest, false);
         }
@@ -444,7 +443,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
             return getParent().iteratePrecedingAxis(nodeTest);
         } else if (tree.depth[nodeNr] == 0) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else {
             return new PrecedingIterator(tree, this, nodeTest, false);
         }
@@ -454,7 +453,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate nodeTest) {
         int type = getNodeKind();
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else {
             return new PrecedingSiblingIterator(tree, this, nodeTest);
         }

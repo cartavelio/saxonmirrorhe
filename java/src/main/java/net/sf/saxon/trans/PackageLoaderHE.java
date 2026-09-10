@@ -177,7 +177,7 @@ public class PackageLoaderHE implements IPackageLoader {
     public StylesheetPackage loadPackage(Source source) throws XPathException {
 
         ParseOptions options = new ParseOptions()
-                .withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance())
+                .withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE)
                 .withSchemaValidationMode(Validation.SKIP)
                 .withDTDValidationMode(Validation.SKIP);
 
@@ -618,7 +618,12 @@ public class PackageLoaderHE implements IPackageLoader {
         String flags = templateElement.getAttributeValue(NamespaceUri.NULL,"flags");
         int slots = getIntegerAttribute(templateElement, "slots");
         SequenceType contextType = parseAlphaCode(templateElement, "cxt");
-        ItemType contextItemType = contextType == null ? AnyItemType.getInstance() : contextType.getPrimaryType();
+        ItemType contextItemType;
+        if (contextType == null) {
+            contextItemType = AnyItemType.INSTANCE;
+        } else {
+            contextItemType = contextType.getPrimaryType();
+        }
 
         NamedTemplate template = new NamedTemplate(templateName, getConfiguration());
         template.setStackFrameMap(new SlotManager(slots));
@@ -851,7 +856,12 @@ public class PackageLoaderHE implements IPackageLoader {
             boolean streamable = "1".equals(templateRuleElement.getAttributeValue(NamespaceUri.NULL,"streamable"));
             String tflags = templateRuleElement.getAttributeValue(NamespaceUri.NULL,"flags");
             SequenceType contextType = parseAlphaCode(templateRuleElement, "cxt");
-            ItemType contextItemType = contextType == null ? AnyItemType.getInstance() : contextType.getPrimaryType();
+            ItemType contextItemType;
+            if (contextType == null) {
+                contextItemType = AnyItemType.INSTANCE;
+            } else {
+                contextItemType = contextType.getPrimaryType();
+            }
 
             NodeInfo matchElement = getChildWithRole(templateRuleElement, "match");
             Pattern match = loadPattern(matchElement);
@@ -1000,11 +1010,11 @@ public class PackageLoaderHE implements IPackageLoader {
             String s = element.getLocalPart();
             switch (s) {
                 case "strip.all":
-                    pack.setStripperRules(new AllElementsSpaceStrippingRule());
+                    pack.setStripperRules(AllElementsSpaceStrippingRule.INSTANCE);
                     pack.setStripsWhitespace(true);
                     break;
                 case "strip.none":
-                    pack.setStripperRules(new NoElementsSpaceStrippingRule());
+                    pack.setStripperRules(NoElementsSpaceStrippingRule.INSTANCE);
                     break;
                 case "strip":
                     SequenceIterator iterator2 = element.iterateChildAxis(NodeKindType.ELEMENT);
@@ -1367,7 +1377,7 @@ public class PackageLoaderHE implements IPackageLoader {
     public ItemType parseAlphaCodeForItemType(NodeInfo element, String name) throws XPathException {
         String attValue = element.getAttributeValue(NamespaceUri.NULL,name);
         if (attValue == null) {
-            return AnyItemType.getInstance();
+            return AnyItemType.INSTANCE;
         } else {
             try {
                 return AlphaCode.toItemType(attValue, importedSchema);
@@ -1400,7 +1410,7 @@ public class PackageLoaderHE implements IPackageLoader {
     public ItemType parseItemTypeAttribute(NodeInfo element, String attName) throws XPathException {
         String attValue = element.getAttributeValue(NamespaceUri.NULL,attName);
         if (attValue == null) {
-            return AnyItemType.getInstance();
+            return AnyItemType.INSTANCE;
         }
         return parseItemType(element, attValue);
     }
@@ -2222,7 +2232,7 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
 
-        eMap.put("empty", (loader, element) -> Literal.makeLiteral(EmptySequence.getInstance()));
+        eMap.put("empty", (loader, element) -> Literal.makeLiteral(EmptySequence.INSTANCE));
 
         eMap.put("emptyTextNodeRemover", (loader, element) -> {
             Expression body = loader.getFirstChildExpression(element);
@@ -2495,7 +2505,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression content = loader.getExpressionWithRole(element, "content");
             StringCollator collator = null;
             if (collationNameExp instanceof StringLiteral) {
-                String collationName = ((StringLiteral) collationNameExp).getString().toString();
+                String collationName = ((StringLiteral) collationNameExp).stringify();
                 collator = loader.config.getCollation(collationName);
             }
             ForEachGroup feg = new ForEachGroup(
@@ -3228,7 +3238,7 @@ public class PackageLoaderHE implements IPackageLoader {
             String flags = element.getAttributeValue(NamespaceUri.NULL,"flags");
             if (flags != null) {
                 if (flags.contains("S")) {
-                    options = options.withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+                    options = options.withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE);
                 }
                 if (flags.contains("l")) {
                     options = options.withLineNumbering(true);

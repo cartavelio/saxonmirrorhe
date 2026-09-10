@@ -69,7 +69,8 @@ public class TinyTextualElement extends TinyElementImpl {
     @Override
     public void copy(Receiver receiver, int copyOptions, Location location) throws XPathException {
         boolean typed = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS);
-        SchemaType type = typed ? getSchemaType() : Untyped.getInstance();
+        SchemaType type;
+        type = typed ? getSchemaType() : Untyped.INSTANCE;
         boolean disallowNamespaceSensitiveContent =
                 ((copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0) &&
                         ((copyOptions & CopyOptions.ALL_NAMESPACES) == 0);
@@ -98,7 +99,7 @@ public class TinyTextualElement extends TinyElementImpl {
         } else {
             namespaces = NamespaceMap.emptyMap();
         }
-        receiver.startElement(NameOfNode.makeName(this), type, EmptyAttributeMap.getInstance(),
+        receiver.startElement(NameOfNode.makeName(this), type, EmptyAttributeMap.INSTANCE,
                               namespaces, location, ReceiverOption.NONE);
         receiver.characters(getUnicodeStringValue(), location, ReceiverOption.NONE);
         receiver.endElement();
@@ -520,7 +521,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
         @Override
         public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         /**
@@ -532,7 +533,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
         @Override
         public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         /**
@@ -544,7 +545,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
         @Override
         public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         /**
@@ -556,7 +557,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
         @Override
         public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
 

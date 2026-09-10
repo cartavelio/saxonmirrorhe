@@ -30,10 +30,7 @@ import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationParamsHandler;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
-import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.StringTool;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.*;
 import net.sf.saxon.style.AttributeValueTemplate;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
@@ -168,12 +165,15 @@ public class XQueryParser extends XPathParser {
             GlobalContextRequirement requirement = exec.getGlobalContextRequirement();
             if (requirement != null) {
                 requirement.addRequiredSequenceType(mainModule.getRequiredContextValueType(), true);
-            } else if (mainModule.getRequiredContextItemType() != null
-                    && mainModule.getRequiredContextItemType() != AnyItemType.getInstance()) {
-                GlobalContextRequirement req = new GlobalContextRequirement();
-                req.setExternal(true);
-                req.addRequiredSequenceType(mainModule.getRequiredContextValueType(), true);
-                exec.setGlobalContextRequirement(req);
+            } else {
+                if (mainModule.getRequiredContextItemType() != null) {
+                    if (mainModule.getRequiredContextItemType() != AnyItemType.INSTANCE) {
+                        GlobalContextRequirement req = new GlobalContextRequirement();
+                        req.setExternal(true);
+                        req.addRequiredSequenceType(mainModule.getRequiredContextValueType(), true);
+                        exec.setGlobalContextRequirement(req);
+                    }
+                }
             }
 
 //            setDefaultContainer(new SimpleContainer(mainModule.getPackageData()));
@@ -2238,8 +2238,7 @@ public class XQueryParser extends XPathParser {
                     SortSpec spec = sortSpecList.get(i);
                     SortKeyDefinition key = new SortKeyDefinition(languageVersion);
                     key.setSortKey(sortSpecList.get(i).sortKey, false);
-                    String str = spec.ascending ? "ascending" : "descending";
-                    key.setOrder(new StringLiteral(BMPString.of(str)));
+                    key.setOrder(new StringLiteral(spec.ascending ? U_ASCENDING : U_DESCENDING));
                     key.setEmptyLeast(spec.emptyLeast);
 
                     if (spec.collation != null) {
@@ -2280,6 +2279,9 @@ public class XQueryParser extends XPathParser {
         return flwor;
 
     }
+
+    private final static UnicodeString U_ASCENDING = Latin1.of("ascending");
+    private final static UnicodeString U_DESCENDING = Latin1.of("descending");
 
     /**
      * Make a LetExpression. This returns an ordinary LetExpression if tracing is off, and an EagerLetExpression
@@ -3316,7 +3318,7 @@ public class XQueryParser extends XPathParser {
             if (requiredType == null) {
                 grumble("Unknown schema type " + typeName, "XQST0104");
             }
-            if (requiredType == Untyped.getInstance()) {
+            if (requiredType == Untyped.INSTANCE) {
                 mode = Validation.STRIP;
                 requiredType = null;
             }
@@ -4460,11 +4462,7 @@ public class XQueryParser extends XPathParser {
 //            if (attName.equals("xml:id") && !NameChecker.isValidNCName(rval)) {
 //                grumble("Value of xml:id must be a valid NCName", "XQST0082");
 //            }
-            AttributeDetails a = new AttributeDetails();
-            a.lexicalName = attName;
-            a.value = val;
-            a.startOffset = attOffset;
-            a.endOffset = end;
+            AttributeDetails a = new AttributeDetails(attName, val, attOffset, end);
             attributes.add(a);
 
             // on return, the current character is the closing quote
@@ -4508,9 +4506,9 @@ public class XQueryParser extends XPathParser {
         IntHashSet attFingerprints = new IntHashSet(attributes.size());
         // we've checked for duplicate lexical QNames, but not for duplicate expanded-QNames
         for (AttributeDetails a : attributes) {
-            String attName = a.lexicalName;
-            String attValue = a.value;
-            int attOffset = a.startOffset;
+            String attName = a.lexicalName();
+            String attValue = a.value();
+            int attOffset = a.startOffset();
 
             if ("xmlns".equals(attName) || attName.startsWith("xmlns:")) {
                 // do nothing
@@ -4886,7 +4884,7 @@ public class XQueryParser extends XPathParser {
                 Expression exp = parsePseudoXML(true);
                 // An end tag can appear here, and is returned as a string value
                 if (exp instanceof StringLiteral) {
-                    String endTag = ((StringLiteral) exp).getString().toString();
+                    String endTag = ((StringLiteral) exp).stringify();
                     if (Whitespace.isWhite(endTag.charAt(0))) {
                         grumble("End tag contains whitespace before the name");
                     }
@@ -5458,11 +5456,11 @@ public class XQueryParser extends XPathParser {
         return "XQuery";
     }
 
-    private static class AttributeDetails {
-        String lexicalName;
-        String value;
-        int startOffset;
-        int endOffset;
+    private record AttributeDetails (
+        String lexicalName,
+        String value,
+        int startOffset,
+        int endOffset) {
     }
 
     public static class Import {

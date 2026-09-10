@@ -14,7 +14,7 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.regex.RegularExpression;
-import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeChar;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -106,7 +106,7 @@ public class XSLAnalyzeString extends StyleElement {
 
         if (regex instanceof StringLiteral && flags instanceof StringLiteral) {
             try {
-                final UnicodeString regex = ((StringLiteral) this.regex).getString();
+                final UnicodeString regex = ((StringLiteral) this.regex).getUnicodeString();
                 final String flagstr = ((StringLiteral) flags).stringify();
 
                 String regexDialect = getEffectiveVersion() >= 30 ? "XP31" : "XP20";
@@ -145,7 +145,7 @@ public class XSLAnalyzeString extends StyleElement {
 
     private void setDummyRegex() {
         try {
-            pattern = getConfiguration().compileRegularExpression(BMPString.of("x"), "", "XP20", null);
+            pattern = getConfiguration().compileRegularExpression(new UnicodeChar('x'), "", "XP20", null);
         } catch (XPathException err) {
             throw new IllegalStateException();
         }

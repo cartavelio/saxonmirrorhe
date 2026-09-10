@@ -121,7 +121,8 @@ public class AccumulatorData implements IAccumulatorData {
                 value = processRule(rule, node, false, value, context);
                 logChange(node, value, context, " BEFORE ");
             }
-            for (NodeInfo kid : node.children()) {
+            SequenceIterator children = node.iterateChildAxis(null);
+            for (NodeInfo kid; (kid = (NodeInfo) children.next()) != null; ) {
                 value = visit(kid, value, context, listener);
             }
             ((ManualIterator) context.getCurrentIterator()).setContextItem(node);

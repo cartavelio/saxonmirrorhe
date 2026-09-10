@@ -22,6 +22,7 @@ import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.Latin1;
 import net.sf.saxon.style.PublicStylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetPackage;
@@ -61,18 +62,7 @@ public final class EvaluateInstr extends Expression {
     private Operand dynamicParamsOp;
     private NamespaceUri defaultXPathNamespace = null;
 
-    /**
-     * Set the retained static context
-     *
-     * @param rsc the static context to be retained
-     */
-    @Override
-    public void setRetainedStaticContext(RetainedStaticContext rsc) {
-        super.setRetainedStaticContext(rsc);
-    }
-
-
-
+    private final static StringValue SV_DEFAULT_COLLATION = new StringValue(Latin1.of("default-collation"));
     /**
      * Create an xsl:evaluate instruction
      *
@@ -393,6 +383,13 @@ public final class EvaluateInstr extends Expression {
         return new EvaluateInstrElaborator();
     }
 
+    private record CacheKey (
+            String exprText, String baseUri, boolean schemaAware, Optional<NodeInfo> namespaceContext) {}
+
+    private record CacheValue (
+            Expression expr, SlotManager slotManager, Collection<XPathVariable> variables) {}
+
+
     private static class EvaluateInstrElaborator extends PullElaborator {
 
         @Override
@@ -443,33 +440,39 @@ public final class EvaluateInstr extends Expression {
 
                 // Create a cache key so the compiled expression can be reused
 
-                StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
-                fsb.append(baseUri);
-                fsb.append("##");
-                fsb.append(schemaAwareAttr);
-                fsb.append("##");
-                fsb.append(exprText);
-                if (namespaceContextBase != null) {
-                    fsb.append("##");
-                    namespaceContextBase.generateId(fsb);
-                }
-                String cacheKey = fsb.toString();
+                Optional<NodeInfo> namespaceContext = Optional.ofNullable(namespaceContextBase);
+                CacheKey cacheKey = new CacheKey(exprText,
+                                                 baseUri,
+                                                 isSchemaAware,
+                                                 namespaceContext);
+
+//                StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
+//                fsb.append(baseUri);
+//                fsb.append("##");
+//                fsb.append(schemaAwareAttr);
+//                fsb.append("##");
+//                fsb.append(exprText);
+//                if (namespaceContextBase != null) {
+//                    fsb.append("##");
+//                    namespaceContextBase.generateId(fsb);
+//                }
+//                String cacheKey = fsb.toString();
                 Collection<XPathVariable> declaredVars = null;
 
                 Controller controller = context.getController();
-                LFUCache<String, Object[]> cache;
+                LFUCache<CacheKey, CacheValue> cache;
                 //noinspection SynchronizationOnLocalVariableOrMethodParameter
                 synchronized(controller) {
-                    cache = (LFUCache<String, Object[]>) controller.getUserData(instr.getLocation(), "xsl:evaluate");
+                    cache = (LFUCache<CacheKey, CacheValue>) controller.getUserData(instr.getLocation(), "xsl:evaluate");
                     if (cache == null) {
                         cache = new LFUCache<>(100);
                         controller.setUserData(instr.getLocation(), "xsl:evaluate", cache);
                     } else {
-                        Object[] o = cache.get(cacheKey);
+                        CacheValue o = cache.get(cacheKey);
                         if (o != null) {
-                            expr = (Expression) o[0];
-                            slotMap = (SlotManager) o[1];
-                            declaredVars = (Collection<XPathVariable>) o[2];
+                            expr = o.expr();
+                            slotMap = o.slotManager();
+                            declaredVars = o.variables();
                         }
                     }
                 }
@@ -487,7 +490,7 @@ public final class EvaluateInstr extends Expression {
 //                    if (version == 30) {
 //                        version = 31;
 //                    }
-                    MapItem options = (optionsEval == null ? EmptyMap.getInstance(40) : (MapItem) optionsEval.eval(context));
+                    MapItem options = (optionsEval == null ? EmptyMap.INSTANCE_40 : (MapItem) optionsEval.eval(context));
 
                     IndependentContext env = new IndependentContext(config);
                     env.setWarningHandler((str, loc) -> {
@@ -523,7 +526,7 @@ public final class EvaluateInstr extends Expression {
                     env.setFunctionLibrary(libraryList1);
                     env.setDecimalFormatManager(instr.getRetainedStaticContext().getDecimalFormatManager());
 
-                    GroundedValue defaultCollation = options.get(StringValue.bmp("default-collation"));
+                    GroundedValue defaultCollation = options.get(SV_DEFAULT_COLLATION);
                     if (defaultCollation != null) {
                         env.setDefaultCollationName(defaultCollation.head().getStringValue());
                     }
@@ -590,11 +593,11 @@ public final class EvaluateInstr extends Expression {
 
                     // Save the compiled expression in the cache for next time
 
-                    if (cacheKey != null) {
+                    //if (cacheKey != null) {
                         declaredVars = env.getDeclaredVariables();
-                        cache.put(cacheKey, new Object[]{expr, slotMap, declaredVars});
+                        cache.put(cacheKey, new CacheValue(expr, slotMap, declaredVars));
                         //System.err.println("Cache miss, size = " + cache.size());
-                    }
+                    //}
                 }
 
                 XPathContextMajor c2 = context.newContext();
