@@ -836,8 +836,6 @@ public class XPathParser {
             case Token.SOME:
             case Token.EVERY:
                 return parseQuantifiedExpression();
-//            case Token.FOR_MEMBER:
-//                return parseForMemberExpression(this);
             case Token.IF:
                 return parseIfExpression();
             case Token.SWITCH:
