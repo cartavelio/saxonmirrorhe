@@ -125,11 +125,22 @@ public abstract class RegexFunction extends SystemFunction implements StatefulSy
         Item regexItem = args[1].head();
         if (regexItem == null) {
             // for XPath 4.0 tokenize() only
-            return null;
+            if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40) {
+                return null;
+            } else {
+                XPathException err = new XPathException("Regular expression argument must not be an empty sequence (unless 4.0 is enabled)", "XPTY0004");
+                err.setIsTypeError(true);
+                throw err;
+            }
         }
         UnicodeString regexArg = regexItem.getUnicodeStringValue();
 
         Item flagsItem = args[args.length - 1].head();   // May generally be empty in XPath 4.0
+        if (flagsItem == null && getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
+            XPathException err = new XPathException("Flags argument must not be an empty sequence (unless 4.0 is enabled)", "XPTY0004");
+            err.setIsTypeError(true);
+            throw err;
+        }
         String flags = flagsItem == null ? "" : flagsItem.getStringValue();
         String hostLang = "XP30";
         if (config.getXsdVersion() == Configuration.XSD11) {
