@@ -8,7 +8,6 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
@@ -44,7 +43,9 @@ public class Path_1 extends SystemFunction {
                 SequenceType.one(LocalUnionType.of(BuiltInAtomicType.STRING, BuiltInAtomicType.ANY_URI)));
         OptionsParameter pathOptions = new OptionsParameter(40);
         pathOptions.addAllowedOption("indexes", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
-        pathOptions.addAllowedOption("namespaces", SequenceType.one(inScopeNamespacesResult), EmptyMap.getInstance());
+        pathOptions.addAllowedOption("lexical", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        pathOptions.addAllowedOption("origin", SequenceType.OPTIONAL_NODE, EmptySequence.getInstance());
+        pathOptions.addAllowedOption("namespaces", SequenceType.optional(inScopeNamespacesResult), EmptySequence.getInstance());
         return pathOptions;
     }
 
@@ -70,6 +71,8 @@ public class Path_1 extends SystemFunction {
             }
         }
         boolean withIndexes = true;
+        boolean lexical = false;
+        NodeInfo origin = null;
         Map<NamespaceUri, String> namespaces = Collections.emptyMap();
         if (arguments.length > 1) {
             MapItem options = (MapItem)arguments[1].head();
@@ -79,17 +82,25 @@ public class Path_1 extends SystemFunction {
                 if (checkedOptions.containsKey("indexes")) {
                     withIndexes = checkedOptions.get("indexes").effectiveBooleanValue();
                 }
+                if (checkedOptions.containsKey("lexical")) {
+                    lexical = checkedOptions.get("lexical").effectiveBooleanValue();
+                }
                 if (checkedOptions.containsKey("namespaces")) {
-                    MapItem nsMap = (MapItem) checkedOptions.get("namespaces");
-                    namespaces = new HashMap<>();
-                    for (KeyValuePair kvp : nsMap.keyValuePairs()) {
-                        namespaces.put(NamespaceUri.of(kvp.value.getStringValue()), kvp.key.getStringValue());
+                    MapItem nsMap = (MapItem) checkedOptions.get("namespaces").head();
+                    if (nsMap != null) {
+                        namespaces = new HashMap<>();
+                        for (KeyValuePair kvp : nsMap.keyValuePairs()) {
+                            namespaces.put(NamespaceUri.of(kvp.value.getStringValue()), kvp.key.getStringValue());
+                        }
                     }
+                }
+                if (checkedOptions.containsKey("origin")) {
+                    origin = (NodeInfo)checkedOptions.get("origin").head();
                 }
             }
 
         }
-        return makePath(node, withIndexes, namespaces, context);
+        return makePath(node, withIndexes, lexical, namespaces, origin, context);
 
     }
 
@@ -97,20 +108,36 @@ public class Path_1 extends SystemFunction {
      * Get the path to a node
      * @param node the node whose path is required
      * @param withIndex true if index positions are to be included (in square brackets, after each element name)
+     * @param lexical true if element and attribute names are to be output in lexical QName form
      * @param namespaces map from namespace URIs to prefixes. If a namespace is present in the map, the prefix
      *                   is used in preference to Q{uri}local notation
      * @param context the dynamic evaluation context
      * @return the path, as a StringValue.
      */
-    public static StringValue makePath(NodeInfo node, boolean withIndex, Map<NamespaceUri, String> namespaces, XPathContext context) {
-        if (node.getNodeKind() == Type.DOCUMENT) {
+    public static StringValue makePath(NodeInfo node, boolean withIndex, boolean lexical,
+                                       Map<NamespaceUri, String> namespaces, NodeInfo origin, XPathContext context)
+            throws XPathException {
+        if (node.getNodeKind() == Type.DOCUMENT && origin == null) {
             return StringValue.makeStringValue("/");
         }
         StringBuilder fsb = new StringBuilder(256);
         AxisIterator iter = node.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
         NodeInfo n;
+        boolean first = true;
         while ((n = iter.next()) != null) {
+            if (origin != null && n.isSameNodeInfo(origin) && !first) {
+                String path = fsb.toString();
+                if (path.startsWith("/")) {
+                    path = path.substring(1);
+                }
+                return new StringValue(path);
+            }
+            first = false;
             if (n.getParent() == null) {
+                if (origin != null) {
+                    throw new XPathException(
+                            "In fn:path, the origin node must be an ancestor of the target node", "FOAP0001");
+                }
                 if (n.getNodeKind() == Type.DOCUMENT) {
                     return new StringValue(fsb.toString());
                 } else {
@@ -123,9 +150,13 @@ public class Path_1 extends SystemFunction {
                 case Type.DOCUMENT:
                     return new StringValue(fsb.toString());
                 case Type.ELEMENT:
-                    fsb2.append("/")
-                            .append(qualifier(n.getNamespaceUri(), namespaces))
-                            .append(n.getLocalPart());
+                    if (lexical) {
+                        fsb2.append("/").append(n.getDisplayName());
+                    } else {
+                        fsb2.append("/")
+                                .append(qualifier(n.getNamespaceUri(), namespaces))
+                                .append(n.getLocalPart());
+                    }
                     if (withIndex) {
                         fsb2.append("[").append(Navigator.getNumberSimple(n, context)).append("]");
                     }
@@ -134,10 +165,14 @@ public class Path_1 extends SystemFunction {
                     break;
                 case Type.ATTRIBUTE:
                     fsb2.append("/@");
-                    if (n.getNamespaceUri() != NamespaceUri.NULL) {
-                        fsb2.append(qualifier(n.getNamespaceUri(), namespaces));
+                    if (lexical) {
+                        fsb2.append(n.getDisplayName());
+                    } else {
+                        if (n.getNamespaceUri() != NamespaceUri.NULL) {
+                            fsb2.append(qualifier(n.getNamespaceUri(), namespaces));
+                        }
+                        fsb2.append(n.getLocalPart());
                     }
-                    fsb2.append(n.getLocalPart());
                     fsb2.append(fsb);
                     fsb = fsb2;
                     break;
