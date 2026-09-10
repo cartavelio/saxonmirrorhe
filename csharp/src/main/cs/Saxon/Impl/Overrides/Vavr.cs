@@ -8,14 +8,13 @@ using Saxon.Hej.trans;
 namespace Saxon.Impl.Overrides {
     public class Vavr {
         
-        /**
-         * Get a value from a VAVR map, returning null if the value is not present
-         * @param map the VAVR map
-         * @param key the supplied key
-         * @return the corresponding value if present, or null if not.
-         * @param <K> the key type of the map
-         * @param <V> the value type of the map
-         */
+
+         // * Get a value from a VAVR map, returning null if the value is not present
+         // * @param map the VAVR map
+         // * @param key the supplied key
+         // * @return the corresponding value if present, or null if not.
+         // * @param <K> the key type of the map
+         // * @param <V> the value type of the map
 
         public static V get<K, V> (System.Collections.Immutable.ImmutableDictionary<K,V> map, K key) {
             bool present = map.TryGetValue(key, out var value);
