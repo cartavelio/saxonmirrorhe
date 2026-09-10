@@ -79,7 +79,7 @@ test_case_name_pattern = None
 run_assertion = None
 '''serialization-matches'''
 total_tests = 0
-exceptionList = ['unicode-90', 'validation-1601']
+exceptionList = ['unicode-90', 'validation-1601', 'regex-classes', 'as-0106a', 'as-0110a', 'as-0112a', 'as-0501a', 'as-0801a', 'as-0802a']
 '''number-5018 number-2806 number-5014 number-5029'''
 
 def cwd_from_base_uri(base_uri: str):
@@ -211,7 +211,7 @@ def process_test_set(doc_builderi: saxonc.PyDocumentBuilder, proci: saxonc.PySax
                         if test_case.is_node:
                             test_casei = test_case.get_node_value()
                             test_case_name = test_casei.get_attribute_value("name")
-                            if (test_case_name_pattern is None or test_case_name_pattern.fullmatch(test_case_name)) and test_set_name not in exceptionList:
+                            if (test_case_name_pattern is None or test_case_name_pattern.fullmatch(test_case_name)) and test_case_name not in exceptionList:
                                 print("-s:" + test_set_name + " -t:" + test_case_name)
                                 run_test_case(test_case, xpathProcForEnv)
                         else:

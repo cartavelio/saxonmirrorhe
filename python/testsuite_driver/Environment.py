@@ -379,6 +379,7 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
         print("*** Failed to load schema by URI: " + str(ex))
         environment.xquery_proc.set_schema_aware(False)
         environment.xpath_proc.set_schema_aware(False)
+        environment.xslt_proc.set_schema_aware(False)
         '''environment.usable = False
         return environment'''
 

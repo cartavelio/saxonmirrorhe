@@ -2646,7 +2646,7 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
   inn = nullptr;
 }
 
-void testCatalog(const char *cwd, SaxonProcessor *proc,
+void testCatalog(const char *cwd,
                  const std::string *const dataDir,
                  sResultCount *sresult) {
 
@@ -2655,6 +2655,9 @@ void testCatalog(const char *cwd, SaxonProcessor *proc,
 #endif
   cout << endl << "Test: testCatalog" << endl;
   bool trace = false;
+
+  SaxonProcessor *proc = new SaxonProcessor();
+
   proc->setcwd(cwd);
   XsltExecutable *executable = nullptr;
   Xslt30Processor *trans = nullptr;
@@ -2716,9 +2719,10 @@ void testCatalog(const char *cwd, SaxonProcessor *proc,
     //   catalogFiles = nullptr;
     // }
   }
+  delete proc;
 }
 
-void testCatalog2(const char *cwd, SaxonProcessor *proc,
+void testCatalog2(const char *cwd,
                   const std::string *const dataDir,
                   sResultCount *sresult) {
 
@@ -2727,6 +2731,7 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc,
 #endif
   cout << endl << "Test: testCatalog2" << endl;
   bool trace = false;
+  SaxonProcessor *proc = new SaxonProcessor();
   proc->setcwd(cwd);
   XsltExecutable *executable = nullptr;
   XsltExecutable *executable2 = nullptr;
@@ -2750,6 +2755,7 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc,
     executable2->setGlobalContextFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/books.xml").c_str());
 
     XdmValue *resultValue = executable2->applyTemplatesReturningValue();
+
     if (resultValue != nullptr) {
       XdmItem *item1 = resultValue->getHead();
       const char *result2 = item1->getStringValue();
@@ -2792,9 +2798,11 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc,
     //   // catalogFiles = nullptr;
     // }
   }
+
+  delete proc;
 }
 
-void testCatalogError(const char *cwd, SaxonProcessor *proc,
+void testCatalogError(const char *cwd,
                       const std::string *const dataDir,
                       sResultCount *sresult) {
 
@@ -2802,15 +2810,16 @@ void testCatalogError(const char *cwd, SaxonProcessor *proc,
   SaxonProcessor::getInfo();
 #endif
   cout << endl << "Test: testCatalogError" << endl;
+  SaxonProcessor *proc = new SaxonProcessor();
   bool trace = false;
   proc->setcwd(cwd);
   XsltExecutable *executable = nullptr;
   Xslt30Processor *trans = nullptr;
   vector<const char*> catalogFiles {};
+
   try {
     const string catFile = CppTestUtils::concat(2, dataDir->c_str(), "/catalog-err.xml");
     catalogFiles.push_back(catFile.c_str());
-
     proc->setCatalogFiles(catalogFiles.data(), 1);
 
     trans = proc->newXslt30Processor();
@@ -2818,7 +2827,6 @@ void testCatalogError(const char *cwd, SaxonProcessor *proc,
     executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/example.xsl").c_str());
 
     executable->setInitialMatchSelectionAsFile(CppTestUtils::concat(2, dataDir->c_str(), "/example.xml").c_str());
-
     const char *result = executable->applyTemplatesReturningString();
 
     if (result != NULL) {
@@ -2862,6 +2870,7 @@ void testCatalogError(const char *cwd, SaxonProcessor *proc,
     //   catalogFiles = nullptr;
     // }
   }
+  delete proc;
 }
 
 void testXInclude(const char* cwd, SaxonProcessor* proc,
@@ -3574,21 +3583,21 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
-  testCatalog(cwd, processor, &dataDir, sresult);
+  testCatalog(cwd, &dataDir, sresult);
 
   cout << endl
        << "============================================================="
        << endl
        << endl;
 
-  testCatalog2(cwd, processor, &dataDir, sresult);
+  testCatalog2(cwd, &dataDir, sresult);
 
   cout << endl
        << "============================================================="
        << endl
        << endl;
 
-  testCatalogError(cwd, processor, &dataDir, sresult);
+  testCatalogError(cwd, &dataDir, sresult);
 
   cout << endl
        << "============================================================="
