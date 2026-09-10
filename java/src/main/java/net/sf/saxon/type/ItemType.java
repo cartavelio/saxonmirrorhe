@@ -161,16 +161,16 @@ public interface ItemType {
 
     String getBasicAlphaCode();
 
-    /**
-     * Get the full alpha code for this item type. As well as the basic alpha code, this contains
-     * additional information, for example <code>element(EFG)</code> has a basic alpha code of
-     * <code>NE</code>, but the full alpha code of <code>NE nQ{}EFG</code>.
-     * @return the alpha code for the type
-     */
-
-    default String getFullAlphaCode() {
-        return AlphaCode.fromItemType(this);
-    }
+//    /**
+//     * Get the full alpha code for this item type. As well as the basic alpha code, this contains
+//     * additional information, for example <code>element(EFG)</code> has a basic alpha code of
+//     * <code>NE</code>, but the full alpha code of <code>NE nQ{}EFG</code>.
+//     * @return the alpha code for the type
+//     */
+//
+//    default String getFullAlphaCode() {
+//        return AlphaCode.fromItemType(this);
+//    }
 
     /**
      * Return a string representation of this ItemType suitable for use in stylesheet

@@ -72,6 +72,10 @@ public class ChoiceItemType implements ItemType, ChoiceType {
         this.memberTypes = memberTypes;
     }
 
+    /**
+     * Get the alternative member types as a list
+     * @return the alternatives making up this choice type
+     */
     public List<? extends ItemType> getMemberTypes() {
         return memberTypes;
     }
@@ -221,25 +225,25 @@ public class ChoiceItemType implements ItemType, ChoiceType {
         return "U";
     }
 
-    public String getFullAlphaCode() {
-        // TODO: integrate this code into AlphaCode.fromItemType()
-        if (memberTypes.size() == 1) {
-            return memberTypes.get(0).getFullAlphaCode();
-        }
-        StringBuilder sb = new StringBuilder("U m[");
-        boolean first = true;
-        for (ItemType member : asChoiceItemType().getMemberTypes()) {
-            if (first) {
-                first = false;
-            } else {
-                sb.append(",");
-            }
-            sb.append(member.getFullAlphaCode());
-        }
-        sb.append("]");
-        return sb.toString();
-
-    }
+//    public String getFullAlphaCode() {
+//        // TODO: integrate this code into AlphaCode.fromItemType()
+//        if (memberTypes.size() == 1) {
+//            return memberTypes.get(0).getFullAlphaCode();
+//        }
+//        StringBuilder sb = new StringBuilder("U m[");
+//        boolean first = true;
+//        for (ItemType member : asChoiceItemType().getMemberTypes()) {
+//            if (first) {
+//                first = false;
+//            } else {
+//                sb.append(",");
+//            }
+//            sb.append(member.getFullAlphaCode());
+//        }
+//        sb.append("]");
+//        return sb.toString();
+//
+//    }
 
     /**
      * Test whether a given item conforms to this type

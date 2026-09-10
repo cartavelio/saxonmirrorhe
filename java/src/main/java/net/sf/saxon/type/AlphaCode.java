@@ -984,39 +984,9 @@ public class AlphaCode {
                 memberMaps.add(makeTree(pt));
             }
             result.members = memberMaps;
-//        } else if (primary instanceof NameTest) {
-//            StructuredQName name = ((NameTest) primary).getMatchingNodeName();
-//            result.name = name.getEQName();
         } else if (primary instanceof SchemaNodeTest) {
             StructuredQName name = ((SchemaNodeTest) primary).getNodeName();
             result.name = name.getEQName();
-//        } else if (primary instanceof LocalNameTest) {
-//            result.name = "*:" + ((LocalNameTest) primary).getLocalName();
-//        } else if (primary instanceof NamespaceTest) {
-//            result.name = "Q{" + ((NamespaceTest) primary).getNamespaceURI() + "}*";
-//        } else if (primary instanceof CombinedNodeTest) {
-//            final CombinedNodeTest combi = (CombinedNodeTest) primary;
-//            String c = combi.getContentTypeForAlphaCode();
-//            if (c != null) {
-//                if (!c.startsWith("Q{" + NamespaceConstant.ANONYMOUS)) {  // bug 4969
-//                    result.content = c;
-//                }
-//                result.name = combi.getMatchingNodeName().getEQName();
-//                result.nillable = combi.isNillable();
-//            } else {
-//                result.vennOperator = combi.getOperator();
-//                result.vennOperands = new AlphaCodeTree[2];
-//                result.vennOperands[0] = makeTree(combi.getOperand(0));
-//                result.vennOperands[1] = makeTree(combi.getOperand(1));
-//            }
-//        } else if (primary instanceof MultipleNodeKindTest) {
-//            result.vennOperator = OperatorSymbol.UNION;
-//            Set<PrimitiveUType> types = primary.getUType().decompose();
-//            result.vennOperands = new AlphaCodeTree[types.size()];
-//            int i = 0;
-//            for (PrimitiveUType type : types) {
-//                result.vennOperands[i++] = makeTree(type.toItemType());
-//            }
         } else if (primary instanceof NamedXNodeType) {
             QNameTest nt = ((NamedXNodeType) primary).getAllowedNodeNames();
             if (nt != AnyQNameTest.getInstance()) {

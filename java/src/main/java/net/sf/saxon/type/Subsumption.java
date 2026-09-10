@@ -11,6 +11,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -544,6 +545,15 @@ public abstract class Subsumption {
         return OVERLAPS;
     }
 
+    @CSharpReplaceBody(code="Affinity[][] result = new Affinity[rows][];\n"
+            + "            for (int i=0; i<rows; i++) {\n"
+            + "                result[i] = new Affinity[columns];\n"
+            + "            }\n"
+            + "            return result;")
+    private static Affinity[][] makeAffinityTable(int rows, int columns) {
+        return new Affinity[rows][columns];
+    }
+
     public static Affinity choiceItemRelationship(ChoiceItemType c1, ChoiceItemType c2) {
         // Algorithm (issue #1395):  A ⊆ B is true if every item type a among the
         // alternatives of A satisfies a ⊆ b for some item type b among the alternatives of B.
@@ -558,7 +568,7 @@ public abstract class Subsumption {
         // * If every pair of item types is disjoint, then DISJOINT
         // * Else OVERLAPS
         //System.err.println("choiceRelationship /// c1=" + c1.getFullAlphaCode() + " /// c2=" + c2.getFullAlphaCode());
-        Affinity[][] affinities = new Affinity[c1.memberTypes.size()][c2.memberTypes.size()];
+        Affinity[][] affinities = makeAffinityTable(c1.memberTypes.size(), c2.memberTypes.size());
         boolean allDIS = true;
         for (int i = 0; i < c1.memberTypes.size(); i++) {
             for (int j = 0; j < c2.memberTypes.size(); j++) {

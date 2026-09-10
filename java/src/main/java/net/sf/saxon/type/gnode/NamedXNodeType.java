@@ -556,31 +556,31 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
         };
     }
 
-    /**
-     * Get the full alpha code for this item type. As well as the basic alpha code, this contains
-     * additional information, for example <code>element(EFG)</code> has a basic alpha code of
-     * <code>NE</code>, but the full alpha code of <code>NE nQ{}EFG</code>.
-     *
-     * @return the alpha code for the type
-     */
-
-    public String getFullAlphaCode() {
-        StringBuilder sb = new StringBuilder(getBasicAlphaCode());
-        if (nameTest instanceof SpecificQNameTest) {
-            sb.append(" n");
-            sb.append(((SpecificQNameTest) nameTest).getStructuredQName().getEQName());
-        }
-        if (schemaType != Untyped.INSTANCE && schemaType != AnyType.INSTANCE && schemaType != BuiltInAtomicType.UNTYPED_ATOMIC) {
-            sb.append(" c");
-            StructuredQName name = schemaType.getStructuredQName();
-            if (name.hasURI(NamespaceUri.SCHEMA)) {
-                sb.append("~").append(name.getLocalPart());
-            } else {
-                sb.append(name.getEQName());
-            }
-        }
-        return sb.toString();
-    }
+//    /**
+//     * Get the full alpha code for this item type. As well as the basic alpha code, this contains
+//     * additional information, for example <code>element(EFG)</code> has a basic alpha code of
+//     * <code>NE</code>, but the full alpha code of <code>NE nQ{}EFG</code>.
+//     *
+//     * @return the alpha code for the type
+//     */
+//
+//    public String getFullAlphaCode() {
+//        StringBuilder sb = new StringBuilder(getBasicAlphaCode());
+//        if (nameTest instanceof SpecificQNameTest) {
+//            sb.append(" n");
+//            sb.append(((SpecificQNameTest) nameTest).getStructuredQName().getEQName());
+//        }
+//        if (schemaType != Untyped.INSTANCE && schemaType != AnyType.INSTANCE && schemaType != BuiltInAtomicType.UNTYPED_ATOMIC) {
+//            sb.append(" c");
+//            StructuredQName name = schemaType.getStructuredQName();
+//            if (name.hasURI(NamespaceUri.SCHEMA)) {
+//                sb.append("~").append(name.getLocalPart());
+//            } else {
+//                sb.append(name.getEQName());
+//            }
+//        }
+//        return sb.toString();
+//    }
 
 
 }

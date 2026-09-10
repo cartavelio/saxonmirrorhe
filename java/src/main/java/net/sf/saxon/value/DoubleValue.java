@@ -181,11 +181,11 @@ public final class DoubleValue extends NumericValue {
         if (isNaN()) {
             return AtomicSortComparer.COLLATION_KEY_NaN.hashCode();
         } else if (Double.isInfinite(value)) {
-            return Double.hashCode(value);
+            return Double.valueOf(value).hashCode();
         } else if (isWholeNumber() && value > Integer.MIN_VALUE && value < Integer.MAX_VALUE) {
             return (int) value;
         } else {
-            return Double.valueOf(getDoubleValue()).hashCode();
+            return Double.valueOf(value).hashCode();
         }
     }
 

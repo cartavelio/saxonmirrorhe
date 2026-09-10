@@ -66,6 +66,8 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
         return ChoiceItemType.CHOICE_OF_ANY;
     }
 
+
+
     /**
      * Determine whether this item type is an atomic type
      *
@@ -93,7 +95,21 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
     public String toExportString() {
         return toString();
     }
-    
+
+    /**
+     * Normalize this item type, returning a potentially different item type that matches the same
+     * items. For example, {@code record(*)} and {@code map(*)} match the same items. The default
+     * implementation returns the item type unchanged. This method does NOT expand item types
+     * to an equivalent choice item type.
+     * <p>Item types should be normalized before comparison using equals().</p>
+     *
+     * @return the normalized item type.
+     */
+    @Override
+    public ItemType normalizeItemType() {
+        return this;
+    }
+
     /**
      * Determine whether this item type is atomic (that is, whether it can ONLY match
      * atomic values)
