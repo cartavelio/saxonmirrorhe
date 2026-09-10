@@ -98,7 +98,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     private int[] occurrenceLimits = {100, 250};
     private SchemaURIResolver schemaURIResolver = null;
     private final SchemaURIResolver standardSchemaResolver;
-    private PreparedSchema unnamedSchema;
     private int resultDocumentThreadsLimit = Runtime.getRuntime().availableProcessors();
     private int thresholdForCompilingTypes = 100;
     private int thresholdForInliningFunctions = 100;
@@ -774,17 +773,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return namespaceStatus.keySet();
     }
 
-    /**
-     * Get the SuperSchema, containing references to all names defined in all
-     * known schemas
-     *
-     * @return the PreparedSchema containing the schema components for all loaded target namespaces
-     */
-
-    public PreparedSchema getUnnamedSchema() {
-        return unnamedSchema;
-    }
-
     public PreparedSchema getCachedSchema(NamespaceUri namespace) {
         return schemaCache.get(namespace);
     }
@@ -954,25 +942,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             destination = atb;
         }
         return destination;
-    }
-
-    /**
-     * Validate an attribute value (XSLT only)
-     *
-     * @param nodeName   the name of the attribute
-     * @param value      the value of the attribute as a string
-     * @param validation STRICT or LAX
-     * @return an int, containing the type annotation to apply to the attribute node
-     * @throws ValidationException if the value is invalid
-     */
-
-    @Override
-    public SimpleType validateAttribute(StructuredQName nodeName, UnicodeString value, int validation)
-            throws ValidationException, MissingComponentException {
-        if (isLicenseNotFound()) {
-            return BuiltInAtomicType.UNTYPED_ATOMIC;
-        }
-        return unnamedSchema.validateAttribute(nodeName, value, validation);
     }
 
     /**
