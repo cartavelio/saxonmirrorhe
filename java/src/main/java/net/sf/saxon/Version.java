@@ -39,6 +39,11 @@ public final class Version {
         return "SAXON";
     }
 
+
+    public static String getProductNameTitleCase() {
+        return "Saxon";
+    }
+
     /**
      * Return the name of the product vendor.
      *
@@ -115,7 +120,7 @@ public final class Version {
      */
 
     public static String getProductTitle() {
-        return getProductName() + '-' + getSoftwarePlatform() + '-' + softwareEdition + ' ' +
+        return getProductNameTitleCase() + getSoftwarePlatform() + '-' + softwareEdition + ' ' +
             getProductVersion()  + " from Saxonica";
     }
 
