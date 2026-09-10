@@ -20,12 +20,11 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.tiny.TinyBuilder;
-
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.DateTimeValue;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import org.w3c.tidy.Tidy;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -457,7 +456,7 @@ public class XQuery10TestSuiteDriver {
 
                 setQueryParameters(catalog, testCase, dqc, inputUriNT, collectionNT);
                 if (unfolded) {
-                    dqc.setParameter(new StructuredQName("", "", "zlsJJ"), UntypedAtomicValue.EMPTY_STRING);
+                    dqc.setParameter(new StructuredQName("", "", "zlsJJ"), StringValue.ZERO_LENGTH_UNTYPED);
                 }
 
                 NodeInfo defaultCollection = getChildElement(testCase, defaultCollectionNT);

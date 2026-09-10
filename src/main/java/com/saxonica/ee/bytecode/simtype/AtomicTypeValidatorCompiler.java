@@ -133,7 +133,7 @@ public class AtomicTypeValidatorCompiler {
                     Arrays.sort(valueArray);
                     ExpressionCompiler.allocateStatic(compiler, valueArray);
                     ga.loadArg(0);
-                    ga.invokeInstanceMethod(CharSequence.class, "toString");
+                    ga.invokeInstanceMethod(Object.class, "toString");
                     ga.invokeStaticMethod(Arrays.class, "binarySearch", Object[].class, Object.class);
                     LabelInfo ok = mi.newLabel("enumOK");
                     ga.ifZCmp(GeneratorAdapter.GE, ok.label());

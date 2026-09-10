@@ -779,7 +779,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             int prim = at.getPrimitiveType();
             ConversionResult result;
             if (prim == StandardNames.XS_UNTYPED_ATOMIC) {
-                result = new UntypedAtomicValue(StringView.tidy((String) value));
+                result = StringValue.makeUntypedAtomic(StringView.tidy((String) value));
             } else if (prim == StandardNames.XS_STRING) {
                 Converter converter = getConfiguration().getConversionRules().getConverter(BuiltInAtomicType.STRING, at);
                 result = converter.convert(new StringValue((String) value));

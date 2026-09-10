@@ -162,7 +162,7 @@ public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
         //pw.flush();
         cv.visitEnd();
         verify(cw, "FunctionSequenceCoercer " + expr.getLocation().getLineNumber(), compiler.isDebugByteCode());
-        return compiler.makeClass(cw, className);
+        return (Class<? extends CompiledItemMappingFunction>) compiler.makeClass(cw, className);
     }
 }
 

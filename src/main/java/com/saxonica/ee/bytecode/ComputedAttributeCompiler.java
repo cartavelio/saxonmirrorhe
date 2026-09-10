@@ -55,7 +55,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
 
 
         // push the content onto the stack
-        compiler.compileToPrimitive(select, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(select, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
 
         FixedAttributeCompiler.generateAttributeValidationPushCode(compiler, (ComputedAttribute) expression, null, nodeNameVar);
 
@@ -86,7 +86,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         ComputedAttribute instr = (ComputedAttribute) expression;
 
         Expression select = instr.getSelect();
-        compiler.compileToPrimitive(select, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(select, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
 
         int contentVar = methodInfo.allocateLocal(UnicodeString.class);
         ga.storeLocal(contentVar);

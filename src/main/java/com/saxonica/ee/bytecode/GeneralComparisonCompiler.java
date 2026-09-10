@@ -74,7 +74,10 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                         ga.goTo(end);
                         break;
                     default:
-                        ga.invokeStaticMethod(CodepointCollator.class, "compareStrings", UnicodeString.class, UnicodeString.class);
+                        ga.invokeStaticMethod(CodepointCollator.class, "getInstance");
+                        ga.dupX2();
+                        ga.pop();
+                        ga.invokeInstanceMethod(CodepointCollator.class, "compareStrings", UnicodeString.class, UnicodeString.class);
                         ga.ifZCmp(ValueComparisonCompiler.translateOperator(comparison.getSingletonOperator()), returnTrue.label());
                         ga.goTo(returnFalse);
                 }
@@ -323,14 +326,18 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
         // Test if arg0 is untyped
         if (th.relationship(type0, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT) {
             ga.loadArgOrLocal(item0Var);
-            ga.ifNotInstance(UntypedAtomicValue.class, notUntyped0);
+            visitAnnotation(compiler, "generateComparisonCode-testing item0 untyped");
+            ga.invokeInstanceMethod(AtomicValue.class, "isUntypedAtomic");
+            ga.ifFalse(notUntyped0);
             ga.loadArgOrLocal(item1Var);
-            ga.ifInstance(UntypedAtomicValue.class, doneConversion1);
+            visitAnnotation(compiler, "generateComparisonCode-testing item1 untyped");
+            ga.invokeInstanceMethod(AtomicValue.class, "isUntypedAtomic");
+            ga.ifTrue(doneConversion1);
             // a0 is untypedAtomic, a1 is not
             if (th.relationship(type1, NumericType.getInstance()) != Affinity.DISJOINT) {
                 ga.loadArgOrLocal(item1Var);
                 ga.ifNotInstance(NumericValue.class, notNumeric0);
-
+                visitAnnotation(compiler, "generateComparisonCode-item1 numeric");
                 ga.loadArgOrLocal(item0Var);
                 ga.checkClass(StringValue.class);
                 ga.loadArgOrLocal(item1Var);
@@ -372,6 +379,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
             ga.storeLocal(checkTypesVar);
             methodInfo.placeLabel(doneConversion0);
             methodInfo.placeLabel(notUntyped0);
+            visitAnnotation(compiler, "generateComparisonCode-label notUntyped0");
         }
 
         // Test if arg1 is untyped
@@ -379,7 +387,8 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
         if (th.relationship(type1, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT) {
             if (type1 != BuiltInAtomicType.UNTYPED_ATOMIC) {
                 ga.loadArgOrLocal(item1Var);
-                ga.ifNotInstance(UntypedAtomicValue.class, notUntyped1);
+                ga.invokeInstanceMethod(AtomicValue.class, "isUntypedAtomic");
+                ga.ifFalse(notUntyped1);
             }
 
             // a1 is untypedAtomic, a0 is not
@@ -388,7 +397,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                 ga.ifNotInstance(NumericValue.class, notNumeric1);
 
                 ga.loadArgOrLocal(item1Var);
-                ga.checkClass(UntypedAtomicValue.class);
+                ga.checkClass(StringValue.class);
                 ga.loadArgOrLocal(item0Var);
                 ga.checkClass(NumericValue.class);
                 ga.push(Token.inverse(comparison.getSingletonOperator()));
@@ -535,11 +544,11 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                 case Token.FGE:
                 case Token.FLE:
 
+                    ga.invokeStaticMethod(CodepointCollator.class, "getInstance");
                     ga.loadLocal(item0Var);
                     ga.invokeInstanceMethod(AtomicValue.class, "getUnicodeStringValue");
                     ga.loadLocal(item1Var);
                     ga.invokeInstanceMethod(AtomicValue.class, "getUnicodeStringValue");
-                    ga.invokeStaticMethod(CodepointCollator.class, "getInstance");
                     ga.invokeInstanceMethod(CodepointCollator.class, "compareStrings", UnicodeString.class, UnicodeString.class);
 
                     ga.ifZCmp(ValueComparisonCompiler.translateOperator(op), returnTrue.label());

@@ -24,7 +24,7 @@ public class TranslateCompiler extends ToStringCompiler {
         LabelInfo translateReturn = methodInfo.newLabel("translateReturn");
 
         compiler.compileToItem(fnc.getArg(0));
-        returnZeroLengthStringIfNull(fnc.getArg(0), ga, methodInfo, translateReturn, 0);
+        treatAsEmptyIfFirstArgumentIsEmpty(fnc.getArg(0), ga, methodInfo, translateReturn, 0, onEmpty);
         ga.checkClass(StringValue.class);
 
         IntToIntMap staticMap = fn.getStaticMap();

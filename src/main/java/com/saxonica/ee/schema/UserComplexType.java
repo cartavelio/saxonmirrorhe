@@ -3029,7 +3029,7 @@ public class UserComplexType extends UserDefinedType
             if (node.isNilled()) {
                 return EmptyAtomicSequence.getInstance();
             }
-            return new UntypedAtomicValue(node.getUnicodeStringValue());
+            return StringValue.makeUntypedAtomic(node.getUnicodeStringValue());
         } else if (isEmptyContent()) {
             return EmptyAtomicSequence.getInstance();
         } else {

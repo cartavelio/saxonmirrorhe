@@ -29,7 +29,6 @@ public class CommentCompiler extends SimpleNodeConstructorCompiler {
     public void checkContent(CompilerService compiler, Expression expression) {
         Comment comment = (Comment) expression;
         Generator ga = compiler.getCurrentGenerator();
-        ga.invokeInstanceMethod(Object.class, "toString");
         if (comment.isXSLT()) {
             ga.invokeStaticMethod(Comment.class, "checkContentXSLT", UnicodeString.class);
         } else {

@@ -10,6 +10,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.Converter;
@@ -104,16 +105,16 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
                 compiler.compileToPrimitive(operand, Double.TYPE, oe2);
                 ga.invokeStaticMethod(DoubleValue.class, "doubleToString", Double.TYPE);
                 postpareForEmptiness(onEmpty, ga, methodInfo, needToHandleEmpty, handleEmpty);
-                if (requiredClass == UnicodeString.class) {
-                    ga.invokeStaticMethod(BMPString.class, "of", String.class);
+                if (requiredClass == String.class) {
+                    ga.invokeInstanceMethod(UnicodeString.class, "toString");
                 }
             } else if (operandType == StandardNames.XS_FLOAT) {
                 oe2 = prepareForEmptiness(oe2, needToHandleEmpty, handleEmpty);
                 compiler.compileToPrimitive(operand, Float.TYPE, oe2);
                 ga.invokeStaticMethod(FloatValue.class, "floatToString", Float.TYPE);
                 postpareForEmptiness(onEmpty, ga, methodInfo, needToHandleEmpty, handleEmpty);
-                if (requiredClass == UnicodeString.class) {
-                    ga.invokeStaticMethod(BMPString.class, "of", String.class);
+                if (requiredClass == String.class) {
+                    ga.invokeInstanceMethod(UnicodeString.class, "toString");
                 }
             } else if (operandType == StandardNames.XS_STRING || operandType == StandardNames.XS_UNTYPED_ATOMIC) {
                 compiler.compileToPrimitive(operand, requiredClass, onEmpty);
@@ -123,7 +124,7 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
                 LabelInfo end = methodInfo.newLabel("endASC");
 
                 compiler.compileToItem(operand);
-                visitAnnotation(compiler, "AtomicSequenceConverterCompiler-Item-Returned");
+                visitAnnotation(compiler, "AtomicSequenceConverterCompiler-Primitive-Returned");
                 if (Cardinality.allowsZero(operand.getCardinality())) {
                     LabelInfo notNull = methodInfo.newLabel("notNullASC");
                     ga.dup();
@@ -154,6 +155,8 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
             //ga.pop();
             if (onEmpty instanceof OnEmpty.ReturnEmptyString) {
                 ga.push("");
+            } else if (onEmpty instanceof OnEmpty.ReturnEmptyUnicodeString) {
+                ga.invokeStaticMethod(EmptyUnicodeString.class, "getInstance");
             } else if (onEmpty instanceof OnEmpty.ReturnNull) {
                 ga.pushNull();
             } else {

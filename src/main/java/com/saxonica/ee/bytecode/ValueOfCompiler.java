@@ -47,7 +47,7 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
         int valVar = methodInfo.allocateLocal(UnicodeString.class);
         if (th.isSubType(select.getItemType(), BuiltInAtomicType.STRING) &&
                 !Cardinality.allowsZero(select.getCardinality())) {
-            compiler.compileToPrimitive(select, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(select, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
             ga.storeLocal(valVar);
         } else {
             compiler.compileToItem(select);
@@ -104,7 +104,8 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
 
     /**
      * Generate code to write the node to the current receiver. On entry the stack holds the
-     * current receiver, the node name (for named node kinds only) and the content (for all nodes)
+     * current receiver, the node name (for named node kinds only) and the content (for all nodes),
+     * as a UnicodeString
      *
      * @param compiler   the compiler service
      * @param expression the expression to be compiled

@@ -14,7 +14,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.str.UnicodeBuilder;
-import net.sf.saxon.value.UntypedAtomicValue;
 
 /**
  * A FieldChecker is instantiated when a field in an identity constraint is matched; it receives
@@ -177,7 +176,7 @@ public class FieldChecker extends AbstractReceiver {
             SchemaType eltype = elementType;
             UnicodeString fieldVal = buffer.toUnicodeString();
             if (eltype == null || eltype instanceof AnySimpleType) {
-                val = new UntypedAtomicValue(fieldVal); // force to String because buffer is mutable
+                val = StringValue.makeUntypedAtomic(fieldVal); // force to String because buffer is mutable
             } else {
                 SchemaType contentType = eltype;
                 if (eltype instanceof ComplexType) {

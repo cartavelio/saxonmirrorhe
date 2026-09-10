@@ -11,6 +11,9 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import org.objectweb.asm.Type;
 
 public class StringJoinCompiler extends ToStringCompiler {
@@ -54,17 +57,27 @@ public class StringJoinCompiler extends ToStringCompiler {
     }
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty)
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty)
             throws CannotCompileException {
-        assert requiredClass == String.class;
+
+        // The logic here is designed to avoid creating a string builder, and evaluating the separator argument,
+        // in the common case where the first argument turns out to be a singleton. For example this happens
+        // with <xsl:value-of select="$x"/> if the type of $x is undeclared and cannot be inferred.
+
+        // The code is generic, relying on the fact that StringBuilder and UnicodeBuilder have very similar methods.
+
+        // Rewritten in v11 to use StringBuilder rather than FastStringBuffer. This simplifies the logic because
+        // after an append() operation, the StringBuilder stays on the stack.
+
+        assert requiredClass == String.class || requiredClass == UnicodeString.class;
+        boolean unicode = requiredClass == UnicodeString.class;
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
         Expression expr0 = fnc.getArg(0);
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "StringJoin-Item");
         LabelInfo end = methodInfo.newLabel("endSJ");
-        LabelInfo notNull = methodInfo.newLabel("strJnotNull");
-        LabelInfo notNull2 = methodInfo.newLabel("strJnotNull2");
+        LabelInfo nonEmptyInput = methodInfo.newLabel("strJnotNull");
 
         compiler.compileToIterator(expr0);
         visitLineNumber(compiler, ga, expression);
@@ -74,101 +87,119 @@ public class StringJoinCompiler extends ToStringCompiler {
         ga.loadLocal(iterVar);
         ga.invokeInstanceMethod(SequenceIterator.class, "next");
         ga.dup();
-        ga.ifNonNull(notNull.label());
+        ga.ifNonNull(nonEmptyInput.label());
         visitAnnotation(compiler, "StringJoin-Item-1-null");
         ga.pop();
         if (((StringJoin)fnc.getTargetFunction()).isReturnEmptyIfEmpty()) {
             onEmpty.generate(ga);
+        } else if (unicode) {
+            ga.invokeStaticMethod(EmptyUnicodeString.class, "getInstance");
         } else {
             ga.push("");
         }
         ga.goTo(end);
 
-        methodInfo.placeLabel(notNull);
-        ga.invokeInstanceMethod(Item.class, "getStringValue");
-        int firstVar = methodInfo.allocateLocal(String.class);
-        ga.storeLocal(firstVar);
+        methodInfo.placeLabel(nonEmptyInput);
+        // Stack: firstItem
+
+        String stringValueMethod = unicode ? "getUnicodeStringValue" : "getStringValue";
+        Class<?> stringClass = unicode ? UnicodeString.class : String.class;
+        Class<?> builderClass = unicode ? UnicodeBuilder.class : StringBuilder.class;
+        String builderToStringMethod = unicode ? "toUnicodeString" : "toString";
+
+        ga.invokeInstanceMethod(Item.class, stringValueMethod);
+        // Stack: firstUString
 
         ga.loadLocal(iterVar);
         ga.invokeInstanceMethod(SequenceIterator.class, "next");
         ga.dup();
-        ga.ifNonNull(notNull2.label());
+        // Stack: firstUString secondItem secondItem
+
+        LabelInfo moreThanOne = methodInfo.newLabel("moreThanOne");
+        ga.ifNonNull(moreThanOne.label());
+        // Stack: firstUString null
         ga.pop();
-        ga.loadLocal(firstVar);
-        //invokeStatic(ga,StringValue.class, "makeStringValue", CharSequence.class);
         ga.goTo(end);
 
-        methodInfo.placeLabel(notNull2);
-        ga.newInstance(StringBuilder.class);
+        methodInfo.placeLabel(moreThanOne);
+        // Stack: firstUString secondItem
+        ga.swap();
+        // Stack: secondItem firstUString
+
+        ga.newInstance(builderClass);
         ga.dup();
         ga.push(64);
-        ga.invokeConstructor(StringBuilder.class, Integer.TYPE);
-        int sbVar = methodInfo.allocateLocal(StringBuilder.class);
-        ga.storeLocal(sbVar);
-        ga.loadLocal(sbVar);
-        ga.loadLocal(firstVar);
-        ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
+        ga.invokeConstructor(builderClass, Integer.TYPE);
 
-        LabelInfo done = methodInfo.newLabel("doneSJ");
-        int sepVar = -1;
-        if (fnc.getArity() == 1) {
-            ga.loadLocal(sbVar);
-            ga.swap();
-            ga.invokeInstanceMethod(Item.class, "getStringValue");
-            ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
-        } else {
-            compiler.compileToPrimitive(((SystemFunctionCall) expression).getArg(1), String.class, OnEmpty.RETURN_EMPTY_STRING);
-            sepVar = methodInfo.allocateLocal(String.class);
-            ga.storeLocal(sepVar);
-            ga.loadLocal(sbVar);
-            ga.loadLocal(sepVar);
-            ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
-            ga.loadLocal(sbVar);
-            ga.swap();
-            ga.invokeInstanceMethod(Item.class, "getStringValue");
-            ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
-        }
-        //int itVar = methodInfo.allocateLocal(Item.class);
-        LabelInfo loop = methodInfo.placeNewLabel("loop");
-        ga.loadLocal(iterVar);
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
-        // assert stack : item
-        //ga.storeLocal(itVar);
-        //ga.loadLocal(itVar);
-        ga.dup();
-        ga.ifNull(done.label());
-        // assert stack : item
-        ga.loadLocal(sbVar);
-        // assert stack : item buffer
-        if (sepVar >= 0) {
-            ga.loadLocal(sepVar);
-            // assert stack : item buffer separator
-            ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
-            ga.loadLocal(sbVar);
-            // assert stack : item buffer
-        }
+        // Stack: secondItem firstUString builder
         ga.swap();
-        // assert stack : buffer item
-        ga.invokeInstanceMethod(Item.class, "getStringValue");
-        // assert stack : buffer string
-        ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
-        // assert stack : (empty)
-        ga.goTo(loop);
+        // Stack: secondItem builder firstUString
+        ga.invokeInstanceMethod(builderClass, "append", stringClass);
+        // Stack: secondItem builder
 
-        methodInfo.placeLabel(done);
-        ga.pop();
-        ga.loadLocal(sbVar);
-        ga.invokeInstanceMethod(StringBuilder.class, "toString");
-        //ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+        if (fnc.getArity() == 2) {
+            // there is a separator
+            int sepVar = methodInfo.allocateLocal(stringClass);
+            compiler.compileToPrimitive(fnc.getArg(1), stringClass, unicode ? OnEmpty.RETURN_EMPTY_UNICODE_STRING : OnEmpty.RETURN_EMPTY_STRING);
+            ga.storeLocal(sepVar);
+            // Stack: secondItem builder
 
+            LabelInfo separatorLoop = methodInfo.placeNewLabel("separatorLoop");
+            // Stack: nextItem builder
+            ga.loadLocal(sepVar);
+            // Stack: nextItem builder sepUString
+            ga.invokeInstanceMethod(builderClass, "append", stringClass);
+            // Stack: nextItem builder
+            ga.swap();
+            // Stack: builder nextItem
+            ga.invokeInstanceMethod(Item.class, stringValueMethod);
+            // Stack: builder nextUString
+            ga.invokeInstanceMethod(builderClass, "append", stringClass);
+            // Stack: builder
+            ga.loadLocal(iterVar);
+            // Stack: builder iterator
+            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            // Stack: builder nextItem
+            ga.dupX1();
+            // Stack: nextItem builder nextItem
+            ga.ifNonNull(separatorLoop.label());
+            // Stack: null builder
+            ga.swap();
+            ga.pop();
+            ga.invokeInstanceMethod(builderClass, builderToStringMethod);
+
+        } else {
+            // there is no separator
+            // Stack: secondItem builder
+            ga.swap();
+            // Stack: builder secondItem
+
+            LabelInfo simpleLoop = methodInfo.placeNewLabel("simpleLoop");
+            // Stack: builder nextItem
+            ga.invokeInstanceMethod(Item.class, stringValueMethod);
+            // Stack: builder nextUString
+            ga.invokeInstanceMethod(builderClass, "append", stringClass);
+            // Stack: builder
+            ga.loadLocal(iterVar);
+            ga.invokeInstanceMethod(SequenceIterator.class, "next");
+            // Stack: builder nextItem
+            ga.dup();
+            ga.ifNonNull(simpleLoop.label());
+
+            // Stack: builder null
+            ga.pop();
+            ga.invokeInstanceMethod(builderClass, builderToStringMethod);
+
+        }
+        // Stack: UString
         methodInfo.placeLabel(end);
 
         methodInfo.releaseLocal(iterVar);
         //methodInfo.releaseLocal(itVar);
-        methodInfo.releaseLocal(sbVar);
-        methodInfo.releaseLocal(sepVar);
+
 
     }
+
 
 }
 

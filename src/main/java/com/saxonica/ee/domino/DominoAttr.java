@@ -9,12 +9,11 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependAxisIterator;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
@@ -473,7 +472,7 @@ public class DominoAttr implements NodeInfo {
      */
     @Override
     public AtomicSequence atomize() throws XPathException {
-        return new UntypedAtomicValue(getUnicodeStringValue());
+        return StringValue.makeUntypedAtomic(getUnicodeStringValue());
     }
 
     /**

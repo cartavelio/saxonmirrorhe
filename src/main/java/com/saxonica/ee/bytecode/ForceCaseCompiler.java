@@ -7,6 +7,7 @@ import com.saxonica.ee.bytecode.util.OnEmpty;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.UpperCase;
+import net.sf.saxon.str.StringView;
 
 /**
  * Generate bytecode for evaluation of a call to the upper-case() and lower-case functions
@@ -14,7 +15,7 @@ import net.sf.saxon.functions.UpperCase;
 public class ForceCaseCompiler extends ToStringCompiler {
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToString(CompilerService compiler, Expression expression, OnEmpty onEmpty) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "ForceCase-str");
         SystemFunctionCall fnc = (SystemFunctionCall)expression;
@@ -25,7 +26,13 @@ public class ForceCaseCompiler extends ToStringCompiler {
         } else {
             ga.invokeInstanceMethod(String.class, "toLowerCase");
         }
+    }
 
+    @Override
+    public void compileToUnicodeString(CompilerService compiler, Expression expression, OnEmpty onEmpty) throws CannotCompileException {
+        compileToString(compiler, expression, onEmpty);
+        Generator ga = compiler.getCurrentGenerator();
+        ga.invokeStaticMethod(StringView.class, "of", String.class);
     }
 }
 

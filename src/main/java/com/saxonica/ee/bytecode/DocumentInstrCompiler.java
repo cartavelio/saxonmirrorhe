@@ -80,25 +80,28 @@ public class DocumentInstrCompiler extends ToPushCompiler {
 //            ga.newInstance(TextFragmentValue.class);
 //            ga.dup();
             allocateStatic(compiler, compiler.getConfiguration());
+            // Stack: config
             if (instr.getConstantText() != null) {
 //                textValue = constantText;
-                ga.push(instr.getConstantText().toString());
+                allocateStatic(compiler, instr.getConstantText());
+                // Stack: config UniString
             } else {
 //                StringBuilder sb = new StringBuilder(StringBuilder.SMALL);
 //                SequenceIterator iter = content.iterate(context);
-                int fsbVar = methodInfo.allocateLocal(UnicodeBuilder.class);
+                //int fsbVar = methodInfo.allocateLocal(UnicodeBuilder.class);
                 int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
 
                 ga.newInstance(UnicodeBuilder.class);
                 ga.dup();
                 ga.invokeConstructor(UnicodeBuilder.class);
-                ga.storeLocal(fsbVar);
-
+                //ga.storeLocal(fsbVar);
+                // Stack: config UniBuilder
                 compiler.compileToIterator(instr.getContentExpression());
                 ga.storeLocal(iterVar);
 
                 LabelInfo loopDone = methodInfo.newLabel("docLoopDone");
                 LabelInfo loop = methodInfo.placeNewLabel("docLoop");
+                // Stack: config UniBuilder
 //                while (true) {
 //                    Item item = iter.next();
 //                    if (item==null) break;
@@ -106,26 +109,29 @@ public class DocumentInstrCompiler extends ToPushCompiler {
 //                }
                 ga.loadLocal(iterVar);
                 ga.invokeInstanceMethod(SequenceIterator.class, "next");
+                // Stack: config UniBuilder Item
                 ga.dup();
                 ga.ifNull(loopDone.label());
+                // Stack: config UniBuilder Item
                 ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
-                ga.loadLocal(fsbVar);
-                ga.swap();
+                // Stack: config UniBuilder UniString
                 ga.invokeInstanceMethod(UnicodeBuilder.class, "append", UnicodeString.class);
+                // Stack: config UniBuilder
                 ga.goTo(loop);
 
                 methodInfo.placeLabel(loopDone);
+                // Stack: config UniBuilder Item
                 ga.pop();
+                // Stack: config UniBuilder
 //                textValue = sb.condense();
-                ga.loadLocal(fsbVar);
-                ga.invokeInstanceMethod(UnicodeBuilder.class, "trimToSize");
 
-                methodInfo.releaseLocal(fsbVar);
                 methodInfo.releaseLocal(iterVar);
+                ga.invokeInstanceMethod(UnicodeBuilder.class, "toUnicodeString");
+                // Stack: config UniString
             }
-            ga.invokeInstanceMethod(UnicodeBuilder.class, "toUnicodeString");
 //            root = TextFragmentValue.makeTextFragment(config, textValue, getBaseURI());
             ga.push(instr.getStaticBaseURIString());
+            // Stack: config UniString String
             ga.invokeStaticMethod(TextFragmentValue.class, "makeTextFragment", Configuration.class, UnicodeString.class, String.class);
 ////            ((TextFragmentValue)root).setConfiguration(controller.getConfiguration());
 //            ga.dup();

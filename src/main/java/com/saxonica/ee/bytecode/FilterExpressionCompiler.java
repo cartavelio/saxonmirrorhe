@@ -486,7 +486,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
         //pw.flush();
         cv.visitEnd();
         verify(cw, "Filter expression at line " + predicate.getLocation().getLineNumber(), compiler.isDebugByteCode());
-        return compiler.makeClass(cw, className);
+        return (Class<? extends CompiledFilterIterator>) compiler.makeClass(cw, className);
 
     }
 

@@ -10,7 +10,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 /**
@@ -19,7 +19,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 public class AttributeGetterCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         final FingerprintedQName attributeName = ((AttributeGetter) expression).getAttributeName();
         final Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -28,18 +28,11 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         compiler.generateGetContext();
         ga.invokeInstanceMethod(XPathContext.class, "getContextItem");
         // item
-        LabelInfo end = methodInfo.newLabel("endAttGet");
+        LabelInfo testAbsence = methodInfo.newLabel("attTestAbsence");
+        LabelInfo exists = methodInfo.newLabel("attExists");
+        LabelInfo absent = methodInfo.newLabel("attAbsent");
+        LabelInfo done = methodInfo.newLabel("attDone");
         int requiredChecks = ((AttributeGetter) expression).getRequiredChecks();
-//        if ((requiredChecks & AttributeGetter.CHECK_CONTEXT_ITEM_PRESENT) != 0) {
-//            LabelInfo notUndefined = methodInfo.newLabel("notUndefined");
-//            ga.dup();
-//            // item item
-//            ga.ifNonNull(notUndefined.label());
-//            // Throw error - context item is undefined
-//            compiler.generateDynamicError("The context item for @" + attributeName.getDisplayName() + " is absent", "XPDY0002", expression.getLocation(), false);
-//            // item
-//            methodInfo.placeLabel(notUndefined);
-//        }
 
         // Fast path if the node is an element in a tiny tree
         LabelInfo notTiny = methodInfo.newLabel("notTiny");
@@ -51,7 +44,7 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         ga.push(attributeName.getFingerprint());
         ga.invokeInstanceMethod(TinyElementImpl.class, "getAttributeValue", Integer.TYPE);
         // string or null
-        ga.goTo(end);
+        ga.goTo(testAbsence);
 
         methodInfo.placeLabel(notTiny);
         // item
@@ -63,9 +56,7 @@ public class AttributeGetterCompiler extends ToItemCompiler {
             // item
             compiler.generateDynamicError("The context item for @" + attributeName.getDisplayName() + " is not a node", "XPDY0002", expression.getLocation(), false);
             ga.pop();
-            ga.pushNull();
-            ga.goTo(end);
-
+            ga.goTo(absent);
             methodInfo.placeLabel(isNode);
         }
         // item
@@ -79,8 +70,7 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         ga.ifICmp(GeneratorAdapter.EQ, isElement.label());
         // item
         ga.pop();
-        ga.pushNull();
-        ga.goTo(end);
+        ga.goTo(absent);
 
         methodInfo.placeLabel(isElement);
         // item
@@ -89,15 +79,20 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         ga.invokeInstanceMethod(NodeInfo.class, "getAttributeValue", String.class, String.class);
         // string or null
 
-        methodInfo.placeLabel(end);
+        methodInfo.placeLabel(testAbsence);
         // string or null
         ga.dup();
-        LabelInfo exists = methodInfo.newLabel("exists");
         ga.ifNonNull(exists.label());
-        // string
+        // null
         ga.pop();
+        methodInfo.placeLabel(absent);
         onEmpty.generate(ga);
+        ga.goTo(done);
         methodInfo.placeLabel(exists);
+        if (requiredClass == UnicodeString.class) {
+            ga.invokeStaticMethod(StringView.class, "of", String.class);
+        }
+        methodInfo.placeLabel(done);
     }
 
     @Override
@@ -137,15 +132,9 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         // string string
         ga.ifNull(end.label());
         // string
-        ga.newInstance(UntypedAtomicValue.class);
-        // string UAV
-        ga.dupX1();
-        // UAV string UAV
-        ga.swap();
-        // UAV UAV string
-        ga.invokeStaticMethod(StringView.class,"tidy",String.class);
-        // UAV UAV UnicodeString
-        ga.invokeConstructor(UntypedAtomicValue.class, UnicodeString.class);
+        ga.invokeStaticMethod(StringView.class,"tidy", String.class);
+        // UnicodeString
+        ga.invokeStaticMethod(StringValue.class, "makeUntypedAtomic", UnicodeString.class);
         // UAV
         ga.goTo(end);
 
@@ -188,15 +177,9 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         // string string
         ga.ifNull(end.label());
         // string
-        ga.newInstance(UntypedAtomicValue.class);
-        // string UAV
-        ga.dupX1();
-        // UAV string UAV
-        ga.swap();
-        // UAV UAV string
         ga.invokeStaticMethod(StringView.class, "tidy", String.class);
-        // UAV UAV UnicodeString
-        ga.invokeConstructor(UntypedAtomicValue.class, UnicodeString.class);
+        // UnicodeString
+        ga.invokeStaticMethod(StringValue.class, "makeUntypedAtomic", UnicodeString.class);
         // UAV
         ga.goTo(end);
 

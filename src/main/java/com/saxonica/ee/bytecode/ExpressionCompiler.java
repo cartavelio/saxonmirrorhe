@@ -5,6 +5,7 @@ import com.saxonica.ee.bytecode.util.*;
 import com.saxonica.ee.bytecode.util.CompilerService.StaticVariableInfo;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.ClassReader;
@@ -181,6 +182,10 @@ public abstract class ExpressionCompiler {
         if (onEmpty instanceof OnEmpty.ReturnEmptyString) {
             ga.pop();
             ga.push("");
+            ga.goTo(exit);
+        } else if (onEmpty instanceof OnEmpty.ReturnEmptyUnicodeString) {
+            ga.pop();
+            ga.invokeStaticMethod(EmptyUnicodeString.class, "getInstance");
             ga.goTo(exit);
         } else if (onEmpty instanceof OnEmpty.ReturnNull) {
             ga.pop();

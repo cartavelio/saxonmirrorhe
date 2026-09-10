@@ -90,9 +90,9 @@ public class LiteralCompiler extends ExpressionCompiler {
      * @param onEmpty       action to be performed if the value of the expression is an empty sequence
      */
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
-        visitAnnotation(compiler, "LiteralCompiler-Primitive");
+        visitAnnotation(compiler, "LiteralCompiler-Primitive - " + (((Literal) expression).toString()));
         visitLineNumber(compiler, ga, expression);
         Literal literal = (Literal) expression;
         if (Literal.isEmptySequence(expression)) {

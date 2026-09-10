@@ -18,7 +18,6 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -716,7 +715,7 @@ public class DominoNode implements NodeInfo, VirtualNode {
             case Type.PROCESSING_INSTRUCTION:
                 return new StringValue(getUnicodeStringValue());
             default:
-                return new UntypedAtomicValue(getUnicodeStringValue());
+                return StringValue.makeUntypedAtomic(getUnicodeStringValue());
         }
     }
 

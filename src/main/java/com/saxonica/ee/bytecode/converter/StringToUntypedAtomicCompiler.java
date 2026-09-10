@@ -6,8 +6,7 @@ import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.UntypedAtomicValue;
-import org.objectweb.asm.Type;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Stack;
 
@@ -26,14 +25,12 @@ public class StringToUntypedAtomicCompiler extends ConverterCompiler {
         if (allowsEmpty) {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
             Stack<Class<?>> classStack = new Stack<>();
-            classStack.push(UntypedAtomicValue.class);
-            classStack.push(UntypedAtomicValue.class);
+            classStack.push(StringValue.class);
+            classStack.push(StringValue.class);
             OnEmpty.UnwindAndJump unwindAndJump = new OnEmpty.UnwindAndJump(classStack, empty);
             LabelInfo end = methodInfo.newLabel("end");
-            ga.newInstance(Type.getType(UntypedAtomicValue.class));
-            ga.dup();
             compileToPrimitive(compiler, expression, UnicodeString.class, unwindAndJump);
-            ga.invokeConstructor(UntypedAtomicValue.class, UnicodeString.class);
+            ga.invokeStaticMethod(StringValue.class, "makeUntypedAtomic", UnicodeString.class);
             unwindAndJump.getUnwindStack().pop();
             unwindAndJump.getUnwindStack().pop();
             ga.goTo(end);
@@ -41,10 +38,8 @@ public class StringToUntypedAtomicCompiler extends ConverterCompiler {
             ga.pushNull();
             methodInfo.placeLabel(end);
         } else {
-            ga.newInstance(Type.getType(UntypedAtomicValue.class));
-            ga.dup();
             compileToPrimitive(compiler, expression, UnicodeString.class, OnEmpty.RETURN_NULL);
-            ga.invokeConstructor(UntypedAtomicValue.class, UnicodeString.class);
+            ga.invokeStaticMethod(StringValue.class, "makeUntypedAtomic", UnicodeString.class);
         }
     }
 

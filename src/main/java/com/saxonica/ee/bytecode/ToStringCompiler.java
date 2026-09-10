@@ -53,6 +53,31 @@ public abstract class ToStringCompiler extends ToItemCompiler {
 
     }
 
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass,
+                                   OnEmpty onEmpty) throws CannotCompileException {
+        if (requiredClass == UnicodeString.class) {
+            compileToUnicodeString(compiler, expression, onEmpty);
+        } else if (requiredClass == String.class) {
+            compileToString(compiler, expression, onEmpty);
+        }
+    }
+
+    // All subclasses must be able to compile to a UnicodeString
+    public void compileToUnicodeString(CompilerService compiler, Expression expression, OnEmpty onEmpty)
+            throws CannotCompileException {
+        throw new CannotCompileException(expression, "CompileToUnicodeString not implemented");
+    }
+
+    // Some classes may also be able to compile directly to a String; those that can't will compile to a
+    // UnicodeString and convert the result
+    public void compileToString(CompilerService compiler, Expression expression, OnEmpty onEmpty)
+            throws CannotCompileException {
+        compileToUnicodeString(compiler, expression,
+                               onEmpty == OnEmpty.RETURN_EMPTY_STRING ? OnEmpty.RETURN_EMPTY_UNICODE_STRING : onEmpty);
+        Generator ga = compiler.getCurrentGenerator();
+        ga.invokeInstanceMethod(UnicodeString.class, "toString");
+    }
+
 
 }
 

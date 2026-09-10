@@ -97,7 +97,8 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
 
         if (maybeUntypedAtomic) {
             ga.loadLocal(atomicValueVar);
-            ga.ifNotInstance(UntypedAtomicValue.class, not_untypedAtomicValueLb);
+            ga.invokeInstanceMethod(AtomicValue.class, "isUntypedAtomic");
+            ga.ifFalse(not_untypedAtomicValueLb);
             untypedAtomicChecker(test, ga, methodInfo, valueVar, toDoubleVar, atomicValueVar, checkWholeNumber_lb);
             methodInfo.placeLabel(not_untypedAtomicValueLb);
         }

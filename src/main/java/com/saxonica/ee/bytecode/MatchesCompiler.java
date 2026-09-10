@@ -60,7 +60,7 @@ public class MatchesCompiler extends ToBooleanCompiler {
             if (fn.getArity() == 2) {
                 ga.push("");
             } else {
-                compiler.compileToPrimitive(fnc.getArg(2), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+                compiler.compileToPrimitive(fnc.getArg(2), UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
             }
             compiler.generateGetContext();
             ga.invokeInstanceMethod(Matches.class, "evalMatches", AtomicValue.class, AtomicValue.class, UnicodeString.class, XPathContext.class);
@@ -68,7 +68,7 @@ public class MatchesCompiler extends ToBooleanCompiler {
         } else {
             // return re.containsMatch(sv0.getStringValueCS())
             allocateStatic(compiler, re);
-            compiler.compileToPrimitive(arg0, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(arg0, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
             ga.invokeInstanceMethod(RegularExpression.class, "containsMatch", UnicodeString.class);
         }
 

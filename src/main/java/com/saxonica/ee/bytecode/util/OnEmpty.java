@@ -1,5 +1,7 @@
 package com.saxonica.ee.bytecode.util;
 
+import net.sf.saxon.str.EmptyUnicodeString;
+
 import java.util.Stack;
 
 /**
@@ -11,6 +13,7 @@ import java.util.Stack;
 public abstract class OnEmpty {
 
     public static final OnEmpty RETURN_EMPTY_STRING = new ReturnEmptyString();
+    public static final OnEmpty RETURN_EMPTY_UNICODE_STRING = new ReturnEmptyUnicodeString();
     public static final OnEmpty RETURN_NULL = new ReturnNull();
 
     public abstract void generate(Generator ga);
@@ -116,7 +119,7 @@ public abstract class OnEmpty {
     }
 
     /**
-     * The ReturnNull subclass indicates that when an expression evaluates to the empty sequence, the value should
+     * The ReturnEmptyString subclass indicates that when an expression evaluates to the empty sequence, the value should
      * be returned as a zero-length string. This works only for expressions that evaluate to a string.
      */
 
@@ -124,6 +127,18 @@ public abstract class OnEmpty {
         @Override
         public void generate(Generator ga) {
             ga.push("");
+        }
+    }
+
+    /**
+     * The ReturnEmptyString subclass indicates that when an expression evaluates to the empty sequence, the value should
+     * be returned as a zero-length string. This works only for expressions that evaluate to a string.
+     */
+
+    public static class ReturnEmptyUnicodeString extends OnEmpty {
+        @Override
+        public void generate(Generator ga) {
+            ga.invokeStaticMethod(EmptyUnicodeString.class, "getInstance");
         }
     }
 }

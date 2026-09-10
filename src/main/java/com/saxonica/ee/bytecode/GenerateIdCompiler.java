@@ -21,7 +21,7 @@ public class GenerateIdCompiler extends ToStringCompiler {
         visitAnnotation(compiler, "GenerateId-String");
         LabelInfo generateIdReturn = methodInfo.newLabel("generateIdReturn");
         compiler.compileToItem(fnc.getArg(0));
-        returnZeroLengthStringIfNull(fnc.getArg(0), ga, methodInfo, generateIdReturn, 0);
+        treatAsEmptyIfFirstArgumentIsEmpty(fnc.getArg(0), ga, methodInfo, generateIdReturn, 0, onEmpty);
         ga.checkClass(NodeInfo.class);
         ga.newInstance(Type.getType(StringBuilder.class));
         ga.dup();
@@ -33,12 +33,13 @@ public class GenerateIdCompiler extends ToStringCompiler {
         ga.invokeInstanceMethod(NodeInfo.class, "generateId", StringBuilder.class);
         ga.loadLocal(bufferVar);
         ga.invokeInstanceMethod(StringBuilder.class, "trimToSize");
-        methodInfo.placeLabel(generateIdReturn);
+        ga.loadLocal(bufferVar);
         methodInfo.releaseLocal(bufferVar);
         ga.invokeInstanceMethod(Object.class, "toString");
         if (requiredClass == UnicodeString.class) {
             ga.invokeStaticMethod(BMPString.class, "of", String.class);
         }
+        methodInfo.placeLabel(generateIdReturn);
     }
 }
 

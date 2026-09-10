@@ -20,7 +20,7 @@ public class CompareToStringConstantCompiler extends ToBooleanCompiler {
 
         Expression exp = ((CompareToConstant) expression).getBaseExpression();
         int operator = ((CompareToConstant) expression).getComparisonOperator();
-        String comparand = ((CompareToStringConstant) expression).getComparand().toString();
+        UnicodeString comparand = ((CompareToStringConstant) expression).getComparand();
 
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -31,11 +31,11 @@ public class CompareToStringConstantCompiler extends ToBooleanCompiler {
         LabelInfo returnFalse = methodInfo.newLabel("returnFalse");
         LabelInfo end = methodInfo.newLabel("endCmpToString");
 
+        ga.invokeStaticMethod(CodepointCollator.class, "getInstance");
         compiler.compileToItem(exp);
         ga.checkClass(StringValue.class);
         ga.invokeInstanceMethod(StringValue.class, "getUnicodeStringValue");
-        ga.push(comparand);
-        ga.invokeStaticMethod(CodepointCollator.class, "getInstance");
+        allocateStatic(compiler, comparand);
         ga.invokeInstanceMethod(CodepointCollator.class, "compareStrings", UnicodeString.class, UnicodeString.class);
         ga.ifZCmp(ValueComparisonCompiler.translateOperator(operator), returnTrue.label());
 

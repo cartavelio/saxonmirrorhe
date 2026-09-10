@@ -91,7 +91,6 @@ public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler
 
         ProcessingInstruction procInstr = (ProcessingInstruction) expression;
         Generator ga = compiler.getCurrentGenerator();
-        ga.invokeInstanceMethod(Object.class, "toString");
         if (procInstr.isXSLT()) {
             ga.invokeStaticMethod(ProcessingInstruction.class, "checkContentXSLT", UnicodeString.class);
         } else {

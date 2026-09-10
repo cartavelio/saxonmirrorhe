@@ -122,20 +122,20 @@ public abstract class ToItemCompiler extends ExpressionCompiler {
 
     /**
      * Utility method for use by subclasses to generate code that causes an empty string to be returned
-     * if the first argument is an empty sequence.
+     * if the first argument is an empty sequence. The actual return value depends on the onEmpty
+     * argument.
      * Precondition: the value of the first argument is on the stack, either as a string or as an item
      * Postcondition: either the control has jumped to the return label with a zero-length string on the
      * stack, or control drops through with the value of the first argument still on the stack (as supplied).
-     *
-     * @param arg         the first argument
+     *  @param arg         the first argument
      * @param ga          the Generator
      * @param methodInfo  the method information
      * @param returnLabel the label to jump to on completion
      * @param extraPops   items (other than the string being tested) that need to be popped of the stack if jumping to
-     *                    the return label
+     * @param onEmpty     the way in which the returned empty string is to be represented
      */
 
-    protected void returnZeroLengthStringIfNull(Expression arg, Generator ga, GeneratedMethodInfo methodInfo, LabelInfo returnLabel, int extraPops) {
+    protected void treatAsEmptyIfFirstArgumentIsEmpty(Expression arg, Generator ga, GeneratedMethodInfo methodInfo, LabelInfo returnLabel, int extraPops, OnEmpty onEmpty) {
         if (Cardinality.allowsZero(arg.getCardinality())) {
             LabelInfo stringArgNonNull = methodInfo.newLabel("stringArgNonNull");
             ga.dup();
@@ -143,7 +143,7 @@ public abstract class ToItemCompiler extends ExpressionCompiler {
             for (int i = 0; i < extraPops + 1; i++) {
                 ga.pop();
             }
-            ga.push("");
+            onEmpty.generate(ga);
             ga.goTo(returnLabel);
             methodInfo.placeLabel(stringArgNonNull);
         }

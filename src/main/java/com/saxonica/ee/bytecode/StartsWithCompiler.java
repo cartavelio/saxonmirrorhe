@@ -56,8 +56,8 @@ public class StartsWithCompiler extends ToBooleanCompiler {
         } else {
 
             allocateStatic(compiler, stringCollator);
-            compiler.compileToPrimitive(arg0, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
-            compiler.compileToPrimitive(arg1, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(arg0, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
+            compiler.compileToPrimitive(arg1, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
             ga.invokeInstanceMethod(SubstringMatcher.class,
                                     isStartsWith ? "startsWith" : "endsWith",
                                     UnicodeString.class, UnicodeString.class);

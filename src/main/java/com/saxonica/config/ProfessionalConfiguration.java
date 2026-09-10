@@ -228,6 +228,21 @@ public class ProfessionalConfiguration extends Configuration {
     }
 
     /**
+     * Obsolete interface for setting configuration properties: retained for backwards compatibility
+     * @param name the name of the property (in the form of a URI)
+     * @param value the value of the property
+     */
+
+    public void setConfigurationProperty(String name, Object value) {
+        if (name.equals("http://saxonica.com/oem-data")) {
+            supplyLicenseKey(new BufferedReader(new StringReader((String) value)));
+        } else {
+            super.setConfigurationProperty(name, value);
+        }
+    }
+
+
+    /**
      * Set a property of the configuration. This method underpins the setAttribute() method of the
      * TransformerFactory implementation, and is provided
      * to enable setting of Configuration properties using URIs without instantiating a TransformerFactory:

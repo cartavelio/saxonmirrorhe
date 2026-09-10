@@ -32,7 +32,7 @@ public class AnalyzeStringCompiler extends ToIteratorCompiler {
 
 
         compileRegex(compiler, ga, mi, analyzeStr, re);
-        compiler.compileToPrimitive(analyzeStr.getSelect(), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(analyzeStr.getSelect(), UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
         ga.invokeInstanceMethod(RegularExpression.class, "analyze", UnicodeString.class);
         //RegexIterator on stack
         int iterVar = ga.newLocal(RegexIterator.class);
@@ -104,7 +104,7 @@ public class AnalyzeStringCompiler extends ToIteratorCompiler {
 
 
         compileRegex(compiler, ga, mi, analyzeStr, re);
-        compiler.compileToPrimitive(analyzeStr.getSelect(), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(analyzeStr.getSelect(), UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
         ga.invokeInstanceMethod(RegularExpression.class, "analyze", UnicodeString.class);
         //RegexIterator on stack
         int iterVar = ga.newLocal(RegexIterator.class);
@@ -190,8 +190,8 @@ public class AnalyzeStringCompiler extends ToIteratorCompiler {
         if (re == null) {
             compiler.generateGetContext();
             ga.invokeInstanceMethod(XPathContext.class, "getConfiguration");
-            compiler.compileToPrimitive(analyzeStr.getRegex(), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
-            compiler.compileToPrimitive(analyzeStr.getFlags(), String.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(analyzeStr.getRegex(), UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
+            compiler.compileToPrimitive(analyzeStr.getFlags(), String.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
             ga.push("XP30");
             ga.pushNull();
             ga.invokeInstanceMethod(Configuration.class, "compileRegularExpression", UnicodeString.class, String.class, String.class, List.class);

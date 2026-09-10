@@ -13,41 +13,41 @@ import net.sf.saxon.value.StringValue;
  */
 public class SubstringCompiler extends ToItemCompiler {
 
-    @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty)
-            throws CannotCompileException {
-        SystemFunctionCall fnc = (SystemFunctionCall)expression;
-        final Substring fn = (Substring) fnc.getTargetFunction();
-        int numArgs = fn.getArity();
-        Generator ga = compiler.getCurrentGenerator();
-        GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        visitAnnotation(compiler, "Substring-str");
-
-        LabelInfo substringReturn = methodInfo.newLabel("substringReturn");
-
-        compiler.compileToItem(fnc.getArg(0));
-        returnZeroLengthStringIfNull(fnc.getArg(0), ga, methodInfo, substringReturn, 0);
-
-        ga.checkClass(StringValue.class);
-
-        if (numArgs == 2) {
-            compiler.compileToItem(fnc.getArg(1));
-            ga.checkClass(NumericValue.class);
-            ga.invokeStaticMethod(Substring.class, "substring", StringValue.class, NumericValue.class);
-        } else {
-            compiler.compileToItem(fnc.getArg(1));
-            ga.checkClass(NumericValue.class);
-            compiler.compileToItem(fnc.getArg(2));
-            ga.checkClass(NumericValue.class);
-            ga.invokeStaticMethod(Substring.class, "substring", StringValue.class, NumericValue.class, NumericValue.class);
-        }
-
-        methodInfo.placeLabel(substringReturn);
-        if (requiredClass == String.class) {
-            ga.invokeInstanceMethod(Object.class, "toString");
-        }
-
-    }
+//    @Override
+//    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty)
+//            throws CannotCompileException {
+//        SystemFunctionCall fnc = (SystemFunctionCall)expression;
+//        final Substring fn = (Substring) fnc.getTargetFunction();
+//        int numArgs = fn.getArity();
+//        Generator ga = compiler.getCurrentGenerator();
+//        GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
+//        visitAnnotation(compiler, "Substring-str");
+//
+//        LabelInfo substringReturn = methodInfo.newLabel("substringReturn");
+//
+//        compiler.compileToItem(fnc.getArg(0));
+//        treatAsEmptyIfFirstArgumentIsEmpty(fnc.getArg(0), ga, methodInfo, substringReturn, 0, onEmpty);
+//
+//        ga.checkClass(StringValue.class);
+//
+//        if (numArgs == 2) {
+//            compiler.compileToItem(fnc.getArg(1));
+//            ga.checkClass(NumericValue.class);
+//            ga.invokeStaticMethod(Substring.class, "substring", StringValue.class, NumericValue.class);
+//        } else {
+//            compiler.compileToItem(fnc.getArg(1));
+//            ga.checkClass(NumericValue.class);
+//            compiler.compileToItem(fnc.getArg(2));
+//            ga.checkClass(NumericValue.class);
+//            ga.invokeStaticMethod(Substring.class, "substring", StringValue.class, NumericValue.class, NumericValue.class);
+//        }
+//
+//        methodInfo.placeLabel(substringReturn);
+//        if (requiredClass == String.class) {
+//            ga.invokeInstanceMethod(Object.class, "toString");
+//        }
+//
+//    }
 
     @Override
     public void compileToItem(CompilerService compiler, Expression expression)

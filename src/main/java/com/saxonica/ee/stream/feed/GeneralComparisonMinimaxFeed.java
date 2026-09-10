@@ -110,7 +110,7 @@ public class GeneralComparisonMinimaxFeed extends AtomicItemFeed {
                 while ((it = unstreamed.next()) != null) {
                     AtomicValue val = (AtomicValue) it;
                     unstreamedValues.add(val);
-                    if (val instanceof UntypedAtomicValue) {
+                    if (val.isUntypedAtomic()) {
                         // try converting to numeric; but no failure if this isn't possible
                         String str = Whitespace.trim(val.getStringValue());
                         if (str.matches("^[-+0-9\\.]*$")) {
@@ -144,7 +144,7 @@ public class GeneralComparisonMinimaxFeed extends AtomicItemFeed {
                 }
             }
             AtomicValue streamedVal = (AtomicValue) item;
-            if (streamedVal instanceof UntypedAtomicValue && minUnstreamedNumeric != null) {
+            if (streamedVal.isUntypedAtomic() && minUnstreamedNumeric != null) {
                 streamedVal = new DoubleValue(StringToDouble11.getInstance().stringToNumber(streamedVal.getUnicodeStringValue()));
             }
             if (streamedVal instanceof NumericValue) {

@@ -17,9 +17,6 @@ import net.sf.saxon.value.*;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Generate bytecode for evaluation of an LetExpression
  */
@@ -407,118 +404,72 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
 
             case Evaluators.SHARED_APPEND_EXPRESSION:
                 if (exp instanceof Block) {
-//                    Block block = (Block) exp;
-//                    Expression[] children = block.getChildren();
-//                    List<Sequence> subsequences = new ArrayList<Sequence>(children.length);
-//                    for (Expression child : children) {
+//                    Block block = (Block) expr;
+//                    Operand[] children = block.getOperanda();
+//                    ZenoSequence chain = new ZenoSequence();
+//                    for (Operand o : children) {
+//                        Expression child = o.getChildExpression();
 //                        if (Cardinality.allowsMany(child.getCardinality())) {
-//                            subsequences.add(SequenceTool.toLazySequence(child.iterate(context)));
+//                            chain.appendSequence(SequenceTool.toGroundedValue(child.iterate(context)));
 //                        } else {
 //                            Item j = child.evaluateItem(context);
 //                            if (j != null) {
-//                                subsequences.add(j);
+//                                chain.append(j);
 //                            }
 //                        }
 //                    }
-//                    return new Chain(subsequences);
+//                    return chain;
                     Block block = (Block) exp;
                     Operand[] children = block.getOperanda();
                     ga.newInstance(ZenoSequence.class);
-                    // Stack: Chain
                     ga.dup();
-                    // Stack: Chain Chain
-                    ga.newInstance(ArrayList.class);
-                    // Stack: Chain Chain ArrayList
-                    ga.dup();
-                    // Stack: Chain Chain ArrayList ArrayList
-                    ga.push(children.length);
-                    // Stack: Chain Chain ArrayList ArrayList int
-                    ga.invokeConstructor(ArrayList.class, Integer.TYPE);
-                    // Stack: Chain Chain ArrayList
+                    ga.invokeConstructor(ZenoSequence.class);
+                    // Stack: ZenoSequence
                     for (Operand o : children) {
                         Expression child = o.getChildExpression();
                         if (Cardinality.allowsMany(child.getCardinality())) {
+                            // chain.appendSequence(SequenceTool.toGroundedValue(child.iterate(context)));
                             ga.dup();
+                            // Stack: ZenoSequence ZenoSequence
                             compiler.compileToIterator(child);
-                            // Stack: Chain Chain ArrayList ArrayList SeqIterator
+                            // Stack: ZenoSequence ZenoSequence SeqIterator
                             ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
-                            // Stack: Chain Chain ArrayList ArrayList Sequence
-                            ga.invokeInstanceMethod(List.class, "add", Object.class);
-                            // Stack: Chain Chain ArrayList boolean
-                            ga.pop(); // discard the returned boolean
-                            // Stack: Chain Chain ArrayList
+                            // Stack: ZenoSequence ZenoSequence GroundedValue
+                            ga.invokeInstanceMethod(ZenoSequence.class, "appendSequence", GroundedValue.class);
+                            // Stack: ZenoSequence
                         } else {
+//                            Item j = child.evaluateItem(context);
+//                            if (j != null) {
+//                                chain.append(j);
+//                            }
+                            // Stack: ZenoSequence
                             ga.dup();
-                            // Stack: Chain Chain ArrayList ArrayList
+                            // Stack: ZenoSequence ZenoSequence
                             compiler.compileToItem(child);
-                            // Stack: Chain Chain ArrayList ArrayList Item
-                            if (Cardinality.allowsZero(child.getCardinality())) {
-                                LabelInfo itemNull = methodInfo.newLabel("itemNull");
-                                LabelInfo itemDone = methodInfo.newLabel("itemDone");
-                                LabelInfo groundedLab = methodInfo.newLabel("groundedLab");
-                                ga.dup();
-                                // Stack: Chain Chain ArrayList ArrayList Item Item
-                                ga.ifNull(itemNull.label());
-                                // Stack: Chain Chain ArrayList ArrayList Item
-                                ga.dup();
-                                // Stack: Chain Chain ArrayList ArrayList Item Item
-                                ga.ifInstance(GroundedValue.class, groundedLab);
-                                // Stack: Chain Chain ArrayList ArrayList Item
-                                ga.newInstance(ZeroOrOne.class);
-                                // Stack: Chain Chain ArrayList ArrayList Item SingletonItem
-                                ga.dup2();
-                                // Stack: Chain Chain ArrayList ArrayList Item SingletonItem Item SingletonItem
-                                ga.swap();
-                                // Stack: Chain Chain ArrayList ArrayList Item SingletonItem SingletonItem Item
-                                ga.invokeConstructor(ZeroOrOne.class, Item.class);
-                                // Stack: Chain Chain ArrayList ArrayList Item SingletonItem
-                                ga.swap();
-                                // Stack: Chain Chain ArrayList ArrayList SingletonItem Item
-                                ga.pop();
-                                // Stack: Chain Chain ArrayList ArrayList SingletonItem
-                                methodInfo.placeLabel(groundedLab);
-                                ga.invokeInstanceMethod(List.class, "add", Object.class);
-                                // Stack: Chain Chain ArrayList boolean
-                                ga.pop(); // discard the returned boolean
-                                // Stack: Chain Chain ArrayList
-                                ga.goTo(itemDone.label());
-                                methodInfo.placeLabel(itemNull);
-                                // Stack: Chain Chain ArrayList ArrayList Item
-                                ga.pop();
-                                ga.pop();
-                                // Stack: Chain Chain ArrayList
-                                methodInfo.placeLabel(itemDone);
-                            } else {
-                                // Stack: Chain Chain ArrayList ArrayList Item
-                                ga.dup();
-                                // Stack: Chain Chain ArrayList ArrayList Item Item
-                                LabelInfo groundedLab = methodInfo.newLabel("groundedLab");
-                                ga.ifInstance(GroundedValue.class, groundedLab);
-                                // Stack: Chain Chain ArrayList ArrayList Item
-                                ga.newInstance(ZeroOrOne.class);
-                                // Stack: Chain Chain ArrayList ArrayList Item SingletonItem
-                                ga.dup2();
-                                // Stack: Chain Chain ArrayList ArrayList Item SingletonItem Item SingletonItem
-                                ga.swap();
-                                // Stack: Chain Chain ArrayList ArrayList Item SingletonItem SingletonItem Item
-                                ga.invokeConstructor(ZeroOrOne.class, Item.class);
-                                // Stack: Chain Chain ArrayList ArrayList Item SingletonItem
-                                ga.swap();
-                                // Stack: Chain Chain ArrayList ArrayList SingletonItem Item
-                                ga.pop();
-                                // Stack: Chain Chain ArrayList ArrayList SingletonItem
-                                methodInfo.placeLabel(groundedLab);
-                                ga.invokeInstanceMethod(List.class, "add", Object.class);
-                                // Stack: Chain Chain ArrayList boolean
-                                ga.pop(); // discard the returned boolean
-                                // Stack: Chain Chain ArrayList
-                            }
+                            // Stack: ZenoSequence ZenoSequence Item
+                            LabelInfo itemIsNull = methodInfo.newLabel("itemIsNull");
+                            LabelInfo itemDone = methodInfo.newLabel("itemDone");
+                            ga.dup();
+                            // Stack: ZenoSequence ZenoSequence Item Item
+                            ga.ifNull(itemIsNull.label());
+                            // Stack: ZenoSequence ZenoSequence Item
+                            ga.invokeInstanceMethod(ZenoSequence.class, "append", Item.class);
+                            // Stack: ZenoSequence
+                            ga.goTo(itemDone);
+                            methodInfo.placeLabel(itemIsNull);
+                            // Stack: ZenoSequence ZenoSequence null
+                            ga.pop();
+                            // Stack: ZenoSequence ZenoSequence
+                            ga.pop();
+                            // Stack: ZenoSequence
+                            methodInfo.placeLabel(itemDone);
                         }
                     }
-                    // Stack: Chain Chain ArrayList
-                    ga.invokeStaticMethod(ZenoSequence.class, "fromList", List.class);
-                    // Stack: Chain
+                    // Stack: ZenoSequence
 
+                } else {
+                    // not a Block
+                    throw new CannotCompileException("Shared append expression is not a Block", true);
                 }
                 break;
 

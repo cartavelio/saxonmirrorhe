@@ -34,7 +34,7 @@ public class StringLengthCompiler extends ToItemCompiler {
             }
             ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
         } else {
-            compiler.compileToPrimitive(fnc.getArg(0), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(fnc.getArg(0), UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
         }
 
         ga.invokeInstanceMethod(UnicodeString.class, requiredClass == Long.TYPE ? "length" : "length32");

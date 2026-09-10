@@ -6,6 +6,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.TypeHierarchy;
@@ -31,6 +32,7 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
 
         // push the content onto the stack
         visitAnnotation(compiler, "SimpleNodeConstructor-Push-content");
+        //System.err.println("Content::: " + content.toShortString() + " --- " + content.getClass());
         compiler.compileToPrimitive(content, UnicodeString.class, OnEmpty.RETURN_NULL);
         LabelInfo done = null;
         if (Cardinality.allowsZero(content.getCardinality())) {
@@ -43,7 +45,7 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
                 ga.pop();
                 ga.goTo(done);
             } else {
-                ga.push("");
+                ga.invokeStaticMethod(EmptyUnicodeString.class, "getInstance");
             }
             methodInfo.placeLabel(notNull);
         }
@@ -160,7 +162,7 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
         Expression content = simpleNode.getSelect();
 
         // push the content onto the stack
-        compiler.compileToPrimitive(content, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(content, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
 
         // check and adjust the content if necessary
         checkContent(compiler, expression);

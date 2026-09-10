@@ -24,16 +24,14 @@ public class StringToFloatCompiler extends ConverterCompiler {
         if (allowsEmpty) {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
             LabelInfo end = methodInfo.newLabel("end");
-            compileToPrimitive(compiler, expression, CharSequence.class, new OnEmpty.UnwindAndJump(empty));
+            compileToPrimitive(compiler, expression, Float.TYPE, new OnEmpty.UnwindAndJump(empty));
             ga.invokeStaticMethod(FloatValue.class, "makeFloatValue", Float.TYPE);
-            // TODO: looks wrong, we have a CharSequence on the stack, not a float
             ga.goTo(end);
             methodInfo.placeLabel(empty);
             ga.pushNull();
             methodInfo.placeLabel(end);
         } else {
-            compileToPrimitive(compiler, expression, CharSequence.class, OnEmpty.RETURN_NULL);
-            // TODO: looks wrong, we have a CharSequence on the stack, not a float
+            compileToPrimitive(compiler, expression, Float.TYPE, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(FloatValue.class, "makeFloatValue", Float.TYPE);
         }
     }

@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.UnicodeString;
 
 /**
  * Generate bytecode for evaluation of a call to the string() function
@@ -11,7 +12,7 @@ import net.sf.saxon.om.Item;
 public class StringFnCompiler extends ToStringCompiler {
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
         final Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -26,9 +27,9 @@ public class StringFnCompiler extends ToStringCompiler {
         /* try block*/
         methodInfo.placeLabel(L0);
         compiler.compileToItem(fnc.getArg(0));
-        returnZeroLengthStringIfNull(fnc.getArg(0), ga, methodInfo, stringReturn, 0);
+        treatAsEmptyIfFirstArgumentIsEmpty(fnc.getArg(0), ga, methodInfo, stringReturn, 0, onEmpty);
 
-        ga.invokeInstanceMethod(Item.class, "getStringValue");
+        ga.invokeInstanceMethod(Item.class, requiredClass == UnicodeString.class ? "getUnicodeStringValue" : "getStringValue");
         methodInfo.placeLabel(stringReturn);
         methodInfo.placeLabel(L1);
         ga.goTo(end.label());

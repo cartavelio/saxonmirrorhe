@@ -10,6 +10,7 @@ import net.sf.saxon.expr.instruct.NamespaceConstructor;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -108,7 +109,8 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
 
     /**
      * Generate code to write the node to the current receiver. On entry the stack holds the
-     * current receiver, the node name (for named node kinds only) and the content (for all nodes)
+     * current receiver, the node name (for named node kinds only) and the content (for all nodes),
+     * as a UnicodeString
      *
      * @param compiler
      * @param expression
@@ -118,10 +120,12 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
 
-        // assert stack : Receiver prefix uri
+        // assert stack : Receiver prefix (as String) uri (as UnicodeString)
         LabelInfo xmlTestOk = methodInfo.newLabel("xmltestok");
         LabelInfo xmlnsOk = methodInfo.newLabel("xmlnsOk");
         LabelInfo validURI = methodInfo.newLabel("validURI");
+        ga.invokeInstanceMethod(UnicodeString.class, "toString");
+        // assert stack : Receiver prefix (as String) uri (as String)
         ga.dup2();
         // assert stack : Receiver prefix uri prefix uri
         ga.dup();

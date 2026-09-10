@@ -1,7 +1,7 @@
 package com.saxonica.ee.bytecode.iter;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.expr.instruct.AbstractBlockIterator;
 import net.sf.saxon.om.SequenceIterator;
 
 /**
@@ -9,36 +9,16 @@ import net.sf.saxon.om.SequenceIterator;
  * into a single combined sequence.
  */
 
-public abstract class CompiledBlockIterator implements SequenceIterator {
+public abstract class CompiledBlockIterator extends AbstractBlockIterator {
 
-    protected int state = 0;
+    protected int currentOperand = 0;
     protected XPathContext context;
     protected SequenceIterator currentIterator = null;
 
     public CompiledBlockIterator() {
+        super();
     }
 
-    public CompiledBlockIterator(XPathContext context) {
-        this.context = context;
-    }
-
-
-    public XPathContext getContext() {
-        return context;
-    }
-
-    public void setContext(XPathContext context) {
-        this.context = context;
-    }
-
-    /**
-     * Get the next item in the sequence. <BR>
-     *
-     * @return the next item, or null if there are no more items.
-     */
-
-    @Override
-    public abstract Item next();
 
 }
 

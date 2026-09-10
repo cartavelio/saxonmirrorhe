@@ -234,7 +234,7 @@ public class CompilerService implements ICompilerService {
 
     public static class StaticVariableInfo {
         public String name;
-        public Class classVar;
+        public Class<?> classVar;
         public Object object;
     }
 
@@ -246,15 +246,15 @@ public class CompilerService implements ICompilerService {
     public HashMap<ObjectIdentityWrapper, StaticSubClasses> cClassMap = new HashMap<>();
 
     /*@Nullable*/
-    public Class getCompiledClass(Expression expr) {
+    public Class<?> getCompiledClass(Expression expr) {
         ObjectIdentityWrapper oiw = new ObjectIdentityWrapper(expr);
         if (cClassMap.get(oiw) != null) {
-            return (Class) cClassMap.get(oiw).object;
+            return (Class<?>) cClassMap.get(oiw).object;
         }
         return null;
     }
 
-    public void setCompiledClass(Expression expr, Class clss) {
+    public void setCompiledClass(Expression expr, Class<?> clss) {
         StaticSubClasses staticSubClass = new StaticSubClasses();
         staticSubClass.name = expr.getExpressionName();
 
@@ -322,7 +322,7 @@ public class CompilerService implements ICompilerService {
 
     public static class GeneratedClassInfo {
         String className;
-        Class superclass;
+        Class<?> superclass;
         ClassWriter cw;
         HashMap<ObjectIdentityWrapper, CompilerService.StaticVariableInfo> staticVarsMap =
                 new HashMap<>();
@@ -335,7 +335,7 @@ public class CompilerService implements ICompilerService {
             return cw;
         }
 
-        public Class getSuperclass() {
+        public Class<?> getSuperclass() {
             return superclass;
         }
 
@@ -344,7 +344,7 @@ public class CompilerService implements ICompilerService {
             this.className = className;
         }
 
-        public void setSuperClass(Class superclass) {
+        public void setSuperClass(Class<?> superclass) {
             this.superclass = superclass;
         }
 
@@ -437,7 +437,7 @@ public class CompilerService implements ICompilerService {
         info.pushOutputterInfo(-1);
     }
 
-    public void pushNewClassInfo(String className, Class superclass, ClassWriter cw) {
+    public void pushNewClassInfo(String className, Class<?> superclass, ClassWriter cw) {
         GeneratedClassInfo generatedClassInfo = new GeneratedClassInfo();
         generatedClassInfo.setClassWriter(cw);
         generatedClassInfo.setSuperClass(superclass);
@@ -683,7 +683,7 @@ public class CompilerService implements ICompilerService {
                 }
             }
 
-            Class generated = makeClass(cw, className);
+            Class<?> generated = makeClass(cw, className);
             GeneratedCode gc;
             try {
                 gc = (GeneratedCode) generated.newInstance();
@@ -797,7 +797,7 @@ public class CompilerService implements ICompilerService {
      * @throws CannotCompileException if the expression cannot be compiled
      */
 
-    public void compileToPrimitive(Expression expr, Class c) throws CannotCompileException {
+    public void compileToPrimitive(Expression expr, Class<?> c) throws CannotCompileException {
         ExpressionCompiler comp = getExpressionCompiler(expr);
         if (expr instanceof ByteCodeCandidate) {
             expr = ((ByteCodeCandidate) expr).getBaseExpression();
@@ -955,8 +955,8 @@ public class CompilerService implements ICompilerService {
      * @return the constructed Class object
      */
 
-    public Class makeClass(ClassWriter writer, String className) {
-        //System.err.println("Make class " + className);
+    public Class<?> makeClass(ClassWriter writer, String className) {
+        // System.err.println("Make class " + className);
         ClassVisitor cv = writer;
         cv = makeAnnotatedTraceClassVisitor(cv, className);
 
@@ -978,7 +978,8 @@ public class CompilerService implements ICompilerService {
 
         try {
             ((GeneratedClassLoader) myClassLoader).registerClass(className, classFile);
-            Class myClass = myClassLoader.loadClass(className);
+            //System.err.println("registerClass " + className);
+            Class<?> myClass = myClassLoader.loadClass(className);
             myClass.newInstance();
             for (StaticVariableInfo staticVar : getCurrentClass().staticVarsMap.values()) {
 
@@ -1025,7 +1026,7 @@ public class CompilerService implements ICompilerService {
 
         StaticVariableInfo staticVariableInfo = new StaticVariableInfo();
         staticVariableInfo.name = name;
-        Class staticClass = value.getClass();
+        Class<?> staticClass = value.getClass();
 
         while (staticClass.getName().startsWith("gen_")) {
             staticClass = staticClass.getSuperclass();
@@ -1126,7 +1127,7 @@ public class CompilerService implements ICompilerService {
             ga.endMethod();
 
 
-            m = Method.getMethod("net.sf.saxon.type.ValidationFailure validate(net.sf.saxon.str.CodePoints)");
+            m = Method.getMethod("net.sf.saxon.type.ValidationFailure validate(net.sf.saxon.str.UnicodeString)");
             ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
             pushNewMethodInfo(ga, false, 0, -1);
             try {
@@ -1151,7 +1152,7 @@ public class CompilerService implements ICompilerService {
 
             ExpressionCompiler.verify(cw, objectName, isDebugByteCode());
 
-            Class generated = makeClass(cw, className);
+            Class<?> generated = makeClass(cw, className);
             AtomicTypeValidator gc;
             try {
                 gc = (AtomicTypeValidator) generated.newInstance();

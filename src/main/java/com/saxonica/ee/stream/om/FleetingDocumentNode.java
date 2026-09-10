@@ -9,7 +9,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 
 import java.util.*;
 
@@ -148,7 +148,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      */
     @Override
     public AtomicSequence atomize() throws XPathException {
-        return new UntypedAtomicValue(getUnicodeStringValue());
+        return StringValue.makeUntypedAtomic(getUnicodeStringValue());
     }
 
     /**

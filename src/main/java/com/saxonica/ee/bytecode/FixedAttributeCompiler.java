@@ -40,28 +40,36 @@ public class FixedAttributeCompiler extends ToPushCompiler {
         int opt = instr.getOptions();
         Location locationId = instr.getLocation();
 
-        // prepare the call on receiver.attribute()
+        // prepare the call on Outputter.attribute()
         compiler.generateGetOutputter();
+        // Stack: Outputter
         allocateStatic(compiler, nodeName);
-        SchemaType schemaType = instr.getSchemaType();
+        // Stack: Outputter nodeName
+        SimpleType schemaType = instr.getSchemaType();
         if (schemaType != null) {
-            allocateStatic(compiler, instr.getSchemaType());
+            allocateStatic(compiler, schemaType);
         } else {
             ga.getStaticField(BuiltInAtomicType.class, "UNTYPED_ATOMIC", BuiltInAtomicType.class);
         }
+        // Stack: Outputter nodeName schemaType
 
         // push the content onto the stack
-        compiler.compileToPrimitive(select, String.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(select, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
 
+        // Stack: Outputter nodeName schemaType UniString
         generateAttributeValidationPushCode(compiler, instr, nodeName, -1);
+        // Stack: Outputter nodeName schemaType UniString
         ga.invokeInstanceMethod(UnicodeString.class, "toString");
+        // Stack: Outputter nodeName schemaType String
         if (nodeName.getFingerprint() == StandardNames.XML_ID) {
             ga.invokeStaticMethod(Whitespace.class, "collapseWhitespace", String.class);
         }
 
         // Complete the call on receiver.attribute()
         allocateStatic(compiler, locationId);
+        // Stack: Outputter nodeName schemaType String
         ga.push(opt);
+        // Stack: Outputter nodeName schemaType String int
         visitAnnotation(compiler, "FixedAttributeCompiler - call attribute()");
         ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class, String.class, Location.class, Integer.TYPE);
     }
@@ -231,7 +239,7 @@ public class FixedAttributeCompiler extends ToPushCompiler {
         // set the string value
 
         ga.dup();
-        compiler.compileToPrimitive(expr, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(expr, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
         ga.invokeInstanceMethod(Orphan.class, "setStringValue", UnicodeString.class);
 
         validateOrphanAttribute(compiler, instr);

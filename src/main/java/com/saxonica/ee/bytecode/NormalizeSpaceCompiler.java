@@ -45,7 +45,8 @@ public class NormalizeSpaceCompiler extends ToStringCompiler {
 
         } else {
 
-            compiler.compileToPrimitive(fnc.getArg(0), requiredClass, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(fnc.getArg(0), requiredClass,
+                                        requiredClass == String.class ? OnEmpty.RETURN_EMPTY_STRING : OnEmpty.RETURN_EMPTY_UNICODE_STRING);
 
         }
     }
