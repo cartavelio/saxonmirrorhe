@@ -192,8 +192,7 @@ namespace SaxonCS_NUnit {
                 Assert.True(true);
             }
         }
-
-
+        
         /**
          * Test with statically-known collation
          */
