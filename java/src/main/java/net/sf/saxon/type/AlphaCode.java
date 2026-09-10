@@ -983,12 +983,10 @@ public class AlphaCode {
             boolean allAtomic = true;
             for (AlphaCodeTree m : tree.members) {
                 SequenceType st = sequenceTypeFromTree(m, schema);
-                if (st.getPrimaryType().isAtomicType()) {
-                    final ItemType primaryType = st.getPrimaryType();
-                    members.add(primaryType);
-                    if (!primaryType.isAtomicType()) {
-                        allAtomic = false;
-                    }
+                final ItemType primaryType = st.getPrimaryType();
+                members.add(primaryType);
+                if (!primaryType.isAtomicType()) {
+                    allAtomic = false;
                 }
             }
             if (allAtomic) {
