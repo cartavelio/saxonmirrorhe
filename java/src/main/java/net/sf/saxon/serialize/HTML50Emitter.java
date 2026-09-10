@@ -13,11 +13,14 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.UnicodeChar;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaType;
 
 import javax.xml.transform.OutputKeys;
+import java.io.IOException;
 
 /**
  * This class generates HTML 5.0 output
@@ -132,6 +135,35 @@ public class HTML50Emitter extends HTMLEmitter {
         }
         super.startElement(elemName, type, attributes, namespaces, location, properties);
     }
+
+    /**
+     * Handle a processing instruction.
+     */
+
+    @Override
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties)
+            throws XPathException {
+        if (!started) {
+            openDocument();
+        }
+        UnicodeString t = data.tidy();
+        if (isQt40) {
+            try {
+                writer.write("<!--?");
+                writer.write(target.replaceAll("-(?=-)", "- "));
+                if (!t.isEmpty()) {
+                    writer.write(new UnicodeChar(32));
+                    writer.write(t.toString().replaceAll("-(?=-)", "- "));
+                }
+                writer.write("?-->");
+            } catch (IOException e) {
+                throw new XPathException(e);
+            }
+        } else {
+            super.processingInstruction(target, data, locationId, properties);
+        }
+    }
+
 
     /**
      * Ask whether control characters should be rejected: true for HTML4, false for HTML5

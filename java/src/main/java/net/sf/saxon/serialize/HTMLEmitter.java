@@ -46,6 +46,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
     private NamespaceUri uri;
     private boolean escapeNonAscii = false;
     private final Stack<NodeName> nodeNameStack = new Stack<>();
+    protected boolean isQt40;
 
     /**
      * Decode preferred representation
@@ -56,18 +57,13 @@ public abstract class HTMLEmitter extends XMLEmitter {
 
     private static int representationCode(String rep) {
         rep = rep.toLowerCase();
-        switch (rep) {
-            case "native":
-                return REP_NATIVE;
-            case "entity":
-                return REP_ENTITY;
-            case "decimal":
-                return REP_DECIMAL;
-            case "hex":
-                return REP_HEX;
-            default:
-                return REP_ENTITY;
-        }
+        return switch (rep) {
+            case "native" -> REP_NATIVE;
+            case "entity" -> REP_ENTITY;
+            case "decimal" -> REP_DECIMAL;
+            case "hex" -> REP_HEX;
+            default -> REP_ENTITY;
+        };
     }
 
     /**
@@ -212,6 +208,11 @@ public abstract class HTMLEmitter extends XMLEmitter {
         if (started) {
             return;
         }
+        String specVn = outputProperties.getProperty(SaxonOutputKeys.SPEC_VERSION);
+        if ("40".equals(specVn) || "4.0".equals(specVn)) {
+            isQt40 = true;
+        }
+
         String byteOrderMark = outputProperties.getProperty(SaxonOutputKeys.BYTE_ORDER_MARK);
 
         if ("yes".equals(byteOrderMark) &&
