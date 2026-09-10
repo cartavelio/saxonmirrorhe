@@ -276,10 +276,7 @@ void SaxonProcessor::initialize(bool l) {
     }
     procRef = createSaxonProcessor2((SaxonProcessor::sxn_environ->thread), (int)l);
 if(procRef<0) {
-    std::cerr<<"Processor is in unclean state"<<std::endl;
-} else {
-
-    std::cerr<<"Processor ="<<procRef<<std::endl;
+    exception = new SaxonApiException("Processor is in unclean state");
 }
 
 #ifdef DEBUG
@@ -289,19 +286,7 @@ if(procRef<0) {
 }
 
 void SaxonProcessor::attachCurrentThread() {
-   /* jint envResult = SaxonProcessor::sxn_environ->jvm->GetEnv((void **)&(SaxonProcessor::sxn_environ->env), JNI_VERSION_1_2);
-    if (envResult  != JNI_OK) {
-#ifdef DEBUG
-        std::cerr<<"SaxonProcessor::sxn_environ->env not OK - attaching to thread"<<std::endl;
-#endif
-        SaxonProcessor::sxn_environ->jvm->AttachCurrentThread((void **)&(SaxonProcessor::sxn_environ->env), NULL);
-    }
-#ifdef DEBUG
-    else {
-        std::cerr<<"SaxonProcessor::sxn_environ->env OK - running in current thread"<<std::endl;
-    }
-#endif
-    */
+//TODO remove method
 
 }
 
@@ -637,7 +622,7 @@ XPathProcessor *SaxonProcessor::newXPathProcessor() {
     return (new XPathProcessor(this, cwd));
 }
 
-/*SchemaValidator *SaxonProcessor::newSchemaValidator() {
+SchemaValidator *SaxonProcessor::newSchemaValidator() {
     if (licensei) {
         applyConfigurationProperties();
         return (new SchemaValidator(this, cwd));
@@ -645,7 +630,7 @@ XPathProcessor *SaxonProcessor::newXPathProcessor() {
         std::cerr << "\nError: Processor is not licensed for schema processing!!" << std::endl;
         return nullptr;
     }
-}*/
+}
 
 
 const char *SaxonProcessor::version() {

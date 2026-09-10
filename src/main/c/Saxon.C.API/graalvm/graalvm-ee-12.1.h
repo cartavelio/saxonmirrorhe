@@ -98,11 +98,11 @@ long long int j_getSchemaManager(graal_isolatethread_t*, void *);
 
 long long int j_getValidationReport(graal_isolatethread_t*, void *);
 
-long long int registerSchema(graal_isolatethread_t*, void *, char*, char*, void *);
+long long int j_registerSchema(graal_isolatethread_t*, void *, char*, char*, void *);
 
-long long int registerSchemaString(graal_isolatethread_t*, void *, char*, char*, void *);
+long long int j_registerSchemaString(graal_isolatethread_t*, void *, char*, char*, void *);
 
-long long int exportSchema(graal_isolatethread_t*, void *, char*, char*);
+long long int j_exportSchema(graal_isolatethread_t*, void *, char*, char*);
 
 long long int j_validate(graal_isolatethread_t*, void *, void *, char*, char*, char*, void *);
 

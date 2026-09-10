@@ -98,11 +98,11 @@ typedef long long int (*j_getSchemaManager_fn_t)(graal_isolatethread_t*, void *)
 
 typedef long long int (*j_getValidationReport_fn_t)(graal_isolatethread_t*, void *);
 
-typedef long long int (*registerSchema_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
+typedef long long int (*j_registerSchema_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
 
-typedef long long int (*registerSchemaString_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
+typedef long long int (*j_registerSchemaString_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
 
-typedef long long int (*exportSchema_fn_t)(graal_isolatethread_t*, void *, char*, char*);
+typedef long long int (*j_exportSchema_fn_t)(graal_isolatethread_t*, void *, char*, char*);
 
 typedef long long int (*j_validate_fn_t)(graal_isolatethread_t*, void *, void *, char*, char*, char*, void *);
 

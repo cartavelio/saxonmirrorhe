@@ -38,6 +38,22 @@ public:
     */
     SchemaValidator(SaxonProcessor* proc, std::string cwd="");
 
+
+
+    //! Copy constructor.
+    /*!
+      Creates Schema Validator
+    */
+    SchemaValidator(const SchemaValidator &other);
+
+
+    //! The copy assignment= operator
+    /*!
+      * Create a copy of the SchemaValidator.
+      * @param other - SchemaValidator object
+    */
+    SchemaValidator &operator=(const SchemaValidator &other);
+
      //! Set the Current working Directory
     /**
      * Set the current working directory for the Schema Validator
@@ -60,7 +76,7 @@ public:
    *
    * @param schemaStr - The schema document supplied as a string
    */
-  void registerSchemaFromString(const char * schemaStr);
+  void registerSchemaFromString(const char * schemaStr, const char * systemID = nullptr);
 
   //! Export a precompiled Schema Component Model containing all the components (except built-in components) that have been loaded by using the register methods.
   /**
@@ -197,9 +213,7 @@ public:
      * element declaration results in the content being considered valid.
      * @param l -  true if validation is to be lax, false if it is to be strict
     */
-    void setLax(bool l){
-      lax = l;
-    }
+    void setLax(bool l);
 
 
     //! Get the underlying java object of the C++ schema validator

@@ -253,7 +253,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
             setProperty("qs", query);
         }
         int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-        int64_t  status = j_executeQueryToFile(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (char *)cwdXQ.c_str(), (char *)ofilename, (void *)processorDataRef);
+        int64_t  status = j_executeQueryToFile(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (char *)cwdXQ.c_str(), (char *)ofilename, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
         if(status == -2) {
             exception = new SaxonApiException();
@@ -275,7 +275,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
             setProperty("qs", query);
         }
         int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-        int64_t result = j_executeQueryToValue(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (char *)cwdXQ.c_str(),(void *)processorDataRef);
+        int64_t result = j_executeQueryToValue(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (char *)cwdXQ.c_str(),(void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
         if(result >= 0) {
             int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
@@ -332,7 +332,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
         }
         allocFn fn = operator new;
         int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-        char *result = j_executeQueryToString(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)proc->procRef, (char *)cwdXQ.c_str(), (void *)processorDataRef);
+        char *result = j_executeQueryToString(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)proc->procRef, (char *)cwdXQ.c_str(), (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
         if(result == nullptr){
             exception = new SaxonApiException();
