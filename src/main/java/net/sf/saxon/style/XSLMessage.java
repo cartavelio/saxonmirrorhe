@@ -11,8 +11,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.MessageInstr;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -76,7 +76,7 @@ public final class XSLMessage extends StyleElement {
                     errorCode = makeAttributeValueTemplate(errorCodeAtt, att);
                     break;
                 default:
-                    if (attName.hasURI(NamespaceConstant.SAXON) && attName.getLocalPart().equals("time")) {
+                    if (attName.hasURI(NamespaceUri.SAXON) && attName.getLocalPart().equals("time")) {
                         isExtensionAttributeAllowed(attName.getDisplayName());
                         boolean timed = processBooleanAttribute("saxon:time", value);
                         if (timed) {

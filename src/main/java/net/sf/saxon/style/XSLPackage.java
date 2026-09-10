@@ -102,7 +102,7 @@ public class XSLPackage extends XSLModuleRoot {
                 // no action
             } else if (lexicalName.equals("version")) {
                 if (version == -1) {
-                    processVersionAttribute("");
+                    processVersionAttribute(NamespaceUri.NULL);
                 }
             } else if (lexicalName.equals("package-version") && getLocalPart().equals("package")) {
                 packageVersionAtt = Whitespace.trim(value);
@@ -183,7 +183,7 @@ public class XSLPackage extends XSLModuleRoot {
                 if (getLocalPart().equals("package") &&
                         (fp == StandardNames.XSL_USE_PACKAGE || fp == StandardNames.XSL_EXPOSE)) {
                     // all is well
-                } else if (!((StyleElement) child).isInXsltNamespace() && !"".equals(child.getURI())) {
+                } else if (!((StyleElement) child).isInXsltNamespace() && !"".equals(child.getNamespaceUri())) {
                     // elements in other namespaces are allowed and ignored
                 } else if (child instanceof AbsentExtensionElement && ((StyleElement) child).forwardsCompatibleModeIsEnabled()) {
                     // this is OK: an unknown XSLT element is allowed in forwards compatibility mode

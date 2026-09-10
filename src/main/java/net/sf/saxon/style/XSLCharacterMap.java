@@ -56,7 +56,7 @@ public class XSLCharacterMap extends StyleElement {
     public StructuredQName getCharacterMapName() {
         StructuredQName name = getObjectName();
         if (name == null) {
-            return makeQName(getAttributeValue("", "name"), null, "name");
+            return makeQName(getAttributeValue(NamespaceUri.NULL, "name"), null, "name");
         }
         return name;
     }
@@ -152,7 +152,7 @@ public class XSLCharacterMap extends StyleElement {
                 String displayname = st.nextToken();
                 try {
                     String[] parts = NameChecker.getQNameParts(displayname);
-                    String uri = getURIForPrefix(parts[0], false);
+                    NamespaceUri uri = getURIForPrefix(parts[0], false);
                     if (uri == null) {
                         compileError("Undeclared namespace prefix " + Err.wrap(parts[0])
                                 + " in character map name", "XTSE0280");

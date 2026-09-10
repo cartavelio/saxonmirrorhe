@@ -31,7 +31,7 @@ public interface NamespaceResolver {
      */
 
     /*@Nullable*/
-    String getURIForPrefix(String prefix, boolean useDefault);
+    NamespaceUri getURIForPrefix(String prefix, boolean useDefault);
 
     /**
      * Get an iterator over all the prefixes declared in this namespace context. This will include

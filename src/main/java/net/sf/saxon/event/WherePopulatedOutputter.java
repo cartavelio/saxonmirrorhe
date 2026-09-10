@@ -114,7 +114,7 @@ public class WherePopulatedOutputter extends ProxyOutputter {
      * Notify a namespace binding.
      */
     @Override
-    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+    public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
         if (level == 1) {
             pendingNamespaces = pendingNamespaces.put(prefix, namespaceUri);
         } else {
@@ -275,7 +275,7 @@ public class WherePopulatedOutputter extends ProxyOutputter {
                         return;
 
                     case Type.NAMESPACE:
-                        namespace(node.getLocalPart(), node.getStringValue(), 0);
+                        namespace(node.getLocalPart(), NamespaceUri.of(node.getStringValue()), 0);
                         return;
 
                     default:
@@ -317,7 +317,7 @@ public class WherePopulatedOutputter extends ProxyOutputter {
                         return;
 
                     case Type.NAMESPACE:
-                        namespace(node.getLocalPart(), node.getStringValue(), 0);
+                        namespace(node.getLocalPart(), NamespaceUri.of(node.getStringValue()), 0);
                         return;
 
                     default:

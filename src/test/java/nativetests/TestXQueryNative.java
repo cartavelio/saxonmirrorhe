@@ -147,8 +147,8 @@ public class TestXQueryNative {
                     "1"
             );
 
-            UserFunction fn1 = exp1.getMainModule().getUserDefinedFunction("f.ns", "t1", 1);
-            UserFunction fn2 = exp1.getMainModule().getUserDefinedFunction("f.ns", "t2", 1);
+            UserFunction fn1 = exp1.getMainModule().getUserDefinedFunction(NamespaceUri.of("f.ns"), "t1", 1);
+            UserFunction fn2 = exp1.getMainModule().getUserDefinedFunction(NamespaceUri.of("f.ns"), "t2", 1);
             DynamicQueryContext dqc = new DynamicQueryContext(config);
             Controller controller = exp1.newController(dqc);
 
@@ -194,7 +194,7 @@ public class TestXQueryNative {
             sqc.setExtensionFunctionLibrary(new FunctionLibrary() {
 
                 final SymbolicName.F fn = new SymbolicName.F(
-                        new StructuredQName("hello", "http://my.hello.com/", "world"), 0);
+                        new StructuredQName("hello", NamespaceUri.of("http://my.hello.com/"), "world"), 0);
 
                 @Override
                 public Function getFunctionItem(SymbolicName.F functionName, StaticContext env) {
@@ -262,7 +262,7 @@ public class TestXQueryNative {
             StaticQueryContext sqc = config.newStaticQueryContext();
             XQueryExpression exp = sqc.compileQuery("<e/>");
             Item result = exp.iterator(new DynamicQueryContext(config)).next();
-            assertEquals("http://suprise.com/", ((NodeInfo) result).getURI(), "wrong URI");
+            assertEquals("http://suprise.com/", ((NodeInfo) result).getNamespaceUri(), "wrong URI");
         } catch (XPathException e) {
             fail();
         }
@@ -276,11 +276,11 @@ public class TestXQueryNative {
         try {
             String query = "$x + $y";
             StaticQueryContext sqc = new Configuration().newStaticQueryContext();
-            sqc.declareGlobalVariable(new StructuredQName("", "", "x"), SequenceType.SINGLE_INTEGER, Int64Value.MINUS_ONE, false);
-            sqc.declareGlobalVariable(new StructuredQName("", "", "y"), SequenceType.SINGLE_INTEGER, null, true);
+            sqc.declareGlobalVariable(new StructuredQName("", NamespaceUri.NULL, "x"), SequenceType.SINGLE_INTEGER, Int64Value.MINUS_ONE, false);
+            sqc.declareGlobalVariable(new StructuredQName("", NamespaceUri.NULL, "y"), SequenceType.SINGLE_INTEGER, null, true);
             XQueryExpression exp = sqc.compileQuery(query);
             DynamicQueryContext dqc = new DynamicQueryContext(sqc.getConfiguration());
-            dqc.setParameter(new StructuredQName("", "", "y"), Int64Value.PLUS_ONE);
+            dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, "y"), Int64Value.PLUS_ONE);
             StringWriter sw = new StringWriter();
             exp.run(dqc, new StreamResult(sw), new Properties());
             assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>0", sw.toString());

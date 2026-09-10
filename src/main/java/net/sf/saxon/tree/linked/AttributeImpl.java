@@ -326,12 +326,12 @@ public class AttributeImpl extends NodeImpl {
             AttributeInfo att = getAttributeInfo();
             owner.setAttributeInfo(getSiblingPosition(),
                                    new AttributeInfo(newNameCode, BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), att.getProperties()));
-            String newURI = newNameCode.getURI();
+            NamespaceUri newURI = newNameCode.getURI();
             if (!newURI.isEmpty()) {
                 // new attribute name is in a namespace
                 String newPrefix = newNameCode.getPrefix();
                 NamespaceBinding newBinding = new NamespaceBinding(newPrefix, newURI);
-                String oldURI = ((ElementImpl) getRawParent()).getURIForPrefix(newPrefix, false);
+                NamespaceUri oldURI = ((ElementImpl) getRawParent()).getURIForPrefix(newPrefix, false);
                 if (oldURI == null) {
                     owner.addNamespace(newBinding, inherit);
                 } else if (!oldURI.equals(newURI)) {

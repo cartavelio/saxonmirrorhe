@@ -12,6 +12,7 @@ import net.sf.saxon.Version;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.StylesheetPackage;
@@ -32,7 +33,7 @@ import java.util.List;
 
 public class SefFunction extends SystemFunction {
 
-    private final static String FN_ALIAS = "http://ns.saxonica.com/xpath-functions";
+    private final static NamespaceUri FN_ALIAS = NamespaceUri.of("http://ns.saxonica.com/xpath-functions");
     protected SymbolicName.F functionAlias;
 
     /**

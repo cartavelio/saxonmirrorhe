@@ -9,12 +9,10 @@ package net.sf.saxon.option.jdom2;
 
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
 import org.jdom2.*;
@@ -105,14 +103,14 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
                              Location location, int properties) throws XPathException {
         flush();
         String local = elemName.getLocalPart();
-        String uri = elemName.getURI();
+        NamespaceUri uri = elemName.getURI();
         String prefix = elemName.getPrefix();
         Element element;
         if (ancestors.isEmpty()) {
             startDocument(ReceiverOption.NONE);
             implicitDocumentNode = true;
         }
-        element = new Element(local, prefix, uri);
+        element = new Element(local, prefix, uri.toString());
         if (ancestors.size() == 1) {
             document.setRootElement(element);
         } else {
@@ -132,13 +130,13 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
         for (AttributeInfo att : attributes) {
             NodeName nameCode = att.getNodeName();
             String attlocal = nameCode.getLocalPart();
-            String atturi = nameCode.getURI();
+            NamespaceUri atturi = nameCode.getURI();
             String attprefix = nameCode.getPrefix();
             String value = att.getValue();
             Namespace ns = attprefix.isEmpty() ?
-                    Namespace.getNamespace(atturi) :
-                    Namespace.getNamespace(attprefix, atturi);
-            boolean isXmlId = uri.equals(NamespaceConstant.XML) && attlocal.equals("id");
+                    Namespace.getNamespace(atturi.toString()) :
+                    Namespace.getNamespace(attprefix, atturi.toString());
+            boolean isXmlId = atturi.equals(NamespaceUri.XML) && attlocal.equals("id");
             if (isXmlId) {
                 value = Whitespace.trim(value);
             }
@@ -152,14 +150,14 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
 
     private void namespace(Element element, NamespaceBinding namespaceBinding) throws XPathException {
         String prefix = namespaceBinding.getPrefix();
-        String uri = namespaceBinding.getURI();
+        NamespaceUri uri = namespaceBinding.getURI();
         if (uri.isEmpty() && prefix.length() != 0) {
             // ignore XML 1.1 namespace undeclarations because JDOM can't handle them
             return;
         }
         Namespace ns = prefix.isEmpty() ?
-                Namespace.getNamespace(uri) :
-                Namespace.getNamespace(prefix, uri);
+                Namespace.getNamespace(uri.toString()) :
+                Namespace.getNamespace(prefix, uri.toString());
         element.addNamespaceDeclaration(ns);
     }
 

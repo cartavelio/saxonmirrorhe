@@ -498,7 +498,7 @@ public final class AxisExpression extends Expression {
                                     StructuredQName sq = getConfiguration().getNamePool().getStructuredQName(kid);
                                     if (sq.getLocalPart().equals(childElement.getLocalPart()) && kid != childfp) {
                                         message += ". Perhaps the namespace is " +
-                                                (childElement.hasURI("") ? "missing" : "wrong") +
+                                                (childElement.hasURI(NamespaceUri.NULL) ? "missing" : "wrong") +
                                                 ", and " + sq.getEQName() + " was intended?";
                                         break;
                                     }
@@ -623,8 +623,8 @@ public final class AxisExpression extends Expression {
 
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
     private static String getDiagnosticName(StructuredQName name, StaticContext env) {
-        String uri = name.getURI();
-        if (uri.equals("")) {
+        NamespaceUri uri = name.getURI();
+        if (uri.isEmpty()) {
             return name.getLocalPart();
         } else {
             NamespaceResolver resolver = env.getNamespaceResolver();

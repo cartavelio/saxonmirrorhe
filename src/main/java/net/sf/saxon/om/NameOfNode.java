@@ -35,7 +35,7 @@ public class NameOfNode implements NodeName {
 
     public static NodeName makeName(NodeInfo node) {
         if (node instanceof MutableNodeInfo) {
-            return new FingerprintedQName(node.getPrefix(), node.getURI(), node.getLocalPart());
+            return new FingerprintedQName(node.getPrefix(), node.getNamespaceUri(), node.getLocalPart());
         } else if (node instanceof AbstractVirtualNode) {
             return new NameOfNode(((AbstractVirtualNode)node).getUnderlyingNode());
         } else {
@@ -59,8 +59,8 @@ public class NameOfNode implements NodeName {
      * @return the URI. Returns the empty string to represent the no-namespace
      */
     @Override
-    public String getURI() {
-        return node.getURI();
+    public NamespaceUri getURI() {
+        return node.getNamespaceUri();
     }
 
     /**
@@ -100,12 +100,12 @@ public class NameOfNode implements NodeName {
      * @return true if the name is in the specified namespace
      */
     @Override
-    public boolean hasURI(String ns) {
+    public boolean hasURI(NamespaceUri ns) {
         if (node instanceof TinyNodeImpl) {
             // fast path (avoids object allocation)
             return ((TinyNodeImpl)node).hasURI(ns);
         }
-        return node.getURI().equals(ns);
+        return node.getNamespaceUri().equals(ns);
     }
 
     /**
@@ -117,7 +117,7 @@ public class NameOfNode implements NodeName {
 
     @Override
     public NamespaceBinding getNamespaceBinding() {
-        return NamespaceBinding.makeNamespaceBinding(getPrefix(), getURI());
+        return new NamespaceBinding(getPrefix(), getURI());
     }
 
     /**
@@ -157,7 +157,7 @@ public class NameOfNode implements NodeName {
         if (node.hasFingerprint()) {
             return node.getFingerprint();
         } else {
-            return namePool.allocateFingerprint(node.getURI(), node.getLocalPart());
+            return namePool.allocateFingerprint(node.getNamespaceUri(), node.getLocalPart());
         }
     }
 
@@ -179,7 +179,7 @@ public class NameOfNode implements NodeName {
             if (node.hasFingerprint() && n.hasFingerprint()) {
                 return node.getFingerprint() == n.getFingerprint();
             } else {
-                return n.getLocalPart().equals(node.getLocalPart()) && n.hasURI(node.getURI());
+                return n.getLocalPart().equals(node.getLocalPart()) && n.hasURI(node.getNamespaceUri());
             }
         } else {
             return false;

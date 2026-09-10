@@ -7,7 +7,6 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trans.ComponentTest;
@@ -152,16 +151,16 @@ public abstract class XSLAcceptExpose extends StyleElement {
                     compileErrorInAttribute("No prefix before ':*'", "XTSE0020", "names");
                 }
                 String prefix = tok.substring(0, tok.length() - 2);
-                String uri = getURIForPrefix(prefix, false);
+                NamespaceUri uri = getURIForPrefix(prefix, false);
                 if (uri == null) {
                     compileErrorInAttribute("Undeclared prefix " + prefix, "XTSE0020", "names");
-                    uri = NamespaceConstant.ANONYMOUS; // for recovery
+                    uri = NamespaceUri.ANONYMOUS; // for recovery
                 }
                 test = new NamespaceTest(getNamePool(), Type.ELEMENT, uri);
                 addWildCardTest(componentTypeCode, test);
             } else if (tok.startsWith("Q{") && tok.endsWith("}*")) {
                 final String uri = tok.substring(2, tok.length() - 2);
-                test = new NamespaceTest(getNamePool(), Type.ELEMENT, uri);
+                test = new NamespaceTest(getNamePool(), Type.ELEMENT, NamespaceUri.of(uri));
                 wildcardComponentTests.add(new ComponentTest(componentTypeCode, test, -1));
             } else if (tok.startsWith("*:")) {
                 if (tok.length() == 2) {

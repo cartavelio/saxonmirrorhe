@@ -12,7 +12,6 @@ import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
@@ -604,7 +603,7 @@ public class SaxonCAPI {
      */
     public static XdmValue createXdmAtomicItem(String typeStr, String valueStr) throws SaxonApiException {
 
-        int fp = StandardNames.getFingerprint(NamespaceConstant.SCHEMA, typeStr);
+        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
 
         BuiltInAtomicType type = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
         if (type == null) {
@@ -703,11 +702,11 @@ public class SaxonCAPI {
      */
     public static String getTypeName(String typeStr) {
 
-        int fp = StandardNames.getFingerprint(NamespaceConstant.SCHEMA, typeStr);
+        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
 
         BuiltInAtomicType typei = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
         StructuredQName sname = typei.getTypeName();
-        return new QName(sname.getPrefix(), sname.getURI(), sname.getLocalPart()).getClarkName();
+        return new QName(sname.getPrefix(), sname.getURI().toString(), sname.getLocalPart()).getClarkName();
 
     }
 

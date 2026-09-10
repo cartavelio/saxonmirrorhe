@@ -13,6 +13,7 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -126,11 +127,11 @@ public class Categories {
             throw new RuntimeException("Failed to build categories.xml", e);
         }
 
-        int fp_name = config.getNamePool().allocateFingerprint("", "name");
-        int fp_f = config.getNamePool().allocateFingerprint("", "f");
-        int fp_t = config.getNamePool().allocateFingerprint("", "t");
+        int fp_name = config.getNamePool().allocateFingerprint(NamespaceUri.NULL, "name");
+        int fp_f = config.getNamePool().allocateFingerprint(NamespaceUri.NULL, "f");
+        int fp_t = config.getNamePool().allocateFingerprint(NamespaceUri.NULL, "t");
 
-        AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, "", "cat", config.getNamePool()));
+        AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "cat", config.getNamePool()));
         NodeInfo item;
         while ((item = iter.next()) != null) {
             String cat = ((TinyElementImpl)item).getAttributeValue(fp_name);

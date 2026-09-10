@@ -199,7 +199,7 @@ class DOMAttributeMap implements NamedNodeMap {
             if (att == null) {
                 return null;
             }
-            if (uri.equals(att.getURI()) && localName.equals(att.getLocalPart())) {
+            if (uri.equals(att.getNamespaceUri().toString()) && localName.equals(att.getLocalPart())) {
                 return NodeOverNodeInfo.wrap(att);
             }
         }

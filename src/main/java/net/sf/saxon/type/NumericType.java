@@ -60,7 +60,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
 
     @Override
     public StructuredQName getTypeName() {
-        return new StructuredQName("xs", NamespaceConstant.SCHEMA, "numeric");
+        return new StructuredQName("xs", NamespaceUri.SCHEMA, "numeric");
     }
 
     /**
@@ -412,8 +412,8 @@ public class NumericType extends LocalUnionType implements SimpleType {
      *         of an anonymous type, and in the case of a global type defined in a no-namespace schema.
      */
     @Override
-    public String getTargetNamespace() {
-        return NamespaceConstant.SCHEMA;
+    public NamespaceUri getTargetNamespace() {
+        return NamespaceUri.SCHEMA;
     }
 
     /**
@@ -457,7 +457,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
     @Override
     @CSharpModifiers(code = {"public", "override"})
     public StructuredQName getStructuredQName() {
-        return new StructuredQName("xs", NamespaceConstant.SCHEMA, "numeric");
+        return new StructuredQName("xs", NamespaceUri.SCHEMA, "numeric");
     }
 
     /**

@@ -246,7 +246,7 @@ public class AttributeCollectionImpl implements Attributes {
         if (index < 0 || index >= used) {
             return null;
         }
-        return names[index].getURI();
+        return names[index].getURI().toString();
     }
 
 
@@ -433,7 +433,7 @@ public class AttributeCollectionImpl implements Attributes {
             return -1;        // indicates an empty attribute set
         }
         for (int i = 0; i < used; i++) {
-            if (names[i] != null && names[i].hasURI(uri) && localName.equals(names[i].getLocalPart())) {
+            if (names[i] != null && names[i].getURI().toString().equals(uri) && localName.equals(names[i].getLocalPart())) {
                 return i;
             }
         }
@@ -472,7 +472,7 @@ public class AttributeCollectionImpl implements Attributes {
 
     public void setAttribute(AttributeInfo attribute) {
         NodeName name = attribute.getNodeName();
-        int index = getIndex(name.getURI(), name.getLocalPart());
+        int index = getIndex(name.getURI().toString(), name.getLocalPart());
         if (index < 0) {
             addAttribute(name, attribute.getType(), attribute.getValue(),
                          attribute.getLocation(), attribute.getProperties());

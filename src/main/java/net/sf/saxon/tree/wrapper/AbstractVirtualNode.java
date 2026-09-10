@@ -276,8 +276,8 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      */
 
     @Override
-    public String getURI() {
-        return node.getURI();
+    public NamespaceUri getNamespaceUri() {
+        return node.getNamespaceUri();
     }
 
     /**
@@ -330,7 +330,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @since 9.4
      */
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         return node.getAttributeValue(uri, local);
     }
 

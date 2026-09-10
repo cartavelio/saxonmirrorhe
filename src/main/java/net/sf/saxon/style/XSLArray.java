@@ -11,9 +11,9 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 
@@ -35,7 +35,7 @@ public class XSLArray extends XSLSequence {
      */
     @Override
     public boolean isInXsltNamespace() {
-        return getNodeName().hasURI(NamespaceConstant.XSLT);
+        return getNodeName().hasURI(NamespaceUri.XSLT);
     }
 
     @Override

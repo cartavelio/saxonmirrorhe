@@ -92,7 +92,7 @@ public class LargeAttributeMap implements AttributeMap {
     }
 
     @Override
-    public AttributeInfo get(String uri, String local) {
+    public AttributeInfo get(NamespaceUri uri, String local) {
         NodeName name = new FingerprintedQName("", uri, local);
         return get(name);
     }

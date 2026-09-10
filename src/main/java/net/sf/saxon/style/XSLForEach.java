@@ -13,8 +13,8 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.expr.sort.SortExpression;
 import net.sf.saxon.expr.sort.SortKeyDefinitionList;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -94,7 +94,7 @@ public class XSLForEach extends StyleElement {
             } else if (f.equals("separator")) {
                 requireXslt40("separator");
                 separator = makeAttributeValueTemplate(value, att);
-            } else if (attName.getLocalPart().equals("threads") && attName.hasURI(NamespaceConstant.SAXON)) {
+            } else if (attName.getLocalPart().equals("threads") && attName.hasURI(NamespaceUri.SAXON)) {
                 threads = makeAttributeValueTemplate(Whitespace.trim(value), att);
                 if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
                     compileWarning("saxon:threads - no multithreading takes place when compiling with trace enabled",

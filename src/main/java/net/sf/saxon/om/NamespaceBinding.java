@@ -21,10 +21,10 @@ import java.util.Iterator;
 public final class NamespaceBinding implements NamespaceBindingSet {
 
     private final String prefix;
-    private final String uri;
+    private final NamespaceUri uri;
 
-    public final static NamespaceBinding XML = new NamespaceBinding("xml", NamespaceConstant.XML);
-    public final static NamespaceBinding DEFAULT_UNDECLARATION = new NamespaceBinding("", "");
+    public final static NamespaceBinding XML = new NamespaceBinding("xml", NamespaceUri.XML);
+    public final static NamespaceBinding DEFAULT_UNDECLARATION = new NamespaceBinding("", NamespaceUri.NULL);
 
     public final static NamespaceBinding[] EMPTY_ARRAY = new NamespaceBinding[0];
 
@@ -37,7 +37,7 @@ public final class NamespaceBinding implements NamespaceBindingSet {
      *               not be null.
      */
 
-    public NamespaceBinding(String prefix, String uri) {
+    public NamespaceBinding(String prefix, NamespaceUri uri) {
         this.prefix = prefix;
         this.uri = uri;
         if (prefix == null || uri == null) {
@@ -46,7 +46,7 @@ public final class NamespaceBinding implements NamespaceBindingSet {
     }
 
     @Override
-    public String getURI(String prefix) {
+    public NamespaceUri getURI(String prefix) {
         return prefix.equals(this.prefix) ? uri : null;
     }
 
@@ -67,7 +67,7 @@ public final class NamespaceBinding implements NamespaceBindingSet {
         } else if (prefix.equals("xml") && uri.equals(NamespaceConstant.XML)) {
             return XML;
         } else {
-            return new NamespaceBinding(prefix.toString(), uri.toString());
+            return new NamespaceBinding(prefix.toString(), NamespaceUri.of(uri.toString()));
         }
     }
 
@@ -89,7 +89,7 @@ public final class NamespaceBinding implements NamespaceBindingSet {
      *         prefixes, it indicates that the prefix is not bound to any namespace and therefore cannot be used.
      */
 
-    public String getURI() {
+    public NamespaceUri getURI() {
         return uri;
     }
 
@@ -111,7 +111,7 @@ public final class NamespaceBinding implements NamespaceBindingSet {
      */
 
     public boolean isDefaultUndeclaration() {
-        return prefix.isEmpty() && uri.isEmpty();
+        return prefix.isEmpty() && uri == NamespaceUri.NULL;
     }
 
     /**

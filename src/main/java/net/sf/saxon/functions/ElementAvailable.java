@@ -12,11 +12,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
@@ -137,7 +133,7 @@ public class ElementAvailable extends SystemFunction {
             if (arguments[0] instanceof StringLiteral) {
                 String arg = ((StringLiteral) arguments[0]).stringify();
                 StructuredQName elem = getElementName(arg);
-                if (elem.hasURI(NamespaceConstant.XSLT) && elem.getLocalPart().equals("evaluate")) {
+                if (elem.hasURI(NamespaceUri.XSLT) && elem.getLocalPart().equals("evaluate")) {
                     return super.getSpecialProperties(arguments) | StaticProperty.DEPENDS_ON_RUNTIME_ENVIRONMENT;
                 }
             }
@@ -165,15 +161,15 @@ public class ElementAvailable extends SystemFunction {
 
         StructuredQName qName = getElementName(lexicalName);
 
-        if (qName.hasURI(NamespaceConstant.XSLT)) {
-            int fp = context.getConfiguration().getNamePool().getFingerprint(NamespaceConstant.XSLT, qName.getLocalPart());
+        if (qName.hasURI(NamespaceUri.XSLT)) {
+            int fp = context.getConfiguration().getNamePool().getFingerprint(NamespaceUri.XSLT, qName.getLocalPart());
             int xsltVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             boolean known = xsltVersion == 40 ? isXslt40Element(fp) : isXslt30Element(fp);
             if (fp == StandardNames.XSL_EVALUATE) {
                 known = known && !context.getConfiguration().getBooleanProperty(Feature.DISABLE_XSL_EVALUATE);
             }
             return known;
-        } else if (qName.hasURI(NamespaceConstant.IXSL) && !edition.equals("JS")) {
+        } else if (qName.hasURI(NamespaceUri.IXSL) && !edition.equals("JS")) {
             return false;
         }
         return context.getConfiguration().isExtensionElementAvailable(qName);
@@ -182,7 +178,7 @@ public class ElementAvailable extends SystemFunction {
     private StructuredQName getElementName(String lexicalName) throws XPathException {
         try {
             if (NameChecker.isValidNCName(StringTool.codePoints(lexicalName))) {
-                String uri = getRetainedStaticContext().getURIForPrefix("", true);
+                NamespaceUri uri = getRetainedStaticContext().getURIForPrefix("", true);
                 return new StructuredQName("", uri, lexicalName);
             } else {
                 return StructuredQName.fromLexicalQName(lexicalName, false,

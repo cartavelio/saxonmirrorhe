@@ -10,6 +10,7 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
@@ -21,7 +22,7 @@ import net.sf.saxon.value.Whitespace;
 
 public class XSLNamespaceAlias extends StyleElement {
 
-    private String stylesheetURI;
+    private NamespaceUri stylesheetURI;
     private NamespaceBinding resultNamespaceBinding;
 
     /**
@@ -72,16 +73,16 @@ public class XSLNamespaceAlias extends StyleElement {
         if (stylesheetURI == null) {
             compileError("stylesheet-prefix " + stylesheetPrefix + " has not been declared", "XTSE0812");
             // recovery action
-            stylesheetURI = "";
+            stylesheetURI = NamespaceUri.NULL;
             resultNamespaceBinding = NamespaceBinding.DEFAULT_UNDECLARATION;
             return;
         }
-        String resultURI = getURIForPrefix(resultPrefix, true);
+        NamespaceUri resultURI = getURIForPrefix(resultPrefix, true);
         if (resultURI == null) {
             compileError("result-prefix " + resultPrefix + " has not been declared", "XTSE0812");
             // recovery action
-            stylesheetURI = "";
-            resultURI = "";
+            stylesheetURI = NamespaceUri.NULL;
+            resultURI = NamespaceUri.NULL;
         }
         resultNamespaceBinding = new NamespaceBinding(resultPrefix, resultURI);
     }
@@ -102,7 +103,7 @@ public class XSLNamespaceAlias extends StyleElement {
         top.addNamespaceAlias(decl);
     }
 
-    public String getStylesheetURI() {
+    public NamespaceUri getStylesheetURI() {
         return stylesheetURI;
     }
 

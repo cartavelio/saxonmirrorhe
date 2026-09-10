@@ -319,8 +319,8 @@ public class SimpleMode extends Mode {
      */
 
     @Override
-    public Set<String> getExplicitNamespaces(NamePool pool) {
-        Set<String> namespaces = new HashSet<>();
+    public Set<NamespaceUri> getExplicitNamespaces(NamePool pool) {
+        Set<NamespaceUri> namespaces = new HashSet<>();
         IntIterator ii = namedElementRuleChains.keyIterator();
         while (ii.hasNext()) {
             int fp = ii.next();
@@ -553,7 +553,7 @@ public class SimpleMode extends Mode {
                     if (node.hasFingerprint()) {
                         namedNodeChain = namedElementRuleChains.get(node.getFingerprint());
                     } else {
-                        namedNodeChain = getNamedRuleChain(context, Type.ELEMENT, node.getURI(), node.getLocalPart());
+                        namedNodeChain = getNamedRuleChain(context, Type.ELEMENT, node.getNamespaceUri(), node.getLocalPart());
                     }
                     if (namedNodeChain != null) {
                         bestRule = searchRuleChain(node, context, null, namedNodeChain);
@@ -566,7 +566,7 @@ public class SimpleMode extends Mode {
                     if (node.hasFingerprint()) {
                         namedNodeChain = namedAttributeRuleChains.get(node.getFingerprint());
                     } else {
-                        namedNodeChain = getNamedRuleChain(context, Type.ATTRIBUTE, node.getURI(), node.getLocalPart());
+                        namedNodeChain = getNamedRuleChain(context, Type.ATTRIBUTE, node.getNamespaceUri(), node.getLocalPart());
                     }
                     if (namedNodeChain != null) {
                         bestRule = searchRuleChain(node, context, null, namedNodeChain);
@@ -626,7 +626,7 @@ public class SimpleMode extends Mode {
      * to consider
      */
 
-    protected RuleChain getNamedRuleChain(XPathContext c, int kind, String uri, String local) {
+    protected RuleChain getNamedRuleChain(XPathContext c, int kind, NamespaceUri uri, String local) {
         // If this is the first attempt to match a non-fingerprinted node, build indexes
         // to the rule chains based on StructuredQName rather than fingerprint
         synchronized(this) {
@@ -783,7 +783,7 @@ public class SimpleMode extends Mode {
                     if (node.hasFingerprint()) {
                         namedNodeChain = namedElementRuleChains.get(node.getFingerprint());
                     } else {
-                        namedNodeChain = getNamedRuleChain(context, Type.ELEMENT, node.getURI(), node.getLocalPart());
+                        namedNodeChain = getNamedRuleChain(context, Type.ELEMENT, node.getNamespaceUri(), node.getLocalPart());
                     }
                     if (namedNodeChain != null) {
                         ruleSearchState = makeRuleSearchState(namedNodeChain, context);
@@ -797,7 +797,7 @@ public class SimpleMode extends Mode {
                     if (node.hasFingerprint()) {
                         namedNodeChain = namedAttributeRuleChains.get(node.getFingerprint());
                     } else {
-                        namedNodeChain = getNamedRuleChain(context, Type.ATTRIBUTE, node.getURI(), node.getLocalPart());
+                        namedNodeChain = getNamedRuleChain(context, Type.ATTRIBUTE, node.getNamespaceUri(), node.getLocalPart());
                     }
                     if (namedNodeChain != null) {
                         ruleSearchState = makeRuleSearchState(namedNodeChain, context);

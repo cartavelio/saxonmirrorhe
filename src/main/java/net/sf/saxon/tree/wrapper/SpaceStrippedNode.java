@@ -10,12 +10,12 @@ package net.sf.saxon.tree.wrapper;
 import com.saxonica.ee.validate.SkipValidator;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Stripper;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -24,7 +24,6 @@ import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.Whitespace;
 
 
@@ -119,7 +118,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
             // the document contains one or more xml:space="preserve" attributes, so we need to see
             // if one of them is on an ancestor of this node
             while (p.getNodeKind() == Type.ELEMENT) {
-                String val = p.getAttributeValue(NamespaceConstant.XML, "space");
+                String val = p.getAttributeValue(NamespaceUri.XML, "space");
                 if (val != null) {
                     if ("preserve".equals(val)) {
                         return true;

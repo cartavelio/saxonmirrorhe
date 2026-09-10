@@ -92,7 +92,7 @@ public class AttributeMapWithIdentity implements AttributeMap {
     }
 
     @Override
-    public AttributeInfo get(String uri, String local) {
+    public AttributeInfo get(NamespaceUri uri, String local) {
         for (AttributeInfo info : attributes) {
             NodeName name = info.getNodeName();
             if (name.getLocalPart().equals(local) && name.hasURI(uri) && !(info instanceof AttributeInfo.Deleted)) {
@@ -100,17 +100,6 @@ public class AttributeMapWithIdentity implements AttributeMap {
             }
         }
         return null;
-    }
-
-    public int getIndex(String uri, String local) {
-        for (int i=0; i<attributes.size(); i++) {
-            AttributeInfo info = attributes.get(i);
-            NodeName name = info.getNodeName();
-            if (name.getLocalPart().equals(local) && name.hasURI(uri)) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     public AttributeMapWithIdentity set(int index, AttributeInfo info) {

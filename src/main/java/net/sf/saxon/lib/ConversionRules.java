@@ -8,6 +8,7 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.expr.sort.LFUCache;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NotationSet;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.*;
@@ -129,7 +130,7 @@ public class ConversionRules {
      */
 
 
-    public boolean isDeclaredNotation(String uri, String local) {
+    public boolean isDeclaredNotation(NamespaceUri uri, String local) {
         //noinspection SimplifiableIfStatement
         if (notationSet == null) {
             return true;    // in the absence of a known configuration, treat all notations as valid

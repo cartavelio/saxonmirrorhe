@@ -521,7 +521,7 @@ public abstract class NodeOverNodeInfo implements Node {
         if (node.getNodeKind() == Type.NAMESPACE) {
             return NamespaceConstant.XMLNS;
         }
-        String uri = node.getURI();
+        String uri = node.getNamespaceUri().toString();
         return "".equals(uri) ? null : uri;
     }
 

@@ -18,7 +18,6 @@ import net.sf.saxon.gizmo.DefaultTalker;
 import net.sf.saxon.gizmo.JLine2Talker;
 import net.sf.saxon.gizmo.Talker;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
@@ -217,16 +216,16 @@ public class Gizmo {
             }
         }
 
-        env.declareNamespace("xml", NamespaceConstant.XML);
-        env.declareNamespace("xsl", NamespaceConstant.XSLT);
-        env.declareNamespace("saxon", NamespaceConstant.SAXON);
-        env.declareNamespace("xs", NamespaceConstant.SCHEMA);
-        env.declareNamespace("xsi", NamespaceConstant.SCHEMA_INSTANCE);
-        env.declareNamespace("fn", NamespaceConstant.FN);
-        env.declareNamespace("math", NamespaceConstant.MATH);
-        env.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
-        env.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
-        env.declareNamespace("", "");
+        env.declareNamespace("xml", NamespaceUri.XML);
+        env.declareNamespace("xsl", NamespaceUri.XSLT);
+        env.declareNamespace("saxon", NamespaceUri.SAXON);
+        env.declareNamespace("xs", NamespaceUri.SCHEMA);
+        env.declareNamespace("xsi", NamespaceUri.SCHEMA_INSTANCE);
+        env.declareNamespace("fn", NamespaceUri.FN);
+        env.declareNamespace("math", NamespaceUri.MATH);
+        env.declareNamespace("map", NamespaceUri.MAP_FUNCTIONS);
+        env.declareNamespace("array", NamespaceUri.ARRAY_FUNCTIONS);
+        env.declareNamespace("", NamespaceUri.NULL);
 
         env.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
 
@@ -245,16 +244,16 @@ public class Gizmo {
         env = new IndependentContext(config);
         env.setXPathLanguageLevel(40);
 
-        env.declareNamespace("xml", NamespaceConstant.XML);
-        env.declareNamespace("xsl", NamespaceConstant.XSLT);
-        env.declareNamespace("saxon", NamespaceConstant.SAXON);
-        env.declareNamespace("xs", NamespaceConstant.SCHEMA);
-        env.declareNamespace("xsi", NamespaceConstant.SCHEMA_INSTANCE);
-        env.declareNamespace("fn", NamespaceConstant.FN);
-        env.declareNamespace("math", NamespaceConstant.MATH);
-        env.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
-        env.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
-        env.declareNamespace("", "");
+        env.declareNamespace("xml", NamespaceUri.XML);
+        env.declareNamespace("xsl", NamespaceUri.XSLT);
+        env.declareNamespace("saxon", NamespaceUri.SAXON);
+        env.declareNamespace("xs", NamespaceUri.SCHEMA);
+        env.declareNamespace("xsi", NamespaceUri.SCHEMA_INSTANCE);
+        env.declareNamespace("fn", NamespaceUri.FN);
+        env.declareNamespace("math", NamespaceUri.MATH);
+        env.declareNamespace("map", NamespaceUri.MAP_FUNCTIONS);
+        env.declareNamespace("array", NamespaceUri.ARRAY_FUNCTIONS);
+        env.declareNamespace("", NamespaceUri.NULL);
 
         env.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
 
@@ -604,7 +603,7 @@ public class Gizmo {
         }
         String prefix = buffer.substring(0, ws).trim();
         String uri = buffer.substring(ws).trim();
-        env.declareNamespace(prefix, uri);
+        env.declareNamespace(prefix, NamespaceUri.of(uri));
     }
 
     private void rename(StringBuilder buffer) throws XPathException {

@@ -14,6 +14,7 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.lib.ResourceResolverWrappingURIResolver;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeSource;
 import net.sf.saxon.om.Sequence;
@@ -998,7 +999,7 @@ public class XsltCompiler {
      */
 
     public String getDefaultElementNamespace() {
-        return compilerInfo.getDefaultElementNamespace();
+        return compilerInfo.getDefaultElementNamespace().toString();
     }
 
     /**
@@ -1012,7 +1013,7 @@ public class XsltCompiler {
      */
 
     public void setDefaultElementNamespace(String defaultNS) {
-        compilerInfo.setDefaultElementNamespace(defaultNS);
+        compilerInfo.setDefaultElementNamespace(NamespaceUri.of(defaultNS));
     }
 
     /**

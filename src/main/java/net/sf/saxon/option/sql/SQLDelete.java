@@ -12,10 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SimpleExpression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.EmptyAtomicSequence;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.ExtensionInstruction;
@@ -50,21 +47,21 @@ public class SQLDelete extends ExtensionInstruction {
     protected void prepareAttributes() {
 
         final AttributeMap atts = attributes();
-        table = atts.getValue("", "table");
+        table = atts.getValue(NamespaceUri.NULL, "table");
         if (table == null) {
             reportAbsence("table");
             table = "saxon-error-table";
         }
         table = SQLConnect.quoteSqlName(table);
 
-        AttributeInfo dbWhere = atts.get("", "where");
+        AttributeInfo dbWhere = atts.get(NamespaceUri.NULL, "where");
         if (dbWhere == null) {
             where = new StringLiteral(StringValue.EMPTY_STRING);
         } else {
             where = makeAttributeValueTemplate(dbWhere.getValue(), dbWhere);
         }
 
-        AttributeInfo connectAtt = atts.get("", "connection");
+        AttributeInfo connectAtt = atts.get(NamespaceUri.NULL, "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {

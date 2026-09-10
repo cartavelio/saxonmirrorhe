@@ -313,10 +313,10 @@ public interface NodeInfo extends Item, Location
      * @return The URI of the namespace of this node. For an unnamed node,
      *         or for an element or attribute that is not in a namespace, or for a processing
      *         instruction, returns an empty string.
-     * @since 8.4
+     * @since 12.0; replaces getURI() which returned a string.
      */
 
-    String getURI();
+    NamespaceUri getNamespaceUri();
 
     /**
      * Get the display name of this node, in the form of a lexical QName.
@@ -440,7 +440,7 @@ public interface NodeInfo extends Item, Location
      */
 
     /*@Nullable*/
-    String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local);
+    String getAttributeValue(NamespaceUri uri, String local);
 
     /**
      * Get the root node of the tree containing this node

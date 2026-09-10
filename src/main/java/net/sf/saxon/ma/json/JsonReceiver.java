@@ -11,7 +11,6 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.*;
@@ -119,7 +118,7 @@ public class JsonReceiver implements Receiver {
         boolean inMap = "map".equals(parent) || stack.isEmpty();
         stack.push(elemName);
         //started.push(false);
-        if (!elemName.hasURI(NamespaceConstant.FN)) {
+        if (!elemName.hasURI(NamespaceUri.FN)) {
             throw new XPathException("xml-to-json: element found in wrong namespace: " +
                                              elemName.getStructuredQName().getEQName(), ERR_INPUT);
         }
@@ -129,7 +128,7 @@ public class JsonReceiver implements Receiver {
         String escapedKey = null;
         for (AttributeInfo att : attributes) {
             NodeName attName = att.getNodeName();
-            if (attName.hasURI("")) {
+            if (attName.hasURI(NamespaceUri.NULL)) {
                 switch (attName.getLocalPart()) {
                     case "key":
                         if (!inMap) {
@@ -159,7 +158,7 @@ public class JsonReceiver implements Receiver {
                     default:
                         throw new XPathException("xml-to-json: Disallowed attribute in input: " + attName.getDisplayName(), ERR_INPUT);
                 }
-            } else if (attName.hasURI(NamespaceConstant.FN)) {
+            } else if (attName.hasURI(NamespaceUri.FN)) {
                 throw new XPathException("xml-to-json: Disallowed attribute in input: " + attName.getDisplayName(), ERR_INPUT);
             }
             // Attributes in other namespaces are ignored

@@ -276,7 +276,7 @@ public class XPathParser {
      */
 
     public void grumble(String message, String errorCode) throws XPathException {
-        grumble(message, new StructuredQName("", NamespaceConstant.ERR, errorCode), -1);
+        grumble(message, new StructuredQName("", NamespaceUri.ERR, errorCode), -1);
     }
 
     /**
@@ -290,7 +290,7 @@ public class XPathParser {
      */
 
     public void grumble(String message, String errorCode, int offset) throws XPathException {
-        grumble(message, new StructuredQName("", NamespaceConstant.ERR, errorCode), offset);
+        grumble(message, new StructuredQName("", NamespaceUri.ERR, errorCode), offset);
     }
 
     /**
@@ -305,7 +305,7 @@ public class XPathParser {
 
     protected void grumble(String message, StructuredQName errorCode, int offset) throws XPathException {
         if (errorCode == null) {
-            errorCode = new StructuredQName("err", NamespaceConstant.ERR, "XPST0003");
+            errorCode = new StructuredQName("err", NamespaceUri.ERR, "XPST0003");
         }
         String nearbyText = null;
         int line = -1;
@@ -1078,7 +1078,7 @@ public class XPathParser {
     private Expression makeOtherwiseExpression (Expression lhs, Expression rhs) throws XPathException {
         checkLanguageVersion40();
         LetExpression let = new LetExpression();
-        let.setVariableQName(new StructuredQName("vv", NamespaceConstant.ANONYMOUS, "n" + lhs.hashCode()));
+        let.setVariableQName(new StructuredQName("vv", NamespaceUri.ANONYMOUS, "n" + lhs.hashCode()));
         let.setSequence(lhs);
         let.setRequiredType(SequenceType.ANY_SEQUENCE);
         LocalVariableReference v1 = new LocalVariableReference(let.getVariableQName());
@@ -1355,7 +1355,7 @@ public class XPathParser {
 
             clauses++;
             setLocation(v, offset);
-            v.setVariableQName(makeStructuredQName(var, ""));
+            v.setVariableQName(makeStructuredQName(var, NamespaceUri.NULL));
             nextToken();
 
             // process the "in" or ":=" clause
@@ -1412,7 +1412,7 @@ public class XPathParser {
             v.setOperator(operator);
             setLocation(v, offset);
 
-            v.setVariableQName(makeStructuredQName(var, ""));
+            v.setVariableQName(makeStructuredQName(var, NamespaceUri.NULL));
             nextToken();
 
             if (t.currentToken == Token.AS && language == ParsedLanguage.XQUERY) {
@@ -1509,14 +1509,14 @@ public class XPathParser {
 
     public ItemType getPlainType(StructuredQName sq) throws XPathException {
         Configuration config = env.getConfiguration();
-        String uri = sq.getURI();
+        NamespaceUri uri = sq.getURI();
         if (uri.isEmpty()) {
             uri = env.getDefaultElementNamespace();
         }
         String local = sq.getLocalPart();
         String qname = sq.getDisplayName();
 
-        boolean builtInNamespace = uri.equals(NamespaceConstant.SCHEMA);
+        boolean builtInNamespace = uri.equals(NamespaceUri.SCHEMA);
 
         if (builtInNamespace) {
             ItemType t = Type.getBuiltInItemType(uri, local);
@@ -1534,7 +1534,7 @@ public class XPathParser {
                 assert false;
             }
 //#if CSHARP==false
-        } else if (uri.equals(NamespaceConstant.JAVA_TYPE)) {
+        } else if (uri.equals(NamespaceUri.JAVA_TYPE)) {
             Class theClass;
             try {
                 String className = JavaExternalObjectType.localNameToClassName(local);
@@ -1545,7 +1545,7 @@ public class XPathParser {
             }
             return config.getJavaExternalObjectType(theClass);
 //#endif
-        } else if (uri.equals(NamespaceConstant.DOT_NET_TYPE)) {
+        } else if (uri.equals(NamespaceUri.DOT_NET_TYPE)) {
             return Version.platform.getExternalObjectType(config, uri, local);
         } else {
             SchemaType st = config.getSchemaType(sq);
@@ -1624,10 +1624,10 @@ public class XPathParser {
             grumble(e.getMessage(), e.getErrorCodeLocalPart());
             assert false;
         }
-        String uri = sq.getURI();
+        NamespaceUri uri = sq.getURI();
         String local = sq.getLocalPart();
 
-        boolean builtInNamespace = uri.equals(NamespaceConstant.SCHEMA);
+        boolean builtInNamespace = uri.equals(NamespaceUri.SCHEMA);
         if (builtInNamespace) {
             SimpleType target = Type.getBuiltInSimpleType(uri, local);
             if (target == null) {
@@ -1640,7 +1640,7 @@ public class XPathParser {
                 checkAllowedType(env, (BuiltInAtomicType) t);
             }
             return t;
-        } else if (uri.equals(NamespaceConstant.DOT_NET_TYPE)) {
+        } else if (uri.equals(NamespaceUri.DOT_NET_TYPE)) {
             return (AtomicType) Version.platform.getExternalObjectType(env.getConfiguration(), uri, local);
 
         } else {
@@ -1781,7 +1781,7 @@ public class XPathParser {
                     nextToken();
                     expect(Token.NAME);
                     StructuredQName typeName = getQNameParser().parse(
-                            t.currentTokenValue, NamespaceConstant.SCHEMA);
+                            t.currentTokenValue, NamespaceUri.SCHEMA);
                     primaryType = getPlainType(typeName);
                     if (!(primaryType instanceof AtomicType)) {
                         grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
@@ -1806,7 +1806,7 @@ public class XPathParser {
                     checkLanguageVersion40();
                     nextToken();
                     expect(Token.NAME);
-                    StructuredQName typeAlias = getQNameParser().parse(t.currentTokenValue, "");
+                    StructuredQName typeAlias = getQNameParser().parse(t.currentTokenValue, NamespaceUri.NULL);
                     ItemType realType = getStaticContext().resolveTypeAlias(typeAlias);
                     if (realType == null) {
                         grumble("Named type (" + typeAlias.getDisplayName() + ") has not been defined");
@@ -2519,8 +2519,8 @@ public class XPathParser {
         return parseExpression();
     }
 
-    protected boolean isReservedInQuery(String uri) {
-        return NamespaceConstant.isReservedInQuery31(uri);
+    protected boolean isReservedInQuery(NamespaceUri uri) {
+        return NamespaceUri.isReservedInQuery31(uri);
     }
 
     /**
@@ -2782,7 +2782,7 @@ public class XPathParser {
         }
 
         //int vtest = makeNameCode(var, false) & 0xfffff;
-        StructuredQName vtest = makeStructuredQName(var, "");
+        StructuredQName vtest = makeStructuredQName(var, NamespaceUri.NULL);
         assert vtest != null;
 
         // See if it's a range variable or a variable in the context
@@ -2795,7 +2795,7 @@ public class XPathParser {
                 for (StructuredQName errorVariable : StandardNames.errorVariables) {
                     if (errorVariable.getLocalPart().equals(vtest.getLocalPart())) {
                         StructuredQName functionName =
-                                new StructuredQName("saxon", NamespaceConstant.SAXON, "dynamic-error-info");
+                                new StructuredQName("saxon", NamespaceUri.SAXON, "dynamic-error-info");
                         SymbolicName.F sn = new SymbolicName.F(functionName, 1);
                         Expression[] args = new Expression[]{new StringLiteral(vtest.getLocalPart())};
                         return VendorFunctionSetHE.getInstance().bind(sn, args, env, new ArrayList<>());
@@ -3128,7 +3128,7 @@ public class XPathParser {
                         nextToken();
                         expect(Token.RPAR);
                         nextToken();
-                        return new NameTest(Type.NAMESPACE, "", nsName, pool);
+                        return new NameTest(Type.NAMESPACE, NamespaceUri.NULL, nsName, pool);
                     } else {
                         grumble("No arguments are allowed in namespace-node()");
                         return null;
@@ -3162,13 +3162,13 @@ public class XPathParser {
                         // Became an error as a result of XPath erratum XP.E7
                         grumble("Processing instruction name must be a valid NCName", "XPTY0004");
                     } else {
-                        fp = pool.allocateFingerprint("", piName);
+                        fp = pool.allocateFingerprint(NamespaceUri.NULL, piName);
                     }
                 } else if (t.currentToken == Token.NAME) {
                     try {
                         String[] parts = NameChecker.getQNameParts(t.currentTokenValue);
                         if (parts[0].isEmpty()) {
-                            fp = pool.allocateFingerprint("", parts[1]);
+                            fp = pool.allocateFingerprint(NamespaceUri.NULL, parts[1]);
                         } else {
                             grumble("Processing instruction name must not contain a colon");
                         }
@@ -3208,7 +3208,7 @@ public class XPathParser {
                 } else {
                     grumble("Unexpected " + Token.tokens[t.currentToken] + " after '(' in SequenceType");
                 }
-                String suri = null;
+                NamespaceUri suri = null;
                 if (fp != -1) {
                     suri = pool.getURI(fp);
                 }
@@ -3271,10 +3271,10 @@ public class XPathParser {
                         SchemaType schemaType;
                         StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
                         assert contentType != null;
-                        String uri = contentType.getURI();
+                        NamespaceUri uri = contentType.getURI();
                         String lname = contentType.getLocalPart();
 
-                        if (uri.equals(NamespaceConstant.SCHEMA)) {
+                        if (uri.equals(NamespaceUri.SCHEMA)) {
                             schemaType = env.getConfiguration().getSchemaType(contentType);
                         } else {
                             if (!env.isImportedSchema(uri)) {
@@ -3515,7 +3515,7 @@ public class XPathParser {
                 Block block = new Block(entries.toArray(entriesArray));
                 HashTrieMap options = new HashTrieMap();
                 options.initialPut(new StringValue("duplicates"), new StringValue("reject"));
-                options.initialPut(new QNameValue("", NamespaceConstant.SAXON, "duplicates-error-code"), new StringValue("XQDY0137"));
+                options.initialPut(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"), new StringValue("XQDY0137"));
                 result = MapFunctionSet.getInstance().makeFunction("merge", 2).makeFunctionCall(block, Literal.makeLiteral(options));
                 break;
         }
@@ -3716,7 +3716,8 @@ public class XPathParser {
         }
         setLocation(fcall, offset);
         for (Expression argument : arguments) {
-            if (fcall != argument && argument.getParentExpression() == null && !functionName.hasURI(NamespaceConstant.GLOBAL_JS)) {
+            if (fcall != argument && argument.getParentExpression() == null
+                    && !functionName.hasURI(NamespaceUri.GLOBAL_JS)) {
                 // avoid doing this when the function has already been optimized away, e.g. unordered()
                 // Also avoid doing this when a js: function is parsed into an ixsl:call()
                 // TODO move the adoptChildExpression into individual function libraries
@@ -3787,7 +3788,7 @@ public class XPathParser {
      */
 
     public static String getMissingFunctionExplanation(StructuredQName functionName, Configuration config) {
-        String actualURI = functionName.getURI();
+        String actualURI = functionName.getURI().toString();
         String similarNamespace = NamespaceConstant.findSimilarNamespace(actualURI);
         if (similarNamespace != null) {
             if (similarNamespace.equals(actualURI)) {
@@ -3856,7 +3857,7 @@ public class XPathParser {
     /*@NotNull*/
     protected StructuredQName resolveFunctionName(String fname) throws XPathException {
         if (scanOnly) {
-            return new StructuredQName("", NamespaceConstant.SAXON, "dummy");
+            return new StructuredQName("", NamespaceUri.SAXON, "dummy");
         }
         StructuredQName functionName = null;
         try {
@@ -3866,7 +3867,7 @@ public class XPathParser {
             assert false;
         }
 
-        if (functionName.hasURI(NamespaceConstant.SCHEMA)) {
+        if (functionName.hasURI(NamespaceUri.SCHEMA)) {
             ItemType t = Type.getBuiltInItemType(functionName.getURI(), functionName.getLocalPart());
             if (t instanceof BuiltInAtomicType) {
                 checkAllowedType(env, (BuiltInAtomicType) t);
@@ -3943,7 +3944,7 @@ public class XPathParser {
             nextToken();
             expect(Token.NAME);
             String argName = t.currentTokenValue;
-            StructuredQName argQName = makeStructuredQName(argName, "");
+            StructuredQName argQName = makeStructuredQName(argName, NamespaceUri.NULL);
             if (paramNames.contains(argQName)) {
                 grumble("Duplicate parameter name " + Err.wrap(t.currentTokenValue, Err.VARIABLE), "XQST0039");
             }
@@ -4018,7 +4019,7 @@ public class XPathParser {
         int arity = params.size();
 
         UserFunction uf = new UserFunction();
-        uf.setFunctionName(new StructuredQName("anon", NamespaceConstant.ANONYMOUS, "f_" + uf.hashCode()));
+        uf.setFunctionName(new StructuredQName("anon", NamespaceUri.ANONYMOUS, "f_" + uf.hashCode()));
         uf.setPackageData(p.getStaticContext().getPackageData());
         uf.setBody(body);
         uf.setAnnotations(annotations);
@@ -4303,7 +4304,7 @@ public class XPathParser {
         List<UserFunctionParameter> params = new ArrayList<>(1);
         SequenceType resultType = SequenceType.ANY_SEQUENCE;
 
-        StructuredQName argQName = new StructuredQName("saxon", NamespaceConstant.SAXON, "dot");
+        StructuredQName argQName = new StructuredQName("saxon", NamespaceUri.SAXON, "dot");
 
         UserFunctionParameter arg = new UserFunctionParameter();
         arg.setRequiredType(SequenceType.SINGLE_ITEM);
@@ -4489,7 +4490,7 @@ public class XPathParser {
             return StandardNames.XML_SPACE;
         }
         try {
-            String defaultNS = useDefault ? env.getDefaultElementNamespace() : "";
+            NamespaceUri defaultNS = useDefault ? env.getDefaultElementNamespace() : NamespaceUri.NULL;
             StructuredQName sq = qNameParser.parse(qname, defaultNS);
             return env.getConfiguration().getNamePool().allocateFingerprint(sq.getURI(), sq.getLocalPart());
         } catch (XPathException e) {
@@ -4511,10 +4512,10 @@ public class XPathParser {
      *                        undeclared or if the name is not a lexically valid QName
      */
 
-    public final StructuredQName makeStructuredQNameSilently(/*@NotNull*/ String qname, String defaultUri)
+    public final StructuredQName makeStructuredQNameSilently(/*@NotNull*/ String qname, NamespaceUri defaultUri)
             throws XPathException {
         if (scanOnly) {
-            return new StructuredQName("", NamespaceConstant.SAXON, "dummy");
+            return new StructuredQName("", NamespaceUri.SAXON, "dummy");
         }
         return qNameParser.parse(qname, defaultUri);
     }
@@ -4531,12 +4532,12 @@ public class XPathParser {
      */
 
     /*@NotNull*/
-    public final StructuredQName makeStructuredQName(/*@NotNull*/ String qname, String defaultUri) throws XPathException {
+    public final StructuredQName makeStructuredQName(/*@NotNull*/ String qname, NamespaceUri defaultUri) throws XPathException {
         try {
             return makeStructuredQNameSilently(qname, defaultUri);
         } catch (XPathException err) {
             grumble(err.getMessage(), err.getErrorCodeLocalPart());
-            return new StructuredQName("", "", "error");  // Not executed; here to keep the compiler happy
+            return new StructuredQName("", NamespaceUri.NULL, "error");  // Not executed; here to keep the compiler happy
         }
     }
 
@@ -4555,12 +4556,13 @@ public class XPathParser {
 
     /*@NotNull*/
     public final NodeName makeNodeName(String qname, boolean useDefault) throws XPathException {
-        StructuredQName sq = makeStructuredQNameSilently(qname, useDefault ? env.getDefaultElementNamespace() : "");
+        StructuredQName sq = makeStructuredQNameSilently(qname,
+                                                         useDefault ? env.getDefaultElementNamespace() : NamespaceUri.NULL);
         String prefix = sq.getPrefix();
-        String uri = sq.getURI();
+        NamespaceUri uri = sq.getURI();
         String local = sq.getLocalPart();
         if (uri.isEmpty()) {
-            int fp = env.getConfiguration().getNamePool().allocateFingerprint("", local);
+            int fp = env.getConfiguration().getNamePool().allocateFingerprint(NamespaceUri.NULL, local);
             return new NoNamespaceName(local, fp);
         } else {
             int fp = env.getConfiguration().getNamePool().allocateFingerprint(uri, local);
@@ -4587,7 +4589,7 @@ public class XPathParser {
     public NodeTest makeNameTest(short nodeType, /*@NotNull*/ String qname, boolean useDefault)
             throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
-        String defaultNS = "";
+        NamespaceUri defaultNS = NamespaceUri.NULL;
         if (useDefault && nodeType == Type.ELEMENT && !qname.startsWith("Q{") && !qname.contains(":")) {
             UnprefixedElementMatchingPolicy policy = env.getUnprefixedElementMatchingPolicy();
             switch (policy) {
@@ -4599,7 +4601,7 @@ public class XPathParser {
                     StructuredQName q = makeStructuredQName(qname, defaultNS);
                     int fp1 = pool.allocateFingerprint(q.getURI(), q.getLocalPart());
                     NameTest test1 = new NameTest(nodeType, fp1, pool);
-                    int fp2 = pool.allocateFingerprint("", q.getLocalPart());
+                    int fp2 = pool.allocateFingerprint(NamespaceUri.NULL, q.getLocalPart());
                     NameTest test2 = new NameTest(nodeType, fp2, pool);
                     return new CombinedNodeTest(test1, Token.UNION, test2);
                 case ANY_NAMESPACE:
@@ -4617,7 +4619,7 @@ public class XPathParser {
     public QNameTest makeQNameTest(short nodeType, String qname)
             throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
-        StructuredQName q = makeStructuredQName(qname, "");
+        StructuredQName q = makeStructuredQName(qname, NamespaceUri.NULL);
         assert q != null;
         int fp = pool.allocateFingerprint(q.getURI(), q.getLocalPart());
         return new NameTest(nodeType, fp, pool);
@@ -4639,14 +4641,14 @@ public class XPathParser {
         NamePool pool = env.getConfiguration().getNamePool();
         if (scanOnly) {
             // return an arbitrary namespace if we're only doing a syntax check
-            return new NamespaceTest(pool, nodeType, NamespaceConstant.SAXON);
+            return new NamespaceTest(pool, nodeType, NamespaceUri.SAXON);
         }
         if (prefix.startsWith("Q{")) {
             String uri = prefix.substring(2, prefix.length() - 2);
-            return new NamespaceTest(pool, nodeType, uri);
+            return new NamespaceTest(pool, nodeType, NamespaceUri.of(uri));
         }
         try {
-            StructuredQName sq = qNameParser.parse(prefix + ":dummy", "");
+            StructuredQName sq = qNameParser.parse(prefix + ":dummy", NamespaceUri.NULL);
             return new NamespaceTest(pool, nodeType, sq.getURI());
         } catch (XPathException err) {
             grumble(err.getMessage(), err.getErrorCodeLocalPart());

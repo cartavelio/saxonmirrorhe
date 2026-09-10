@@ -58,7 +58,7 @@ public class TinyTextualElement extends TinyElementImpl {
     }
 
     @Override
-    public String getAttributeValue(String uri, String local) {
+    public String getAttributeValue(NamespaceUri uri, String local) {
         return null;
     }
 
@@ -344,8 +344,8 @@ public class TinyTextualElement extends TinyElementImpl {
 
         /*@NotNull*/
         @Override
-        public String getURI() {
-            return "";
+        public NamespaceUri getNamespaceUri() {
+            return NamespaceUri.NULL;
         }
 
         /**
@@ -398,7 +398,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * @since 9.4
          */
         @Override
-        public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+        public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
             return null;
         }
 

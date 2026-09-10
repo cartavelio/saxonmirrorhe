@@ -306,10 +306,10 @@ public abstract class TinyNodeImpl implements NodeInfo {
      */
 
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         int code = tree.nameCode[nodeNr];
         if (code < 0) {
-            return "";
+            return NamespaceUri.NULL;
         }
         return tree.getNamePool().getURI(code & NamePool.FP_MASK);
     }
@@ -320,7 +320,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return true if the namespace of the node is the same as the alleged namespace URI
      */
 
-    public boolean hasURI(String ns) {
+    public boolean hasURI(NamespaceUri ns) {
         int code = tree.nameCode[nodeNr];
         if (code < 0) {
             return false;
@@ -587,7 +587,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      */
 
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         return null;
     }
 

@@ -1,6 +1,7 @@
 package s9apitest;
 
 import net.sf.saxon.lib.FunctionAnnotationHandler;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.s9api.*;
@@ -21,7 +22,7 @@ public class TestAnnotationHandler {
     private static class ColourHandler implements FunctionAnnotationHandler {
 
         @Override
-        public String getAssertionNamespace () {
+        public NamespaceUri getAssertionNamespace () {
             return "http://s.com";
         }
 

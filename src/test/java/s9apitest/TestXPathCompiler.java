@@ -10,6 +10,7 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.s9api.*;
@@ -572,7 +573,7 @@ public class TestXPathCompiler {
                 }
 
                 @Override
-                public String getURIForPrefix(String prefix, boolean useDefault) {
+                public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
                     if ("xfi".equals(prefix)) {
                         return "http://www.xbrl.org/2008/function/instance";
                     } else if ("xbrli".equals(prefix)) {

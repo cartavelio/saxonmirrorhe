@@ -11,6 +11,7 @@ import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -46,7 +47,7 @@ public class QNameValue extends QualifiedNameValue {
      * @param localName The local part of the QName
      */
 
-    public QNameValue(String prefix, String uri, String localName) {
+    public QNameValue(String prefix, NamespaceUri uri, String localName) {
         this(prefix, uri, localName, BuiltInAtomicType.QNAME);
     }
 
@@ -62,7 +63,7 @@ public class QNameValue extends QualifiedNameValue {
      * @param type      The type label, xs:QName or a subtype of xs:QName
      */
 
-    public QNameValue(String prefix, String uri, String localName, AtomicType type) {
+    public QNameValue(String prefix, NamespaceUri uri, String localName, AtomicType type) {
         super(new StructuredQName(prefix, uri, localName), type);
     }
 
@@ -84,19 +85,18 @@ public class QNameValue extends QualifiedNameValue {
      *                        namespace with a non-empty prefix
      */
 
-    public QNameValue(String prefix, String uri, String localName, AtomicType type, boolean check) throws XPathException {
+    public QNameValue(String prefix, NamespaceUri uri, String localName, AtomicType type, boolean check) throws XPathException {
         this(buildStructuredQName(prefix, uri, localName, check), type);
     }
 
-    private static StructuredQName buildStructuredQName(String prefix, String uri, String localName, boolean check) throws XPathException {
+    private static StructuredQName buildStructuredQName(String prefix, NamespaceUri uri, String localName, boolean check) throws XPathException {
         if (check && !NameChecker.isValidNCName(localName)) {
             XPathException err = new XPathException("Malformed local name in QName: '" + localName + '\'');
             err.setErrorCode("FORG0001");
             throw err;
         }
         prefix = prefix == null ? "" : prefix;
-        uri = "".equals(uri) ? null : uri;
-        if (check && uri == null && prefix.length() != 0) {
+        if (check && uri.isEmpty() && prefix.length() != 0) {
             XPathException err = new XPathException("QName has null namespace but non-empty prefix");
             err.setErrorCode("FOCA0002");
             throw err;
@@ -148,7 +148,7 @@ public class QNameValue extends QualifiedNameValue {
             case LOCALNAME:
                 return new StringValue(getLocalName(), BuiltInAtomicType.NCNAME);
             case NAMESPACE:
-                return new AnyURIValue((getNamespaceURI()));
+                return new AnyURIValue((getNamespaceURI().toUnicodeString()));
             case PREFIX:
                 String prefix = getPrefix();
                 if (prefix.isEmpty()) {

@@ -87,7 +87,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
         if (name.hasFingerprint() && origin.hasFingerprint()) {
             return name.getFingerprint() == origin.getFingerprint();
         } else {
-            return name.hasURI(origin.getURI()) && name.getLocalPart().equals(origin.getLocalPart());
+            return name.hasURI(origin.getNamespaceUri()) && name.getLocalPart().equals(origin.getLocalPart());
         }
     }
 
@@ -155,7 +155,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
             return origin.getFingerprint();
         } else {
             NamePool pool = origin.getConfiguration().getNamePool();
-            return pool.allocateFingerprint(origin.getURI(), origin.getLocalPart());
+            return pool.allocateFingerprint(origin.getNamespaceUri(), origin.getLocalPart());
         }
     }
 
@@ -184,8 +184,8 @@ public class SameNameTest extends NodeTest implements QNameTest {
      * @return the namespace URI (using "" for the "null namepace")
      */
 
-    public String getNamespaceURI() {
-        return origin.getURI();
+    public NamespaceUri getNamespaceURI() {
+        return origin.getNamespaceUri();
     }
 
     /**
@@ -224,7 +224,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
      */
 
     public int hashCode() {
-        return origin.getNodeKind() << 20 ^ origin.getURI().hashCode() ^ origin.getLocalPart().hashCode();
+        return origin.getNodeKind() << 20 ^ origin.getNamespaceUri().hashCode() ^ origin.getLocalPart().hashCode();
     }
 
     /**
@@ -242,7 +242,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
      */
 
     public NameTest getEquivalentNameTest() {
-        return new NameTest(origin.getNodeKind(), origin.getURI(), origin.getLocalPart(), origin.getConfiguration().getNamePool());
+        return new NameTest(origin.getNodeKind(), origin.getNamespaceUri(), origin.getLocalPart(), origin.getConfiguration().getNamePool());
     }
 
     /**

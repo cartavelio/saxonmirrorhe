@@ -51,8 +51,8 @@ public enum AnySimpleType implements SimpleType {
      */
 
     @Override
-    public String getTargetNamespace() {
-        return NamespaceConstant.SCHEMA;
+    public NamespaceUri getTargetNamespace() {
+        return NamespaceUri.SCHEMA;
     }
 
     /**
@@ -200,7 +200,7 @@ public enum AnySimpleType implements SimpleType {
         return NAME;
     }
 
-    public final static StructuredQName NAME = new StructuredQName("xs", NamespaceConstant.SCHEMA, "anySimpleType");
+    public final static StructuredQName NAME = new StructuredQName("xs", NamespaceUri.SCHEMA, "anySimpleType");
 
     /**
      * Get a description of this type for use in diagnostics

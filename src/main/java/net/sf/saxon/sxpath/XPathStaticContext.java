@@ -10,6 +10,7 @@ package net.sf.saxon.sxpath;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.value.QNameValue;
 
 /**
@@ -27,7 +28,7 @@ public interface XPathStaticContext extends StaticContext {
      *            in the XPath expression.
      */
 
-    void setDefaultElementNamespace(String uri);
+    void setDefaultElementNamespace(NamespaceUri uri);
 
     /**
      * Set an external namespace resolver. If this is set, then all resolution of namespace
@@ -61,7 +62,7 @@ public interface XPathStaticContext extends StaticContext {
      *         declared.
      */
 
-    XPathVariable declareVariable(String namespaceURI, String localName);
+    XPathVariable declareVariable(NamespaceUri namespaceURI, String localName);
 
     /**
      * Get a Stack Frame Map containing definitions of all the declared variables. This will return a newly

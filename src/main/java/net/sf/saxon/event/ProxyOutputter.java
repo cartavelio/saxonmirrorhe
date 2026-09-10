@@ -127,7 +127,7 @@ public class ProxyOutputter extends Outputter {
      * in a single call.
      */
     @Override
-    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+    public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
         next.namespace(prefix, namespaceUri, properties);
     }
 

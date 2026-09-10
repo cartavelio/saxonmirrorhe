@@ -54,20 +54,20 @@ public class SQLUpdate extends ExtensionInstruction {
     protected void prepareAttributes() {
 
         final AttributeMap atts = attributes();
-        table = atts.getValue("", "table");
+        table = atts.getValue(NamespaceUri.NULL, "table");
         if (table == null) {
             reportAbsence("table");
         }
         table = SQLConnect.quoteSqlName(table);
 
-        AttributeInfo dbWhere = atts.get("", "where");
+        AttributeInfo dbWhere = atts.get(NamespaceUri.NULL, "where");
         if (dbWhere == null) {
             where = new StringLiteral(StringValue.EMPTY_STRING);
         } else {
             where = makeAttributeValueTemplate(dbWhere.getValue(), dbWhere);
         }
 
-        AttributeInfo connectAtt = atts.get("", "connection");
+        AttributeInfo connectAtt = atts.get(NamespaceUri.NULL, "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {

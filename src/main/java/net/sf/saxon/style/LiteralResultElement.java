@@ -118,9 +118,9 @@ public class LiteralResultElement extends StyleElement {
             for (AttributeInfo att : atts) {
                 NodeName name = att.getNodeName();
                 int fp = name.getFingerprint();
-                String attURI = name.getURI();
+                NamespaceUri attURI = name.getURI();
 
-                if (attURI.equals(NamespaceConstant.XSLT)) {
+                if (attURI.equals(NamespaceUri.XSLT)) {
                     if (!STANDARD_ATTRIBUTES.contains(fp)) {
                         // Standard attributes have already been dealt with
                         if (fp == StandardNames.XSL_INHERIT_NAMESPACES) {
@@ -165,7 +165,7 @@ public class LiteralResultElement extends StyleElement {
             // A top-level element can never be a "real" literal result element,
             // but this class gets used for unknown elements found at the top level
 
-            if (getURI().isEmpty()) {
+            if (getNamespaceUri().isEmpty()) {
                 compileError("Top level elements must have a non-null namespace URI", "XTSE0130");
                 // Now gets caught earlier - such elements are built as DataElement instances
             }
@@ -189,7 +189,7 @@ public class LiteralResultElement extends StyleElement {
             if (sheet.hasNamespaceAliases()) {
                 NamespaceMap aliasedNamespaces = retainedNamespaces;
                 for (NamespaceBinding nb : retainedNamespaces) {
-                    String suri = nb.getURI();
+                    NamespaceUri suri = nb.getURI();
                     NamespaceBinding ncode = sheet.getNamespaceAlias(suri);
                     if (ncode != null && !ncode.getURI().equals(suri)) {
                         // apply the namespace alias.
@@ -203,7 +203,7 @@ public class LiteralResultElement extends StyleElement {
 
                 // determine if there is an alias for the namespace of the element name
 
-                String elementURI = getURI();
+                NamespaceUri elementURI = getNamespaceUri();
                 NamespaceBinding elementAlias = sheet.getNamespaceAlias(elementURI);
                 if (elementAlias != null && !elementAlias.getURI().equals(elementURI)) {
                     resultNodeName = new FingerprintedQName(elementAlias.getPrefix(),
@@ -214,13 +214,13 @@ public class LiteralResultElement extends StyleElement {
 
             // deal with special attributes
 
-            String useAttSets = getAttributeValue(NamespaceConstant.XSLT, "use-attribute-sets");
+            String useAttSets = getAttributeValue(NamespaceUri.XSLT, "use-attribute-sets");
             if (useAttSets != null) {
                 attributeSets = getUsedAttributeSets(useAttSets);
             }
 
             validation = getDefaultValidation();
-            String type = getAttributeValue(NamespaceConstant.XSLT, "type");
+            String type = getAttributeValue(NamespaceUri.XSLT, "type");
             if (type != null) {
                 if (!isSchemaAware()) {
                     compileError("The xsl:type attribute is available only with a schema-aware XSLT processor", "XTSE1660");
@@ -229,7 +229,7 @@ public class LiteralResultElement extends StyleElement {
                 validation = Validation.BY_TYPE;
             }
 
-            String validate = getAttributeValue(NamespaceConstant.XSLT, "validation");
+            String validate = getAttributeValue(NamespaceUri.XSLT, "validation");
             if (validate != null) {
                 validation = validateValidationAttribute(validate);
                 if (schemaType != null) {
@@ -246,7 +246,7 @@ public class LiteralResultElement extends StyleElement {
 
                     NodeName anameCode = attributeNames[i];
                     NodeName alias = anameCode;
-                    String attURI = anameCode.getURI();
+                    NamespaceUri attURI = anameCode.getURI();
 
                     if (!attURI.isEmpty()) {    // attribute has a namespace prefix
                         NamespaceBinding newBinding = sheet.getNamespaceAlias(attURI);
@@ -282,7 +282,7 @@ public class LiteralResultElement extends StyleElement {
 
             NamespaceMap afterExclusions = retainedNamespaces;
             for (NamespaceBinding nb : retainedNamespaces) {
-                String uri = nb.getURI();
+                NamespaceUri uri = nb.getURI();
                 if (isExcludedNamespace(uri) && !sheet.isAliasResultNamespace(uri)) {
                     afterExclusions = afterExclusions.remove(nb.getPrefix());
                 }
@@ -385,7 +385,7 @@ public class LiteralResultElement extends StyleElement {
         // xsl:stylesheet
 
         StyleNodeFactory nodeFactory = getCompilation().getStyleNodeFactory(topLevel);
-        if (!isInScopeNamespace(NamespaceConstant.XSLT)) {
+        if (!isInScopeNamespace(NamespaceUri.XSLT)) {
             String message;
             if (getLocalPart().equals("stylesheet") || getLocalPart().equals("transform")) {
                 message = "Namespace for stylesheet element should be " + NamespaceConstant.XSLT;
@@ -405,7 +405,7 @@ public class LiteralResultElement extends StyleElement {
         // check there is an xsl:version attribute (it's mandatory), and copy
         // it to the new xsl:stylesheet element
 
-        String version = getAttributeValue(NamespaceConstant.XSLT, "version");
+        String version = getAttributeValue(NamespaceUri.XSLT, "version");
         if (version == null) {
             XPathException err = new XPathException("Simplified stylesheet: xsl:version attribute is missing");
             err.setErrorCode("XTSE0150");
@@ -428,7 +428,7 @@ public class LiteralResultElement extends StyleElement {
 
             final Location loc = Loc.NONE;
 
-            NamespaceMap map = getAllNamespaces().put("xsl", NamespaceConstant.XSLT);
+            NamespaceMap map = getAllNamespaces().put("xsl", NamespaceUri.XSLT);
             AttributeMap atts = EmptyAttributeMap.getInstance();
             atts = atts.put(new AttributeInfo(
                     new NoNamespaceName("version"), BuiltInAtomicType.UNTYPED_ATOMIC, version, loc, ReceiverOption.NONE));
@@ -472,7 +472,7 @@ public class LiteralResultElement extends StyleElement {
 
     @Override
     public StructuredQName getObjectName() {
-        return new StructuredQName(getPrefix(), getURI(), getLocalPart());
+        return new StructuredQName(getPrefix(), getNamespaceUri(), getLocalPart());
     }
 
 }

@@ -7,7 +7,7 @@
 
 package net.sf.saxon.serialize;
 
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.str.StringConstants;
 
@@ -44,7 +44,7 @@ public class XHTML1Emitter extends XMLEmitter {
 
 
     private boolean isRecognizedHtmlElement(NodeName name) {
-        return name.hasURI(NamespaceConstant.XHTML);
+        return name.hasURI(NamespaceUri.XHTML);
 
     }
 

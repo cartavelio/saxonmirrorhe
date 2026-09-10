@@ -17,10 +17,7 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.*;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.XPathException;
@@ -813,7 +810,7 @@ public class AlphaCode {
                         partialNameTest = new LocalNameTest(config.getNamePool(), kind, name.substring(2));
                     } else if (name.endsWith("}*")) {
                         String uri = name.substring(2, name.length() - 2);
-                        partialNameTest = new NamespaceTest(config.getNamePool(), kind, uri);
+                        partialNameTest = new NamespaceTest(config.getNamePool(), kind, NamespaceUri.of(uri));
                     }
                 }
                 if (partialNameTest != null) {
@@ -834,14 +831,14 @@ public class AlphaCode {
                             if (name == null) {
                                 itemType = NodeKindTest.NAMESPACE;
                             } else {
-                                itemType = new NameTest(Type.NAMESPACE, "", qName.getLocalPart(), config.getNamePool());
+                                itemType = new NameTest(Type.NAMESPACE, NamespaceUri.NULL, qName.getLocalPart(), config.getNamePool());
                             }
                             break;
                         case "NP":
                             if (name == null) {
                                 itemType = NodeKindTest.PROCESSING_INSTRUCTION;
                             } else {
-                                itemType = new NameTest(Type.PROCESSING_INSTRUCTION, "", qName.getLocalPart(), config.getNamePool());
+                                itemType = new NameTest(Type.PROCESSING_INSTRUCTION, NamespaceUri.NULL, qName.getLocalPart(), config.getNamePool());
                             }
                             break;
                         case "ND":
@@ -1005,10 +1002,10 @@ public class AlphaCode {
             result.name = ((AtomicType) primary).getEQName();
         } else if (primary instanceof UnionType) {
             StructuredQName name = ((UnionType) primary).getTypeName();
-            if (name.hasURI(NamespaceConstant.SCHEMA)) {
+            if (name.hasURI(NamespaceUri.SCHEMA)) {
                 // built-in union types xs:numeric, xs:error
                 result.name = "~" + name.getLocalPart();
-            } else if (name.hasURI(NamespaceConstant.ANONYMOUS)) {
+            } else if (name.hasURI(NamespaceUri.ANONYMOUS)) {
                 // Anonymous union types: Saxon extension defined using the syntax union(A, B, C)
                 try {
                     List<AlphaCodeTree> memberMaps = new ArrayList<>();
@@ -1264,8 +1261,8 @@ public class AlphaCode {
     public static String fromLexicalSequenceType(XPathContext context, String input) throws XPathException {
         XPathParser parser = context.getConfiguration().newExpressionParser("XP", false);
         IndependentContext env = new IndependentContext(context.getConfiguration());
-        env.declareNamespace("xs", NamespaceConstant.SCHEMA);
-        env.declareNamespace("fn", NamespaceConstant.FN);
+        env.declareNamespace("xs", NamespaceUri.SCHEMA);
+        env.declareNamespace("fn", NamespaceUri.FN);
         SequenceType st = parser.parseSequenceType(input, env);
         return fromSequenceType(st);
     }

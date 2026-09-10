@@ -11,11 +11,12 @@ import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.CharacterSet;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -263,16 +264,17 @@ public class CDATAFilter extends ProxyReceiver {
         String cdata = details.getProperty(OutputKeys.CDATA_SECTION_ELEMENTS);
         if (cdata == null) {
             // this doesn't happen, but there's no harm allowing for it
-            nameList = new HashSet<NodeName>(0);
+            nameList = new HashSet<>(0);
             return;
         }
-        nameList = new HashSet<NodeName>(10);
+        nameList = new HashSet<>(10);
         StringTokenizer st2 = new StringTokenizer(cdata, " \t\n\r", false);
         while (st2.hasMoreTokens()) {
             String expandedName = st2.nextToken();
             StructuredQName sq = StructuredQName.fromClarkName(expandedName);
-            String uri = sq.getURI();
-            if (!isHTML || (isHTML4 && !uri.equals("")) || (isHTML5 && !uri.equals("") && !uri.equals(NamespaceConstant.XHTML))) {
+            NamespaceUri uri = sq.getURI();
+            if (!isHTML || (isHTML4 && !uri.equals(NamespaceUri.NULL))
+                    || (isHTML5 && !uri.equals(NamespaceUri.NULL) && !uri.equals(NamespaceUri.XHTML))) {
                 nameList.add(new FingerprintedQName("", uri, sq.getLocalPart()));
             }
         }

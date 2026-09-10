@@ -10,6 +10,7 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.FunctionLibraryList;
@@ -53,8 +54,8 @@ public class Executable {
     // table of character maps indexed by StructuredQName
     private CharacterMapIndex characterMapIndex;
 
-    // hash table of query library modules
-    private HashMap<String, List<QueryModule>> queryLibraryModules;
+    // hash table of query library modules indexed by module namespace
+    private HashMap<NamespaceUri, List<QueryModule>> queryLibraryModules;
 
     // hash set of query module location hints that have been processed
     private HashSet<String> queryLocationHintsProcessed;
@@ -304,7 +305,7 @@ public class Executable {
         if (queryLibraryModules == null) {
             queryLibraryModules = new HashMap<>(5);
         }
-        String uri = module.getModuleNamespace();
+        NamespaceUri uri = module.getModuleNamespace();
         List<QueryModule> existing = queryLibraryModules.get(uri);
         if (existing == null) {
             existing = new ArrayList<>(5);
@@ -324,7 +325,7 @@ public class Executable {
      */
 
     /*@Nullable*/
-    public List<QueryModule> getQueryLibraryModules(String namespace) {
+    public List<QueryModule> getQueryLibraryModules(NamespaceUri namespace) {
         if (queryLibraryModules == null) {
             return null;
         }

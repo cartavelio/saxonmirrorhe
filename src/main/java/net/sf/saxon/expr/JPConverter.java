@@ -515,7 +515,7 @@ public abstract class JPConverter {
         @Override
         public GroundedValue convert(Object object, XPathContext context) throws XPathException {
             javax.xml.namespace.QName qn = (javax.xml.namespace.QName) object;
-            return new QNameValue(qn.getPrefix(), qn.getNamespaceURI(), qn.getLocalPart());
+            return new QNameValue(qn.getPrefix(), NamespaceUri.of(qn.getNamespaceURI()), qn.getLocalPart());
         }
 
         @Override

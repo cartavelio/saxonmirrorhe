@@ -11,6 +11,7 @@ import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.XPathParser;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -530,7 +531,7 @@ public class StandardErrorReporter
         if (outputErrorCodes) {
             QName qCode = err.getErrorCode();
             if (qCode != null) {
-                if (qCode.getNamespaceURI().equals(NamespaceConstant.ERR)) {
+                if (qCode.getNamespaceURI().equals(NamespaceUri.ERR)) {
                     return qCode.getLocalName() + " ";
                 } else {
                     return qCode.toString() + " ";

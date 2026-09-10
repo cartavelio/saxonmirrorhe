@@ -18,6 +18,7 @@ import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pull.ActiveStAXSource;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.JavaRegularExpression;
@@ -182,8 +183,8 @@ public class JavaPlatform implements Platform {
         retainedStaticContext.setNamespaces(new NamespaceResolver() {
 
             @Override
-            public String getURIForPrefix(String prefix, boolean useDefault) {
-                return nc.getNamespaceURI(prefix);
+            public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
+                return NamespaceUri.of(nc.getNamespaceURI(prefix));
             }
 
             @Override
@@ -496,7 +497,7 @@ public class JavaPlatform implements Platform {
     }
 
     @Override
-    public ExternalObjectType getExternalObjectType(Configuration config, String uri, String localName) {
+    public ExternalObjectType getExternalObjectType(Configuration config, NamespaceUri uri, String localName) {
         throw new UnsupportedOperationException("getExternalObjectType for Java");
     }
 

@@ -11,6 +11,7 @@ import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.XPathParser;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
@@ -613,7 +614,7 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
         }
         String message = "";
         if (qCode != null) {
-            if (qCode.hasURI(NamespaceConstant.ERR)) {
+            if (qCode.hasURI(NamespaceUri.ERR)) {
                 message = qCode.getLocalPart();
             } else {
                 message = qCode.getDisplayName();

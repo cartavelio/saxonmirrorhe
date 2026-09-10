@@ -315,7 +315,7 @@ public class QueryAPIExamples {
                 "$in * $in");
 
         final DynamicQueryContext dynamicContext = new DynamicQueryContext(config);
-        dynamicContext.setParameter(new StructuredQName("","","in"), Int64Value.makeIntegerValue(17));
+        dynamicContext.setParameter(new StructuredQName("", NamespaceUri.NULL, "in"), Int64Value.makeIntegerValue(17));
         final Long result = (Long)exp.evaluateSingle(dynamicContext);
         System.out.println("17 * 17 = " + result);
 
@@ -340,7 +340,7 @@ public class QueryAPIExamples {
 
         // Run the first query
         final DynamicQueryContext dynamicContext = new DynamicQueryContext(config);
-        dynamicContext.setParameter(new StructuredQName("","","in"), Int64Value.makeIntegerValue(3));
+        dynamicContext.setParameter(new StructuredQName("", NamespaceUri.NULL, "in"), Int64Value.makeIntegerValue(3));
         final NodeInfo doc = (NodeInfo)exp1.evaluateSingle(dynamicContext);
 
         // Run the second query
@@ -366,7 +366,7 @@ public class QueryAPIExamples {
                 "};" +
                 "10");
 
-        final UserFunction fn1 = exp1.getMainModule().getUserDefinedFunction("f.ns", "t1", 2);
+        final UserFunction fn1 = exp1.getMainModule().getUserDefinedFunction(NamespaceUri.of("f.ns"), "t1", 2);
         if (fn1 == null) {
             throw new IllegalStateException("Function f:t1() not found");
         }

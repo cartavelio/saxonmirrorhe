@@ -40,8 +40,8 @@ public final class NoNamespaceName implements NodeName {
      * @return the URI. Returns the empty string to represent the no-namespace
      */
     @Override
-    public String getURI() {
-        return "";
+    public NamespaceUri getURI() {
+        return NamespaceUri.NULL;
     }
 
     /**
@@ -71,7 +71,7 @@ public final class NoNamespaceName implements NodeName {
      */
     @Override
     public StructuredQName getStructuredQName() {
-        return new StructuredQName("", "", getLocalPart());
+        return new StructuredQName("", NamespaceUri.NULL, getLocalPart());
     }
 
     /**
@@ -81,7 +81,7 @@ public final class NoNamespaceName implements NodeName {
      * @return true if the name is in the specified namespace
      */
     @Override
-    public boolean hasURI(String ns) {
+    public boolean hasURI(NamespaceUri ns) {
         return ns.isEmpty();
     }
 
@@ -127,7 +127,7 @@ public final class NoNamespaceName implements NodeName {
     @Override
     public int obtainFingerprint(NamePool namePool) {
         if (nameCode == -1) {
-            return nameCode = namePool.allocateFingerprint("", localName);
+            return nameCode = namePool.allocateFingerprint(NamespaceUri.NULL, localName);
         } else {
             return nameCode;
         }
@@ -138,7 +138,7 @@ public final class NoNamespaceName implements NodeName {
      */
     @Override
     public int hashCode() {
-        return StructuredQName.computeHashCode("", localName);
+        return StructuredQName.computeHashCode(NamespaceUri.NULL, localName);
     }
 
     /**
@@ -148,7 +148,7 @@ public final class NoNamespaceName implements NodeName {
     public boolean equals(/*@NotNull*/ Object obj) {
         return obj instanceof NodeName &&
                 ((NodeName) obj).getLocalPart().equals(localName) &&
-                ((NodeName) obj).hasURI("");
+                ((NodeName) obj).hasURI(NamespaceUri.NULL);
     }
 
     @Override

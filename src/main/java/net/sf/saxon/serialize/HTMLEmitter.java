@@ -11,6 +11,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.*;
@@ -42,7 +43,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
     private int inScript;
     protected int version = 5;
     private String parentElement;
-    private String uri;
+    private NamespaceUri uri;
     private boolean escapeNonAscii = false;
     private final Stack<NodeName> nodeNameStack = new Stack<>();
 

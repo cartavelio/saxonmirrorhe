@@ -41,7 +41,7 @@ public class XSLUsePackage extends StyleElement {
     void findUsedPackage(CompilerInfo info) throws XPathException {
         if (usedPackage == null) {
             if (nameAtt == null) {
-                nameAtt = Whitespace.trim(getAttributeValue("", "name"));
+                nameAtt = Whitespace.trim(getAttributeValue(NamespaceUri.NULL, "name"));
             }
             if (nameAtt == null) {
                 reportAbsence("name");
@@ -216,7 +216,8 @@ public class XSLUsePackage extends StyleElement {
                 SymbolicName name = ((StylesheetComponent) overridingDeclaration).getSymbolicName();
                 if (name != null) {
                     overrides.add(name);
-                } else if (overridingDeclaration instanceof XSLTemplate && overridingDeclaration.getAttributeValue("", "match") != null) {
+                } else if (overridingDeclaration instanceof XSLTemplate &&
+                        overridingDeclaration.getAttributeValue(NamespaceUri.NULL, "match") != null) {
                     StructuredQName[] modeNames = ((XSLTemplate)overridingDeclaration).getModeNames();
                     for (StructuredQName m : modeNames) {
                         overrides.add(new SymbolicName(StandardNames.XSL_MODE, m));
@@ -274,7 +275,8 @@ public class XSLUsePackage extends StyleElement {
                 AxisIterator overridings = override.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
                 NodeInfo overridingDeclaration;
                 while ((overridingDeclaration = overridings.next()) != null) {
-                    if (overridingDeclaration instanceof XSLTemplate && overridingDeclaration.getAttributeValue("", "match") != null) {
+                    if (overridingDeclaration instanceof XSLTemplate &&
+                            overridingDeclaration.getAttributeValue(NamespaceUri.NULL, "match") != null) {
                         StructuredQName[] modeNames = ((XSLTemplate) overridingDeclaration).getModeNames();
                         for (StructuredQName modeName : modeNames) {
                             if (modeName.equals(Mode.OMNI_MODE)) {

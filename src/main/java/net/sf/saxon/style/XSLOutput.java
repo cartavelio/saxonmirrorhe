@@ -9,7 +9,6 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.functions.ResolveQName;
 import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.om.*;
@@ -79,13 +78,13 @@ public class XSLOutput extends StyleElement {
                 }
                 serializationAttributes.put(f, val);
             } else {
-                String attributeURI = attName.getURI();
-                if ("".equals(attributeURI) ||
-                        NamespaceConstant.XSLT.equals(attributeURI) ||
-                        NamespaceConstant.SAXON.equals(attributeURI)) {
+                NamespaceUri attributeURI = attName.getURI();
+                if (NamespaceUri.NULL.equals(attributeURI) ||
+                        NamespaceUri.XSLT.equals(attributeURI) ||
+                        NamespaceUri.SAXON.equals(attributeURI)) {
                     checkUnknownAttribute(attName);
                 } else {
-                    String name = '{' + attributeURI + '}' + attName.getLocalPart();
+                    String name = "{" + attributeURI + "}" + attName.getLocalPart();
                     if (userAttributes == null) {
                         userAttributes = new HashMap<>(5);
                     }
@@ -125,7 +124,7 @@ public class XSLOutput extends StyleElement {
      * @param ns the namespace URI of the attribute required, either the XSLT namespace or ""
      */
     @Override
-    protected void processVersionAttribute(String ns)  {
+    protected void processVersionAttribute(NamespaceUri ns)  {
         version = ((StyleElement)getParent()).getEffectiveVersion();
     }
 
@@ -159,11 +158,11 @@ public class XSLOutput extends StyleElement {
                     if (prefix.isEmpty()) {
                         compileError("method must be xml, html, xhtml, text, json, adaptive, or a prefixed name", "XTSE1570");
                     } else {
-                        String uri = getURIForPrefix(prefix, false);
+                        NamespaceUri uri = getURIForPrefix(prefix, false);
                         if (uri == null) {
                             undeclaredNamespaceError(prefix, "XTSE0280", "method");
                         }
-                        checkAndPut(sf, OutputKeys.METHOD, '{' + uri + '}' + parts[1], details, precedences, thisPrecedence);
+                        checkAndPut(sf, OutputKeys.METHOD, "{" + uri + "}" + parts[1], details, precedences, thisPrecedence);
                         //details.put(OutputKeys.METHOD, '{' + uri + '}' + parts[1] );
                     }
                 } catch (QNameException e) {

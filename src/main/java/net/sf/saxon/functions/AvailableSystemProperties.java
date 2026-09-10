@@ -15,8 +15,8 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AtomicArray;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
@@ -39,20 +39,20 @@ public class AvailableSystemProperties extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         List<AtomicValue> myList = new ArrayList<>();
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "version"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "vendor"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "vendor-url"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "product-name"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "product-version"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "is-schema-aware"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "supports-serialization"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "supports-backwards-compatibility"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "supports-namespace-axis"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "supports-streaming"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "supports-dynamic-evaluation"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "supports-higher-order-functions"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "xpath-version"));
-        myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "xsd-version"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "version"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "vendor"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "vendor-url"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "product-name"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "product-version"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "is-schema-aware"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "supports-serialization"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "supports-backwards-compatibility"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "supports-namespace-axis"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "supports-streaming"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "supports-dynamic-evaluation"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "supports-higher-order-functions"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "xpath-version"));
+        myList.add(new QNameValue("xsl", NamespaceUri.XSLT, "xsd-version"));
 //#if EE==true || PE==true
         myList.add(new QNameValue("bin", EXPathBinaryFunctionSet.NAMESPACE, "version"));
         myList.add(new QNameValue("file", EXPathFileFunctionSet.NAMESPACE, "version"));
@@ -63,7 +63,7 @@ public class AvailableSystemProperties extends SystemFunction {
 
         if (context.getConfiguration().getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
             for (String s : System.getProperties().stringPropertyNames()) {
-                 myList.add(new QNameValue("", "", s));
+                 myList.add(new QNameValue("", NamespaceUri.NULL, s));
             }
         }
 

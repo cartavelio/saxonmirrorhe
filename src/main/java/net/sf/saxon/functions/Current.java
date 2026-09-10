@@ -8,7 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -24,7 +24,7 @@ public class Current extends SystemFunction {
      */
 
     /*@NotNull*/ public static final StructuredQName FN_CURRENT =
-        new StructuredQName("", NamespaceConstant.FN, "current");
+        new StructuredQName("", NamespaceUri.FN, "current");
 
 
     /**

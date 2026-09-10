@@ -13,11 +13,7 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticFunctionCall;
 import net.sf.saxon.expr.instruct.OriginalFunction;
 import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 
@@ -34,7 +30,7 @@ public class XSLOriginalLibrary implements FunctionLibrary {
         return THE_INSTANCE;
     }
 
-    public static StructuredQName XSL_ORIGINAL = new StructuredQName("xsl", NamespaceConstant.XSLT, "original");
+    public static StructuredQName XSL_ORIGINAL = new StructuredQName("xsl", NamespaceUri.XSLT, "original");
 
     private XSLOriginalLibrary() {}
 
@@ -67,7 +63,7 @@ public class XSLOriginalLibrary implements FunctionLibrary {
     @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext env) throws XPathException {
         if (functionName.getComponentKind() == StandardNames.XSL_FUNCTION &&
-            functionName.getComponentName().hasURI(NamespaceConstant.XSLT) &&
+            functionName.getComponentName().hasURI(NamespaceUri.XSLT) &&
             functionName.getComponentName().getLocalPart().equals("original") &&
             env instanceof ExpressionContext) {
             ExpressionContext expressionContext = (ExpressionContext) env;

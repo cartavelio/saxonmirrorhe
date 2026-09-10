@@ -9,11 +9,7 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -92,10 +88,10 @@ public class XHTMLURIEscaper extends HTMLURIEscaper {
      */
 
     private static boolean isURLAttribute(NodeName elcode, NodeName atcode) {
-        if (!elcode.hasURI(NamespaceConstant.XHTML)) {
+        if (!elcode.hasURI(NamespaceUri.XHTML)) {
             return false;
         }
-        if (!atcode.hasURI("")) {
+        if (!atcode.hasURI(NamespaceUri.NULL)) {
             return false;
         }
         String attName = atcode.getLocalPart();

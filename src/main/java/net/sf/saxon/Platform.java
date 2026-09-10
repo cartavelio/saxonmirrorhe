@@ -12,6 +12,7 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.SimpleCollation;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -248,7 +249,7 @@ public interface Platform {
      * @return the SchemaType object representing this type
      */
 
-    ExternalObjectType getExternalObjectType(Configuration config, String uri, String localName);
+    ExternalObjectType getExternalObjectType(Configuration config, NamespaceUri uri, String localName);
 
     /**
      * Return the name of the directory in which the software is installed (if available)

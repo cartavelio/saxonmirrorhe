@@ -10,6 +10,7 @@ package net.sf.saxon.option.sql;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
@@ -108,7 +109,7 @@ public class SQLColumn extends StyleElement {
     }
 
     public String getColumnName() {
-        return ((NodeInfo) this).getAttributeValue("", "name");
+        return ((NodeInfo) this).getAttributeValue(NamespaceUri.NULL, "name");
     }
 
 

@@ -10,7 +10,6 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.CallTemplate;
 import net.sf.saxon.expr.instruct.NamedTemplate;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -27,7 +26,7 @@ import java.util.List;
 public class XSLCallTemplate extends StyleElement {
 
     private static final StructuredQName ERROR_TEMPLATE_NAME =
-            new StructuredQName("saxon", NamespaceConstant.SAXON, "error-template");
+            new StructuredQName("saxon", NamespaceUri.SAXON, "error-template");
 
     private StructuredQName calledTemplateName;   // the name of the called template
     private NamedTemplate template = null;             // the template to be called (which may subsequently be overridden in another package)
@@ -154,7 +153,7 @@ public class XSLCallTemplate extends StyleElement {
         PrincipalStylesheetModule pack = getPrincipalStylesheetModule();
         NamedTemplate template = pack.getNamedTemplate(templateName);
         if (template == null) {
-            if (templateName.hasURI(NamespaceConstant.XSLT) && templateName.getLocalPart().equals("original")) {
+            if (templateName.hasURI(NamespaceUri.XSLT) && templateName.getLocalPart().equals("original")) {
                 // Handle xsl:original
                 return (NamedTemplate) getXslOriginal(StandardNames.XSL_TEMPLATE);
             }

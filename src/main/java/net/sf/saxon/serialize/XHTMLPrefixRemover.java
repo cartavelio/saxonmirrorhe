@@ -9,9 +9,8 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.s9api.Location;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -32,10 +31,10 @@ public class XHTMLPrefixRemover extends ProxyReceiver {
      * @param uri URI of the namespace
      * @return  true if requires special treatment
      */
-    private boolean isSpecial(String uri) {
-        return uri.equals(NamespaceConstant.XHTML) ||
-                uri.equals(NamespaceConstant.SVG) ||
-                uri.equals(NamespaceConstant.MATHML);
+    private boolean isSpecial(NamespaceUri uri) {
+        return uri.equals(NamespaceUri.XHTML) ||
+                uri.equals(NamespaceUri.SVG) ||
+                uri.equals(NamespaceUri.MATHML);
     }
     /**
      * Notify the start of an element
@@ -52,7 +51,7 @@ public class XHTMLPrefixRemover extends ProxyReceiver {
         }
 
         if (isSpecial(elemName.getURI())) {
-            String uri = elemName.getURI();
+            NamespaceUri uri = elemName.getURI();
             if (!elemName.getPrefix().isEmpty()) {
                 elemName = new FingerprintedQName("", uri, elemName.getLocalPart());
             }

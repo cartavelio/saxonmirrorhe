@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.number.*;
 import net.sf.saxon.lib.Numberer;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.regex.ARegexIterator;
@@ -69,7 +70,7 @@ public class FormatDate extends SystemFunction implements Callable {
             throw err;
         }
 
-        if (cal.hasURI("")) {
+        if (cal.hasURI(NamespaceUri.NULL)) {
             String calLocal = cal.getLocalPart();
             if (calLocal.equals("AD") || calLocal.equals("ISO")) {
                 // no action

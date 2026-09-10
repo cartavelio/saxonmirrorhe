@@ -49,7 +49,7 @@ public class ExpressionPresenter {
     private final Stack<Expression> expressionStack = new Stack<>();
     private final Stack<String> nameStack = new Stack<>();
     private NamespaceMap namespaceMap = NamespaceMap.emptyMap();
-    private String defaultNamespace;
+    private NamespaceUri defaultNamespace;
     private Options options = new ExportOptions();
     private boolean relocatable = false;
 
@@ -212,7 +212,7 @@ public class ExpressionPresenter {
      * @param namespace the default namespace
      */
 
-    public void setDefaultNamespace(String namespace) {
+    public void setDefaultNamespace(NamespaceUri namespace) {
         defaultNamespace = namespace;
         namespaceMap = namespaceMap.put("", namespace);
     }
@@ -358,27 +358,30 @@ public class ExpressionPresenter {
             }
             if (!sc.getDefaultElementNamespace().isEmpty() &&
                     (parentSC == null || !sc.getDefaultElementNamespace().equals(parentSC.getDefaultElementNamespace()))) {
-                emitAttribute("defaultElementNS", sc.getDefaultElementNamespace());
+                emitAttribute("defaultElementNS", sc.getDefaultElementNamespace().toString());
             }
             if (!NamespaceConstant.FN.equals(sc.getDefaultFunctionNamespace())) {
-                emitAttribute("defaultFunctionNS", sc.getDefaultFunctionNamespace());
+                emitAttribute("defaultFunctionNS", sc.getDefaultFunctionNamespace().toString());
             }
             if (!((ExportOptions)options).suppressStaticContext && (parentSC == null || !sc.declaresSameNamespaces(parentSC))) {
                 UnicodeBuilder ub = new UnicodeBuilder();
                 for (Iterator<String> iter = sc.iteratePrefixes(); iter.hasNext(); ) {
                     String p = iter.next();
 
-                    String uri = sc.getURIForPrefix(p, true);
+                    NamespaceUri uri = sc.getURIForPrefix(p, true);
                     ub.append(p);
                     ub.append("=");
 
-                    if (Whitespace.containsWhitespace(StringTool.codePoints(uri))) {
-                        throw new XPathException("Cannot export a stylesheet if namespaces contain whitespace: '" + uri + "'");
+
+                    if (uri.equals(NamespaceUri.getUriForConventionalPrefix(p))) {
+                        ub.append("~");
+                    } else {
+                        UnicodeString uUri = uri.toUnicodeString();
+                        if (Whitespace.containsWhitespace(uUri.codePoints())) {
+                            throw new XPathException("Cannot export a stylesheet if namespaces contain whitespace: '" + uri + "'");
+                        }
+                        ub.append(uUri);
                     }
-                    if (uri.equals(NamespaceConstant.getUriForConventionalPrefix(p))) {
-                        uri = "~";
-                    }
-                    ub.append(uri);
                     ub.append(" ");
 
                 }
@@ -485,7 +488,7 @@ public class ExpressionPresenter {
      * @param uri    the namespace URI
      */
 
-    public void namespace(String prefix, String uri) {
+    public void namespace(String prefix, NamespaceUri uri) {
         try {
             cco.namespace(prefix, uri, ReceiverOption.NONE);
         } catch (XPathException e) {

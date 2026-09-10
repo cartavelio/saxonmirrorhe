@@ -9,9 +9,9 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.CopyOf;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -66,7 +66,7 @@ public final class XSLCopyOf extends StyleElement {
                 validationAtt = Whitespace.trim(value);
             } else if (f.equals("type")) {
                 typeAtt = Whitespace.trim(value);
-            } else if (attName.getLocalPart().equals("read-once") && attName.hasURI(NamespaceConstant.SAXON)) {
+            } else if (attName.getLocalPart().equals("read-once") && attName.hasURI(NamespaceUri.SAXON)) {
                 compileError("The saxon:read-once attribute is no longer available - use xsl:stream");
             } else {
                 checkUnknownAttribute(attName);

@@ -8,6 +8,7 @@
 package net.sf.saxon.pull;
 
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 
 import javax.xml.namespace.NamespaceContext;
@@ -51,7 +52,7 @@ public class NamespaceContextImpl implements NamespaceResolver
 
     /*@Nullable*/
     @Override
-    public String getURIForPrefix(String prefix, boolean useDefault) {
+    public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
         return resolver.getURIForPrefix(prefix, useDefault);
     }
 
@@ -77,7 +78,8 @@ public class NamespaceContextImpl implements NamespaceResolver
         if (prefix.equals("xmlns")) {
             return "http://www.w3.org/2000/xmlns/";
         }
-        return resolver.getURIForPrefix(prefix, true);
+        NamespaceUri uri = resolver.getURIForPrefix(prefix, true);
+        return uri == null ? null : uri.toString();
     }
 
     /**
@@ -93,8 +95,8 @@ public class NamespaceContextImpl implements NamespaceResolver
         Iterator<String> prefixes = iteratePrefixes();
         while (prefixes.hasNext()) {
             String p = prefixes.next();
-            String u = resolver.getURIForPrefix(p, true);
-            if (u.equals(uri)) {
+            NamespaceUri u = resolver.getURIForPrefix(p, true);
+            if (u.toString().equals(uri)) {
                 return p;
             }
         }
@@ -112,8 +114,8 @@ public class NamespaceContextImpl implements NamespaceResolver
         List<String> list = new ArrayList<>(4);
         Iterator<String> prefixes = iteratePrefixes();
         prefixes.forEachRemaining(p -> {
-            String u = resolver.getURIForPrefix(p, true);
-            if (u.equals(uri)) {
+            NamespaceUri u = resolver.getURIForPrefix(p, true);
+            if (u.toString().equals(uri)) {
                 list.add(p);
             }
         });

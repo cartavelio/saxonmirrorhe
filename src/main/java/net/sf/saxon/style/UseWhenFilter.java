@@ -61,7 +61,7 @@ public class UseWhenFilter extends ProxyReceiver {
 
     private int depthOfHole = 0;
     private boolean emptyStylesheetElement = false;
-    private final Stack<String> defaultNamespaceStack = new Stack<>();
+    private final Stack<NamespaceUri> defaultNamespaceStack = new Stack<>();
     private final Stack<Integer> versionStack = new Stack<>();
     private final DateTimeValue currentDateTime = DateTimeValue.getCurrentDateTime(null);
     private final Compilation compilation;
@@ -125,11 +125,11 @@ public class UseWhenFilter extends ProxyReceiver {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
         int fp = elemName.obtainFingerprint(getNamePool());
-        boolean inXsltNamespace = elemName.hasURI(NamespaceConstant.XSLT);
-        boolean inSaxonNamespace = elemName.hasURI(NamespaceConstant.SAXON);
-        String stdAttUri = inXsltNamespace ? "" : NamespaceConstant.XSLT;
+        boolean inXsltNamespace = elemName.hasURI(NamespaceUri.XSLT);
+        boolean inSaxonNamespace = elemName.hasURI(NamespaceUri.SAXON);
+        NamespaceUri stdAttUri = inXsltNamespace ? NamespaceUri.NULL : NamespaceUri.XSLT;
 
-        String xpathDefaultNamespaceAtt = null;
+        NamespaceUri xpathDefaultNamespaceAtt = null;
         String versionAtt = null;
         String xmlBaseAtt = null;
         String useWhenAtt = null;
@@ -140,12 +140,12 @@ public class UseWhenFilter extends ProxyReceiver {
         for (AttributeInfo att : attributes) {
             NodeName attName = att.getNodeName();
             attName.obtainFingerprint(getNamePool());
-            String uri = attName.getURI();
+            NamespaceUri uri = attName.getURI();
             if (uri.equals(stdAttUri)) {
                 String local = attName.getLocalPart();
                 switch (local) {
                     case "xpath-default-namespace":
-                        xpathDefaultNamespaceAtt = att.getValue();
+                        xpathDefaultNamespaceAtt = NamespaceUri.of(att.getValue());
                         break;
                     case "version":
                         versionAtt = att.getValue();
@@ -158,15 +158,15 @@ public class UseWhenFilter extends ProxyReceiver {
                         break;
                 }
                 if (local.startsWith("_")
-                        && uri.equals("")
+                        && uri.equals(NamespaceUri.NULL)
                         && (inXsltNamespace || inSaxonNamespace)) {
                     hasShadowAttributes = true;
                 }
-            } else if (inSaxonNamespace || uri.equals(NamespaceConstant.SAXON)) {
+            } else if (inSaxonNamespace || uri.equals(NamespaceUri.SAXON)) {
                 if (attName.getLocalPart().startsWith("_")) {
                     hasShadowAttributes = true;
                 }
-            } else if (uri.equals(NamespaceConstant.XML)) {
+            } else if (uri.equals(NamespaceUri.XML)) {
                 if (attName.getLocalPart().equals("base")) {
                     xmlBaseAtt = att.getValue();
                 }
@@ -232,7 +232,7 @@ public class UseWhenFilter extends ProxyReceiver {
                         case StandardNames.XSL_VARIABLE:
                         case StandardNames.XSL_PARAM:
                             if (hasShadowAttributes) {
-                                staticAtt = attributes.getValue("", "static");
+                                staticAtt = attributes.getValue(NamespaceUri.NULL, "static");
                             }
                             if (staticAtt != null) {
                                 String staticStr = Whitespace.trim(staticAtt);
@@ -247,7 +247,7 @@ public class UseWhenFilter extends ProxyReceiver {
                         case StandardNames.XSL_IMPORT:
                             // We need to process the included/imported stylesheet now, because its static variables
                             // can be used later in this module
-                            String href = attributes.getValue("", "href");
+                            String href = attributes.getValue(NamespaceUri.NULL, "href");
                             includedDoc = processIncludeImport(elemName, location, baseUri, href, fp == StandardNames.XSL_IMPORT);
                             break;
 
@@ -259,8 +259,8 @@ public class UseWhenFilter extends ProxyReceiver {
                             if (precedence.getDepth() > 1) {
                                 throw new XPathException("xsl:use-package cannot appear in an imported stylesheet", "XTSE3008");
                             }
-                            String name = attributes.getValue("", "name");
-                            String pversion = attributes.getValue("", "package-version");
+                            String name = attributes.getValue(NamespaceUri.NULL, "name");
+                            String pversion = attributes.getValue(NamespaceUri.NULL, "package-version");
                             if (name != null) {
                                 try {
                                     UsePack use = new UsePack(name, pversion, location.saveLocation());
@@ -345,16 +345,16 @@ public class UseWhenFilter extends ProxyReceiver {
                                        NamespaceResolver nsResolver,
                                        Location location, URI baseUri,
                                        NestedIntegerValue precedence) throws XPathException {
-        String nameStr = attributes.getValue("", "name");
-        String asStr = attributes.getValue("", "as");
-        String requiredStr = Whitespace.trim(attributes.getValue("", "required"));
+        String nameStr = attributes.getValue(NamespaceUri.NULL, "name");
+        String asStr = attributes.getValue(NamespaceUri.NULL, "as");
+        String requiredStr = Whitespace.trim(attributes.getValue(NamespaceUri.NULL, "required"));
         boolean isRequired = StyleElement.isYes(requiredStr);
 
 
         UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, nsResolver);
         staticContext.setBaseURI(baseUri.toString());
         staticContext.setContainingLocation(
-                new AttributeLocation(elemName.getStructuredQName(), new StructuredQName("", "", "as"), location));
+                new AttributeLocation(elemName.getStructuredQName(), new StructuredQName("", NamespaceUri.NULL, "as"), location));
         SequenceType requiredType = SequenceType.ANY_SEQUENCE;
 
         int languageLevel = compilation.getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
@@ -381,11 +381,11 @@ public class UseWhenFilter extends ProxyReceiver {
         boolean isParam = elemName.getLocalPart().equals("param");
         boolean isSupplied = isParam && compilation.getParameters().containsKey(varName);
         AttributeLocation attLoc =
-                new AttributeLocation(elemName.getStructuredQName(), new StructuredQName("", "", "select"), location);
+                new AttributeLocation(elemName.getStructuredQName(), new StructuredQName("", NamespaceUri.NULL, "select"), location);
 
         if (isParam) {
             if (isRequired && !isSupplied) {
-                String selectStr = attributes.getValue("", "select");
+                String selectStr = attributes.getValue(NamespaceUri.NULL, "select");
                 if (selectStr != null) {
                     throw createXPathException("Cannot supply a default value when required='yes'", "XTSE0010", attLoc);
                 } else {
@@ -404,7 +404,7 @@ public class UseWhenFilter extends ProxyReceiver {
         }
 
         if (isVariable || !isSupplied) {
-            String selectStr = attributes.getValue("", "select");
+            String selectStr = attributes.getValue(NamespaceUri.NULL, "select");
             GroundedValue value;
             if (selectStr == null) {
                 if (isVariable) {
@@ -455,8 +455,8 @@ public class UseWhenFilter extends ProxyReceiver {
         for (AttributeInfo att : attributes) {
             NodeName attName = att.getNodeName();
             String local = attName.getLocalPart();
-            String uri = attName.getURI();
-            if (local.startsWith("_") && (uri.isEmpty() || uri.equals(NamespaceConstant.SAXON)) && local.length() >= 2) {
+            NamespaceUri uri = attName.getURI();
+            if (local.startsWith("_") && (uri.isEmpty() || uri.equals(NamespaceUri.SAXON)) && local.length() >= 2) {
                 String value = att.getValue();
                 AttributeLocation attLocation =
                         new AttributeLocation(elemName.getStructuredQName(), attName.getStructuredQName(), location);
@@ -466,7 +466,7 @@ public class UseWhenFilter extends ProxyReceiver {
                 if (uri.isEmpty()) {
                     newName = new NoNamespaceName(plainName);
                 } else {
-                    newName = new FingerprintedQName(attName.getPrefix(), NamespaceConstant.SAXON, plainName);
+                    newName = new FingerprintedQName(attName.getPrefix(), NamespaceUri.SAXON, plainName);
                 }
 
                 // if a corresponding attribute exists with no underscore, overwrite it.
@@ -639,8 +639,8 @@ public class UseWhenFilter extends ProxyReceiver {
 
 
     private void setNamespaceBindings(UseWhenStaticContext staticContext) {
-        staticContext.setDefaultElementNamespace(NamespaceConstant.NULL);
-        for (String uri : new TopDownStackIterable<>(defaultNamespaceStack)) {
+        staticContext.setDefaultElementNamespace(NamespaceUri.NULL);
+        for (NamespaceUri uri : new TopDownStackIterable<>(defaultNamespaceStack)) {
             if (uri != null) {
                 staticContext.setDefaultElementNamespace(uri);
                 break;

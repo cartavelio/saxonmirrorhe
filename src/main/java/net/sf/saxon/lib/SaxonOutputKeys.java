@@ -9,6 +9,7 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.QNameException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ValidationException;
@@ -348,7 +349,7 @@ public class SaxonOutputKeys {
             } else {
                 try {
                     String[] parts = NameChecker.getQNameParts(displayname);
-                    String muri = nsResolver.getURIForPrefix(parts[0], useDefaultNS);
+                    NamespaceUri muri = nsResolver.getURIForPrefix(parts[0], useDefaultNS);
                     if (muri == null) {
                         throw new XPathException("Namespace prefix '" + parts[0] + "' has not been declared", errorCode);
                     }

@@ -1103,7 +1103,7 @@ public class DOMTest {
 
             List result = xq.evaluate(dynamicContext);
             assertEquals(1, result.size());
-            assertEquals("http://foo", ((NodeInfo) result.get(0)).getURI());
+            assertEquals("http://foo", ((NodeInfo) result.get(0)).getNamespaceUri());
 
 
         } catch (Exception e) {

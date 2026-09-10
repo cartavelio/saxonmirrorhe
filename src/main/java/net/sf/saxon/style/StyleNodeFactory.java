@@ -10,7 +10,6 @@ package net.sf.saxon.style;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -131,12 +130,12 @@ public class StyleNodeFactory implements NodeFactory {
             e.setNamespaceMap(namespaces);
             e.initialise(elemName, elemType, attlist, parent, sequence);
             e.setLocation(baseURI, lineNumber, columnNumber);
-            e.processExtensionElementAttribute("");
-            e.processExcludedNamespaces("");
-            e.processVersionAttribute("");
-            e.processDefaultXPathNamespaceAttribute("");
-            e.processExpandTextAttribute("");
-            e.processDefaultValidationAttribute("");
+            e.processExtensionElementAttribute(NamespaceUri.NULL);
+            e.processExcludedNamespaces(NamespaceUri.NULL);
+            e.processVersionAttribute(NamespaceUri.NULL);
+            e.processDefaultXPathNamespaceAttribute(NamespaceUri.NULL);
+            e.processExpandTextAttribute(NamespaceUri.NULL);
+            e.processDefaultValidationAttribute(NamespaceUri.NULL);
 
             if (toplevel && !e.isDeclaration() && !(e instanceof XSLExpose) && e.forwardsCompatibleModeIsEnabled()) {
                 DataElement d = new DataElement();
@@ -162,9 +161,9 @@ public class StyleNodeFactory implements NodeFactory {
 
         }
 
-        String uri = elemName.getURI();
+        NamespaceUri uri = elemName.getURI();
 
-        if (toplevel && !uri.equals(NamespaceConstant.XSLT)) {
+        if (toplevel && !uri.equals(NamespaceUri.XSLT)) {
             DataElement d = new DataElement();
             d.setNamespaceMap(namespaces);
             d.initialise(elemName, elemType, attlist, parent, sequence);
@@ -178,7 +177,7 @@ public class StyleNodeFactory implements NodeFactory {
 
             // Detect a mis-spelt XSLT element, or a 3.0 element used in a 2.0 stylesheet
 
-            if (uri.equals(NamespaceConstant.XSLT)) {
+            if (uri.equals(NamespaceUri.XSLT)) {
                 if (parent instanceof XSLStylesheet) {
                     if (((XSLStylesheet) parent).getEffectiveVersion() <= 20) {
                         temp = new AbsentExtensionElement();
@@ -191,7 +190,7 @@ public class StyleNodeFactory implements NodeFactory {
                     temp.initialise(elemName, elemType, attlist, parent, sequence);
                     temp.setLocation(baseURI, lineNumber, columnNumber);
                     temp.setCompilation(compilation);
-                    temp.processStandardAttributes("");
+                    temp.processStandardAttributes(NamespaceUri.NULL);
                     if (temp.getEffectiveVersion() > 20) {
                         temp.setValidationError(new XmlProcessingIncident("Unknown XSLT instruction"),
                                                 StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
@@ -204,7 +203,7 @@ public class StyleNodeFactory implements NodeFactory {
 
             // Detect an unrecognized element in the Saxon namespace
 
-            if (uri.equals(NamespaceConstant.SAXON)) {
+            if (uri.equals(NamespaceUri.SAXON)) {
                 String message = elemName.getDisplayName() + " is not recognized as a Saxon instruction";
                 if (config.getEditionCode().equals("HE")) {
                     message += ". Saxon extensions require Saxon-PE or higher";
@@ -231,11 +230,11 @@ public class StyleNodeFactory implements NodeFactory {
             temp.setCompilation(compilation);
             temp.initialise(elemName, elemType, attlist, parent, sequence);
             temp.setLocation(baseURI, lineNumber, columnNumber);
-            temp.processStandardAttributes(NamespaceConstant.XSLT);
+            temp.processStandardAttributes(NamespaceUri.XSLT);
 
             XmlProcessingIncident reason;
 
-            if (uri.equals(NamespaceConstant.XSLT)) {
+            if (uri.equals(NamespaceUri.XSLT)) {
                 reason = new XmlProcessingIncident("Unknown XSLT element: " + Err.wrap(localname, Err.ELEMENT), "XTSE0010");
                 temp.setValidationError(reason, StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
 
@@ -246,7 +245,7 @@ public class StyleNodeFactory implements NodeFactory {
                 // create a surrogate element called AbsentExtensionElement, and
                 // save the reason for failure just in case there is no xsl:fallback
 
-                if (NamespaceConstant.isReserved(uri)) {
+                if (NamespaceUri.isReserved(uri)) {
                     reason = new XmlProcessingIncident("Cannot use a reserved namespace for extension instructions", "XTSE0800");
                     temp.setValidationError(reason, StyleElement.OnFailure.REPORT_ALWAYS);
                 } else {
@@ -260,8 +259,8 @@ public class StyleNodeFactory implements NodeFactory {
         }
     }
 
-    private static boolean isExtensionNamespace(String uri, NodeInfo parent, NamespaceMap namespaces, AttributeMap attlist) {
-        String attValue = attlist.getValue(NamespaceConstant.XSLT, "extension-element-prefixes");
+    private static boolean isExtensionNamespace(NamespaceUri uri, NodeInfo parent, NamespaceMap namespaces, AttributeMap attlist) {
+        String attValue = attlist.getValue(NamespaceUri.XSLT, "extension-element-prefixes");
         if (attValue != null) {
             StringTokenizer st2 = new StringTokenizer(attValue, " \t\n\r", false);
             while (st2.hasMoreTokens()) {
@@ -269,7 +268,7 @@ public class StyleNodeFactory implements NodeFactory {
                 if ("#default".equals(s)) {
                     s = "";
                 }
-                String ns = namespaces.getURIForPrefix(s, false);
+                NamespaceUri ns = namespaces.getURIForPrefix(s, false);
                 if (ns.equals(uri)) {
                     return true;
                 }
@@ -492,9 +491,9 @@ public class StyleNodeFactory implements NodeFactory {
      * @return true if an extension element of this name is recognized
      */
 
-    public boolean isElementAvailable(String uri, String localName, boolean instructionsOnly) {
+    public boolean isElementAvailable(NamespaceUri uri, String localName, boolean instructionsOnly) {
         int fingerprint = namePool.getFingerprint(uri, localName);
-        if (uri.equals(NamespaceConstant.XSLT)) {
+        if (uri.equals(NamespaceUri.XSLT)) {
             if (fingerprint == -1) {
                 return false;     // all names are pre-registered
             }

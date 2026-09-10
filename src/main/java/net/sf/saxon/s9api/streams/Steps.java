@@ -222,7 +222,7 @@ public class Steps {
         return item -> {
             NodeInfo node = item.getUnderlyingNode();
             return node.getNodeKind() == Type.ELEMENT
-                    && node.getLocalPart().equals(local) && node.getURI().equals(ns);
+                    && node.getLocalPart().equals(local) && node.getNamespaceUri().equals(ns);
         };
     }
 

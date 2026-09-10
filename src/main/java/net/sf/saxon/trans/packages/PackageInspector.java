@@ -13,13 +13,9 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Sender;
 import net.sf.saxon.event.Sink;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -59,19 +55,19 @@ public class PackageInspector extends ProxyReceiver {
             // abort the parse when the second start element tag is found
             throw new XPathException("#start#");
         }
-        isSefFile = elemName.hasURI(NamespaceConstant.SAXON_XSLT_EXPORT);
-        if (attributes.get("", "name") == null) {
+        isSefFile = elemName.hasURI(NamespaceUri.SAXON_XSLT_EXPORT);
+        if (attributes.get(NamespaceUri.NULL, "name") == null) {
             diagnostics = "Top level element " + elemName.getStructuredQName().getEQName() + " has no @name attribute";
         } else {
-            packageName = attributes.get("", "name").getValue();
+            packageName = attributes.get(NamespaceUri.NULL, "name").getValue();
         }
-        if (attributes.get("", "package-version") != null) {
-            packageVersion = attributes.get("", "package-version").getValue();
+        if (attributes.get(NamespaceUri.NULL, "package-version") != null) {
+            packageVersion = attributes.get(NamespaceUri.NULL, "package-version").getValue();
         }
-        if (attributes.get("", "packageVersion") != null) {
-            packageVersion = attributes.get("", "packageVersion").getValue();
+        if (attributes.get(NamespaceUri.NULL, "packageVersion") != null) {
+            packageVersion = attributes.get(NamespaceUri.NULL, "packageVersion").getValue();
         }
-        AttributeInfo saxonVersion = attributes.get("", "saxonVersion");
+        AttributeInfo saxonVersion = attributes.get(NamespaceUri.NULL, "saxonVersion");
         if (saxonVersion != null) {
             if (saxonVersion.getValue().startsWith("9")) {
                 throw new XPathException("Saxon " + Version.getProductVersion() + " cannot load a SEF file created using version " + saxonVersion.getValue());

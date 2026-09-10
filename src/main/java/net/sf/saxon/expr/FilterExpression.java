@@ -16,7 +16,6 @@ import net.sf.saxon.functions.PositionAndLast;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -678,7 +677,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             if (Cardinality.allowsZero(card)) {
                 LetExpression let = new LetExpression();
                 let.setRequiredType(SequenceType.makeSequenceType(comparand.getItemType(), card));
-                let.setVariableQName(new StructuredQName("pp", NamespaceConstant.SAXON, "pp" + let.hashCode()));
+                let.setVariableQName(new StructuredQName("pp", NamespaceUri.SAXON, "pp" + let.hashCode()));
                 let.setSequence(comparand);
                 comparand = new LocalVariableReference(let);
                 LocalVariableReference existsArg = new LocalVariableReference(let);
@@ -721,7 +720,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
 
             LetExpression let = new LetExpression();
             let.setRequiredType(SequenceType.SINGLE_INTEGER);
-            let.setVariableQName(new StructuredQName("nn", NamespaceConstant.SAXON, "nn" + let.hashCode()));
+            let.setVariableQName(new StructuredQName("nn", NamespaceUri.SAXON, "nn" + let.hashCode()));
             let.setSequence(min);
             min = new LocalVariableReference(let);
             LocalVariableReference min2 = new LocalVariableReference(let);
@@ -813,7 +812,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     LetExpression let = new LetExpression();
                     let.setRequiredType(SequenceType.makeSequenceType(
                             comparand.getItemType(), StaticProperty.ALLOWS_ONE));
-                    let.setVariableQName(new StructuredQName("pp", NamespaceConstant.SAXON, "pp" + let.hashCode()));
+                    let.setVariableQName(new StructuredQName("pp", NamespaceUri.SAXON, "pp" + let.hashCode()));
                     let.setSequence(comparand);
                     LocalVariableReference isWholeArg = new LocalVariableReference(let);
                     LocalVariableReference arithArg = new LocalVariableReference(let);
@@ -841,7 +840,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     ExpressionTool.copyLocationInfo(start, let);
                     let.setRequiredType(SequenceType.makeSequenceType(
                             comparand.getItemType(), StaticProperty.ALLOWS_ONE));
-                    let.setVariableQName(new StructuredQName("pp", NamespaceConstant.SAXON, "pp" + let.hashCode()));
+                    let.setVariableQName(new StructuredQName("pp", NamespaceUri.SAXON, "pp" + let.hashCode()));
                     let.setSequence(comparand);
                     LocalVariableReference isWholeArg = new LocalVariableReference(let);
                     LocalVariableReference castArg = new LocalVariableReference(let);
@@ -861,7 +860,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     LetExpression let = new LetExpression();
                     let.setRequiredType(SequenceType.makeSequenceType(
                             comparand.getItemType(), StaticProperty.ALLOWS_ONE));
-                    let.setVariableQName(new StructuredQName("pp", NamespaceConstant.SAXON, "pp" + let.hashCode()));
+                    let.setVariableQName(new StructuredQName("pp", NamespaceUri.SAXON, "pp" + let.hashCode()));
                     let.setSequence(comparand);
                     LocalVariableReference isWholeArg = new LocalVariableReference(let);
                     LocalVariableReference arithArg = new LocalVariableReference(let);

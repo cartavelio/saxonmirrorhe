@@ -98,7 +98,7 @@ public class ReceivingContentHandler
      * namecodes.
      */
 
-    private final HashMap<String, HashMap<String, NodeName>> nameCache = new HashMap<>(10);
+    private final HashMap<NamespaceUri, HashMap<String, NodeName>> nameCache = new HashMap<>(10);
     private HashMap<String, NodeName> noNamespaceNameCache = new HashMap<>(10);
 
     // Action to be taken with defaulted attributes. 0=process normally, -1=suppress, +1=mark as defaulted
@@ -303,7 +303,7 @@ public class ReceivingContentHandler
             // should never be reported, but it's been known to happen
             return;
         }
-        currentNamespaceMap = currentNamespaceMap.bind(prefix, uri);
+        currentNamespaceMap = currentNamespaceMap.bind(prefix, NamespaceUri.of(uri));
     }
 
     /**
@@ -372,7 +372,7 @@ public class ReceivingContentHandler
             flush(true);
 
             int options = ReceiverOption.NAMESPACE_OK | ReceiverOption.ALL_NAMESPACES;
-            NodeName elementName = getNodeName(uri, localname, rawname);
+            NodeName elementName = getNodeName(NamespaceUri.of(uri), localname, rawname);
             AttributeMap attributes = makeAttributeMap(atts, localLocator);
             receiver.startElement(elementName, Untyped.getInstance(),
                                   attributes, currentNamespaceMap,
@@ -396,7 +396,6 @@ public class ReceivingContentHandler
             int properties = ReceiverOption.NAMESPACE_OK;
             String value = atts.getValue(a);
             String qname = atts.getQName(a);
-            String uri = atts.getURI(a);
             if (qname.startsWith("xmlns") && (qname.length() == 5 || qname.charAt(5) == ':')) {
                 // We normally configure the parser so that it doesn't notify namespaces as attributes.
                 // But when running as a TransformerHandler, we have no control over the feature settings
@@ -406,6 +405,7 @@ public class ReceivingContentHandler
                 continue;
             }
 
+            NamespaceUri uri = NamespaceUri.of(atts.getURI(a));
             if (isAttributes2 && !((Attributes2) atts).isSpecified(a)) {
                 // Attribute originates from DTD or schema defaulting.
                 if (defaultedAttributesAction == -1) {
@@ -418,11 +418,11 @@ public class ReceivingContentHandler
                 // Bug 4996 - if the attribute originates from Xerces schema processing,
                 // and if the attribute is namespaced, then the prefix and namespace declaration
                 // may be missing. Although Xerces is getting this wrong, we attempt to repair the damage.
-                if (uri != null && !uri.isEmpty() && qname.indexOf(':') < 0) {
+                if (uri != NamespaceUri.NULL && qname.indexOf(':') < 0) {
                     // defaulted attribute has a URI but no prefix
                     String trialPrefix = getConfiguration().getNamePool().suggestPrefixForURI(uri);
                     if (trialPrefix == null) {
-                        String[] existingUris = currentNamespaceMap.getURIsAsArray();
+                        NamespaceUri[] existingUris = currentNamespaceMap.getURIsAsArray();
                         for (int u = 0; u < existingUris.length; u++) {
                             if (existingUris[u].equals(uri)) {
                                 trialPrefix = currentNamespaceMap.getPrefixArray()[u];
@@ -430,7 +430,7 @@ public class ReceivingContentHandler
                         }
                     }
                     if (trialPrefix == null) {
-                        trialPrefix = "p" + Err.abbreviateURI(uri).replace("/", "").replace("...", ".");
+                        trialPrefix = "p" + Err.abbreviateURI(uri.toString()).replace("/", "").replace("...", ".");
                         if (!NameChecker.isValidNCName(trialPrefix)) {
                             trialPrefix = "p" + "_" + qname;
                         }
@@ -504,7 +504,7 @@ public class ReceivingContentHandler
      * @throws SAXException if the information supplied by the SAX parser is insufficient
      */
 
-    private NodeName getNodeName(String uri, String localname, String rawname) throws SAXException {
+    private NodeName getNodeName(NamespaceUri uri, String localname, String rawname) throws SAXException {
         // System.err.println("URI=" + uri + " local=" + " raw=" + rawname);
         // The XML parser isn't required to report the rawname (qname), though all known parsers do.
         // If none is provided, we give up

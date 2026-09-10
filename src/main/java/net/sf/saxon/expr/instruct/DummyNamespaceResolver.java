@@ -7,9 +7,9 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.tree.jiter.PairIterator;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.tree.jiter.PairIterator;
 
 import java.util.Iterator;
 
@@ -48,14 +48,14 @@ public final class DummyNamespaceResolver implements NamespaceResolver {
      */
 
     @Override
-    public String getURIForPrefix(String prefix, boolean useDefault) {
+    public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
         if (prefix.isEmpty()) {
-            return NamespaceConstant.NULL;
+            return NamespaceUri.NULL;
         } else if ("xml".equals(prefix)) {
-            return NamespaceConstant.XML;
+            return NamespaceUri.XML;
         } else {
             // this is a dummy namespace resolver, we don't actually know the URI
-            return NamespaceConstant.NULL;
+            return NamespaceUri.NULL;
         }
     }
 

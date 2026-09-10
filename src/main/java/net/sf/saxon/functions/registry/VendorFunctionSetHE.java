@@ -16,7 +16,6 @@ import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.ApplyFn;
 import net.sf.saxon.functions.Doc_2;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.*;
@@ -112,8 +111,8 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
     }
 
     @Override
-    public String getNamespace() {
-        return NamespaceConstant.SAXON;
+    public NamespaceUri getNamespace() {
+        return NamespaceUri.SAXON;
     }
 
     @Override
@@ -239,7 +238,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 case "code":
                     StructuredQName errorCodeQName = error.getErrorCodeQName();
                     if (errorCodeQName == null) {
-                        errorCodeQName = new StructuredQName("saxon", NamespaceConstant.SAXON, "XXXX9999");
+                        errorCodeQName = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
                     }
                     return new QNameValue(errorCodeQName, BuiltInAtomicType.QNAME);
                 case "description":

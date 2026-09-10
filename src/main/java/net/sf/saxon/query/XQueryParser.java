@@ -55,19 +55,12 @@ import java.util.regex.Pattern;
  */
 public class XQueryParser extends XPathParser {
 
-    public final static String XQUERY10 = "1.0";
-    public final static String XQUERY30 = "3.0";
-    public final static String XQUERY31 = "3.1";
-    public final static String XQUERY40 = "4.0";
-
     private boolean memoFunction = false;
     private boolean streaming = false;
-    //protected String queryVersion = null;
     private int errorCount = 0;
-    /*@Nullable*/ private XPathException firstError = null;
-    //private int languageVersion = 31;
+    private XPathException firstError = null;
 
-    /*@NotNull*/ protected Executable executable;
+    protected Executable executable;
 
     private boolean foundCopyNamespaces = false;
     private boolean foundBoundarySpaceDeclaration = false;
@@ -82,8 +75,8 @@ public class XQueryParser extends XPathParser {
     private boolean foundDefaultDecimalFormat = false;
     private boolean preambleProcessed = false;
 
-    public final Set<String> importedModules = new HashSet<>(5);
-    final List<String> namespacesToBeSealed = new ArrayList<>(10);
+    public final Set<NamespaceUri> importedModules = new HashSet<>(5);
+    final List<NamespaceUri> namespacesToBeSealed = new ArrayList<>(10);
     final List<Import> schemaImports = new ArrayList<>(5);
     final List<Import> moduleImports = new ArrayList<>(5);
 
@@ -567,11 +560,11 @@ public class XQueryParser extends XPathParser {
         expect(Token.EQUALS);
         nextToken();
         expect(Token.STRING_LITERAL);
-        String uri = uriLiteral(t.currentTokenValue);
+        NamespaceUri uri = NamespaceUri.of(uriLiteral(t.currentTokenValue));
         checkProhibitedPrefixes(prefix, uri);
         if (uri.isEmpty()) {
             grumble("Module namespace cannot be \"\"", "XQST0088");
-            uri = "http://saxon.fallback.namespace/";   // for error recovery
+            uri = NamespaceUri.of("http://saxon.fallback.namespace/");   // for error recovery
         }
         nextToken();
         expect(Token.SEMICOLON);
@@ -603,7 +596,7 @@ public class XQueryParser extends XPathParser {
         while (true) {
             try {
                 if (t.currentToken == Token.MODULE_NAMESPACE) {
-                    String uri = ((QueryModule) env).getModuleNamespace();
+                    NamespaceUri uri = ((QueryModule) env).getModuleNamespace();
                     if (uri == null) {
                         grumble("Module declaration must not be used in a main module");
                     } else {
@@ -791,7 +784,7 @@ public class XQueryParser extends XPathParser {
                         parserExtension.parseRevalidationDeclaration(this);
                         break;
                     case Token.EOF:
-                        String uri = ((QueryModule) env).getModuleNamespace();
+                        NamespaceUri uri = ((QueryModule) env).getModuleNamespace();
                         if (uri == null) {
                             grumble("The main module must contain a query expression after any declarations in the prolog");
                         } else {
@@ -849,17 +842,17 @@ public class XQueryParser extends XPathParser {
             expect(Token.NAME);
             t.setState(Tokenizer.DEFAULT_STATE);
             StructuredQName qName;
-            String uri;
+            NamespaceUri uri;
             if (t.currentTokenValue.indexOf(':') < 0) {
-                uri = NamespaceConstant.XQUERY;
+                uri = NamespaceUri.XQUERY;
                 qName = new StructuredQName("", uri, t.currentTokenValue);
             } else {
-                qName = makeStructuredQName(t.currentTokenValue, "");
+                qName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
                 assert qName != null;
                 uri = qName.getURI();
             }
             Annotation annotation = new Annotation(qName);
-            if (uri.equals(NamespaceConstant.XQUERY)) {
+            if (uri.equals(NamespaceUri.XQUERY)) {
                 if (!qName.equals(Annotation.PRIVATE) && !qName.equals(Annotation.PUBLIC) &&
                         !qName.equals(Annotation.UPDATING) && !qName.equals(Annotation.SIMPLE)) {
                     grumble("Unrecognized variable or function annotation " + qName.getDisplayName(), "XQST0045");
@@ -867,7 +860,7 @@ public class XQueryParser extends XPathParser {
                 annotation.addAnnotationParameter(new Int64Value(options));
             } else if (isReservedInQuery(uri)) {
                 grumble("The annotation " + t.currentTokenValue + " is in a reserved namespace", "XQST0045");
-            } else if (uri.equals("")) {
+            } else if (uri.isEmpty()) {
                 grumble("The annotation " + t.currentTokenValue + " is in no namespace", "XQST0045");
             } else {
                 // no action - ignore namespaced annotations
@@ -917,8 +910,8 @@ public class XQueryParser extends XPathParser {
     }
 
 
-    private void sealNamespaces(/*@NotNull*/ List<String> namespacesToBeSealed, /*@NotNull*/ Configuration config) {
-        for (String ns : namespacesToBeSealed) {
+    private void sealNamespaces(/*@NotNull*/ List<NamespaceUri> namespacesToBeSealed, /*@NotNull*/ Configuration config) {
+        for (NamespaceUri ns : namespacesToBeSealed) {
             config.sealNamespace(ns);
         }
     }
@@ -1053,11 +1046,7 @@ public class XQueryParser extends XPathParser {
         foundOrderingDeclaration = true;
         nextToken();
         expect(Token.NAME);
-        if ("ordered".equals(t.currentTokenValue)) {
-            // no action
-        } else if ("unordered".equals(t.currentTokenValue)) {
-            // no action
-        } else {
+        if (!"ordered".equals(t.currentTokenValue) && !"unordered".equals(t.currentTokenValue)) {
             grumble("ordering mode must be 'ordered' or 'unordered'");
         }
         nextToken();
@@ -1171,7 +1160,7 @@ public class XQueryParser extends XPathParser {
             prefix = "";
         }
         if (t.currentToken == Token.STRING_LITERAL) {
-            String uri = uriLiteral(t.currentTokenValue);
+            NamespaceUri uri = NamespaceUri.of(uriLiteral(t.currentTokenValue));
             checkProhibitedPrefixes(prefix, uri);
             sImport.namespaceURI = uri;
             nextToken();
@@ -1197,7 +1186,7 @@ public class XQueryParser extends XPathParser {
                 if (prefix.isEmpty()) {
                     ((QueryModule) env).setDefaultElementNamespace(sImport.namespaceURI);
                 } else {
-                    if (sImport.namespaceURI == null || "".equals(sImport.namespaceURI)) {
+                    if (sImport.namespaceURI == null || sImport.namespaceURI.isEmpty()) {
                         grumble("A prefix cannot be bound to the null namespace", "XQST0057");
                     }
                     ((QueryModule) env).declarePrologNamespace(prefix, sImport.namespaceURI);
@@ -1207,9 +1196,8 @@ public class XQueryParser extends XPathParser {
                 reportError(err);
             }
         }
-        for (Object schemaImport : schemaImports) {
-            Import imp = (Import) schemaImport;
-            if (imp.namespaceURI.equals(sImport.namespaceURI)) {
+        for (Import schemaImport : schemaImports) {
+            if (schemaImport.namespaceURI.equals(sImport.namespaceURI)) {
                 grumble("Schema namespace '" + sImport.namespaceURI + "' is imported more than once", "XQST0058");
                 break;
             }
@@ -1255,9 +1243,9 @@ public class XQueryParser extends XPathParser {
                     } catch (SchemaException err) {
                         grumble("Error in schema " + sImport.namespaceURI + ": " + err.getMessage(), "XQST0059", sImport.offset);
                     }
-                } else if (sImport.namespaceURI.equals(NamespaceConstant.XML) ||
-                        sImport.namespaceURI.equals(NamespaceConstant.FN) ||
-                        sImport.namespaceURI.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+                } else if (sImport.namespaceURI.equals(NamespaceUri.XML) ||
+                        sImport.namespaceURI.equals(NamespaceUri.FN) ||
+                        sImport.namespaceURI.equals(NamespaceUri.SCHEMA_INSTANCE)) {
                     config.addSchemaForBuiltInNamespace(sImport.namespaceURI);
                 } else {
                     grumble("Unable to locate requested schema " + sImport.namespaceURI, "XQST0059", sImport.offset);
@@ -1286,12 +1274,12 @@ public class XQueryParser extends XPathParser {
             prefix = readNamespaceBinding();
         }
         if (t.currentToken == Token.STRING_LITERAL) {
-            String uri = uriLiteral(t.currentTokenValue);
+            NamespaceUri uri = NamespaceUri.of(uriLiteral(t.currentTokenValue));
             checkProhibitedPrefixes(prefix, uri);
             mImport.namespaceURI = uri;
             if (mImport.namespaceURI.isEmpty()) {
                 grumble("Imported module namespace cannot be \"\"", "XQST0088");
-                mImport.namespaceURI = "http://saxon.fallback.namespace/line" + t.getLineNumber();   // for error recovery
+                mImport.namespaceURI = NamespaceUri.of("http://saxon.fallback.namespace/line" + t.getLineNumber());   // for error recovery
             }
             if (importedModules.contains(mImport.namespaceURI)) {
                 grumble("Two 'import module' declarations specify the same module namespace", "XQST0047");
@@ -1323,18 +1311,6 @@ public class XQueryParser extends XPathParser {
                 reportError(err);
             }
         }
-
-//        // Check that this import would not create a cycle involving a change of namespace
-//        if (!disableCycleChecks) {
-//            if (!mImport.namespaceURI.equals(((QueryModule)env).getModuleNamespace())) {
-//                QueryModule parent = (QueryModule)env;
-//                if (!parent.mayImport(mImport.namespaceURI)) {
-//                    StaticError err = new StaticError("A module cannot import itself directly or indirectly, unless all modules in the cycle are in the same namespace");
-//                    err.setErrorCode("XQST0073");
-//                    throw err;
-//                }
-//            }
-//        }
 
         moduleImports.add(mImport);
     }
@@ -1398,14 +1374,14 @@ public class XQueryParser extends XPathParser {
         StreamSource[] sources = null;
         if (resolver != null) {
             try {
-                sources = resolver.resolve(mImport.namespaceURI, env.getStaticBaseURI(), hints);
+                sources = resolver.resolve(mImport.namespaceURI.toString(), env.getStaticBaseURI(), hints);
             } catch (XPathException err) {
                 grumble("Failed to resolve URI of imported module: " + err.getMessage(), "XQST0059", mImport.offset);
             }
         }
         if (sources == null) {
             resolver = env.getConfiguration().getStandardModuleURIResolver();
-            sources = resolver.resolve(mImport.namespaceURI, env.getStaticBaseURI(), hints);
+            sources = resolver.resolve(mImport.namespaceURI.toString(), env.getStaticBaseURI(), hints);
         }
 
         for (String hint : mImport.locationURIs) {
@@ -1505,7 +1481,7 @@ public class XQueryParser extends XPathParser {
     private void parseDecimalFormatDeclaration() throws XPathException {
         nextToken();
         expect(Token.NAME);
-        StructuredQName formatName = makeStructuredQName(t.currentTokenValue, "");
+        StructuredQName formatName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
         if (env.getDecimalFormatManager().getNamedDecimalFormat(formatName) != null) {
             grumble("Duplicate declaration of decimal-format " + formatName.getDisplayName(), "XQST0111");
         }
@@ -1620,8 +1596,8 @@ public class XQueryParser extends XPathParser {
         }
         nextToken();
         expect(Token.STRING_LITERAL);
-        String uri = uriLiteral(t.currentTokenValue);
-        if (uri.equals(NamespaceConstant.XML) || uri.equals(NamespaceConstant.XMLNS)) {
+        NamespaceUri uri = NamespaceUri.of(uriLiteral(t.currentTokenValue));
+        if (uri.equals(NamespaceUri.XML) || uri.equals(NamespaceUri.XMLNS)) {
             grumble("Reserved namespace used as default element/type namespace", "XQST0070");
         }
         ((QueryModule) env).setDefaultFunctionNamespace(uri);
@@ -1647,8 +1623,8 @@ public class XQueryParser extends XPathParser {
         }
         nextToken();
         expect(Token.STRING_LITERAL);
-        String uri = uriLiteral(t.currentTokenValue);
-        if (uri.equals(NamespaceConstant.XML) || uri.equals(NamespaceConstant.XMLNS)) {
+        NamespaceUri uri = NamespaceUri.of(uriLiteral(t.currentTokenValue));
+        if (uri.equals(NamespaceUri.XML) || uri.equals(NamespaceUri.XMLNS)) {
             grumble("Reserved namespace used as default element/type namespace", "XQST0070");
         }
         ((QueryModule) env).setDefaultElementNamespace(uri);
@@ -1673,7 +1649,7 @@ public class XQueryParser extends XPathParser {
         expect(Token.EQUALS);
         nextToken();
         expect(Token.STRING_LITERAL);
-        String uri = uriLiteral(t.currentTokenValue);
+        NamespaceUri uri = NamespaceUri.of(uriLiteral(t.currentTokenValue));
         checkProhibitedPrefixes(prefix, uri);
         if ("xml".equals(prefix)) {
             // disallowed here even if bound to the correct namespace - erratum XQ.E19
@@ -1696,7 +1672,7 @@ public class XQueryParser extends XPathParser {
      * @throws XPathException if the prefix is prohibited
      */
 
-    private void checkProhibitedPrefixes(/*@Nullable*/ String prefix, /*@Nullable*/ String uri) throws XPathException {
+    private void checkProhibitedPrefixes(String prefix, NamespaceUri uri) throws XPathException {
         if (prefix != null && !prefix.isEmpty() && !NameChecker.isValidNCName(prefix)) {
             grumble("The namespace prefix " + Err.wrap(prefix) + " is not a valid NCName");
         }
@@ -1704,18 +1680,18 @@ public class XQueryParser extends XPathParser {
             prefix = "";
         }
         if (uri == null) {
-            uri = "";
+            uri = NamespaceUri.NULL;
         }
         if ("xmlns".equals(prefix)) {
             grumble("The namespace prefix 'xmlns' cannot be redeclared", "XQST0070");
         }
-        if (uri.equals(NamespaceConstant.XMLNS)) {
+        if (uri.equals(NamespaceUri.XMLNS)) {
             grumble("The xmlns namespace URI is reserved", "XQST0070");
         }
-        if (uri.equals(NamespaceConstant.XML) && !prefix.equals("xml")) {
+        if (uri.equals(NamespaceUri.XML) && !prefix.equals("xml")) {
             grumble("The XML namespace cannot be bound to any prefix other than 'xml'", "XQST0070");
         }
-        if (prefix.equals("xml") && !uri.equals(NamespaceConstant.XML)) {
+        if (prefix.equals("xml") && !uri.equals(NamespaceUri.XML)) {
             grumble("The prefix 'xml' cannot be bound to any namespace other than " + NamespaceConstant.XML, "XQST0070");
         }
     }
@@ -1746,12 +1722,12 @@ public class XQueryParser extends XPathParser {
         nextToken();
         expect(Token.NAME);
         String varName = t.currentTokenValue;
-        StructuredQName varQName = makeStructuredQName(t.currentTokenValue, "");
+        StructuredQName varQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
         assert varQName != null;
         var.setVariableQName(varQName);
 
-        String uri = varQName.getURI();
-        String moduleURI = ((QueryModule) env).getModuleNamespace();
+        NamespaceUri uri = varQName.getURI();
+        NamespaceUri moduleURI = ((QueryModule) env).getModuleNamespace();
         if (moduleURI != null && !moduleURI.equals(uri)) {
             grumble("A variable declared in a library module must be in the module namespace", "XQST0048", offset);
         }
@@ -1937,13 +1913,13 @@ public class XQueryParser extends XPathParser {
         nextToken();
         expect(Token.FUNCTION);
 
-        String uri;
+        NamespaceUri uri;
         StructuredQName qName;
         if (t.currentTokenValue.indexOf(':') < 0) {
             uri = env.getDefaultFunctionNamespace();
             qName = new StructuredQName("", uri, t.currentTokenValue);
         } else {
-            qName = makeStructuredQName(t.currentTokenValue, "");
+            qName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
             uri = qName.getURI();
         }
 
@@ -1951,7 +1927,7 @@ public class XQueryParser extends XPathParser {
             grumble("The function must be in a namespace", "XQST0060");
         }
 
-        String moduleURI = ((QueryModule) env).getModuleNamespace();
+        NamespaceUri moduleURI = ((QueryModule) env).getModuleNamespace();
         if (moduleURI != null && !moduleURI.equals(uri)) {
             grumble("A function in a library module must be in the module namespace", "XQST0048");
         }
@@ -1981,7 +1957,7 @@ public class XQueryParser extends XPathParser {
                 expect(Token.DOLLAR);
                 nextToken();
                 expect(Token.NAME);
-                StructuredQName argQName = makeStructuredQName(t.currentTokenValue, "");
+                StructuredQName argQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
                 if (paramNames.contains(argQName)) {
                     grumble("Duplicate parameter name " + Err.wrap(t.currentTokenValue, Err.VARIABLE), "XQST0039");
                 }
@@ -2059,7 +2035,7 @@ public class XQueryParser extends XPathParser {
         memoFunction = false;
     }
 
-    public static final StructuredQName SAXON_MEMO_FUNCTION = new StructuredQName("saxon", NamespaceConstant.SAXON, "memo-function");
+    public static final StructuredQName SAXON_MEMO_FUNCTION = new StructuredQName("saxon", NamespaceUri.SAXON, "memo-function");
 
 
     /**
@@ -2085,10 +2061,10 @@ public class XQueryParser extends XPathParser {
     private void parseOptionDeclaration() throws XPathException {
         nextToken();
         expect(Token.NAME);
-        String defaultUri = NamespaceConstant.XQUERY;
+        NamespaceUri defaultUri = NamespaceUri.XQUERY;
         StructuredQName varName = makeStructuredQName(t.currentTokenValue, defaultUri);
         assert varName != null;
-        String uri = varName.getURI();
+        NamespaceUri uri = varName.getURI();
 
         if (uri.isEmpty()) {
             grumble("The QName identifying an option declaration must be prefixed", "XPST0081");
@@ -2100,9 +2076,9 @@ public class XQueryParser extends XPathParser {
         //String value = URILiteral(t.currentTokenValue).trim();
         String value = unescape(t.currentTokenValue).toString();
 
-        if (uri.equals(NamespaceConstant.OUTPUT)) {
+        if (uri.equals(NamespaceUri.OUTPUT)) {
             parseOutputDeclaration(varName, value);
-        } else if (uri.equals(NamespaceConstant.SAXON)) {
+        } else if (uri.equals(NamespaceUri.SAXON)) {
             String localName = varName.getLocalPart();
             switch (localName) {
                 case "output":
@@ -2184,7 +2160,8 @@ public class XQueryParser extends XPathParser {
             default: {
                 Properties props = getExecutable().getPrimarySerializationProperties().getProperties();
                 ResultDocument.setSerializationProperty(props,
-                                                        "", localName,
+                                                        NamespaceUri.NULL,
+                                                        localName,
                                                         value,
                                                         env.getNamespaceResolver(),
                                                         false,
@@ -2215,11 +2192,12 @@ public class XQueryParser extends XPathParser {
 
         Properties props = getExecutable().getPrimarySerializationProperties().getProperties();
         try {
-            StructuredQName name = makeStructuredQName(keyword, "");
+            StructuredQName name = makeStructuredQName(keyword, NamespaceUri.NULL);
             String lname = name.getLocalPart();
-            String uri = name.getURI();
+            NamespaceUri uri = name.getURI();
             ResultDocument.setSerializationProperty(props,
-                                                    uri, lname,
+                                                    uri,
+                                                    lname,
                                                     value,
                                                     env.getNamespaceResolver(),
                                                     false,
@@ -2437,7 +2415,7 @@ public class XQueryParser extends XPathParser {
             expect(Token.DOLLAR);
             nextToken();
             expect(Token.NAME);
-            StructuredQName varQName = makeStructuredQName(t.currentTokenValue, "");
+            StructuredQName varQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
             SequenceType type = forMember ? SequenceType.ANY_SEQUENCE : SequenceType.SINGLE_ITEM;
             nextToken();
 
@@ -2478,7 +2456,7 @@ public class XQueryParser extends XPathParser {
                 expect(Token.DOLLAR);
                 nextToken();
                 expect(Token.NAME);
-                StructuredQName posQName = makeStructuredQName(t.currentTokenValue, "");
+                StructuredQName posQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
                 if (!scanOnly && posQName.equals(varQName)) {
                     grumble("The two variables declared in a single 'for' clause must have different names", "XQST0089");
                 }
@@ -2547,7 +2525,7 @@ public class XQueryParser extends XPathParser {
             expect(Token.NAME);
             String var = t.currentTokenValue;
 
-            StructuredQName varQName = makeStructuredQName(var, "");
+            StructuredQName varQName = makeStructuredQName(var, NamespaceUri.NULL);
             SequenceType type = SequenceType.ANY_SEQUENCE;
             nextToken();
             if (t.currentToken == Token.AS) {
@@ -2585,7 +2563,7 @@ public class XQueryParser extends XPathParser {
         expect(Token.NAME);
         String var = t.currentTokenValue;
 
-        StructuredQName varQName = makeStructuredQName(var, "");
+        StructuredQName varQName = makeStructuredQName(var, NamespaceUri.NULL);
         SequenceType type = SequenceType.ANY_SEQUENCE;
         nextToken();
         LocalVariableBinding v = new LocalVariableBinding(varQName, type);
@@ -2753,7 +2731,7 @@ public class XQueryParser extends XPathParser {
         expect(Token.NAME);
         String name = t.currentTokenValue;
         nextToken();
-        return makeStructuredQName(name, "");
+        return makeStructuredQName(name, NamespaceUri.NULL);
     }
 
     /**
@@ -3023,11 +3001,10 @@ public class XQueryParser extends XPathParser {
 
         LetExpression outerLet = makeLetExpression();
         outerLet.setRequiredType(SequenceType.ANY_SEQUENCE);
-        outerLet.setVariableQName(new StructuredQName("zz", NamespaceConstant.SAXON, "zz_typeswitchVar"));
+        outerLet.setVariableQName(new StructuredQName("zz", NamespaceUri.SAXON, "zz_typeswitchVar"));
         outerLet.setSequence(operand);
 
         while (t.currentToken == Token.CASE) {
-            int caseOffset = t.currentTokenStartOffset;
             List<SequenceType> typeList;
             Expression action;
             nextToken();
@@ -3035,7 +3012,7 @@ public class XQueryParser extends XPathParser {
                 nextToken();
                 expect(Token.NAME);
                 final String var = t.currentTokenValue;
-                final StructuredQName varQName = makeStructuredQName(var, "");
+                final StructuredQName varQName = makeStructuredQName(var, NamespaceUri.NULL);
                 nextToken();
                 expect(Token.AS);
                 nextToken();
@@ -3068,7 +3045,7 @@ public class XQueryParser extends XPathParser {
             nextToken();
             expect(Token.NAME);
             final String var = t.currentTokenValue;
-            final StructuredQName varQName = makeStructuredQName(var, "");
+            final StructuredQName varQName = makeStructuredQName(var, NamespaceUri.NULL);
             nextToken();
             expect(Token.RETURN);
             nextToken();
@@ -3180,7 +3157,7 @@ public class XQueryParser extends XPathParser {
 
         LetExpression outerLet = makeLetExpression();
         outerLet.setRequiredType(SequenceType.OPTIONAL_ATOMIC);
-        outerLet.setVariableQName(new StructuredQName("zz", NamespaceConstant.SAXON, "zz_switchVar"));
+        outerLet.setVariableQName(new StructuredQName("zz", NamespaceUri.SAXON, "zz_switchVar"));
         outerLet.setSequence(Atomizer.makeAtomizer(operand, null));
 
         do {
@@ -3347,11 +3324,11 @@ public class XQueryParser extends XPathParser {
         }
 
         boolean validateType = false;
-        StructuredQName pragmaName = makeStructuredQName(qname, "");
+        StructuredQName pragmaName = makeStructuredQName(qname, NamespaceUri.NULL);
         assert pragmaName != null;
-        String uri = pragmaName.getURI();
+        NamespaceUri uri = pragmaName.getURI();
         String localName = pragmaName.getLocalPart();
-        if (uri.equals(NamespaceConstant.SAXON)) {
+        if (uri.equals(NamespaceUri.SAXON)) {
             if ("validate-type".equals(localName)) {
                 if (!env.getConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
                     warning("Ignoring saxon:validate-type. To use this feature " +
@@ -3590,7 +3567,7 @@ public class XQueryParser extends XPathParser {
                     return new ErrorExpression(new XmlProcessingException(staticError));
                 }
             } else if (vName instanceof QualifiedNameValue) {
-                String uri = ((QualifiedNameValue) vName).getNamespaceURI();
+                NamespaceUri uri = ((QualifiedNameValue) vName).getNamespaceURI();
                 elemName = new FingerprintedQName("", uri, ((QualifiedNameValue) vName).getLocalName());
                 elemName.obtainFingerprint(env.getConfiguration().getNamePool());
             } else {
@@ -3720,7 +3697,7 @@ public class XQueryParser extends XPathParser {
                     }
                     throw staticError;
                 }
-                if (attributeName.getPrefix().isEmpty() && !attributeName.hasURI("")) {
+                if (attributeName.getPrefix().isEmpty() && !attributeName.hasURI(NamespaceUri.NULL)) {
                     attributeName = new FingerprintedQName("_", attributeName.getURI(),
                                                            attributeName.getLocalPart(),
                                                            attributeName.getFingerprint());
@@ -3769,7 +3746,7 @@ public class XQueryParser extends XPathParser {
             warningMessage = "Cannot create a namespace declaration using an attribute constructor";
         }
         NodeName attributeName = makeNodeName(t.currentTokenValue, false);
-        if (!attributeName.getURI().equals("") && attributeName.getPrefix().equals("")) {
+        if (!attributeName.hasURI(NamespaceUri.NULL) && attributeName.getPrefix().isEmpty()) {
             // This must be because the name was given as Q{uri}local. Invent a prefix.
             attributeName = new FingerprintedQName("_", attributeName.getURI(), attributeName.getLocalPart());
         }
@@ -4301,21 +4278,21 @@ public class XQueryParser extends XPathParser {
                     grumble("Namespace must not contain an unescaped closing brace", "XPST0003");
                 }
                 rval = sb.toString();
-                String uri = uriLiteral(rval);
-                if (!StandardURIChecker.getInstance().isValidURI(uri)) {
+                NamespaceUri uri = NamespaceUri.of(uriLiteral(rval));
+                if (!StandardURIChecker.getInstance().isValidURI(uri.toString())) {
                     grumble("Namespace must be a valid URI value", "XQST0046");
                 }
                 String prefix;
                 if ("xmlns".equals(attName)) {
                     prefix = "";
-                    if (uri.equals(NamespaceConstant.XML)) {
+                    if (uri.equals(NamespaceUri.XML)) {
                         grumble("Cannot have the XML namespace as the default namespace", "XQST0070");
                     }
                 } else {
                     prefix = attName.substring(6);
-                    if (prefix.equals("xml") && !uri.equals(NamespaceConstant.XML)) {
+                    if (prefix.equals("xml") && !uri.equals(NamespaceUri.XML)) {
                         grumble("Cannot bind the prefix 'xml' to a namespace other than the XML namespace", "XQST0070");
-                    } else if (uri.equals(NamespaceConstant.XML) && !prefix.equals("xml")) {
+                    } else if (uri.equals(NamespaceUri.XML) && !prefix.equals("xml")) {
                         grumble("Cannot bind a prefix other than 'xml' to the XML namespace", "XQST0070");
                     } else if (prefix.equals("xmlns")) {
                         grumble("Cannot use xmlns as a namespace prefix", "XQST0070");
@@ -4357,7 +4334,7 @@ public class XQueryParser extends XPathParser {
         } else {
             try {
                 String[] parts = NameChecker.getQNameParts(elname);
-                String namespace = ((QueryModule) env).checkURIForPrefix(parts[0]);
+                NamespaceUri namespace = ((QueryModule) env).checkURIForPrefix(parts[0]);
                 if (namespace == null) {
                     grumble("Undeclared prefix in element name " + Err.wrap(elname, Err.ELEMENT), "XPST0081", offset);
                 }
@@ -4399,12 +4376,12 @@ public class XQueryParser extends XPathParser {
                 // See test qxmp180
             } else {
                 NodeName attributeName = null;
-                String attNamespace;
+                NamespaceUri attNamespace;
                 try {
                     String[] parts = NameChecker.getQNameParts(attName);
                     if (parts[0].isEmpty()) {
                         // attributes don't use the default namespace
-                        attNamespace = "";
+                        attNamespace = NamespaceUri.NULL;
                     } else {
                         attNamespace = ((QueryModule) env).checkURIForPrefix(parts[0]);
                     }
@@ -5271,7 +5248,7 @@ public class XQueryParser extends XPathParser {
     }
 
     private static class Import {
-        String namespaceURI;
+        NamespaceUri namespaceURI;
         List<String> locationURIs;
         int offset;
     }

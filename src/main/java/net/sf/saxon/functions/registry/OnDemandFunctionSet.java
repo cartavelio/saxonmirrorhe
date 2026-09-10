@@ -12,6 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 
@@ -33,11 +34,11 @@ import java.util.List;
 public class OnDemandFunctionSet implements FunctionLibrary {
 
     private final Configuration config;
-    private final String namespace;
+    private final NamespaceUri namespace;
     private final String libraryClass;
     private FunctionLibrary library;
 
-    public OnDemandFunctionSet(Configuration config, String namespace, String libraryClass) {
+    public OnDemandFunctionSet(Configuration config, NamespaceUri namespace, String libraryClass) {
         this.config = config;
         this.namespace = namespace;
         this.libraryClass = libraryClass;

@@ -352,9 +352,9 @@ public abstract class NodeImpl
      */
 
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         NodeName qName = getNodeName();
-        return qName == null ? "" : qName.getURI();
+        return qName == null ? NamespaceUri.NULL : qName.getURI();
     }
 
     /**
@@ -614,7 +614,7 @@ public abstract class NodeImpl
 
     /*@Nullable*/
     @Override
-    public String getAttributeValue( /*@NotNull*/ String uri, /*@NotNull*/ String localName) {
+    public String getAttributeValue( /*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String localName) {
         return null;
     }
 
@@ -694,7 +694,7 @@ public abstract class NodeImpl
     }
 
     @Override
-    public NodeImpl getSuccessorElement(SteppingNode anchor, String uri, String local) {
+    public NodeImpl getSuccessorElement(SteppingNode anchor, NamespaceUri uri, String local) {
         NodeImpl next = getNextInDocument((NodeImpl)anchor);
         while (next != null && !(next.getNodeKind() == Type.ELEMENT &&
                                          (uri == null || next.getNodeName().hasURI(uri)) &&

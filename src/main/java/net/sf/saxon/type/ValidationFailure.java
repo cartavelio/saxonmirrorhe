@@ -8,14 +8,13 @@
 package net.sf.saxon.type;
 
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Invalidity;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AbsolutePath;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.value.AtomicValue;
 
 import javax.xml.transform.SourceLocator;
@@ -358,7 +357,7 @@ public class ValidationFailure
         if (errorCode == null) {
             this.errorCode = null;
         } else {
-            this.errorCode = new StructuredQName("err", NamespaceConstant.ERR, errorCode);
+            this.errorCode = new StructuredQName("err", NamespaceUri.ERR, errorCode);
         }
     }
 
@@ -377,7 +376,7 @@ public class ValidationFailure
     public String getErrorCode() {
         if (errorCode == null) {
             return null;
-        } else if (errorCode.hasURI(NamespaceConstant.ERR)) {
+        } else if (errorCode.hasURI(NamespaceUri.ERR)) {
             return errorCode.getLocalPart();
         } else {
             return errorCode.getEQName();

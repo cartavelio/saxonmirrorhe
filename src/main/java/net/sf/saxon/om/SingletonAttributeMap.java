@@ -55,7 +55,7 @@ public class SingletonAttributeMap extends AttributeInfo implements AttributeMap
     }
 
     @Override
-    public AttributeInfo get(String uri, String local) {
+    public AttributeInfo get(NamespaceUri uri, String local) {
         return getNodeName().getLocalPart().equals(local) && getNodeName().hasURI(uri) ? this : null;
     }
 

@@ -7,10 +7,7 @@
 
 package net.sf.saxon.option.dom4j;
 
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
@@ -269,14 +266,14 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      */
 
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         switch (nodeKind) {
             case Type.ELEMENT:
-                return ((Element) node).getNamespaceURI();
+                return NamespaceUri.of(((Element) node).getNamespaceURI());
             case Type.ATTRIBUTE:
-                return ((Attribute) node).getNamespaceURI();
+                return NamespaceUri.of(((Attribute) node).getNamespaceURI());
             default:
-                return "";
+                return NamespaceUri.NULL;
         }
     }
 
@@ -559,7 +556,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @since 9.4
      */
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         if (nodeKind == Type.ELEMENT) {
             for (Object o : ((Element) node).attributes()) {
                 Attribute att = (Attribute) o;
@@ -657,7 +654,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    public SteppingNode getSuccessorElement(SteppingNode anchor, String uri, String local) {
+    public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, String local) {
         Node stop = anchor == null ? null : ((DOM4JNodeWrapper)anchor).node;
         Node next = node;
         do {
@@ -896,7 +893,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                     final String prefix = namespace.getPrefix();
                     final String uri = namespace.getURI();
 
-                    result[n++] = new NamespaceBinding(prefix, uri);
+                    result[n++] = new NamespaceBinding(prefix, NamespaceUri.of(uri));
                 }
                 if (count < result.length) {
                     result[count] = null;
@@ -932,10 +929,10 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                 Namespace ns = elem.getNamespace();
                 String prefix = ns.getPrefix();
                 String uri = ns.getURI();
-                nsMap = nsMap.bind(prefix, uri);
+                nsMap = nsMap.bind(prefix, NamespaceUri.of(uri));
                 if (!addl.isEmpty()) {
                     for (Namespace ns2 : addl) {
-                        nsMap = nsMap.bind(ns2.getPrefix(), ns2.getURI());
+                        nsMap = nsMap.bind(ns2.getPrefix(), NamespaceUri.of(ns2.getURI()));
                     }
                 }
                 return inScopeNamespaces = nsMap;

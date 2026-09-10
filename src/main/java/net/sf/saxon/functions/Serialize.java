@@ -356,7 +356,7 @@ public class Serialize extends SystemFunction implements Callable {
                     Integer.toHexString(65536 + code).substring(1), "SEPM0018");
             }
         }
-        StructuredQName name = new StructuredQName("output", NamespaceConstant.OUTPUT, "serialization-parameters");
+        StructuredQName name = new StructuredQName("output", NamespaceUri.OUTPUT, "serialization-parameters");
         return new CharacterMap(name, intHashMap);
     }
 
@@ -424,7 +424,7 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if ((seqVal = map.get("use-character-maps")) != null) {
             CharacterMap characterMap = toCharacterMap(seqVal, context);
-            charMapIndex.putCharacterMap(new StructuredQName("", "", "charMap"), characterMap);
+            charMapIndex.putCharacterMap(new StructuredQName("", NamespaceUri.NULL, "charMap"), characterMap);
             props.setProperty(SaxonOutputKeys.USE_CHARACTER_MAPS, "charMap");
         }
         if ((seqVal = map.get("version")) != null) {
@@ -491,7 +491,7 @@ public class Serialize extends SystemFunction implements Callable {
             if (param instanceof NodeInfo) {
                 NodeInfo paramNode = (NodeInfo) param;
                 if (paramNode.getNodeKind() != Type.ELEMENT ||
-                    !NamespaceConstant.OUTPUT.equals(paramNode.getURI()) ||
+                    !NamespaceUri.OUTPUT.equals(paramNode.getNamespaceUri()) ||
                     !"serialization-parameters".equals(paramNode.getLocalPart())) {
                     throw new XPathException("Second argument to fn:serialize() must be an element named {"
                         + NamespaceConstant.OUTPUT + "}serialization-parameters", "XPTY0004");

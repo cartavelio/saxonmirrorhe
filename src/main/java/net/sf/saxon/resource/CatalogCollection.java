@@ -15,10 +15,7 @@ import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SpaceStrippingRule;
-import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -180,13 +177,13 @@ public class CatalogCollection extends AbstractResourceCollection {
         AxisIterator iter =
                 catalog.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         NodeInfo top = iter.next();
-        if (top == null || !("collection".equals(top.getLocalPart()) && top.getURI().isEmpty())) {
+        if (top == null || !("collection".equals(top.getLocalPart()) && top.getNamespaceUri() == NamespaceUri.NULL)) {
             String message;
             if (top == null) {
                 message = "No outermost element found in collection catalog";
             } else {
                 message = "Outermost element of collection catalog should be Q{}collection " +
-                        "(found Q{" + top.getURI() + "}" + top.getLocalPart() + ")";
+                        "(found Q{" + top.getNamespaceUri() + "}" + top.getLocalPart() + ")";
             }
             XPathException err = new XPathException(message);
             err.setErrorCode("FODC0004");
@@ -195,7 +192,7 @@ public class CatalogCollection extends AbstractResourceCollection {
         }
         iter.close();
 
-        String stableAtt = top.getAttributeValue("", "stable");
+        String stableAtt = top.getAttributeValue(NamespaceUri.NULL, "stable");
         if (stableAtt != null) {
             if ("true".equals(stableAtt)) {
                 stable = true;
@@ -216,13 +213,13 @@ public class CatalogCollection extends AbstractResourceCollection {
         while ((item = documents.next()) != null) {
 
             if (!("doc".equals(item.getLocalPart()) &&
-                          item.getURI().isEmpty())) {
+                          item.getNamespaceUri() == NamespaceUri.NULL)) {
                 XPathException err = new XPathException("Children of <collection> element must be <doc> elements");
                 err.setErrorCode("FODC0004");
                 err.setXPathContext(context);
                 throw err;
             }
-            String hrefAtt = item.getAttributeValue("", "href");
+            String hrefAtt = item.getAttributeValue(NamespaceUri.NULL, "href");
             if (hrefAtt == null) {
                 XPathException err = new XPathException("A <doc> element in the collection catalog has no @href attribute");
                 err.setErrorCode("FODC0004");

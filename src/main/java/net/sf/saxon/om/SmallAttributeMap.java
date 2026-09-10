@@ -53,7 +53,7 @@ public class SmallAttributeMap implements AttributeMap {
     }
 
     @Override
-    public AttributeInfo get(String uri, String local) {
+    public AttributeInfo get(NamespaceUri uri, String local) {
         for (AttributeInfo info : attributes) {
             NodeName name = info.getNodeName();
             if (name.getLocalPart().equals(local) && name.hasURI(uri)) {

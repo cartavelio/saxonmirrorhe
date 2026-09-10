@@ -11,6 +11,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
@@ -57,7 +58,7 @@ public class HTML40Emitter extends HTMLEmitter {
      */
     @Override
     protected boolean isHTMLElement(NodeName name) {
-        return name.getURI().equals("");
+        return name.hasURI(NamespaceUri.NULL);
     }
 
     @Override

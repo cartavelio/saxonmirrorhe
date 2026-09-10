@@ -7,7 +7,7 @@
 
 package net.sf.saxon.query;
 
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.NumericValue;
@@ -21,10 +21,10 @@ import java.util.List;
  */
 public class Annotation {
 
-    public static final StructuredQName UPDATING = new StructuredQName("", NamespaceConstant.XQUERY, "updating");
-    public static final StructuredQName SIMPLE = new StructuredQName("", NamespaceConstant.XQUERY, "simple");
-    public static final StructuredQName PRIVATE = new StructuredQName("", NamespaceConstant.XQUERY, "private");
-    public static final StructuredQName PUBLIC = new StructuredQName("", NamespaceConstant.XQUERY, "public");
+    public static final StructuredQName UPDATING = new StructuredQName("", NamespaceUri.XQUERY, "updating");
+    public static final StructuredQName SIMPLE = new StructuredQName("", NamespaceUri.XQUERY, "simple");
+    public static final StructuredQName PRIVATE = new StructuredQName("", NamespaceUri.XQUERY, "private");
+    public static final StructuredQName PUBLIC = new StructuredQName("", NamespaceUri.XQUERY, "public");
 
 
     // The name of the annotation

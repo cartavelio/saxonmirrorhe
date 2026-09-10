@@ -171,7 +171,7 @@ public class FixedElement extends ElementCreator {
                 for (Operand o : getContentExpression().operands()) {
                     Expression exp = o.getChildExpression();
                     if (exp instanceof FixedAttribute) {
-                        if (!((FixedAttribute)exp).getAttributeName().hasURI("")) {
+                        if (!((FixedAttribute)exp).getAttributeName().hasURI(NamespaceUri.NULL)) {
                             ok = false;
                             break;
                         }
@@ -446,7 +446,7 @@ public class FixedElement extends ElementCreator {
                     // The only namespace bindings we can trust are those declared on this element
                     // We could also trust those on enclosing LREs in the same function/template,
                     // but it's not a big win to go looking for them.
-                    String uri = namespaceBindings.getURI(parts[0]);
+                    NamespaceUri uri = namespaceBindings.getURI(parts[0]);
                     if (uri == null) {
                         return null;
                     } else {
@@ -590,7 +590,7 @@ public class FixedElement extends ElementCreator {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("elem", this);
         out.emitAttribute("name", elementName.getDisplayName());
-        out.emitAttribute("nsuri", elementName.getURI());
+        out.emitAttribute("nsuri", elementName.getURI().toString());
         String flags = getInheritanceFlags();
         if (!elementName.getURI().isEmpty() && elementName.getPrefix().isEmpty()) {
             flags += "d";  // "d" to indicate default namespace

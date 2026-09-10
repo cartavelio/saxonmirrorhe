@@ -15,8 +15,8 @@ import net.sf.saxon.functions.KeyFn;
 import net.sf.saxon.functions.Root_1;
 import net.sf.saxon.functions.SuperId;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.QNameParser;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -85,7 +85,7 @@ public class PatternParser extends XPathParser {
                             // let $P := predicate return if ($P instance of xs:numeric) then ($P eq 1) else $P
                             LetExpression let = new LetExpression();
                             StructuredQName varName =
-                                    new StructuredQName("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "v" + filter.hashCode());
+                                    new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "v" + filter.hashCode());
                             let.setVariableQName(varName);
                             InstanceOfExpression condition =
                                     new InstanceOfExpression(new LocalVariableReference(let), SequenceType.SINGLE_NUMERIC);

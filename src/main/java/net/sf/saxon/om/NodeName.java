@@ -42,7 +42,7 @@ public interface NodeName extends IdentityComparable {
      * @return the URI. Returns the empty string to represent the no-namespace
      */
 
-    String getURI();
+    NamespaceUri getURI();
 
     /**
      * Get the local part of the QName
@@ -75,7 +75,7 @@ public interface NodeName extends IdentityComparable {
      * @return true if the name is in the specified namespace
      */
 
-    boolean hasURI(String ns);
+    boolean hasURI(NamespaceUri ns);
 
     /**
      * Get a {@link NamespaceBinding} whose (prefix, uri) pair are the prefix and URI of this

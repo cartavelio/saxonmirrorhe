@@ -8,8 +8,8 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
@@ -31,7 +31,7 @@ public class Lang extends SystemFunction  {
         NodeInfo node = target;
 
         while (node != null) {
-            doclang = node.getAttributeValue(NamespaceConstant.XML, "lang");
+            doclang = node.getAttributeValue(NamespaceUri.XML, "lang");
             if (doclang != null) {
                 break;
             }

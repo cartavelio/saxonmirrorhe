@@ -7,9 +7,9 @@
 
 package net.sf.saxon.serialize;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringConstants;
@@ -64,8 +64,8 @@ public class HTML50Emitter extends HTMLEmitter {
      */
     @Override
     protected boolean isHTMLElement(NodeName name) {
-        String uri = name.getURI();
-        return uri.equals("") || uri.equals(NamespaceConstant.XHTML);
+        NamespaceUri uri = name.getURI();
+        return uri.isEmpty() || uri.equals(NamespaceUri.XHTML);
     }
 
     @Override

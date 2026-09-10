@@ -14,8 +14,8 @@ import net.sf.saxon.expr.instruct.CallTemplate;
 import net.sf.saxon.expr.instruct.NamedTemplate;
 import net.sf.saxon.expr.instruct.WithParam;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -43,7 +43,7 @@ public class AbsentExtensionElement extends StyleElement {
      */
     @Override
     public boolean isInXsltNamespace() {
-        return getNodeName().hasURI(NamespaceConstant.XSLT);
+        return getNodeName().hasURI(NamespaceUri.XSLT);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class AbsentExtensionElement extends StyleElement {
                 List<WithParam> params = new ArrayList<>();
                 for (AttributeInfo att : attributes().asList()) {
                     StructuredQName name = att.getNodeName().getStructuredQName();
-                    if (!name.hasURI(NamespaceConstant.XSLT) && !name.hasURI(NamespaceConstant.XML)) {
+                    if (!name.hasURI(NamespaceUri.XSLT) && !name.hasURI(NamespaceUri.XML)) {
                         for (NamedTemplate.LocalParamInfo param : declaredParams) {
                             if (param.name.equals(name) && !param.isTunnel) {
                                 SequenceType required = param.requiredType;

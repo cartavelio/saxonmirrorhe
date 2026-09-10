@@ -432,14 +432,14 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
 
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         switch (nodeKind) {
             case Type.ELEMENT:
-                return ((Element) node).getNamespaceURI();
+                return NamespaceUri.of(((Element) node).getNamespaceURI());
             case Type.ATTRIBUTE:
-                return ((Attribute) node).getNamespaceURI();
+                return NamespaceUri.of(((Attribute) node).getNamespaceURI());
             default:
-                return "";
+                return NamespaceUri.NULL;
         }
     }
 
@@ -535,7 +535,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    public SteppingNode getSuccessorElement(SteppingNode anchor, String uri, String local) {
+    public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, String local) {
         Node stop = anchor == null ? null : ((XOMNodeWrapper)anchor).node;
         Node next = node;
         do {
@@ -675,9 +675,9 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
 
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         if (nodeKind == Type.ELEMENT) {
-            Attribute att = ((Element) node).getAttribute(local, uri);
+            Attribute att = ((Element) node).getAttribute(local, uri.toString());
             if (att != null) {
                 return att.getValue();
             }
@@ -752,10 +752,10 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                     // include the default namespace undeclaration xmlns="" only if needed
                     ParentNode parent = node.getParent();
                     if (parent instanceof Element && !((Element)parent).getNamespaceURI("").isEmpty()) {
-                        list.add(new NamespaceBinding(prefix, uri));
+                        list.add(new NamespaceBinding(prefix, NamespaceUri.of(uri)));
                     }
                 } else {
-                    list.add(new NamespaceBinding(prefix, uri));
+                    list.add(new NamespaceBinding(prefix, NamespaceUri.of(uri)));
                 }
             }
             return list.toArray(NamespaceBinding.EMPTY_ARRAY);
@@ -789,7 +789,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                 for (int i = 0; i < size; i++) {
                     String prefix = elem.getNamespacePrefix(i);
                     String uri = elem.getNamespaceURI(prefix);
-                    nsMap = nsMap.bind(prefix, uri);
+                    nsMap = nsMap.bind(prefix, NamespaceUri.of(uri));
                 }
                 return inScopeNamespaces = nsMap;
             }

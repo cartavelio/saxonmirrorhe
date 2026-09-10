@@ -408,8 +408,7 @@ public class XdmAtomicValue extends XdmItem {
         } else if (av instanceof DateValue) {
             return ((DateValue)av).toLocalDate();
         } else if (av instanceof QNameValue) {
-            QNameValue q = (QNameValue) av;
-            return new QName(q.getPrefix(), q.getNamespaceURI(), q.getLocalName());
+            return new QName(((QNameValue) av).getStructuredQName());
         } else {
             return av.getUnicodeStringValue();
         }

@@ -86,8 +86,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     // namespace aliases. This information is needed at compile-time only
     private int numberOfAliases = 0;
     private List<ComponentDeclaration> namespaceAliasList = new ArrayList<>(5);
-    private HashMap<String, NamespaceBinding> namespaceAliasMap;
-    private Set<String> aliasResultUriSet;
+    private HashMap<NamespaceUri, NamespaceBinding> namespaceAliasMap;
+    private Set<NamespaceUri> aliasResultUriSet;
 
     // attribute sets. A package can contain several declarations attribute sets with the same name.
     // They are indexed in the order they will be applied, that is, highest precedence first
@@ -409,7 +409,6 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         // Gather the output properties
 
         Properties props = gatherOutputProperties(null);
-        //props.setProperty(SaxonOutputKeys.STYLESHEET_VERSION, getStylesheetPackage().getHostLanguageVersion() + "");
         props.setProperty(SaxonOutputKeys.STYLESHEET_VERSION, top.getEffectiveVersion() + "");
         getStylesheetPackage().setDefaultOutputProperties(props);
 
@@ -511,12 +510,12 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     }
 
 
-    private static void gatherUsePackageDeclarations(Compilation compilation, StyleElement wrapper, List<XSLUsePackage> declarations) throws XPathException {
+    private static void gatherUsePackageDeclarations(Compilation compilation, StyleElement wrapper, List<XSLUsePackage> declarations)  {
         for (NodeInfo use : wrapper.children()) {
             if (use instanceof XSLUsePackage) {
                 declarations.add((XSLUsePackage) use);
             } else if (use instanceof XSLInclude) {
-                String href = Whitespace.trim(use.getAttributeValue("", "href"));
+                String href = Whitespace.trim(use.getAttributeValue(NamespaceUri.NULL, "href"));
                 DocumentKey key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), false);
                 TreeInfo includedTree = compilation.getStylesheetModules().get(key);
                 StyleElement incWrapper = (StyleElement) ((DocumentImpl) includedTree.getRootNode()).getDocumentElement();
@@ -722,9 +721,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * Add a named template to the index
      *
      * @param decl the declaration of the Template object
-     * @throws XPathException if an error occurs
      */
-    protected void indexNamedTemplate(ComponentDeclaration decl) throws XPathException {
+    protected void indexNamedTemplate(ComponentDeclaration decl) {
         HashMap<SymbolicName, Component> componentIndex = stylesheetPackage.getComponentIndex();
         XSLTemplate sourceTemplate = (XSLTemplate) decl.getSourceElement();
         SymbolicName sName = sourceTemplate.getSymbolicName();
@@ -749,7 +747,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                         String errorCode = sourceTemplate.getParent() instanceof XSLOverride ? "XTSE3055" : "XTSE0660";
                         sourceTemplate.compileError("Duplicate named template (see line " +
                                                             otherTemplate.getSourceElement().getLineNumber() + " of " + otherTemplate.getSourceElement().getSystemId() + ')', errorCode);
-                    } else if (thisPrecedence < otherPrecedence) {
+                    } else //noinspection StatementWithEmptyBody
+                        if (thisPrecedence < otherPrecedence) {
                         //return;
                     } else {
                         // can't happen, but we'll play safe
@@ -776,7 +775,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     }
 
 
-    private static void setLocalParamDetails(XSLTemplate source, NamedTemplate nt) throws XPathException {
+    private static void setLocalParamDetails(XSLTemplate source, NamedTemplate nt) {
         AxisIterator kids = source.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         List<NamedTemplate.LocalParamInfo> details = new ArrayList<>();
         SequenceTool.supply(kids, (ItemConsumer<? super Item>) child -> {
@@ -826,8 +825,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             entries = new ArrayList<>();
             attributeSetDeclarations.put(name, entries);
         } else {
-            String thisVis = Whitespace.trim(sourceAttributeSet.getAttributeValue("", "visibility"));
-            String firstVis = Whitespace.trim(entries.get(0).getSourceElement().getAttributeValue("", "visibility"));
+            String thisVis = Whitespace.trim(sourceAttributeSet.getAttributeValue(NamespaceUri.NULL, "visibility"));
+            String firstVis = Whitespace.trim(entries.get(0).getSourceElement().getAttributeValue(NamespaceUri.NULL, "visibility"));
             if (thisVis == null ? firstVis != null : !thisVis.equals(firstVis)) {
                 throw new XPathException("Visibility attributes on attribute-sets sharing the same name must all be the same", "XTSE0010");
             }
@@ -899,7 +898,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 src.compileDeclaration(compilation, decl);
                 content.addAll(src.getContainedInstructions());
                 vis = src.getVisibility();
-                explicitVisibility = explicitVisibility || src.getAttributeValue("", "visibility") != null;
+                explicitVisibility = explicitVisibility || src.getAttributeValue(NamespaceUri.NULL, "visibility") != null;
             }
 
             AttributeSet aSet = index.get(entry.getKey());
@@ -1075,7 +1074,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * if no alias is defined
      */
 
-    protected NamespaceBinding getNamespaceAlias(String uri) {
+    protected NamespaceBinding getNamespaceAlias(NamespaceUri uri) {
         return namespaceAliasMap.get(uri);
     }
 
@@ -1086,7 +1085,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * @return true if an xsl:namespace-alias has been defined for this namespace URI
      */
 
-    protected boolean isAliasResultNamespace(String uri) {
+    protected boolean isAliasResultNamespace(NamespaceUri uri) {
         return aliasResultUriSet.contains(uri);
     }
 
@@ -1097,14 +1096,14 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     private void collectNamespaceAliases() {
         namespaceAliasMap = new HashMap<>(numberOfAliases);
         aliasResultUriSet = new HashSet<>(numberOfAliases);
-        HashSet<String> aliasesAtThisPrecedence = new HashSet<>();
+        HashSet<NamespaceUri> aliasesAtThisPrecedence = new HashSet<>();
         int currentPrecedence = -1;
         // Note that we are processing the list in reverse stylesheet order,
         // that is, highest precedence first.
         for (int i = 0; i < numberOfAliases; i++) {
             ComponentDeclaration decl = namespaceAliasList.get(i);
             XSLNamespaceAlias xna = (XSLNamespaceAlias) decl.getSourceElement();
-            String scode = xna.getStylesheetURI();
+            NamespaceUri scode = xna.getStylesheetURI();
             NamespaceBinding resultBinding = xna.getResultNamespaceBinding();
             int prec = decl.getPrecedence();
 
@@ -1327,8 +1326,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             ExecutableFunctionLibrary underriding = new ExecutableFunctionLibrary(config);
 
             for (Component decl : stylesheetPackage.getComponentIndex().values()) {
-                Visibility vis = decl.getVisibility();
-                if (/*(vis == Visibility.PUBLIC || vis == Visibility.FINAL) &&*/ decl.getActor() instanceof UserFunction) {
+                if (decl.getActor() instanceof UserFunction) {
                     UserFunction f = (UserFunction) decl.getActor();
                     if (f.isOverrideExtensionFunction()) {
                         overriding.addFunction(f);
@@ -1493,15 +1491,15 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * @return the required Schema, or null if no such schema has been imported
      */
 
-    protected boolean isImportedSchema(String targetNamespace) {
+    protected boolean isImportedSchema(NamespaceUri targetNamespace) {
         return stylesheetPackage.getSchemaNamespaces().contains(targetNamespace);
     }
 
-    protected void addImportedSchema(String targetNamespace) {
+    protected void addImportedSchema(NamespaceUri targetNamespace) {
         stylesheetPackage.getSchemaNamespaces().add(targetNamespace);
     }
 
-    protected Set<String> getImportedSchemaTable() {
+    protected Set<NamespaceUri> getImportedSchemaTable() {
         return stylesheetPackage.getSchemaNamespaces();
     }
 

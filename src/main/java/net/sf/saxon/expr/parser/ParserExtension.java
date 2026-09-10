@@ -17,8 +17,8 @@ import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
@@ -118,7 +118,7 @@ public class ParserExtension {
         // Special treatment of functions in the system function library that depend on dynamic context; turn these
         // into calls on function-lookup()
 
-        if (functionName.hasURI(NamespaceConstant.FN) && fcf instanceof SystemFunction) {
+        if (functionName.hasURI(NamespaceUri.FN) && fcf instanceof SystemFunction) {
             final BuiltInFunctionSet.Entry details = ((SystemFunction) fcf).getDetails();
             if (details != null &&
                     (details.properties & (BuiltInFunctionSet.FOCUS | BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)) != 0) {
@@ -136,7 +136,7 @@ public class ParserExtension {
     }
 
     private static Expression makeNamedFunctionReference(StructuredQName functionName, Function fcf) {
-        if (fcf instanceof UserFunction && !functionName.hasURI(NamespaceConstant.XSLT)) {
+        if (fcf instanceof UserFunction && !functionName.hasURI(NamespaceUri.XSLT)) {
             // This case is treated specially because a UserFunctionReference in XSLT can be redirected
             // at link time to an overriding function. However, this doesn't apply to xsl:original
             return new UserFunctionReference((UserFunction) fcf);

@@ -106,7 +106,7 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
                              Location location, int properties) throws XPathException {
         flush();
         String local = elemName.getLocalPart();
-        String uri = elemName.getURI();
+        String uri = elemName.getURI().toString();
         String prefix = elemName.getPrefix();
         Element element;
         if (ancestors.isEmpty()) {
@@ -128,7 +128,7 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
         if (namespaces != parentNamespaces) {
             NamespaceBinding[] declarations = namespaces.getDifferences(parentNamespaces, false);
             for (NamespaceBinding ns : declarations) {
-                element.addNamespace(ns.getPrefix(), ns.getURI());
+                element.addNamespace(ns.getPrefix(), ns.getURI().toString());
             }
         }
         nsStack.push(namespaces);
@@ -136,7 +136,7 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
         for (AttributeInfo att : attributes) {
             NodeName nameCode = att.getNodeName();
             String attlocal = nameCode.getLocalPart();
-            String atturi = nameCode.getURI();
+            String atturi = nameCode.getURI().toString();
             String attprefix = nameCode.getPrefix();
             String value = att.getValue();
             Namespace ns = new Namespace(attprefix, atturi);

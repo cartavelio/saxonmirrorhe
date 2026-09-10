@@ -17,7 +17,6 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.QNameTest;
 import net.sf.saxon.s9api.XmlProcessingError;
@@ -253,7 +252,7 @@ public class TryCatch extends Expression {
             } else {
                 StructuredQName code = err.getErrorCodeQName();
                 if (code == null) {
-                    code = new StructuredQName("saxon", NamespaceConstant.SAXON, "XXXX9999");
+                    code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
                 }
                 for (CatchClause clause : catchClauses) {
                     if (clause.nameTest.matches(code)) {
@@ -295,7 +294,7 @@ public class TryCatch extends Expression {
             } else {
                 StructuredQName code = err.getErrorCodeQName();
                 if (code == null) {
-                    code = new StructuredQName("saxon", NamespaceConstant.SAXON, "XXXX9999");
+                    code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
                 }
                 for (CatchClause clause : catchClauses) {
                     if (clause.nameTest.matches(code)) {
@@ -350,7 +349,7 @@ public class TryCatch extends Expression {
             } else {
                 StructuredQName code = err.getErrorCodeQName();
                 if (code == null) {
-                    code = new StructuredQName("saxon", NamespaceConstant.SAXON, "XXXX9999");
+                    code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
                 }
                 for (CatchClause clause : catchClauses) {
                     if (clause.nameTest.matches(code)) {

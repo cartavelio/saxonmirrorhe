@@ -8,6 +8,7 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -119,10 +120,10 @@ public abstract class OutputterEvent {
     public static class Namespace extends OutputterEvent {
 
         String prefix;
-        String uri;
+        NamespaceUri uri;
         int properties;
 
-        public Namespace(String prefix, String uri, int properties) {
+        public Namespace(String prefix, NamespaceUri uri, int properties) {
             this.prefix = prefix;
             this.uri = uri;
             this.properties = properties;

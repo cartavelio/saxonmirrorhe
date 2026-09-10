@@ -12,7 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -31,7 +31,7 @@ public class TypeAvailable extends SystemFunction {
         StructuredQName qName;
         try {
             if (lexicalName.indexOf(':') < 0 && !lexicalName.startsWith("Q{")) {
-                String defaultNS = getRetainedStaticContext().getURIForPrefix("", true);
+                NamespaceUri defaultNS = getRetainedStaticContext().getURIForPrefix("", true);
                 qName = new StructuredQName("", defaultNS, lexicalName);
             } else {
                 qName = StructuredQName.fromLexicalQName(lexicalName,
@@ -43,8 +43,8 @@ public class TypeAvailable extends SystemFunction {
             throw e;
         }
 
-        String uri = qName.getURI();
-        if (uri.equals(NamespaceConstant.JAVA_TYPE)) {
+        NamespaceUri uri = qName.getURI();
+        if (uri.equals(NamespaceUri.JAVA_TYPE)) {
             try {
                 String className = JavaExternalObjectType.localNameToClassName(qName.getLocalPart());
                 config.getClass(className, false);

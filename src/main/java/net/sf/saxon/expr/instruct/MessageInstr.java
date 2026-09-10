@@ -243,7 +243,7 @@ public class MessageInstr extends Instruction {
                     code, false, true, getRetainedStaticContext());
         } catch (XPathException err) {
             // The spec says we fall back to XTMM9000
-            errorCode = new StructuredQName("err", NamespaceConstant.ERR, "XTMM9000");
+            errorCode = new StructuredQName("err", NamespaceUri.ERR, "XTMM9000");
         }
 
         controller.incrementMessageCounter(errorCode);

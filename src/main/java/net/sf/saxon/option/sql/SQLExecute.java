@@ -13,6 +13,7 @@ import net.sf.saxon.expr.SimpleExpression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
@@ -46,14 +47,14 @@ public class SQLExecute extends ExtensionInstruction {
     protected void prepareAttributes() {
         // Attributes for SQL-statement
         AttributeMap atts = attributes();
-        AttributeInfo statementAtt = atts.get("", "statement");
+        AttributeInfo statementAtt = atts.get(NamespaceUri.NULL, "statement");
         if (statementAtt == null) {
             reportAbsence("statement");
         } else {
             statement = makeAttributeValueTemplate(statementAtt.getValue(), statementAtt);
         }
 
-        AttributeInfo connectAtt = atts.get("", "connection");
+        AttributeInfo connectAtt = atts.get(NamespaceUri.NULL, "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {

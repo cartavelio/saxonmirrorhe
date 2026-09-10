@@ -13,7 +13,6 @@ import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.ResultDocument;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
@@ -150,7 +149,7 @@ public class XSLResultDocument extends StyleElement {
                 }
                 Expression exp = makeAttributeValueTemplate(val, att);
                 serializationAttributes.put(name, exp);
-            } else if (name.getLocalPart().equals("asynchronous") && name.hasURI(NamespaceConstant.SAXON)) {
+            } else if (name.getLocalPart().equals("asynchronous") && name.hasURI(NamespaceUri.SAXON)) {
                 async = processBooleanAttribute("saxon:asynchronous", value);
                 if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
                     async = false;
@@ -192,7 +191,7 @@ public class XSLResultDocument extends StyleElement {
 
         if (useCharacterMapsAtt != null) {
             String s = XSLOutput.prepareCharacterMaps(this, useCharacterMapsAtt, new Properties());
-            serializationAttributes.put(new StructuredQName("", "", "use-character-maps"),
+            serializationAttributes.put(new StructuredQName("", NamespaceUri.NULL, "use-character-maps"),
                     new StringLiteral(s));
         }
     }
@@ -217,8 +216,8 @@ public class XSLResultDocument extends StyleElement {
 
     }
 
-    public static StructuredQName METHOD = new StructuredQName("", "", "method");
-    public static StructuredQName BUILD_TREE = new StructuredQName("", "", "build-tree");
+    public static StructuredQName METHOD = new StructuredQName("", NamespaceUri.NULL, "method");
+    public static StructuredQName BUILD_TREE = new StructuredQName("", NamespaceUri.NULL, "build-tree");
 
     /*@Nullable*/
     @Override
@@ -261,9 +260,9 @@ public class XSLResultDocument extends StyleElement {
             AxisIterator kids = iterateAxis(AxisInfo.CHILD);
             NodeInfo first = kids.next();
             if (first instanceof LiteralResultElement) {
-                if (first.getURI().equals(NamespaceConstant.XHTML) && first.getLocalPart().equals("html")) {
+                if (first.getNamespaceUri().equals(NamespaceUri.XHTML) && first.getLocalPart().equals("html")) {
                     method = "xhtml";
-                } else if (first.getLocalPart().equalsIgnoreCase("html") && first.getURI().isEmpty()) {
+                } else if (first.getLocalPart().equalsIgnoreCase("html") && first.getNamespaceUri().isEmpty()) {
                     method = "html";
                 } else {
                     method = "xml";
@@ -281,7 +280,7 @@ public class XSLResultDocument extends StyleElement {
             if (exp instanceof StringLiteral) {
                 String s = ((StringLiteral) exp).stringify();
                 String lname = property.getLocalPart();
-                String uri = property.getURI();
+                NamespaceUri uri = property.getURI();
                 try {
 
                     ResultDocument.setSerializationProperty(localProps, uri, lname, s,
@@ -291,7 +290,7 @@ public class XSLResultDocument extends StyleElement {
                         method = s;
                     }
                 } catch (XPathException e) {
-                    if (NamespaceConstant.SAXON.equals(e.getErrorCodeNamespace())) {
+                    if (NamespaceUri.SAXON.equals(e.getErrorCodeNamespace())) {
                         compileWarning(e.getMessage(), e.getErrorCodeQName());
                     } else {
                         e.setErrorCode("XTSE0020");

@@ -340,13 +340,13 @@ public class ContentHandlerProxy implements Receiver {
             if (prefix.equals("xml")) {
                 return;
             }
-            String uri = ns.getURI();
+            NamespaceUri uri = ns.getURI();
             if (!undeclareNamespaces && uri.isEmpty() && !prefix.isEmpty()) {
                 // This is a namespace undeclaration, but the ContentHandler doesn't want to know about undeclarations
                 return;
             }
             try {
-                handler.startPrefixMapping(prefix, uri);
+                handler.startPrefixMapping(prefix, uri.toString());
                 namespaceStack.push(prefix);
             } catch (SAXException err) {
                 handleSAXException(err);
@@ -370,13 +370,13 @@ public class ContentHandlerProxy implements Receiver {
 
         if (depth > 0 || !requireWellFormed) {
             try {
-                String uri = elemName.getURI();
+                NamespaceUri uri = elemName.getURI();
                 String localName = elemName.getLocalPart();
                 String qname = elemName.getDisplayName();
 
-                handler.startElement(uri, localName, qname, atts2);
+                handler.startElement(uri.toString(), localName, qname, atts2);
 
-                elementStack.push(uri);
+                elementStack.push(uri.toString());
                 elementStack.push(localName);
                 elementStack.push(qname);
 

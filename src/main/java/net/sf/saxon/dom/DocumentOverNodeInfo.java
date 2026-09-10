@@ -301,7 +301,7 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
                 break;
             }
             if (next.getNodeKind() == Type.ELEMENT) {
-                if ((ns.equals("*") || ns.equals(next.getURI())) &&
+                if ((ns.equals("*") || ns.equals(next.getNamespaceUri())) &&
                         (localName.equals("*") || localName.equals(next.getLocalPart()))) {
                     nodes.add(NodeOverNodeInfo.wrap(next));
                 }

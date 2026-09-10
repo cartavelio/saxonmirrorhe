@@ -204,7 +204,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
             }
 
             if (namespace == null) {
-                String nsuri = "";
+                NamespaceUri nsuri = NamespaceUri.NULL;
                 if (!parts[0].equals("")) {
                     nsuri = getURIForPrefix(parts[0], false);
                     if (nsuri == null) {
@@ -236,10 +236,10 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                             break;
                         }
                     }
-                    // Otherwise see the URI is known to the namepool
+                    // Otherwise see if the URI is known to the namepool
                     if (parts[0].equals("")) {
                         String p = getNamePool().suggestPrefixForURI(
-                                ((StringLiteral) namespace).stringify());
+                                NamespaceUri.of(((StringLiteral) namespace).stringify()));
                         if (p != null) {
                             parts[0] = p;
                         }
@@ -250,7 +250,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                         parts[0] = "ns0";
                     }
                 }
-                NodeName nodeName = new FingerprintedQName(parts[0], nsuri, parts[1]);
+                NodeName nodeName = new FingerprintedQName(parts[0], NamespaceUri.of(nsuri), parts[1]);
                 nodeName.obtainFingerprint(getNamePool());
                 FixedAttribute fixedAtt = new FixedAttribute(nodeName, validationAction, schemaType);
                 fixedAtt.setInstruction(true);

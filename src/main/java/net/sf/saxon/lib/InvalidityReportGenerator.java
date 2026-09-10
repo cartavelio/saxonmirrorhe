@@ -9,6 +9,7 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 
@@ -20,7 +21,7 @@ import net.sf.saxon.trans.XPathException;
 
 public class InvalidityReportGenerator extends StandardInvalidityHandler {
 
-    public static final String REPORT_NS = "http://saxon.sf.net/ns/validation";
+    public static final NamespaceUri REPORT_NS = NamespaceUri.of("http://saxon.sf.net/ns/validation");
 
 
     public InvalidityReportGenerator(Configuration config) {

@@ -7,9 +7,8 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.s9api.Location;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -223,11 +222,11 @@ public class NamespaceReducer extends ProxyReceiver implements NamespaceResolver
 
     /*@Nullable*/
     @Override
-    public String getURIForPrefix(String prefix, boolean useDefault) {
+    public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
         if (prefix.isEmpty() && !useDefault) {
-            return NamespaceConstant.NULL;
+            return NamespaceUri.NULL;
         } else if ("xml".equals(prefix)) {
-            return NamespaceConstant.XML;
+            return NamespaceUri.XML;
         } else {
             for (int i = namespacesSize - 1; i >= 0; i--) {
                 if (namespaces[i].getPrefix().equals(prefix)) {
@@ -235,7 +234,7 @@ public class NamespaceReducer extends ProxyReceiver implements NamespaceResolver
                 }
             }
         }
-        return prefix.isEmpty() ? NamespaceConstant.NULL : null;
+        return prefix.isEmpty() ? NamespaceUri.NULL : null;
     }
 
     /**

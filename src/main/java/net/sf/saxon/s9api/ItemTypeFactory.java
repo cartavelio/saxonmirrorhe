@@ -11,7 +11,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.XPathParser;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
@@ -63,7 +62,7 @@ public class ItemTypeFactory {
             XPathParser parser = new XPathParser();
             IndependentContext env = new IndependentContext();
             env.setXPathLanguageLevel(40);
-            env.declareNamespace("xs", NamespaceConstant.SCHEMA);
+            env.declareNamespace("xs", NamespaceUri.SCHEMA);
             net.sf.saxon.value.SequenceType st = parser.parseSequenceType(typeDesignation, env);
             if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
                 parser.grumble("No occurrence indicator is allowed");
@@ -93,9 +92,9 @@ public class ItemTypeFactory {
     }
 
     private ItemType getAtomicType(StructuredQName name) throws SaxonApiException {
-        if (name.hasURI(NamespaceConstant.SCHEMA)) {
+        if (name.hasURI(NamespaceUri.SCHEMA)) {
             String local = name.getLocalPart();
-            int fp = StandardNames.getFingerprint(NamespaceConstant.SCHEMA, local);
+            int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, local);
             if (config.getXsdVersion() == Configuration.XSD10 && config.getXMLVersion() == Configuration.XML10) {
                 return getBuiltInAtomicType(fp);
             } else {

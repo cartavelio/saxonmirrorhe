@@ -9,6 +9,7 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NameTest;
@@ -150,11 +151,11 @@ public class XdmNode extends XdmItem {
                 if (n.getLocalPart().isEmpty()) {
                     return null;
                 } else {
-                    return new QName(new StructuredQName("", "", n.getLocalPart()));
+                    return new QName(new StructuredQName("", NamespaceUri.NULL, n.getLocalPart()));
                 }
             case Type.ELEMENT:
             case Type.ATTRIBUTE:
-                return new QName(n.getPrefix(), n.getURI(), n.getLocalPart());
+                return new QName(new StructuredQName(n.getPrefix(), n.getNamespaceUri(), n.getLocalPart()));
             default:
                 return null;
         }
@@ -388,7 +389,8 @@ public class XdmNode extends XdmItem {
 
     public String getAttributeValue(QName name) {
         NodeInfo node = getUnderlyingNode();
-        return node.getAttributeValue(name.getNamespaceURI(), name.getLocalName());
+        StructuredQName sq = name.getStructuredQName();
+        return node.getAttributeValue(sq.getURI(), sq.getLocalPart());
     }
 
     /**
@@ -402,7 +404,7 @@ public class XdmNode extends XdmItem {
      */
 
     public String attribute(String name) {
-        return getUnderlyingNode().getAttributeValue("", name);
+        return getUnderlyingNode().getAttributeValue(NamespaceUri.NULL, name);
     }
 
 

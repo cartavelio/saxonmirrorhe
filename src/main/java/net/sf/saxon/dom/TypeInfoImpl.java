@@ -8,6 +8,7 @@
 package net.sf.saxon.dom;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaType;
@@ -51,7 +52,7 @@ public class TypeInfoImpl implements TypeInfo {
 
     @Override
     public String getTypeNamespace() {
-        return schemaType.getStructuredQName().getURI();
+        return schemaType.getStructuredQName().getURI().toString();
     }
 
     /**
@@ -71,7 +72,7 @@ public class TypeInfoImpl implements TypeInfo {
                                  String typeNameArg,
                                  int derivationMethod) throws IllegalStateException {
         SchemaType base = schemaType.getBaseType();
-        int fingerprint = config.getNamePool().allocateFingerprint(typeNamespaceArg, typeNameArg);
+        int fingerprint = config.getNamePool().allocateFingerprint(NamespaceUri.of(typeNamespaceArg), typeNameArg);
         if (derivationMethod == 0 || (derivationMethod & schemaType.getDerivationMethod()) != 0) {
             if (base.getFingerprint() == fingerprint) {
                 return true;

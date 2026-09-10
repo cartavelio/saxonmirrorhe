@@ -11,10 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -77,8 +74,8 @@ public class XSLImportSchema extends StyleElement {
 
     public void readSchema() throws XPathException {
         try {
-            String schemaLoc = Whitespace.trim(getAttributeValue("", "schema-location"));
-            String namespace = Whitespace.trim(getAttributeValue("", "namespace"));
+            String schemaLoc = Whitespace.trim(getAttributeValue(NamespaceUri.NULL, "schema-location"));
+            String namespace = Whitespace.trim(getAttributeValue(NamespaceUri.NULL, "namespace"));
             if (namespace == null) {
                 namespace = "";
             } else {
@@ -96,6 +93,7 @@ public class XSLImportSchema extends StyleElement {
                 throw xe;
             }
             NodeInfo inlineSchema = null;
+            NamespaceUri targetNamespace = null;
             for (NodeInfo child : children()) {
                 if (inlineSchema != null) {
                     compileError(getDisplayName() + " must not have more than one child element");
@@ -109,27 +107,30 @@ public class XSLImportSchema extends StyleElement {
                 }
 
                 if (namespace.isEmpty()) {
-                    namespace = inlineSchema.getAttributeValue("", "targetNamespace");
+                    namespace = inlineSchema.getAttributeValue(NamespaceUri.NULL, "targetNamespace");
                     if (namespace == null) {
                         namespace = "";
                     }
                 }
 
-                namespace = config.readInlineSchema(inlineSchema, namespace,
+                targetNamespace = NamespaceUri.of(namespace);
+                targetNamespace = config.readInlineSchema(inlineSchema, targetNamespace,
                         getCompilation().getCompilerInfo().getErrorReporter());
-                getPrincipalStylesheetModule().addImportedSchema(namespace);
+                getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
             }
             if (inlineSchema != null) {
                 return;
             }
             if (namespace.equals(NamespaceConstant.XML) ||
-                namespace.equals(NamespaceConstant.FN)||
-                namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
-                config.addSchemaForBuiltInNamespace(namespace);
-                getPrincipalStylesheetModule().addImportedSchema(namespace);
+                    namespace.equals(NamespaceConstant.FN) ||
+                    namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+                targetNamespace = NamespaceUri.of(namespace);
+                config.addSchemaForBuiltInNamespace(targetNamespace);
+                getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
                 return;
             }
-            boolean namespaceKnown = config.isSchemaAvailable(namespace);
+            targetNamespace = NamespaceUri.of(namespace);
+            boolean namespaceKnown = config.isSchemaAvailable(targetNamespace);
             if (schemaLoc == null && !namespaceKnown) {
                 compileWarning("No schema for this namespace is known, " +
                         "and no schema-location was supplied, so no schema has been imported",
@@ -148,9 +149,9 @@ public class XSLImportSchema extends StyleElement {
 //                        getCompilation().getCompilerInfo().getResourceResolver());
 //                pipe.setSchemaURIResolver(schemaResolver);
                 pipe.setErrorReporter(getCompilation().getCompilerInfo().getErrorReporter());
-                namespace = config.readSchema(pipe, getBaseURI(), schemaLoc, namespace);
+                targetNamespace = config.readSchema(pipe, getBaseURI(), schemaLoc, targetNamespace);
             }
-            getPrincipalStylesheetModule().addImportedSchema(namespace);
+            getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
         } catch (SchemaException err) {
             String errorCode = err.getErrorCodeLocalPart() == null ? "XTSE0220" : err.getErrorCodeLocalPart();
             compileError(err.getMessage(), errorCode);

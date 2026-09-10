@@ -7,7 +7,6 @@
 
 package net.sf.saxon.tree.wrapper;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -139,7 +138,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
             AxisIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
             NodeInfo node;
             while ((node = iter.next()) != null) {
-                String val = node.getAttributeValue(NamespaceConstant.XML, "space");
+                String val = node.getAttributeValue(NamespaceUri.XML, "space");
                 if ("preserve".equals(val)) {
                     return true;
                 }

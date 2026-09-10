@@ -15,11 +15,11 @@ import net.sf.saxon.expr.instruct.SequenceInstr;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -82,7 +82,7 @@ public class XSLMap extends StyleElement {
                 if (attName.getURI().isEmpty()) {
                     requireXslt40("on-duplicates");
                     onDuplicates = makeExpression(value, att);
-                } else if (attName.hasURI(NamespaceConstant.SAXON)) {
+                } else if (attName.hasURI(NamespaceUri.SAXON)) {
                     if (getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                         onDuplicates = makeExpression(value, att);
                     } else {
@@ -113,12 +113,12 @@ public class XSLMap extends StyleElement {
 
         if (onDuplicates != null) {
             optionsExp = MapFunctionSet.getInstance().makeFunction("entry", 2).makeFunctionCall(
-                    Literal.makeLiteral(new QNameValue("", NamespaceConstant.SAXON, "on-duplicates")),
+                    Literal.makeLiteral(new QNameValue("", NamespaceUri.SAXON, "on-duplicates")),
                     onDuplicates);
         } else {
             HashTrieMap options = new HashTrieMap();
             options.initialPut(StringValue.bmp("duplicates"), StringValue.bmp("reject"));
-            options.initialPut(new QNameValue("", NamespaceConstant.SAXON, "duplicates-error-code"),
+            options.initialPut(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"),
                                StringValue.bmp("XTDE3365"));
             optionsExp = Literal.makeLiteral(options, select);
         }

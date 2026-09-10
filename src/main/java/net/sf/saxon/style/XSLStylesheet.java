@@ -8,6 +8,7 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
@@ -108,7 +109,7 @@ public class XSLStylesheet extends XSLModuleRoot {
                     curr instanceof DataElement) {
                 // all is well
             } else if (curr instanceof StyleElement) {
-                if (!((StyleElement)curr).isInXsltNamespace() && !((StyleElement)curr).getNodeName().hasURI("")) {
+                if (!((StyleElement)curr).isInXsltNamespace() && !((StyleElement)curr).getNodeName().hasURI(NamespaceUri.NULL)) {
                     // elements in other namespaces are allowed and ignored
                 } else if (curr instanceof AbsentExtensionElement && ((StyleElement) curr).forwardsCompatibleModeIsEnabled()) {
                     // this is OK: an unknown XSLT element is allowed in forwards compatibility mode

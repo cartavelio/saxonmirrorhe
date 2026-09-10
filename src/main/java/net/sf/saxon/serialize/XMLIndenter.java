@@ -11,7 +11,6 @@ import net.sf.saxon.event.Event;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
@@ -122,7 +121,7 @@ public class XMLIndenter extends ProxyReceiver {
 
         level++;
         if (suppressedAtLevel < 0) {
-            String xmlSpace = attributes.getValue(NamespaceConstant.XML, "space");
+            String xmlSpace = attributes.getValue(NamespaceUri.XML, "space");
             if (xmlSpace != null && xmlSpace.trim().equals("preserve")) {
                 // Note, we are suppressing indentation within an xml:space="preserve" region even if a descendant
                 // specifies xml:space="default"
@@ -151,9 +150,9 @@ public class XMLIndenter extends ProxyReceiver {
                 for (NamespaceBinding binding : nbs) {
                     String prefix = binding.getPrefix();
                     if (prefix.isEmpty()) {
-                        len += 9 + binding.getURI().length();
+                        len += 9 + binding.getURI().toString().length();
                     } else {
-                        len += prefix.length() + 10 + binding.getURI().length();
+                        len += prefix.length() + 10 + binding.getURI().toString().length();
                     }
                 }
             }

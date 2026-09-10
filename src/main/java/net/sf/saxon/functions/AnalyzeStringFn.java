@@ -14,7 +14,6 @@ import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegexMatchHandler;
@@ -53,18 +52,18 @@ public class AnalyzeStringFn extends RegexFunction {
     }
 
     private synchronized void init(Configuration config, boolean schemaAware) throws XPathException {
-        vocab.resultName = new FingerprintedQName("", NamespaceConstant.FN, "analyze-string-result");
-        vocab.nonMatchName = new FingerprintedQName("", NamespaceConstant.FN, "non-match");
-        vocab.matchName = new FingerprintedQName("", NamespaceConstant.FN, "match");
-        vocab.groupName = new FingerprintedQName("", NamespaceConstant.FN, "group");
+        vocab.resultName = new FingerprintedQName("", NamespaceUri.FN, "analyze-string-result");
+        vocab.nonMatchName = new FingerprintedQName("", NamespaceUri.FN, "non-match");
+        vocab.matchName = new FingerprintedQName("", NamespaceUri.FN, "match");
+        vocab.groupName = new FingerprintedQName("", NamespaceUri.FN, "group");
         vocab.groupNrName = new NoNamespaceName("nr");
 
         //#if EE==true
         if (schemaAware) {
-            vocab.resultType = config.getSchemaType(new StructuredQName("", NamespaceConstant.FN, "analyze-string-result-type"));
+            vocab.resultType = config.getSchemaType(new StructuredQName("", NamespaceUri.FN, "analyze-string-result-type"));
             vocab.nonMatchType = BuiltInAtomicType.STRING;
-            vocab.matchType = config.getSchemaType(new StructuredQName("", NamespaceConstant.FN, "match-type"));
-            vocab.groupType = config.getSchemaType(new StructuredQName("", NamespaceConstant.FN, "group-type"));
+            vocab.matchType = config.getSchemaType(new StructuredQName("", NamespaceUri.FN, "match-type"));
+            vocab.groupType = config.getSchemaType(new StructuredQName("", NamespaceUri.FN, "group-type"));
             vocab.groupNrType = BuiltInAtomicType.POSITIVE_INTEGER;
             if (vocab.resultType == null || vocab.matchType == null || vocab.groupType == null) {
                 throw new XPathException("Schema for analyze-string has not been successfully loaded");
@@ -99,7 +98,7 @@ public class AnalyzeStringFn extends RegexFunction {
             Configuration config = context.getConfiguration();
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized(config) {
-                if (schemaAware && !config.isSchemaAvailable(NamespaceConstant.FN)) {
+                if (schemaAware && !config.isSchemaAvailable(NamespaceUri.FN)) {
                     config.addSchemaSource(StandardSchemaResolver.fetchResource("xpath-functions.scm", config));
                 }
             }

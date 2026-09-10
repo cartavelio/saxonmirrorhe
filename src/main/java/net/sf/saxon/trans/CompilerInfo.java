@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryLibrary;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
@@ -51,7 +52,7 @@ public class CompilerInfo {
     private boolean relocatable = false;
     private Iterable<QueryLibrary> queryLibraries;
     private OptimizerOptions optimizerOptions;
-    private String defaultNamespaceForElementsAndTypes = "";
+    private NamespaceUri defaultNamespaceForElementsAndTypes = NamespaceUri.NULL;
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private int languageVersion = 30;
@@ -667,11 +668,11 @@ public class CompilerInfo {
         return languageVersion;
     }
 
-    public String getDefaultElementNamespace() {
+    public NamespaceUri getDefaultElementNamespace() {
         return defaultNamespaceForElementsAndTypes;
     }
 
-    public void setDefaultElementNamespace(String defaultNamespaceForElementsAndTypes) {
+    public void setDefaultElementNamespace(NamespaceUri defaultNamespaceForElementsAndTypes) {
         this.defaultNamespaceForElementsAndTypes = defaultNamespaceForElementsAndTypes;
     }
 

@@ -49,7 +49,7 @@ public class Path_1 extends ScalarSystemFunction {
                 case Type.DOCUMENT:
                     return new StringValue(fsb.toString());
                 case Type.ELEMENT:
-                    fsb2.append("/Q{").append(n.getURI()).append("}");
+                    fsb2.append("/Q{").append(n.getNamespaceUri()).append("}");
                     fsb2.append(n.getLocalPart());
                     fsb2.append("[").append(Navigator.getNumberSimple(n, context)).append("]");
                     fsb2.append(fsb);
@@ -57,7 +57,7 @@ public class Path_1 extends ScalarSystemFunction {
                     break;
                 case Type.ATTRIBUTE:
                     fsb2.append("/@");
-                    String attURI = n.getURI();
+                    String attURI = n.getNamespaceUri().toString();
                     if (!"".equals(attURI)) {
                         fsb2.append("Q{").append(attURI).append("}");
                     }

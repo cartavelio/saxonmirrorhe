@@ -30,7 +30,7 @@ public class NodeName_1 extends ScalarSystemFunction {
         if (node.getLocalPart().isEmpty()) {
             return null;
         }
-        return new QNameValue(node.getPrefix(), node.getURI(), node.getLocalPart(), BuiltInAtomicType.QNAME);
+        return new QNameValue(node.getPrefix(), node.getNamespaceUri(), node.getLocalPart(), BuiltInAtomicType.QNAME);
     }
 
     @Override

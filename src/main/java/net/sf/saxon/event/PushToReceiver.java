@@ -10,15 +10,16 @@ package net.sf.saxon.event;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.FingerprintedQName;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NoNamespaceName;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.QName;
+import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.push.Container;
 import net.sf.saxon.s9api.push.Document;
 import net.sf.saxon.s9api.push.Element;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.s9api.push.Push;
-import net.sf.saxon.s9api.QName;
-import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Untyped;
@@ -80,7 +81,7 @@ public class PushToReceiver implements Push {
                 implicitClose();
                 final NodeName fp = defaultNamespace.isEmpty()
                         ? new NoNamespaceName(name)
-                        : new FingerprintedQName("", defaultNamespace, name);
+                        : new FingerprintedQName("", NamespaceUri.of(defaultNamespace), name);
                 cco.startElement(fp, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             } catch (XPathException e) {
                 throw new SaxonApiException(e);
@@ -264,7 +265,7 @@ public class PushToReceiver implements Push {
         public Element namespace(String prefix, String uri) throws SaxonApiException {
             checkChildNotFound();
             try {
-                getOutputter().namespace(prefix, uri, ReceiverOption.NONE);
+                getOutputter().namespace(prefix, NamespaceUri.of(uri), ReceiverOption.NONE);
                 return this;
             } catch (XPathException e) {
                 throw new SaxonApiException(e);

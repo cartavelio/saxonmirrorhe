@@ -9,7 +9,6 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringTool;
@@ -226,7 +225,7 @@ public class LinkedTreeBuilder extends Builder
                       ((ReceivingContentHandler.LocalLocator) location).levelInEntity == 0;
         //#endif
 
-        AttributeInfo xmlId = suppliedAttributes.get(NamespaceConstant.XML, "id");
+        AttributeInfo xmlId = suppliedAttributes.get(NamespaceUri.XML, "id");
         if (xmlId != null && Whitespace.containsWhitespace(StringTool.codePoints(xmlId.getValue()))) {
             suppliedAttributes = suppliedAttributes.put(new AttributeInfo(
                     xmlId.getNodeName(), xmlId.getType(), Whitespace.trim(xmlId.getValue()), xmlId.getLocation(), xmlId.getProperties()));

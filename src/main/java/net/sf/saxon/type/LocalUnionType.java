@@ -9,7 +9,6 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -43,7 +42,7 @@ public class LocalUnionType implements PlainType, UnionType {
 
     @Override
     public StructuredQName getTypeName() {
-        return new StructuredQName("", NamespaceConstant.ANONYMOUS, "U" + hashCode());
+        return new StructuredQName("", NamespaceUri.ANONYMOUS, "U" + hashCode());
     }
 
     /**

@@ -8,10 +8,7 @@
 package net.sf.saxon.dom;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -370,14 +367,14 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
 
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         synchronized (docWrapper.docNode) {
             if (nodeKind == Type.ELEMENT) {
-                return getElementURI((Element) node);
+                return NamespaceUri.of(getElementURI((Element) node));
             } else if (nodeKind == Type.ATTRIBUTE) {
-                return getAttributeURI((Attr) node);
+                return NamespaceUri.of(getAttributeURI((Attr) node));
             }
-            return "";
+            return NamespaceUri.NULL;
         }
     }
 
@@ -645,7 +642,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * @since 9.4
      */
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         NameTest test = new NameTest(Type.ATTRIBUTE, uri, local, getNamePool());
         AxisIterator iterator = iterateAxis(AxisInfo.ATTRIBUTE, test);
         NodeInfo attribute = iterator.next();
@@ -746,11 +743,11 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                         if (attName.equals("xmlns")) {
                             String prefix = "";
                             String uri = att.getValue();
-                            result[n++] = new NamespaceBinding(prefix, uri);
+                            result[n++] = new NamespaceBinding(prefix, NamespaceUri.of(uri));
                         } else if (attName.startsWith("xmlns:")) {
                             String prefix = attName.substring(6);
                             String uri = att.getValue();
-                            result[n++] = new NamespaceBinding(prefix, uri);
+                            result[n++] = new NamespaceBinding(prefix, NamespaceUri.of(uri));
                         }
                     }
                     if (count < result.length) {
@@ -794,9 +791,9 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                         String attName = att.getName();
                         if (attName.startsWith("xmlns")) {
                             if (attName.length() == 5) {
-                                nsMap = nsMap.bind("", att.getValue());
+                                nsMap = nsMap.bind("", NamespaceUri.of(att.getValue()));
                             } else if (attName.charAt(5) == ':') {
-                                nsMap = nsMap.bind(attName.substring(6), att.getValue());
+                                nsMap = nsMap.bind(attName.substring(6), NamespaceUri.of(att.getValue()));
                             }
                         }
                     }
@@ -906,7 +903,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    public SteppingNode getSuccessorElement(SteppingNode anchor, String uri, String local) {
+    public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, String local) {
         synchronized (docWrapper.docNode) {
             Node stop = anchor == null ? null : ((DOMNodeWrapper)anchor).node;
             Node next = node;

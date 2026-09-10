@@ -12,6 +12,7 @@ import net.sf.saxon.Version;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.trans.XPathException;
@@ -60,15 +61,16 @@ public class CaseVariants {
             throw new RuntimeException("Failed to build casevariants.xml", e);
         }
 
-        AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, "", "c", config.getNamePool()));
+        AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT,
+                                            new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
         while (true) {
             NodeInfo item = iter.next();
             if (item == null) {
                 break;
             }
-            String code = item.getAttributeValue("", "n");
+            String code = item.getAttributeValue(NamespaceUri.NULL, "n");
             int icode = Integer.parseInt(code, 16);
-            String variants = item.getAttributeValue("", "v");
+            String variants = item.getAttributeValue(NamespaceUri.NULL, "v");
             String[] vhex = variants.split(",");
             int[] vint = new int[vhex.length];
             for (int i=0; i<vhex.length; i++) {

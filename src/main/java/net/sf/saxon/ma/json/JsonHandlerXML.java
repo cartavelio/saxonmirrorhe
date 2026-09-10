@@ -15,7 +15,6 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
@@ -42,7 +41,7 @@ public class JsonHandlerXML extends JsonHandler {
     private boolean checkForDuplicates;
 
     private static final String SCHEMA_URI = "http://www.w3.org/2005/xpath-functions.xsd";
-    private static final String JSON_NS = NamespaceConstant.FN;
+    private static final NamespaceUri JSON_NS = NamespaceUri.FN;
     public static final String PREFIX = "";
 
     private NamePool namePool;
@@ -71,7 +70,7 @@ public class JsonHandlerXML extends JsonHandler {
      * @return the QName
      */
     private FingerprintedQName qname(String s) {
-        FingerprintedQName fp = new FingerprintedQName("", "", s);
+        FingerprintedQName fp = new FingerprintedQName("", NamespaceUri.NULL, s);
         fp.obtainFingerprint(namePool);
         return fp;
     }

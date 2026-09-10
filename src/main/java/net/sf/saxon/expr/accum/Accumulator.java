@@ -13,7 +13,7 @@ import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -47,8 +47,8 @@ public class Accumulator extends Actor {
 
 
     public Accumulator() {
-        preDescentRules = new SimpleMode(new StructuredQName("saxon", NamespaceConstant.SAXON, "preDescent"));
-        postDescentRules = new SimpleMode(new StructuredQName("saxon", NamespaceConstant.SAXON, "postDescent"));
+        preDescentRules = new SimpleMode(new StructuredQName("saxon", NamespaceUri.SAXON, "preDescent"));
+        postDescentRules = new SimpleMode(new StructuredQName("saxon", NamespaceUri.SAXON, "postDescent"));
         // The "body" of an accumulator is an artificial expression that contains all the constituent expressions, for ease of management.
         body = Literal.makeEmptySequence();
     }

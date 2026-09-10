@@ -11,7 +11,6 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ReceiverWithOutputProperties;
 import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.functions.FormatNumber;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
@@ -192,17 +191,17 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
 
     private void serializeFunction(Function fn) throws XPathException {
         StructuredQName fname = fn.getFunctionName();
-        if (fname == null || fname.hasURI(NamespaceConstant.ANONYMOUS)) {
+        if (fname == null || fname.hasURI(NamespaceUri.ANONYMOUS)) {
             emit("(anonymous-function)");
-        } else if (fname.hasURI(NamespaceConstant.FN)) {
+        } else if (fname.hasURI(NamespaceUri.FN)) {
             emit("fn:" + fname.getLocalPart());
-        } else if (fname.hasURI(NamespaceConstant.MATH)) {
+        } else if (fname.hasURI(NamespaceUri.MATH)) {
             emit("math:" + fname.getLocalPart());
-        } else if (fname.hasURI(NamespaceConstant.MAP_FUNCTIONS)) {
+        } else if (fname.hasURI(NamespaceUri.MAP_FUNCTIONS)) {
             emit("map:" + fname.getLocalPart());
-        } else if (fname.hasURI(NamespaceConstant.ARRAY_FUNCTIONS)) {
+        } else if (fname.hasURI(NamespaceUri.ARRAY_FUNCTIONS)) {
             emit("array:" + fname.getLocalPart());
-        } else if (fname.hasURI(NamespaceConstant.SCHEMA)) {
+        } else if (fname.hasURI(NamespaceUri.SCHEMA)) {
             emit("xs:" + fname.getLocalPart());
         } else {
             emit(fname.getEQName());

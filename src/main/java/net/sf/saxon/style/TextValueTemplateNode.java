@@ -10,6 +10,7 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.ValueOf;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -46,7 +47,8 @@ public class TextValueTemplateNode extends TextImpl {
     public void parse() throws XPathException {
         boolean disable = false;
         NodeInfo parent = getParent();
-        if (parent instanceof XSLText && StyleElement.isYes(Whitespace.trim(parent.getAttributeValue("", "disable-output-escaping")))) {
+        if (parent instanceof XSLText && StyleElement.isYes(Whitespace.trim(
+                parent.getAttributeValue(NamespaceUri.NULL, "disable-output-escaping")))) {
             disable = true;
         }
         try {

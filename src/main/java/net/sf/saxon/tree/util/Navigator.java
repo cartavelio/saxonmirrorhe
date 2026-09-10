@@ -14,13 +14,14 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Reverse;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.*;
+import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.tree.jiter.WrappingJavaIterator;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
@@ -63,7 +64,7 @@ public final class Navigator {
      * @since 9.0
      */
 
-    public static String getAttributeValue(/*@NotNull*/ NodeInfo element, /*@NotNull*/ String uri, /*@NotNull*/ String localName) {
+    public static String getAttributeValue(NodeInfo element, NamespaceUri uri, String localName) {
         return element.getAttributeValue(uri, localName);
     }
 
@@ -80,7 +81,7 @@ public final class Navigator {
      * @since 9.9
      */
 
-    public static String getInheritedAttributeValue(NodeInfo element, String uri, String localName) {
+    public static String getInheritedAttributeValue(NodeInfo element, NamespaceUri uri, String localName) {
         NodeInfo node = element;
         while (node != null) {
             String value = node.getAttributeValue(uri, localName);
@@ -101,7 +102,7 @@ public final class Navigator {
 
     public static StructuredQName getNodeName(NodeInfo node) {
         if (node.getLocalPart() != null) {
-            return new StructuredQName(node.getPrefix(), node.getURI(), node.getLocalPart());
+            return new StructuredQName(node.getPrefix(), node.getNamespaceUri(), node.getLocalPart());
         } else {
             return null;
         }
@@ -156,7 +157,7 @@ public final class Navigator {
     public static String getBaseURI(/*@NotNull*/ NodeInfo node, Predicate<NodeInfo> isTopElementWithinEntity) {
         String xmlBase = node instanceof TinyElementImpl ?
                 ((TinyElementImpl)node).getAttributeValue(StandardNames.XML_BASE) :
-                node.getAttributeValue(NamespaceConstant.XML, "base");
+                node.getAttributeValue(NamespaceUri.XML, "base");
         if (xmlBase != null) {
             URI baseURI;
             try {
@@ -323,7 +324,7 @@ public final class Navigator {
             return n1.getFingerprint() == n2.getFingerprint();
         } else {
             return n1.getLocalPart().equals(n2.getLocalPart()) &&
-                n1.getURI().equals(n2.getURI());
+                n1.getNamespaceUri().equals(n2.getNamespaceUri());
         }
     }
 
@@ -798,7 +799,7 @@ public final class Navigator {
                 return;
             }
             case Type.NAMESPACE: {
-                out.namespace(node.getLocalPart(), node.getStringValue(), ReceiverOption.NONE);
+                out.namespace(node.getLocalPart(), NamespaceUri.of(node.getStringValue()), ReceiverOption.NONE);
                 return;
             }
             default:

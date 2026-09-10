@@ -467,7 +467,7 @@ public class Copy extends ElementCreator {
 
             case Type.NAMESPACE:
                 out.namespace(
-                        ((NodeInfo) item).getLocalPart(), item.getStringValue(), ReceiverOption.NONE);
+                        ((NodeInfo) item).getLocalPart(), NamespaceUri.of(item.getStringValue()), ReceiverOption.NONE);
                 break;
 
             case Type.DOCUMENT:

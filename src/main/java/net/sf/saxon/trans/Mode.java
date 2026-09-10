@@ -17,7 +17,6 @@ import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.TemplateRule;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
@@ -45,11 +44,11 @@ import java.util.function.Predicate;
 public abstract class Mode extends Actor {
 
     public static final StructuredQName OMNI_MODE =
-            new StructuredQName("saxon", NamespaceConstant.SAXON, "_omniMode");
+            new StructuredQName("saxon", NamespaceUri.SAXON, "_omniMode");
     public static final StructuredQName UNNAMED_MODE_NAME =
-            new StructuredQName("xsl", NamespaceConstant.XSLT, "unnamed");
+            new StructuredQName("xsl", NamespaceUri.XSLT, "unnamed");
     public static final StructuredQName DEFAULT_MODE_NAME =
-        new StructuredQName("xsl", NamespaceConstant.XSLT, "default");
+        new StructuredQName("xsl", NamespaceUri.XSLT, "default");
 
 
     protected StructuredQName modeName;
@@ -263,7 +262,7 @@ public abstract class Mode extends Actor {
      * @return the set of all namespace URIs of names explicitly matched by rules in this mode
      */
 
-    public abstract Set<String> getExplicitNamespaces(NamePool pool);
+    public abstract Set<NamespaceUri> getExplicitNamespaces(NamePool pool);
 
     public void setDefaultResultType(SequenceType type) {
         defaultResultType = type;

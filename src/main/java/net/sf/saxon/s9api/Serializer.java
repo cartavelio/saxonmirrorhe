@@ -8,10 +8,10 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.event.*;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.serialize.CharacterMap;
@@ -496,14 +496,14 @@ public class Serializer extends AbstractDestination {
 
     public void setOutputProperty(QName property, String value) {
         SerializerFactory sf = processor.getUnderlyingConfiguration().getSerializerFactory();
-        String uri = property.getNamespaceURI();
-        if (uri.isEmpty() || uri.equals(NamespaceConstant.SAXON)) {
+        NamespaceUri uri = property.getNamespaceURI();
+        if (uri.isEmpty() || uri.equals(NamespaceUri.SAXON)) {
             try {
                 value = sf.checkOutputProperty(property.getClarkName(), value);
             } catch (XPathException e) {
                 throw new IllegalArgumentException(e.getMessage());
             }
-            if (uri.equals(NamespaceConstant.SAXON) && property.getLocalName().equals("next-in-chain")) {
+            if (uri.equals(NamespaceUri.SAXON) && property.getLocalName().equals("next-in-chain")) {
                 // reject the next-in-chain property: it's not relevant to a Serializer
                 throw new IllegalArgumentException("saxon:next-in-chain is not a valid serialization property");
             }

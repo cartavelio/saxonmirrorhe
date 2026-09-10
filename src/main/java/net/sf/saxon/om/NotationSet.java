@@ -19,6 +19,6 @@ public interface NotationSet {
      * @param local the local part of the notation name
      * @return true if the notation name is present
      */
-    boolean isDeclaredNotation(String uri, String local);
+    boolean isDeclaredNotation(NamespaceUri uri, String local);
 }
 

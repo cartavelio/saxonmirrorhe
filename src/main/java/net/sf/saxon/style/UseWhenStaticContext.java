@@ -18,6 +18,7 @@ import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.sxpath.AbstractStaticContext;
@@ -160,8 +161,8 @@ public class UseWhenStaticContext extends AbstractStaticContext implements Stati
      */
 
     @Override
-    public String getDefaultFunctionNamespace() {
-        return NamespaceConstant.FN;
+    public NamespaceUri getDefaultFunctionNamespace() {
+        return NamespaceUri.FN;
     }
 
     /**
@@ -180,10 +181,11 @@ public class UseWhenStaticContext extends AbstractStaticContext implements Stati
      * in the static context as being an imported schema namespace. (A consequence of this is that
      * within a Configuration, there can only be one schema for any given namespace, including the
      * null namespace).
+     * @param namespace
      */
 
     @Override
-    public boolean isImportedSchema(String namespace) {
+    public boolean isImportedSchema(NamespaceUri namespace) {
         return false;
     }
 
@@ -194,7 +196,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements Stati
      */
 
     @Override
-    public Set<String> getImportedSchemaNamespaces() {
+    public Set<NamespaceUri> getImportedSchemaNamespaces() {
         return Collections.emptySet();
     }
 

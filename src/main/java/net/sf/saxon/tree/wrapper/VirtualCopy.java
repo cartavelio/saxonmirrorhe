@@ -140,15 +140,15 @@ public class VirtualCopy implements NodeInfo {
         if (getNodeKind() == Type.ELEMENT) {
             if (dropNamespaces) {
                 NamespaceMap nsMap = NamespaceMap.emptyMap();
-                String ns = getURI();
+                NamespaceUri ns = getNamespaceUri();
                 if (!ns.isEmpty()) {
                     nsMap = nsMap.put(getPrefix(), ns);
                 }
                 AxisIterator iter = original.iterateAxis(AxisInfo.ATTRIBUTE);
                 NodeInfo att;
                 while ((att = iter.next()) != null) {
-                    if (!att.getURI().equals("")) {
-                        nsMap = nsMap.put(att.getPrefix(), att.getURI());
+                    if (!att.getNamespaceUri().isEmpty()) {
+                        nsMap = nsMap.put(att.getPrefix(), att.getNamespaceUri());
                     }
                 }
                 return nsMap;
@@ -352,8 +352,8 @@ public class VirtualCopy implements NodeInfo {
      */
 
     @Override
-    public String getURI() {
-        return original.getURI();
+    public NamespaceUri getNamespaceUri() {
+        return original.getNamespaceUri();
     }
 
     /**
@@ -497,7 +497,7 @@ public class VirtualCopy implements NodeInfo {
      *         if this node is not an element.
      */
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         return original.getAttributeValue(uri, local);
     }
 
@@ -586,13 +586,13 @@ public class VirtualCopy implements NodeInfo {
         if (getNodeKind() == Type.ELEMENT) {
             if (dropNamespaces) {
                 List<NamespaceBinding> allNamespaces = new ArrayList<>(5);
-                String ns = getURI();
+                NamespaceUri ns = getNamespaceUri();
                 if (ns.isEmpty()) {
-                    if (getParent() != null && !getParent().getURI().isEmpty()) {
-                        allNamespaces.add(new NamespaceBinding("", ""));
+                    if (getParent() != null && !getParent().getNamespaceUri().isEmpty()) {
+                        allNamespaces.add(new NamespaceBinding("", NamespaceUri.NULL));
                     }
                 } else {
-                    allNamespaces.add(new NamespaceBinding(getPrefix(), getURI()));
+                    allNamespaces.add(new NamespaceBinding(getPrefix(), getNamespaceUri()));
                 }
                 for (AttributeInfo att : original.attributes()) {
                     NodeName name = att.getNodeName();

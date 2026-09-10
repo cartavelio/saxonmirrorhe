@@ -34,7 +34,7 @@ public class NamespaceDeltaMap extends NamespaceMap implements NamespaceBindingS
 
     private NamespaceDeltaMap() {
         prefixes = new String[]{};
-        uris = new String[]{};
+        uris = new NamespaceUri[]{};
     }
 
     @Override
@@ -48,7 +48,7 @@ public class NamespaceDeltaMap extends NamespaceMap implements NamespaceBindingS
     }
 
     @Override
-    public NamespaceDeltaMap put(String prefix, String uri) {
+    public NamespaceDeltaMap put(String prefix, NamespaceUri uri) {
         return (NamespaceDeltaMap)super.put(prefix, uri);
     }
 

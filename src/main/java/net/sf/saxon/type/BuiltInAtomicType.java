@@ -13,7 +13,6 @@ import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -272,8 +271,8 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
      */
 
     @Override
-    public String getTargetNamespace() {
-        return NamespaceConstant.SCHEMA;
+    public NamespaceUri getTargetNamespace() {
+        return NamespaceUri.SCHEMA;
     }
 
     /**
@@ -283,7 +282,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
      */
     @Override
     public String getEQName() {
-        return "Q{" + NamespaceConstant.SCHEMA + "}" + getName();
+        return "Q{" + NamespaceUri.SCHEMA + "}" + getName();
     }
 
     /**
@@ -550,7 +549,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     /*@NotNull*/
     @Override
     public final StructuredQName getStructuredQName() {
-        return new StructuredQName("xs", NamespaceConstant.SCHEMA, StandardNames.getLocalName(fingerprint));
+        return new StructuredQName("xs", NamespaceUri.SCHEMA, StandardNames.getLocalName(fingerprint));
     }
 
     /**
@@ -948,6 +947,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
                     // This check added in 9.3. The XSLT spec says that this check should not be performed during
                     // validation. However, this appears to be based on an incorrect assumption: see spec bug 6952
                     if (!rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName())) {
+                        System.err.println(rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName()));
                         return new ValidationFailure("Notation {" + nv.getNamespaceURI() + "}" +
                                 nv.getLocalName() + " is not declared in the schema");
                     }

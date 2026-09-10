@@ -53,11 +53,11 @@ public class NamespaceForPrefix extends SystemFunction implements Callable {
             prefix = p.getStringValue();
         }
         NamespaceResolver resolver = element.getAllNamespaces();
-        String uri = resolver.getURIForPrefix(prefix, true);
+        NamespaceUri uri = resolver.getURIForPrefix(prefix, true);
         if (uri == null || uri.isEmpty()) {
             return null;
         }
-        return new AnyURIValue(uri);
+        return new AnyURIValue(uri.toUnicodeString());
     }
 
 }

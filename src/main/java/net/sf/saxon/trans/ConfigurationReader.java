@@ -191,11 +191,11 @@ public class ConfigurationReader implements Receiver {
     @Override
     public void startElement(NodeName elemName, SchemaType type, AttributeMap atts,
                              NamespaceMap namespaces, Location location, int properties) throws XPathException {
-        String uri = elemName.getURI();
+        NamespaceUri uri = elemName.getURI();
         String localName = elemName.getLocalPart();
         localNameStack.push(localName);
         buffer.setLength(0);
-        if (NamespaceConstant.SAXON_CONFIGURATION.equals(uri)) {
+        if (NamespaceUri.SAXON_CONFIGURATION.equals(uri)) {
             if (level == 0) {
                 if (!"configuration".equals(localName)) {
                     error(localName, null, null, "configuration");
@@ -433,7 +433,7 @@ public class ConfigurationReader implements Receiver {
     private void readSerializationElement(AttributeMap atts, NamespaceMap nsMap) {
         Properties props = new Properties();
         for (AttributeInfo a : atts) {
-            String uri = a.getNodeName().getURI();
+            NamespaceUri uri = a.getNodeName().getURI();
             String name = a.getNodeName().getLocalPart();
             String value = a.getValue();
             if (value.isEmpty()) {
@@ -453,7 +453,7 @@ public class ConfigurationReader implements Receiver {
         Properties props = new Properties();
         String collationUri = null;
         for (AttributeInfo a : atts) {
-            String uri = a.getNodeName().getURI();
+            NamespaceUri uri = a.getNodeName().getURI();
             String name = a.getNodeName().getLocalPart();
             String value = a.getValue();
             if (uri.isEmpty()) {
@@ -482,7 +482,7 @@ public class ConfigurationReader implements Receiver {
 
     private void readLocalizationsElement(AttributeMap atts) {
         for (AttributeInfo a : atts) {
-            String uri = a.getNodeName().getURI();
+            NamespaceUri uri = a.getNodeName().getURI();
             String name = a.getNodeName().getLocalPart();
             String value = a.getValue();
             if (uri.isEmpty()) {
@@ -500,7 +500,7 @@ public class ConfigurationReader implements Receiver {
         String lang = null;
         Properties properties = new Properties();
         for (AttributeInfo a : atts) {
-            String uri = a.getNodeName().getURI();
+            NamespaceUri uri = a.getNodeName().getURI();
             String name = a.getNodeName().getLocalPart();
             String value = a.getValue();
             if (uri.isEmpty()) {
@@ -630,7 +630,7 @@ public class ConfigurationReader implements Receiver {
         QNameParser qp = new QNameParser(nsMap).withAcceptEQName(true);
         StructuredQName qName = null;
         try {
-            qName = qp.parse(name, "");
+            qName = qp.parse(name, NamespaceUri.NULL);
         } catch (XPathException e) {
             error("withParam", "name", name, "Requires valid QName");
         }
@@ -658,7 +658,7 @@ public class ConfigurationReader implements Receiver {
     private void readXQueryElement(AttributeMap atts) {
         Properties props = new Properties();
         for (AttributeInfo a : atts) {
-            String uri = a.getNodeName().getURI();
+            NamespaceUri uri = a.getNodeName().getURI();
             String name = a.getNodeName().getLocalPart();
             String value = a.getValue();
             if (!value.isEmpty() && uri.isEmpty()) {
@@ -684,7 +684,7 @@ public class ConfigurationReader implements Receiver {
     private void readXsltElement(AttributeMap atts) {
         Properties props = new Properties();
         for (AttributeInfo a : atts) {
-            String uri = a.getNodeName().getURI();
+            NamespaceUri uri = a.getNodeName().getURI();
             String name = a.getNodeName().getLocalPart();
             String value = a.getValue();
             if (!value.isEmpty() && uri.isEmpty()) {
@@ -712,7 +712,7 @@ public class ConfigurationReader implements Receiver {
     private void readXsdElement(AttributeMap atts) {
         Properties props = new Properties();
         for (AttributeInfo a : atts) {
-            String uri = a.getNodeName().getURI();
+            NamespaceUri uri = a.getNodeName().getURI();
             String name = a.getNodeName().getLocalPart();
             String value = a.getValue();
             if (!value.isEmpty() && uri.isEmpty()) {

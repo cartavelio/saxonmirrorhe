@@ -164,7 +164,7 @@ public abstract class StandardNames {
     public static final int XML_LANG_TYPE = XML + 5;
     public static final int XML_SPACE_TYPE = 6;
 
-    public static final NodeName XML_ID_NAME = new FingerprintedQName("xml", NamespaceConstant.XML, "id", XML_ID);
+    public static final NodeName XML_ID_NAME = new FingerprintedQName("xml", NamespaceUri.XML, "id", XML_ID);
 
     public static final int XS_STRING = XS + 1;
     public static final int XS_BOOLEAN = XS + 2;
@@ -293,13 +293,13 @@ public abstract class StandardNames {
     private static final String[] localNames = new String[1023];
     private static final HashMap<String, Integer> lookup = new HashMap<>(1023);
     public static StructuredQName[] errorVariables = {
-            new StructuredQName("err", NamespaceConstant.ERR, "code"),
-            new StructuredQName("err", NamespaceConstant.ERR, "description"),
-            new StructuredQName("err", NamespaceConstant.ERR, "value"),
-            new StructuredQName("err", NamespaceConstant.ERR, "module"),
-            new StructuredQName("err", NamespaceConstant.ERR, "line-number"),
-            new StructuredQName("err", NamespaceConstant.ERR, "column-number"),
-            new StructuredQName("err", NamespaceConstant.ERR, "additional")
+            new StructuredQName("err", NamespaceUri.ERR, "code"),
+            new StructuredQName("err", NamespaceUri.ERR, "description"),
+            new StructuredQName("err", NamespaceUri.ERR, "value"),
+            new StructuredQName("err", NamespaceUri.ERR, "module"),
+            new StructuredQName("err", NamespaceUri.ERR, "line-number"),
+            new StructuredQName("err", NamespaceUri.ERR, "column-number"),
+            new StructuredQName("err", NamespaceUri.ERR, "additional")
     };
     // key is an expanded QName in Clark notation
     // value is a fingerprint, as a java.lang.Integer
@@ -580,8 +580,8 @@ public abstract class StandardNames {
      * @return the standard fingerprint, or -1 if this is not a built-in name
      */
 
-    public static int getFingerprint(String uri, String localName) {
-        return lookup.getOrDefault('{' + uri + '}' + localName, -1);
+    public static int getFingerprint(NamespaceUri uri, String localName) {
+        return lookup.getOrDefault('{' + uri.toString() + '}' + localName, -1);
     }
 
     /**
@@ -604,21 +604,21 @@ public abstract class StandardNames {
      */
 
     /*@NotNull*/
-    public static String getURI(int fingerprint) {
+    public static NamespaceUri getURI(int fingerprint) {
         int c = fingerprint >> 7;
         switch (c) {
             case DFLT_NS:
-                return "";
+                return NamespaceUri.NULL;
             case XSL_NS:
-                return NamespaceConstant.XSLT;
+                return NamespaceUri.XSLT;
             case SAXON_NS:
-                return NamespaceConstant.SAXON;
+                return NamespaceUri.SAXON;
             case XML_NS:
-                return NamespaceConstant.XML;
+                return NamespaceUri.XML;
             case XS_NS:
-                return NamespaceConstant.SCHEMA;
+                return NamespaceUri.SCHEMA;
             case XSI_NS:
-                return NamespaceConstant.SCHEMA_INSTANCE;
+                return NamespaceUri.SCHEMA_INSTANCE;
             default:
                 throw new IllegalArgumentException("Unknown system fingerprint " + fingerprint);
         }
@@ -632,11 +632,11 @@ public abstract class StandardNames {
      */
 
     public static String getClarkName(int fingerprint) {
-        String uri = getURI(fingerprint);
-        if (uri.isEmpty()) {
+        NamespaceUri uri = getURI(fingerprint);
+        if (uri == NamespaceUri.NULL) {
             return getLocalName(fingerprint);
         } else {
-            return '{' + uri + '}' + getLocalName(fingerprint);
+            return '{' + uri.toString() + '}' + getLocalName(fingerprint);
         }
     }
 
@@ -715,7 +715,7 @@ public abstract class StandardNames {
      */
 
     public final static StructuredQName SQ_XS_INVALID_NAME =
-            new StructuredQName("xs", NamespaceConstant.SCHEMA, "invalid-name");
+            new StructuredQName("xs", NamespaceUri.SCHEMA, "invalid-name");
             //getStructuredQName(XS_INVALID_NAME);
 
 }

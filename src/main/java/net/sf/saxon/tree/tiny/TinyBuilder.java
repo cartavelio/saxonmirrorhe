@@ -521,7 +521,7 @@ public class TinyBuilder extends Builder {
         textualElementEligibilityState = Eligibility.INELIGIBLE;
         int s = (int)commentBuilder.length();
         commentBuilder.accept(remainder);
-        int nameCode = namePool.allocateFingerprint("", piname);
+        int nameCode = namePool.allocateFingerprint(NamespaceUri.NULL, piname);
 
         nodeNr = tt.addNode(Type.PROCESSING_INSTRUCTION, currentDepth, s, remainder.length32(),
                 nameCode);

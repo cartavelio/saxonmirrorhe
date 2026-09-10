@@ -7,14 +7,14 @@
 
 package net.sf.saxon.functions.registry;
 
-import net.sf.saxon.functions.hof.AtomicConstructorFunction;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.functions.hof.AtomicConstructorFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -64,7 +64,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         if (functionName.getArity() != 1) {
             return null;
         }
-        final String uri = functionName.getComponentName().getURI();
+        final NamespaceUri uri = functionName.getComponentName().getURI();
         final String localName = functionName.getComponentName().getLocalPart();
         final SchemaType type = config.getSchemaType(new StructuredQName("", uri, localName));
         if (type == null || type.isComplexType()) {
@@ -123,9 +123,9 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
 
     @Override
     public Expression bind(SymbolicName.F functionName, Expression[] arguments, StaticContext env, List<String> reasons) {
-        final String uri = functionName.getComponentName().getURI();
+        final NamespaceUri uri = functionName.getComponentName().getURI();
         final String localName = functionName.getComponentName().getLocalPart();
-        boolean builtInNamespace = uri.equals(NamespaceConstant.SCHEMA);
+        boolean builtInNamespace = uri.equals(NamespaceUri.SCHEMA);
         if (builtInNamespace) {
             // it's a constructor function: treat it as shorthand for a cast expression
             if (functionName.getArity() != 1) {

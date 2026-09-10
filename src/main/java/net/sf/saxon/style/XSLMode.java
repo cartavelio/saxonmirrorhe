@@ -9,13 +9,9 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.accum.Accumulator;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.*;
-import net.sf.saxon.trans.rules.*;
+import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
@@ -75,7 +71,7 @@ public class XSLMode extends StyleElement {
     public StructuredQName getObjectName() {
         StructuredQName qn = super.getObjectName();
         if (qn == null) {
-            String nameAtt = Whitespace.trim(getAttributeValue("", "name"));
+            String nameAtt = Whitespace.trim(getAttributeValue(NamespaceUri.NULL, "name"));
             if (nameAtt == null) {
                 return Mode.UNNAMED_MODE_NAME;
             }
@@ -204,7 +200,7 @@ public class XSLMode extends StyleElement {
 
                     break;
                 default:
-                    if (attName.hasURI(NamespaceConstant.SAXON)) {
+                    if (attName.hasURI(NamespaceUri.SAXON)) {
                         isExtensionAttributeAllowed(attName.getDisplayName());
                         if (attName.getLocalPart().equals("trace")) {
                             traceMatching = processBooleanAttribute("saxon:trace", value);

@@ -7,6 +7,7 @@ import jaxptest.ConfigTest;
 import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
@@ -333,7 +334,7 @@ public class TestValidator {
             Processor proc = new Processor(true);
             proc.getSchemaManager().importComponents(new StreamSource(new File(configTest.getDataDir() + "dita/concept.scm")));
             // define a ns prefix to be associated with a default attribute added to the instance during validation
-            proc.getUnderlyingConfiguration().getNamePool().suggestPrefix("dita", "http://dita.oasis-open.org/architecture/2005/");
+            proc.getUnderlyingConfiguration().getNamePool().suggestPrefix("dita", NamespaceUri.of("http://dita.oasis-open.org/architecture/2005/"));
             XdmNode doc = proc.newDocumentBuilder().build(new StreamSource(new File(configTest.getDataDir() + "dita/concept.xml")));
             XQueryCompiler c = proc.newXQueryCompiler();
             c.setSchemaAware(true);

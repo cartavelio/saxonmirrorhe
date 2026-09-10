@@ -7,6 +7,7 @@
 
 package net.sf.saxon.style;
 
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 
@@ -60,7 +61,7 @@ public abstract class XSLModuleRoot extends StyleElement {
      */
 
     public int getInputTypeAnnotationsAttribute()  {
-        String inputTypeAnnotationsAtt = getAttributeValue("", "input-type-annotations");
+        String inputTypeAnnotationsAtt = getAttributeValue(NamespaceUri.NULL, "input-type-annotations");
         if (inputTypeAnnotationsAtt != null) {
             switch (inputTypeAnnotationsAtt) {
                 case "strip":

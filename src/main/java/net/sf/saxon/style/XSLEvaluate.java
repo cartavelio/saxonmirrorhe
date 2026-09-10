@@ -18,10 +18,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
@@ -140,7 +137,7 @@ public class XSLEvaluate extends StyleElement {
                     withParams = makeExpression(withParamsAtt, att);
                     break;
                 default:
-                    if (attName.getLocalPart().equals("options") && attName.getURI().equals(NamespaceConstant.SAXON)) {
+                    if (attName.getLocalPart().equals("options") && attName.getURI().equals(NamespaceUri.SAXON)) {
                         if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                             options = makeExpression(att.getValue(), att);
                         }

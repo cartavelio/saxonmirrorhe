@@ -8,6 +8,7 @@
 
 package net.sf.saxon.lib;
 
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.XPathException;
@@ -28,7 +29,7 @@ public interface FunctionAnnotationHandler {
      * @return the namespace handled by this function annotation handler.
      */
 
-    String getAssertionNamespace();
+    NamespaceUri getAssertionNamespace();
 
     /**
      * Test whether a given set of annotations in this namespace is valid.

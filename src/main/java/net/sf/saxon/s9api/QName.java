@@ -9,6 +9,7 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -40,7 +41,7 @@ public class QName {
      */
 
     public QName(String prefix, String uri, String localName) {
-        sqName = new StructuredQName(prefix, uri, localName);
+        sqName = new StructuredQName(prefix, NamespaceUri.of(uri), localName);
     }
 
     /**
@@ -56,11 +57,11 @@ public class QName {
         uri = (uri == null ? "" : uri);
         int colon = lexical.indexOf(':');
         if (colon < 0) {
-            sqName = new StructuredQName("", uri, lexical);
+            sqName = new StructuredQName("", NamespaceUri.of(uri), lexical);
         } else {
             String prefix = lexical.substring(0, colon);
             String local = lexical.substring(colon + 1);
-            sqName = new StructuredQName(prefix, uri, local);
+            sqName = new StructuredQName(prefix, NamespaceUri.of(uri), local);
         }
     }
 
@@ -74,7 +75,7 @@ public class QName {
     public QName(String localName) {
         int colon = localName.indexOf(':');
         if (colon < 0) {
-            sqName = new StructuredQName("", "", localName);
+            sqName = new StructuredQName("", NamespaceUri.NULL, localName);
         } else {
             throw new IllegalArgumentException("Local name contains a colon");
         }
@@ -120,7 +121,7 @@ public class QName {
      */
 
     public QName(javax.xml.namespace.QName qName) {
-        sqName = new StructuredQName(qName.getPrefix(), qName.getNamespaceURI(), qName.getLocalPart());
+        sqName = new StructuredQName(qName.getPrefix(), NamespaceUri.of(qName.getNamespaceURI()), qName.getLocalPart());
     }
     //#endif
     
@@ -243,7 +244,7 @@ public class QName {
      * @return the namespace part of the QName, or "" for a name in no namespace
      */
 
-    public String getNamespaceURI() {
+    public NamespaceUri getNamespaceURI() {
         return sqName.getURI();
     }
 
@@ -268,7 +269,7 @@ public class QName {
      */
 
     public String getClarkName() {
-        String uri = getNamespaceURI();
+        NamespaceUri uri = getNamespaceURI();
         if (uri.isEmpty()) {
             return getLocalName();
         } else {
@@ -284,8 +285,8 @@ public class QName {
    *
    */
     public String getEQName() {
-        String uri = getNamespaceURI();
-        if (uri.length() == 0) {
+        NamespaceUri uri = getNamespaceURI();
+        if (uri.isEmpty()) {
             return getLocalName();
         } else {
             return "Q{" + uri + "}" + getLocalName();

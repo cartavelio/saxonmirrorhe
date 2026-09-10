@@ -356,7 +356,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
      */
 
     /*@Nullable*/
-    public UserFunction getUserDefinedFunction(/*@NotNull*/ String uri, /*@NotNull*/ String localName, int arity) {
+    public UserFunction getUserDefinedFunction(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String localName, int arity) {
         SymbolicName functionKey = new SymbolicName.F(new StructuredQName("", uri, localName), arity);
         XQueryFunction fd = functions.get(functionKey);
         if (fd == null) {

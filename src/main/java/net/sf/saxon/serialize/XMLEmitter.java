@@ -502,7 +502,7 @@ public class XMLEmitter extends Emitter {
         return internalSubset != null;
     }
 
-    public void namespace(String nsprefix, String nsuri, boolean isFirst) throws XPathException {
+    public void namespace(String nsprefix, NamespaceUri nsuri, boolean isFirst) throws XPathException {
         try {
             if (nsprefix.isEmpty()) {
                 if (isFirst) {
@@ -510,7 +510,7 @@ public class XMLEmitter extends Emitter {
                 } else {
                     writeAttributeIndentString();
                 }
-                writeAttribute(elementCode, "xmlns", nsuri, ReceiverOption.NONE);
+                writeAttribute(elementCode, "xmlns", nsuri.toString(), ReceiverOption.NONE);
             } else //noinspection StatementWithEmptyBody
                 if (nsprefix.equals("xml")) {
                 //return;
@@ -528,7 +528,7 @@ public class XMLEmitter extends Emitter {
                     } else {
                         writeAttributeIndentString();
                     }
-                    writeAttribute(elementCode, "xmlns:" + nsprefix, nsuri, ReceiverOption.NONE);
+                    writeAttribute(elementCode, "xmlns:" + nsprefix, nsuri.toString(), ReceiverOption.NONE);
                 }
             }
 

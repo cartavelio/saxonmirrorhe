@@ -66,7 +66,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
      * Notify a namespace binding.
      */
     @Override
-    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+    public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
         if (level == 0) {
             if (++count == 2) {
                 checkAllowsMany(Loc.NONE);

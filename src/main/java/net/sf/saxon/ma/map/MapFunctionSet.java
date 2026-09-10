@@ -134,8 +134,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     @Override
-    public String getNamespace() {
-        return NamespaceConstant.MAP_FUNCTIONS;
+    public NamespaceUri getNamespace() {
+        return NamespaceUri.MAP_FUNCTIONS;
     }
 
     @Override

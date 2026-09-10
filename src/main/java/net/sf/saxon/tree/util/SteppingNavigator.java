@@ -7,6 +7,7 @@
 
 package net.sf.saxon.tree.util;
 
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
@@ -136,7 +137,7 @@ public abstract class SteppingNavigator {
     private static class FollowingElementStepper implements Stepper {
 
         SteppingNode anchor;
-        String uri;
+        NamespaceUri uri;
         String local;
 
         /**
@@ -147,7 +148,7 @@ public abstract class SteppingNavigator {
          * @param local  either null, or a local name which the selected elements must match
          */
 
-        FollowingElementStepper(SteppingNode anchor, String uri, String local) {
+        FollowingElementStepper(SteppingNode anchor, NamespaceUri uri, String local) {
             this.anchor = anchor;
             this.uri = uri;
             this.local = local;

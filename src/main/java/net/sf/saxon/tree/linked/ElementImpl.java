@@ -11,7 +11,6 @@ import net.sf.saxon.event.CopyNamespaceSensitiveException;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeSelector;
@@ -445,11 +444,11 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
     @Override
     public void rename(NodeName newName, boolean inherit) {
         String prefix = newName.getPrefix();
-        String uri = newName.getURI();
+        NamespaceUri uri = newName.getURI();
         NamespaceBinding ns = new NamespaceBinding(prefix, uri);
-        String uc = getURIForPrefix(prefix, true);
+        NamespaceUri uc = getURIForPrefix(prefix, true);
         if (uc == null) {
-            uc = "";
+            uc = NamespaceUri.NULL;
         }
         if (!uc.equals(uri)) {
             if (uc.isEmpty()) {
@@ -478,7 +477,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         if (binding.getURI().isEmpty()) {
             throw new IllegalArgumentException("Cannot add a namespace undeclaration");
         }
-        String existing = namespaceMap.getURI(binding.getPrefix());
+        NamespaceUri existing = namespaceMap.getURI(binding.getPrefix());
         if (existing != null) {
             if (!existing.equals(binding.getURI())) {
                 throw new IllegalArgumentException("New namespace conflicts with existing namespace binding");
@@ -571,11 +570,11 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         AttributeMapWithIdentity atts = prepareAttributesForUpdate();
         atts = atts.add(new AttributeInfo(nodeName, attType, value, Loc.NONE, ReceiverOption.NONE));
         setAttributes(atts);
-        if (!nodeName.hasURI("")) {
+        if (!nodeName.hasURI(NamespaceUri.NULL)) {
             // The new attribute name is in a namespace
             NamespaceBinding binding = nodeName.getNamespaceBinding();
             String prefix = binding.getPrefix();
-            String uc = getURIForPrefix(prefix, false);
+            NamespaceUri uc = getURIForPrefix(prefix, false);
             if (uc == null) {
                 // The namespace is not already declared on the element
                 addNamespace(binding, inheritNamespaces);
@@ -647,13 +646,12 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * Add a namespace node from this node. The namespaces of its descendant nodes are unaffected.
      * The method has no effect on non-element nodes. If there is an existing namespace using this
      * prefix, the method throws an exception.
-     *
-     * @param prefix the namespace prefix. Empty string for the default namespace.
+     *  @param prefix the namespace prefix. Empty string for the default namespace.
      * @param uri    The namespace URI.
      */
     @Override
-    public void addNamespace(String prefix, String uri) {
-        String existingURI = namespaceMap.getURI(prefix);
+    public void addNamespace(String prefix, NamespaceUri uri) {
+        NamespaceUri existingURI = namespaceMap.getURI(prefix);
         if (existingURI == null) {
             namespaceMap = namespaceMap.put(prefix, uri);
         } else if (!existingURI.equals(uri)) {
@@ -694,13 +692,13 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
     /*@Nullable*/
     @Override
-    public String getURIForPrefix(/*@NotNull*/ String prefix, boolean useDefault) {
+    public NamespaceUri getURIForPrefix(/*@NotNull*/ String prefix, boolean useDefault) {
 
         if (prefix.isEmpty()) {
             if (useDefault) {
                 return namespaceMap.getDefaultNamespace();
             } else {
-                return NamespaceConstant.NULL;
+                return NamespaceUri.NULL;
             }
         } else {
             return namespaceMap.getURI(prefix);
@@ -726,7 +724,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     /*@Nullable*/
-    public boolean isInScopeNamespace(/*@NotNull*/ String uri) {
+    public boolean isInScopeNamespace(/*@NotNull*/ NamespaceUri uri) {
         for (NamespaceBinding b : namespaceMap) {
             if (b.getURI().equals(uri)) {
                 return true;
@@ -813,14 +811,15 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
     /**
      * Get the value of a given attribute of this node
      *
-     * @param uri       the namespace URI of the attribute name, or "" if the attribute is not in a namepsace
+     * @param uri       the namespace URI of the attribute name, or {@link NamespaceUri#NULL}
+     *                  if the attribute is not in a namespace
      * @param localName the local part of the attribute name
      * @return the attribute value if it exists or null if not
      */
 
     /*@Nullable*/
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String localName) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String localName) {
         return attributeMap == null ? null : attributeMap.getValue(uri, localName);
     }
 

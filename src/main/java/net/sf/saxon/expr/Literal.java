@@ -560,8 +560,8 @@ public class Literal extends Expression {
                         if (!name.getPrefix().isEmpty()) {
                             out.emitAttribute("prefix", name.getPrefix());
                         }
-                        if (!name.hasURI("")) {
-                            out.emitAttribute("ns", name.getURI());
+                        if (!name.hasURI(NamespaceUri.NULL)) {
+                            out.emitAttribute("ns", name.getURI().toString());
                         }
                         out.emitAttribute("content", ((NodeInfo) value).getStringValue());
                         break;
@@ -643,7 +643,7 @@ public class Literal extends Expression {
         } else if (value instanceof QualifiedNameValue) {
             out.startElement("qName");
             out.emitAttribute("pre", ((QualifiedNameValue) value).getPrefix());
-            out.emitAttribute("uri", ((QualifiedNameValue) value).getNamespaceURI());
+            out.emitAttribute("uri", ((QualifiedNameValue) value).getNamespaceURI().toString());
             out.emitAttribute("loc", ((QualifiedNameValue) value).getLocalName());
             if (!type.equals(BuiltInAtomicType.QNAME)) {
                 out.emitAttribute("type", type.getEQName());

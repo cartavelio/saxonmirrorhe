@@ -8,7 +8,6 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.expr.instruct.ResultDocument;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -32,7 +31,7 @@ import java.util.Set;
  */
 public class SerializationParamsHandler {
 
-    public static final String NAMESPACE = NamespaceConstant.OUTPUT;
+    public static final NamespaceUri NAMESPACE = NamespaceUri.OUTPUT;
     Properties properties;
     CharacterMap characterMap;
     Location locator;
@@ -73,7 +72,7 @@ public class SerializationParamsHandler {
         if (!node.getLocalPart().equals("serialization-parameters")) {
             throw new XPathException("Serialization params: element name must be 'serialization-parameters");
         }
-        if (!node.getURI().equals(NAMESPACE)) {
+        if (!node.getNamespaceUri().equals(NAMESPACE)) {
             throw new XPathException("Serialization params: element namespace must be " + NAMESPACE);
         }
         restrictAttributes(node);
@@ -85,22 +84,22 @@ public class SerializationParamsHandler {
                 throw new XPathException("Duplicated serialization parameter " + child.getDisplayName(), "SEPM0019");
             }
             String lname = child.getLocalPart();
-            String uri = child.getURI();
+            NamespaceUri uri = child.getNamespaceUri();
             if (uri.isEmpty()) {
                 throw new XPathException("Serialization parameter " + lname + " is in no namespace", "SEPM0017");
             }
-            if (NamespaceConstant.OUTPUT.equals(uri)) {
-                uri = "";
+            if (NamespaceUri.OUTPUT.equals(uri)) {
+                uri = NamespaceUri.NULL;
             }
-            if ("".equals(uri) && lname.equals("use-character-maps")) {
+            if (uri.isEmpty() && lname.equals("use-character-maps")) {
                 restrictAttributes(child);
                 AxisIterator gKids = child.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
                 NodeInfo gChild;
                 IntHashMap<String> map = new IntHashMap<>();
                 while ((gChild = gKids.next()) != null) {
                     restrictAttributes(gChild, "character", "map-string");
-                    if (!(gChild.getURI().equals(NAMESPACE) && gChild.getLocalPart().equals("character-map"))) {
-                        if (gChild.getURI().equals(NAMESPACE) || gChild.getURI().isEmpty()) {
+                    if (!(gChild.getNamespaceUri().equals(NAMESPACE) && gChild.getLocalPart().equals("character-map"))) {
+                        if (gChild.getNamespaceUri().equals(NAMESPACE) || gChild.getNamespaceUri().isEmpty()) {
                             throw new XPathException("Invalid child of use-character-maps: " + gChild.getDisplayName(), "SEPM0017");
                         }
                     }
@@ -128,7 +127,7 @@ public class SerializationParamsHandler {
                         child.getAllNamespaces(), false, node.getConfiguration());
                 } catch (XPathException err) {
                     if ("XQST0109".equals(err.getErrorCodeLocalPart()) || "SEPM0016".equals(err.getErrorCodeLocalPart())) {
-                        if ("".equals(uri)) {
+                        if (uri.isEmpty()) {
                             XPathException e2 = new XPathException("Unknown serialization parameter " +
                                 Err.depict(child), "SEPM0017");
                             e2.setLocator(locator);
@@ -154,7 +153,7 @@ public class SerializationParamsHandler {
     private static void restrictAttributes(NodeInfo element, String... allowedNames) throws XPathException {
         for (AttributeInfo att : element.attributes()) {
             NodeName name = att.getNodeName();
-            if ("".equals(name.getURI()) && Arrays.binarySearch(allowedNames, name.getLocalPart()) < 0) {
+            if (name.hasURI(NamespaceUri.NULL) && Arrays.binarySearch(allowedNames, name.getLocalPart()) < 0) {
                 throw new XPathException("In serialization parameters, attribute @" + name.getLocalPart() +
                     " must not appear on element " + element.getDisplayName(), "SEPM0017");
             }
@@ -171,7 +170,7 @@ public class SerializationParamsHandler {
      */
 
     private static String getAttribute(NodeInfo element, String localName) throws XPathException {
-        String value = element.getAttributeValue("", localName);
+        String value = element.getAttributeValue(NamespaceUri.NULL, localName);
         if (value == null) {
             throw new XPathException("In serialization parameters, attribute @" + localName +
                 " is missing on element " + element.getDisplayName());
@@ -188,7 +187,7 @@ public class SerializationParamsHandler {
     public SerializationProperties getSerializationProperties() {
         CharacterMapIndex index = new CharacterMapIndex();
         if (characterMap != null) {
-            index.putCharacterMap(new StructuredQName("", "", "charMap"), characterMap);
+            index.putCharacterMap(new StructuredQName("", NamespaceUri.NULL, "charMap"), characterMap);
             properties.setProperty(SaxonOutputKeys.USE_CHARACTER_MAPS, "charMap");
         }
         return new SerializationProperties(properties, index);
