@@ -30,6 +30,11 @@ public abstract class UnparsedEntity extends SystemFunction implements IContextA
 
     private Item boundContextItem = null;
 
+    @Override
+    public boolean dependsOnContext() {
+        return getArity() == 1;
+    }
+
     public abstract int getOp();
 
     /**

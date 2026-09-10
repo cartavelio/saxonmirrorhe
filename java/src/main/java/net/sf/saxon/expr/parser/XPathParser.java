@@ -4984,7 +4984,7 @@ public class XPathParser {
                 grumble("Function " + functionName.getEQName() + "#" + arity + " not found", "XPST0017", offset);
             }
 
-            if (foundFunction instanceof IContextAccessorFunction) {
+            if (foundFunction instanceof IContextAccessorFunction caf && caf.dependsOnContext()) {
                 // For a context-dependent function, return a call on function-lookup(), which saves the context
                 SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
                 lookup.setRetainedStaticContext(env.makeRetainedStaticContext());

@@ -253,7 +253,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
 
         register("path", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, OPT, CITEM | LATE));
 
-        register("path", 1, e -> e.populate( Path_1::new, BuiltInAtomicType.STRING, OPT, 0)
+        register("path", 1, e -> e.populate(PathFn::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, AnyXNodeType.getInstance(), OPT | NAV, null));
 
         register("round", 2, e -> e.populate(Round::new, NumericType.getInstance(), OPT, AS_NUM_ARG0)

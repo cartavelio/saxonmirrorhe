@@ -20,6 +20,11 @@ import net.sf.saxon.value.SequenceType;
 
 public class Lang extends SystemFunction implements IContextAccessorFunction {
 
+    @Override
+    public boolean dependsOnContext() {
+        return getArity() == 1;
+    }
+
     /**
      * Test whether the context node has the given language attribute
      *

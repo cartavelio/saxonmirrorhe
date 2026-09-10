@@ -211,7 +211,7 @@ public class DraftFunctionReference extends DraftExpression {
                     .withLocation(getLocation());
         }
 
-        if (foundFunction instanceof IContextAccessorFunction) {
+        if (foundFunction instanceof IContextAccessorFunction caf && caf.dependsOnContext()) {
             // For a context-dependent function, return a call on function-lookup(), which saves the context
             SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
             lookup.setRetainedStaticContext(queryModule.makeRetainedStaticContext());

@@ -25,6 +25,11 @@ public class ContextDependentUserFunction extends AbstractFunction implements IC
         this.arity = arity;
     }
 
+    @Override
+    public boolean dependsOnContext() {
+        return true;
+    }
+
     /**
      * Call the Callable.
      *

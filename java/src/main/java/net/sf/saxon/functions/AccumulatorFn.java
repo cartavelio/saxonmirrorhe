@@ -34,6 +34,10 @@ public abstract class AccumulatorFn extends SystemFunction implements IContextAc
 
     private ManualIterator boundContextItem = null;
 
+    @Override
+    public boolean dependsOnContext() {
+        return true;
+    }
 
     private Sequence getAccumulatorValue(String name, Phase phase, XPathContext context) throws XPathException {
         //System.err.println("getAccumulatorValue(" + name + ", " + phase);

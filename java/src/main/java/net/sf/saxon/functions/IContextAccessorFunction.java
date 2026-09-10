@@ -12,12 +12,19 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.trans.XPathException;
 
 /**
- * A ContextAccessorFunction is a function that is dependent on the dynamic context. In the case
+ * A ContextAccessorFunction is a function that is (or may be) dependent on the dynamic context. In the case
  * of dynamic function calls, the context is bound at the point where the function is created,
  * not at the point where the function is called.
  */
 
 public interface IContextAccessorFunction {
+
+    /**
+     * Ask whether this function is actually dependent on the dynamic context
+     * @return true if the function cannot be used unless the dynamic context is first bound
+     */
+
+    boolean dependsOnContext();
 
     /**
      * Bind context information to appear as part of the function's closure. If this method

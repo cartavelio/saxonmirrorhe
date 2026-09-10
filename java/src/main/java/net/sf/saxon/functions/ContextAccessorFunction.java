@@ -19,6 +19,11 @@ import net.sf.saxon.trans.XPathException;
 
 public abstract class ContextAccessorFunction extends SystemFunction implements IContextAccessorFunction {
 
+    @Override
+    public boolean dependsOnContext() {
+        return true;
+    }
+
     /**
      * Evaluate the expression
      *

@@ -281,6 +281,11 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
             this.arityOneConstructor = arityOneConstructor;
         }
 
+        @Override
+        public boolean dependsOnContext() {
+            return true;
+        }
+
         /**
          * Call the Callable.
          *

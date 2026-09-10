@@ -37,6 +37,11 @@ public abstract class SuperId extends SystemFunction implements IContextAccessor
     public static final int ID = 0;
     public static final int ELEMENT_WITH_ID = 1;
 
+    @Override
+    public boolean dependsOnContext() {
+        return getArity() == 1;
+    }
+
     public abstract int getOp();
 
     /**

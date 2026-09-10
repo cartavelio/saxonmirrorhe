@@ -20,6 +20,11 @@ import net.sf.saxon.value.StringValue;
 
 public class Idref extends SystemFunction implements IContextAccessorFunction {
 
+    @Override
+    public boolean dependsOnContext() {
+        return getArity() == 1;
+    }
+
     /**
      * Get the static properties of this expression (other than its type). The result is
      * bit-significant. These properties are used for optimizations. In general, if

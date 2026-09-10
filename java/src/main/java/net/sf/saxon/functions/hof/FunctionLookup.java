@@ -110,10 +110,10 @@ public class FunctionLookup extends ContextAccessorFunction {
             if (foundFunction == null) {
                 return null;
             }
-            if (foundFunction instanceof IContextAccessorFunction) {
+            if (foundFunction instanceof IContextAccessorFunction caf && caf.dependsOnContext()) {
                 // The function is context-dependent, so it needs to be bound to the
                 // dynamic context of the call on function-lookup
-                return ((IContextAccessorFunction)foundFunction).bindContext(context);
+                return caf.bindContext(context);
             } else {
                 // Indicates a function with no dynamic context dependencies
                 if (foundFunction instanceof UserFunction) {

@@ -31,9 +31,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Implement the fn:path function with one or two arguments
+ * Implement the fn:path function
  */
-public class Path_1 extends SystemFunction /*implements IContextAccessorFunction */ {
+public class PathFn extends SystemFunction implements IContextAccessorFunction {
+
+    private Item boundContextItem;
+
+    @Override
+    public boolean dependsOnContext() {
+        return getArity() == 0;
+    }
+
+    @Override
+    public FunctionItem bindContext(XPathContext context) throws XPathException {
+        boundContextItem = context.getContextItem();
+        return this;
+    }
 
     public static OptionsParameter getOptionDetails() {
 //        ItemType inScopeNamespacesResult = new MapType(
@@ -51,10 +64,6 @@ public class Path_1 extends SystemFunction /*implements IContextAccessorFunction
         return pathOptions;
     }
 
-//    @Override
-//    public FunctionItem bindContext(XPathContext context) throws XPathException {
-//        return null;
-//    }
 
     /**
      * Call the function.
@@ -63,7 +72,7 @@ public class Path_1 extends SystemFunction /*implements IContextAccessorFunction
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         GNode node;
         if (arguments.length == 0) {
-            Item item = context.getContextItem();
+            Item item = boundContextItem == null ? context.getContextItem() : boundContextItem;
             if (item instanceof Parcel) {
                 GroundedValue val = ((Parcel)item).getValue();
                 switch (val.getLength()) {

@@ -129,6 +129,13 @@
       <reason>Authentication issue reading from http://timeanddate.com</reason>
    </exception>
    
+   <exception test-set="fn-xsd-validator" 
+      test-case="xsd-validator-092" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-15"/>
+      <reason>Spec unclear: see spec issue #2384</reason>
+   </exception>
+   
    <exception test-set="misc-BuiltInKeywords" 
       test-case=" Keywords-fn-scan-left-1
                   Keywords-fn-scan-right-1
