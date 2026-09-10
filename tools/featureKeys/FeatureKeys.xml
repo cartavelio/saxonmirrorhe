@@ -471,13 +471,13 @@
                 run-time it is dynamically disabled. (These terms are defined in the XSLT 3.0 spec.)
                 By default, the feature is enabled.</p>
             <p><i>The XSLT 3.0 specification requires conformant processors to provide a way of
-            disabling <code>xsl:evaluate</code>. This shouldn't be taken as meaning that 
-            <code>xsl:evaluate</code> poses particular security risks. The main reason for disabling it
-            is if you want to carry out static analysis or inspection of stylesheet code to see what 
-            features it uses. But if you're doing such inspection, it's not difficult to check that
-            <code>xsl:evaluate</code> is only being used to execute trusted code. Note also that
-            <code>fn:transform</code> can similarly be used to execute dynamically-constructed code,
-            and there is no switch to disable that function</i></p>
+                disabling <code>xsl:evaluate</code>. This shouldn't be taken as meaning that 
+                <code>xsl:evaluate</code> poses particular security risks. The main reason for disabling it
+                is if you want to carry out static analysis or inspection of stylesheet code to see what 
+                features it uses. But if you're doing such inspection, it's not difficult to check that
+                <code>xsl:evaluate</code> is only being used to execute trusted code. Note also that
+                <code>fn:transform()</code> can similarly be used to execute dynamically-constructed code,
+                and there is no switch to disable that function.</i></p>
         </desc>
     </feature>
     <feature>
@@ -584,9 +584,12 @@
             <p>The supplied class is instantiated and the resulting <code>EntityResolver</code> is
                 used whenever Saxon itself creates an <code>XMLReader</code> for parsing source
                 documents. It is not used with a user-supplied <code>XMLReader</code>.</p>
-
+            <p>The default value is <link>net.sf.saxon.lib.StandardEntityResolver</link>. This is an entity
+                resolver that recognizes the names of many standard W3C DTDs and external entity
+                files, and resolves them against local copies issued with the Saxon software, to
+                avoid the need to fetch them from the web.</p>
             <p>The property can be set to a zero-length string, in which case no
-                    <code>EntityResolver</code> will be used. This is the default value.</p>
+                    <code>EntityResolver</code> will be used.</p>
 
         </desc>
     </feature>
@@ -1253,7 +1256,7 @@
         <desc>
             <p>At one time this property controlled how recoverable errors were handled
             (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-                specification, so the property is no longer used.</p>
+            specification, so the property is now deprecated.</p>
         </desc>
     </feature>
     <feature>
@@ -1266,14 +1269,14 @@
         <commandline for="T">-warnings:(silent|recover|fatal)</commandline>
         <configfile>xslt/@recoveryPolicy</configfile>
         <configfiledesc>
-            <p>Indicates how XSLT recoverable errors are handled (for example, ambiguous template
-                rules).</p>
+            <p>Previously used to indicate how XSLT recoverable errors were handled, but since the
+                XSLT 3.0 specification has eliminated these, the property is now deprecated.</p>
         </configfiledesc>
         <typedesc>recoverWithWarnings|recoverSilently| doNotRecover</typedesc>
         <desc>
             <p>At one time this property controlled how recoverable errors were handled
                 (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-                specification, so the property is no longer used.</p>
+                specification, so the property is now deprecated.</p>
         </desc>
     </feature>
     <feature>
@@ -2965,17 +2968,16 @@
             <p>A regular expression used to decide whether a collection URI is to
                 be treated as representing a ZIP file. The default pattern is
                 "^jar:|\.jar$|\.zip$\.docx$\.xlsx$" which matches a URI that starts with "jar:"
-                or that ends with ".jar", ".zip", ".docx, or ".xlsx".</p>
+                or that ends with ".jar", ".zip", ".docx", or ".xlsx".</p>
         </configfiledesc>
         <desc>
             <p>The value of this property is a regular expression used to decide whether a collection URI is to
                 be treated as representing a ZIP file. The default pattern is
                 "^jar:|\.jar$|\.zip$\.docx$\.xlsx$" which matches a URI that starts with "jar:"
-                or that ends with ".jar", ".zip", ".docx, or ".xlsx".</p>
+                or that ends with ".jar", ".zip", ".docx", or ".xlsx".</p>
             <p>This is used by the standard Collection Finder and may not be relevant
-                if a custom Collection Finder is in use.
-            </p>
-            <p>If the absolutized URI passed to the collection() function matches
+                if a custom Collection Finder is in use.</p>
+            <p>If the absolutized URI passed to the <code>collection()</code> function matches
             this pattern, then the URI will be treated as a reference to a ZIP file
             (and will therefore fail if the URI does not resolve to a resource that can
             be opened as a ZIP file).</p>

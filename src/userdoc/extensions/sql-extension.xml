@@ -15,7 +15,8 @@
       many limitations in the design), but more as an illustration of how extension instructions can be used to enhance
       the capability of the processor. Although extension instructions require Saxon-PE or higher, the source code of 
       the SQL instructions is open source code available under the Mozilla Public License, and can be found in a 
-      <a class="bodylink" href="https://saxonica.plan.io/projects/saxonmirrorhe/repository/he/show/src/main/java/net/sf/saxon/option/sql?utf8=✓&amp;rev=saxon11">GIT repository</a></p>
+      <a class="bodylink" target="_blank"
+         href="https://saxonica.plan.io/projects/saxonmirrorhe/repository/he/show/src/main/java/net/sf/saxon/option/sql?utf8=✓&amp;rev=saxon11">GIT repository</a>.</p>
    
    
    <p>More recently, Saxon provides a set of extension functions providing similar capability in a cleaner way (this
