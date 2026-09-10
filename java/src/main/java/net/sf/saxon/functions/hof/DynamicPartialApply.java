@@ -13,6 +13,7 @@ import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.functions.IContextAccessorFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -34,7 +35,8 @@ import java.util.function.Supplier;
  * The result of evaluating a {@code DynamicPartialApply} expression is generally a {@link CurriedFunction}, which is a type
  * of {@link FunctionItem}.
  *
- * This class handles dynamic function calls where one or more of the supplied arguments is a "?" placeholder.
+ * <p>This class handles dynamic function calls where one or more of the supplied arguments
+ * is a "?" placeholder.</p>
  *
  * <p>Evaluation of the {@link DynamicPartialApply} expression returns a function item, specifically
  *       a {@link CurriedFunction} instance. This implements the {@link FunctionItem} interface,
@@ -365,6 +367,10 @@ public class DynamicPartialApply extends Expression {
                         throw new XPathException(
                                 "The number of arguments supplied in the partial function application is " + len +
                                         ", but the arity of the function item is " + f.getArity(), "XPTY0004");
+                    }
+
+                    if (f instanceof IContextAccessorFunction icaf) {
+                        f = icaf.bindContext(context);
                     }
                     Sequence[] values = new Sequence[len];
                     for (int i = 0; i < boundArgumentsEvaluators.length; i++) {
