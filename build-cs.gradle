@@ -503,11 +503,9 @@ task dotnetPublish(
         "-p:Version=${csver}", "-p:PackageVersion=${csver}"
     }
   }
-  /*
   doLast {
     signExe("${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll")
   }
-  */
   doLast {
     println("Published SaxonCS release for ${csplatform}")
   }
