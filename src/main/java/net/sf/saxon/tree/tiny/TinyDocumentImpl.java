@@ -22,7 +22,7 @@ import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashMap;
 
 import java.util.ArrayList;
@@ -179,6 +179,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
 
     @Override
     public void generateId(/*@NotNull*/ StringBuilder buffer) {
+        System.err.println("generateId(/)");
         buffer.append('d');
         buffer.append(getTreeInfo().getDocumentNumber());
     }
@@ -193,7 +194,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() {
-        return new UntypedAtomicValue(getUnicodeStringValue());
+        return StringValue.makeUntypedAtomic(getUnicodeStringValue());
     }
 
     /**

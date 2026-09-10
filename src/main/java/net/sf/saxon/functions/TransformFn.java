@@ -40,7 +40,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -573,9 +572,8 @@ public class TransformFn extends SystemFunction implements Callable {
         int languageVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         checkTransformOptions(options, context, languageVersion);
         if (options.get("xslt-version") != null) {
-            BigDecimalValue thisVersion = new BigDecimalValue(new BigDecimal(languageVersion).divide(BigDecimal.TEN));
-            BigDecimalValue targetVersion = (BigDecimalValue) options.get("xslt-version").head();
-            if (targetVersion.compareTo(thisVersion) > 0) {
+            double targetVersion = ((BigDecimalValue) options.get("xslt-version").head()).getDoubleValue();
+            if (targetVersion * 10 > languageVersion) {
                 throw new XPathException("The transform option xslt-version is higher than the language version supported by this processor", "FOXT0002");
             }
 

@@ -20,7 +20,6 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 
 /**
  * A node (implementing the NodeInfo interface) representing an attribute, text node,
@@ -261,11 +260,11 @@ public final class Orphan implements MutableNodeInfo {
             case Type.TEXT:
             case Type.DOCUMENT:
             case Type.NAMESPACE:
-                return new UntypedAtomicValue(getUnicodeStringValue());
+                return StringValue.makeUntypedAtomic(getUnicodeStringValue());
             default:
                 if (typeAnnotation == null || typeAnnotation == Untyped.getInstance() ||
                         typeAnnotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
-                    return new UntypedAtomicValue(getUnicodeStringValue());
+                    return StringValue.makeUntypedAtomic(getUnicodeStringValue());
                 } else {
                     return typeAnnotation.atomize(this);
                 }

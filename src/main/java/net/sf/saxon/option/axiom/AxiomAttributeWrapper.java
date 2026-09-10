@@ -16,14 +16,13 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependAxisIterator;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMContainer;
 import org.apache.axiom.om.OMElement;
@@ -159,7 +158,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
 
     @Override
     public AtomicSequence atomize() {
-        return new UntypedAtomicValue(getUnicodeStringValue());
+        return StringValue.makeUntypedAtomic(getUnicodeStringValue());
     }
 
     /**

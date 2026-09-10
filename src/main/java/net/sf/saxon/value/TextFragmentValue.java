@@ -373,7 +373,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() {
-        return new UntypedAtomicValue(text);
+        return StringValue.makeUntypedAtomic(text);
     }
 
     /**
@@ -863,7 +863,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
         /*@NotNull*/
         @Override
         public AtomicSequence atomize() throws XPathException {
-            return new UntypedAtomicValue(fragment.text);
+            return StringValue.makeUntypedAtomic(fragment.text);
         }
 
         /**

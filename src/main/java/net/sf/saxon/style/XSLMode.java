@@ -40,11 +40,7 @@ public class XSLMode extends StyleElement {
     private Set<? extends Accumulator> accumulators;
     private boolean prepared = false;
     private boolean streamable = false;
-    private boolean failOnMultipleMatch = false;
-    private boolean warningOnNoMatch = false;
-    private boolean warningOnMultipleMatch = true;
     private boolean traceMatching = false;
-    private BuiltInRuleSet defaultRules = TextOnlyCopyRuleSet.getInstance();
 
     /**
      * Ask whether this node is a declaration, that is, a permitted child of xsl:stylesheet
@@ -147,7 +143,7 @@ public class XSLMode extends StyleElement {
             String value = att.getValue();
             switch (f) {
                 case "streamable":
-                    boolean streamable = processStreamableAtt(value);
+                    streamable = processStreamableAtt(value);
                     break;
                 case "name":
                     nameAtt = Whitespace.trim(value);
@@ -163,10 +159,7 @@ public class XSLMode extends StyleElement {
                 case "on-multiple-match": {
                     switch (Whitespace.trim(value)) {
                         case "fail":
-                            boolean failOnMultipleMatch = true;
-                            break;
                         case "use-last":
-                            failOnMultipleMatch = false;
                             break;
                         default:
                             invalidAttribute(f, "fail|use-last");
@@ -177,22 +170,11 @@ public class XSLMode extends StyleElement {
                 case "on-no-match":
                     switch (Whitespace.trim(value)) {
                         case "text-only-copy":
-                            // no action, this is the default
-                            break;
                         case "shallow-copy":
-                            BuiltInRuleSet defaultRules = ShallowCopyRuleSet.getInstance();
-                            break;
                         case "deep-copy":
-                            defaultRules = DeepCopyRuleSet.getInstance();
-                            break;
                         case "shallow-skip":
-                            defaultRules = ShallowSkipRuleSet.getInstance();
-                            break;
                         case "deep-skip":
-                            defaultRules = DeepSkipRuleSet.getInstance();
-                            break;
                         case "fail":
-                            defaultRules = FailRuleSet.getInstance();
                             break;
                         default:
                             invalidAttribute(f, "text-only-copy|shallow-copy|deep-copy|shallow-skip|deep-skip|fail");
@@ -200,11 +182,11 @@ public class XSLMode extends StyleElement {
                     }
                     break;
                 case "warning-on-multiple-match": {
-                    boolean warningOnMultipleMatch = processBooleanAttribute("warning-on-multiple-match", value);
+                    processBooleanAttribute("warning-on-multiple-match", value);
                     break;
                 }
                 case "warning-on-no-match": {
-                    boolean warningOnNoMatch = processBooleanAttribute("warning-on-no-match", value);
+                    processBooleanAttribute("warning-on-no-match", value);
                     break;
                 }
                 case "typed": {
@@ -258,7 +240,7 @@ public class XSLMode extends StyleElement {
         mode.setModeTracing(traceMatching);     // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
 
         if (extraAsAtt != null) {               // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
-            SequenceType extraResultType = null;
+            SequenceType extraResultType;
             try {
                 extraResultType = makeExtendedSequenceType(extraAsAtt);
             } catch (XPathException e) {
@@ -289,6 +271,10 @@ public class XSLMode extends StyleElement {
                     normalizedAtt = "no";
                 } else {
                     normalizedAtt = trimmed;
+                }
+                if (f.equals("streamable") && !streamable) {
+                    // we've decided earlier to fall back to non-streaming
+                    normalizedAtt = "no";
                 }
                 mode.getActivePart().setExplicitProperty(f, normalizedAtt, decl.getPrecedence());
                 if (mode.isMustBeTyped() && getContainingPackage().getTargetEdition().matches("JS\\d?")) {

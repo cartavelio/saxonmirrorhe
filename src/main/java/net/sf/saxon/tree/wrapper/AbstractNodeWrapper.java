@@ -22,7 +22,6 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
@@ -77,7 +76,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
             case Type.PROCESSING_INSTRUCTION:
                 return new StringValue(getUnicodeStringValue());
             default:
-                return new UntypedAtomicValue(getUnicodeStringValue());
+                return StringValue.makeUntypedAtomic(getUnicodeStringValue());
         }
     }
 
@@ -127,7 +126,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @CSharpModifiers(code={"public", "virtual"})
     public String getSystemId() {
         if (treeInfo instanceof GenericTreeInfo) {
-            return treeInfo.getRootNode().getSystemId();
+            return ((GenericTreeInfo)treeInfo).getSystemId();
         } else {
             throw new UnsupportedOperationException();
             // must implement in subclass

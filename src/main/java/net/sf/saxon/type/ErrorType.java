@@ -17,7 +17,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.Collections;
@@ -283,7 +283,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
     /*@NotNull*/
     @Override
     public AtomicSequence atomize(/*@NotNull*/ NodeInfo node) {
-        return new UntypedAtomicValue(node.getUnicodeStringValue());
+        return StringValue.makeUntypedAtomic(node.getUnicodeStringValue());
     }
 
     /**

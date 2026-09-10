@@ -15,7 +15,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSetPredicate;
 
@@ -169,10 +169,10 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
         int kind = tree.nodeKind[nextNodeNr];
         switch (kind) {
             case Type.TEXT: {
-                return new UntypedAtomicValue(TinyTextImpl.getStringValue(tree, nextNodeNr));
+                return StringValue.makeUntypedAtomic(TinyTextImpl.getStringValue(tree, nextNodeNr));
             }
             case Type.WHITESPACE_TEXT: {
-                return new UntypedAtomicValue(WhitespaceTextImpl.getStringValue(tree, nextNodeNr));
+                return StringValue.makeUntypedAtomic(WhitespaceTextImpl.getStringValue(tree, nextNodeNr));
             }
             case Type.ELEMENT:
             case Type.TEXTUAL_ELEMENT: {

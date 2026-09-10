@@ -392,7 +392,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
         int[] ib = new int[2];
         boolean bb = collationContains(iter1, iter2, ib, false);
         if (bb) {
-            return s1.substring(0, ib[0]);
+            return s1.prefix(ib[0]);
         } else {
             return EmptyUnicodeString.getInstance();
         }

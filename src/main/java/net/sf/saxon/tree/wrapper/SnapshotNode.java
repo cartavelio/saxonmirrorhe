@@ -21,7 +21,7 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This class represents a node within a tree produced by the snapshot() function, as a virtual copy of
@@ -162,7 +162,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
                 } else {
                     // Ancestors of the pivot node have type xs:anyType. The typed value is therefore the
                     // string value as an instance of xs:untypedAtomic
-                    return new UntypedAtomicValue(pivot.getUnicodeStringValue());
+                    return StringValue.makeUntypedAtomic(pivot.getUnicodeStringValue());
                 }
         }
     }

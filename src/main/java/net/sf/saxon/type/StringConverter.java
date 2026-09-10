@@ -195,13 +195,13 @@ public abstract class StringConverter extends Converter {
 
         @Override
         public StringValue convert(AtomicValue input) {
-            return new UntypedAtomicValue(input.getUnicodeStringValue());
+            return StringValue.makeUntypedAtomic(input.getUnicodeStringValue());
         }
 
         
         @Override
         public ConversionResult convertString(UnicodeString input) {
-            return new UntypedAtomicValue(input);
+            return StringValue.makeUntypedAtomic(input);
         }
 
         /*@Nullable*/

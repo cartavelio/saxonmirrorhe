@@ -13,7 +13,7 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
@@ -248,7 +248,7 @@ public enum AnySimpleType implements SimpleType {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize(/*@NotNull*/ NodeInfo node) {
-        return new UntypedAtomicValue(node.getUnicodeStringValue());
+        return StringValue.makeUntypedAtomic(node.getUnicodeStringValue());
     }
 
     /**
@@ -331,7 +331,7 @@ public enum AnySimpleType implements SimpleType {
     /*@NotNull*/
     @Override
     public AtomicSequence getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules) {
-        return new UntypedAtomicValue(value);
+        return StringValue.makeUntypedAtomic(value);
     }
 
     /**

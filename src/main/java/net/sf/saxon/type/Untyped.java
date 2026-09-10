@@ -15,7 +15,7 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashSet;
 
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
@@ -466,7 +466,7 @@ public enum Untyped implements ComplexType {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize(/*@NotNull*/ NodeInfo node) {
-        return new UntypedAtomicValue(node.getUnicodeStringValue());
+        return StringValue.makeUntypedAtomic(node.getUnicodeStringValue());
     }
 
     /**

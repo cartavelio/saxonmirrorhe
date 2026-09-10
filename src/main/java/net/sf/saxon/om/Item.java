@@ -48,20 +48,33 @@ public interface Item extends GroundedValue {
     }
 
     /**
-     * Get the value of the item as a string. For nodes, this is the string value of the
+     * Get the value of the item as a Unicode string. For nodes, this is the string value of the
      * node as defined in the XPath 2.0 data model, except that all nodes are treated as being
      * untyped: it is not an error to get the string value of a node with a complex type.
      * For atomic values, the method returns the result of casting the atomic value to a string.
      *
      * @return the string value of the item
      * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
-     *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
-     *                                       needed)
+     *         is used here to avoid introducing exception handling to a large number of paths where it is not
+     *         needed)
      * @since 8.4
      */
 
     @Override
     UnicodeString getUnicodeStringValue();
+
+    /**
+     * Get the value of the item as a Java string. For nodes, this is the string value of the
+     * node as defined in the XPath 2.0 data model, except that all nodes are treated as being
+     * untyped: it is not an error to get the string value of a node with a complex type.
+     * For atomic values, the method returns the result of casting the atomic value to a string.
+     *
+     * @return the string value of the item
+     * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
+     *         is used here to avoid introducing exception handling to a large number of paths where it is not
+     *         needed)
+     * @since 8.4
+     */
 
     @Override
     default String getStringValue() {

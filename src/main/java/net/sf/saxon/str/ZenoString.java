@@ -251,7 +251,7 @@ public class ZenoString extends UnicodeString {
             for (int i=first+1; i<last; i++) {
                 z = z.concat(segments.get(i));
             }
-            return z.concat(segments.get(last).substring(0, end-offsets.get(last)));
+            return z.concat(segments.get(last).prefix(end-offsets.get(last)));
         }
     }
 

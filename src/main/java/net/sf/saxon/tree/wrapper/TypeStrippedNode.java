@@ -18,7 +18,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -91,7 +91,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() throws XPathException {
-        return new UntypedAtomicValue(getUnicodeStringValue());
+        return StringValue.makeUntypedAtomic(getUnicodeStringValue());
     }
 
     /**

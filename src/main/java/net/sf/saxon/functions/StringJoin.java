@@ -139,7 +139,7 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
         output.close();
     }
 
-    private class StringJoinFold implements Fold {
+    private static class StringJoinFold implements Fold {
 
         private int position = 0;
         private final UnicodeString separator;

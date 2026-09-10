@@ -732,7 +732,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 return false;
             }
             if (iter0 instanceof RangeIterator) {
-                if (value1 instanceof UntypedAtomicValue) {
+                if (value1.isUntypedAtomic()) {
                     value1 = StringConverter.StringToInteger.INSTANCE.convertString(value1.getUnicodeStringValue()).asAtomic();
                 }
                 RangeIterator ri = (RangeIterator)iter0;

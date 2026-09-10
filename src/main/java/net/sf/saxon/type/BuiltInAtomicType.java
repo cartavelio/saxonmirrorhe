@@ -1017,7 +1017,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         if (fingerprint == StandardNames.XS_STRING) {
             return new StringValue(stringValue.tidy());
         } else if (fingerprint == StandardNames.XS_UNTYPED_ATOMIC) {
-            return new UntypedAtomicValue(stringValue);
+            return StringValue.makeUntypedAtomic(stringValue);
         }
         StringConverter converter = stringConverter;
         if (converter == null) {
@@ -1055,7 +1055,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         if (fingerprint == StandardNames.XS_STRING) {
             return new StringValue(value.tidy());
         } else if (fingerprint == StandardNames.XS_UNTYPED_ATOMIC) {
-            return new UntypedAtomicValue(value);
+            return StringValue.makeUntypedAtomic(value);
         }
         StringConverter converter = getStringConverter(rules);
         if (isNamespaceSensitive()) {
