@@ -405,7 +405,7 @@ public class ZenoString extends UnicodeString {
             }
         }
 
-        verifySegmentLengths();
+        //verifySegmentLengths();
         return this;
     }
 

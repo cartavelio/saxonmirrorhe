@@ -49,14 +49,25 @@ public class Twine24 extends UnicodeString {
      *                   (that is, codepoints higher than 65535 must be supplied as a single unit)
      */
 
-    public Twine24(int[] codePoints) {
-        bytes = new byte[codePoints.length * 3];
-        for (int i = 0, j = 0; i < codePoints.length; i++, j += 3) {
+    public Twine24(int[] codePoints, int used) {
+        bytes = new byte[used * 3];
+        for (int i = 0, j = 0; i < used; i++, j += 3) {
             int c = codePoints[i];
             bytes[j] = (byte) ((c >> 16) & 0xff);
             bytes[j + 1] = (byte) ((c >> 8) & 0xff);
             bytes[j + 2] = (byte) (c & 0xff);
         }
+    }
+
+    /**
+     * Construct a {@code Twine} from an array of codepoints.
+     *
+     * @param codePoints the codepoints making up the string: must not contain any surrogates
+     *                   (that is, codepoints higher than 65535 must be supplied as a single unit)
+     */
+
+    public Twine24(int[] codePoints) {
+        this(codePoints, codePoints.length);
     }
 
     public byte[] getByteArray() {

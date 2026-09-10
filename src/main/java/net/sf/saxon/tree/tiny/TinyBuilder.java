@@ -522,7 +522,7 @@ public class TinyBuilder extends Builder {
         commentBuilder.accept(remainder);
         int nameCode = namePool.allocateFingerprint("", piname);
 
-        nodeNr = tt.addNode(Type.PROCESSING_INSTRUCTION, currentDepth, s, remainder.tidy().length32(),
+        nodeNr = tt.addNode(Type.PROCESSING_INSTRUCTION, currentDepth, s, remainder.length32(),
                 nameCode);
 
         int prev = prevAtDepth[currentDepth];

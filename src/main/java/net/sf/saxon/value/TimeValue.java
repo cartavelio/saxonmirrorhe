@@ -387,7 +387,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(16);
 
         appendTwoDigits(sb, hour);
         sb.append(':');

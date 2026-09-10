@@ -98,7 +98,7 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
         int y = getYears();
         int m = getMonths();
 
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(16);
         if (_negative) {
             sb.append('-');
         }

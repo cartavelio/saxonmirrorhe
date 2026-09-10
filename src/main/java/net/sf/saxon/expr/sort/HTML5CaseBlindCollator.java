@@ -205,7 +205,7 @@ public class HTML5CaseBlindCollator implements StringCollator, SubstringMatcher 
      */
 
     private UnicodeString normalize(UnicodeString cs) {
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(cs.length32());
         IntIterator iter = cs.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();

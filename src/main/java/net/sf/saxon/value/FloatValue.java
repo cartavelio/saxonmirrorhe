@@ -213,7 +213,7 @@ public final class FloatValue extends NumericValue {
 
     @Override
     public UnicodeString getCanonicalLexicalRepresentation() {
-        UnicodeBuilder fsb = new UnicodeBuilder();
+        UnicodeBuilder fsb = new UnicodeBuilder(32);
         return FloatingPointConverter.appendFloat(fsb, value, true);
     }
 

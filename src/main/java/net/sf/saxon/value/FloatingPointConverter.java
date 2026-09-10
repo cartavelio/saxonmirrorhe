@@ -465,7 +465,7 @@ public class FloatingPointConverter {
 
     //@CSharpReplaceBody(code = "return net.sf.saxon.str.BMPString.of(d.ToString(System.Globalization.CultureInfo.InvariantCulture));") // for now...
     public static UnicodeString convertDouble(double d, boolean forceExponential) {
-        UnicodeBuilder s = new UnicodeBuilder();
+        UnicodeBuilder s = new UnicodeBuilder(32);
         if (d == Double.NEGATIVE_INFINITY) {
             s.appendLatin(NEGATIVE_INFINITY);
         } else if (d == Double.POSITIVE_INFINITY) {

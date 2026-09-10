@@ -161,7 +161,7 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
         @Override
         public void processItem(Item item) {
             if (position == 0) {
-                data.accept(item.getUnicodeStringValue());
+                data.append(item.getUnicodeStringValue());
                 position = 1;
             } else {
                 data.accept(separator).accept(item.getUnicodeStringValue());

@@ -88,7 +88,7 @@ public class GMonthValue extends GDateValue {
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(16);
 
         sb.appendLatin("--");
         appendTwoDigits(sb, month);

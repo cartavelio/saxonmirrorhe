@@ -70,7 +70,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
         }
 
 
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(sv0.length32());
         long s2len = sv2.length();
         IntIterator iter = sv0.codePoints();
         while (iter.hasNext()) {
@@ -119,7 +119,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
      */
 
     public static StringValue translateUsingMap(StringValue in, IntToIntMap map) {
-        UnicodeBuilder builder = new UnicodeBuilder();
+        UnicodeBuilder builder = new UnicodeBuilder(in.length32());
         IntIterator iter = in.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();

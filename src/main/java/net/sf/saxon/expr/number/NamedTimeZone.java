@@ -387,7 +387,7 @@ public class NamedTimeZone {
      */
 
     public static String formatTimeZoneOffset(DateTimeValue timeValue) {
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(16);
         CalendarValue.appendTimezone(timeValue.getTimezoneInMinutes(), sb);
         return sb.toString();
     }

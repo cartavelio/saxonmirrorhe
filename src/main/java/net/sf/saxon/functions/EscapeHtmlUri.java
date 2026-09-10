@@ -11,7 +11,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.HTMLURIEscaper;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
@@ -24,7 +23,7 @@ public class EscapeHtmlUri extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
-        final UnicodeString s = arg.getUnicodeStringValue();
+        final String s = arg.getStringValue();
         return new StringValue(HTMLURIEscaper.escapeURL(s, false, getRetainedStaticContext().getConfiguration()));
     }
 

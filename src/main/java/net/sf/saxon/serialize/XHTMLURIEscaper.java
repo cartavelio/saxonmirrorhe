@@ -15,7 +15,6 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -135,7 +134,7 @@ public class XHTMLURIEscaper extends HTMLURIEscaper {
                                 return new AttributeInfo(
                                         attName,
                                         att.getType(),
-                                        escapeURL(StringView.tidy(normalized), true, getConfiguration()).toString(),
+                                        escapeURL(normalized, true, getConfiguration()),
                                         att.getLocation(),
                                         att.getProperties() | ReceiverOption.DISABLE_CHARACTER_MAPS);
                             } catch (XPathException e) {

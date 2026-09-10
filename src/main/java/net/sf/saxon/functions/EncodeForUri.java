@@ -51,7 +51,7 @@ public class EncodeForUri extends ScalarSystemFunction {
 
     public static StringValue escape(UnicodeString s, String allowedPunctuation) {
         s = s.tidy();
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(s.length32() + 20);
         IntIterator iter = s.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();

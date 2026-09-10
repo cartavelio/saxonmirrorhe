@@ -183,7 +183,7 @@ public final class DayTimeDurationValue extends DurationValue
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(16);
         if (_negative) {
             sb.append('-');
         }
