@@ -2,6 +2,7 @@ package s9apitest;
 
 import com.saxonica.config.ProfessionalConfiguration;
 import net.sf.saxon.functions.FunctionLibrary;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryModule;
@@ -32,7 +33,7 @@ public class TestFunctionLibrary {
         }
 
         try {
-            File library = new File("src/test/testdata/functionLibrary.xsl");
+            File library = Testdata.file("functionLibrary.xsl");
             SAXSource stylesheet = new SAXSource(new InputSource(library.toURI().toString()));
             XsltCompiler compiler = processor.newXsltCompiler();
             XsltPackage exec = compiler.compilePackage(stylesheet);
@@ -85,7 +86,7 @@ public class TestFunctionLibrary {
         }
 
         try {
-            File library = new File("src/test/testdata/functionLibrary.xq");
+            File library = Testdata.file("functionLibrary.xq");
             FileInputStream stream = new FileInputStream(library);
 
             XQueryCompiler compiler = processor.newXQueryCompiler();
