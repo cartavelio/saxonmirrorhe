@@ -429,6 +429,9 @@
             <li><p>Constructor functions have a zero-arity version that takes the context item as
                 the default argument. Also, the single argument version can be called using <code>value</code>
                 as the argument keyword.</p></li>
+            <li><p>The <code>fn:codepoints-to-string()</code> had been changed to allow a variable number of
+            arguments (rather than a single sequence-valued argument). This change didn't make it into the spec
+            and has now been reverted.</p></li>
         </ul>
         
         

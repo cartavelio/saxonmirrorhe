@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.parser;
 
+import com.saxonica.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.*;
@@ -19,6 +20,7 @@ import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
+import net.sf.saxon.functions.registry.XPath20FunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -1063,14 +1065,23 @@ public class XPathParser {
                     grumble("Concatenation operator ('||') requires XPath 3.0 to be enabled");
                 }
                 RetainedStaticContext rsc = new RetainedStaticContext(env);
+                BuiltInFunctionSet lib = env.getXPathVersion() == 40
+                        ? XPath40FunctionSet.getInstance()
+                        : XPath20FunctionSet.getInstance();
+
                 if (lhs.isCallOn(Concat.class)) {
                     Expression[] args = ((SystemFunctionCall) lhs).getArguments();
                     Expression[] newArgs = new Expression[args.length + 1];
                     System.arraycopy(args, 0, newArgs, 0, args.length);
                     newArgs[args.length] = rhs;
-                    return SystemFunction.makeCall("concat", rsc, newArgs);
+                    SystemFunction concat = lib.makeFunction("concat", newArgs.length);
+                    concat.setRetainedStaticContext(rsc);
+                    return concat.makeFunctionCall(newArgs);
                 } else {
-                    return SystemFunction.makeCall("concat", rsc, lhs, rhs);
+                    SystemFunction concat = lib.makeFunction("concat", 2);
+                    concat.setRetainedStaticContext(rsc);
+                    Expression[] args = new Expression[]{lhs, rhs};
+                    return concat.makeFunctionCall(args);
                 }
             }
             case Token.PLUS:

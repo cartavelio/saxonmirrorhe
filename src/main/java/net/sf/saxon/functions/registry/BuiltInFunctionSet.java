@@ -7,12 +7,12 @@
 
 package net.sf.saxon.functions.registry;
 
-import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.OperandUsage;
+import net.sf.saxon.expr.StaticContext;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
-import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.Concat;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.OptionsParameter;
@@ -31,7 +31,10 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntHashMap;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -205,33 +208,33 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                             reasons.add("concat() prior to XPath 4.0 requires at least two arguments");
                             return null;
                         }
-                        // Require each argument to be a singleton
-                        Expression[] a2 = new Expression[staticArgs.length];
-                        for (int i=0; i<staticArgs.length; i++) {
-                            if (staticArgs[i] instanceof StringLiteral) {
-                                a2[i] = staticArgs[i];
-                            } else {
-                                final int pos = i;
-                                Supplier<RoleDiagnostic> role =
-                                        () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "concat", pos);
-                                a2[i] = CardinalityChecker.makeCardinalityChecker(
-                                        staticArgs[i], StaticProperty.ALLOWS_ZERO_OR_ONE, role);
-                                a2[i].setRetainedStaticContext(env.makeRetainedStaticContext());
-                            }
-                        }
-                        staticArgs = a2;
+//                        // Require each argument to be a singleton
+//                        Expression[] a2 = new Expression[staticArgs.length];
+//                        for (int i=0; i<staticArgs.length; i++) {
+//                            if (staticArgs[i] instanceof StringLiteral) {
+//                                a2[i] = staticArgs[i];
+//                            } else {
+//                                final int pos = i;
+//                                Supplier<RoleDiagnostic> role =
+//                                        () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "concat", pos);
+//                                a2[i] = CardinalityChecker.makeCardinalityChecker(
+//                                        staticArgs[i], StaticProperty.ALLOWS_ZERO_OR_ONE, role);
+//                                a2[i].setRetainedStaticContext(env.makeRetainedStaticContext());
+//                            }
+//                        }
+//                        staticArgs = a2;
                     }
                 }
-                int declaredArity = entry.maxArity;
-                Expression[] newArgs = Arrays.copyOf(staticArgs, declaredArity);
-                if (declaredArity > staticArgs.length) {
-                    newArgs[declaredArity - 1] = Literal.makeEmptySequence();
-                } else if (declaredArity < staticArgs.length) {
-                    Expression block = new Block(Arrays.copyOfRange(staticArgs, declaredArity - 1, staticArgs.length));
-                    ExpressionTool.copyLocationInfo(staticArgs[0], block);
-                    newArgs[declaredArity - 1] = block;
-                }
-                staticArgs = newArgs;
+//                int declaredArity = entry.maxArity;
+//                Expression[] newArgs = Arrays.copyOf(staticArgs, declaredArity);
+//                if (declaredArity > staticArgs.length) {
+//                    newArgs[declaredArity - 1] = Literal.makeEmptySequence();
+//                } else if (declaredArity < staticArgs.length) {
+//                    Expression block = new Block(Arrays.copyOfRange(staticArgs, declaredArity - 1, staticArgs.length));
+//                    ExpressionTool.copyLocationInfo(staticArgs[0], block);
+//                    newArgs[declaredArity - 1] = block;
+//                }
+//                staticArgs = newArgs;
 
             } else if ((keywords != null && !keywords.isEmpty()) || staticArgs.length < entry.maxArity) {
                 staticArgs = UserFunction.makeExpandedArgumentArray(staticArgs, keywords, entry);

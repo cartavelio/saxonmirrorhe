@@ -98,8 +98,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
         // Concat changes in 4.0:
-        // TODO: reimpose restrictions if 4.0 not in use
-        registerVariadic("concat", 1, e -> e.populate(Concat::new, BuiltInAtomicType.STRING, ONE, SEQV)
+        registerVariadic("concat", 1, e -> e.populate(Concat31::new, BuiltInAtomicType.STRING, ONE, SEQV)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
 
         register("contains", 2, e -> e.populate(Contains::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL)
