@@ -51,18 +51,18 @@ namespace TestDriver {
             return builder.Build(target);
         }
         
-        private bool validateLinkedDocument(XdmNode element, Processor processor) {
+        private bool validateLinkedDocument(XdmNode element, Processor processor, XsdSchema schema, string expectedOutcome) {
             try {
-                String href = element.GetAttributeValue(xlinkHref);
+                string href = element.GetAttributeValue(xlinkHref);
                 Uri target = new Uri(element.BaseUri, href);
-                SchemaValidator v = processor.SchemaManager.NewSchemaValidator();
+                SchemaValidator v = schema.NewValidator();
                 v.Lax = false;
                 List<ValidationFailure> failures = new ();
                 v.InvalidityListener = failures.Add;
                 v.SetDestination(new NullDestination());
                 v.Validate(target);
 
-                if (debug) {
+                if (debug && expectedOutcome == "valid") {
                     foreach (ValidationFailure invalidity in failures)
                     {
                         Console.Error.WriteLine("+++> " + invalidity.Message);
@@ -93,7 +93,7 @@ namespace TestDriver {
          * @throws IOException
          * @throws URISyntaxException
          */
-        private void go(String[] args) {
+        private void go(string[] args) {
             string usage =
                 "SchemaTestSuiteDriver testDir -lang:XSD [-w] [-onwards] -c:contributor? -s:setName? -g:groupName? [-o:outputdir]";
             if (args.Length == 0 || args[0] == "-?") {
@@ -119,38 +119,44 @@ namespace TestDriver {
             var exceptions = new Dictionary<string, string>();
 
             for (int i = 1; i < args.Length; i++) {
-                if (args[i] == ("-w")) {
-                    //showWarnings = true;
-                }
-                else if (args[i] == ("-onwards")) {
-                    onwards = true;
-                }
-                else if (args[i] == ("-debug")) {
-                    debug = true;
-                }
-                else if (args[i].StartsWith("-c:")) {
-                    contributor = args[i][3..];
-                }
-                else if (args[i].StartsWith("-s:")) {
-                    testSetPattern = args[i][3..];
-                }
-                else if (args[i].StartsWith("-g:")) {
-                    testGroupPattern = args[i][3..];
-                } 
-                else if (args[i].StartsWith("-v:")) {
-                    // Note, although we allow setting -v:1.0 to run the tests appropriate to a 1.0 processor,
-                    // we don't expect 100% success, because Saxon does not implement a conformant 1.0 processor,
-                    // it only offers 1.1 conformance.
-                    versionUnderTest = args[i][3..];
-                }
-                else if (args[i].StartsWith("-o:")) {
-                    outputDir = args[i][3..];
-                }
-                else if (args[i].StartsWith("-exceptions:")) {
-                    exceptionsFile = args[i].Substring("-exceptions:".Length);
-                }
-                else if (args[i] == "-?") {
-                    Console.WriteLine(usage);
+                switch (args[i]) {
+                    case "-w":
+                        //showWarnings = true;
+                        break;
+                    case "-onwards":
+                        onwards = true;
+                        break;
+                    case "-debug":
+                        debug = true;
+                        break;
+                    default: {
+                        if (args[i].StartsWith("-c:")) {
+                            contributor = args[i][3..];
+                        }
+                        else if (args[i].StartsWith("-s:")) {
+                            testSetPattern = args[i][3..];
+                        }
+                        else if (args[i].StartsWith("-g:")) {
+                            testGroupPattern = args[i][3..];
+                        } 
+                        else if (args[i].StartsWith("-v:")) {
+                            // Note, although we allow setting -v:1.0 to run the tests appropriate to a 1.0 processor,
+                            // we don't expect 100% success, because Saxon does not implement a conformant 1.0 processor,
+                            // it only offers 1.1 conformance.
+                            versionUnderTest = args[i][3..];
+                        }
+                        else if (args[i].StartsWith("-o:")) {
+                            outputDir = args[i][3..];
+                        }
+                        else if (args[i].StartsWith("-exceptions:")) {
+                            exceptionsFile = args[i]["-exceptions:".Length..];
+                        }
+                        else if (args[i] == "-?") {
+                            Console.WriteLine(usage);
+                        }
+
+                        break;
+                    }
                 }
             }
 
@@ -256,7 +262,7 @@ namespace TestDriver {
                         Processor testConfig = new Processor(true);
                         testConfig.SetProperty(Feature.XSD_VERSION, versionUnderTest);
 
-                        SchemaManager schemaManager = testConfig.SchemaManager;
+                        XsdCompiler schemaManager = testConfig.NewXsdCompiler();
 
 
                         //testConfig.setHostLanguage(Configuration.XML_SCHEMA);
@@ -268,6 +274,7 @@ namespace TestDriver {
                             || node.GetAttributeValue("version").Contains(versionUnderTest);
 
                         bool schemaOK = true;
+                        XsdSchema schema = null;
                         foreach (XdmNode schemaTest in testGroup.Children("schemaTest")) {
 
                             bugzillaRef = null;
@@ -336,7 +343,7 @@ namespace TestDriver {
                                 List<Error> errorList = new ();
                                 schemaManager.ErrorReporter = errorList.Add;
                                 try {
-                                    schemaManager.Compile(schemaDoc);
+                                    schema = schemaManager.Compile(schemaDoc);
                                 }
                                 catch (Exception e) {
                                     if (errorList.Count == 0) {
@@ -360,7 +367,7 @@ namespace TestDriver {
 
                             XdmNode expected = schemaTest.Children("expected").Where(versionCondition).FirstOrDefault();
                             
-                            String expectedOutcome = (expected == null ? "indeterminate" :
+                            string expectedOutcome = (expected == null ? "indeterminate" :
                                 expected.GetAttributeValue("validity"));
                             bool ok = "indeterminate" == expectedOutcome ||
                                       "implementation-defined" == expectedOutcome ||
@@ -437,15 +444,16 @@ namespace TestDriver {
 
                                 XdmNode instanceDocument = getChildElement(instanceTest, instanceDocumentNT);
 
-                                bool success = validateLinkedDocument(instanceDocument, testConfig);
+                                
 
                             
                                 XdmNode expected = instanceTest.Children("expected").Where(versionCondition).FirstOrDefault();
                             
-                                // XdmNode expected = (XdmNode) xpath.evaluateSingle(
-                                //     "expected[not(@version) or contains(@version, '" + versionUnderTest + "')]", instanceTest);
-                                String expectedOutcome = (expected == null ? "indeterminate" :
+                                string expectedOutcome = (expected == null ? "indeterminate" :
                                     expected.GetAttributeValue("validity"));
+                                
+                                bool success = validateLinkedDocument(instanceDocument, testConfig, schema, expectedOutcome);
+                                
                                 bool ok = "indeterminate" == expectedOutcome ||
                                           "implementation-defined" == expectedOutcome ||
                                           "implementation-dependent" == expectedOutcome ||
