@@ -22,28 +22,49 @@ public class Shape {
 
     public Shape(UnicodeString... keys) {
         this.keys = keys;
-        this.slotMap = new HashMap<>();
+        this.slotMap = new HashMap<>(keys.length);
         for (int i=0; i<keys.length; i++) {
             slotMap.put(keys[i], i);
         }
     }
 
+    /**
+     * Get the number of keys in the Shape
+     * @return the number of distinct keys
+     */
     public int size() {
         return keys.length;
     }
 
+    /**
+     * Get the integer slot number allocated to a particular key, if any
+     * @param key the relevant key
+     * @return the slot number used for the specified key, or -1 if the key is not recognised
+     */
     public int getSlot(UnicodeString key) {
         return slotMap.getOrDefault(key, -1);
     }
 
+    /**
+     * Get the key associated with a particular slot number
+     * @param slot the slot number
+     * @return the associated key value
+     */
     public UnicodeString getKey(int slot) {
         return keys[slot];
     }
 
+    /**
+     * Return an iterator over the keys in this Shape
+     * @return an iterator over the keys, retaining the order in which they were originally supplied
+     */
     public AtomicIterator iterateKeys() {
         return new KeyIterator(keys);
     }
 
+    /**
+     * Inner class to iterate over the keys
+     */
     private static class KeyIterator implements AtomicIterator {
         final private UnicodeString[] keys;
         private int position = 0;

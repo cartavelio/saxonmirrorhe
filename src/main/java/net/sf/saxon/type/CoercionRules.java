@@ -154,9 +154,9 @@ public abstract class CoercionRules {
 
                 // step 1(b)(iv): relabel as restricted atomic type
 
-                if (requiredItemType instanceof AtomicType && requiredItemType.getBasicAlphaCode().length() > 2) {
+                if (requiredItemType instanceof AtomicType && ((AtomicType)requiredItemType).getBaseType() != BuiltInAtomicType.ANY_ATOMIC) {
                     AtomicType req = (AtomicType)requiredItemType;
-                    AtomicType prim = ((AtomicType)requiredItemType).getPrimitiveItemType();
+                    AtomicType prim = (AtomicType)((AtomicType)requiredItemType).getPrimitiveItemType();
                     ConversionRules rules = config.getConversionRules();
                     ItemMappingFunction relabeller = ItemMapper.of(item -> {
                         if (prim.matches(item, th)
@@ -196,7 +196,7 @@ public abstract class CoercionRules {
 
             if (requiredItemType instanceof RecordTest) {
                 RecordTest test = (RecordTest)requiredItemType;
-                ItemMappingFunction mapMapper = item -> {
+                ItemMappingFunction mapMapper = ItemMapper.of(item -> {
                     if (item instanceof MapItem) {
                         MapItem m2 = (MapItem)item;
                         for (KeyValuePair kvp : m2.keyValuePairs()) {
@@ -212,7 +212,7 @@ public abstract class CoercionRules {
                     } else {
                         return item;
                     }
-                };
+                });
                 iterator = new ItemMappingIterator(iterator, mapMapper);
 
             }
