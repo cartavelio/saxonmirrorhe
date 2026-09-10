@@ -136,14 +136,14 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
         ManualIterator si = new ManualIterator(item);
         c2.setCurrentIterator(si);
         c2.setCurrentOutputUri(null);
-        try {
+        //try {
             return predicateEvaluator.eval(c2);
-        } catch (XPathException.Circularity | XPathException.StackOverflow e) {
-            throw e;
-        } catch (XPathException ex) {
-            handleDynamicError(ex, c2);
-            return false;
-        }
+//        } catch (XPathException.Circularity | XPathException.StackOverflow e) {
+//            throw e;
+//        } catch (XPathException ex) {
+//            handleDynamicError(ex, c2);
+//            return false;
+//        }
     }
 
     @Override

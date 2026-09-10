@@ -62,7 +62,7 @@ public class GroupStartingIterator extends GroupMatchingIterator implements Look
             if (nextCandidate == null) {
                 break;
             }
-            if (pattern.matches(nextCandidate, runningContext)) {
+            if (pattern.matchesItem(nextCandidate, runningContext)) {
                 nextItem = nextCandidate;
                 return;
             } else {

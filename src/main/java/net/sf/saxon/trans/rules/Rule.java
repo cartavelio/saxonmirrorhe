@@ -236,7 +236,7 @@ public class Rule {
     }
 
     public boolean matches(Item item, XPathContextMajor context) throws XPathException {
-        return alwaysMatches || pattern.matches(item, context);
+        return alwaysMatches || pattern.matchesItem(item, context);
     }
 
 
