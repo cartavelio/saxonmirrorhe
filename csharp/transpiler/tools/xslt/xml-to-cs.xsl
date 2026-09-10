@@ -582,7 +582,7 @@
       <xsl:param name="indent" as="xs:integer" tunnel="yes"/>
       <xsl:call-template name="indent"/>
       <xsl:call-template name="modifiers"/>
-      <xsl:text>class {name/@identifier}</xsl:text>
+      <xsl:text>sealed class {name/@identifier}</xsl:text>
       <xsl:if test="extendedTypes/extendedType, implementedTypes/implementedType">
          <xsl:text> : </xsl:text>
          <xsl:for-each select="extendedTypes/extendedType, implementedTypes/implementedType">
@@ -598,7 +598,7 @@
       <xsl:call-template name="indent-extra"/>
       <xsl:text>// Singleton instance (generated for singleton enum class){$NL}</xsl:text>
       <xsl:call-template name="indent-extra"/>
-      <xsl:text>public static {name/@identifier} {entries/entrie/name/@identifier} = new {name/@identifier}();{$NL}{$NL}</xsl:text>
+      <xsl:text>public static readonly {name/@identifier} {entries/entrie/name/@identifier} = new ();{$NL}{$NL}</xsl:text>
       
       <xsl:apply-templates select="members/member">
          <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
@@ -949,6 +949,7 @@
       <xsl:text>;{$NL}</xsl:text>
    </xsl:template>
    
+ 
    <xsl:template match="*[@nodeType='SwitchStmt']">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:variable name="selectorElem" select="selector"/>
@@ -995,6 +996,10 @@
          <xsl:apply-templates select="statements">
             <xsl:with-param name="indent" select="$indent + 1" tunnel="yes"/>
          </xsl:apply-templates>
+         <xsl:if test="@type='EXPRESSION'">
+            <xsl:call-template name="indent-extra"/>
+            <xsl:text>break;{$NL}</xsl:text>
+         </xsl:if>
       </xsl:for-each>
       <xsl:call-template name="indent"/>
       <xsl:text>}}{$NL}</xsl:text>
@@ -1868,8 +1873,15 @@
       <xsl:apply-templates select="expression"/>
       <xsl:text> is </xsl:text>
       <xsl:apply-templates select="type"/>
+      <xsl:apply-templates select="pattern"/>
       <xsl:text>)</xsl:text>
    </xsl:template>
+   
+   <xsl:template match="*[@nodeType='TypePatternExpr']">
+      <xsl:text> </xsl:text>
+      <xsl:value-of select="name/@identifier"/>
+   </xsl:template>
+   
    
    <!-- Handle a method call to a field in a record. `record.field()` in Java becomes `record.field` in C# -->
    <xsl:template match="*[@nodeType='MethodCallExpr'][key('digestClassKey', @RESOLVED_TYPE, $digest)[self::record]]" priority="18">
