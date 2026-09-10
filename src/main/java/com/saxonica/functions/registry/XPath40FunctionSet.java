@@ -242,6 +242,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
 
+        register("slice", 1, 4, e -> e.populate(Slice::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, BuiltInAtomicType.INTEGER, OPT, null)
+                .arg(2, BuiltInAtomicType.INTEGER, OPT, null)
+                .arg(3, BuiltInAtomicType.INTEGER, OPT, null));
+
         register("some", 1, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE));
 

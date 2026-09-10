@@ -429,7 +429,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, AnyNodeTest.getInstance(), ONE, null)
                 .arg(1, AnyItemType.getInstance(), ONE, null));
 
-        register("slice", 2, e -> e.populate( Slice::new, AnyItemType.getInstance(), STAR, 0)
+        register("slice", 2, e -> e.populate(SaxonSlice::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.INTEGER, STAR, null));
 

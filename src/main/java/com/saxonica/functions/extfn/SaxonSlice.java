@@ -17,7 +17,7 @@ import java.util.List;
  * This class implements the saxon:slice() (proposed as fn:slice() for 4.0))
  */
 
-public class Slice extends SystemFunction {
+public class SaxonSlice extends SystemFunction {
 
     /**
      * Evaluate the expression
