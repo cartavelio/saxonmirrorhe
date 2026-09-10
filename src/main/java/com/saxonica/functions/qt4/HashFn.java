@@ -22,7 +22,6 @@ import net.sf.saxon.value.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.zip.CRC32;
 
@@ -71,7 +70,7 @@ public class HashFn extends SystemFunction {
                     getDetails().optionDetails.processSuppliedOptions(options, context);
             String algorithm = checkedOptions.get("algorithm").getStringValue().trim().toUpperCase();
             if (algorithm.equals("CRC-32")) {
-                return getCRC32Algorithm(binaryInput);
+                return crc32(binaryInput);
             }
             byte[] hash = MessageDigest.getInstance(algorithm).digest(binaryInput);
             return new HexBinaryValue(hash);
@@ -80,22 +79,25 @@ public class HashFn extends SystemFunction {
         }
     }
 
-    @CSharpReplaceBody(code="return new Saxon.Hej.value.HexBinaryValue(System.IO.Hashing.Crc32.Hash(binaryInput));")
-    private static HexBinaryValue getCRC32Algorithm(byte[] binaryInput) {
+    @CSharpReplaceBody(code="return new Saxon.Hej.value.HexBinaryValue(reverseBytes(System.IO.Hashing.Crc32.Hash(binaryInput)));")
+    private static HexBinaryValue crc32(byte[] binaryInput) {
         CRC32 hasher = new CRC32();
         hasher.update(binaryInput);
         long hash = hasher.getValue();
-        return new HexBinaryValue(Arrays.copyOfRange(longToBytes(hash), 4, 8));
+        byte[] result = new byte[4];
+        result[0] = (byte)((hash >> 24) & 0xff);
+        result[1] = (byte) ((hash >> 16) & 0xff);
+        result[2] = (byte) ((hash >> 8) & 0xff);
+        result[3] = (byte) (hash & 0xff);
+        return new HexBinaryValue(result);
     }
 
-    @CSharpReplaceBody(code="return System.BitConverter.GetBytes(l);")
-    public static byte[] longToBytes(long l) {
-        // https://stackoverflow.com/a/29132118/415448
-        byte[] result = new byte[Long.BYTES];
-        for (int i = Long.BYTES - 1; i >= 0; i--) {
-            result[i] = (byte) (l & 0xFF);
-            l >>= Byte.SIZE;
-        }
+    private static byte[] reverseBytes(byte[] input) { // Used in the C# implementation
+        byte[] result = new byte[4];
+        result[0] = input[3];
+        result[1] = input[2];
+        result[2] = input[1];
+        result[3] = input[0];
         return result;
     }
 
