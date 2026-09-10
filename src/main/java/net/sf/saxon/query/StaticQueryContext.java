@@ -752,6 +752,9 @@ public class StaticQueryContext {
         declareNamespace("xs", NamespaceUri.SCHEMA);
         declareNamespace("xsi", NamespaceUri.SCHEMA_INSTANCE);
         declareNamespace("fn", NamespaceUri.FN);
+        declareNamespace("math", NamespaceUri.MATH);
+        declareNamespace("map", NamespaceUri.MAP_FUNCTIONS);
+        declareNamespace("array", NamespaceUri.ARRAY_FUNCTIONS);
         declareNamespace("local", NamespaceUri.LOCAL);
         declareNamespace("err", NamespaceUri.ERR);
         declareNamespace("saxon", NamespaceUri.SAXON);
