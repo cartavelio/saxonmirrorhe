@@ -18,8 +18,7 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
 
 /**
- * Compile an EmptyTextNodeRemover expression to Java source code
- * Needed only for streaming - this class is not used in XQuery
+ * Streamed evaluation of an EmptyTextNodeRemover expression.
  */
 
 public class EmptyTextNodeRemoverAdjunct extends StreamingAdjunct implements FeedMaker {

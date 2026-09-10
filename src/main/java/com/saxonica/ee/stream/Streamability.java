@@ -153,6 +153,7 @@ public class Streamability {
                 info2 = newFocus;
             }
             PostureAndSweep ps = getStreamability(child, info2, reasons);
+            //System.err.println("Streamability of " + child.toString() + " = " + ps);
             Posture p = ps.getPosture();
             Sweep s = ps.getSweep();
             if (s == Sweep.FREE_RANGING || p == Posture.ROAMING) {
