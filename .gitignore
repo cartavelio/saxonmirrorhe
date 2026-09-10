@@ -18,13 +18,14 @@ bin/
 target/
 .gradle/
 .kotlin/
-*.log
+.run/
 __pycache__
 temp/
 sandpit/
 /extra/lib/
 csharp/ee/bin/Debug/
 csharp/ee/obj/
+*.log
 documentation/tools/qt4/**/*.ods
 .~lock.*
 
@@ -46,6 +47,6 @@ documentation/tools/qt4/**/*.ods
 # Binaries built by Rider and friends
 /src/samples/cs/bin/
 
-# SaxonC Python genrated library file
+# SaxonC Python generated library file
 /src/main/c/Saxon.C.API/python-saxon/saxonc.cpp
 /src/main/c/Saxon.C.API/*.lo
