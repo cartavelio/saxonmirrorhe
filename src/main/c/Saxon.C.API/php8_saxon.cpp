@@ -41,8 +41,8 @@ zend_class_entry *xdmArray_ce;
 
 zend_class_entry *xsltExecutable_ce;
 
-#include "php8_DocumentBuilder.cpp"
 #include "php8_SchemaValidator.cpp"
+#include "php8_DocumentBuilder.cpp"
 #include "php8_XPathProcessor.cpp"
 #include "php8_XQueryProcessor.cpp"
 #include "php8_Xslt30Processor.cpp"
@@ -2077,7 +2077,7 @@ PHP_METHOD(XdmNode, getChildNode) {
 }
 
 
-PHP_METHOD(XdmNode, axisNode) {
+PHP_METHOD(XdmNode, axisNodes) {
   long axisValue;
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &axisValue) == FAILURE) {
     RETURN_NULL();
@@ -2102,7 +2102,7 @@ PHP_METHOD(XdmNode, axisNode) {
 
       if (axisValue > 0) {
 
-        XdmNode ** nodes = xdmNode->axisNodes(xdmNode->convertEnumXdmAxis9axisNode));
+        XdmNode ** nodes = xdmNode->axisNodes(xdmNode->convertEnumXdmAxis(axisValue));
         int axisCount = xdmNode->axisNodeCount();
 
         if (axisCount > 0 && nodes != nullptr) {
@@ -3427,6 +3427,11 @@ zend_function_entry xdmNode_methods[] = {
                         ZEND_ACC_PUBLIC) PHP_ME(XdmNode, getChildCount,
                                                 arginfo_saxonc_xdmnode_getChildCount,
                                                 ZEND_ACC_PUBLIC)
+
+ PHP_ME(XdmNode, axisNodes, arginfo_saxonc_xdmnode_axisNodes,
+                        ZEND_ACC_PUBLIC)
+
+
                         PHP_ME(
                             XdmNode, getAttributeCount,
                             arginfo_saxonc_xdmnode_getAttributeCount,
