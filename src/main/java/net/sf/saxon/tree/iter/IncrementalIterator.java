@@ -1,20 +1,40 @@
-package net.sf.saxon.tree.iter;public class IncrementalIterator {
+package net.sf.saxon.tree.iter;
+
+import net.sf.saxon.om.NodeInfo;
+
+/**
+ * This class implements an AxisIterator by providing a start item, and a function
+ * that selects the next item as a function of the previous item.
+ */
+
+public class IncrementalIterator implements AxisIterator {
+
+    // Note: used in SaxonCS
+
+    private java.util.function.Function<NodeInfo, NodeInfo> stepper;
+    private NodeInfo nextItem;
+
+    /**
+     * Create an IncrementalIterator
+     *
+     * @param start   the first item to be returned by the iterator
+     * @param stepper a function that computes the next item, given the current item, or returns
+     *                null at the end of the sequence.
+     */
+    public IncrementalIterator(NodeInfo start, java.util.function.Function<NodeInfo, NodeInfo> stepper) {
+        this.nextItem = stepper.apply(start);
+    }
+
+    /**
+     * Get the next item in the sequence
+     *
+     * @return the next item, or null if there are no more items to be returned.
+     */
+    public NodeInfo next() {
+        NodeInfo current = nextItem;
+        nextItem = stepper.apply(current);
+        return current;
+    }
+
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Saxonica Limited
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All Rights Reserved.
-//
-// Contributor(s): none.
-//
