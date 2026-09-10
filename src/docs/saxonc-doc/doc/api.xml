@@ -6,7 +6,7 @@
       and Schema Validation 1.0/1.1 specifications. SaxonC can be used in C/C++, PHP and Python,
       and links to the APIs in each of these languages are provided below.</p>
 
-   <p>The SaxonC API provides five main classes:</p>
+   <p>The SaxonC API provides six main classes:</p>
 
    <table>
       <thead>
@@ -66,12 +66,32 @@
          <tr>
             <td>
                <p>
+                  <code>XsltExecutable</code>
+               </p>
+            </td>
+            <td>
+               <p>An <code>XsltExecutable</code> represents the compiled form of a stylesheet, created using
+                  one of the compile methods on the <code>Xslt30Processor</code> class.</p>
+            </td>
+            <td>
+               <p>
+                  <a href="https://www.saxonica.com/saxon-c/doc11/html/classXsltExecutable.html"
+                     >C++</a>
+                  <a href="/api/saxon_c_php_api/saxon_c_php_xsltexecutable">PHP</a>
+                  <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXsltExecutable"
+                     >Python</a>
+               </p>
+            </td>
+         </tr>
+         <tr>
+            <td>
+               <p>
                   <code>XQueryProcessor</code>
                </p>
             </td>
             <td>
                <p>An <code>XQueryProcessor</code> object represents a factory to compile, load and
-                  execute queries.</p>
+                  execute XQuery queries.</p>
             </td>
             <td>
                <p>
@@ -91,7 +111,7 @@
             </td>
             <td>
                <p>An <code>XPathProcessor</code> represents a factory to compile, load and execute
-                  the XPath query.</p>
+                  XPath expressions.</p>
             </td>
             <td>
                <p>
@@ -147,13 +167,18 @@
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXPathProcessor.html"
-               >XPathProcessor</a>
+               href="https://www.saxonica.com/saxon-c/doc11/html/classXsltExecutable.html"
+               >XsltExecutable</a>
          </li>
          <li>
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc11/html/classXQueryProcessor.html"
                >XQueryProcessor</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/classXPathProcessor.html"
+               >XPathProcessor</a>
          </li>
          <li>
             <a class="bodylink code"
@@ -264,7 +289,8 @@
                </td>
                <td>
                   <span class="signature">createQNameValue(string $val)</span>
-                  <div class="fcomment">Create an QName Xdm value from string representation in clark notation.</div>
+                  <div class="fcomment">Create an XDM QName from a string representing the QName in Clark
+                     notation.</div>
                </td>
             </tr>  
             <tr>
@@ -273,7 +299,9 @@
                </td>
                <td>
                   <span class="signature">createXdmArrayValue($val)</span>
-                  <div class="fcomment">Make an XdmArray whose argument is a PHP array_map with keys as integer and values as type XdmValue. Values can be of sub-classes of XdmValue.</div>
+                  <div class="fcomment">Make an <a class="bodylink code"
+                     href="../saxon_c_php_xdmarray">XdmArray</a> whose argument is a PHP array_map with keys
+                     of type integer and values of type XdmValue (or a subclass of XdmValue).</div>
                </td>
             </tr> 
             <tr>
@@ -282,7 +310,9 @@
                </td>
                <td>
                   <span class="signature">createXdmMapValue($val)</span>
-                  <div class="fcomment">Make an XdmMap whose argument is a PHP array_map with key and value pair as (string, XdmValue). Values can be of sub-classes of XdmValue.</div>
+                  <div class="fcomment">Make an <a class="bodylink code"
+                     href="../saxon_c_php_xdmmap">XdmMap</a> whose argument is a PHP array_map with key and
+                     value pair as (string, XdmValue).</div>
                </td>
             </tr>             
             <tr>
@@ -357,7 +387,7 @@
                </td>
                <td>
                   <span class="signature">setCatalog(string $catalog_filename, bool $isTracing)</span>
-                  <div class="fcomment">set catalog to be used in Saxon.</div>
+                  <div class="fcomment">Set a catalog to be used in Saxon.</div>
                </td>
             </tr>
             <tr>
@@ -369,7 +399,7 @@
                      $value)</span>
                   <div class="fcomment">Set a configuration property specific to the processor in
                      use. Properties specified here are common across all the processors. See <a
-                        href="http://www.saxonica.com/documentation/index.html#!configuration/config-features"
+                        href="http://www.saxonica.com/documentation11/index.html#!configuration/config-features"
                         >Configuration Features</a> for more details.</div>
                </td>
             </tr>
@@ -422,7 +452,7 @@
                   <div class="fcomment">Create a <a class="bodylink code"
                         href="../saxon_c_php_schemavalidator">SchemaValidator</a> in the PHP
                      environment. A SchemaValidator provides capabilities to load and cache XML
-                     schema definitions. You can also valdiate source documents with registered XML
+                     schema definitions. You can also validate source documents with registered XML
                      schema definitions.</div>
                </td>
             </tr>
@@ -939,17 +969,6 @@
             </tr>
             <tr>
                <td>
-                  <code>void</code>
-               </td>
-               <td>
-                  <span class="signature">applyTemplatesReturningFile()</span>
-                  <div class="fcomment">Invoke a stylesheet by applying templates to a supplied
-                     input sequence (the initial match selection), saving the results to the file
-                     specified in the $fileName argument.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
                   <code>string</code>
                </td>
                <td>
@@ -1006,15 +1025,6 @@
             </tr>
             <tr>
                <td>
-                  <code><a class="bodylink code" href="../saxon_c_php_xsltexecutable">Saxon\XsltExecutable</a></code>
-               </td>
-               <td>
-                  <span class="signature">clone()</span>
-                  <div class="fcomment">Create a clone object of this <a class="bodylink code" href="../saxon_c_php_xsltexecutable">Saxon\XsltExecutable</a> object</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
                   <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a>
                </td>
                <td>
@@ -1032,21 +1042,14 @@
             </tr>
             <tr>
                <td>
-                  <code>void</code>
+                  <code><a class="bodylink code" href="../saxon_c_php_xsltexecutable">Saxon\XsltExecutable</a></code>
                </td>
                <td>
-                  <span class="signature">exportStylesheet(string $fileName)</span>
-                  <div class="fcomment">Produce a representation of the compiled stylesheet.
-                     The representation of the compiled stylesheet is in an XML form, suitable for
-                     distribution and reloading. If the configuration under which the export takes place
-                     is suitably licensed, then license information will be included in the export file
-                     allowing execution of the stylesheet without any additional license.
-                     The detailed form of the output representation is not documented.
-                     The argument $fileName is the destination for the XML document containing the diagnostic representation
-                     of the compiled stylesheet. The stream will be closed when writing has finished.</div>
+                  <span class="signature">clone()</span>
+                  <div class="fcomment">Create a clone of this <a class="bodylink code"
+                     href="../saxon_c_php_xsltexecutable">Saxon\XsltExecutable</a> object.</div>
                </td>
             </tr>
-            
             <tr>
                <td>
                   <code>void</code>
@@ -1092,6 +1095,22 @@
                   <code>void</code>
                </td>
                <td>
+                  <span class="signature">exportStylesheet(string $fileName)</span>
+                  <div class="fcomment">Produce a representation of the compiled stylesheet.
+                     The representation of the compiled stylesheet is in an XML form, suitable for
+                     distribution and reloading. If the configuration under which the export takes place
+                     is suitably licensed, then license information will be included in the export file
+                     allowing execution of the stylesheet without any additional license.
+                     The detailed form of the output representation is not documented.
+                     The argument $fileName is the destination for the XML document containing the diagnostic representation
+                     of the compiled stylesheet. The stream will be closed when writing has finished.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
                   <span class="signature">transformFileToFile(string $sourceFileName, string $outputFileName)</span>
                   <div class="fcomment">Perform a one shot transformation, saving the results to the
                      file specified in the $outputFileName argument.</div>
@@ -1102,7 +1121,7 @@
                   <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a>
                </td>
                <td>
-                  <span class="signature">transformFileToValue(string $aourceFileName)</span>
+                  <span class="signature">transformFileToValue(string $sourceFileName)</span>
                   <div class="fcomment">Perform a one shot transformation. The result is returned as
                      an <a class="bodylink code" href="../saxon_c_php_xdmvalue">XdmValue</a>.</div>
                </td>
@@ -1174,8 +1193,8 @@
                <td>
                   <span class="signature">setSaveXslMessage(bool $show, string $filename)</span>
                   <div class="fcomment">This method gives users the option to switch on or off the <code>xsl:message</code> feature. 
-                     The argument $show as a boolean is used to indicate if xsl:message should be outputted. Default is on.
-                     It is also possible to send the <code>xsl:message</code> outputs to file given by argument $filename.</div>
+                     The boolean argument $show is used to indicate if <code>xsl:message</code> should be outputted. Default is on.
+                     It is also possible to send the <code>xsl:message</code> outputs to a file specified by argument $filename.</div>
                </td>
             </tr>
             <tr>
@@ -1184,8 +1203,8 @@
                </td>
                <td>
                   <span class="signature">setCaptureResultDocuments(bool $flag)</span>
-                  <div class="fcomment">Enable the capture of the result-document ouput into an <a class="bodylink code" href="../saxon_c_php_xdmmap">Saxon\XdmMap</a>.
-                     When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
+                  <div class="fcomment">Enable the capture of the result-document output into an <a class="bodylink code" href="../saxon_c_php_xdmmap">Saxon\XdmMap</a>.
+                     When the <code>xsl:result-document</code> is used and is evaluated this method enables handling of the documents as the destination
                      via a user defined std::map object where we have the pair document URI and XdmNode object. The argument $flag when true enables the map object which is 
                      used to save the result documents from the transformation</div>
                </td>
@@ -1208,10 +1227,10 @@
                <td>
                   <span class="signature">setBaseOutputURI(string $baseOutputURI)</span>
                   <div class="fcomment">Set the base output URI. 
-                     The $baseOutputURI argument is supplied as as a string value. The base output URI is 
+                     The $baseOutputURI argument is supplied as a string value. The base output URI is 
                      used for resolving relative URIs in the href attribute
-                     of the xsl:result-document instruction; it is accessible to XSLT stylesheet
-                     code using the XPath current-output-uri() function</div>
+                     of the <code>xsl:result-document</code> instruction; it is accessible to XSLT stylesheet
+                     code using the XPath <code>current-output-uri()</code> function.</div>
                </td>
             </tr> 
             <tr>
@@ -1222,7 +1241,8 @@
                   <span class="signature">setInitialMode(string $modeName)</span>
                   <div class="fcomment">Set the initial mode for the transformation. 
                      The $modeName argument is supplied as the EQName of the initial mode. Two special values are recognized, in the
-                     reserved XSLT namespace: xsl:unnamed to indicate the mode with no name, and xsl:default to indicate the
+                     reserved XSLT namespace: <code>xsl:unnamed</code> to indicate the mode with no name, and
+                     <code>xsl:default</code> to indicate the
                      mode defined in the stylesheet header as the default mode.
                      The value null also indicates the default mode (which defaults to the unnamed
                      mode, but can be set differently in an XSLT 3.0 stylesheet).</div>
@@ -1689,8 +1709,8 @@
                      will not be cached until caching is re-enabled. The cache is also cleared
                       (but without disabling future caching)
                      if any method is called that changes the static context for compiling
-                     expressions, for example declareVariable(QName) or
-                     declareNamespace(String, String).</div>
+                     expressions, for example <code>declareVariable()</code> or
+                     <code>declareNamespace()</code>.</div>
                </td>
             </tr>
             <tr>
@@ -1705,7 +1725,7 @@
                        the set of declarations and definitions made available to the XPath expression is empty). The schema
                      document for the specified namespace may be loaded before or after this method is called.</p>
                      <p>This method does not bind a prefix to the namespace. That must be done separately, using the
-                        declareNamespace(String, String) method.</p> The argument $uri is the schema namespace to be imported. To import declarations in a no-namespace schema,
+                        <code>declareNamespace()</code> method.</p> The argument $uri is the schema namespace to be imported. To import declarations in a no-namespace schema,
                      supply a zero-length string.</div>
                </td>
             </tr>
@@ -1843,7 +1863,8 @@
                   <div class="fcomment">The validation mode may be either strict or lax. The default is strict; this method may be called
                       to indicate that lax validation is required. With strict validation, validation fails if no element
                       declaration can be located for the outermost element. With lax validation, the absence of an
-                      element declaration results in the content being considered valid. If the argument $lax is true then validation is to be lax, false if it is to be strict</div>
+                      element declaration results in the content being considered valid. If the argument $lax
+                      is true then validation is to be lax, if false then validation is strict.</div>
                </td>
             </tr>
             <tr>
@@ -1936,7 +1957,7 @@
                </td>
                <td>
                   <span class="signature">setProperty(string $name, string $value)</span>
-                  <div class="fcomment">Set properties for this Schema Validator.</div>
+                  <div class="fcomment">Set properties for this SchemaValidator.</div>
                </td>
             </tr>
             <tr>
@@ -2026,7 +2047,7 @@
                </td>
                <td>
                   <span class="signature">itemAt(int $index)</span>
-                  <div class="fcomment">Get the n'th item in the value, counting from zero.</div>
+                  <div class="fcomment">Get the n'th item in the sequence, counting from zero.</div>
                </td>
             </tr>
             <tr>
@@ -2039,7 +2060,9 @@
                </td>
             </tr>
             <tr>
-               <td/>
+               <td>
+                  <code>void</code>
+               </td>
                <td>
                   <span class="signature">addXdmItem(<a class="bodylink code"
                         href="../saxon_c_php_xdmitem">XdmItem</a> $item)</span>
@@ -2119,8 +2142,8 @@
 
       </section>
 
-      <section id="saxon_c_php_xdmnode" title="Saxon\XdmNode">
-         <h1>Saxon\XdmNode Class</h1>
+      <section id="saxon_c_php_xdmatomicvalue" title="Saxon\XdmAtomicValue">
+         <h1>Saxon\XdmAtomicValue Class</h1>
          <p>extends <a href="../saxon_c_php_xdmitem">Saxon\XdmItem</a></p>
 
          <table>
@@ -2137,6 +2160,73 @@
                </td>
                <td>
                   <span class="signature">getStringValue()</span>
+                  <div class="fcomment">Get the string value of the item. For an atomic value, this
+                     has the same effect as casting the value to a string. In all cases the result
+                     is the same as applying the XPath <code>string()</code> function.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>boolean</code>
+               </td>
+               <td>
+                  <span class="signature">getBooleanValue()</span>
+                  <div class="fcomment">Get the value converted to a boolean using the XPath casting
+                     rules.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>double</code>
+               </td>
+               <td>
+                  <span class="signature">getDoubleValue()</span>
+                  <div class="fcomment">Get the value converted to a double using the XPath casting
+                     rules. If the value is a string, the XSD 1.1 rules are used, which means that
+                     the string "+INF" is recognised.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>long</code>
+               </td>
+               <td>
+                  <span class="signature">getLongValue()</span>
+                  <div class="fcomment">Get the value converted to an integer using the XPath
+                     casting rules.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>boolean</code>
+               </td>
+               <td>
+                  <span class="signature">isAtomic()</span>
+                  <div class="fcomment">Determine whether or not the item is an atomic value. This
+                     method will return TRUE as the item is atomic.</div>
+               </td>
+            </tr>
+         </table>
+      </section>
+      
+      <section id="saxon_c_php_xdmnode" title="Saxon\XdmNode">
+         <h1>Saxon\XdmNode Class</h1>
+         <p>extends <a href="../saxon_c_php_xdmitem">Saxon\XdmItem</a></p>
+         
+         <table>
+            <thead>
+               <tr>
+                  <td>Return</td>
+                  <td>Function name and Description</td>
+               </tr>
+            </thead>
+            
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getStringValue()</span>
                   <div class="fcomment">Get the string value of the node.</div>
                </td>
             </tr>
@@ -2146,7 +2236,7 @@
                </td>
                <td>
                   <span class="signature">getNodeKind()</span>
-                  <div class="fcomment">Get the kind of node</div>
+                  <div class="fcomment">Get the kind of node.</div>
                </td>
             </tr>
             <tr>
@@ -2228,73 +2318,6 @@
             </tr>
          </table>
       </section>
-
-      <section id="saxon_c_php_xdmatomicvalue" title="Saxon\XdmAtomicValue">
-         <h1>Saxon\XdmAtomicValue Class</h1>
-         <p>extends <a href="../saxon_c_php_xdmitem">Saxon\XdmItem</a></p>
-
-         <table>
-            <thead>
-               <tr>
-                  <td>Return</td>
-                  <td>Function name and Description</td>
-               </tr>
-            </thead>
-
-            <tr>
-               <td>
-                  <code>string</code>
-               </td>
-               <td>
-                  <span class="signature">getStringValue()</span>
-                  <div class="fcomment">Get the string value of the item. For an atomic value, this
-                     has the same effect as casting the value to a string. In all cases the result
-                     is the same as applying the XPath <code>string()</code> function.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
-                  <code>boolean</code>
-               </td>
-               <td>
-                  <span class="signature">getBooleanValue()</span>
-                  <div class="fcomment">Get the value converted to a boolean using the XPath casting
-                     rules.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
-                  <code>double</code>
-               </td>
-               <td>
-                  <span class="signature">getDoubleValue()</span>
-                  <div class="fcomment">Get the value converted to a double using the XPath casting
-                     rules. If the value is a string, the XSD 1.1 rules are used, which means that
-                     the string "+INF" is recognised.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
-                  <code>long</code>
-               </td>
-               <td>
-                  <span class="signature">getLongValue()</span>
-                  <div class="fcomment">Get the value converted to an integer using the XPath
-                     casting rules.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
-                  <code>boolean</code>
-               </td>
-               <td>
-                  <span class="signature">isAtomic()</span>
-                  <div class="fcomment">Determine whether or not the item is an atomic value. This
-                     method will return TRUE as the item is atomic.</div>
-               </td>
-            </tr>
-         </table>
-      </section>
       
       <section id="saxon_c_php_xdmfunctionitem" title="Saxon\XdmFunctionItem">
          <h1>Saxon\XdmFunctionItem Class</h1>
@@ -2348,10 +2371,12 @@
                <td>
                   <span class="signature">call(<a class="bodylink code"
                      href="../saxon_c_php_saxonprocessor">SaxonProcessor</a> $proc, array $arguments)</span>
-                  <div class="fcomment">Call the function. We supply the SaxonProcessor required for the calling of the function. 
-                     The values to be supplied as arguments to the function. The "function
-                     conversion rules" will be applied to convert the arguments to the required
-                     type when necessary.The result of calling the function</div>
+                  <div class="fcomment">Call the function. The first argument is used to supply the
+                     SaxonProcessor required for the calling of the function. 
+                     The values of the arguments to be supplied to the function are supplied as an array of XdmValue objects.
+                     The "function conversion rules" will be applied to convert the arguments to the required
+                     type when necessary. Returns the result of calling the function as an <a class="bodylink
+                        code" href="../saxon_c_php_xdmvalue">XdmValue</a>.</div>
                </td>
             </tr>
 
@@ -2375,17 +2400,8 @@
                   <code>int</code>
                </td>
                <td>
-                  <span class="signature">getArity()</span>
-                  <div class="fcomment">Get the arity of the function. The arity of the function, that is, the number of arguments in the function's signature</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
-                  <code>int</code>
-               </td>
-               <td>
                   <span class="signature">arrayLength()</span>
-                  <div class="fcomment">Get the number of members in the array. Note that the <code>size()</code> method returns 1 (one),
+                  <div class="fcomment">Get the number of members in the array. (Note that the <code>size()</code> method returns 1,
                       because an XDM array is an item.)</div>
                </td>
             </tr>
@@ -2395,9 +2411,7 @@
                </td>
                <td>
                   <span class="signature">get(int $n)</span>
-                  <div class="fcomment">Get the string value of the item. For an atomic value, this
-                     has the same effect as casting the value to a string. In all cases the result
-                     is the same as applying the XPath <code>string()</code> function.</div>
+                  <div class="fcomment">Get the n'th item in the array, counting from zero.</div>
                </td>
             </tr>
             <tr>
@@ -2407,7 +2421,7 @@
                <td>
                   <span class="signature">put(int $n, <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon/XdmValue</a> $value)</span>
                   <div class="fcomment">Create a new array in which one member is replaced with a new value. The argument $n is the position of the member that is to be replaced, counting the first member
-                     in the array as member zero. $value is the new member in the new created array</div>
+                     in the array as member zero. $value is the new member in the returned new array.</div>
                </td>
             </tr>
         
@@ -2418,8 +2432,8 @@
                </td>
                <td>
                   <span class="signature">addMember(<a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon/XdmValue</a> $value)</span>
-                  <div class="fcomment">Append a new member to an array. The new array, is one item longer than the original.
-                     Note: if the value is lazily evaluated, and evaluation fails then return NULL</div>
+                  <div class="fcomment">Append a new member to an array. The returned new array is one item longer than the original.
+                     Note: if the value is lazily evaluated, and evaluation fails then return null.</div>
                </td>
             </tr>
             <tr>
@@ -2428,8 +2442,8 @@
                </td>
                <td>
                   <span class="signature">concat(<a class="bodylink code" href="../saxon_c_php_xdmarray">Saxon/XdmArray</a> $value)</span>
-                  <div class="fcomment">Concatenate another array. We return a new array, containing the members of this array followed by the members of the
-                      other array</div>
+                  <div class="fcomment">Concatenate another array. Returns a new array, containing the members
+                     of this array followed by the members of the array supplied in the $value argument.</div>
                </td>
             </tr>
          </table>
@@ -2462,7 +2476,7 @@
                </td>
                <td>
                   <span class="signature">mapSize()</span>
-                  <div class="fcomment">Get the number of entries in the map. (Note that the <code>size()</code> method returns 1 (one),
+                  <div class="fcomment">Get the number of entries in the map. (Note that the <code>size()</code> method returns 1,
                       because an XDM map is an item.)</div>
                </td>
             </tr>
@@ -2472,8 +2486,9 @@
                </td>
                <td>
                   <span class="signature">get(<a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">Saxon/XdmAtomicValue</a> $key)</span>
-                  <div class="fcomment">Returns the value to which the specified key is mapped, or NULL if this map contains no mapping for the key. Return the value to which the specified key is mapped, or
-                     NULL if this map contains no mapping for the key</div>
+                  <div class="fcomment">Returns the value to which the specified key is mapped, or null if
+                     this map contains no mapping for the key. The argument $key specifies the key of the entry, as
+                     an <a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">XdmAtomicValue</a>.</div>
                </td>
             </tr>
             <tr>
@@ -2482,8 +2497,9 @@
                </td>
                <td>
                   <span class="signature">get(string $key)</span>
-                  <div class="fcomment">Returns the value to which the specified string-valued key is mapped, or NULL if this map contains no mapping for the key. This is a convenience method to save the trouble of converting the String to an <code>XdmAtomicValue</code>. Return the value to which the specified key is mapped, or
-                     NULL if this map contains no mapping for the key</div>
+                  <div class="fcomment">Returns the value to which the specified string-valued key is mapped,
+                     or null if this map contains no mapping for the key. This is a convenience method to save
+                     the trouble of converting the String to an <code>XdmAtomicValue</code>.</div>
                </td>
             </tr>
             <tr>
@@ -2492,9 +2508,9 @@
                </td>
                <td>
                   <span class="signature">get(long $key)</span>
-                  <div class="fcomment">Returns the value to which the specified integer-valued key is mapped or NULL if this map contains no mapping for the key. 
-                     This is a convenience method to save the trouble of converting the integer to an <code>XdmAtomicValue</code>. Return the value to which the specified key is mapped, or
-                     NULL if this map contains no mapping for the key</div>
+                  <div class="fcomment">Returns the value to which the specified integer-valued key is mapped
+                     or null if this map contains no mapping for the key. 
+                     This is a convenience method to save the trouble of converting the integer to an <code>XdmAtomicValue</code>.</div>
                </td>
             </tr>
             <tr>
@@ -2504,7 +2520,7 @@
                <td>
                   <span class="signature">put(<a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">Saxon/XdmAtomicValue</a> $key, <a class="bodylink code" href="../saxon_c_php_xdmvalue">XdmValue</a> $value)</span>
                   <div class="fcomment">Create a new map containing an additional (key, value) pair. If there is an existing entry with the same key, it is removed.
-                     We return a new map containing the additional entry. The original map is unchanged.</div>
+                     Returns a new map containing the additional entry. The original map is unchanged.</div>
                </td>
             </tr>
             <tr>
@@ -2513,9 +2529,11 @@
                </td>
                <td>
                   <span class="signature">remove(<a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">XdmAtomicValue</a> $key)</span>
-                  <div class="fcomment">Create a new map in which the entry for a given key has been removed. If there is no entry with the same key, the new map has the same content as the old (it may or may not
-                     be the same Java object). The arguement $key is the key with value to be removed given as an <a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">XdmAtomicValue</a>. 
-                     We return a new map without the specified entry. The original map is unchanged.</div>
+                  <div class="fcomment">Create a new map in which the entry for a given key has been removed.
+                     If there is no entry with the specified key, the new map has the same content as the old (it may or may not
+                     be the same object). The argument $key specifies the key of the entry to be removed, as
+                     an <a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">XdmAtomicValue</a>. 
+                     Returns a new map without the specified entry. The original map is unchanged.</div>
                </td>
             </tr>
             <tr>
@@ -2524,8 +2542,7 @@
                </td>
                <td>
                   <span class="signature">isEmpty()</span>
-                  <div class="fcomment">Get the value converted to an integer using the XPath
-                     casting rules.</div>
+                  <div class="fcomment">Returns true if this map contains no entries.</div>
                </td>
             </tr>
             <tr>
@@ -2534,8 +2551,7 @@
                </td>
                <td>
                   <span class="signature">containsKey(<a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">XdmAtomicValue</a> $key)</span>
-                  <div class="fcomment">Determine whether or not the item is an atomic value. This
-                     method will return TRUE as the item is atomic.</div>
+                  <div class="fcomment">Returns true if this map contains an entry for the specified key.</div>
                </td>
             </tr>
             <!-- <tr>
@@ -2576,13 +2592,18 @@
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXPathProcessor"
-               >PyXPathProcessor</a>
+               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXsltExecutable"
+               >PyXsltExecutable</a>
          </li>
          <li>
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXQueryProcessor"
                >PyXQueryProcessor</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXPathProcessor"
+               >PyXPathProcessor</a>
          </li>
          <li>
             <a class="bodylink code"
