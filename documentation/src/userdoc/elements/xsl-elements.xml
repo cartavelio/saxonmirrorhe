@@ -46,7 +46,8 @@
         attributes must be in the XSLT namespace): <code>default-collation</code>,
             <code>default-mode</code>, <code>default-validation</code>,
             <code>exclude-result-prefixes</code>, <code>expand-text</code>,
-            <code>extension-element-prefixes</code>, <code>use-when</code>, <code>version</code>,
+        <code>extension-element-prefixes</code>, <code>schema-role</code> (new in XSLT 4.0),
+        <code>use-when</code>, <code>version</code>, 
         and <code>xpath-default-namespace</code>. For information about these, see the <a
             class="bodylink code" href="stylesheet">xsl:stylesheet</a> element.</p>
 
@@ -203,8 +204,8 @@
                 <attribute name="select"> The expression to be evaluated by the rule may be given
                     either by a <code>select</code> attribute, or by an enclosed sequence
                     constructor. </attribute>
-                <attribute name="saxon:capture" use="optional" data-type="boolean"> Now a synonym
-                    for the XSLT 4.0 attribute <code>capture</code>.</attribute>
+                <attribute name="saxon:capture" use="optional" data-type="boolean"> Deprecated from
+                    Saxon 13. Now a synonym for the XSLT 4.0 attribute <code>capture</code>.</attribute>
             </attributes>
             <examples>
                 <p>For an example of the use of a capturing accumulator rule to construct the
@@ -2344,7 +2345,7 @@
                 <p>The <code>xsl:import-schema</code> declaration requires a schema-aware processor,
                     so is only available in Saxon-EE. For further information see <a
                         class="bodylink" href="/schema-processing">Using XML Schema (XSD)</a>.</p>
-                <p class="qt4">The XSLT 4.0 attribute <code>role</code>is implemented since Saxon
+                <p class="qt4">The XSLT 4.0 attribute <code>role</code> is implemented since Saxon
                     13.</p>
             </status>
             <see-also name="include" type="xsl-elements"/>
