@@ -232,7 +232,7 @@ public class DeepLookupAllExpression extends UnaryExpression {
                 SequenceIterator lhsIter = lhs.iterate(context);
                 Item lhsItem;
                 while ((lhsItem = lhsIter.next()) != null) {
-                    DeepLookupExpression.gatherRecursiveContent(lhsItem, result);
+                    DeepLookupExpression.gatherRecursiveContent(lhsItem, result, item -> true);
                 }
                 return new ItemMappingIterator(
                         new MappingIterator(new ListIterator.Of<>(result),

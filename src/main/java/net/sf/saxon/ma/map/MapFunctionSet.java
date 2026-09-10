@@ -517,15 +517,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             MapItem map = (MapItem) arguments[0].head();
             return new LazySequence(map.entries());
         }
-
-        public static GroundedValue getMapEntries(MapItem map) {
-            ZenoSequence results = new ZenoSequence();
-            for (KeyValuePair pair : map.keyValuePairs()) {
-                SingleEntryMap entry = new SingleEntryMap(pair.key, pair.value);
-                results = results.append(entry);
-            }
-            return results;
-        }
     }
 
     /**

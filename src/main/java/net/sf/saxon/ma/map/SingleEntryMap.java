@@ -7,11 +7,15 @@
 
 package net.sf.saxon.ma.map;
 
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SingleAtomicIterator;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.PlainType;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -24,12 +28,14 @@ import java.util.List;
  */
 
 public class SingleEntryMap extends MapItem {
-    public AtomicValue key;
-    public GroundedValue value;
+    private final AtomicValue key;
+    private final GroundedValue value;
+    private final AtomicMatchKey matchKey;
 
     public SingleEntryMap(AtomicValue key, GroundedValue value) {
         this.key = key;
         this.value = value;
+        this.matchKey = key.asMapKey();
     }
 
     /**
@@ -59,7 +65,7 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        return this.key.asMapKey().equals(key.asMapKey()) ? value : null;
+        return this.matchKey.equals(key.asMapKey()) ? value : null;
     }
 
     /**

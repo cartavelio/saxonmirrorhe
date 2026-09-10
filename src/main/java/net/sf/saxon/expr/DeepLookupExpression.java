@@ -12,26 +12,31 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.functions.hof.ForEachFn;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.SingleEntryMap;
-import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomizingIterator;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 
@@ -252,34 +257,63 @@ public class DeepLookupExpression extends BinaryExpression {
 
     public static class DeepLookupElaborator extends PullElaborator {
 
+        // The algorithm is similar to that in the spec, but slightly optimised.
+        // The basic idea is to build a list of singleton maps representing the entire recursive
+        // content of the tree of maps and arrays. But (a) we do this lazily as far as possible, and
+        // (b) rather than building the entire list and then selecting the items that match the
+        // requested key, we test items against the key before adding them to the result.
+        // In addition, there is a fast path for the common case where the key is known
+        // statically.
+
         public PullEvaluator elaborateForPull() {
             DeepLookupExpression expr = (DeepLookupExpression) getExpression();
 
             PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
-            PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
-            return context -> {
-                // Follow the spec exactly for now
-                List<Item> content = new ArrayList<>();
-                SequenceIterator lhsIter = lhs.iterate(context);
-                Item lhsItem;
-                while ((lhsItem = lhsIter.next()) != null) {
-                    gatherRecursiveContent(lhsItem, content);
-                }
-                MapItem keySet = new HashTrieMap();
-                SequenceIterator keyIter = new AtomizingIterator(rhs.iterate(context));
-                Item key;
-                while ((key = keyIter.next()) != null) {
-                    keySet = keySet.addEntry((AtomicValue)key, BooleanValue.TRUE);
-                }
-                ZenoSequence result = new ZenoSequence();
-                for (Item it : content) {
-                    SingleEntryMap sem = (SingleEntryMap)it;
-                    if (keySet.get(sem.getKey()) != null) {
-                        result = result.appendSequence(sem.getValue());
+
+            if (expr.getRhsExpression() instanceof Literal) {
+                GroundedValue keys = ((Literal)expr.getRhsExpression()).getGroundedValue();
+                MapItem keySet;
+                if (keys.getLength() == 1) {
+                    keySet = new SingleEntryMap((AtomicValue)keys.head(), BooleanValue.TRUE);
+                } else {
+                    keySet = new HashTrieMap();
+                    for (Item key : keys.asIterable()) {
+                        keySet = keySet.addEntry((AtomicValue) key, BooleanValue.TRUE);
                     }
                 }
-                return result.iterate();
-            };
+                final MapItem finalKeySet = keySet;
+                return context -> {
+                    List<Item> content = new ArrayList<>();
+                    SequenceIterator lhsIter = lhs.iterate(context);
+                    Item lhsItem;
+                    while ((lhsItem = lhsIter.next()) != null) {
+                        gatherRecursiveContent(lhsItem, content, item -> finalKeySet.get(((SingleEntryMap) item).getKey()) != null);
+                    }
+                    SequenceIterator selectedEntries = new ListIterator.Of<>(content);
+                    return new MappingIterator(selectedEntries, item -> ((SingleEntryMap) item).getValue().iterate());
+                };
+            } else {
+                PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                return context -> {
+
+                    MapItem keySet = new HashTrieMap();
+                    SequenceIterator keyIter = rhs.iterate(context);
+                    Item key;
+                    while ((key = keyIter.next()) != null) {
+                        keySet = keySet.addEntry((AtomicValue) key, BooleanValue.TRUE);
+                    }
+                    final MapItem finalKeySet = keySet;
+
+                    List<Item> content = new ArrayList<>();
+                    SequenceIterator lhsIter = lhs.iterate(context);
+                    Item lhsItem;
+                    while ((lhsItem = lhsIter.next()) != null) {
+                        gatherRecursiveContent(lhsItem, content, item -> finalKeySet.get(((SingleEntryMap) item).getKey()) != null);
+                    }
+                    SequenceIterator selectedEntries = new ListIterator.Of<>(content);
+                    return new MappingIterator(selectedEntries, item -> ((SingleEntryMap) item).getValue().iterate());
+                };
+            }
         }
     }
 
@@ -290,18 +324,15 @@ public class DeepLookupExpression extends BinaryExpression {
      * per member of the array, where the map key is the integer position of the member and the corresponding
      * value is the member value. Otherwise, an empty sequence.
      */
-    private static GroundedValue immediateContent(Item item)  {
+    private static SequenceIterator immediateContent(Item item)  {
         if (item instanceof MapItem) {
-            return MapFunctionSet.MapEntries.getMapEntries((MapItem)item);
+            return ((MapItem)item).entries();
         } else if (item instanceof ArrayItem) {
-            List<SingleEntryMap> result = new ArrayList<>(((ArrayItem)item).arrayLength());
-            long pos = 1;
-            for (GroundedValue member : ((ArrayItem)item).members()) {
-                result.add(new SingleEntryMap(Int64Value.makeIntegerValue(pos++), member));
-            }
-            return SequenceExtent.makeSequenceExtent(result);
+            return new ForEachFn.PositionalMappingIterator(
+                    ((ArrayItem) item).parcels(),
+                    (parcel, pos) -> new SingleEntryMap(Int64Value.makeIntegerValue(pos), ((Parcel)parcel).getValue()));
         } else {
-            return EmptySequence.getInstance();
+            return EmptyIterator.getInstance();
         }
     }
 
@@ -314,11 +345,15 @@ public class DeepLookupExpression extends BinaryExpression {
      *               supplied array, mapped to their position in the array.
      */
 
-    public static void gatherRecursiveContent(Item item, List<Item> result) {
-        for (Item child : immediateContent(item).asIterable()) {
-            result.add(child);
+    public static void gatherRecursiveContent(Item item, List<Item> result, Predicate<Item> matcher) {
+        Item child;
+        SequenceIterator iter = immediateContent(item);
+        while ((child = iter.next()) != null) {
+            if (matcher.test(child)) {
+                result.add(child);
+            }
             for (Item childItem : ((SingleEntryMap)child).getValue().asIterable()) {
-                gatherRecursiveContent(childItem, result);
+                gatherRecursiveContent(childItem, result, matcher);
             }
         }
     }
