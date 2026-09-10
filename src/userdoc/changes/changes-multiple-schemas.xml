@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<release number="12" date="2023-01-12" xmlns="http://www.saxonica.com/ns/doc/changes">
+    
+
+    
+  
+    
+    <category name="s9api" class="javaonly">
+        
+        <p>Changes on the multiple-schemas branch (not yet integrated)</p>
+        
+        <p>The classes ProfessionalXPathFactory and EnterpriseXPathFactory are dropped. It seems there
+        were no tests referencing these classes, and JAXP XPath has gradually been deprecated. Need to
+        drop the mention in the XPath documentation.</p>
+        
+    </category>
+        
+   
+
+</release>
