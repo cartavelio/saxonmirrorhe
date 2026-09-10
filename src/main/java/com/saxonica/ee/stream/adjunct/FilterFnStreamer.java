@@ -70,7 +70,7 @@ public class FilterFnStreamer extends FilteringAdjunct {
         if (uf == null) {
             reasons.add("Call to " + fn.getParentExpression().toShortString() + " is not streamable, because the predicate function is not statically known");
             return false;
-        } else if (uf.getFunctionName().getURI().equals(NamespaceConstant.ANONYMOUS)) {
+        } else if (uf.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS)) {
             // check that the function satisfies the rules for streamability = inspection
             UserFunctionParameter first = uf.getParameterDefinitions()[0];
             first.setFunctionStreamability(FunctionStreamability.INSPECTION);

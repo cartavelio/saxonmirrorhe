@@ -335,7 +335,7 @@ public class ComplexContentValidator extends AttributeValidator {
                                     if (!first) {
                                         fsb.append(", ");
                                     }
-                                    if (poss.getURI().equals(nodeName.getURI())) {
+                                    if (poss.hasURI(nodeName.getURI())) {
                                         fsb.append(Err.wrap(poss.getLocalPart(), Err.ELEMENT));
                                     } else {
                                         fsb.append(Err.wrap(poss.getEQName(), Err.ELEMENT));

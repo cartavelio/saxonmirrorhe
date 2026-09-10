@@ -1069,8 +1069,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             sep = "-";
             fsb.append(at.getName());
         }
-        StructuredQName name = new StructuredQName("anon", NamespaceConstant.ANONYMOUS, fsb.toString());
-        uut.setTypeName(name, getNamePool().allocateFingerprint(name.getURI(), name.getLocalPart()));
+        String localName = fsb.toString();
+        StructuredQName name = new StructuredQName("anon", NamespaceConstant.ANONYMOUS, localName);
+        uut.setTypeName(name, getNamePool().allocateFingerprint(NamespaceConstant.ANONYMOUS, localName));
         uut.setMemberTypeReferences(memberRefs);
         return uut;
     }
