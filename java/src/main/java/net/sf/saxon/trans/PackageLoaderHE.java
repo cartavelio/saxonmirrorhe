@@ -1755,17 +1755,6 @@ public class PackageLoaderHE implements IPackageLoader {
             return new SquareArrayConstructor(children);
         });
 
-        eMap.put("arrayInstr", (loader, element) -> {
-            Expression forEach = loader.getExpressionWithRole(element, "forEach");
-            Expression select = loader.getExpressionWithRole(element, "select");
-            return new ArrayInstr(forEach, select);
-        });
-
-        eMap.put("arrayMember", (loader, element) -> {
-            Expression child = loader.getFirstChildExpression(element);
-            return new ArrayMemberInstr(child);
-        });
-
         eMap.put("atomic", (loader, element) -> {
             String valAtt = element.getAttributeValue(NamespaceUri.NULL, "val");
             AtomicType type = (AtomicType) loader.parseAlphaCodeForItemType(element, "type");
