@@ -155,6 +155,11 @@ void Xslt30Processor::setJustInTimeCompilation(bool jit) {
   jitCompilation = jit;
 }
 
+bool getJustInTimeCompilation() {
+
+  return jitCompilation;
+}
+
 void Xslt30Processor::setFastCompilation(bool fast) {
   if (fast) {
     setProperty("-fastCompile", "1");

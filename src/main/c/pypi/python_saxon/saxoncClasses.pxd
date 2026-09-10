@@ -180,6 +180,9 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         # Say whether just-in-time compilation of template rules should be used.
         void setJustInTimeCompilation(bool jit)
 
+        # Get just-in-time compilation of template rules flag.
+        void getJustInTimeCompilation(bool jit)
+
         void setXsltLanguageVersion(const char* version)
 
         void setFastCompilation(bool fast)

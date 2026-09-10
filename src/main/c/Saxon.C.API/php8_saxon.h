@@ -267,6 +267,7 @@ PHP_METHOD(Xslt30Processor, compileFromFileAndSave);
 PHP_METHOD(Xslt30Processor, compileFromAssociatedFile);
 PHP_METHOD(Xslt30Processor, importPackage);
 PHP_METHOD(Xslt30Processor, setJustInTimeCompilation);
+PHP_METHOD(Xslt30Processor, getJustInTimeCompilation);
 PHP_METHOD(Xslt30Processor, setTargetEdition);
 PHP_METHOD(Xslt30Processor, setRelocate);
 PHP_METHOD(Xslt30Processor, setFastCompilation);

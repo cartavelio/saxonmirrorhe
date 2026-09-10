@@ -1299,6 +1299,15 @@ cdef class PyXslt30Processor:
         #else:
         #raise Warning("setJustInTimeCompilation: argument must be a boolean type. JIT not set")
 
+     def get_jit_compilation(self):
+         """
+         get_jit_compilation(self)
+         Get the flag set for just-in-time compilation of template rules.
+         Returns:
+            bool: True if just-in-time compilation of template rules is set
+         """
+         return self.thisxptr.getJustInTimeCompilation()
+
      def set_parameter(self, name, PyXdmValue value, encoding = None):
         """
         set_parameter(self, name, PyXdmValue value, encoding = None)
