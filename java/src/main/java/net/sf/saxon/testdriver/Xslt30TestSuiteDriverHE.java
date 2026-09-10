@@ -1005,7 +1005,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
     protected XsltExecutable exportImport(String testName, String testSetName, TestOutcome outcome, XsltCompiler compiler,
                                           XsltExecutable sheet, ErrorCollector collector, Source styleSource) {
         try {
-            if (export && isExportable(testName)) {
+            if (export && isExportable(testName) && !compiler.isSchemaAware()) {
                 sheet = exportStylesheet(testName, testSetName, compiler, sheet, styleSource);
             } else if (sheet == null) {
                 sheet = compiler.compile(styleSource);
