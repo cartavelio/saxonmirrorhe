@@ -47,6 +47,7 @@ import java.io.File;
  */
 
 @CSharpModifiers(code = {"abstract", "internal"})
+@Deprecated
 public abstract class SchemaManager {
 
     public SchemaManager() {

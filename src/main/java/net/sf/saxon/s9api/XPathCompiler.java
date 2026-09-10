@@ -336,6 +336,7 @@ public class XPathCompiler {
      * {@link #useSchema(XsdSchema)} method.
      */
 
+    @Deprecated
     public void importSchemaNamespace(String uri) {
     }
 

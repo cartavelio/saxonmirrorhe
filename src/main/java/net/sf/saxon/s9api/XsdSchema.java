@@ -1,7 +1,17 @@
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.Schema;
 
+/**
+ * This class represents an XSD Schema - that is, a set of schema components, typically resulting
+ * from compiling a collection of one or more source schema documents.
+ *
+ * <p>The class exists in all Saxon editions as an abstract place-holder class, but concrete
+ * implementations exist only in Saxon-EE.</p>
+ */
+
+@CSharpModifiers(code={"internal", "abstract"})
 public abstract class XsdSchema {
 
     /**

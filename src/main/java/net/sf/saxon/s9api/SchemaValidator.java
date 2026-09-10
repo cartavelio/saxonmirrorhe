@@ -51,6 +51,7 @@ public abstract class SchemaValidator extends AbstractDestination {
      * @return the relevant schema
      */
 
+    @CSharpModifiers(code={"internal", "abstract"})
     public abstract XsdSchema getSchema();
 
     /**

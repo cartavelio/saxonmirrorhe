@@ -309,8 +309,9 @@ public class Processor implements Configuration.ApiProvider {
      * Create an {@link XsdCompiler}. This provides capabilities to load
      * XML schema definitions.
      *
-     * @return a new {@code XsdCompiler}. In Saxon-HE and Saxon-PE the resulting {@code XsdCompiler}
-     * will be a dummy implementation that throws {@link UnsupportedOperationException} from most methods.
+     * @return a new {@code XsdCompiler}, provided the Saxon configuration is a licensed Saxon-EE
+     * configuration. In other cases, the method throws an exception.
+     * @throws UnsupportedOperationException if this is not a licensed Saxon-EE configuration.
      * @since 13.0.
      */
 
@@ -335,6 +336,7 @@ public class Processor implements Configuration.ApiProvider {
      * @deprecated since 13.0. Use {@link #newXsdCompiler}.
      */
 
+    @Deprecated
     public SchemaManager getSchemaManager() {
         return schemaManager;
     }

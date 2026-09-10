@@ -10,6 +10,7 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.SchemaURIResolver;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.Source;
@@ -27,8 +28,8 @@ import java.io.File;
  * An {@link XsdCompiler} is used to create {@link XsdSchema} objects from source
  * schema documents.</p>
  *
- * <p>Schema processing requires Saxon-EE. The class {@code XsdCompiler} exists in Saxon-HE
- * and Saxon-PE, but with no useful functionality (most methods throw an {@link UnsupportedOperationException}).
+ * <p>Schema processing requires Saxon-EE. The abstract class {@code XsdCompiler} exists in Saxon-HE
+ * and Saxon-PE, but is never instantiated.
  * In Saxon-EE the subclass {@code XsdSchemaCompilerEE} is instantiated to do the heavy lifting, but this
  * is not normally exposed to users.</p>
  *
@@ -43,10 +44,7 @@ import java.io.File;
  */
 
 //@CSharpModifiers(code = {"internal"})
-public class XsdCompiler {
-
-    public XsdCompiler() {
-    }
+public abstract class XsdCompiler {
 
     /**
      * Set the version of XSD in use for this schema. The value must be "1.0" or "1.1". The default is taken
@@ -56,9 +54,7 @@ public class XsdCompiler {
      * @param version the version of the XSD specification/language: either "1.0" or "1.1".
      */
 
-    public void setXsdVersion(String version) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void setXsdVersion(String version);
 
     /**
      * Get the version of XSD in use for this schema. The value will be "1.0" or "1.1"
@@ -66,9 +62,7 @@ public class XsdCompiler {
      * @return the version of XSD in use.
      */
 
-    public String getXsdVersion() {
-        throw new UnsupportedOperationException();
-    };
+    public abstract String getXsdVersion();
 
     /**
      * Set the ErrorReporter to be used while loading and validating schema documents
@@ -76,9 +70,7 @@ public class XsdCompiler {
      * @param reporter The error reporter to be used. This is notified of all errors detected during the
      *                 compilation. May be set to null to revert to the default ErrorReporter.
      */
-    public void setErrorReporter(ErrorReporter reporter) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void setErrorReporter(ErrorReporter reporter);
 
     /**
      * Get the ErrorReporter being used while loading and validating schema documents
@@ -87,9 +79,7 @@ public class XsdCompiler {
      * compilation. Returns null if no user-supplied ErrorReporter has been set.
      */
 
-    public ErrorReporter getErrorReporter() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract ErrorReporter getErrorReporter();
 
     /**
      * Set the SchemaURIResolver to be used during schema loading. This SchemaURIResolver, despite its name,
@@ -102,9 +92,7 @@ public class XsdCompiler {
      * @param resolver the SchemaURIResolver to be used during schema loading.
      */
 
-    public void setSchemaURIResolver(SchemaURIResolver resolver) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void setSchemaURIResolver(SchemaURIResolver resolver);
 
     /**
      * Get the SchemaURIResolver to be used during schema loading.
@@ -113,9 +101,7 @@ public class XsdCompiler {
      *         URIResolver has been set.
      */
 
-    public SchemaURIResolver getSchemaURIResolver() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract SchemaURIResolver getSchemaURIResolver();
 
     /**
      * Load a schema document from a given Source. The schema components derived from this schema
@@ -133,9 +119,8 @@ public class XsdCompiler {
      * between the schema documents.
      */
 
-    public XsdSchema compile(Source... source) throws SaxonApiException {
-        throw new UnsupportedOperationException();
-    }
+    @CSharpModifiers(code={"internal", "abstract"})
+    public abstract XsdSchema compile(Source... source) throws SaxonApiException;
 
     /**
      * Load a schema document from a given File or set of files. The schema components derived from this schema
@@ -151,9 +136,8 @@ public class XsdCompiler {
      * @since 12.0
      */
 
-    public XsdSchema compile(File... file) throws SaxonApiException {
-        throw new UnsupportedOperationException();
-    }
+    @CSharpModifiers(code = {"internal", "abstract"})
+    public abstract XsdSchema compile(File... file) throws SaxonApiException;
 
     /**
      * Combine a set of schemas into one
@@ -164,9 +148,8 @@ public class XsdCompiler {
      * @since 13.0
      */
 
-    public XsdSchema combine(XsdSchema... schemas) throws SaxonApiException {
-        throw new UnsupportedOperationException();
-    }
+    @CSharpModifiers(code = {"internal", "abstract"})
+    public abstract XsdSchema combine(XsdSchema... schemas) throws SaxonApiException;
 
     /**
      * Return an empty schema. This may be useful for validating instance documents when all
@@ -175,9 +158,8 @@ public class XsdCompiler {
      * @return an empty schema
      */
 
-    public XsdSchema emptySchema() {
-        throw new UnsupportedOperationException();
-    }
+    @CSharpModifiers(code = {"internal", "abstract"})
+    public abstract XsdSchema emptySchema();
 
     /**
      * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
@@ -189,9 +171,8 @@ public class XsdCompiler {
      */
 
 
-    public XsdSchema importComponents(Source source) throws SaxonApiException {
-        throw new UnsupportedOperationException();
-    }
+    @CSharpModifiers(code = {"internal", "abstract"})
+    public abstract XsdSchema importComponents(Source source) throws SaxonApiException;
 
     /**
      * Construct an {@link XsdSchema} by wrapping an internal schema object. This is intended primarily
@@ -200,9 +181,8 @@ public class XsdCompiler {
      * @param internalSchema the internal schema object
      */
 
-    public XsdSchema wrapInternalSchema(Schema internalSchema) {
-        throw new UnsupportedOperationException();
-    }
+    @CSharpModifiers(code = {"internal", "abstract"})
+    public abstract XsdSchema wrapInternalSchema(Schema internalSchema);
 
 }
 
