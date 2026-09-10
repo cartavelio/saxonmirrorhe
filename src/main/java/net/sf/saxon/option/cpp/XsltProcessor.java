@@ -11,6 +11,7 @@ import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
 import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.s9api.*;
@@ -139,9 +140,9 @@ public class XsltProcessor extends SaxonCAPI {
     public void compileFromFileAndSave(String cwd, String xsl, String outFilename){
         XsltCompiler compiler = processor.newXsltCompiler();
         try {
-            Source source = resolveFileToSource(cwd, xsl);
+            Source source = resolveFileToSource(processor, cwd, xsl, ResourceRequest.XSLT_NATURE);
             XsltPackage pack = compiler.compilePackage(source);
-            File file = absoluteFile(cwd, outFilename);
+            File file = resolveFile(processor, cwd, outFilename, ResourceRequest.XSLT_NATURE);
             pack.save(file);
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -161,7 +162,7 @@ public class XsltProcessor extends SaxonCAPI {
         XsltCompiler compiler = processor.newXsltCompiler();
         try {
             XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(str)));
-            File file = absoluteFile(cwd, filename);
+            File file = resolveFile(processor, cwd, filename, ResourceRequest.XSLT_NATURE);
             pack.save(file);
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -211,7 +212,7 @@ public class XsltProcessor extends SaxonCAPI {
             if(packagesToLoad.size()>0) {
                 compilePackages(compiler);
             }
-            Source source = resolveFileToSource(cwd, filename);
+            Source source = resolveFileToSource(processor, cwd, filename, ResourceRequest.XSLT_NATURE);
 
             compiler.setSchemaAware(schemaAware);
             executable = compiler.compile(source);
@@ -326,7 +327,7 @@ public class XsltProcessor extends SaxonCAPI {
                 transformer = executable.load();
             } else {
                 XsltCompiler compiler = processor.newXsltCompiler();
-                source = resolveFileToSource(cwd, stylesheet);
+                source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
                 compiler.setSchemaAware(schemaAware);
 
 
@@ -337,14 +338,13 @@ public class XsltProcessor extends SaxonCAPI {
 
             }
             if (outFilename != null) {
-                serializer = processor.newSerializer();
-                serializer = resolveOutputFile(processor, cwd, outFilename);
+                serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
             }
             applyXsltTransformerProperties(this, cwd, processor, transformer, params, values);
             /*if (sourceFilename == null && doc != null) {
                 transformer.setInitialContextNode(doc);
             } else */ if (sourceFilename != null) {
-                source = resolveFileToSource(cwd, sourceFilename);
+                source = resolveFileToSource(processor, cwd, sourceFilename, ResourceRequest.XML_NATURE);
 
                 transformer.setSource(source);
             }
@@ -416,8 +416,7 @@ public class XsltProcessor extends SaxonCAPI {
                     } else if (params[i].equals("o") && outfile == null) {
                         if (values[i] instanceof String) {
                             outfile = (String) values[i];
-                            Serializer serializer = processor.newSerializer();
-                            serializer = api.resolveOutputFile(processor, cwd, outfile);
+                            Serializer  serializer = api.resolveOutputFile(processor, cwd, outfile, ResourceRequest.XML_NATURE);
                             transformer.setDestination(serializer);
                         }
                     } else if (params[i].equals("it")) {
@@ -453,7 +452,7 @@ public class XsltProcessor extends SaxonCAPI {
                         }
                     } else if (params[i].equals("s")) {
                         if (values[i] instanceof String) {
-                            source = api.resolveFileToSource(cwd, (String) values[i]);
+                            source = api.resolveFileToSource(processor, cwd, (String) values[i], ResourceRequest.XML_NATURE);
                             transformer.setSource(builder.build(source).asSource());
                         } else if (debug) {
                             System.err.println("DEBUG: value error for property 's'");
@@ -600,7 +599,7 @@ public class XsltProcessor extends SaxonCAPI {
                 transformer = executable.load();
             } else {
                 XsltCompiler compiler = processor.newXsltCompiler();
-                source = resolveFileToSource(cwd, stylesheet);
+                source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
 
                 if(packagesToLoad.size()>0) {
                     compilePackages(compiler);
@@ -617,17 +616,13 @@ public class XsltProcessor extends SaxonCAPI {
             /*if (sourceFile == null && doc != null) {
                 transformer.setInitialContextNode(doc);
             } else*/ if (sourceFile != null) {
-                source = resolveFileToSource(cwd, sourceFile);
+                source = resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE);
                 transformer.setSource(source);
             }
             transformer.transform();
             return destination.getXdmNode();
-        } catch (SaxonApiException e) {
-            SaxonCException saxonException = new SaxonCException(e);
-
-            throw e;
-        } catch (Exception ex) {
-            throw new SaxonCException(ex);
+        }  catch (Exception ex) {
+            throw new SaxonApiException(ex);
         }
 
     }
@@ -665,7 +660,7 @@ public class XsltProcessor extends SaxonCAPI {
                 throw ex;
             } else {
                 XsltCompiler compiler = processor.newXsltCompiler();
-                source = resolveFileToSource(cwd, stylesheet);
+                source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
 
                 if(packagesToLoad.size()>0) {
                     compilePackages(compiler);
@@ -685,7 +680,7 @@ public class XsltProcessor extends SaxonCAPI {
             /*if (sourceFile == null && doc != null) {
                 transformer.setInitialContextNode(doc);
             } else*/ if (sourceFile != null) {
-                source = resolveFileToSource(cwd, sourceFile);
+                source = resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE);
                 transformer.setSource(source);
             }
             //transformer.setErrorListener(errorListener);
@@ -724,7 +719,7 @@ public class XsltProcessor extends SaxonCAPI {
         File filei;
           for(int i=0;i<packs.length;i++){
               try {
-                  filei = resolveFile(cwd, packs[i]);
+                  filei = resolveFile(null, cwd, packs[i], null);
               } catch (SaxonApiException e) {
                   System.err.println("Java: Failure in adding packages "+ e.getMessage());
                   continue;
@@ -762,7 +757,7 @@ public class XsltProcessor extends SaxonCAPI {
 
         XsltCompiler compiler = processor.newXsltCompiler();
 
-            Source source = resolveFileToSource(cwd, stylesheet);
+            Source source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
 
 
             XsltTransformer transformer = null;
@@ -784,7 +779,7 @@ public class XsltProcessor extends SaxonCAPI {
 
             applyXsltTransformerProperties(this, null, processor, transformer, params, values);
             if (sourceFile != null) {
-                source = resolveFileToSource(cwd, sourceFile);
+                source = resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE);
                 DocumentBuilder builder = processor.newDocumentBuilder();
                 transformer.setSource(builder.build(source).asSource());
             }
@@ -826,7 +821,7 @@ public class XsltProcessor extends SaxonCAPI {
         String resultStr3 = cpp.transformToString(cwd2, null, "xsl/foo4.xsl",params0, values0);
                 System.out.println("Using initial-template: " + resultStr3);
 
-        XdmNode node2 = cpp.parseXmlFile("/Users/ond1/work/development/campos", "ORP0301177AA__EE__30954_sinsello.xml");
+        /*XdmNode node2 = cpp.parseXmlFile("/Users/ond1/work/development/campos", "ORP0301177AA__EE__30954_sinsello.xml");
         String[] paramsx = {"node"};
         Object[] valuesx = {node2};
         String result2 = cpp.transformToString("/Users/ond1/work/development/campos", "ORP0301177AA__EE__30954_sinsello.xml", "campos.xsl", paramsx, valuesx);
@@ -907,23 +902,13 @@ public class XsltProcessor extends SaxonCAPI {
 
             String resultStr2 = cpp.transformToString(cwd2, null, null, param4, values4);
 
-           /* cpp.transformToFile(cwd, "categories.xml", stylesheet12, "outputTest.txt", null, null);
-            long startTime = System.currentTimeMillis();
-            for (int i = 0; i < repeat; i++) {
-                //result = cpp.xsltApplyStylesheet(cwd, null, "xsl/foo.xsl", params3, values3);
-                result = cpp.transformToString(cwd, null, null, params1, values1);
 
-            }
-            long endTime = System.currentTimeMillis();
-            //  System.out.println("output:" + result + " Time:" + ((endTime - startTime) / 5));
-
-            System.out.println("output:" + result2); */
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
 
-        System.out.println("xslMessage output:" + cpp.getXslMessages().length);
+        System.out.println("xslMessage output:" + cpp.getXslMessages().length);  */
 
     }
 

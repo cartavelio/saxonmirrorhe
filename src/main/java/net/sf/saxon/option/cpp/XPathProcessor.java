@@ -10,6 +10,7 @@ package net.sf.saxon.option.cpp;
 import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
 import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.*;
 
 import javax.xml.transform.Source;
@@ -365,7 +366,7 @@ public class XPathProcessor extends SaxonCAPI {
                 if (!(valuei instanceof String)) {
                     throw new SaxonApiException("Source file has incorrect type");
                 }
-                source = api.resolveFileToSource(cwd, (String) valuei);
+                source = api.resolveFileToSource(processor, cwd, (String) valuei, ResourceRequest.XML_NATURE);
                 ((XPathProcessor) api).setContextItem(builder.build(source));
             }
 
@@ -428,14 +429,12 @@ public class XPathProcessor extends SaxonCAPI {
         System.out.println("Xxxxxxx= " + num);
 
         XPathProcessor xpath = new XPathProcessor(false);
-        System.out.println("Version: " + SaxonCAPI.getProductVersion(xpath.processor));
+        /*System.out.println("Version: " + SaxonCAPI.getProductVersion(xpath.processor));
         String sourcefile1 = "kamervragen.xml";
         String[] params1 = {"s"};
         Object[] values1 = {sourcefile1};
         Processor p = xpath.getProcessor();
-        /*DocumentBuilder b = p.newDocumentBuilder();
-        XdmNode foo = b.build(new StreamSource(new StringReader("<foo><bar/></foo>")));
-        xpath.setContextItem(foo);  */
+
         XdmNode node = xpath.parseXmlString("<out>\n" +
                 "<person attr1='value1' attr2='value2' xmlns='http://example.com'>text1</person>\n" +
                 "    <person>text2</person>\n" +
@@ -488,7 +487,7 @@ public class XPathProcessor extends SaxonCAPI {
         if(value3.length>0 && value4.length>0) {
             System.out.println("Value of parameter = "+ XdmUtils.getStringValue(value3[0]));
             System.out.println("Value of parameter = "+ XdmUtils.getStringValue(value4[0]));
-        }
+        } */
     }
 
 
