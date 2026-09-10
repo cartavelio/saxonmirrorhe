@@ -41,7 +41,9 @@ task resources_notices(
 }
 
 task resources_userdoc_html(
-        dependsOn: ["resources_html_docs", "resources_html_javadoc", "resources_html_dotnetdoc"],
+        dependsOn: ["resources_html_docs",
+                    //"resources_html_javadoc", // exclude Java only stuff for now
+                    "resources_html_dotnetdoc"],
         description: "Copy HTML docs into the resources folder"
 ) {
     // Just a place to hang dependencies
@@ -136,7 +138,7 @@ task resources_drivers(
 
 task samples_common(
         type: Copy,
-        dependsOn: ["copy_usecases", "copy_samples", "gen_config_schema"],
+        dependsOn: ["copy_samples", "gen_config_schema"],
         description: "Assemble Cross-Platform Samples and Use-Cases"
 ) {
     // Just a place to hang dependencies
@@ -214,7 +216,7 @@ task samples_j_src(
 
 task samples_j(
         type: Copy,
-        dependsOn: ["samples_j_src", "run_eej_samples_ee"],
+        dependsOn: ["copy_usecases", "samples_j_src", "run_eej_samples_ee"],
         description: "Copy compiled Java samples into the resources folder"
 ) {
     into "${buildDir}/resources/samples/java/classes"
