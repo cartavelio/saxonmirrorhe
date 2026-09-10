@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -25,6 +26,8 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
+
+import java.util.function.BiConsumer;
 
 /**
  * An instruction derived from an xsl:attribute element in stylesheet, or from
@@ -53,13 +56,14 @@ public final class FixedAttribute extends AttributeCreator {
         this.nodeName = nodeName;
         setSchemaType(schemaType);
         setValidationAction(validationAction);
-        setOptions(0);
+        setOptions(ReceiverOption.NONE);
     }
 
     /**
      * Get the name of this instruction (return 'xsl:attribute')
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_ATTRIBUTE;
     }
@@ -80,6 +84,19 @@ public final class FixedAttribute extends AttributeCreator {
         return nodeName;
     }
 
+    /**
+     * Get the properties of this object to be included in trace messages, by supplying
+     * the property values to a supplied consumer function
+     *
+     * @param consumer the function to which the properties should be supplied, as (property name,
+     *                 value) pairs.
+     */
+    @Override
+    public void gatherProperties(BiConsumer<String, Object> consumer) {
+        consumer.accept("name", getAttributeName());
+    }
+
+    @Override
     public void localTypeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         // If attribute name is xml:id, add whitespace normalization
         if (nodeName.equals(StandardNames.XML_ID_NAME) && !getSelect().isCallOn(NormalizeSpace_1.class)) {
@@ -164,6 +181,7 @@ public final class FixedAttribute extends AttributeCreator {
     }
 
 
+    @Override
     public int getCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -178,6 +196,7 @@ public final class FixedAttribute extends AttributeCreator {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         FixedAttribute exp = new FixedAttribute(nodeName, getValidationAction(), getSchemaType());
         ExpressionTool.copyLocationInfo(this, exp);
@@ -186,6 +205,7 @@ public final class FixedAttribute extends AttributeCreator {
         return exp;
     }
 
+    @Override
     public NodeName evaluateNodeName(XPathContext context) {
         return nodeName;
     }
@@ -198,6 +218,7 @@ public final class FixedAttribute extends AttributeCreator {
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         int fp = nodeName.getFingerprint();
         if (fp == StandardNames.XSI_TYPE ||
@@ -211,11 +232,7 @@ public final class FixedAttribute extends AttributeCreator {
                     " is not permitted in the content model of the simple type " + parentType.getDescription());
             err.setIsTypeError(true);
             err.setLocation(getLocation());
-            if (getPackageData().getHostLanguage() == Configuration.XSLT) {
-                err.setErrorCode("XTTE1510");
-            } else {
-                err.setErrorCode("XQDY0027");
-            }
+            err.setErrorCode(getPackageData().isXSLT() ? "XTTE1510" : "XQDY0027");
             throw err;
         }
         SchemaType type;
@@ -229,11 +246,7 @@ public final class FixedAttribute extends AttributeCreator {
                     " is not permitted in the content model of the complex type " + parentType.getDescription());
             err.setIsTypeError(true);
             err.setLocation(getLocation());
-            if (getPackageData().getHostLanguage() == Configuration.XSLT) {
-                err.setErrorCode("XTTE1510");
-            } else {
-                err.setErrorCode("XQDY0027");
-            }
+            err.setErrorCode(getPackageData().isXSLT() ? "XTTE1510" : "XQDY0027");
             throw err;
         }
 
@@ -247,6 +260,7 @@ public final class FixedAttribute extends AttributeCreator {
     }
 
 
+    @Override
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
         Orphan o = (Orphan) super.evaluateItem(context);
         assert o != null;
@@ -260,6 +274,7 @@ public final class FixedAttribute extends AttributeCreator {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("att", this);
         out.emitAttribute("name", nodeName.getDisplayName());

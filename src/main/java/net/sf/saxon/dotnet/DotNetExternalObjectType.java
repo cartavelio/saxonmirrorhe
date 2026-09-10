@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -23,9 +23,9 @@ import net.sf.saxon.value.Whitespace;
 
 public class DotNetExternalObjectType extends ExternalObjectType {
 
-    private transient cli.System.Type dotNetType;
-    private Configuration config;
-    private StructuredQName qName;
+    private final transient cli.System.Type dotNetType;
+    private final Configuration config;
+    private final StructuredQName qName;
 
     public DotNetExternalObjectType(cli.System.Type dotNetType, Configuration config) {
         this.dotNetType = dotNetType;
@@ -40,6 +40,7 @@ public class DotNetExternalObjectType extends ExternalObjectType {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return UType.EXTENSION;
     }
@@ -51,6 +52,7 @@ public class DotNetExternalObjectType extends ExternalObjectType {
      *         anonymous type.
      */
 
+    @Override
     public String getName() {
         return qName.getLocalPart();
     }
@@ -62,6 +64,7 @@ public class DotNetExternalObjectType extends ExternalObjectType {
      * {@link NamespaceConstant#DOT_NET_TYPE}.
      */
 
+    @Override
     public String getTargetNamespace() {
         return NamespaceConstant.DOT_NET_TYPE;
     }
@@ -74,15 +77,6 @@ public class DotNetExternalObjectType extends ExternalObjectType {
      */
     public String getEQName() {
         return "Q{" + getTargetNamespace() + "}" + getName();
-    }
-
-    /**
-     * Return true if this is an external object type, that is, a Saxon-defined type for external
-     * Java or .NET objects
-     */
-
-    public boolean isExternalType() {
-        return true;
     }
 
     /**
@@ -102,6 +96,7 @@ public class DotNetExternalObjectType extends ExternalObjectType {
      * @return the name of the atomic type, or null if the type is anonymous.
      */
 
+    @Override
     public StructuredQName getTypeName() {
         return null;
     }
@@ -224,6 +219,7 @@ public class DotNetExternalObjectType extends ExternalObjectType {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getPrimitiveItemType() {
         return this;
     }
@@ -237,6 +233,7 @@ public class DotNetExternalObjectType extends ExternalObjectType {
      * except that INTEGER is considered to be a primitive type.
      */
 
+    @Override
     public int getPrimitiveType() {
         return StandardNames.XS_ANY_ATOMIC_TYPE;
     }
@@ -288,21 +285,21 @@ public class DotNetExternalObjectType extends ExternalObjectType {
      * Get the relationship of this external object type to another external object type
      *
      * @param other the other external object type
-     * @return the type relationship, for example {@link TypeHierarchy#SUBSUMES}
+     * @return the type relationship, for example {@link Affinity#SUBSUMES}
      */
 
-    public int getRelationship(DotNetExternalObjectType other) {
+    public Affinity getRelationship(DotNetExternalObjectType other) {
         cli.System.Type j2 = other.dotNetType;
         if (dotNetType.equals(j2)) {
-            return TypeHierarchy.SAME_TYPE;
+            return Affinity.SAME_TYPE;
         } else if (dotNetType.IsAssignableFrom(j2)) {
-            return TypeHierarchy.SUBSUMES;
+            return Affinity.SUBSUMES;
         } else if (j2.IsAssignableFrom(dotNetType)) {
-            return TypeHierarchy.SUBSUMED_BY;
+            return Affinity.SUBSUMED_BY;
         } else if (dotNetType.get_IsInterface() || j2.get_IsInterface()) {
-            return TypeHierarchy.OVERLAPS; // there may be an overlap, we play safe
+            return Affinity.OVERLAPS; // there may be an overlap, we play safe
         } else {
-            return TypeHierarchy.DISJOINT;
+            return Affinity.DISJOINT;
         }
     }
 
@@ -337,6 +334,7 @@ public class DotNetExternalObjectType extends ExternalObjectType {
      * @return true, this is considered to be an atomic type
      */
 
+    @Override
     public boolean isAtomicType() {
         return true;
     }
@@ -496,6 +494,7 @@ public class DotNetExternalObjectType extends ExternalObjectType {
      * @param th      The type hierarchy cache
      * @return true if the item is an instance of this type; false otherwise
      */
+    @Override
     public boolean matches(Item item, TypeHierarchy th) {
         if (item instanceof DotNetObjectValue) {
             cli.System.Object obj = (cli.System.Object) ((DotNetObjectValue) item).getObject();
@@ -568,6 +567,7 @@ public class DotNetExternalObjectType extends ExternalObjectType {
     }
 
 
+    @Override
     public double getDefaultPriority() {
         return 0.5;
     }

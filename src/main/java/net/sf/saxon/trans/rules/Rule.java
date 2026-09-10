@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -173,26 +173,10 @@ public class Rule {
             out.emitAttribute("rank", "" + getRank());
             out.emitAttribute("minImp", getMinImportPrecedence() + "");
             out.emitAttribute("slots", template.getStackFrameMap().getNumberOfVariables() + "");
+            out.emitAttribute("matches", pattern.getItemType().getFullAlphaCode());
             template.explainProperties(out);
             exportOtherProperties(out);
-            /*int[] preconditionIndexes = getPreconditionIndexes();
-            if (preconditionIndexes != null && preconditionIndexes.length > 0) {
-                boolean first = true;
-                String indexes = "";
-                for (int i : preconditionIndexes) {
-                    indexes = indexes + (!first ? " " : "") + i;
-                    first = false;
-                }
-                out.emitAttribute("conditions", indexes);
-            }
-            Set<Expression> preconditions = getPreconditions();
-            if (preconditions != null && preconditions.size() > 0) {
-                out.startSubsidiaryElement("c.pre");
-                for (Expression e : preconditions) {
-                    e.export(out);
-                }
-                out.endSubsidiaryElement();
-            }*/
+
             out.setChildRole("match");
             getPattern().export(out);
             if (template.getBody() != null) {

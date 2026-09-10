@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -52,6 +52,7 @@ public class StandardOutputResolver implements OutputURIResolver {
      * or it must return a fresh instance of itself for each call.</p>
      */
 
+    @Override
     public StandardOutputResolver newInstance() {
         return this;
     }
@@ -66,6 +67,7 @@ public class StandardOutputResolver implements OutputURIResolver {
      * @return a Result object representing the destination for the XML document
      */
 
+    @Override
     public Result resolve(String href, /*@Nullable*/ String base) throws XPathException {
 
         // System.err.println("Output URI Resolver (href='" + href + "', base='" + base + "')");
@@ -146,6 +148,7 @@ public class StandardOutputResolver implements OutputURIResolver {
      * that has been completed.
      */
 
+    @Override
     public void close(Result result) throws XPathException {
         if (result instanceof StreamResult) {
             OutputStream stream = ((StreamResult) result).getOutputStream();

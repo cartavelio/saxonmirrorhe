@@ -17,14 +17,18 @@ package performance;
 
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Date;
 
-public class SimonSoftTest2 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class SimonSoftTest2 {
 
     // See bug 2929 - search for unused namespaces
 
@@ -83,6 +87,8 @@ public class SimonSoftTest2 extends TestCase {
             "</xsl:stylesheet>";
 
 
+    @Test
+    @Tag("performance")
     public void testPerformance() {
         for (int i=0; i<4; i++) {
             Date start = new Date();
@@ -91,16 +97,14 @@ public class SimonSoftTest2 extends TestCase {
                 StreamSource xslSource = new StreamSource(new StringReader(xsl));
                 InputStream xml = new FileInputStream(ConfigTest.DATA_DIR + "xmark1withns.xml");
                 transformElements(xslSource, xml);
-            } catch (FileNotFoundException e) {
-                fail();
-            } catch (SaxonApiException e) {
+            } catch (FileNotFoundException | SaxonApiException e) {
                 fail();
             }
 
             Date end = new Date();
             if (i == 3) {
                 long ms = end.getTime() - start.getTime();
-                assertTrue("speed", ms < 400);
+                assertTrue(ms < 400, "speed");
                 System.out.println("Transformations took: " + ms + " ms.");
             }
         }

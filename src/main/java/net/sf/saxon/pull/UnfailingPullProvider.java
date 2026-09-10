@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,10 +7,8 @@
 
 package net.sf.saxon.pull;
 
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
@@ -26,28 +24,40 @@ import java.util.List;
 
 public interface UnfailingPullProvider extends PullProvider {
 
-    int next() throws XPathException;
+    @Override
+    Event next() throws XPathException;
 
-    int current();
+    @Override
+    Event current();
 
-    AttributeCollection getAttributes();
+    @Override
+    AttributeMap getAttributes();
 
+    @Override
     NamespaceBinding[] getNamespaceDeclarations();
 
-    int skipToMatchingEnd();
+    @Override
+    Event skipToMatchingEnd();
 
+    @Override
     void close();
 
+    @Override
     NodeName getNodeName();
 
+    @Override
     CharSequence getStringValue() throws XPathException;
 
+    @Override
     SchemaType getSchemaType();
 
+    @Override
     AtomicValue getAtomicValue();
 
+    @Override
     Location getSourceLocator();
 
+    @Override
     List<UnparsedEntity> getUnparsedEntities();
 
 }

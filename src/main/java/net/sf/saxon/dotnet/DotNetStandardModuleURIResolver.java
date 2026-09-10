@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -24,7 +24,6 @@ import java.net.URISyntaxException;
  * in a Query Prolog. It is used when no user-defined ModuleURIResolver has been specified, or when
  * the user-defined ModuleURIResolver decides to delegate to the standard ModuleURIResolver.
  *
- * @author Michael H. Kay
  */
 
 public class DotNetStandardModuleURIResolver implements ModuleURIResolver {
@@ -57,6 +56,7 @@ public class DotNetStandardModuleURIResolver implements ModuleURIResolver {
      *          if the module cannot be located
      */
 
+    @Override
     public StreamSource[] resolve(String moduleURI, String baseURI, String[] locations) throws XPathException {
         if (locations.length == 0) {
             XPathException err = new XPathException("Cannot locate module for namespace " + moduleURI);

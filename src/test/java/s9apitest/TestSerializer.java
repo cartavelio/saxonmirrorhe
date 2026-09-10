@@ -2,13 +2,13 @@ package s9apitest;
 
 import com.saxonica.config.ProfessionalTransformerFactory;
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -24,12 +24,14 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * JUnit tests for the s9api XQueryCompiler
  */
-public class TestSerializer extends TestCase {
+public class TestSerializer {
 
+    @Test
     public void testXQuerySerialization() {
         try {
             Processor proc = new Processor(false);
@@ -55,15 +57,16 @@ public class TestSerializer extends TestCase {
             xqeval.run();
 
             String result = os.toString();
-            assertFalse("XML declaration exists", result.contains("<?xml"));
-            assertTrue("Indented", result.contains("doc><e"));
-            assertTrue("Cdata section", result.contains("<e><![CDATA"));
+            assertFalse(result.contains("<?xml"), "XML declaration exists");
+            assertTrue(result.contains("doc><e"), "Indented");
+            assertTrue(result.contains("<e><![CDATA"), "Cdata section");
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testXsltSerialization() {
         try {
             Processor proc = new Processor(false);
@@ -93,15 +96,16 @@ public class TestSerializer extends TestCase {
             trans.transform();
 
             String result = os.toString();
-            assertFalse("XML declaration exists", result.contains("<?xml"));
-            assertTrue("Indented", result.contains("doc><e"));
-            assertTrue("Cdata section", result.contains("<e><![CDATA"));
+            assertFalse(result.contains("<?xml"), "XML declaration exists");
+            assertTrue(result.contains("doc><e"), "Indented");
+            assertTrue(result.contains("<e><![CDATA"), "Cdata section");
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testXsltCharacterMaps() {
         try {
             Processor proc = new Processor(false);
@@ -127,13 +131,14 @@ public class TestSerializer extends TestCase {
             trans.transform();
 
             String result = os.toString();
-            assertTrue("Charmapped", result.contains("tfxt"));
+            assertTrue(result.contains("tfxt"), "Charmapped");
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testSecondaryOutputDestination() {
         try {
             new File(ConfigTest.DATA_DIR + "temp/first.xml").delete();
@@ -161,8 +166,8 @@ public class TestSerializer extends TestCase {
             trans.setDestination(serializer);
             trans.transform();
 
-            assertTrue("first exists", new File(ConfigTest.DATA_DIR + "temp/first.xml").exists());
-            assertTrue("second exists", new File(ConfigTest.DATA_DIR + "temp/second.xml").exists());
+            assertTrue(new File(ConfigTest.DATA_DIR + "temp/first.xml").exists(), "first exists");
+            assertTrue(new File(ConfigTest.DATA_DIR + "temp/second.xml").exists(), "second exists");
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
@@ -182,6 +187,7 @@ public class TestSerializer extends TestCase {
         }
     }
 
+    @Test
     public void testS9apiImport() throws Exception {
         // tests use of dynamic serialization properties chosen by xsl:result-document
         try {
@@ -209,37 +215,7 @@ public class TestSerializer extends TestCase {
         }
     }
 
-//    public void testCaptureOfSerializationProperties() throws Exception {
-//        // attempt to capture the serialization properties defined in the stylesheet
-//        // by subclassing Serializer
-//        try {
-//            final Processor processor = new Processor(true);
-//
-//            XsltCompiler xsltCompiler = processor.newXsltCompiler();
-//
-//            StreamSource xsltSource = new StreamSource(ConfigTest.DATA_DIR + "welch-ser/A.xsl");
-//
-//            XsltExecutable xsltExecutable = xsltCompiler.compile(xsltSource);
-//            XsltTransformer xsltTransformer = xsltExecutable.load();
-//            xsltTransformer.setInitialTemplate(new QName("main"));
-//
-//            Serializer seriar
-//
-//            StringWriter sw = new StringWriter();
-//            Serializer serializer = processor.newSerializer();
-//            serializer.setOutputWriter(sw);
-//            xsltTransformer.setDestination(serializer);
-//            xsltTransformer.setResultDocumentHandler(uri -> serializer);
-//
-//            xsltTransformer.transform();
-//            assertTrue(sw.toString().contains("<foo>bar</foo>")); // proving that method="xml" was used
-//        } catch (SaxonApiException e) {
-//            fail();
-//            e.printStackTrace();
-//        }
-//    }
-
-
+    @Test
     public void testJaxpImport() throws Exception {
         try {
             // same test as above but with JAXP interface
@@ -273,6 +249,7 @@ public class TestSerializer extends TestCase {
         }
     }
 
+    @Test
     public void testAsSaxContentHandler() throws Exception {
         try {
 
@@ -298,15 +275,16 @@ public class TestSerializer extends TestCase {
             reader.parse(new InputSource(sr));
 
             String result = os.toString();
-            assertFalse("XML declaration exists", result.contains("<?xml"));
-            assertTrue("Indented", result.contains("doc><e"));
-            assertTrue("Cdata section", result.contains("<e><![CDATA"));
+            assertFalse(result.contains("<?xml"), "XML declaration exists");
+            assertTrue(result.contains("doc><e"), "Indented");
+            assertTrue(result.contains("<e><![CDATA"), "Cdata section");
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void test3631() {
         try {
             String dir = ConfigTest.DATA_DIR + "nadolu3631/";
@@ -333,6 +311,104 @@ public class TestSerializer extends TestCase {
         }
     }
 
+    @Test
+    public void testBase64BinarySerialization() { // bug 4794
+        String xslt =
+                "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:saxon='http://saxon.sf.net/'>" +
+                        "<xsl:output method='saxon:base64Binary'/>" +
+                        "<xsl:template name = 'xsl:initial-template'>" +
+                        "<xsl:text>iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAA"
+                        + "LEwAACxMBAJqcGAAAAAd0SU1FB9YGARc5KB0XV+IAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBH"
+                        + "SU1Q72QlbgAAAF1JREFUGNO9zL0NglAAxPEfdLTs4BZM4DIO4C7OwQg2JoQ9LE1exdlYvBBeZ7jqch9//q1uH"
+                        + "4TLzw4d6+ErXMMcXuHWxId3KOETnnXXV6MJpcq2MLaI97CER3N0vr4MkhoXe0rZigAAAABJRU5ErkJggg==</xsl:text>" +
+                        "</xsl:template>" +
+                        "</xsl:transform>";
+
+        ByteArrayOutputStream ms = new ByteArrayOutputStream();
+        try {
+            Processor processor = new Processor(true);
+            XsltCompiler comp = processor.newXsltCompiler();
+            Xslt30Transformer transformer = comp.compile(new StreamSource(new StringReader(xslt))).load30();
+            Serializer ser = processor.newSerializer();
+            ser.setOutputStream(ms);
+            transformer.callTemplate(null, ser);
+        } catch (SaxonApiException e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+            fail();
+        }
+        byte[] x = ms.toByteArray();
+        assertEquals(-119, x[0]);
+        assertEquals(80, x[1]);
+        assertEquals(78, x[2]);
+        assertEquals(71, x[3]);
+        assertEquals(247, x.length);
+    }
+
+
+    @Test
+    public void testHexBinarySerialization() { // bug 4794
+        String xslt =
+
+                "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:saxon='http://saxon.sf.net/'>" +
+                        "<xsl:output method='saxon:hexBinary'/>" +
+                        "<xsl:template name = 'xsl:initial-template'>" +
+                        "<xsl:text>CAFEBABE</xsl:text>" +
+                        "</xsl:template>" +
+                        "</xsl:transform>";
+
+        ByteArrayOutputStream ms = new ByteArrayOutputStream();
+        try {
+            Processor processor = new Processor(true);
+            XsltCompiler comp = processor.newXsltCompiler();
+            Xslt30Transformer transformer = comp.compile(new StreamSource(new StringReader(xslt))).load30();
+            Serializer ser = processor.newSerializer();
+            ser.setOutputStream(ms);
+            transformer.callTemplate(null, ser);
+        } catch (SaxonApiException e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+            fail();
+        }
+        byte[] x = ms.toByteArray();
+        assertEquals(-54, x[0]);
+        assertEquals(-2, x[1]);
+        assertEquals(-70, x[2]);
+        assertEquals(-66, x[3]);
+        assertEquals(4, x.length);
+    }
+
+    @Test
+    public void testXQuerySerializationMethod() {
+        String xslt =
+
+                "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                        "<xsl:output method='saxon:xquery' xmlns:saxon='http://saxon.sf.net/'/>" +
+                        "<xsl:template name = 'xsl:initial-template'>" +
+                        "<a>{$a &lt; '&lt;'}</a>" +
+                        "</xsl:template>" +
+                        "</xsl:transform>";
+
+        StringWriter ms = new StringWriter();
+        try {
+            Processor processor = new Processor(true);
+            XsltCompiler comp = processor.newXsltCompiler();
+            Xslt30Transformer transformer = comp.compile(new StreamSource(new StringReader(xslt))).load30();
+            Serializer ser = processor.newSerializer();
+            ser.setOutputWriter(ms);
+            transformer.callTemplate(null, ser);
+        } catch (SaxonApiException e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+            fail();
+        }
+
+        assertEquals("<a>{$a < '&lt;'}</a>", ms.toString());
+
+    }
+
+
+    @Test
     public void testIndentation() {
         try {
             String in = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -359,6 +435,7 @@ public class TestSerializer extends TestCase {
         }
     }
 
+    @Test
     public void testElementToString() {
         try {
             String in = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -372,7 +449,7 @@ public class TestSerializer extends TestCase {
             XdmNode root = doc.select(child("root")).asNode();
             String out = root.toString();
             System.err.println(out);
-            assertTrue("noFinalNewline", out.endsWith("</root>"));
+            assertTrue(out.endsWith("</root>"), "noFinalNewline");
         } catch (SaxonApiException err) {
             fail();
         }

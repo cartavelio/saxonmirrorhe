@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,15 +7,16 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.*;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.Arrays;
@@ -63,6 +64,7 @@ public class XSLMode extends StyleElement {
      * @return false - it is a declaration
      */
 
+    @Override
     public boolean isInstruction() {
         return false;
     }
@@ -73,6 +75,7 @@ public class XSLMode extends StyleElement {
      * If there is no name, the value will be null.
      */
 
+    @Override
     public StructuredQName getObjectName() {
         StructuredQName qn = super.getObjectName();
         if (qn == null) {
@@ -80,12 +83,8 @@ public class XSLMode extends StyleElement {
             if (nameAtt == null) {
                 return Mode.UNNAMED_MODE_NAME;
             }
-            try {
-                qn = makeQName(nameAtt);
-                setObjectName(qn);
-            } catch (XPathException err) {
-                return new StructuredQName("saxon", NamespaceConstant.SAXON, "badly-named-mode-" + generateId());
-            }
+            qn = makeQName(nameAtt, null, "name");
+            setObjectName(qn);
         }
         return qn;
     }
@@ -124,47 +123,45 @@ public class XSLMode extends StyleElement {
             Visibility actualVisibility = declaredVisibility == null ? Visibility.PRIVATE : declaredVisibility;
             VisibilityProvenance provenance = declaredVisibility == null ? VisibilityProvenance.DEFAULTED : VisibilityProvenance.EXPLICIT;
             mode.getDeclaringComponent().setVisibility(actualVisibility, provenance);
+            top.indexMode(decl);
         }
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         String nameAtt = null;
         String visibilityAtt = null;
+        String extraAsAtt = null;
 
         if (prepared) {
             return;
         }
         prepared = true;
 
-        AttributeCollection atts = getAttributeList();
         Visibility visibility = Visibility.PRIVATE;
-        
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+
+        for(AttributeInfo att : attributes()){
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             switch (f) {
                 case "streamable":
-                    streamable = processStreamableAtt(atts.getValue(a));
+                    streamable = processStreamableAtt(value);
                     break;
                 case "name":
-                    nameAtt = Whitespace.trim(atts.getValue(a));
+                    nameAtt = Whitespace.trim(value);
                     if (!nameAtt.equals("#default")) {
-                        try {
-                            setObjectName(makeQName(nameAtt));
-                        } catch (XPathException err) {
-                            compileError(err);
-                        }
+                        setObjectName(makeQName(nameAtt, null, "name"));
                     }
                     break;
                 case "use-accumulators":
-                    String useAccAtt = atts.getValue(a);
                     accumulators = getPrincipalStylesheetModule().getStylesheetPackage()
-                            .getAccumulatorRegistry().getUsedAccumulators(useAccAtt, this);
+                            .getAccumulatorRegistry().getUsedAccumulators(value, this);
 
                     break;
                 case "on-multiple-match": {
-                    String att = Whitespace.trim(atts.getValue(a));
-                    switch (att) {
+                    switch (Whitespace.trim(value)) {
                         case "fail":
                             failOnMultipleMatch = true;
                             break;
@@ -178,9 +175,7 @@ public class XSLMode extends StyleElement {
                     break;
                 }
                 case "on-no-match":
-                    String value = Whitespace.trim(atts.getValue(a));
-                    assert value != null;
-                    switch (value) {
+                    switch (Whitespace.trim(value)) {
                         case "text-only-copy":
                             // no action, this is the default
                             break;
@@ -205,38 +200,37 @@ public class XSLMode extends StyleElement {
                     }
                     break;
                 case "warning-on-multiple-match": {
-                    String att = Whitespace.trim(atts.getValue(a));
-                    warningOnMultipleMatch = processBooleanAttribute("warning-on-multiple-match", att);
+                    warningOnMultipleMatch = processBooleanAttribute("warning-on-multiple-match", value);
                     break;
                 }
                 case "warning-on-no-match": {
-                    String att = Whitespace.trim(atts.getValue(a));
-                    warningOnNoMatch = processBooleanAttribute("warning-on-no-match", att);
+                    warningOnNoMatch = processBooleanAttribute("warning-on-no-match", value);
                     break;
                 }
                 case "typed": {
-                    String att = Whitespace.trim(atts.getValue(a));
-                    checkAttributeValue("typed", att, false, new String[]{
+                    checkAttributeValue("typed", Whitespace.trim(value), false, new String[]{
                             "0", "1", "false", "lax", "no", "strict", "true", "unspecified", "yes"});
                     break;
                 }
                 case "visibility":
-                    visibilityAtt = Whitespace.trim(atts.getValue(a));
+                    visibilityAtt = Whitespace.trim(value);
                     visibility = interpretVisibilityValue(visibilityAtt, "");
                     if (visibility == Visibility.ABSTRACT) {
                         invalidAttribute(f, "public|private|final");
                     }
-                    //if (visibility != Visibility.PRIVATE) {
-                        mode.setDeclaredVisibility(visibility);
-                    //}
+                    mode.setDeclaredVisibility(visibility);
 
                     break;
                 default:
-                    if (atts.getURI(a).equals(NamespaceConstant.SAXON) && atts.getLocalName(a).equals("trace")) {
-                        String att = Whitespace.trim(atts.getValue(a));
-                        traceMatching = processBooleanAttribute("saxon:trace", att);
+                    if (attName.hasURI(NamespaceConstant.SAXON)) {
+                        isExtensionAttributeAllowed(attName.getDisplayName());
+                        if (attName.getLocalPart().equals("trace")) {
+                            traceMatching = processBooleanAttribute("saxon:trace", value);
+                        } else if (attName.getLocalPart().equals("as")) {
+                            extraAsAtt = value;
+                        }
                     } else {
-                        checkUnknownAttribute(atts.getNodeName(a));
+                        checkUnknownAttribute(attName);
                     }
                     break;
             }
@@ -269,35 +263,49 @@ public class XSLMode extends StyleElement {
         }
         mode.setBuiltInRuleSet(defaultRules);
 
-        int recoveryPolicy;
+        RecoveryPolicy recoveryPolicy;
         if (failOnMultipleMatch) {
-            recoveryPolicy = Configuration.DO_NOT_RECOVER;
+            recoveryPolicy = RecoveryPolicy.DO_NOT_RECOVER;
         } else if (warningOnMultipleMatch) {
-            recoveryPolicy = Configuration.RECOVER_WITH_WARNINGS;
+            recoveryPolicy = RecoveryPolicy.RECOVER_WITH_WARNINGS;
         } else {
-            recoveryPolicy = Configuration.RECOVER_SILENTLY;
+            recoveryPolicy = RecoveryPolicy.RECOVER_SILENTLY;
         }
         mode.setRecoveryPolicy(recoveryPolicy);
         mode.obtainDeclaringComponent(this);
         mode.setModeTracing(traceMatching);
+
+        if (extraAsAtt != null) {
+            SequenceType extraResultType = null;
+            try {
+                extraResultType = makeExtendedSequenceType(extraAsAtt);
+            } catch (XPathException e) {
+                compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "saxon:as");
+                extraResultType = SequenceType.ANY_SEQUENCE; // error recovery
+            }
+            mode.setDefaultResultType(extraResultType);
+        }
+
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         checkTopLevel("XTSE0010", false);
-        AttributeCollection atts = getAttributeList();
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String attValue = att.getValue();
             if (f.equals("streamable") || f.equals("on-multiple-match") || f.equals("on-no-match") ||
                     f.equals("warning-on-multiple-match") || f.equals("warning-on-no-match") || f.equals("typed")) {
-                String att = Whitespace.trim(atts.getValue(a));
+                String trimmed = Whitespace.trim(attValue);
                 String normalizedAtt;
-                if ("true".equals(att)||"1".equals(att)){
+                if ("true".equals(trimmed)||"1".equals(trimmed)){
                     normalizedAtt = "yes";
-                } else if ("false".equals(att)||"0".equals(att)){
+                } else if ("false".equals(trimmed)||"0".equals(trimmed)){
                     normalizedAtt = "no";
                 } else {
-                    normalizedAtt = att;
+                    normalizedAtt = trimmed;
                 }
                 mode.getActivePart().setExplicitProperty(f, normalizedAtt, decl.getPrecedence());
                 if (mode.isMustBeTyped() && getContainingPackage().getTargetEdition().matches("JS\\d?")) {
@@ -318,6 +326,7 @@ public class XSLMode extends StyleElement {
         checkTopLevel("XTSE0010", false);
     }
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
         StylesheetPackage pack = getPrincipalStylesheetModule().getStylesheetPackage();
         Component c = pack.getComponent(mode.getSymbolicName());

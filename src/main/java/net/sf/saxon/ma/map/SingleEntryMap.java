@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -20,6 +20,8 @@ import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Iterator;
+
 /**
  * A key and a corresponding value to be held in a Map. A key-value pair also acts as a singleton
  * map in its own right.
@@ -27,9 +29,9 @@ import net.sf.saxon.value.SequenceType;
 
 public class SingleEntryMap implements MapItem {
     public AtomicValue key;
-    public GroundedValue<?> value;
+    public GroundedValue value;
 
-    public SingleEntryMap(AtomicValue key, GroundedValue<?> value) {
+    public SingleEntryMap(AtomicValue key, GroundedValue value) {
         this.key = key;
         this.value = value;
     }
@@ -41,7 +43,7 @@ public class SingleEntryMap implements MapItem {
      * @return the value associated with the given key, or null if the key is not present in the map.
      */
     @Override
-    public GroundedValue<?> get(AtomicValue key) {
+    public GroundedValue get(AtomicValue key) {
         return this.key.asMapKey().equals(key.asMapKey()) ? value : null;
     }
 
@@ -82,7 +84,13 @@ public class SingleEntryMap implements MapItem {
      */
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        return () -> new MonoIterator<>(new KeyValuePair(key, value));
+        // For .NEU - don't use a lambda expression here
+        return new Iterable<KeyValuePair>() {
+            @Override
+            public Iterator<KeyValuePair> iterator() {
+                return new MonoIterator<>(new KeyValuePair(key, value));
+            }
+        };
     }
 
     /**
@@ -95,7 +103,7 @@ public class SingleEntryMap implements MapItem {
      * @return the new map containing the additional entry
      */
     @Override
-    public MapItem addEntry(AtomicValue key, GroundedValue<?> value) {
+    public MapItem addEntry(AtomicValue key, GroundedValue value) {
         return toHashTrieMap().addEntry(key, value);
     }
 
@@ -165,4 +173,4 @@ public class SingleEntryMap implements MapItem {
     }
 }
 
-// Copyright (c) 2010-2018 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

@@ -1,26 +1,28 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
-// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+// Copyright (c) 2018-2020 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
 import static net.sf.saxon.s9api.streams.Steps.path;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
  * JUnit tests for the s9api Xslt30Transformer with xsl:evaluate instruction
  */
-public class TestXslEvaluate extends TestCase {
+public class TestXslEvaluate {
 
     public static final String xsl =
             "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
@@ -54,9 +56,10 @@ public class TestXslEvaluate extends TestCase {
                     + "</xsl:transform>";
 
     /**
-     * Test that xsl:evaluate fails with Saxon-HE configuration
+     * Test that xsl:evaluate works with Saxon-HE configuration
      */
 
+    @Test
     public void testXslEvaluateWithHE() {
 
         try {
@@ -74,11 +77,10 @@ public class TestXslEvaluate extends TestCase {
                 // Transform the source XML to System.out.
 
                 transformer.callTemplate(new QName("main"), destination);
-                fail("Unexpected success");
+                // OK
 
             } catch (SaxonApiException e) {
-                System.err.println(e.getMessage());
-                assertEquals("XTDE3175", e.getErrorCode().getLocalName());
+                fail();
             }
         } catch (SaxonApiException e2) {
             fail();
@@ -90,6 +92,7 @@ public class TestXslEvaluate extends TestCase {
      * Test that xsl:evaluate succeeds with Saxon-HE configuration with xsl:fallback
      */
 
+    @Test
     public void testXslEvaluateWithHEWithFallback() {
 
         try {
@@ -98,6 +101,7 @@ public class TestXslEvaluate extends TestCase {
             // Create a transformer for the stylesheet.
             Xslt30Transformer transformer = processor.newXsltCompiler().compile(
                     new StreamSource(new StringReader(xslWithFallback))).load30();
+            processor.setConfigurationProperty(Feature.DISABLE_XSL_EVALUATE, true);
 
             // Create a destination
             XdmDestination destination = new XdmDestination();
@@ -105,7 +109,7 @@ public class TestXslEvaluate extends TestCase {
             // Transform the source XML to System.out.
 
             transformer.callTemplate(new QName("main"), destination);
-            assertEquals(destination.getXdmNode().select(path("out", "@prop")).asString(), "no");
+            assertEquals("no", destination.getXdmNode().select(path("out", "@prop")).asString());
 
         } catch (SaxonApiException e) {
             System.err.println(e.getMessage());
@@ -118,6 +122,7 @@ public class TestXslEvaluate extends TestCase {
      * Test that xsl:evaluate can be statically disabled
      */
 
+    @Test
     public void testDisableXslEvaluateStatically() {
 
         try {
@@ -152,6 +157,7 @@ public class TestXslEvaluate extends TestCase {
      * Test that xsl:fallback takes effect when xsl:evaluate ine statically disabled
      */
 
+    @Test
     public void testDisableXslEvaluateStaticallyWithFallback() {
         try {
 
@@ -167,7 +173,7 @@ public class TestXslEvaluate extends TestCase {
             // Transform the source XML to System.out.
 
             transformer.callTemplate(new QName("main"), destination);
-            assertEquals(destination.getXdmNode().getStringValue(), "42");
+            assertEquals("42", destination.getXdmNode().getStringValue());
             assertEquals(destination.getXdmNode().select(path("out", "@prop")).asString(), "no");
 
         } catch (SaxonApiException e) {
@@ -184,6 +190,7 @@ public class TestXslEvaluate extends TestCase {
      * Test that xsl:evaluate can be dyamically disabled
      */
 
+    @Test
     public void testDisableXslEvaluateDynamically() {
         try {
             Processor processor = new Processor(true);
@@ -211,6 +218,7 @@ public class TestXslEvaluate extends TestCase {
      * Test that xsl:fallback takes effect when xsl:evaluate ine dyamically disabled
      */
 
+    @Test
     public void testDisableXslEvaluateDynamicallyWithFallback() {
         try {
 
@@ -226,7 +234,7 @@ public class TestXslEvaluate extends TestCase {
             // Transform the source XML to System.out.
             processor.setConfigurationProperty(Feature.DISABLE_XSL_EVALUATE, true);
             transformer.callTemplate(new QName("main"), destination);
-            assertEquals(destination.getXdmNode().getStringValue(), "42");
+            assertEquals("42", destination.getXdmNode().getStringValue());
             assertEquals(destination.getXdmNode().select(path("out", "@prop")).asString(), "no");
 
         } catch (SaxonApiException e) {
@@ -240,14 +248,17 @@ public class TestXslEvaluate extends TestCase {
      * Test value of xsl:supports-dynamic-evaluation in a Saxon-HE static expression
      */
 
+    @Test
     public void testStaticSystemPropertyHE() {
-        systemProperty(false, "no", false);
+        systemProperty(false, "yes", false);
     }
 
+    @Test
     public void testStaticSystemPropertyEE() {
         systemProperty(true, "yes", false);
     }
 
+    @Test
     public void testStaticSystemPropertyEEdisabled() {
         systemProperty(true, "no", true);
     }

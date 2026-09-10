@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,21 +7,17 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -38,21 +34,26 @@ public abstract class ElementCreator extends ParentNodeConstructor {
 
 
     /**
-     * The inheritNamespacesToChildren flag indicates that the namespace nodes on the element created by this instruction
-     * are to be inherited (copied) on the children of this element. That is, if this flag is false, the child
+     * The bequeathNamespacesToChildren flag indicates that the namespace nodes on the element created by this instruction
+     * are to be inherited (copied) by the children of this element. That is, if this flag is false, the child
      * elements must carry a namespace undeclaration for all the namespaces on the parent, unless they are
-     * redeclared in some way.
+     * redeclared in some way. This flag is set in XSLT based on the value of the [xsl:]inherit-namespaces
+     * attribute on the element construction instruction, and in XQuery based on the value of "copy namespaces
+     * inherit | no-inherit" in the query prolog.
      */
 
-    protected boolean inheritNamespacesToChildren = true;
+    boolean bequeathNamespacesToChildren = true;
 
     /**
      * The inheritNamespacesFromParent flag indicates that this element should inherit the namespaces of its
      * parent element in the result tree. That is, if this flag is false, this element must carry a namespace
-     * undeclaration for all the namespaces on its parent, unless they are redeclared in some way.
+     * undeclaration for all the namespaces on its parent, unless they are redeclared in some way. In XSLT this
+     * flag is always true, but in XQuery it is set to false for a child element constructed using
+     * {@code <parent><child/></parent>} as distinct from {@code <parent>{<child/>}parent} -- in the former case,
+     * the child element is not copied and therefore namespace inheritance does not apply.
      */
 
-    protected boolean inheritNamespacesFromParent = true;
+    boolean inheritNamespacesFromParent = true;
 
     /**
      * Construct an ElementCreator. Exists for the benefit of subclasses.
@@ -68,6 +69,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return NodeKindTest.ELEMENT;
     }
@@ -83,8 +85,8 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      * @param inherit true if namespaces are to be inherited by the children
      */
 
-    public void setInheritNamespacesToChildren(boolean inherit) {
-        inheritNamespacesToChildren = inherit;
+    public void setBequeathNamespacesToChildren(boolean inherit) {
+        bequeathNamespacesToChildren = inherit;
     }
 
     /**
@@ -93,8 +95,8 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      * @return true if namespaces constructed on this parent element are to be inherited by its children
      */
 
-    public boolean isInheritNamespacesToChildren() {
-        return inheritNamespacesToChildren;
+    public boolean isBequeathNamespacesToChildren() {
+        return bequeathNamespacesToChildren;
     }
 
     /**
@@ -115,6 +117,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      * @return true if this child element inherits namespaces from its parent element
      */
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isInheritNamespacesFromParent() {
         return inheritNamespacesFromParent;
     }
@@ -127,6 +130,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      * @return a set of flags indicating static properties of this expression
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties() |
                 StaticProperty.SINGLE_DOCUMENT_NODESET;
@@ -141,6 +145,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      * is already performing validation. The default implementation does nothing.
      */
 
+    @Override
     public void suppressValidation(int parentValidationMode) {
         if (getValidationAction() == parentValidationMode && getSchemaType() == null) {
             // TODO: is this safe? e.g. if the child has validation=strict but matches a skip wildcard in the parent
@@ -156,6 +161,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      * @throws XPathException if the content is found to be incorrect
      */
 
+    @Override
     protected void checkContentSequence(StaticContext env) throws XPathException {
         Operand[] components;
         if (getContentExpression() instanceof Block) {
@@ -252,64 +258,58 @@ public abstract class ElementCreator extends ParentNodeConstructor {
     public abstract String getNewBaseURI(XPathContext context, NodeInfo copiedNode);
 
     /**
-     * Callback to output namespace nodes for the new element. This method is responsible
-     * for ensuring that a namespace node is always generated for the namespace of the element
+     * Callback to output namespace bindings for the new element. This method is responsible
+     * for ensuring that a namespace binding is always generated for the namespace of the element
      * name itself.
      *
-     * @param context    The execution context
-     * @param receiver   the Receiver where the namespace nodes are to be written
-     * @param nameCode   the name code of the element being created
+     * @param receiver   the Outputter where the namespace bindings are to be written
+     * @param nodeName   the name of the element being created
      * @param copiedNode the node being copied (for xsl:copy) or null otherwise
      * @throws XPathException if a dynamic error occurs
      */
 
     public abstract void outputNamespaceNodes(
-            XPathContext context, Receiver receiver, NodeName nameCode, /*@Nullable*/ NodeInfo copiedNode)
+            Outputter receiver, NodeName nodeName, /*@Nullable*/ NodeInfo copiedNode)
             throws XPathException;
-
-    /**
-     * Callback to get a list of the intrinsic namespaces that need to be generated for the element.
-     *
-     * @return the set of namespace bindings.
-     * @throws net.sf.saxon.trans.XPathException if an error occurs
-     */
-
-    public NamespaceBinding[] getActiveNamespaces() throws XPathException {
-        return null;
-    }
 
     /**
      * An implementation of Expression must provide at least one of the methods evaluateItem(), iterate(), or process().
      * This method indicates which of these methods is prefered. For instructions this is the process() method.
      */
 
+    @Override
     public int getImplementationMethod() {
-        return Expression.PROCESS_METHOD | Expression.EVALUATE_METHOD;
+        return Expression.PROCESS_METHOD;
     }
 
     /**
      * Evaluate the instruction to produce a new element node. This method is typically used when there is
      * a parent element or document in a result tree, to which the new element is added.
      *
+     *
+     * @param output the destination for the result
      * @param context XPath dynamic evaluation context
      * @return null (this instruction never returns a tail call)
      * @throws XPathException if a dynamic error occurs
      */
-    public TailCall processLeavingTail(XPathContext context)
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context)
             throws XPathException {
-        return processLeavingTail(context, null);
+        return processLeavingTail(output, context, null);
     }
 
     /**
      * Evaluate the instruction to produce a new element node. This method is typically used when there is
      * a parent element or document in a result tree, to which the new element is added.
      *
+     *
+     * @param out        The destination for the result
      * @param context    XPath dynamic evaluation context
      * @param copiedNode null except in the case of xsl:copy, when it is the node being copied; otherwise null
      * @return null (this instruction never returns a tail call)
      * @throws XPathException if a dynamic error occurs
      */
-    public final TailCall processLeavingTail(XPathContext context, /*@Nullable*/ NodeInfo copiedNode)
+    public final TailCall processLeavingTail(Outputter out, XPathContext context, /*@Nullable*/ NodeInfo copiedNode)
             throws XPathException {
 
         try {
@@ -317,47 +317,43 @@ public abstract class ElementCreator extends ParentNodeConstructor {
             NodeName elemName = getElementName(context, copiedNode);
             SchemaType typeCode = getValidationAction() == Validation.PRESERVE ? AnyType.getInstance() : Untyped.getInstance();
 
-            Receiver out = context.getReceiver();
-            Receiver saved = out;
-            boolean pop = false;
             Receiver elemOut = out;
             if (!preservingTypes) {
                 ParseOptions options = new ParseOptions(getValidationOptions());
                 options.setTopLevelElement(elemName.getStructuredQName());
                 context.getConfiguration().prepareValidationReporting(context, options);
-                Receiver validator = context.getConfiguration().getElementValidator(out, options, getLocation());
+                Receiver validator = context.getConfiguration().getElementValidator(elemOut, options, getLocation());
 
-                if (validator != out) {
-                    out = new TreeReceiver(validator);
-                    context.setReceiver(out);
-                    pop = true;
+                if (validator != elemOut) {
+                    out = new ComplexContentOutputter(validator);
                 }
-                elemOut = out;
+                //elemOut = validator;
             }
 
-            if (elemOut.getSystemId() == null) {
-                elemOut.setSystemId(getNewBaseURI(context, copiedNode));
+            if (out.getSystemId() == null) {
+                out.setSystemId(getNewBaseURI(context, copiedNode));
             }
-            int properties = inheritNamespacesToChildren ? 0 : ReceiverOptions.DISINHERIT_NAMESPACES;
+            int properties = ReceiverOption.NONE;
+            if (!bequeathNamespacesToChildren) {
+                properties |= ReceiverOption.DISINHERIT_NAMESPACES;
+            }
             if (!inheritNamespacesFromParent) {
-                properties |= ReceiverOptions.REFUSE_NAMESPACES;
+                properties |= ReceiverOption.REFUSE_NAMESPACES;
             }
+            properties |= ReceiverOption.ALL_NAMESPACES;
 
-            elemOut.startElement(elemName, typeCode, getLocation(), properties);
+            out.startElement(elemName, typeCode, getLocation(), properties);
 
             // output the required namespace nodes via a callback
 
-            outputNamespaceNodes(context, elemOut, elemName, copiedNode);
+            outputNamespaceNodes(out, elemName, copiedNode);
 
             // process subordinate instructions to generate attributes and content
-            getContentExpression().process(context);
+            getContentExpression().process(out, context);
 
             // output the element end tag (which will fail if validation fails)
-            elemOut.endElement();
+            out.endElement();
 
-            if (pop) {
-                context.setReceiver(saved);
-            }
             return null;
 
         } catch (XPathException e) {
@@ -367,91 +363,8 @@ public abstract class ElementCreator extends ParentNodeConstructor {
         }
     }
 
-    /**
-     * Evaluate the constructor, returning the constructed element node. If lazy construction
-     * mode is in effect, then an UnconstructedParent object is returned instead.
-     */
 
-    public Item evaluateItem(XPathContext context) throws XPathException {
-        return constructElement(context, null);
-        // TODO: recover from validation errors that might have occurred
-    }
-
-    /**
-     * Construct the element node as a free-standing (parentless) node in a tiny tree
-     *
-     * @param context    XPath dynamic evaluation context
-     * @param copiedNode for the benefit of xsl:copy, the node being copied
-     * @return the constructed element node
-     * @throws XPathException if a dynamic error occurs
-     */
-    private NodeInfo constructElement(XPathContext context, /*@Nullable*/ NodeInfo copiedNode) throws XPathException {
-        try {
-            Controller controller = context.getController();
-            if (controller == null) {
-                throw new NoDynamicContextException("No controller available");
-            }
-            Receiver saved = context.getReceiver();
-            SequenceOutputter seq = controller.allocateSequenceOutputter(1);
-            seq.getPipelineConfiguration().setHostLanguage(getPackageData().getHostLanguage());
-
-            NodeName elemName = getElementName(context, copiedNode);
-            SchemaType typeCode = getValidationAction() == Validation.PRESERVE ? AnyType.getInstance() : Untyped.getInstance();
-
-            SequenceReceiver ini = seq;
-            if (!preservingTypes) {
-                ParseOptions options = new ParseOptions(getValidationOptions());
-                options.setTopLevelElement(elemName.getStructuredQName());
-                controller.getConfiguration().prepareValidationReporting(context, options);
-                Receiver validator = controller.getConfiguration().getElementValidator(ini, options, getLocation());
-
-                if (ini.getSystemId() == null) {
-                    ini.setSystemId(getNewBaseURI(context, copiedNode));
-                }
-                if (validator == ini) {
-                    context.setReceiver(ini);
-                } else {
-                    TreeReceiver tr = new TreeReceiver(validator);
-                    tr.setPipelineConfiguration(seq.getPipelineConfiguration());
-                    context.setReceiver(tr);
-                    ini = tr;
-                }
-            } else {
-                context.setReceiver(ini);
-                if (ini.getSystemId() == null) {
-                    ini.setSystemId(getNewBaseURI(context, copiedNode));
-                }
-            }
-
-            ini.open();
-            int properties = inheritNamespacesToChildren ? 0 : ReceiverOptions.DISINHERIT_NAMESPACES;
-            if (!inheritNamespacesFromParent) {
-                properties |= ReceiverOptions.REFUSE_NAMESPACES;
-            }
-            ini.startElement(elemName, typeCode, getLocation(), properties);
-
-            // output the namespace nodes for the new element
-            outputNamespaceNodes(context, ini, elemName, null);
-
-            getContentExpression().process(context);
-
-            ini.endElement();
-            ini.close();
-            context.setReceiver(saved);
-
-            // the constructed element is the first and only item in the sequence
-            NodeInfo result = (NodeInfo) seq.popLastItem();
-            seq.reset();
-            return result;
-
-        } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            err.maybeSetContext(context);
-            throw err;
-        }
-    }
-
-    protected void exportValidationAndType(ExpressionPresenter out) {
+    void exportValidationAndType(ExpressionPresenter out) {
         if (getValidationAction() != Validation.SKIP && getValidationAction() != Validation.BY_TYPE) {
             out.emitAttribute("validation", Validation.toString(getValidationAction()));
         }
@@ -463,12 +376,12 @@ public abstract class ElementCreator extends ParentNodeConstructor {
         }
     }
 
-    protected String getInheritanceFlags() {
+    String getInheritanceFlags() {
         String flags = "";
         if (!inheritNamespacesFromParent) {
             flags += "P";
         }
-        if (!inheritNamespacesToChildren) {
+        if (!bequeathNamespacesToChildren) {
             flags += "C";
         }
         return flags;
@@ -476,7 +389,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
 
     public void setInheritanceFlags(String flags) {
         inheritNamespacesFromParent = !flags.contains("P");
-        inheritNamespacesToChildren = !flags.contains("C");
+        bequeathNamespacesToChildren = !flags.contains("C");
     }
 
     /**

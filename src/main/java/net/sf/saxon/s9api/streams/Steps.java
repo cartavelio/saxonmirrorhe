@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,7 +16,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.Type;
@@ -46,6 +46,7 @@ public class Steps {
 
     public static Step<XdmNode> root() {
         return new Step<XdmNode>() {
+            @Override
             public Stream<XdmNode> apply(XdmItem origin) {
                 return origin instanceof XdmNode
                         ? Stream.of(((XdmNode)origin).getRoot())
@@ -100,6 +101,7 @@ public class Steps {
         final ConversionRules rules = type.getConversionRules();
 
         return atomize().then(new Step<XdmAtomicValue>() {
+            @Override
             public Stream<? extends XdmAtomicValue> apply(XdmItem xdmItem) {
                 try {
                     AtomicValue source = ((XdmAtomicValue)xdmItem).getUnderlyingValue();
@@ -189,6 +191,7 @@ public class Steps {
 
     public static <U extends XdmItem> Step<U> nothing() {
         return new Step<U>() {
+            @Override
             public Stream<U> apply(XdmItem xdmItem) {
                 return Stream.empty();
             }
@@ -196,7 +199,7 @@ public class Steps {
     }
 
     private static Predicate<XdmNode> nodeTestPredicate (NodeTest test) {
-        return item -> test.matchesNode(item.getUnderlyingNode());
+        return item -> test.test(item.getUnderlyingNode());
     }
 
     private static Predicate<? super XdmNode> localNamePredicate(String given) {
@@ -986,7 +989,7 @@ public class Steps {
         return new Step<XdmAtomicValue>() {
             @Override
             public Stream<XdmAtomicValue> apply(XdmItem item) {
-                UnfailingIterator<StringValue> iter = new Whitespace.Tokenizer(item.getStringValue());
+                AtomicIterator<StringValue> iter = new Whitespace.Tokenizer(item.getStringValue());
                 return XdmSequenceIterator.ofAtomicValues(iter).stream();
             }
         };
@@ -1019,5 +1022,5 @@ public class Steps {
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited
 

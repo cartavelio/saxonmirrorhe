@@ -2,7 +2,6 @@ package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
 import com.saxonica.config.ProfessionalTransformerFactory;
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
 import net.sf.saxon.lib.Feature;
@@ -10,6 +9,7 @@ import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.serialize.MessageEmitter;
 import net.sf.saxon.serialize.MessageWarner;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.*;
@@ -24,8 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TransformMessageTest extends TestCase {
+
+public class TransformMessageTest {
 
     private static final String IDENTITY_STYLESHEET
         = "<?xml version=\"1.0\"?> \n" +
@@ -39,6 +44,7 @@ public class TransformMessageTest extends TestCase {
             "</xsl:stylesheet>";
 
 
+    @Test
     public void testMessageWarner() throws Exception {
 
         SAXTransformerFactory tFactory = new net.sf.saxon.TransformerFactoryImpl();
@@ -80,6 +86,7 @@ public class TransformMessageTest extends TestCase {
 
     }
 
+    @Test
     public void testTypeHierarchyLeak() {
         try {
             String stylesheet =
@@ -120,7 +127,7 @@ public class TransformMessageTest extends TestCase {
                 transformer.transform(new StreamSource(new StringReader("<input/>")),
                     new StreamResult(resultWriter));
 
-                assertTrue("Results OK", resultWriter.toString().contains("</results>"));
+                assertTrue(resultWriter.toString().contains("</results>"), "Results OK");
 
                 if(i >= iterations - 2) {
                     System.out.println("Breakpoint here to check memory " +
@@ -135,18 +142,18 @@ public class TransformMessageTest extends TestCase {
 
     }
 
+    @Test
     public void testSilentRecovery() {
         try {
             String stylesheet =
                 "<?xml version='1.0'?>" +
                 "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                "    version='2.0'>" +
+                "    version='2.0'><xsl:mode warning-on-multiple-match='false'/>" +
                 "  <xsl:template match='/'>first</xsl:template>" +
                 "  <xsl:template match='/'>second</xsl:template>" +
                 "</xsl:stylesheet>";
 
             TransformerFactory transFactory = new TransformerFactoryImpl();
-            transFactory.setAttribute("http://saxon.sf.net/feature/recoveryPolicy", 0);
             Templates templates = transFactory.newTemplates(
             new SAXSource(new InputSource(new StringReader(stylesheet))));
 
@@ -170,7 +177,7 @@ public class TransformMessageTest extends TestCase {
             transformer.transform(new StreamSource(new StringReader("<input/>")),
                                   new StreamResult(resultWriter));
 
-            assertTrue("Results OK", resultWriter.toString().contains("second"));
+            assertTrue(resultWriter.toString().contains("second"), "Results OK");
 
 
 
@@ -180,18 +187,18 @@ public class TransformMessageTest extends TestCase {
         }
     }
 
+    @Test
     public void testWarningRecovery() {
         try {
             String stylesheet =
                 "<?xml version='1.0'?>" +
                 "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                "    version='2.0'>" +
+                "    version='2.0'><xsl:mode warning-on-multiple-match='true'/>" +
                 "  <xsl:template match='/'>first</xsl:template>" +
                 "  <xsl:template match='/'>second</xsl:template>" +
                 "</xsl:stylesheet>";
 
             TransformerFactory transFactory = new TransformerFactoryImpl();
-            transFactory.setAttribute("http://saxon.sf.net/feature/recoveryPolicy", 1);
             Templates templates = transFactory.newTemplates(
             new SAXSource(new InputSource(new StringReader(stylesheet))));
             final List<TransformerException> warnings = new ArrayList<TransformerException>();
@@ -217,8 +224,8 @@ public class TransformMessageTest extends TestCase {
             transformer.transform(new StreamSource(new StringReader("<input/>")),
                     new StreamResult(resultWriter));
 
-            assertTrue("Results OK", resultWriter.toString().contains("second"));
-            assertEquals("Warnings", warnings.size(), 1);
+            assertTrue(resultWriter.toString().contains("second"), "Results OK");
+            assertEquals(1, warnings.size(), "Warnings");
 
 
         } catch (TransformerException e) {
@@ -227,13 +234,14 @@ public class TransformMessageTest extends TestCase {
         }
     }
 
+    @Test
     public void testNonRecovery() {
         final List<TransformerException> errors = new ArrayList<TransformerException>();
         try {
             String stylesheet =
                 "<?xml version='1.0'?>" +
                 "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                "    version='2.0'>" +
+                "    version='2.0'><xsl:mode on-multiple-match='fail'/>" +
                 "  <xsl:template match='/'>first</xsl:template>" +
                 "  <xsl:template match='/'>second</xsl:template>" +
                 "</xsl:stylesheet>";
@@ -270,10 +278,11 @@ public class TransformMessageTest extends TestCase {
 
 
         } catch (TransformerException e) {
-            assertEquals("Warnings", errors.size(), 1);
+            assertEquals(1, errors.size(), "Warnings");
         }
     }
 
+    @Test
     public void testErrorNotificationSchemaAware() {
         final List<TransformerException> errors = new ArrayList<TransformerException>();
         try {
@@ -318,11 +327,12 @@ public class TransformMessageTest extends TestCase {
             fail("Compilation should fail");
         } catch (TransformerException e) {
             //assertTrue("warnings", warnings.isEmpty());
-            assertFalse("errors", errors.isEmpty());
+            assertFalse(errors.isEmpty(), "errors");
 
         }
     }
 
+    @Test
     public void testBaseOutputUri() {
         try {
             String stylesheet =
@@ -349,7 +359,7 @@ public class TransformMessageTest extends TestCase {
                         }
 
                         public Result resolve(String href, String base) throws TransformerException {
-                            assertEquals(base, "http://some.base.uri/");
+                            assertEquals("http://some.base.uri/", base);
                             return new StreamResult(secondary);
                         }
 
@@ -372,6 +382,7 @@ public class TransformMessageTest extends TestCase {
         }
     }
 
+    @Test
     public void testMessageCapture() {
         try {
             String stylesheet =

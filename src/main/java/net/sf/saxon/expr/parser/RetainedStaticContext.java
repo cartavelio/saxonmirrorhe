@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,13 +12,14 @@ import net.sf.saxon.Version;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.XPathException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Iterator;
 
 /**
  * This class contains the part of the static context of expressions that (a) can change from one expression
@@ -35,7 +36,7 @@ public class RetainedStaticContext implements NamespaceResolver {
     private URI staticBaseUri;
     private String staticBaseUriString;
     private String defaultCollationName;
-    private Map<String, String> namespaces;
+    private NamespaceResolver namespaces;
     private String defaultFunctionNamespace = NamespaceConstant.FN;
     private String defaultElementNamespace;
     private DecimalFormatManager decimalFormatManager;
@@ -45,16 +46,8 @@ public class RetainedStaticContext implements NamespaceResolver {
     public RetainedStaticContext(Configuration config) {
         this.config = config;
         packageData = new PackageData(config);
-        namespaces = new HashMap<>();
+        namespaces = NamespaceMap.emptyMap();
         defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
-    }
-
-    // This is used by copyDefaultURI()
-    private RetainedStaticContext(Map<String, String> namespaces,
-                                  String defaultElementNamespace) {
-        this.namespaces = namespaces;
-        this.defaultElementNamespace = defaultElementNamespace;
-        this.defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
     }
 
     public RetainedStaticContext(StaticContext sc) {
@@ -76,13 +69,18 @@ public class RetainedStaticContext implements NamespaceResolver {
         if (Version.platform.JAXPStaticContextCheck(this, sc)) {
             //updated in method
         } else {
-            this.namespaces = new HashMap<>(4);
             NamespaceResolver resolver = sc.getNamespaceResolver();
-            for (Iterator<String> it = resolver.iteratePrefixes(); it.hasNext(); ) {
-                String prefix = it.next();
-                if (!prefix.equals("xml")) {
-                    namespaces.put(prefix, resolver.getURIForPrefix(prefix, true));
+            if (resolver instanceof NamespaceMap) {
+                namespaces = resolver;
+            } else {
+                NamespaceMap map = NamespaceMap.emptyMap();
+                for (Iterator<String> it = resolver.iteratePrefixes(); it.hasNext(); ) {
+                    String prefix = it.next();
+                    if (!prefix.equals("xml")) {
+                        map = map.put(prefix, resolver.getURIForPrefix(prefix, true));
+                    }
                 }
+                namespaces = map;
             }
         }
 
@@ -255,13 +253,17 @@ public class RetainedStaticContext implements NamespaceResolver {
 
     /**
      * Add a namespace binding to the static namespace context ("in-scope namespaces")
-     *
+     * Not supported when the static context is a JAXP XPath.
      * @param prefix the namespace prefix
      * @param uri    the namespace URI
      */
 
     public void declareNamespace(String prefix, String uri) {
-        namespaces.put(prefix, uri);
+        if (namespaces instanceof NamespaceMap) {
+            namespaces = ((NamespaceMap) namespaces).put(prefix, uri);
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     /**
@@ -278,19 +280,9 @@ public class RetainedStaticContext implements NamespaceResolver {
      * @return the uri for the namespace, or null if the prefix is not in scope.
      * The "null namespace" is represented by the pseudo-URI "".
      */
+    @Override
     public String getURIForPrefix(String prefix, boolean useDefault) {
-        if (prefix.isEmpty()) {
-            if (useDefault) {
-                String u = namespaces.get(prefix);
-                return u == null ? "" : u;
-            } else {
-                return "";
-            }
-        }
-        if (prefix.equals("xml")) {
-            return NamespaceConstant.XML;
-        }
-        return namespaces.get(prefix);
+        return namespaces.getURIForPrefix(prefix, useDefault);
     }
 
     /**
@@ -300,8 +292,9 @@ public class RetainedStaticContext implements NamespaceResolver {
      * @return an iterator over all the prefixes for which a namespace binding exists, including
      * the zero-length string to represent the null/absent prefix if it is bound
      */
+    @Override
     public Iterator<String> iteratePrefixes() {
-        return namespaces.keySet().iterator();
+        return namespaces.iteratePrefixes();
     }
 
     /**
@@ -337,8 +330,10 @@ public class RetainedStaticContext implements NamespaceResolver {
     }
 
 
-    public void setNamespaces(Map<String,String> namespaces) {
+    public void setNamespaces(NamespaceResolver namespaces) {
         this.namespaces = namespaces;
     }
+
+
 }
 

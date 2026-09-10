@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2020 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.ma.map;
 
 import net.sf.saxon.om.GroundedValue;
@@ -20,7 +27,7 @@ import java.util.*;
 
 public class DictionaryMap implements MapItem {
 
-    private HashMap<String, GroundedValue<?>> hashMap;
+    private HashMap<String, GroundedValue> hashMap;
 
     /**
      * Create an empty dictionary, to which entries can be added using {@link #initialPut(String, GroundedValue)},
@@ -35,8 +42,21 @@ public class DictionaryMap implements MapItem {
      * During initial construction of the map, add a key-value pair
      */
 
-    public void initialPut(String key, GroundedValue<?> value) {
+    public void initialPut(String key, GroundedValue value) {
         hashMap.put(key, value);
+    }
+
+    /**
+     * During initial construction of the map, append a value to a possibly existing key-value pair
+     */
+
+    public void initialAppend(String key, GroundedValue value) {
+        GroundedValue existingValue = hashMap.get(key);
+        if (existingValue == null) {
+            initialPut(key, value);
+        } else {
+            hashMap.put(key, existingValue.concatenate(value));
+        }
     }
 
     /**
@@ -46,7 +66,7 @@ public class DictionaryMap implements MapItem {
      * @return the value associated with the given key, or null if the key is not present in the map.
      */
     @Override
-    public GroundedValue<?> get(AtomicValue key) {
+    public GroundedValue get(AtomicValue key) {
         if (key instanceof StringValue) {
             return hashMap.get(key.getStringValue());
         } else {
@@ -80,7 +100,7 @@ public class DictionaryMap implements MapItem {
      * @return a set containing all the key values present in the map, in unpredictable order
      */
     @Override
-    public AtomicIterator keys() {
+    public AtomicIterator<StringValue> keys() {
         Iterator<String> base = hashMap.keySet().iterator();
         return () -> base.hasNext() ? new StringValue(base.next()) : null;
     }
@@ -107,7 +127,7 @@ public class DictionaryMap implements MapItem {
      * @return the new map containing the additional entry
      */
     @Override
-    public MapItem addEntry(AtomicValue key, GroundedValue<?> value) {
+    public MapItem addEntry(AtomicValue key, GroundedValue value) {
         return toHashTrieMap().addEntry(key, value);
     }
 
@@ -142,7 +162,7 @@ public class DictionaryMap implements MapItem {
         if (valueType.equals(SequenceType.ANY_SEQUENCE)) {
             return true;
         }
-        for (GroundedValue<?> val : hashMap.values()) {
+        for (GroundedValue val : hashMap.values()) {
             try {
                 if (!valueType.matches(val, th)) {
                     return false;
@@ -166,8 +186,10 @@ public class DictionaryMap implements MapItem {
         ItemType valueType = null;
         int valueCard = 0;
         // we need to test the entries individually
-        for (Map.Entry<String, GroundedValue<?>> entry : hashMap.entrySet()) {
-            GroundedValue<?> val = entry.getValue();
+        AtomicIterator keyIter = keys();
+        AtomicValue key;
+        for (Map.Entry<String, GroundedValue> entry : hashMap.entrySet()) {
+            GroundedValue val = entry.getValue();
             if (valueType == null) {
                 valueType = SequenceTool.getItemType(val, th);
                 valueCard = SequenceTool.getCardinality(val);

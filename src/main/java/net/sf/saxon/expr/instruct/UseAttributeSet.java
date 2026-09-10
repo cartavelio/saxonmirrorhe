@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -159,6 +160,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      *             can be found.
      */
 
+    @Override
     public void setBindingSlot(int slot) {
         bindingSlot = slot;
     }
@@ -171,6 +173,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      * can be found.
      */
 
+    @Override
     public int getBindingSlot() {
         return bindingSlot;
     }
@@ -181,6 +184,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      * @return the symbolic name of the target component
      */
 
+    @Override
     public SymbolicName getSymbolicName() {
         return new SymbolicName(StandardNames.XSL_ATTRIBUTE_SET, targetName);
     }
@@ -195,6 +199,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
         return target;
     }
 
+    @Override
     public Component getFixedTarget() {
         if (target != null && bindingSlot < 0) {
             return target.getDeclaringComponent();
@@ -224,6 +229,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         return this;
     }
@@ -239,6 +245,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         UseAttributeSet ua = new UseAttributeSet(targetName, isDeclaredStreamable);
         ua.setTarget(target);
@@ -266,6 +273,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         return this;
     }
@@ -277,6 +285,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return NodeKindTest.ATTRIBUTE;
     }
@@ -292,6 +301,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      * dependencies. The flags are documented in class net.sf.saxon.value.StaticProperty
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         // we have to assume the worst; the target attribute set could be overridden by one that has focus dependencies
         return StaticProperty.DEPENDS_ON_XSLT_CONTEXT | StaticProperty.DEPENDS_ON_FOCUS;
@@ -312,6 +322,8 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      * must be implemented in each subclass. The results of the instruction are written
      * to the current Receiver, which can be obtained via the Controller.
      *
+     *
+     * @param output the destination for the result
      * @param context The dynamic context of the transformation, giving access to the current node,
      *                the current variables, etc.
      * @return null if the instruction has completed execution; or a TailCall indicating
@@ -320,7 +332,8 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      */
 
     /*@Nullable*/
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         Component target;
 
         if (bindingSlot < 0) {
@@ -347,7 +360,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
             sm = SlotManager.EMPTY;
         }
         c2.openStackFrame(sm);
-        as.expand(c2);
+        as.expand(output, c2);
         return null;
     }
 
@@ -368,6 +381,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("useAS", this);
         out.emitAttribute("name", targetName);
@@ -395,6 +409,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      * Compute a hashcode
      */
 
+    @Override
     public int computeHashCode() {
         return 0x86423719 ^ targetName.hashCode();
     }

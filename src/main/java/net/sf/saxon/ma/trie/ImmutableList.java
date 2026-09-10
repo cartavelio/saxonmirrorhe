@@ -21,6 +21,16 @@ import java.util.NoSuchElementException;
 public abstract class ImmutableList<T> implements Iterable<T> {
 
     /**
+     * Return an empty list
+     *
+     * @param <T> the nominal item type of the list elements
+     * @return an empty list
+     */
+    public static <T> ImmutableList<T> empty() {
+        return EMPTY_LIST;
+    }
+
+    /**
      * Get the first item in the list
      * @return the first item in the list
      */
@@ -66,15 +76,6 @@ public abstract class ImmutableList<T> implements Iterable<T> {
     }
 
     /**
-     * Return an empty list
-     * @param <T> the nominal item type of the list elements
-     * @return an empty list
-     */
-    public static <T> ImmutableList<T> empty() {
-        return EMPTY_LIST;
-    }
-
-    /**
      * Test whether two lists are equal
      * @param o the other list
      * @return true if the other object is an instance of this ImmutableList class, and the
@@ -103,14 +104,17 @@ public abstract class ImmutableList<T> implements Iterable<T> {
      * @return an iterator over the list
      */
 
+    @Override
     public Iterator<T> iterator() {
         return new Iterator<T>() {
             private ImmutableList<T> list = ImmutableList.this;
 
+            @Override
             public boolean hasNext() {
                 return !list.isEmpty();
             }
 
+            @Override
             public T next() {
                 T element = list.head();
                 list = list.tail();
@@ -137,6 +141,19 @@ public abstract class ImmutableList<T> implements Iterable<T> {
         }
         builder.append(']');
         return builder.toString();
+    }
+
+    /**
+     * Return a list with the contents of this list in reverse order
+     * @return the reversed list
+     */
+
+    public ImmutableList<T> reverse() {
+        ImmutableList<T> result = empty();
+        for (T element : this) {
+            result = result.prepend(element);
+        }
+        return result;
     }
 
     private static final EmptyList EMPTY_LIST = new EmptyList();

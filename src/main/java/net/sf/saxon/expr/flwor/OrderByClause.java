@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
@@ -17,6 +18,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
+
+import static net.sf.saxon.expr.flwor.Clause.ClauseName.ORDER_BY;
 
 /**
  * This class represents an "order by" clause in a FLWOR expression
@@ -29,19 +32,18 @@ public class OrderByClause extends Clause {
                             SequenceType.ANY_SEQUENCE,
                             expr -> expr instanceof SortKeyDefinitionList);
 
-
     Operand sortKeysOp; // Holds a SortKeyDefinitionList
     AtomicComparer[] comparators;
     Operand tupleOp; // Holds a TupleExpression
 
     public OrderByClause(FLWORExpression flwor, SortKeyDefinition[] sortKeys, TupleExpression tupleExpression) {
         this.sortKeysOp = new Operand(flwor, new SortKeyDefinitionList(sortKeys), SORT_KEYS_ROLE);
-        this.tupleOp = new Operand(flwor, tupleExpression, OperandRole.REPEAT_NAVIGATE_CONSTRAINED);
+        this.tupleOp = new Operand(flwor, tupleExpression, OperandRole.FLWOR_TUPLE_CONSTRAINED);
     }
 
     @Override
-    public int getClauseKey() {
-        return ORDERBYCLAUSE;
+    public ClauseName getClauseKey() {
+        return ORDER_BY;
     }
 
     @Override
@@ -49,6 +51,7 @@ public class OrderByClause extends Clause {
         return getTupleExpression().includesBinding(binding);
     }
 
+    @Override
     public OrderByClause copy(FLWORExpression flwor, RebindingMap rebindings) {
         SortKeyDefinitionList sortKeys = getSortKeyDefinitions();
         SortKeyDefinition[] sk2 = new SortKeyDefinition[sortKeys.size()];
@@ -92,13 +95,14 @@ public class OrderByClause extends Clause {
      * output to another tuple stream
      *
      * @param destination the output tuple stream
+     * @param output the destination for the result
      * @param context     XQuery dynamic context
      * @return the push tuple stream that implements the functionality of this clause of the FLWOR
      *         expression
      */
     @Override
-    public TuplePush getPushStream(TuplePush destination, XPathContext context) {
-        return new OrderByClausePush(destination, getTupleExpression(), this, context);
+    public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
+        return new OrderByClausePush(output, destination, getTupleExpression(), this, context);
     }
 
     /**
@@ -119,6 +123,7 @@ public class OrderByClause extends Clause {
      * Type-check the expression
      */
 
+    @Override
     public void typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         boolean allKeysFixed = true;
         SortKeyDefinitionList sortKeys = getSortKeyDefinitions();
@@ -154,6 +159,7 @@ public class OrderByClause extends Clause {
         }
     }
 
+    @Override
     public void addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         SortKeyDefinitionList sortKeys = getSortKeyDefinitions();
         for (SortKeyDefinition skd : sortKeys) {

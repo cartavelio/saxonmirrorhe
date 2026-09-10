@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -100,7 +100,6 @@ public class OnDemandFunctionSet implements FunctionLibrary {
         return this;
     }
 
-//#ifdefined HOF
     @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         boolean match = load(functionName, null);
@@ -110,7 +109,6 @@ public class OnDemandFunctionSet implements FunctionLibrary {
             return null;
         }
     }
-//#endif
 
 }
 

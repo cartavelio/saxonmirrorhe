@@ -1,7 +1,6 @@
 package nativetests;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 
 import java.io.*;
@@ -10,9 +9,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 // Bug 2644 - Gunther Rademacher
 
-public class ConfigDeadlockTest extends TestCase {
+public class ConfigDeadlockTest {
     private static final String logFile = "/Users/mike/Desktop/log.txt";
 
     private static class TestForSaxonBug2327 {

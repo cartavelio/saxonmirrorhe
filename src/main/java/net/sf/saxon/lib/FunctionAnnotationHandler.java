@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,6 +11,7 @@ package net.sf.saxon.lib;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Affinity;
 
 /**
  * Interface to a user-supplied class that handles XQuery annotation assertions in a particular namespace.
@@ -59,9 +60,9 @@ public interface FunctionAnnotationHandler {
      * assertions always subsumes a test with a non-empty list.</p>
      * @param firstList the first list of annotation assertions
      * @param secondList the second list of annotation assertions
-     * @return the relationship between the two lists, as one of the values {@link net.sf.saxon.type.TypeHierarchy#SAME_TYPE},
-     * {@link net.sf.saxon.type.TypeHierarchy#DISJOINT}, {@link net.sf.saxon.type.TypeHierarchy#OVERLAPS},
-     * {@link net.sf.saxon.type.TypeHierarchy#SUBSUMES}, {@link net.sf.saxon.type.TypeHierarchy#SUBSUMED_BY}.
+     * @return the relationship between the two lists, as one of the values {@link net.sf.saxon.type.Affinity#SAME_TYPE},
+     * {@link net.sf.saxon.type.Affinity#DISJOINT}, {@link net.sf.saxon.type.Affinity#OVERLAPS},
+     * {@link net.sf.saxon.type.Affinity#SUBSUMES}, {@link net.sf.saxon.type.Affinity#SUBSUMED_BY}.
      * For example, if the first list is <code>%colour("blue")</code> and the second list is <code>%colour("green")</code>,
      * and no function can be both blue and green, then return <code>DISJOINT</code>. But if a function can have more than
      * one colour, return <code>OVERLAPS</code> because the set of functions conforming to the two assertions has a non-empty
@@ -76,7 +77,7 @@ public interface FunctionAnnotationHandler {
      * until run-time.</p>
      */
 
-    int relationship(AnnotationList firstList, AnnotationList secondList);
+    Affinity relationship(AnnotationList firstList, AnnotationList secondList);
 
 
 

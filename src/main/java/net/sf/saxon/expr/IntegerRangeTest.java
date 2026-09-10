@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -77,6 +77,7 @@ public class IntegerRangeTest extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         // Already done, we only get one of these expressions after the operands have been analyzed
         return this;
@@ -98,6 +99,7 @@ public class IntegerRangeTest extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         if (Literal.isEmptySequence(getMin()) || Literal.isEmptySequence(getMax()) || Literal.isEmptySequence(getValue())) {
             return new Literal(BooleanValue.FALSE);
@@ -114,6 +116,7 @@ public class IntegerRangeTest extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.BOOLEAN;
     }
@@ -122,6 +125,7 @@ public class IntegerRangeTest extends Expression {
      * Determine the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -134,6 +138,7 @@ public class IntegerRangeTest extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         IntegerRangeTest exp = new IntegerRangeTest(
                 getValue().copy(rebindings), getMin().copy(rebindings), getMax().copy(rebindings));
@@ -171,6 +176,7 @@ public class IntegerRangeTest extends Expression {
      * Hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         int h = getValue().hashCode() + 77;
         h ^= getMin().hashCode() ^ getMax().hashCode();
@@ -181,6 +187,7 @@ public class IntegerRangeTest extends Expression {
      * Evaluate the expression
      */
 
+    @Override
     public BooleanValue evaluateItem(XPathContext c) throws XPathException {
         IntegerValue minVal = null;
         IntegerValue maxVal = null;
@@ -245,6 +252,7 @@ public class IntegerRangeTest extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("intRangeTest", this);
         getValue().export(destination);

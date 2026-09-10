@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
@@ -20,6 +20,8 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
+
+import java.util.function.Predicate;
 
 
 /**
@@ -53,6 +55,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return the TreeInfo
      * @since 9.7
      */
+    @Override
     public TreeInfo getTreeInfo() {
         return tree;
     }
@@ -71,19 +74,9 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return this item
      */
 
+    @Override
     public NodeInfo head() {
         return this;
-    }
-
-    /**
-     * To implement {@link Sequence}, this method returns a singleton iterator
-     * that delivers this item in the form of a sequence
-     *
-     * @return a singleton iterator that returns this item
-     */
-
-    public UnfailingIterator<NodeInfo> iterate() {
-        return SingletonIterator.makeIterator(this);
     }
 
     /**
@@ -91,6 +84,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * the version of the method that returns a String.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         return getStringValue();
     }
@@ -107,6 +101,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      *         xs:anyType if it has.
      * @since 9.4
      */
+    @Override
     public SchemaType getSchemaType() {
         return null;
     }
@@ -116,6 +111,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * The default implementation returns -1, meaning unknown
      */
 
+    @Override
     public int getColumnNumber() {
         return tree.getColumnNumber(nodeNr);
     }
@@ -127,6 +123,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * be used as the source of a transformation.</p>
      */
 
+    @Override
     public void setSystemId(String uri) {
         tree.setSystemId(nodeNr, uri);
     }
@@ -150,6 +147,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      *         same node in the tree.
      */
 
+    @Override
     public boolean isSameNodeInfo(/*@NotNull*/ NodeInfo other) {
         return this == other ||
                 (other instanceof TinyNodeImpl &&
@@ -192,6 +190,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * Get the system ID for the entity containing the node.
      */
 
+    @Override
     public String getSystemId() {
         return tree.getSystemId(nodeNr);
     }
@@ -201,6 +200,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * the base URI of the parent node.
      */
 
+    @Override
     public String getBaseURI() {
         return getParent().getBaseURI();
     }
@@ -209,6 +209,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * Get the line number of the node within its source document entity
      */
 
+    @Override
     public int getLineNumber() {
         return tree.getLineNumber(nodeNr);
     }
@@ -218,6 +219,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
         return this;
     }
@@ -247,6 +249,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      *         return true, and the two nodes will produce the same result for generateId())
      */
 
+    @Override
     public final int compareOrder(/*@NotNull*/ NodeInfo other) {
         long a = getSequenceNumber();
         if (other instanceof TinyNodeImpl) {
@@ -278,6 +281,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * Get the fingerprint of the node, used for matching names
      */
 
+    @Override
     public int getFingerprint() {
         int nc = tree.nameCode[nodeNr];
         if (nc == -1) {
@@ -292,6 +296,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return the prefix part of the name. For an unnamed node, return "".
      */
 
+    @Override
     public String getPrefix() {
         int code = tree.nameCode[nodeNr];
         if (code < 0) {
@@ -311,6 +316,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      *         an element or attribute in the default namespace, return an empty string.
      */
 
+    @Override
     public String getURI() {
         int code = tree.nameCode[nodeNr];
         if (code < 0) {
@@ -327,6 +333,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      *         For a node with no name, return an empty string.
      */
 
+    @Override
     public String getDisplayName() {
         int code = tree.nameCode[nodeNr];
         if (code < 0) {
@@ -346,6 +353,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      *         For a node with no name, return "".
      */
 
+    @Override
     public String getLocalPart() {
         int code = tree.nameCode[nodeNr];
         if (code < 0) {
@@ -361,13 +369,14 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return a AxisIteratorImpl that scans the nodes reached by the axis in turn.
      */
 
-    public AxisIterator iterateAxis(byte axisNumber) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber) {
         // fast path for child axis
         if (axisNumber == AxisInfo.CHILD) {
             if (hasChildNodes()) {
                 return new SiblingIterator(tree, this, null, true);
             } else {
-                return EmptyIterator.OfNodes.THE_INSTANCE;
+                return EmptyIterator.ofNodes();
             }
         } else {
             return iterateAxis(axisNumber, AnyNodeTest.getInstance());
@@ -378,129 +387,133 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * Return an iterator over the nodes reached by the given axis from this node
      *
      * @param axisNumber Identifies the required axis, eg. Axis.CHILD or Axis.PARENT
-     * @param nodeTest   A pattern to be matched by the returned nodes.
+     * @param predicate   A condition to be matched by the returned nodes.
      * @return a AxisIteratorImpl that scans the nodes reached by the axis in turn.
      */
 
-    public AxisIterator iterateAxis(byte axisNumber, /*@NotNull*/ NodeTest nodeTest) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+        if (predicate instanceof NodeTest) {
+            NodeTest nodeTest = (NodeTest) predicate;
 
-        int type = getNodeKind();
-        switch (axisNumber) {
-            case AxisInfo.ANCESTOR:
-                return new AncestorIterator(this, nodeTest);
+            int type = getNodeKind();
+            switch (axisNumber) {
+                case AxisInfo.ANCESTOR:
+                    return new AncestorIterator(this, nodeTest);
 
-            case AxisInfo.ANCESTOR_OR_SELF:
-                AxisIterator ancestors = new AncestorIterator(this, nodeTest);
-                if (nodeTest.matchesNode(this)) {
-                    return new PrependAxisIterator(this, ancestors);
-                } else {
-                    return ancestors;
-                }
-
-            case AxisInfo.ATTRIBUTE:
-                if (type != Type.ELEMENT) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                }
-                if (tree.alpha[nodeNr] < 0) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                }
-                return new AttributeIterator(tree, nodeNr, nodeTest);
-
-            case AxisInfo.CHILD:
-                if (hasChildNodes()) {
-                    if (nodeTest instanceof NameTest && ((NameTest) nodeTest).getNodeKind() == Type.ELEMENT) {
-                        // fast path for common case
-                        return new NamedChildIterator(tree, this, nodeTest.getFingerprint());
+                case AxisInfo.ANCESTOR_OR_SELF:
+                    AxisIterator ancestors = new AncestorIterator(this, nodeTest);
+                    if (nodeTest.test(this)) {
+                        return new PrependAxisIterator(this, ancestors);
                     } else {
-                        return new SiblingIterator(tree, this, nodeTest, true);
+                        return ancestors;
                     }
-                } else {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                }
 
-            case AxisInfo.DESCENDANT:
-                if (type == Type.DOCUMENT &&
-                        nodeTest instanceof NameTest &&
-                        nodeTest.getPrimitiveType() == Type.ELEMENT) {
-                    return ((TinyDocumentImpl) this).getAllElements(nodeTest.getFingerprint());
-                } else if (hasChildNodes()) {
-                    if (tree.externalNodes != null) {
-                        return new GraftingDescendantIterator(tree, this, nodeTest);
-                    } else if (nodeTest.getUType().overlaps(UType.TEXT)) {
-                        return new DescendantIterator(tree, this, nodeTest);
+                case AxisInfo.ATTRIBUTE:
+                    if (type != Type.ELEMENT) {
+                        return EmptyIterator.ofNodes();
+                    }
+                    if (tree.alpha[nodeNr] < 0) {
+                        return EmptyIterator.ofNodes();
+                    }
+                    return new AttributeIterator(tree, nodeNr, nodeTest);
+
+                case AxisInfo.CHILD:
+                    if (hasChildNodes()) {
+                        if (nodeTest instanceof NameTest && ((NameTest) nodeTest).getNodeKind() == Type.ELEMENT) {
+                            // fast path for common case
+                            return new NamedChildIterator(tree, this, nodeTest.getFingerprint());
+                        } else {
+                            return new SiblingIterator(tree, this, nodeTest, true);
+                        }
                     } else {
-                        return new DescendantIteratorSansText(tree, this, nodeTest);
+                        return EmptyIterator.ofNodes();
                     }
-                } else {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                }
 
-            case AxisInfo.DESCENDANT_OR_SELF:
-                AxisIterator descendants = iterateAxis(AxisInfo.DESCENDANT, nodeTest);
-                if (nodeTest.matchesNode(this)) {
-                    return new PrependAxisIterator(this, descendants);
-                } else {
-                    return descendants;
-                }
+                case AxisInfo.DESCENDANT:
+                    if (type == Type.DOCUMENT &&
+                            nodeTest instanceof NameTest &&
+                            nodeTest.getPrimitiveType() == Type.ELEMENT) {
+                        return ((TinyDocumentImpl) this).getAllElements(nodeTest.getFingerprint());
+                    } else if (hasChildNodes()) {
+                        if (nodeTest.getUType().overlaps(UType.TEXT)) {
+                            return new DescendantIterator(tree, this, nodeTest);
+                        } else {
+                            return new DescendantIteratorSansText(tree, this, nodeTest);
+                        }
+                    } else {
+                        return EmptyIterator.ofNodes();
+                    }
 
-            case AxisInfo.FOLLOWING:
-                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-                    return new FollowingIterator(tree, getParent(), nodeTest, true);
-                } else if (tree.depth[nodeNr] == 0) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                } else {
-                    return new FollowingIterator(tree, this, nodeTest, false);
-                }
+                case AxisInfo.DESCENDANT_OR_SELF:
+                    AxisIterator descendants = iterateAxis(AxisInfo.DESCENDANT, nodeTest);
+                    if (nodeTest.test(this)) {
+                        return new PrependAxisIterator(this, descendants);
+                    } else {
+                        return descendants;
+                    }
 
-            case AxisInfo.FOLLOWING_SIBLING:
-                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                } else {
-                    return new SiblingIterator(tree, this, nodeTest, false);
-                }
+                case AxisInfo.FOLLOWING:
+                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
+                        return new FollowingIterator(tree, getParent(), nodeTest, true);
+                    } else if (tree.depth[nodeNr] == 0) {
+                        return EmptyIterator.ofNodes();
+                    } else {
+                        return new FollowingIterator(tree, this, nodeTest, false);
+                    }
 
-            case AxisInfo.NAMESPACE:
-                if (type != Type.ELEMENT) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                }
-                return NamespaceNode.makeIterator(this, nodeTest);
+                case AxisInfo.FOLLOWING_SIBLING:
+                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
+                        return EmptyIterator.ofNodes();
+                    } else {
+                        return new SiblingIterator(tree, this, nodeTest, false);
+                    }
 
-            case AxisInfo.PARENT:
-                NodeInfo parent = getParent();
-                return Navigator.filteredSingleton(parent, nodeTest);
+                case AxisInfo.NAMESPACE:
+                    if (type != Type.ELEMENT) {
+                        return EmptyIterator.ofNodes();
+                    }
+                    return NamespaceNode.makeIterator(this, nodeTest);
 
-            case AxisInfo.PRECEDING:
-                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-                    return new PrecedingIterator(tree, getParent(), nodeTest, false);
-                } else if (tree.depth[nodeNr] == 0) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                } else {
-                    return new PrecedingIterator(tree, this, nodeTest, false);
-                }
+                case AxisInfo.PARENT:
+                    NodeInfo parent = getParent();
+                    return Navigator.filteredSingleton(parent, nodeTest);
 
-            case AxisInfo.PRECEDING_SIBLING:
-                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                } else {
-                    return new PrecedingSiblingIterator(tree, this, nodeTest);
-                }
+                case AxisInfo.PRECEDING:
+                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
+                        return getParent().iterateAxis(axisNumber, predicate);
+                    } else if (tree.depth[nodeNr] == 0) {
+                        return EmptyIterator.ofNodes();
+                    } else {
+                        return new PrecedingIterator(tree, this, nodeTest, false);
+                    }
 
-            case AxisInfo.SELF:
-                return Navigator.filteredSingleton(this, nodeTest);
+                case AxisInfo.PRECEDING_SIBLING:
+                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
+                        return EmptyIterator.ofNodes();
+                    } else {
+                        return new PrecedingSiblingIterator(tree, this, nodeTest);
+                    }
 
-            case AxisInfo.PRECEDING_OR_ANCESTOR:
-                if (type == Type.DOCUMENT) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                } else if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-                    // See test numb32.
-                    TinyNodeImpl el = getParent();
-                    return new PrependAxisIterator(el, new PrecedingIterator(tree, el, nodeTest, true));
-                } else {
-                    return new PrecedingIterator(tree, this, nodeTest, true);
-                }
+                case AxisInfo.SELF:
+                    return Navigator.filteredSingleton(this, nodeTest);
 
-            default:
-                throw new IllegalArgumentException("Unknown axis number " + axisNumber);
+                case AxisInfo.PRECEDING_OR_ANCESTOR:
+                    if (type == Type.DOCUMENT) {
+                        return EmptyIterator.ofNodes();
+                    } else if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
+                        // See test numb32.
+                        TinyNodeImpl el = getParent();
+                        return new PrependAxisIterator(el, new PrecedingIterator(tree, el, nodeTest, true));
+                    } else {
+                        return new PrecedingIterator(tree, this, nodeTest, true);
+                    }
+
+                default:
+                    throw new IllegalArgumentException("Unknown axis number " + axisNumber);
+            }
+        } else {
+            return new Navigator.AxisFilter(iterateAxis(axisNumber, AnyNodeTest.getInstance()), predicate);
         }
     }
 
@@ -511,6 +524,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      */
 
     /*@Nullable*/
+    @Override
     public TinyNodeImpl getParent() {
         if (parent != null) {
             return parent;
@@ -557,6 +571,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      *         <code>false</code> otherwise.
      */
 
+    @Override
     public boolean hasChildNodes() {
         // overridden in TinyParentNodeImpl
         return false;
@@ -573,6 +588,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @since 9.4
      */
 
+    @Override
     public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
         return null;
     }
@@ -583,6 +599,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return the NodeInfo representing the root of this tree
      */
 
+    @Override
     public NodeInfo getRoot() {
         return nodeNr==0 ? this : tree.getRootNode();
 //        if (tree.depth[nodeNr] == 0) {
@@ -598,6 +615,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * Get the configuration
      */
 
+    @Override
     public Configuration getConfiguration() {
         return tree.getConfiguration();
     }
@@ -626,7 +644,23 @@ public abstract class TinyNodeImpl implements NodeInfo {
      */
 
     /*@Nullable*/
+    @Override
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
+        return null;
+    }
+
+    /**
+     * Get all the namespace bindings that are in-scope for this element.
+     * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+     * a binding to the default namespace (represented by a prefix of ""). It will never include
+     * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+     * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+     * <p>For a node other than an element, returns null.</p>
+     *
+     * @return the in-scope namespaces for an element, or null for any other kind of node.
+     */
+    @Override
+    public NamespaceMap getAllNamespaces() {
         return null;
     }
 
@@ -637,10 +671,11 @@ public abstract class TinyNodeImpl implements NodeInfo {
      *               a character string that uniquely identifies this node.
      */
 
+    @Override
     public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
         buffer.append("d");
         buffer.append(Long.toString(tree.getDocumentNumber()));
-        buffer.append(NODE_LETTER[getNodeKind()]);
+        buffer.cat(NODE_LETTER[getNodeKind()]);
         buffer.append(Integer.toString(nodeNr));
     }
 
@@ -723,6 +758,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return true if the node is an ID
      */
 
+    @Override
     public boolean isId() {
         return false;   // overridden for element and attribute nodes
     }
@@ -733,6 +769,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return true if the node is an IDREF or IDREFS element or attribute
      */
 
+    @Override
     public boolean isIdref() {
         return false;    // overridden for element and attribute nodes
     }
@@ -743,6 +780,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return true if the node has the is-nilled property
      */
 
+    @Override
     public boolean isNilled() {
         return tree.isNilled(nodeNr);
     }

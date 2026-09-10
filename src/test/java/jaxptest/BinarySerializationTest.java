@@ -1,22 +1,26 @@
 package jaxptest;
 
 import com.saxonica.config.ProfessionalTransformerFactory;
-import junit.framework.TestCase;
 import net.sf.saxon.lib.OutputURIResolver;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BinarySerializationTest extends TestCase {
 
+public class BinarySerializationTest {
+    public static final String TESTPDF = ConfigTest.DATA_DIR + "temp/testfile.pdf";
+
+    @Test
     public void testBase64OutputMethod() throws TransformerException,
             FileNotFoundException {
 
 
-        new File("testfile.pdf").delete();
+        new File(TESTPDF).delete();
         TransformerFactory tfactory = new ProfessionalTransformerFactory();
         tfactory.setAttribute("http://saxon.sf.net/feature/outputURIResolver",
                 new MyOutputURIResolver());
@@ -43,7 +47,7 @@ public class BinarySerializationTest extends TestCase {
 
         transformer.transform(xmlSource, transResult);
 
-        assertTrue(new File("testfile.pdf").exists());
+        assertTrue(new File(TESTPDF).exists());
 
     }
 
@@ -59,17 +63,19 @@ public class BinarySerializationTest extends TestCase {
             System.out.println("MyOutputURIResolver");
 
             try {
-                resdoc = new FileOutputStream("testfile.pdf");
+                resdoc = new FileOutputStream(TESTPDF);
             } catch (FileNotFoundException e) {
                 throw new AssertionError(e);
             }
 
         }
 
+        @Override
         public OutputURIResolver newInstance() {
             return new MyOutputURIResolver();
         }
 
+        @Override
         public Result resolve(String href, String base)
                 throws TransformerException {
 
@@ -81,6 +87,7 @@ public class BinarySerializationTest extends TestCase {
 
         }
 
+        @Override
         public void close(Result result) {
 
             System.out.println("close");

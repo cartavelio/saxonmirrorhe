@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.SlotManager;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.TypeAliasManager;
@@ -25,13 +26,12 @@ import java.util.List;
 public class PackageData {
 
     protected Configuration config;
-    private int hostLanguage;
-    private int xPathVersion;
+    private HostLanguage hostLanguage;
     private boolean isSchemaAware;
     private DecimalFormatManager decimalFormatManager = null;
     protected KeyManager keyManager = null;
     private AccumulatorRegistry accumulatorRegistry = null;
-    private List<GlobalVariable> globalVariables = new ArrayList<GlobalVariable>();
+    private List<GlobalVariable> globalVariables = new ArrayList<>();
     private SlotManager globalSlotManager;
     private int localLicenseId = -1;
     private String targetEdition;
@@ -54,6 +54,15 @@ public class PackageData {
     }
 
     /**
+     * Create a PackageData object as a copy of an existing PackageData
+     * @param p the existing PackageData object
+     */
+
+    public PackageData(PackageData p) {
+
+    }
+
+    /**
      * Get the Configuration to which this package belongs
      * @return the Saxon configuration
      */
@@ -73,30 +82,29 @@ public class PackageData {
 
     /**
      * Get the language in which this package is written
-     * @return typically {@link Configuration#XSLT}, {@link Configuration#XQUERY}, or {@link Configuration#XPATH}
+     * @return typically {@link HostLanguage#XSLT}, {@link HostLanguage#XQUERY}, or {@link HostLanguage#XPATH}
      */
 
-    public int getHostLanguage() {
+    public HostLanguage getHostLanguage() {
         return hostLanguage;
     }
 
     /**
-     * Set the language in which this package is written
-     * @param hostLanguage typically {@link Configuration#XSLT}, {@link Configuration#XQUERY}, or {@link Configuration#XPATH}
+     * Ask if the host language is XSLT
+     * @return true if the host language is XSLT
      */
 
-    public void setHostLanguage(int hostLanguage) {
-        this.hostLanguage = hostLanguage;
+    public boolean isXSLT() {
+        return hostLanguage == HostLanguage.XSLT;
     }
 
     /**
-     * Get the XPath version in use (as the version number times ten, e.g. version 3.0 =&gt; 30)
-     *
-     * @return the version number times ten
+     * Set the language in which this package is written
+     * @param hostLanguage typically {@link HostLanguage#XSLT}, {@link HostLanguage#XQUERY}, or {@link HostLanguage#XPATH}
      */
 
-    public int getXPathVersion() {
-        return xPathVersion;
+    public void setHostLanguage(HostLanguage hostLanguage) {
+        this.hostLanguage = hostLanguage;
     }
 
     /**
@@ -193,7 +201,7 @@ public class PackageData {
 
     public DecimalFormatManager getDecimalFormatManager() {
         if (decimalFormatManager == null) {
-            decimalFormatManager = new DecimalFormatManager(hostLanguage, xPathVersion);
+            decimalFormatManager = new DecimalFormatManager(hostLanguage, 31);
         }
         return decimalFormatManager;
     }

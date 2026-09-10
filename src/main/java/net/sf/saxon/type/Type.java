@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,9 +13,11 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.*;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.value.*;
 
 
@@ -79,10 +81,7 @@ public abstract class Type {
      * Node kind used in the tiny tree to represent an element node having simple text content
      */
     public static final short TEXTUAL_ELEMENT = 17; // Chosen so kind & 0x0f = Type.ELEMENT
-    /**
-     * Item type representing an external element node grafted into the tiny tree
-     */
-    public static final short EXTERNAL_NODE_REFERENCE = 33; // Chosen so kind & 0x0f = Type.ELEMENT
+
     /**
      * An item type that matches any node
      */
@@ -127,7 +126,10 @@ public abstract class Type {
      * to, and it is not always the case that one of them is a subtype of all the others.
      *
      * @param item the item whose type is required
-     * @param th   the type hierarchy cache. If null, the returned type may be less precise
+     * @param th   the type hierarchy cache. In most cases this can be null, but the returned type may
+     *             then be less precise (for example, the type returned for a map or array will simply
+     *             be <code>map(*)</code> or <code>array(*)</code>). For external objects, the parameter
+     *             must not be null
      * @return the item type of the item
      */
 
@@ -145,13 +147,8 @@ public abstract class Type {
             switch (node.getNodeKind()) {
                 case Type.DOCUMENT:
                     // Need to know whether the document is well-formed and if so what the element type is
-                    AxisIterator iter = node.iterateAxis(AxisInfo.CHILD);
                     ItemType elementType = null;
-                    while (true) {
-                        NodeInfo n = iter.next();
-                        if (n == null) {
-                            break;
-                        }
+                    for (NodeInfo n : node.children()) {
                         int kind = n.getNodeKind();
                         if (kind == Type.TEXT) {
                             elementType = null;
@@ -213,7 +210,7 @@ public abstract class Type {
             }
             return ((ExternalObject<?>) item).getItemType(th);
         } else if (item instanceof MapItem) {
-            return th == null ? MapType.ANY_MAP_TYPE : ((MapItem) item).getItemType(th);
+            return th == null ? MapType.ANY_MAP_TYPE : ((MapItem)item).getItemType(th);
         } else if (item instanceof ArrayItem) {
             return th == null ? ArrayItemType.ANY_ARRAY_TYPE : new ArrayItemType(((ArrayItem) item).getMemberType(th));
         } else { //if (item instanceof FunctionItem) {
@@ -374,12 +371,12 @@ public abstract class Type {
                     Cardinality.union(((MapType) t1).getValueType().getCardinality(), ((MapType) t2).getValueType().getCardinality()));
             return new MapType(k, v);
         }
-        int r = th.relationship(t1, t2);
-        if (r == TypeHierarchy.SAME_TYPE) {
+        Affinity r = th.relationship(t1, t2);
+        if (r == Affinity.SAME_TYPE) {
             return t1;
-        } else if (r == TypeHierarchy.SUBSUMED_BY) {
+        } else if (r == Affinity.SUBSUMED_BY) {
             return t2;
-        } else if (r == TypeHierarchy.SUBSUMES) {
+        } else if (r == Affinity.SUBSUMES) {
             return t1;
         } else {
             return t1.getUType().union(t2.getUType()).toItemType();

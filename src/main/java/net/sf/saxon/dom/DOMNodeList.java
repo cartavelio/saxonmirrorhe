@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,7 +16,7 @@ import java.util.List;
  */
 
 public final class DOMNodeList implements org.w3c.dom.NodeList {
-    private List<Node> sequence;
+    private final List<Node> sequence;
 
     /**
      * Construct an node list that wraps a supplied list of DOM Nodes.
@@ -32,6 +32,7 @@ public final class DOMNodeList implements org.w3c.dom.NodeList {
      * return the number of nodes in the list (DOM method)
      */
 
+    @Override
     public int getLength() {
         return sequence.size();
     }
@@ -43,6 +44,7 @@ public final class DOMNodeList implements org.w3c.dom.NodeList {
      */
 
     /*@Nullable*/
+    @Override
     public Node item(int index) {
         if (index < 0 || index >= sequence.size()) {
             return null;

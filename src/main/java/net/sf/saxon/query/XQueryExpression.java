@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,9 @@ package net.sf.saxon.query;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.ExpressionOwner;
 import net.sf.saxon.expr.PackageData;
@@ -19,14 +21,18 @@ import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.lib.TraceListener;
-import net.sf.saxon.lib.UnfailingErrorListener;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trace.TraceableComponent;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -41,11 +47,11 @@ import java.util.*;
 /**
  * XQueryExpression represents a compiled query. This object is immutable and thread-safe,
  * the same compiled query may be executed many times in series or in parallel. The object
- * can be created only by using the compileQuery method of the QueryProcessor class.
+ * is intended to be created only by using the compileQuery method of the QueryProcessor class.
  * <p>Various methods are provided for evaluating the query, with different options for
  * delivery of the results.</p>
  */
-public class XQueryExpression implements Location, ExpressionOwner {
+public class XQueryExpression implements Location, ExpressionOwner, TraceableComponent {
 
     protected Expression expression;
     protected SlotManager stackFrameMap;
@@ -54,8 +60,8 @@ public class XQueryExpression implements Location, ExpressionOwner {
 
 
     /**
-     * The constructor is protected, to ensure that instances can only be
-     * created using the compileQuery() methods of StaticQueryContext
+     * The constructor should only be
+     * called using the compileQuery() methods of StaticQueryContext
      * @param exp        an expression to be wrapped as an XQueryExpression
      * @param mainModule the static context of the main module
      * @param streaming  true if streamed execution is requested
@@ -109,7 +115,7 @@ public class XQueryExpression implements Location, ExpressionOwner {
         ExpressionTool.allocateSlots(exp, 0, stackFrameMap);
         ExpressionTool.computeEvaluationModesForUserFunctionCalls(exp);
         for (GlobalVariable var : getPackageData().getGlobalVariableList()) {
-            Expression top = var.getSelectExpression();
+            Expression top = var.getBody();
             if (top != null) {
                 ExpressionTool.computeEvaluationModesForUserFunctionCalls(top);
             }
@@ -127,6 +133,42 @@ public class XQueryExpression implements Location, ExpressionOwner {
 
     public Expression getExpression() {
         return expression;
+    }
+
+    @Override
+    public Expression getBody() {
+        return getExpression();
+    }
+
+    @Override
+    public Expression getChildExpression() {
+        return expression;
+    }
+
+    @Override
+    public void setBody(Expression expression) {
+        setChildExpression(expression);
+    }
+
+    /**
+     * Get a name identifying the object of the expression, for example a function name, template name,
+     * variable name, key name, element name, etc. This is used only where the name is known statically.
+     *
+     * @return the QName of the object declared or manipulated by this instruction or expression
+     */
+    @Override
+    public StructuredQName getObjectName() {
+        return null;
+    }
+
+    @Override
+    public String getTracingTag() {
+        return "query";
+    }
+
+    @Override
+    public Location getLocation() {
+        return this;
     }
 
     /**
@@ -160,7 +202,7 @@ public class XQueryExpression implements Location, ExpressionOwner {
         List<GlobalVariable> map = getPackageData().getGlobalVariableList();
         if (map != null) {
             for (GlobalVariable var : map) {
-                Expression select = var.getSelectExpression();
+                Expression select = var.getBody();
                 if (select != null && ExpressionTool.dependsOnFocus(select)) {
                     return true;
                 }
@@ -303,7 +345,7 @@ public class XQueryExpression implements Location, ExpressionOwner {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterator(/*@NotNull*/ DynamicQueryContext env) throws XPathException {
+    public SequenceIterator iterator(/*@NotNull*/ DynamicQueryContext env) throws XPathException {
         if (isUpdateQuery()) {
             throw new XPathException("Cannot call iterator() on an updating query");
         }
@@ -327,11 +369,11 @@ public class XQueryExpression implements Location, ExpressionOwner {
 
             context.openStackFrame(stackFrameMap);
 
-            SequenceIterator<?> iterator = expression.iterate(context);
-            if ((iterator.getProperties() & SequenceIterator.GROUNDED) != 0) {
+            SequenceIterator iterator = expression.iterate(context);
+            if (iterator.getProperties().contains(SequenceIterator.Property.GROUNDED)) {
                 return iterator;
             } else {
-                return new ErrorReportingIterator<>(iterator, controller.getErrorListener());
+                return new ErrorReportingIterator(iterator, controller.getErrorReporter());
             }
         } catch (XPathException err) {
             TransformerException terr = err;
@@ -384,15 +426,12 @@ public class XQueryExpression implements Location, ExpressionOwner {
 
         Properties actualProperties = validateOutputProperties(controller, outputProperties);
 
-        //controller.defineGlobalParameters();
-
         XPathContextMajor context = initialContext(env, controller);
 
         // In tracing/debugging mode, evaluate all the global variables first
         TraceListener tracer = controller.getTraceListener();
         if (tracer != null) {
             controller.preEvaluateGlobals(context);
-            //tracer.open(controller);
         }
 
         context.openStackFrame(stackFrameMap);
@@ -400,29 +439,20 @@ public class XQueryExpression implements Location, ExpressionOwner {
         boolean mustClose = result instanceof StreamResult && ((StreamResult) result).getOutputStream() == null;
         Receiver out;
         if (result instanceof Receiver) {
-            out = (Receiver)result;
+            out = (Receiver) result;
         } else {
             SerializerFactory sf = context.getConfiguration().getSerializerFactory();
             PipelineConfiguration pipe = controller.makePipelineConfiguration();
-            pipe.setHostLanguage(Configuration.XQUERY);
+            pipe.setHostLanguage(HostLanguage.XQUERY);
             out = sf.getReceiver(result, new SerializationProperties(actualProperties), pipe);
-
-//            String itemSeparator = actualProperties.getProperty(SaxonOutputKeys.ITEM_SEPARATOR);
-//            if (out instanceof ComplexContentOutputter && itemSeparator != null) {
-//                out = new SequenceNormalizer(out, itemSeparator);
-//                context.setReceiver(out);
-//            }
         }
 
-        NamespaceReducer nr = new NamespaceReducer(out);
-        out = new ComplexContentOutputter(nr);
-
-        context.setReceiver(out);
-        out.open();
+        ComplexContentOutputter dest = new ComplexContentOutputter(out);
+        dest.open();
 
         // Run the query
         try {
-            expression.process(context);
+            expression.process(dest, context);
         } catch (XPathException err) {
             controller.reportFatalError(err);
             throw err;
@@ -431,7 +461,7 @@ public class XQueryExpression implements Location, ExpressionOwner {
                 if (tracer != null) {
                     tracer.close();
                 }
-                out.close();
+                dest.close();
             } catch (XPathException e) {
                 e.printStackTrace();
             }
@@ -490,7 +520,9 @@ public class XQueryExpression implements Location, ExpressionOwner {
                     baseProperties.setProperty(key, value);
                 } catch (XPathException dynamicError) {
                     outputProperties.remove(key);
-                    controller.getErrorListener().warning(dynamicError);
+                    XmlProcessingException err = new XmlProcessingException(dynamicError);
+                    err.setWarning(true);
+                    controller.getErrorReporter().report(err);
                 }
             }
         }
@@ -499,32 +531,6 @@ public class XQueryExpression implements Location, ExpressionOwner {
             baseProperties.setProperty("method", "xml");
         }
         return baseProperties;
-    }
-
-    /**
-     * Run the query in pull mode. From Saxon 9.8 this method is identical to {@link #run(DynamicQueryContext, Result, Properties)}
-     *
-     * @param dynamicEnv  the dynamic context for query evaluation
-     * @param destination the Receiver to accept the query results *usually a serializer)
-     * @throws XPathException if a dynamic error occurs during the evaluation
-     * @deprecated since 9.8.
-     */
-
-    public void pull(/*@NotNull*/ DynamicQueryContext dynamicEnv, /*@NotNull*/ Result destination, Properties outputProperties) throws XPathException {
-        run(dynamicEnv, destination, outputProperties);
-    }
-
-    /**
-     * Run the query in pull mode. From Saxon 9.8 this method is identical to {@link #run(DynamicQueryContext, Result, Properties)}
-     * (supplying the default serialization properties from the configuration as the third argument)
-     * @param dynamicEnv  the dynamic context for query evaluation
-     * @param destination the Receiver to accept the query results *usually a serializer)
-     * @throws XPathException if a dynamic error occurs during the evaluation
-     * @deprecated since 9.8.
-     */
-
-    public void pull(DynamicQueryContext dynamicEnv, SequenceReceiver destination) throws XPathException {
-        run(dynamicEnv, destination, getConfiguration().getDefaultSerializationProperties());
     }
 
     /**
@@ -572,11 +578,11 @@ public class XQueryExpression implements Location, ExpressionOwner {
 
     protected XPathContextMajor initialContext(DynamicQueryContext dynamicEnv, Controller controller) throws XPathException {
 
-        Item<?> contextItem = controller.getGlobalContextItem();
+        Item contextItem = controller.getGlobalContextItem();
         XPathContextMajor context = controller.newXPathContext();
 
         if (contextItem != null) {
-            ManualIterator<Item<?>> single = new ManualIterator<>(contextItem);
+            ManualIterator single = new ManualIterator(contextItem);
             context.setCurrentIterator(single);
             controller.setGlobalContextItem(contextItem);
         }
@@ -664,6 +670,7 @@ public class XQueryExpression implements Location, ExpressionOwner {
      * @see #getSystemId
      */
     /*@Nullable*/
+    @Override
     public String getPublicId() {
         return null;
     }
@@ -681,6 +688,7 @@ public class XQueryExpression implements Location, ExpressionOwner {
      * @see #getPublicId
      */
     /*@Nullable*/
+    @Override
     public String getSystemId() {
         return mainModule.getSystemId();
     }
@@ -698,6 +706,7 @@ public class XQueryExpression implements Location, ExpressionOwner {
      * @return The line number, or -1 if none is available.
      * @see #getColumnNumber
      */
+    @Override
     public int getLineNumber() {
         return -1;
     }
@@ -715,6 +724,7 @@ public class XQueryExpression implements Location, ExpressionOwner {
      * @return The column number, or -1 if none is available.
      * @see #getLineNumber
      */
+    @Override
     public int getColumnNumber() {
         return -1;
     }
@@ -724,6 +734,7 @@ public class XQueryExpression implements Location, ExpressionOwner {
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
         return this;
     }
@@ -731,13 +742,14 @@ public class XQueryExpression implements Location, ExpressionOwner {
     /**
      * Get the host language (XSLT, XQuery, XPath) used to implement the code in this container
      *
-     * @return typically {@link net.sf.saxon.Configuration#XSLT} or {@link net.sf.saxon.Configuration#XQUERY}
+     * @return {@link HostLanguage#XQUERY}
      */
 
-    public int getHostLanguage() {
-        return Configuration.XQUERY;
+    public HostLanguage getHostLanguage() {
+        return HostLanguage.XQUERY;
     }
 
+    @Override
     public void setChildExpression(Expression expr) {
             expression = expr;
     }
@@ -747,44 +759,34 @@ public class XQueryExpression implements Location, ExpressionOwner {
      * any exceptions that are raised to the ErrorListener
      */
 
-    private class ErrorReportingIterator<T extends Item<?>> implements SequenceIterator<T> {
-        private SequenceIterator<T> base;
-        private UnfailingErrorListener listener;
+    private class ErrorReportingIterator implements SequenceIterator {
+        private SequenceIterator base;
+        private ErrorReporter reporter;
 
-        public ErrorReportingIterator(SequenceIterator<T> base, UnfailingErrorListener listener) {
+        public ErrorReportingIterator(SequenceIterator base, ErrorReporter reporter) {
             this.base = base;
-            this.listener = listener;
+            this.reporter = reporter;
         }
 
         /*@Nullable*/
-        public T next() throws XPathException {
+        @Override
+        public Item next() throws XPathException {
             try {
                 return base.next();
             } catch (XPathException e1) {
                 e1.maybeSetLocation(expression.getLocation());
-                listener.fatalError(e1);
+                XmlProcessingException err = new XmlProcessingException(e1);
+                reporter.report(err);
                 e1.setHasBeenReported(true);
                 throw e1;
             }
         }
 
+        @Override
         public void close() {
             base.close();
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-         *         and {@link #LOOKAHEAD}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         *         It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        public int getProperties() {
-            return 0;
-        }
     }
 
 }

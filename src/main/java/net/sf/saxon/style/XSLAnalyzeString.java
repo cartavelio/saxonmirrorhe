@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,12 +10,11 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.AnalyzeString;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +38,7 @@ public class XSLAnalyzeString extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -48,48 +48,56 @@ public class XSLAnalyzeString extends StyleElement {
      * instruction
      */
 
+    @Override
     public boolean mayContainFallback() {
         return true;
     }
 
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         String selectAtt = null;
         String regexAtt = null;
         String flagsAtt = null;
 
-        AttributeCollection atts = getAttributeList();
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
+            switch (f) {
+                case "regex":
+                    regexAtt = value;
+                    regex = makeAttributeValueTemplate(regexAtt, att);
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("regex")) {
-                regexAtt = atts.getValue(a);
-                regex = makeAttributeValueTemplate(regexAtt, a);
+                    break;
+                case "select":
+                    selectAtt = value;
+                    select = makeExpression(selectAtt, att);
+                    break;
+                case "flags":
+                    flagsAtt = value; // not trimmed, see bugzilla 4315
 
-            } else if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
-            } else if (f.equals("flags")) {
-                flagsAtt = atts.getValue(a); // not trimmed, see bugzilla 4315
-                flags = makeAttributeValueTemplate(flagsAtt, a);
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                    flags = makeAttributeValueTemplate(flagsAtt, att);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
 
         if (selectAtt == null) {
             reportAbsence("select");
-            select = makeExpression(".", -1);    // for error recovery
+            select = makeExpression(".", null);    // for error recovery
         }
 
         if (regexAtt == null) {
             reportAbsence("regex");
-            regex = makeAttributeValueTemplate("xxx", -1);  // for error recovery
+            regex = makeAttributeValueTemplate("xxx", null);  // for error recovery
         }
 
         if (flagsAtt == null) {
             flagsAtt = "";
-            flags = makeAttributeValueTemplate("", -1);
+            flags = makeAttributeValueTemplate("", null);
         }
 
 
@@ -115,28 +123,32 @@ public class XSLAnalyzeString extends StyleElement {
 
     }
 
-    private void invalidRegex(String message) throws XPathException {
+    private void invalidRegex(String message) {
         compileErrorInAttribute(message, "XTDE1140", "regex");
         // prevent it being reported more than once
-        pattern = getConfiguration().compileRegularExpression("x", "", "XP20", null);
+        setDummyRegex();
     }
 
-    private void invalidFlags(String message) throws XPathException {
+    private void invalidFlags(String message) {
         compileErrorInAttribute(message, "XTDE1145", "flags");
         // prevent it being reported more than once
-        pattern = getConfiguration().compileRegularExpression("x", "", "XP20", null);
+        setDummyRegex();
     }
 
+    private void setDummyRegex() {
+        try {
+            pattern = getConfiguration().compileRegularExpression("x", "", "XP20", null);
+        } catch (XPathException err) {
+            throw new IllegalStateException();
+        }
+    }
+
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         //checkWithinTemplate();
 
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
         boolean foundFallback = false;
-        while (true) {
-            NodeInfo curr = kids.next();
-            if (curr == null) {
-                break;
-            }
+        for (NodeInfo curr : children()) {
             if (curr instanceof XSLFallback) {
                 foundFallback = true;
             } else if (curr instanceof XSLMatchingSubstring) {
@@ -168,6 +180,7 @@ public class XSLAnalyzeString extends StyleElement {
 
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression matchingBlock = null;
         if (matching != null) {

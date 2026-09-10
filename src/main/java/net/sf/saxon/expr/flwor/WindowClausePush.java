@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -27,7 +28,8 @@ public class WindowClausePush extends TuplePush {
     private TuplePush destination;
     /*@Nullable*/ List<WindowClause.Window> currentWindows = new ArrayList<>();
 
-    public WindowClausePush(TuplePush destination, WindowClause windowClause) {
+    public WindowClausePush(Outputter outputter, TuplePush destination, WindowClause windowClause) {
+        super(outputter);
         this.windowClause = windowClause;
         this.destination = destination;
     }
@@ -70,7 +72,7 @@ public class WindowClausePush extends TuplePush {
                         w.endPreviousItem = previousPrevious;
                         w.endNextItem = current;
                         w.endPosition = position - 1;
-                        despatch(w, context);
+                        despatch(w, getOutputter(), context);
                         currentWindows.clear();
                     }
                     WindowClause.Window window = new WindowClause.Window();
@@ -94,7 +96,7 @@ public class WindowClausePush extends TuplePush {
                             w.endPreviousItem = previous;
                             w.endNextItem = next;
                             w.endPosition = position;
-                            despatch(w, context);
+                            despatch(w, getOutputter(), context);
                             if (w.isDespatched()) {
                                 removals.add(w);
                             }
@@ -113,7 +115,7 @@ public class WindowClausePush extends TuplePush {
                 w.endPreviousItem = previous;
                 w.endNextItem = null;
                 w.endPosition = position;
-                despatch(w, context);
+                despatch(w, getOutputter(), context);
             }
         }
     }
@@ -124,11 +126,12 @@ public class WindowClausePush extends TuplePush {
      * variables to the appropriate properties of the window
      *
      * @param w       the window to be despatched
+     * @param output the destination for the result
      * @param context the dynamic evaluation context
      * @throws XPathException if anything goes wrong, for example if the window contents have the wrong type
      */
 
-    private void despatch(WindowClause.Window w, XPathContext context) throws XPathException {
+    private void despatch(WindowClause.Window w, Outputter output, XPathContext context) throws XPathException {
 
         windowClause.checkWindowContents(w);
 
@@ -207,4 +210,4 @@ public class WindowClausePush extends TuplePush {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

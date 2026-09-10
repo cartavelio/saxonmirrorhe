@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -58,6 +58,7 @@ public class NodeKindTest extends NodeTest {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return uType;
     }
@@ -89,6 +90,7 @@ public class NodeKindTest extends NodeTest {
         }
     }
 
+    @Override
     public boolean matches(Item item, /*@NotNull*/TypeHierarchy th) {
         return item instanceof NodeInfo && kind == ((NodeInfo) item).getNodeKind();
     }
@@ -113,6 +115,7 @@ public class NodeKindTest extends NodeTest {
         return kind == nodeKind;
     }
 
+    @Override
     public IntPredicate getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         if (kind == Type.TEXT) {
@@ -133,7 +136,8 @@ public class NodeKindTest extends NodeTest {
      * @param node the node to be matched
      */
 
-    public boolean matchesNode(NodeInfo node) {
+    @Override
+    public boolean test(NodeInfo node) {
         return node.getNodeKind() == kind;
     }
 
@@ -142,6 +146,7 @@ public class NodeKindTest extends NodeTest {
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
+    @Override
     public final double getDefaultPriority() {
         return -0.5;
     }
@@ -152,6 +157,7 @@ public class NodeKindTest extends NodeTest {
      * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
      */
 
+    @Override
     public int getPrimitiveType() {
         return kind;
     }
@@ -161,6 +167,7 @@ public class NodeKindTest extends NodeTest {
      * Return AnyType if there are no restrictions.
      */
 
+    @Override
     public SchemaType getContentType() {
         switch (kind) {
             case Type.DOCUMENT:
@@ -188,6 +195,7 @@ public class NodeKindTest extends NodeTest {
      */
 
     /*@NotNull*/
+    @Override
     public AtomicType getAtomizedItemType() {
         switch (kind) {
             case Type.DOCUMENT:
@@ -281,40 +289,6 @@ public class NodeKindTest extends NodeTest {
     }
 
     /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @param knownToBe An item type that the supplied item is known to conform to; the generated code
-     *                  can assume that the item is an instance of this type.
-     * @param targetVersion The version of Saxon-JS for which code is being generated. Currently either 1 or 2.
-
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) {
-        String instNode = knownToBe instanceof NodeTest ? " " : " SaxonJS.U.isNode(item) && ";
-        switch (getNodeKind()) {
-            case Type.DOCUMENT:
-                return "return" + instNode + "(item.nodeType===9||item.nodeType===11);";
-            case Type.ELEMENT:
-                return "return" + instNode + "item.nodeType===1;";
-            case Type.TEXT:
-                return "return" + instNode + "item.nodeType===3;";
-            case Type.COMMENT:
-                return "return" + instNode + "item.nodeType===8;";
-            case Type.PROCESSING_INSTRUCTION:
-                return "return" + instNode + "item.nodeType===7&&item.target!=='xml';";
-            case Type.ATTRIBUTE:
-                return "return SaxonJS.U.isAttr(item)";
-            case Type.NAMESPACE:
-                return "return SaxonJS.U.isNamespaceNode(item)";
-            default:
-                return "return false;";
-        }
-    }
-
-    /**
      * Get extra diagnostic information about why a supplied item does not conform to this
      * item type, if available. If extra information is returned, it should be in the form of a complete
      * sentence, minus the closing full stop. No information should be returned for obvious cases.
@@ -341,6 +315,7 @@ public class NodeKindTest extends NodeTest {
         }
     }
 
+    @Override
     public String toShortString() {
         switch (getNodeKind()) {
             case Type.ELEMENT:

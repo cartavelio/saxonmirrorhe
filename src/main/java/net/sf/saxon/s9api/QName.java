@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,11 +8,12 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.InscopeNamespaceResolver;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
+
+import java.util.Objects;
 
 /**
  * The QName class represents an instance of xs:QName, as defined in the XPath 2.0 data model.
@@ -104,7 +105,7 @@ public class QName {
         try {
             NodeInfo node = (NodeInfo) element.getUnderlyingValue();
             sqName = StructuredQName.fromLexicalQName(lexicalQName, true,
-                    true, new InscopeNamespaceResolver(node));
+                    true, node.getAllNamespaces());
 
         } catch (XPathException err) {
             throw new IllegalArgumentException(err);
@@ -128,7 +129,7 @@ public class QName {
      */
 
     public QName(StructuredQName sqName) {
-        this.sqName = sqName;
+        this.sqName = Objects.requireNonNull(sqName);
     }
 
     /**

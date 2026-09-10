@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,6 +35,7 @@ public class AllElementsSpaceStrippingRule implements SpaceStrippingRule {
      * @return STRIP_DEFAULT: strip spaces unless xml:space tells you not to.
      */
 
+    @Override
     public int isSpacePreserving(NodeName fingerprint, SchemaType schemaType) {
         return Stripper.STRIP_DEFAULT;
     }
@@ -44,6 +45,7 @@ public class AllElementsSpaceStrippingRule implements SpaceStrippingRule {
      * is necessary
      *
      * @return a filter in the form of a ProxyReceiver, or null
+     * @param next
      */
     @Override
     public ProxyReceiver makeStripper(Receiver next) {
@@ -55,6 +57,7 @@ public class AllElementsSpaceStrippingRule implements SpaceStrippingRule {
      *
      * @param presenter the output handler
      */
+    @Override
     public void export(ExpressionPresenter presenter) {
         presenter.startElement("strip.all");
         presenter.endElement();

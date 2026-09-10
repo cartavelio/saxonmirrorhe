@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,27 +8,29 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ProxyOutputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.CharSequenceConsumer;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
+
+import java.util.function.BiConsumer;
 
 /**
  * An xsl:value-of element in the stylesheet. <br>
@@ -58,7 +60,7 @@ public final class ValueOf extends SimpleNodeConstructor {
 
     public ValueOf(Expression select, boolean disable, boolean noNodeIfEmpty) {
         setSelect(select);
-        options = disable ? ReceiverOptions.DISABLE_ESCAPING : 0;
+        options = disable ? ReceiverOption.DISABLE_ESCAPING : ReceiverOption.NONE;
         this.noNodeIfEmpty = noNodeIfEmpty;
         adoptChildExpression(select);
 
@@ -76,7 +78,7 @@ public final class ValueOf extends SimpleNodeConstructor {
                 }
             }
             if (!special) {
-                options |= ReceiverOptions.NO_SPECIAL_CHARS;
+                options |= ReceiverOption.NO_SPECIAL_CHARS;
             }
         }
     }
@@ -103,6 +105,7 @@ public final class ValueOf extends SimpleNodeConstructor {
         return noNodeIfEmpty;
     }
 
+    @Override
     public String toShortString() {
         if (getSelect() instanceof StringLiteral) {
             return "text{" + Err.depict(((StringLiteral)getSelect()).getValue()) + "}";
@@ -110,12 +113,29 @@ public final class ValueOf extends SimpleNodeConstructor {
             return super.toShortString();
         }
     }
+
+    /**
+     * Get the properties of this object to be included in trace messages, by supplying
+     * the property values to a supplied consumer function
+     *
+     * @param consumer the function to which the properties should be supplied, as (property name,
+     *                 value) pairs.
+     */
+    @Override
+    public void gatherProperties(BiConsumer<String, Object> consumer) {
+        if (getSelect() instanceof StringLiteral) {
+            consumer.accept("text", (((StringLiteral) getSelect()).getValue().getStringValue()));
+        }
+
+    }
+
     /**
      * Get the name of this instruction for diagnostic and tracing purposes
      *
      * @return the namecode of the instruction name
      */
 
+    @Override
     public int getInstructionNameCode() {
         if (isNumberingInstruction) {
             return StandardNames.XSL_NUMBER;
@@ -143,14 +163,16 @@ public final class ValueOf extends SimpleNodeConstructor {
      */
 
     public boolean isDisableOutputEscaping() {
-        return (options & ReceiverOptions.DISABLE_ESCAPING) != 0;
+        return ReceiverOption.contains(options, ReceiverOption.DISABLE_ESCAPING);
     }
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return NodeKindTest.TEXT;
     }
 
+    @Override
     public int computeCardinality() {
         if (noNodeIfEmpty) {
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
@@ -159,6 +181,7 @@ public final class ValueOf extends SimpleNodeConstructor {
         }
     }
 
+    @Override
     public void localTypeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) {
         //
     }
@@ -190,8 +213,10 @@ public final class ValueOf extends SimpleNodeConstructor {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
-        ValueOf exp = new ValueOf(getSelect().copy(rebindings), (options & ReceiverOptions.DISABLE_ESCAPING) != 0, noNodeIfEmpty);
+        ValueOf exp = new ValueOf(getSelect().copy(rebindings),
+                                  ReceiverOption.contains(options, ReceiverOption.DISABLE_ESCAPING), noNodeIfEmpty);
         ExpressionTool.copyLocationInfo(this, exp);
         if (isNumberingInstruction) {
             exp.setIsNumberingInstruction();
@@ -209,6 +234,7 @@ public final class ValueOf extends SimpleNodeConstructor {
      *          if the expression doesn't match the required content type
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         // if the expression is a constant value, check that it is valid for the type
         if (getSelect() instanceof Literal) {
@@ -274,20 +300,49 @@ public final class ValueOf extends SimpleNodeConstructor {
     /**
      * Process this instruction
      *
+     *
+     * @param output the destination for the result
      * @param context the dynamic context of the transformation
      * @return a TailCall to be executed by the caller, always null for this instruction
      */
 
     /*@Nullable*/
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         if (noNodeIfEmpty) {
             StringValue value = (StringValue) getSelect().evaluateItem(context);
             if (value != null) {
-                processValue(value.getStringValueCS(), context);
+                processValue(value.getStringValueCS(), output, context);
             }
             return null;
+        } else if (getSelect().getItemType() == BuiltInAtomicType.STRING && !isDisableOutputEscaping()) {
+            // Try to stream the value direct to the serializer where possible
+            Outputter toText = new ProxyOutputter(output) {
+                @Override
+                public void append(Item item) throws XPathException {
+                    getNextOutputter().characters(item.getStringValueCS(), Loc.NONE, options);
+                }
+
+                @Override
+                public void append(Item item, Location locationId, int properties) throws XPathException {
+                    getNextOutputter().characters(item.getStringValueCS(), locationId, properties | options);
+                }
+
+                @Override
+                public CharSequenceConsumer getStringReceiver(boolean asTextNode) {
+                    return getNextOutputter().getStringReceiver(true);
+                }
+
+//                @Override
+//                public CharSequenceConsumer getStringReceiver() {return getNextOutputter().getStringReceiver();
+//                }
+            };
+            getSelect().process(toText, context);
+            // Send a zero-length text node to set previousAtomic=false
+            //output.characters("", getLocation(), ReceiverOption.NONE);
+            return null;
         } else {
-            return super.processLeavingTail(context);
+            return super.processLeavingTail(output, context);
         }
     }
 
@@ -295,14 +350,15 @@ public final class ValueOf extends SimpleNodeConstructor {
      * Process the value of the node, to create the new node.
      *
      * @param value   the string value of the new node
+     * @param output the destination for the result
      * @param context the dynamic evaluation context
      * @throws XPathException if a dynamic error occurs
      *
      */
 
-    public void processValue(CharSequence value, XPathContext context) throws XPathException {
-        Receiver out = context.getReceiver();
-        out.characters(value, getLocation(), options);
+    @Override
+    public void processValue(CharSequence value, Outputter output, XPathContext context) throws XPathException {
+        output.characters(value, getLocation(), options);
     }
 
     /**
@@ -314,6 +370,7 @@ public final class ValueOf extends SimpleNodeConstructor {
      * @throws XPathException if a dynamic error occurs
      */
 
+    @Override
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
         try {
             CharSequence val;
@@ -332,7 +389,7 @@ public final class ValueOf extends SimpleNodeConstructor {
             Orphan o = new Orphan(controller.getConfiguration());
             o.setNodeKind(Type.TEXT);
             o.setStringValue(val);
-            if ((options & ReceiverOptions.DISABLE_ESCAPING) != 0) {
+            if (isDisableOutputEscaping()) {
                 o.setDisableOutputEscaping(true);
             }
             return o;
@@ -348,13 +405,14 @@ public final class ValueOf extends SimpleNodeConstructor {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("valueOf", this);
         String flags = "";
-        if ((options & ReceiverOptions.DISABLE_ESCAPING) != 0) {
+        if (isDisableOutputEscaping()) {
             flags += "d";
         }
-        if ((options & ReceiverOptions.NO_SPECIAL_CHARS) != 0) {
+        if (ReceiverOption.contains(options, ReceiverOption.NO_SPECIAL_CHARS)) {
             flags += "S";
         }
         if (noNodeIfEmpty) {

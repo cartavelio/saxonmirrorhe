@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -228,7 +228,7 @@ public class RoleDiagnostic {
             return s;
         }
         return composeRequiredMessage(requiredItemType) +
-                "; supplied expression (" + supplied.toShortString() + ") has item type " +
+                ", but the supplied expression {" + supplied.toShortString() + "} has item type " +
                 supplied.getItemType();
     }
 
@@ -247,7 +247,7 @@ public class RoleDiagnostic {
         FastStringBuffer message = new FastStringBuffer(256);
         message.append(composeRequiredMessage(requiredItemType));
         message.append("; the supplied value ");
-        message.append(Err.depict(item));
+        message.cat(Err.depict(item));
 
         if (requiredItemType.getGenre() != item.getGenre()) {
             message.append(" is ");

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -60,6 +60,7 @@ public class GDayValue extends GDateValue {
      * @param typeLabel
      */
 
+    @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
         GDayValue v = new GDayValue(day, getTimezoneInMinutes());
         v.typeLabel = typeLabel;
@@ -73,11 +74,13 @@ public class GDayValue extends GDateValue {
      * and xs:untypedAtomic. For external objects, the result is AnyAtomicType.
      */
 
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.G_DAY;
     }
 
     /*@NotNull*/
+    @Override
     public CharSequence getPrimitiveStringValue() {
 
         FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
@@ -103,6 +106,7 @@ public class GDayValue extends GDateValue {
      *
      */
 
+    @Override
     public CalendarValue add(DurationValue duration) throws XPathException {
         XPathException err = new XPathException("Cannot add a duration to an xs:gDay");
         err.setErrorCode("XPTY0004");
@@ -117,6 +121,7 @@ public class GDayValue extends GDateValue {
      * @return the date/time in the new timezone
      */
 
+    @Override
     public CalendarValue adjustTimezone(int tz) {
         DateTimeValue dt = (DateTimeValue) toDateTime().adjustTimezone(tz);
         return new GDayValue(dt.getDay(), dt.getTimezoneInMinutes());

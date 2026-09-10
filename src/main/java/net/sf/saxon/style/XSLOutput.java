@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.functions.ResolveQName;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
@@ -16,6 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.OutputKeys;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -48,49 +50,52 @@ public class XSLOutput extends StyleElement {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
-        AttributeCollection atts = getAttributeList();
+    @Override
+    public void prepareAttributes() {
         String nameAtt = null;
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getNodeName(a).getStructuredQName().getClarkName();
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getStructuredQName().getClarkName();
             if (f.equals("name")) {
-                nameAtt = Whitespace.trim(atts.getValue(a));
+                nameAtt = Whitespace.trim(value);
             } else if (f.equals("version")) {
-                String outputVersion = Whitespace.trim(atts.getValue(a));
+                String outputVersion = Whitespace.trim(value);
                 serializationAttributes.put(f, outputVersion);
             } else if (f.equals("use-character-maps")) {
-                useCharacterMaps = atts.getValue(a);
+                useCharacterMaps = value;
             } else if (f.equals("parameter-document")) {
-                String val = Whitespace.trim(atts.getValue(a));
+                String val = Whitespace.trim(value);
+                try {
+                    val = ResolveURI.makeAbsolute(val, getBaseURI()).toASCIIString();
+                } catch (URISyntaxException e) {
+                    compileError(XPathException.makeXPathException(e));
+                }
                 serializationAttributes.put(f, val);
-                serializationAttributes.put(SaxonOutputKeys.PARAMETER_DOCUMENT_BASE_URI, getBaseURI());
+                //serializationAttributes.put(SaxonOutputKeys.PARAMETER_DOCUMENT_BASE_URI, getBaseURI());
             } else if (XSLResultDocument.fans.contains(f) && !f.equals("output-version")) {
-                String val = atts.getValue(a);
+                String val = value;
                 if (!f.equals(SaxonOutputKeys.ITEM_SEPARATOR) && !f.equals(SaxonOutputKeys.NEWLINE)) {
                     val = Whitespace.trim(val);
                 }
                 serializationAttributes.put(f, val);
             } else {
-                String attributeURI = atts.getURI(a);
+                String attributeURI = attName.getURI();
                 if ("".equals(attributeURI) ||
                         NamespaceConstant.XSLT.equals(attributeURI) ||
                         NamespaceConstant.SAXON.equals(attributeURI)) {
-                    checkUnknownAttribute(atts.getNodeName(a));
+                    checkUnknownAttribute(attName);
                 } else {
-                    String name = '{' + attributeURI + '}' + atts.getLocalName(a);
+                    String name = '{' + attributeURI + '}' + attName.getLocalPart();
                     if (userAttributes == null) {
-                        userAttributes = new HashMap<String, String>(5);
+                        userAttributes = new HashMap<>(5);
                     }
-                    userAttributes.put(name, atts.getValue(a));
+                    userAttributes.put(name, value);
                 }
             }
         }
         if (nameAtt != null) {
-            try {
-                outputFormatName = makeQName(nameAtt);
-            } catch (XPathException err) {
-                compileError(err.getMessage(), "XTSE1570");
-            }
+            outputFormatName = makeQName(nameAtt, "XTSE1570", "name");
         }
     }
 
@@ -104,11 +109,13 @@ public class XSLOutput extends StyleElement {
         return outputFormatName;
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         checkTopLevel("XTSE0010", false);
         checkEmpty();
     }
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) {
         // no action
     }
@@ -212,7 +219,7 @@ public class XSLOutput extends StyleElement {
                         value, this, useDefaultNS, false, allowStar, "XTSE0280");
             }
             if (isQName(property) && value.contains(":")) {
-                value = ResolveQName.resolveQName(value, this).getClarkName();
+                value = ResolveQName.resolveQName(value, this).getEQName();
             }
             value = sf.checkOutputProperty(property, value);
         } catch (XPathException err) {
@@ -269,28 +276,26 @@ public class XSLOutput extends StyleElement {
      * @param useCharacterMaps the value of the use-character-maps attribute
      * @param details          The existing output properties
      * @return the augmented value of the use-character-maps attribute in Clark notation
-     * @throws XPathException if the value is invalid
      */
     public static String prepareCharacterMaps(StyleElement element,
                                               String useCharacterMaps,
-                                              Properties details)
-            throws XPathException {
+                                              Properties details) {
         PrincipalStylesheetModule psm = element.getPrincipalStylesheetModule();
         String existing = details.getProperty(SaxonOutputKeys.USE_CHARACTER_MAPS);
         if (existing == null) {
             existing = "";
         }
-        String s = "";
+        StringBuilder s = new StringBuilder();
         StringTokenizer st = new StringTokenizer(useCharacterMaps, " \t\n\r", false);
         while (st.hasMoreTokens()) {
             String displayname = st.nextToken();
-            StructuredQName qName = element.makeQName(displayname);
+            StructuredQName qName = element.makeQName(displayname, null, "use-character-maps");
             ComponentDeclaration decl = psm.getCharacterMap(qName);
             if (decl == null) {
                 element.compileErrorInAttribute(
                     "No character-map named '" + displayname + "' has been defined", "XTSE1590", "use-character-maps");
             }
-            s += " " + qName.getClarkName();
+            s.append(" ").append(qName.getClarkName());
         }
         existing = s + existing;
         return existing;

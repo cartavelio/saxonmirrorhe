@@ -216,24 +216,7 @@ namespace Saxon.Api
             return JNamespaceConstant.isReserved(uri);    
         }
 
-		/// <summary>
-		/// Determine whether a namespace is a reserved namespace in XQuery
-		/// </summary>
-		/// <returns><c>true</c>, if this namespace URI is reserved in XQuery, <c>false</c> otherwise.</returns>
-		/// <param name="uri">the namespace URI to be tested</param>
-        public static bool isReservedInQuery(String uri)
-        {
-            return JNamespaceConstant.isReservedInQuery(uri);
-        }
 
-		/// <summary>
-		/// Determine whether a namespace is a reserved namespace in XQuery 3.0
-		/// </summary>
-		/// <returns><c>true</c>, if this namespace URI is reserved in XQuery 3.0, <c>false</c> otherwise.</returns>
-		/// <param name="uri">the namespace URI to be tested</param>
-        public static bool isReservedInQuery30(String uri) {
-            return JNamespaceConstant.isReservedInQuery30(uri);
-        }
 
 		/// <summary>
 		/// Determine whether a namespace is a reserved namespace in XQuery 3.1
@@ -257,7 +240,7 @@ namespace Saxon.Api
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.

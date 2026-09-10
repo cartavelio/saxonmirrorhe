@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -24,6 +24,7 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
      * Determine if the node has children.
      */
 
+    @Override
     public boolean hasChildNodes() {
         return nodeNr + 1 < tree.numberOfNodes &&
                 tree.depth[nodeNr + 1] > tree.depth[nodeNr];
@@ -36,6 +37,7 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
      * @return the accumulated character content of the element, including descendant elements.
      */
 
+    @Override
     public String getStringValue() {
         return getStringValueCS(tree, nodeNr).toString();
     }
@@ -45,6 +47,7 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
      * the version of the method that returns a String.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         return getStringValueCS(tree, nodeNr);
     }
@@ -72,12 +75,8 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
         // we optimize two special cases: firstly, where the node has no children, and secondly,
         // where it has a single text node as a child.
 
-
         if (tree.nodeKind[nodeNr] == Type.TEXTUAL_ELEMENT) {
             return TinyTextImpl.getStringValue(tree, nodeNr);
-        } else if (tree.nodeKind[nodeNr] == Type.EXTERNAL_NODE_REFERENCE) {
-            GraftedElement graft = tree.externalNodes.get(tree.alpha[nodeNr]);
-            return graft.getStringValueCS();
         } else if (next < tree.numberOfNodes) {    // bug 4445
             if (tree.depth[next] <= level) {
                 return "";
@@ -85,7 +84,6 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
                 return TinyTextImpl.getStringValue(tree, next);
             }
         }
-
 
         // now handle the general case
 
@@ -96,18 +94,12 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
                 if (sb == null) {
                     sb = new FastStringBuffer(FastStringBuffer.C256);
                 }
-                sb.append(TinyTextImpl.getStringValue(tree, next));
+                sb.cat(TinyTextImpl.getStringValue(tree, next));
             } else if (kind == Type.WHITESPACE_TEXT) {
                 if (sb == null) {
                     sb = new FastStringBuffer(FastStringBuffer.C256);
                 }
                 WhitespaceTextImpl.appendStringValue(tree, next, sb);
-            } else if (kind == Type.EXTERNAL_NODE_REFERENCE) {
-                GraftedElement graft = (GraftedElement) tree.getNode(next);
-                if (sb == null) {
-                    sb = new FastStringBuffer(FastStringBuffer.C256);
-                }
-                sb.append(graft.getStringValueCS());
             }
             next++;
         }

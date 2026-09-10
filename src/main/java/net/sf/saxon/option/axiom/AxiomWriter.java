@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,17 +8,13 @@
 package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import org.apache.axiom.om.*;
 
 import java.util.Stack;
@@ -31,7 +27,8 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
 
     private OMFactory factory;
     private OMDocument document;
-    private Stack<OMContainer> ancestors = new Stack<OMContainer>();
+    private Stack<OMContainer> ancestors = new Stack<>();
+    private Stack<NamespaceMap> nsStack = new Stack<>();
     private boolean implicitDocumentNode = false;
     private FastStringBuffer textBuffer = new FastStringBuffer(FastStringBuffer.C256);
 
@@ -44,6 +41,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
     public AxiomWriter(PipelineConfiguration pipe) {
         super(pipe);
         factory = OMAbstractFactory.getOMFactory();
+        nsStack.push(NamespaceMap.emptyMap());
     }
 
     /**
@@ -54,6 +52,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
      * @param publicID The public identifier of the unparsed entity
      */
 
+    @Override
     public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
         // no-op
     }
@@ -62,6 +61,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
      * Start of the document.
      */
 
+    @Override
     public void open() {
     }
 
@@ -69,13 +69,16 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
      * End of the document.
      */
 
+    @Override
     public void close() {
     }
 
     /**
      * Start of a document node.
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         document = factory.createOMDocument();
         ancestors.push(document);
@@ -86,6 +89,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
         ancestors.pop();
     }
@@ -94,13 +98,16 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
      * Start of an element.
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         flush();
-        String local = nameCode.getLocalPart();
-        String uri = nameCode.getURI();
-        String prefix = nameCode.getPrefix();
+        String local = elemName.getLocalPart();
+        String uri = elemName.getURI();
+        String prefix = elemName.getPrefix();
         if (ancestors.isEmpty()) {
-            startDocument(0);
+            startDocument(ReceiverOption.NONE);
             implicitDocumentNode = true;
         }
         OMElement element;
@@ -117,49 +124,50 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
             ancestors.peek().addChild(element);
         }
         ancestors.push(element);
-    }
 
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        for (NamespaceBinding ns : namespaceBindings) {
-            String prefix = ns.getPrefix();
-            String uri = ns.getURI();
-            if (prefix.equals("")) {
-                ((OMElement) ancestors.peek()).declareDefaultNamespace(uri);
-            } else if (uri.equals("")) {
-                // ignore namespace undeclarations - Axiom can't handle them
-            } else {
-                OMNamespace ons = factory.createOMNamespace(uri, prefix);
-                ((OMElement) ancestors.peek()).declareNamespace(ons);
+        NamespaceMap parentNamespaces = nsStack.peek();
+        if (namespaces != parentNamespaces) {
+            NamespaceBinding[] declarations = namespaces.getDifferences(parentNamespaces, false);
+            for (NamespaceBinding ns : declarations) {
+                String nsprefix = ns.getPrefix();
+                String nsuri = ns.getURI();
+                if (nsprefix.equals("")) {
+                    element.declareDefaultNamespace(nsuri);
+                } else if (nsuri.equals("")) {
+                    // ignore namespace undeclarations - Axiom can't handle them
+                } else {
+                    OMNamespace ons = factory.createOMNamespace(nsuri, nsprefix);
+                    element.declareNamespace(ons);
+                }
             }
         }
-    }
+        nsStack.push(namespaces);
 
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        String local = nameCode.getLocalPart();
-        String uri = nameCode.getURI();
-        String prefix = nameCode.getPrefix();
-        OMNamespace ns = uri.isEmpty() ? null : factory.createOMNamespace(uri, prefix);
-        OMAttribute att = factory.createOMAttribute(local, ns, value.toString());
-        if ((properties & ReceiverOptions.IS_ID) != 0 || (local.equals("id") && uri.equals(NamespaceConstant.XML))) {
-            att.setAttributeType("ID");
-        } else if ((properties & ReceiverOptions.IS_IDREF) != 0) {
-            att.setAttributeType("IDREF");
+        for (AttributeInfo att : attributes) {
+            NodeName nameCode = att.getNodeName();
+            String attlocal = nameCode.getLocalPart();
+            String atturi = nameCode.getURI();
+            String attprefix = nameCode.getPrefix();
+            OMNamespace ns = atturi.isEmpty() ? null : factory.createOMNamespace(atturi, attprefix);
+            OMAttribute attr = factory.createOMAttribute(attlocal, ns, att.getValue());
+            if (ReceiverOption.contains(properties, ReceiverOption.IS_ID) || (attlocal.equals("id") && atturi.equals(NamespaceConstant.XML))) {
+                attr.setAttributeType("ID");
+            } else if (ReceiverOption.contains(properties, ReceiverOption.IS_IDREF)) {
+                attr.setAttributeType("IDREF");
+            }
+            element.addAttribute(attr);
         }
-        ((OMElement) ancestors.peek()).addAttribute(att);
-    }
-
-    public void startContent() throws XPathException {
-        flush();
     }
 
     /**
      * End of an element.
      */
 
+    @Override
     public void endElement() throws XPathException {
         flush();
         ancestors.pop();
+        nsStack.pop();
         Object parent = ancestors.peek();
         if (parent == document && implicitDocumentNode) {
             endDocument();
@@ -170,8 +178,9 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
      * Character data.
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        textBuffer.append(chars);
+        textBuffer.cat(chars);
     }
 
     private void flush() {
@@ -187,6 +196,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
      * Handle a processing instruction.
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
             throws XPathException {
         flush();
@@ -199,6 +209,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
      * Handle a comment.
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         flush();
         OMContainer parent = ancestors.peek();
@@ -214,6 +225,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }
@@ -235,6 +247,7 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo getCurrentRoot() {
         return new AxiomDocumentNodeWrapper(document, systemId, config);
     }

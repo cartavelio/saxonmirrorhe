@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,11 +8,10 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 
 /**
@@ -25,6 +24,7 @@ import net.sf.saxon.type.Type;
 public class XSLStylesheet extends XSLModuleRoot {
 
 
+    @Override
     protected boolean mayContainParam() {
         return true;
     }
@@ -34,15 +34,16 @@ public class XSLStylesheet extends XSLModuleRoot {
      * Prepare the attributes on the stylesheet element
      */
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         processDefaultCollationAttribute();
         processDefaultMode();
         String inputTypeAnnotationsAtt = null;
-        AttributeCollection atts = getAttributeList();
-        for (int a = 0; a < atts.getLength(); a++) {
-
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             switch (f) {
                 case "version":
                     // already processed
@@ -57,10 +58,10 @@ public class XSLStylesheet extends XSLModuleRoot {
                     //
                     break;
                 case "input-type-annotations":
-                    inputTypeAnnotationsAtt = atts.getValue(a);
+                    inputTypeAnnotationsAtt = value;
                     break;
                 default:
-                    checkUnknownAttribute(atts.getNodeName(a));
+                    checkUnknownAttribute(attName);
                     break;
             }
         }
@@ -87,14 +88,13 @@ public class XSLStylesheet extends XSLModuleRoot {
 
     }
 
-
-
     /**
      * Validate this element
      *
      * @param decl Not used
      */
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         if (validationError != null) {
             compileError(validationError);
@@ -103,26 +103,24 @@ public class XSLStylesheet extends XSLModuleRoot {
             compileError(getDisplayName() + " must be the outermost element", "XTSE0010");
         }
 
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo curr;
-        while ((curr = kids.next()) != null) {
+        for (NodeInfo curr : children()) {
             if (curr.getNodeKind() == Type.TEXT ||
                     (curr instanceof StyleElement && ((StyleElement) curr).isDeclaration()) ||
                     curr instanceof DataElement) {
                 // all is well
-            } else if (!NamespaceConstant.XSLT.equals(curr.getURI()) && !"".equals(curr.getURI())) {
-                // elements in other namespaces are allowed and ignored
-            } else if (curr instanceof AbsentExtensionElement && ((StyleElement) curr).forwardsCompatibleModeIsEnabled()) {
-                // this is OK: an unknown XSLT element is allowed in forwards compatibility mode
-            } else if (NamespaceConstant.XSLT.equals(curr.getURI())) {
-                assert curr instanceof StyleElement;
-                ((StyleElement) curr).compileError("Element " + curr.getDisplayName() +
-                        " must not appear directly within " + getDisplayName(), "XTSE0010");
-            } else {
-                assert curr instanceof StyleElement;
-                ((StyleElement) curr).compileError("Element " + curr.getDisplayName() +
-                        " must not appear directly within " + getDisplayName() +
-                        " because it is not in a namespace", "XTSE0130");
+            } else if (curr instanceof StyleElement) {
+                if (!NamespaceConstant.XSLT.equals(curr.getURI()) && !"".equals(curr.getURI())) {
+                    // elements in other namespaces are allowed and ignored
+                } else if (curr instanceof AbsentExtensionElement && ((StyleElement) curr).forwardsCompatibleModeIsEnabled()) {
+                    // this is OK: an unknown XSLT element is allowed in forwards compatibility mode
+                } else if (NamespaceConstant.XSLT.equals(curr.getURI())) {
+                    ((StyleElement) curr).compileError("Element " + curr.getDisplayName() +
+                                                               " must not appear directly within " + getDisplayName(), "XTSE0010");
+                } else {
+                    ((StyleElement) curr).compileError("Element " + curr.getDisplayName() +
+                                                               " must not appear directly within " + getDisplayName() +
+                                                               " because it is not in a namespace", "XTSE0130");
+                }
             }
         }
     }

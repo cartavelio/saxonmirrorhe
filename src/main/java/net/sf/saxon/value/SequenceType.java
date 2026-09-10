@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,11 +7,8 @@
 
 package net.sf.saxon.value;
 
-import com.saxonica.ee.extfn.ExperimentalSequenceTypeMarshaller;
-import com.saxonica.ee.extfn.ExperimentalXPathCompiler;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -478,9 +475,9 @@ public final class SequenceType {
      *                        won't happen if the sequence is grounded)
      */
 
-    public boolean matches(Sequence<?> value, TypeHierarchy th) throws XPathException {
+    public boolean matches(Sequence value, TypeHierarchy th) throws XPathException {
         int count = 0;
-        SequenceIterator<?> iter = value.iterate();
+        SequenceIterator iter = value.iterate();
         Item item;
         while ((item = iter.next()) != null) {
             count++;
@@ -562,13 +559,8 @@ public final class SequenceType {
         }
     }
 
-    public String toExportString2() {
-        String result = null;
-//#if EE==true
-        MapItem map = ExperimentalXPathCompiler.makeMap(this);
-        result= ExperimentalSequenceTypeMarshaller.unmarshal(map).getStringValue();
-//#endif
-        return result;
+    public String toAlphaCode() {
+        return AlphaCode.fromSequenceType(this);
     }
 
     /**
@@ -588,8 +580,10 @@ public final class SequenceType {
     }
 
     public boolean isSameType(SequenceType other, TypeHierarchy th) {
-        return cardinality == other.cardinality && th.relationship(primaryType, other.primaryType) == TypeHierarchy.SAME_TYPE;
+        return cardinality == other.cardinality && th.relationship(primaryType, other.primaryType) == Affinity.SAME_TYPE;
     }
+
+
 
 
 }

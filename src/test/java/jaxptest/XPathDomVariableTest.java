@@ -1,12 +1,12 @@
 package jaxptest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DOMNodeWrapper;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.xpath.XPathFactoryImpl;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -19,12 +19,17 @@ import javax.xml.xpath.*;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * Unit tests for free-standing XPath evaluation using a DOM.
  */
-public class XPathDomVariableTest extends TestCase {
+public class XPathDomVariableTest {
 
+    @Test
     public void testFunctionCall() throws Throwable {
         // Initialize DOM objects
         DocumentBuilderFactory dfactory = DocumentBuilderFactory.newInstance();
@@ -99,10 +104,11 @@ public class XPathDomVariableTest extends TestCase {
 
         // Execute
         Object result = expr.evaluate(doc, XPathConstants.NODESET);
-        assertTrue("Result is NodeList", result instanceof NodeList);
-        assertTrue("Result length 1?", ((NodeList)result).getLength() == 1);
+        assertTrue(result instanceof NodeList, "Result is NodeList");
+        assertEquals(1, ((NodeList)result).getLength(), "Result length 1?");
     }
 
+    @Test
     public void testSetSource() throws Throwable {
         // Initialize DOM objects
         DocumentBuilderFactory dfactory = DocumentBuilderFactory.newInstance();
@@ -123,14 +129,15 @@ public class XPathDomVariableTest extends TestCase {
         Configuration config = ((XPathFactoryImpl)xpf).getConfiguration();
         DOMObjectModel model = DOMObjectModel.getInstance();
         NodeInfo wrapper = model.wrap(node, config);
-        assertTrue("Wrapped DOM node", wrapper instanceof DOMNodeWrapper);
+        assertTrue(wrapper instanceof DOMNodeWrapper, "Wrapped DOM node");
 
         // Check we can get a nodeList back
         XPathExpression exp = xpe.compile("/descendant-or-self::node()");
         NodeList nodeList = (NodeList)exp.evaluate(node, XPathConstants.NODESET);
-        assertTrue("2 nodes", nodeList.getLength() == 2);
+        assertEquals(2, nodeList.getLength(), "2 nodes");
     }
 
+    @Test
     public void testStringVariable() throws Throwable {
         // Initialize DOM objects
         DocumentBuilderFactory dfactory = DocumentBuilderFactory.newInstance();
@@ -205,7 +212,7 @@ public class XPathDomVariableTest extends TestCase {
 
         // Execute
         String result = (String)expr.evaluate(doc, XPathConstants.STRING);
-        assertTrue("Result OK?", result.equals("banana custard!!"));
+        assertTrue(result.equals("banana custard!!"), "Result OK?");
     }
 
 }

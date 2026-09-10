@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,7 +35,7 @@ public abstract class Sets {
      * @return A node-set containing all nodes that are in both p1 and p2
      */
 
-    public static SequenceIterator<NodeInfo> intersection(SequenceIterator<NodeInfo> p1, SequenceIterator<NodeInfo> p2) throws XPathException {
+    public static SequenceIterator intersection(SequenceIterator p1, SequenceIterator p2) throws XPathException {
         return new IntersectionEnumeration(p1, p2, GlobalOrderComparer.getInstance());
     }
 
@@ -48,7 +48,7 @@ public abstract class Sets {
      * @return A node-set containing all nodes that are in p1 and not in p2
      */
 
-    public static SequenceIterator<NodeInfo> difference(SequenceIterator<NodeInfo> p1, SequenceIterator<NodeInfo> p2) throws XPathException {
+    public static SequenceIterator difference(SequenceIterator p1, SequenceIterator p2) throws XPathException {
         return new DifferenceEnumeration(p1, p2, GlobalOrderComparer.getInstance());
     }
 
@@ -62,8 +62,8 @@ public abstract class Sets {
      *         is not empty)
      */
 
-    public static boolean hasSameNode(SequenceIterator<NodeInfo> p1, SequenceIterator<NodeInfo> p2) throws XPathException {
-        SequenceIterator<NodeInfo> intersection =
+    public static boolean hasSameNode(SequenceIterator p1, SequenceIterator p2) throws XPathException {
+        SequenceIterator intersection =
                 new IntersectionEnumeration(p1, p2, GlobalOrderComparer.getInstance());
         return intersection.next() != null;
     }
@@ -79,9 +79,9 @@ public abstract class Sets {
      *         in document order, the first node in the node set passed as the second argument.
      */
 
-    public static SequenceIterator<?> leading(
+    public static SequenceIterator leading(
             XPathContext context,
-            SequenceIterator<?> ns1, SequenceIterator<?> ns2) throws XPathException {
+            SequenceIterator ns1, SequenceIterator ns2) throws XPathException {
 
         NodeInfo first = null;
 
@@ -119,7 +119,7 @@ public abstract class Sets {
                 Token.PRECEDES,
                 Literal.makeLiteral(new ZeroOrOne<>(first)));
 
-        return new FilterIterator<>(ns1, filter, context);
+        return new FilterIterator(ns1, filter, context);
 
     }
 
@@ -136,7 +136,7 @@ public abstract class Sets {
     /*@Nullable*/
     public static SequenceIterator trailing(
             XPathContext context,
-            SequenceIterator<?> ns1, SequenceIterator<?> ns2) throws XPathException {
+            SequenceIterator ns1, SequenceIterator ns2) throws XPathException {
 
         NodeInfo first = null;
 
@@ -175,7 +175,7 @@ public abstract class Sets {
                 Token.FOLLOWS,
                 Literal.makeLiteral(new ZeroOrOne<>(first)));
 
-        return new FilterIterator<>(ns1, filter, context);
+        return new FilterIterator(ns1, filter, context);
 
     }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,6 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 
 
@@ -17,7 +16,7 @@ import net.sf.saxon.om.SequenceIterator;
  * do so).
  */
 
-public interface ReversibleIterator<T extends Item<?>> extends SequenceIterator<T> {
+public interface ReversibleIterator extends SequenceIterator {
 
     /**
      * Get a new SequenceIterator that returns the same items in reverse order.
@@ -27,7 +26,7 @@ public interface ReversibleIterator<T extends Item<?>> extends SequenceIterator<
      * @return an iterator over the items in reverse order
      */
 
-    SequenceIterator<T> getReverseIterator();
+    SequenceIterator getReverseIterator();
 
 }
 

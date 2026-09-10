@@ -1,19 +1,23 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.util.List;
 
 import static net.sf.saxon.s9api.streams.Steps.atomize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test XdmArray class, representing an XPath map item
  */
-public class TestXdmArray extends TestCase {
+public class TestXdmArray {
 
+    @Test
     public void testArrayOperations() {
         XdmArray a = new XdmArray();
         assertEquals(0, a.arrayLength());
@@ -23,20 +27,20 @@ public class TestXdmArray extends TestCase {
         assertEquals(3, a.arrayLength());
         assertEquals(1, a.size());
         try {
-            assertEquals(((XdmAtomicValue) a.get(1)).getLongValue(), 2);
+            assertEquals(2, ((XdmAtomicValue) a.get(1)).getLongValue());
         } catch (SaxonApiException e) {
             fail();
         }
         a = a.put(1, new XdmAtomicValue(17));
         try {
-            assertEquals(((XdmAtomicValue) a.get(1)).getLongValue(), 17);
+            assertEquals(17, ((XdmAtomicValue) a.get(1)).getLongValue());
         } catch (SaxonApiException e) {
             fail();
         }
 
         List<XdmValue> values = a.asList();
         try {
-            assertEquals(((XdmAtomicValue) values.get(1)).getLongValue(), 17);
+            assertEquals(17, ((XdmAtomicValue) values.get(1)).getLongValue());
         } catch (SaxonApiException e) {
             fail();
         }
@@ -44,6 +48,7 @@ public class TestXdmArray extends TestCase {
     }
 
 
+    @Test
     public void testArrayAsFunction() {
         XdmArray a = new XdmArray(new XdmValue[]{new XdmAtomicValue(1), new XdmAtomicValue(2), new XdmAtomicValue(3)});
         Processor proc = new Processor(true);
@@ -57,6 +62,7 @@ public class TestXdmArray extends TestCase {
         }
     }
 
+    @Test
     public void testArrayAsQueryParameter() {
         try {
             XdmArray a = new XdmArray(new XdmValue[]{new XdmAtomicValue(1), new XdmAtomicValue(2), new XdmAtomicValue(3)});
@@ -76,6 +82,7 @@ public class TestXdmArray extends TestCase {
         }
     }
 
+    @Test
     public void testArrayAsQueryResult() {
         try {
             Processor proc = new Processor(true);
@@ -90,6 +97,7 @@ public class TestXdmArray extends TestCase {
         }
     }
 
+    @Test
     public void testArrayConvertIntegers() {
         int[] in = new int[]{5,6,7,8};
         XdmArray result = XdmArray.makeArray(in);
@@ -98,6 +106,7 @@ public class TestXdmArray extends TestCase {
         assertTrue(ItemType.INT.matches((XdmAtomicValue)result.get(3)));
     }
 
+    @Test
     public void testArrayConvertLongs() {
         long[] in = new long[]{5, 6, 7, 8};
         XdmArray result = XdmArray.makeArray(in);
@@ -106,6 +115,7 @@ public class TestXdmArray extends TestCase {
         assertTrue(ItemType.LONG.matches((XdmAtomicValue) result.get(3)));
     }
 
+    @Test
     public void testArrayConvertStrings() {
         String[] in = new String[]{"a", "b", "c", "d"};
         XdmArray result = XdmArray.makeArray(in);
@@ -115,6 +125,7 @@ public class TestXdmArray extends TestCase {
         assertTrue(ItemType.STRING.matches((XdmAtomicValue) result.get(3)));
     }
 
+    @Test
     public void testArrayConvertBooleans() {
         boolean[] in = new boolean[]{true, true, false};
         XdmArray result = XdmArray.makeArray(in);
@@ -123,6 +134,7 @@ public class TestXdmArray extends TestCase {
         assertTrue(ItemType.BOOLEAN.matches((XdmAtomicValue) result.get(2)));
     }
 
+    @Test
     public void testArrayConvertArrays() {
         String[] in0 = new String[]{"a", "b", "c", "d"};
         String[] in1 = new String[]{"w", "x", "y", "z"};
@@ -138,6 +150,7 @@ public class TestXdmArray extends TestCase {
         assertTrue(arrayOfArray.matches(result));
     }
 
+    @Test
     public void testAtomizeArrayStep() {
         try {
             Processor proc = new Processor(true);

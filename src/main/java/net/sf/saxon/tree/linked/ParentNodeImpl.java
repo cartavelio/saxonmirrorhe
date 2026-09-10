@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,18 +7,26 @@
 
 package net.sf.saxon.tree.linked;
 
+//import com.sun.tools.javac.util.List;
+
+import net.sf.saxon.event.Builder;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.CopyOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
+import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.function.Predicate;
 
 /**
  * ParentNodeImpl is an implementation of a non-leaf node (specifically, an Element node
@@ -28,7 +36,7 @@ import java.util.Arrays;
  */
 
 
-abstract class ParentNodeImpl extends NodeImpl {
+public abstract class ParentNodeImpl extends NodeImpl {
 
     /*@Nullable*/ private Object children = null;       // null for no children
     // a NodeImpl for a single child
@@ -47,6 +55,7 @@ abstract class ParentNodeImpl extends NodeImpl {
      * @return the sequence number if there is one, or -1L otherwise.
      */
 
+    @Override
     protected final long getSequenceNumber() {
         return getRawSequenceNumber() == -1 ? -1L : (long) getRawSequenceNumber() << 32;
     }
@@ -74,8 +83,28 @@ abstract class ParentNodeImpl extends NodeImpl {
      * Determine if the node has any children.
      */
 
+    @Override
     public final boolean hasChildNodes() {
         return children != null;
+    }
+
+    /**
+     * Return the sequence of children of this node, as an {@code Iterable}. This
+     * method is designed to allow iteration over the children in a Java "for each" loop,
+     * in the form <code>for (NodeInfo child : children()) {...}</code>
+     *
+     * @return the children of the node, as an {@code Iterable}.
+     */
+
+    @Override
+    public Iterable<NodeImpl> children() {
+        if (children == null) {
+            return Collections.emptyList();
+        } else if (children instanceof NodeImpl) {
+            return () -> new MonoIterator<>((NodeImpl)children);
+        } else {
+            return Arrays.asList((NodeImpl[])children);
+        }
     }
 
     /**
@@ -102,9 +131,9 @@ abstract class ParentNodeImpl extends NodeImpl {
      * @return an iterator over the children of this node
      */
 
-    protected final AxisIterator iterateChildren(/*@Nullable*/ NodeTest test) {
+    protected final AxisIterator iterateChildren(Predicate<? super NodeInfo> test) {
         if (children == null) {
-            return EmptyIterator.OfNodes.THE_INSTANCE;
+            return EmptyIterator.ofNodes();
         } else if (children instanceof NodeImpl) {
             NodeImpl child = (NodeImpl) children;
             if (test == null || test == AnyNodeTest.getInstance()) {
@@ -129,6 +158,7 @@ abstract class ParentNodeImpl extends NodeImpl {
      */
 
     /*@Nullable*/
+    @Override
     public final NodeImpl getFirstChild() {
         if (children == null) {
             return null;
@@ -146,6 +176,7 @@ abstract class ParentNodeImpl extends NodeImpl {
      */
 
     /*@Nullable*/
+    @Override
     public final NodeImpl getLastChild() {
         if (children == null) {
             return null;
@@ -257,11 +288,13 @@ abstract class ParentNodeImpl extends NodeImpl {
      * @return the accumulated character content of the element, including descendant elements.
      */
 
+    @Override
     public String getStringValue() {
         return getStringValueCS().toString();
     }
 
 
+    @Override
     public CharSequence getStringValueCS() {
         FastStringBuffer sb = null;
 
@@ -271,7 +304,7 @@ abstract class ParentNodeImpl extends NodeImpl {
                 if (sb == null) {
                     sb = new FastStringBuffer(FastStringBuffer.C64);
                 }
-                sb.append(next.getStringValueCS());
+                sb.cat(next.getStringValueCS());
             }
             next = next.getNextInDocument(this);
         }
@@ -336,6 +369,7 @@ abstract class ParentNodeImpl extends NodeImpl {
      *                                  implementation does not accept.
      */
 
+    @Override
     public void insertChildren(/*@NotNull*/ NodeInfo[] source, boolean atStart, boolean inherit) {
         if (atStart) {
             insertChildrenAt(source, 0, inherit);
@@ -355,7 +389,7 @@ abstract class ParentNodeImpl extends NodeImpl {
      *                new parent; false if such namespaces should be undeclared on the children
      */
 
-    protected synchronized void insertChildrenAt(/*@NotNull*/ NodeInfo[] source, int index, boolean inherit) {
+    synchronized void insertChildrenAt(/*@NotNull*/ NodeInfo[] source, int index, boolean inherit) {
         if (source.length == 0) {
             return;
         }
@@ -412,9 +446,19 @@ abstract class ParentNodeImpl extends NodeImpl {
                 case Type.PROCESSING_INSTRUCTION:
                     return new ProcInstImpl(source.getLocalPart(), source.getStringValue());
                 case Type.ELEMENT:
-                    throw new IllegalArgumentException(
-                            "Cannot insert an element node unless it is an instance of net.sf.saxon.om.tree.ElementImpl");
-                default:
+                    Builder builder = null;
+                    try {
+                        builder = new LinkedTreeBuilder(getConfiguration().makePipelineConfiguration());
+                        builder.open();
+                        source.copy(builder, CopyOptions.ALL_NAMESPACES, Loc.NONE);
+                        builder.close();
+                    } catch (XPathException e) {
+                        throw new IllegalArgumentException(
+                                "Failed to convert inserted element node to an instance of net.sf.saxon.om.tree.ElementImpl");
+
+                    }
+                    return (NodeImpl)builder.getCurrentRoot();
+                    default:
                     throw new IllegalArgumentException(
                             "Cannot insert a node unless it is an element, comment, text node, or processing instruction");
             }

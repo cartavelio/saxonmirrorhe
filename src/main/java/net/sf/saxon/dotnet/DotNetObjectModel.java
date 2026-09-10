@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -43,6 +43,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      * @return by convention (but not necessarily) the class that implements a document node in the relevant
      * external model
      */
+    @Override
     public String getDocumentClassName() {
         return "cli.System.Xml.XmlDocument";
     }
@@ -52,14 +53,17 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      * an XPath implementation
      */
 
+    @Override
     public String getIdentifyingURI() {
         return NamespaceConstant.OBJECT_MODEL_DOT_NET_DOM;
     }
 
+    @Override
     public PJConverter getPJConverter(Class<?> targetClass) {
         if (isRecognizedNodeClass(targetClass)) {
             return new PJConverter() {
-                public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+                @Override
+                public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
                     if (value instanceof ZeroOrOne) {
                         NodeInfo node = (NodeInfo) ((ZeroOrOne) value).head();
                         if (node instanceof VirtualNode) {
@@ -82,13 +86,16 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
         }
     }
 
+    @Override
     public JPConverter getJPConverter(Class sourceClass, Configuration config) {
         if (isRecognizedNodeClass(sourceClass)) {
             return new JPConverter() {
-                public Sequence<?> convert(Object object, XPathContext context) throws XPathException {
+                @Override
+                public Sequence convert(Object object, XPathContext context) throws XPathException {
                     return unwrapXdmValue(object);
                 }
 
+                @Override
                 public ItemType getItemType() {
                     return AnyNodeTest.getInstance();
                 }
@@ -108,6 +115,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      *         returns a collection of nodes in this object model
      */
 
+    @Override
     public PJConverter getNodeListCreator(Object node) {
         return null;
     }
@@ -149,7 +157,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      * @return the underlying Value
      */
 
-    public abstract Sequence<?> unwrapXdmValue(Object object);
+    public abstract Sequence unwrapXdmValue(Object object);
 
     /**
      * Wrap a Value as an XdmValue
@@ -158,7 +166,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      * @return the resulting XdmValue
      */
 
-    public abstract Object wrapAsXdmValue(Sequence<?> value);
+    public abstract Object wrapAsXdmValue(Sequence value);
 
     /**
      * Test whether the supplied type is a subtype of System.Xml.XmlNode
@@ -182,7 +190,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      *          if conversion fails
      */
 
-    public Sequence<?> convertObjectToXPathValue(Object object, Configuration config) throws XPathException {
+    public Sequence convertObjectToXPathValue(Object object, Configuration config) throws XPathException {
         if (object instanceof XmlNode) {
             XmlNode node = (XmlNode) object;
             DotNetDocumentWrapper dw = new DotNetDocumentWrapper(
@@ -211,14 +219,14 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      *          supplied value cannot be converted to the appropriate class
      */
 
-    public Object convertXPathValueToObject(Sequence<?> value, cli.System.Type targetClass) throws XPathException {
+    public Object convertXPathValueToObject(Sequence value, cli.System.Type targetClass) throws XPathException {
         //System.err.println("CONVERT TO: " + targetClass.toString());
         if (isXmlNodeType(targetClass) &&
                 value instanceof DotNetNodeWrapper) {
             return ((DotNetNodeWrapper) value).getRealNode();
         } else if (isXdmAtomicValueType(targetClass)) {
-            SequenceIterator<? extends AtomicValue> atomIterator = Atomizer.getAtomizingIterator(value.iterate(), false);
-            GroundedValue<? extends AtomicValue> extent = atomIterator.materialize();
+            SequenceIterator atomIterator = Atomizer.getAtomizingIterator(value.iterate(), false);
+            GroundedValue extent = atomIterator.materialize();
             if (extent.getLength() == 0) {
                 return null;
             } else if (extent instanceof AtomicValue) {
@@ -242,6 +250,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      * @return a Receiver that writes to that result, if available; or null otherwise
      */
 
+    @Override
     public Receiver getDocumentBuilder(Result result) throws XPathException {
         return null;
     }
@@ -281,6 +290,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      * @return true if the data from the Source has been sent to the Receiver, false otherwise
      */
 
+    @Override
     public boolean sendSource(Source source, Receiver receiver) throws XPathException {
         return false;
     }
@@ -294,6 +304,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      * @return a NodeInfo corresponding to the Source, if this can be constructed; otherwise null
      */
 
+    @Override
     public NodeInfo unravel(Source source, Configuration config) {
         return null;
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,8 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.NameChecker;
@@ -62,15 +63,18 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      * @return the string "xsl:processing-instruction"
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_PROCESSING_INSTRUCTION;
     }
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return NodeKindTest.PROCESSING_INSTRUCTION;
     }
 
+    @Override
     public int getCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -83,6 +87,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ProcessingInstruction exp = new ProcessingInstruction(getNameExp().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
@@ -90,6 +95,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
         return exp;
     }
 
+    @Override
     public void localTypeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         StaticContext env = visitor.getStaticContext();
         nameOp.typeCheck(visitor, contextItemType);
@@ -121,6 +127,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
         }
     }
 
+    @Override
     public int getDependencies() {
         return getNameExp().getDependencies() | super.getDependencies();
     }
@@ -130,16 +137,17 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      * Process the value of the node, to create the new node.
      *
      * @param value   the string value of the new node
+     * @param output the destination for the result
      * @param context the dynamic evaluation context
      * @throws XPathException
      */
 
-    public void processValue(CharSequence value, XPathContext context) throws XPathException {
+    @Override
+    public void processValue(CharSequence value, Outputter output, XPathContext context) throws XPathException {
         String expandedName = evaluateName(context);
         if (expandedName != null) {
             String data = checkContent(value.toString(), context);
-            Receiver out = context.getReceiver();
-            out.processingInstruction(expandedName, data, getLocation(), 0);
+            output.processingInstruction(expandedName, data, getLocation(), ReceiverOption.NONE);
         }
     }
 
@@ -151,6 +159,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      * @throws XPathException if the content is invalid
      */
 
+    @Override
     protected String checkContent(String data, XPathContext context) throws XPathException {
         if (isXSLT()) {
             return checkContentXSLT(data);
@@ -195,6 +204,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
         return Whitespace.removeLeadingWhitespace(data).toString();
     }
 
+    @Override
     public NodeName evaluateNodeName(XPathContext context) throws XPathException {
         String expandedName = evaluateName(context);
         return new NoNamespaceName(expandedName);
@@ -251,6 +261,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("procInst", this);
         String flags = "";

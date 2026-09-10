@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -59,6 +59,7 @@ public class SubscriptExpression extends SingleItemFilter {
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().optimize(visitor, contextInfo);
         if (Literal.isConstantOne(getSubscript())) {
@@ -75,6 +76,7 @@ public class SubscriptExpression extends SingleItemFilter {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         SubscriptExpression exp = new SubscriptExpression(getBaseExpression().copy(rebindings), getSubscript().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
@@ -122,6 +124,7 @@ public class SubscriptExpression extends SingleItemFilter {
                 getSubscript().isEqual(((SubscriptExpression) other).getSubscript());
     }
 
+    @Override
     public int computeHashCode() {
         return getBaseExpression().hashCode() ^ getSubscript().hashCode();
     }
@@ -131,6 +134,7 @@ public class SubscriptExpression extends SingleItemFilter {
      * return something if the input is non-empty
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_ONE;
     }
@@ -147,6 +151,7 @@ public class SubscriptExpression extends SingleItemFilter {
         return "SubscriptExpression";
     }
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         NumericValue index = (NumericValue) getSubscript().evaluateItem(context);
         if (index == null) {
@@ -155,13 +160,13 @@ public class SubscriptExpression extends SingleItemFilter {
         int intindex = index.asSubscript();
         if (intindex != -1) {
             Item item;
-            SequenceIterator<?> iter = getBaseExpression().iterate(context);
+            SequenceIterator iter = getBaseExpression().iterate(context);
             if (intindex == 1) {
                 item = iter.next();
             } else if (iter instanceof MemoSequence.ProgressiveIterator) {
                 MemoSequence mem = ((MemoSequence.ProgressiveIterator)iter).getMemoSequence();
                 item = mem.itemAt(intindex - 1);
-            } else if ((iter.getProperties() & SequenceIterator.GROUNDED) != 0) {
+            } else if (iter.getProperties().contains(SequenceIterator.Property.GROUNDED)) {
                 GroundedValue value = iter.materialize();
                 item = value.itemAt(intindex - 1);
             } else {
@@ -195,6 +200,7 @@ public class SubscriptExpression extends SingleItemFilter {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("subscript", this);
         getBaseExpression().export(destination);

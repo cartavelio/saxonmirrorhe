@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,11 +17,11 @@ import net.sf.saxon.trans.XPathException;
  * to one that iterates over A-OR-SELF.
  */
 
-public class PrependSequenceIterator<T extends Item<?>> implements SequenceIterator<T> {
-    T start;
-    SequenceIterator<T> base;
+public class PrependSequenceIterator implements SequenceIterator {
+    Item start;
+    SequenceIterator base;
 
-    public PrependSequenceIterator(T start, SequenceIterator<T> base) {
+    public PrependSequenceIterator(Item start, SequenceIterator base) {
         this.start = start;
         this.base = base;
     }
@@ -33,9 +33,10 @@ public class PrependSequenceIterator<T extends Item<?>> implements SequenceItera
      */
 
     /*@Nullable*/
-    public T next() throws XPathException {
+    @Override
+    public Item next() throws XPathException {
         if (start != null) {
-            T temp = start;
+            Item temp = start;
             start = null;
             return temp;
         } else {
@@ -43,23 +44,11 @@ public class PrependSequenceIterator<T extends Item<?>> implements SequenceItera
         }
     }
 
+    @Override
     public void close() {
         base.close();
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 
 
 }

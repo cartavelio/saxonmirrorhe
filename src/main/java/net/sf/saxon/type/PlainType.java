@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -25,11 +25,15 @@ public interface PlainType extends ItemType {
     StructuredQName getTypeName();
 
     /**
-     * Ask whether this is an external type, that is, the type of a Java or .NET external object
-     * @return true if this is an external type
+     * Test whether this type is namespace sensitive, that is, if a namespace context is needed
+     * to translate between the lexical space and the value space. This is true for types derived
+     * from, or containing, QNames and NOTATIONs
+     *
+     * @return true if any of the member types is namespace-sensitive, or if namespace sensitivity
+     * cannot be determined because there are components missing from the schema.
      */
 
-    boolean isExternalType();
+    boolean isNamespaceSensitive();
 
     /**
      * Get the list of plain types that are subsumed by this type
@@ -48,6 +52,7 @@ public interface PlainType extends ItemType {
      * @return true if the item is an instance of this type; false otherwise
      */
 
+    @Override
     boolean matches(Item item, TypeHierarchy th);
 
     /**
@@ -62,6 +67,7 @@ public interface PlainType extends ItemType {
      * except where this type is xs:error. The class ErrorType does not inherit from BuiltInAtomicType
      * because of multiple inheritance problems).
      */
+    @Override
     AtomicType getPrimitiveItemType();
 }
 

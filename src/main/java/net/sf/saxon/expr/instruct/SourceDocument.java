@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.parser.*;
@@ -173,6 +174,7 @@ public class SourceDocument extends Instruction {
      * @return the depencies, as a bit-mask
      */
 
+    @Override
     public int computeDependencies() {
         // Focus-dependency in the body is not relevant.
         int dependencies = 0;
@@ -223,9 +225,23 @@ public class SourceDocument extends Instruction {
         SpaceStrippingRule xsltStripSpace = getPackageData() instanceof StylesheetPackage
                 ? ((StylesheetPackage) getPackageData()).getSpaceStrippingRule()
                 : null;
+        String flags = "";
         if (parseOptions.getSpaceStrippingRule() == xsltStripSpace) {
-            out.emitAttribute("flags", "s");
+            flags += "s";
         }
+        if (parseOptions.isLineNumbering()) {
+            flags += "l";
+        }
+        if (parseOptions.isExpandAttributeDefaults()) {
+            flags += "a";
+        }
+        if (parseOptions.getDTDValidationMode() == Validation.STRICT) {
+            flags += "d";
+        }
+        if (parseOptions.isXIncludeAware()) {
+            flags += "i";
+        }
+        out.emitAttribute("flags", flags);
         if (accumulators != null && !accumulators.isEmpty()) {
             FastStringBuffer fsb = new FastStringBuffer(256);
             for (Accumulator acc : accumulators) {
@@ -262,6 +278,8 @@ public class SourceDocument extends Instruction {
      * must be implemented in each subclass. The results of the instruction are written
      * to the current Receiver, which can be obtained via the Controller.
      *
+     *
+     * @param output the destination for the result
      * @param context The dynamic context of the transformation, giving access to the current node,
      *                the current variables, etc.
      * @return null if the instruction has completed execution; or a TailCall indicating
@@ -269,9 +287,9 @@ public class SourceDocument extends Instruction {
      *         been unwound so as to save stack space.
      */
     @Override
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         try {
-            push(context);
+            push(output, context);
         } catch (QuitParsingException q) {
             // no action, this is an early exit indicating success
             //throw q;
@@ -293,7 +311,7 @@ public class SourceDocument extends Instruction {
      * without reading the input to completion
      */
 
-    public void push(XPathContext context) throws XPathException {
+    public void push(Outputter output, XPathContext context) throws XPathException {
         String href = hrefOp.getChildExpression().evaluateAsString(context).toString();
         NodeInfo doc = DocumentFn.makeDoc(href, getStaticBaseURIString(), getPackageData(),
                                           parseOptions, context, getLocation(), false);
@@ -303,8 +321,8 @@ public class SourceDocument extends Instruction {
                     doc.getTreeInfo(), accumulators);
         }
         XPathContext c2 = context.newMinorContext();
-        c2.setCurrentIterator(new ManualIterator<>(doc));
-        bodyOp.getChildExpression().process(c2);
+        c2.setCurrentIterator(new ManualIterator(doc));
+        bodyOp.getChildExpression().process(output, c2);
     }
 
 

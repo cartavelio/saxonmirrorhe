@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,21 +9,21 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.SequenceNormalizerWithSpaceSeparator;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.SerializationProperties;
-import net.sf.saxon.trans.SymbolicName;
-import net.sf.saxon.trans.Visibility;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.trans.*;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -44,11 +44,13 @@ import java.util.Objects;
  * calling a stylesheet-defined function directly) work equally well with XSLT 2.0 and in some cases
  * XSLT 1.0 stylesheets.</p>
  * <p>An <code>Xslt30Transformer</code> must not be used concurrently in multiple threads.
- * It is safe to reuse the object within a single thread to run several transformations using the
- * same stylesheet, but the values of the global context item and of stylesheet parameters
+ * It is safe to reuse the object within a single thread to run several transformations using
+ * the same stylesheet, but the values of the global context item and of stylesheet parameters
  * must be initialized before any transformations are run, and must remain unchanged thereafter.</p>
- * <p>An <code>Xslt30Transformer</code> is always constructed by running the <code>Load30</code>
- * method of an {@link XsltExecutable}.</p>
+ * <p>Some of the entry point methods are synchronized. This is not
+ * because multi-threaded execution is permitted; rather it is to reduce the damage if it is attempted.</p>
+ * <p>An <code>Xslt30Transformer</code> is always constructed by running the
+ * method {@link XsltExecutable#load30()}.</p>
  * <p>Unlike <code>XsltTransformer</code>, an <code>Xslt30Transformer</code> is not a <code>Destination</code>.
  * To pipe the results of one transformation into another, the target should be an <code>XsltTransfomer</code>
  * rather than an <code>Xslt30Transformer</code>.</p>
@@ -122,8 +124,8 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      *                          supplied.
      * @throws IllegalStateException if the transformation has already been evaluated by calling one of the methods
      *                               <code>applyTemplates</code>, <code>callTemplate</code>, or <code>callFunction</code>
-     * @throws SaxonApiException     if a required parameter is not present; if a parameter cannot be converted
-     *                               to the required type; if the context item cannot be converted to the required type.
+     * @throws SaxonApiException Not thrown, but retained in the method signature for compatibility reasons. Note that
+     * no error is thrown at this stage if the context item is of the wrong type.
      */
 
     public void setGlobalContextItem(XdmItem globalContextItem) throws SaxonApiException {
@@ -140,43 +142,16 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      *                          by the stylesheet has already taken place
      * @throws IllegalStateException if the transformation has already been evaluated by calling one of the methods
      *                               <code>applyTemplates</code>, <code>callTemplate</code>, or <code>callFunction</code>
-     * @throws SaxonApiException Not thrown, but retained in the method signature for compatibility reasons.
+     * @throws SaxonApiException Not thrown, but retained in the method signature for compatibility reasons. Note that
+     * no error is thrown at this stage if the context item is of the wrong type.
      */
 
-    public void setGlobalContextItem(XdmItem globalContextItem, boolean alreadyStripped) throws SaxonApiException {
+    public synchronized void setGlobalContextItem(XdmItem globalContextItem, boolean alreadyStripped) throws SaxonApiException {
         if (primed) {
             throw new IllegalStateException("Stylesheet has already been evaluated");
         }
         this.globalContextItem = globalContextItem == null ? null : globalContextItem.getUnderlyingValue();
         this.alreadyStripped = alreadyStripped;
-    }
-
-    /**
-     * Set the initial context node for the transformation.
-     *
-     * @param node the initial context node, or null if there is to be no initial context node
-     * @deprecated since 9.7.0.1 - use {@link #setGlobalContextItem}
-     */
-
-    public void setInitialContextNode(XdmNode node) {
-        if (primed) {
-            throw new IllegalStateException("Stylesheet has already been evaluated");
-        }
-        this.globalContextItem = node.getUnderlyingNode();
-    }
-
-    /**
-     * Set the initial context item for the transformation.
-     *
-     * @param item the initial context item, or null if there is to be no initial context item
-     * @deprecated since 9.8 - use {@link #setGlobalContextItem}
-     */
-
-    public void setInitialContextItem(XdmItem item) {
-        if (primed) {
-            throw new IllegalStateException("Stylesheet has already been evaluated");
-        }
-        this.globalContextItem = item.getUnderlyingValue();
     }
 
     /**
@@ -207,7 +182,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @throws SaxonApiException     currently occurs only if the supplied value of a parameter cannot be evaluated
      */
 
-    public <T extends XdmValue> void setStylesheetParameters(Map<QName, T> parameters) throws SaxonApiException {
+    public synchronized <T extends XdmValue> void setStylesheetParameters(Map<QName, T> parameters) throws SaxonApiException {
         if (primed) {
             throw new IllegalStateException("Stylesheet has already been evaluated");
         }
@@ -218,7 +193,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             StructuredQName name = param.getKey().getStructuredQName();
             try {
                 globalParameterSet.put(name,
-                                       ((Sequence<?>) param.getValue().getUnderlyingValue()).materialize());
+                                       ((Sequence) param.getValue().getUnderlyingValue()).materialize());
             } catch (XPathException e) {
                 throw new SaxonApiException(e);
             }
@@ -270,8 +245,8 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @throws SaxonApiException not currently used, but retained in the method signature for compatibility reasons
      */
 
-    public <T extends XdmValue> void setInitialTemplateParameters(Map<QName, T> parameters, boolean tunnel) throws SaxonApiException {
-        Map<StructuredQName, Sequence<?>> templateParams = new HashMap<>();
+    public synchronized <T extends XdmValue> void setInitialTemplateParameters(Map<QName, T> parameters, boolean tunnel) throws SaxonApiException {
+        Map<StructuredQName, Sequence> templateParams = new HashMap<>();
         for (Map.Entry<QName, T> entry : parameters.entrySet()) {
             templateParams.put(entry.getKey().getStructuredQName(), entry.getValue().getUnderlyingValue());
         }
@@ -298,7 +273,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @throws SaxonApiException if the transformation fails
      */
 
-    public void applyTemplates(Source source, Destination destination) throws SaxonApiException {
+    public synchronized void applyTemplates(Source source, Destination destination) throws SaxonApiException {
 
         Objects.requireNonNull(destination);
         if (source == null) {
@@ -337,7 +312,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @throws SaxonApiException if the transformation fails
      */
 
-    public XdmValue applyTemplates(Source source) throws SaxonApiException {
+    public synchronized XdmValue applyTemplates(Source source) throws SaxonApiException {
         Objects.requireNonNull(source);
         RawDestination raw = new RawDestination();
         applyTemplates(source, raw);
@@ -372,7 +347,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @since 9.9.1.1
      */
 
-    public void transform(Source source, Destination destination) throws SaxonApiException {
+    public synchronized void transform(Source source, Destination destination) throws SaxonApiException {
 
         Objects.requireNonNull(destination);
         if (source == null) {
@@ -429,7 +404,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * should be initialized by calling the <code>newSerializer</code> method on this <code>Xslt30Transformer</code>
      */
 
-    public void applyTemplates(XdmValue selection, Destination destination) throws SaxonApiException {
+    public synchronized void applyTemplates(XdmValue selection, Destination destination) throws SaxonApiException {
         Objects.requireNonNull(selection);
         Objects.requireNonNull(destination);
         prime();
@@ -465,7 +440,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @throws SaxonApiException if the transformation fails
      */
 
-    public XdmValue applyTemplates(XdmValue selection) throws SaxonApiException {
+    public synchronized XdmValue applyTemplates(XdmValue selection) throws SaxonApiException {
         Objects.requireNonNull(selection);
         RawDestination raw = new RawDestination();
         applyTemplates(selection, raw);
@@ -490,7 +465,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * should be initialized by calling the <code>newSerializer</code> method on this <code>Xslt30Transformer</code>
      */
 
-    public void callTemplate(QName templateName, Destination destination) throws SaxonApiException {
+    public synchronized void callTemplate(QName templateName, Destination destination) throws SaxonApiException {
         Objects.requireNonNull(destination);
         prime();
         if (templateName == null) {
@@ -508,19 +483,10 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
         } catch (XPathException e) {
             destination.closeAndNotify();
             if (!e.hasBeenReported()) {
-                try {
-                    getErrorListener().fatalError(e);
-                } catch (TransformerException e1) {
-                    // ignore secondary error
-                }
+                getErrorReporter().report(new XmlProcessingException(e));
             }
             throw new SaxonApiException(e);
         }
-    }
-
-    private void setBuildTreeConditionally(Destination destination) {
-//        controller.setBuildTree(
-//                destination.isRequiresTree(controller.getExecutable().getDefaultOutputProperties()));
     }
 
     /**
@@ -538,7 +504,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      */
 
 
-    public XdmValue callTemplate(QName templateName) throws SaxonApiException {
+    public synchronized XdmValue callTemplate(QName templateName) throws SaxonApiException {
         RawDestination dest = new RawDestination();
         callTemplate(templateName, dest);
         return dest.getXdmValue();
@@ -558,7 +524,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      *                           signature; or if a dynamic error occurs in evaluating the function.
      */
 
-    public XdmValue callFunction(QName function, XdmValue[] arguments) throws SaxonApiException {
+    public synchronized XdmValue callFunction(QName function, XdmValue[] arguments) throws SaxonApiException {
         Objects.requireNonNull(function);
         Objects.requireNonNull(arguments);
         prime();
@@ -571,22 +537,18 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             context.setCurrentComponent(f);
             context.setTemporaryOutputState(StandardNames.XSL_FUNCTION);
             context.setCurrentOutputUri(null);
-            Sequence<?> result = uf.call(context, vr);
+            Sequence result = uf.call(context, vr);
             result = result.materialize();
             return XdmValue.wrap(result);
         } catch (XPathException e) {
             if (!e.hasBeenReported()) {
-                try {
-                    getErrorListener().fatalError(e);
-                } catch (TransformerException e1) {
-                    // ignore secondary error
-                }
+                getErrorReporter().report(new XmlProcessingException(e));
             }
             throw new SaxonApiException(e);
         }
     }
 
-    private Component getFunctionComponent(QName function, XdmValue[] arguments) throws XPathException {
+    private synchronized Component getFunctionComponent(QName function, XdmValue[] arguments) throws XPathException {
         SymbolicName fName = new SymbolicName.F(function.getStructuredQName(), arguments.length);
         PreparedStylesheet pss = (PreparedStylesheet) controller.getExecutable();
         Component f = pss.getComponent(fName);
@@ -602,14 +564,14 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
     private Sequence[] typeCheckFunctionArguments(UserFunction uf, XdmValue[] arguments) throws XPathException {
         Configuration config = processor.getUnderlyingConfiguration();
         UserFunctionParameter[] params = uf.getParameterDefinitions();
-        GroundedValue<?>[] vr =
-                (GroundedValue<?>[])new GroundedValue[arguments.length];
+        GroundedValue[] vr =
+                (GroundedValue[])new GroundedValue[arguments.length];
         for (int i = 0; i < arguments.length; i++) {
             net.sf.saxon.value.SequenceType type = params[i].getRequiredType();
             vr[i] = arguments[i].getUnderlyingValue();
             if (!type.matches(vr[i], config.getTypeHierarchy())) {
                 RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, uf.getFunctionName().getDisplayName(), i);
-                Sequence<?> converted = config.getTypeHierarchy().applyFunctionConversionRules(vr[i], type, role, ExplicitLocation.UNKNOWN_LOCATION);
+                Sequence converted = config.getTypeHierarchy().applyFunctionConversionRules(vr[i], type, role, Loc.NONE);
                 vr[i] = converted.materialize();
             }
         }
@@ -632,7 +594,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * should be initialized by calling the <code>newSerializer</code> method on this <code>Xslt30Transformer</code>
      */
 
-    public void callFunction(QName function, XdmValue[] arguments, Destination destination) throws SaxonApiException {
+    public synchronized void callFunction(QName function, XdmValue[] arguments, Destination destination) throws SaxonApiException {
         prime();
         try {
             Component f = getFunctionComponent(function, arguments);
@@ -647,21 +609,11 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             SerializationProperties params = controller.getExecutable().getPrimarySerializationProperties();
             Receiver receiver = destination.getReceiver(controller.makePipelineConfiguration(), params);
             receiver.open();
-            if (!(receiver instanceof SequenceReceiver)) {
-                receiver = new TreeReceiver(receiver);
-            }
-            context.setReceiver(receiver);
-            uf.process(vr, context);
+            uf.process(context, vr, new ComplexContentOutputter(receiver));
             receiver.close();
 
         } catch (XPathException e) {
-            if (!e.hasBeenReported()) {
-                try {
-                    getErrorListener().fatalError(e);
-                } catch (TransformerException e1) {
-                    // ignore secondary error
-                }
-            }
+            getErrorReporter().report(new XmlProcessingException(e));
             throw new SaxonApiException(e);
         }
 
@@ -704,7 +656,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
                 Receiver rt = getReceivingTransformer(controller, globalParameterSet, finalDestination);
                 rt = new SequenceNormalizerWithSpaceSeparator(rt);
                 rt.setPipelineConfiguration(pipe);
-                return r =rt;
+                return r = rt;
             }
 
             @Override

@@ -17,14 +17,18 @@ package performance;
 
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Date;
 
-public class SimonSoftTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class SimonSoftTest {
 
     // See bug 2929 - cost of whitespace stripping
 
@@ -64,6 +68,8 @@ public class SimonSoftTest extends TestCase {
             "</xsl:stylesheet>";
 
 
+    @Test
+    @Tag("performance")
     public void testPerformance() {
         for (int i=0; i<4; i++) {
             numTransformed = 0;
@@ -76,9 +82,7 @@ public class SimonSoftTest extends TestCase {
                 InputStream xml = new FileInputStream(ConfigTest.DATA_DIR + "xmark1.xml");
 
                 transformElements(xslSource, xml);
-            } catch (FileNotFoundException e) {
-                fail();
-            } catch (SaxonApiException e) {
+            } catch (FileNotFoundException | SaxonApiException e) {
                 fail();
             }
 
@@ -86,7 +90,7 @@ public class SimonSoftTest extends TestCase {
             if (i == 3) {
                 long ms = end.getTime() - start.getTime();
                 System.out.println("Transformations took: " + (end.getTime() - start.getTime()) + " ms.");
-                assertTrue("speed", ms < 400);
+                assertTrue(ms < 400, "speed");
             }
         }
 

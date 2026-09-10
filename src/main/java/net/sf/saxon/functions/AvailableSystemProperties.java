@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,7 +35,8 @@ public class AvailableSystemProperties extends SystemFunction {
      * @throws XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         List<QNameValue> myList = new ArrayList<>();
         myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "version"));
         myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "vendor"));
@@ -71,6 +72,7 @@ public class AvailableSystemProperties extends SystemFunction {
     public Expression makeFunctionCall(Expression[] arguments) {
         return new SystemFunctionCall(this, arguments) {
             // Suppress early evaluation
+            @Override
             public Expression preEvaluate(ExpressionVisitor visitor) {
                 return this;
             }
@@ -78,4 +80,4 @@ public class AvailableSystemProperties extends SystemFunction {
     }
 }
 
-//Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

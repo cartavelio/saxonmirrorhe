@@ -56,6 +56,8 @@ namespace Saxon.Api
         private IList<StaticError> errorList = null;
         private net.sf.saxon.s9api.SchemaManager schemaManager;
 		private Processor processor;
+        private ErrorReporter reporter;
+
 
 
 		// internal constructor
@@ -65,6 +67,7 @@ namespace Saxon.Api
 			this.processor = processor;
 			this.schemaManager = processor.JProcessor.getSchemaManager();
 			this.config = (JConfiguration)processor.Implementation;
+            reporter = null;
         }
 
         /// <summary>
@@ -142,13 +145,14 @@ namespace Saxon.Api
         /// of the schema. It is not used for errors detected when using the schema to validate
         /// a source document.</para>
         /// </remarks>
-
+        [Obsolete("IList<StaticError> ErrorList is deprecated, please use the method SetErrorList and GetErrorList.")]
         public IList<StaticError> ErrorList
         {
             set
             {
                 errorList = value;
-                schemaManager.setErrorListener(new ErrorGatherer(errorList));
+                reporter = null;
+                schemaManager.setErrorReporter(new ErrorReporterToStaticError(errorList));
             }
             get
             {
@@ -156,20 +160,61 @@ namespace Saxon.Api
             }
         }
 
-
-
+        /// <summary>
+		/// List of errors. The caller may supply an empty list before calling <c>Compile</c>;
+        /// the processor will then populate the list with error information obtained during
+		/// the schema compilation. Each error will be included as an object of type <c>StaticError</c>.
+        /// If no error list is supplied by the caller, error information will be written to
+        /// the standard error stream.
+        /// </summary>
+        /// <remarks>
+		/// <para>By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
+        /// intercept error conditions as they occur.</para>
+        /// <para>Note that this error list is used only for errors detected during the compilation
+        /// of the schema. It is not used for errors detected when using the schema to validate
+        /// a source document.</para>
+		/// </remarks>
+		/// <param name="value">Supplied list.</param>
+        public void SetErrorList(IList<XmlProcessingError> value)
+        {
+            reporter = new ErrorReporter(value);
+            schemaManager.setErrorReporter(reporter);
+        }
 
         /// <summary>
-		/// Compile a schema supplied as a <c>Stream</c>. The resulting schema components are added
-        /// to the cache.
+		/// Get list of errors as <code>IList&lt;XmlProcessingError&gt;</code>
         /// </summary>
-        /// <param name="input">A stream containing the source text of the schema. This method
-        /// will consume the supplied stream. It is the caller's responsibility to close the stream
-        /// after use.</param>
-        /// <param name="baseUri">The base URI of the schema document, for resolving any references to other
-        /// schema documents</param>        
+        public IList<XmlProcessingError> GetErrorList()
+        {
+            if (reporter == null) {
+                return new List<XmlProcessingError>();
+            }
+            return reporter.ErrorList;
 
-        public void Compile(Stream input, Uri baseUri)
+        }
+
+
+        /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined ErrorReporter.
+        /// If this property is used then the ErrorList property and SetErrorList method is overriden </summary>
+        /// <remarks>The <c>IErrorReporter</c> to be used</remarks>
+        public IErrorReporter ErrorReporter {
+            set {
+                schemaManager.setErrorReporter(new ErrorReporterWrapper(value));                
+            }
+           
+        }
+
+    /// <summary>
+    /// Compile a schema supplied as a <c>Stream</c>. The resulting schema components are added
+    /// to the cache.
+    /// </summary>
+    /// <param name="input">A stream containing the source text of the schema. This method
+    /// will consume the supplied stream. It is the caller's responsibility to close the stream
+    /// after use.</param>
+    /// <param name="baseUri">The base URI of the schema document, for resolving any references to other
+    /// schema documents</param>        
+
+    public void Compile(Stream input, Uri baseUri)
         {
             JStreamSource ss = new JStreamSource(new JDotNetInputStream(input));
             ss.setSystemId(baseUri.ToString());
@@ -227,14 +272,15 @@ namespace Saxon.Api
 
         public void Compile(XdmNode node)
         {
-            ErrorGatherer eg = null;
-            if (errorList != null)
+            
+            if (reporter == null)
             {
-                eg = new ErrorGatherer(errorList);
+                reporter = new ErrorReporter(new List<XmlProcessingError>());
+
             }
             try
             {
-                config.readInlineSchema((JNodeInfo)node.value, null, eg);
+                config.readInlineSchema((JNodeInfo)node.value, null, reporter);
             }
             catch (JSchemaException e)
             {
@@ -808,7 +854,7 @@ namespace Saxon.Api
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.

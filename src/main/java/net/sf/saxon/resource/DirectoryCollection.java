@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -79,10 +79,12 @@ public class DirectoryCollection extends AbstractResourceCollection {
         return true;
     }
 
+    @Override
     public Iterator<String> getResourceURIs(XPathContext context) {
         return directoryContents(dirFile, params);
     }
 
+    @Override
     public Iterator<Resource> getResources(final XPathContext context) {
         final ParseOptions options = optionsFromQueryParameters(params, context);
         options.setSpaceStrippingRule(whitespaceRules);
@@ -94,7 +96,11 @@ public class DirectoryCollection extends AbstractResourceCollection {
              in -> {
                  try {
                      InputDetails details = getInputDetails(in);
+                     details.resourceUri = in;
                      details.parseOptions = options;
+                     if (params.getContentType() != null) {
+                         details.contentType = params.getContentType();
+                     }
                      Resource resource = makeResource(context.getConfiguration(), details);
                      if (resource != null) {
                          if (metadata) {
@@ -128,7 +134,7 @@ public class DirectoryCollection extends AbstractResourceCollection {
      */
 
     private MetadataResource makeMetadataResource(Resource resource, InputDetails details) {
-        Map<String, GroundedValue<?>> properties = new HashMap<>();
+        Map<String, GroundedValue> properties = new HashMap<>();
         try {
 
             URI uri = new URI(resource.getResourceURI());
@@ -209,16 +215,19 @@ public class DirectoryCollection extends AbstractResourceCollection {
             advance();
         }
 
+        @Override
         public boolean hasNext() {
             return next != null;
         }
 
+        @Override
         public String next() {
             String s = next;
             advance();
             return s;
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }

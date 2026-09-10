@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -80,8 +80,6 @@ public interface FunctionLibrary {
 
     FunctionLibrary copy();
 
-//#ifdefined HOF
-
     /**
      * Test whether a function with a given name and arity is available; if so, return a function
      * item that can be dynamically called.
@@ -99,7 +97,7 @@ public interface FunctionLibrary {
     /*@Nullable*/
     Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext)
             throws XPathException;
-//#endif
+
 
 
 }

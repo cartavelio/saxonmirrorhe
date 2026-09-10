@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,14 +10,14 @@ package net.sf.saxon.testdriver;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Query;
-import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.functions.ResolveQName;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.trace.XSLTTraceListener;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.value.AtomicValue;
@@ -25,8 +25,6 @@ import net.sf.saxon.value.QNameValue;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
-import javax.xml.transform.SourceLocator;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
@@ -116,6 +114,23 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         };
     }
 
+    public boolean unavailableInXX(String type, String value) {
+        if (type.equals("feature") && value.equals("higher_order_functions")) {
+            return true;
+        }
+        if (type.equals("feature") && value.equals("streaming")) {
+            return true;
+        }
+        if (type.equals("year_component_values") &&
+                (value.equals("support year above 9999") ||
+                         value.equals("support negative year") ||
+                         value.equals("support year zero")
+                )) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     protected void runTestCase(XdmNode testCase, XPathCompiler xpath) throws SaxonApiException {
 
@@ -123,19 +138,25 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         String testName = testCase.attribute("name");
         String testSetName = testCase.getParent().attribute("name");
 
-        if (exceptionsMap.containsKey("$" + testSetName)) {
-            notrun++;
-            XdmNode exceptionElement = exceptionsMap.get("$" + testSetName);
-            resultsDoc.writeTestcaseElement(testName, exceptionElement.attribute("report"),
-                    exceptionElement.axisIterator(Axis.CHILD, new QName("reason")).next().getStringValue());
-            return;
+        for (String key : new String[]{testName, "$" + testSetName}) {
+            if (exceptionsMap.containsKey(key)) {
+                notrun++;
+                XdmNode exceptionElement = exceptionsMap.get(key);
+                String report = exceptionElement.attribute("report");
+                if (report == null) {
+                    report = "notRun";
+                }
+                Optional<XdmNode> reason = exceptionElement.select(child("reason")).findFirst();
+                String reasonStr = reason.map(XdmItem::getStringValue).orElse(null);
+                resultsDoc.writeTestcaseElement(testName, report, reasonStr);
+                return;
+            }
         }
-
-        if (exceptionsMap.containsKey(testName)) {
+        
+        final Optional<XdmNode> outputFile = testCase.select(path("test", "output", "@file")).asOptionalNode();
+        if (outputFile.isPresent() && "#absent".equals(outputFile.get().getStringValue())) {
             notrun++;
-            XdmNode exceptionElement = exceptionsMap.get(testName);
-            resultsDoc.writeTestcaseElement(testName, exceptionElement.attribute("report"),
-                    exceptionElement.axisIterator(Axis.CHILD, new QName("reason")).next().getStringValue());
+            resultsDoc.writeTestcaseElement(testName, "notRun", "requires absent base URI");
             return;
         }
 
@@ -196,6 +217,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
         if (testName.contains("environment-variable")) {
             EnvironmentVariableResolver resolver = new EnvironmentVariableResolver() {
+                @Override
                 public Set<String> getAvailableEnvironmentVariables() {
                     Set<String> strings = new HashSet<>();
                     strings.add("QTTEST");
@@ -204,6 +226,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                     return strings;
                 }
 
+                @Override
                 public String getEnvironmentVariable(String name) {
                     switch (name) {
                         case "QTTEST":
@@ -302,7 +325,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             Source styleSource = new StreamSource(testCase.getBaseURI().resolve(fileName).toString());
 
             XsltCompiler compiler = env.xsltCompiler;
-            compiler.setErrorListener(collector);
+            compiler.setErrorReporter(collector);
             initPatternOptimization(compiler);
             compiler.clearParameters();
             //compiler.getUnderlyingCompilerInfo().setRuleOptimization(optimizeRules);
@@ -337,7 +360,16 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             String optimizationAssertion = optimizationAssertions.get(testName);
             if (optimizationAssertion != null && sheet != null) {
                 try {
-                    assertOptimization(sheet, optimizationAssertion);
+                    boolean ok = assertOptimization(sheet, optimizationAssertion);
+                    if (ok) {
+                        System.err.println("Optimization OK: " + optimizationAssertion);
+                    } else {
+                        outcome.setComment("Optimization assertion failed");
+                        if (strict) {
+                            noteFailure(testSetName, testName);
+                            resultsDoc.writeTestcaseElement(testName, "fail", outcome.getComment());
+                        }
+                    }
                     System.err.println("Optimization OK: " + optimizationAssertion);
                 } catch (SaxonApiException e) {
                     System.err.println("Optimization assertion failed: " + optimizationAssertion);
@@ -346,7 +378,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         } else if (principalPackage.isPresent()) {
             XsltCompiler compiler = env.xsltCompiler;
             //compiler.setXsltLanguageVersion(xsltLanguageVersion);
-            compiler.setErrorListener(collector);
+            compiler.setErrorReporter(collector);
             compiler.clearParameters();
             testInput.select(child("param").where(isTrue("static"))).forEach(param -> {
                 String name = param.attribute("name");
@@ -375,12 +407,12 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 sheet = xpack.link();
             } catch (SaxonApiException err) {
                 System.err.println(err.getMessage());
-                outcome.setException(err);
+                outcome.setException(err.getErrorCode());
                 outcome.setErrorsReported(collector.getErrorCodes());
             } catch (Exception err) {
                 err.printStackTrace();
                 System.err.println(err.getMessage());
-                outcome.setException(new SaxonApiException(err));
+                outcome.setException(new QName(err.getClass().getName()));
                 outcome.setErrorsReported(collector.getErrorCodes());
             }
 
@@ -443,7 +475,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             }
             URI baseOut = new File(resultsDir + "/results/output.xml").toURI();
             try {
-                outcome.setBaseOutputUri(baseOut.toASCIIString());
                 runJSTransform(env, outcome, initialTemplateName, initialModeName, initialFunctionName, baseOut);
             } catch (StackOverflowError e) {
                 notrun++;
@@ -459,14 +490,20 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             XdmItem contextItem = env.contextItem;
 
             Optional<String> outputUri = testInput.select(path("output", "@file")).asOptionalString();
-
             URI baseOut = new File(resultsDir + "/results/output.xml").toURI();
             String baseOutputURI = new File(resultsDir + "/results/output.xml").toURI().toString();
-            if (outputUri.isPresent() && !outputUri.get().equals("")) {
+            if (outputUri.isPresent()) {
+                if (outputUri.get().equals("")) {
+                    // special case for test current-output-uri-014: the spec says it's relative to the
+                    // test-set location, but that would mean overwriting the test set!
+                    String testSetUri = testCase.getBaseURI().toASCIIString();
+                    int c = testSetUri.indexOf("/tests/");
+                    outputUri = Optional.of(testSetUri.substring(c + 7));
+                }
                 baseOutputURI = baseOut.resolve(outputUri.get()).toString();
             }
             outcome.setBaseOutputUri(baseOutputURI);
-
+            
             boolean failure;
             try {
                 if (useXslt30Transformer) {
@@ -499,6 +536,10 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         boolean expectEarlyExit = earlyExit.equals(Optional.of("true"));
         if (expectEarlyExit != collector.isMadeEarlyExit()) {
             outcome.setComment(expectEarlyExit ? "Failed to make early exit" : "Unexpected early exit");
+            if (strict) {
+                noteFailure(testSetName, testName);
+                resultsDoc.writeTestcaseElement(testName, "fail", outcome.getComment());
+            }
         }
 
         Optional<XdmNode> assertion = testCase.select(
@@ -519,14 +560,18 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         } else {
             if (outcome.getWrongErrorMessage() != null) {
                 outcome.setComment(outcome.getWrongErrorMessage());
-                wrongErrorResults++;
-                successes++;
-                resultsDoc.writeTestcaseElement(testName, "wrongError", outcome.getComment());
+                if (strict) {
+                    resultsDoc.writeTestcaseElement(testName, "fail", outcome.getComment());
+                } else {
+                    wrongErrorResults++;
+                    successes++;
+                    resultsDoc.writeTestcaseElement(testName, "wrongError", outcome.getComment());
+                }
             } else {
                 noteFailure(testSetName, testName);
                 // MHK: Nov 2015 - temporary diagnostics
                 if (outcome.getException() != null && outcome.getComment() == null) {
-                    outcome.setComment(outcome.getException().getMessage());
+                    outcome.setComment(outcome.getException().toString());
                 }
                 resultsDoc.writeTestcaseElement(testName, "fail", outcome.getComment());
             }
@@ -559,7 +604,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                     transformer.setInitialMode(initialModeName);
                 } catch (IllegalArgumentException e) {
                     if (e.getCause() instanceof XPathException) {
-                        collector.fatalError((XPathException) e.getCause());
+                        collector.report(new XmlProcessingException((XPathException) e.getCause()));
                         throw new SaxonApiException(e.getCause());
                     } else {
                         throw e;
@@ -591,7 +636,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 transformer.setParameter(varName, env.params.get(varName));
                 setGlobalParameter(varName, env.params.get(varName));
             }
-            transformer.setErrorListener(collector);
+            transformer.setErrorReporter(collector);
            /* if (outputUri != null) {
                 transformer.setBaseOutputURI(testInput.getBaseURI().resolve(outputUri).toString());
             } else {
@@ -643,7 +688,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             outcome.setWarningsReported(collector.getFoundWarnings());
             //}
         } catch (SaxonApiException err) {
-            outcome.setException(err);
+            outcome.setException(err.getErrorCode());
             if (collector.getErrorCodes().isEmpty()) {
                 outcome.addReportedError(err.getErrorCode().getLocalName());
             } else {
@@ -728,7 +773,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 transformer.setGlobalContextItem(contextItem);
             }
 
-            transformer.setErrorListener(collector);
+            transformer.setErrorReporter(collector);
 
             transformer.setBaseOutputURI(baseOutputURI);
 
@@ -748,16 +793,18 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             XsltController controller = transformer.getUnderlyingController();
 
             Destination dest = null;
-            if (resultAsTree && !resultSerialized) {
-                // If we want non-serialized, we need to accumulate any result documents as trees too
-                // But we can't do both, so serializing takes precedence.
-                transformer.setResultDocumentHandler(
-                        new ResultDocHandler(env.processor, outcome, baseOutputURI, false));
-                dest = new XdmDestination();
-                ((XdmDestination)dest).setTreeModel(treeModel);
-            } else {
-                transformer.setResultDocumentHandler(
-                        new ResultDocHandler(env.processor, outcome, baseOutputURI, true));
+            if (baseOutputURI != null) {
+                if (resultAsTree && !resultSerialized) {
+                    // If we want non-serialized, we need to accumulate any result documents as trees too
+                    // But we can't do both, so serializing takes precedence.
+                    transformer.setResultDocumentHandler(
+                            new ResultDocHandler(env.processor, outcome, baseOutputURI, false));
+                    dest = new XdmDestination();
+                    ((XdmDestination)dest).setTreeModel(treeModel);
+                } else {
+                    transformer.setResultDocumentHandler(
+                            new ResultDocHandler(env.processor, outcome, baseOutputURI, true));
+                }
             }
             if (resultSerialized) {
                 dest = serializer;
@@ -789,7 +836,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 }
             } catch (IllegalArgumentException e) {
                 if (e.getCause() instanceof XPathException) {
-                    collector.fatalError((XPathException) e.getCause());
+                    collector.report(new XmlProcessingException((XPathException) e.getCause()));
                     throw new SaxonApiException(e.getCause());
                 } else {
                     throw e;
@@ -880,7 +927,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 System.err.println("Thrown exception " + ((XPathException) err.getCause()).getErrorCodeLocalPart() +
                         ": " + err.getCause().getMessage());
             }
-            outcome.setException(err);
+            outcome.setException(err.getErrorCode());
             if (collector.getErrorCodes().isEmpty()) {
                 if (err.getErrorCode() == null) {
                     outcome.addReportedError("Error_with_no_error_code");
@@ -902,7 +949,8 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
     protected void initPatternOptimization(XsltCompiler compiler) {
     }
 
-    protected XsltExecutable exportImport(String testName, String testSetName, TestOutcome outcome, XsltCompiler compiler, XsltExecutable sheet, ErrorCollector collector, Source styleSource) {
+    protected XsltExecutable exportImport(String testName, String testSetName, TestOutcome outcome, XsltCompiler compiler,
+                                          XsltExecutable sheet, ErrorCollector collector, Source styleSource) {
         try {
             if (export && isExportable(testName)) {
                 sheet = exportStylesheet(testName, testSetName, compiler, sheet, styleSource);
@@ -910,7 +958,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 sheet = compiler.compile(styleSource);
             }
         } catch (SaxonApiException err) {
-            outcome.setException(err);
+            outcome.setException(err.getErrorCode());
             if (err.getErrorCode() != null) {
                 collector.getErrorCodes().add(err.getErrorCode().getLocalName());
             }
@@ -918,7 +966,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         } catch (Exception err) {
             err.printStackTrace();
             System.err.println(err.getMessage());
-            outcome.setException(new SaxonApiException(err));
+            outcome.setException(new QName(err.getClass().getName()));
             outcome.setErrorsReported(collector.getErrorCodes());
         }
         return sheet;
@@ -932,62 +980,30 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
     protected XsltExecutable exportStylesheet(String testName, String testSetName, XsltCompiler compiler, XsltExecutable sheet, Source styleSource) throws SaxonApiException {
         try {
-            driverProc.setConfigurationProperty(Feature.LINE_NUMBERING, true);
             File exportFile = new File(resultsDir + "/export/" + testSetName + "/" + testName + ".sef");
             if (xxCompilerLocation != null && !compiler.isSchemaAware()) {
                 if (xxCompiler == null) {
-                    XdmMap options = new XdmMap();
-                    boolean assertionsEnabled = compiler.isAssertionsEnabled();
-                    options = options.put(new XdmAtomicValue("enable-assertions"), new XdmAtomicValue(assertionsEnabled));
-
-
                     XsltCompiler c = driverProc.newXsltCompiler();
                     c.setAssertionsEnabled(true);
                     c.setParameter(new QName("FAST_JAVA_XPATH"), new XdmAtomicValue(true));
-                    c.setParameter(new QName("options"), options);
                     c.setFastCompilation(true); // TODO: temporary
                     xxCompiler = c.compile(new StreamSource(new File(xxCompilerLocation)));
                 }
                 Xslt30Transformer transformer = xxCompiler.load30();
-                // Copy over any static parameters that have been set
-                GlobalParameterSet staticParams = compiler.getUnderlyingCompilerInfo().getParameters();
-                XdmMap staticParamMap = new XdmMap();
-                for (StructuredQName name : staticParams.getKeys()) {
-                    GroundedValue<?> value = staticParams.get(name);
-                    staticParamMap = staticParamMap.put(new XdmAtomicValue(new QName(name)), XdmValue.wrap(value));
-                }
-                Map<QName, XdmValue> transformParams = new HashMap<>();
-                transformParams.put(new QName("staticParameters"), staticParamMap);
-                transformer.setStylesheetParameters(transformParams);
                 transformer.setAssertionsEnabled(true);
                 transformer.setInitialMode(new QName("compile-complete"));
-                List<QName> reportedErrors = new ArrayList<>();
-                transformer.setMessageListener(new MessageListener2() {
-                    @Override
-                    public void message(XdmNode content, QName errorCode, boolean terminate, SourceLocator locator) {
-                        System.err.println(content);
-                        if (!errorCode.getLocalName().equals("XTMM9000")) {
-                            reportedErrors.add(errorCode);
-                        }
-                    }
-                });
+                ParseOptions options = new ParseOptions();
+                options.setLineNumbering(true);
+                styleSource = new AugmentedSource(styleSource, options);
                 Serializer serializer = driverProc.newSerializer(exportFile);
                 transformer.applyTemplates(styleSource, serializer);
-                if (!reportedErrors.isEmpty()) {
-                    throw new SaxonApiException(new XPathException(
-                            "Stylesheet compilation failed", reportedErrors.get(0).getLocalName()));
-                }
             } else {
                 XsltPackage compiledPack = compiler.compilePackage(styleSource);
                 compiledPack.save(exportFile);
             }
             sheet = reloadExportedStylesheet(compiler, exportFile);
         } catch (SaxonApiException e) {
-            try {
-                compiler.getErrorListener().fatalError(XPathException.makeXPathException(e));
-            } catch (TransformerException te) {
-                assert false;
-            }
+            compiler.getErrorReporter().report(new XmlProcessingException(XPathException.makeXPathException(e)));
             //System.err.println(e.getMessage());
             //e.printStackTrace();  //temporary, for debugging
             throw e;
@@ -1004,6 +1020,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             if (export) {
                 try {
                     File exportFile = new File(resultsDir + "/export/" + testSetName + "/" + testName + ".base.sef");
+                    System.err.println("Exported package to " + exportFile.getAbsolutePath());
                     pack.save(exportFile);
                     return compiler.loadLibraryPackage(exportFile.toURI());
                 } catch (SaxonApiException e) {
@@ -1015,7 +1032,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 return pack;
             }
         } catch (SaxonApiException err) {
-            outcome.setException(err);
+            outcome.setException(err.getErrorCode());
             if (err.getErrorCode() != null) {
                 collector.getErrorCodes().add(err.getErrorCode().getLocalName());
             }
@@ -1023,7 +1040,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         } catch (Exception err) {
             err.printStackTrace();
             System.err.println(err.getMessage());
-            outcome.setException(new SaxonApiException(err));
+            outcome.setException(new QName(err.getClass().getName()));
             outcome.setErrorsReported(collector.getErrorCodes());
         }
         return pack;
@@ -1122,7 +1139,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         }
     }
 
-    protected void assertOptimization(XsltExecutable stylesheet, String assertion) throws SaxonApiException {
+    protected boolean assertOptimization(XsltExecutable stylesheet, String assertion) throws SaxonApiException {
 
         XdmDestination builder = new XdmDestination();
         stylesheet.explain(builder);
@@ -1135,9 +1152,8 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         if (bv == null || !bv.getBooleanValue()) {
             println("** Optimization assertion failed");
             println(expressionTree.toString());
-            throw new SaxonApiException("Expected optimization not performed");
         }
-
+        return bv != null && bv.getBooleanValue();
     }
 
     // Dependencies which are always satisfied in Saxon. (Note, this doesn't necessarily
@@ -1226,20 +1242,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         boolean inverse = "false".equals(dependency.attribute("satisfied"));
         boolean needed = !"false".equals(dependency.attribute("satisfied"));
 
-        if (xxCompilerLocation != null) {
-            if (type.equals("year_component_values") &&
-                    (value.equals("support year above 9999") ||
-                             value.equals("support negative year") ||
-                             value.equals("support year zero")
-                    )) {
-                return false; // whether needed or not
-            }
-            if (unavailableInXX(type, value)) {
-                return !needed;
-            }
-        }
-
-
         if (alwaysOn.contains(type) || alwaysOn.contains(tv)) {
             return needed;
         }
@@ -1291,7 +1293,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                         return true;
                     }
                     case "higher_order_functions":
-                        return (edition.equals("PE") || edition.equals("EE")) ^ inverse;
+                        return !inverse;
                     case "simple-uca-fallback":
                         return !inverse;
                     case "advanced-uca-fallback":
@@ -1319,6 +1321,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 if (!value.equals(old)) {
                     env.processor.setConfigurationProperty(Feature.DEFAULT_LANGUAGE, value);
                     env.resetActions.add(new Environment.ResetAction() {
+                        @Override
                         public void reset(Environment env) {
                             env.processor.setConfigurationProperty(Feature.DEFAULT_LANGUAGE, old);
                         }
@@ -1331,6 +1334,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 final boolean old = env.xsltCompiler.isAssertionsEnabled();
                 env.xsltCompiler.setAssertionsEnabled(on);
                 env.resetActions.add(new Environment.ResetAction() {
+                    @Override
                     public void reset(Environment env) {
                         env.xsltCompiler.setAssertionsEnabled(old);
                     }
@@ -1369,32 +1373,22 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 return !inverse;
 
             case "on-multiple-match":
-                env.resetActions.add(new Environment.ResetAction() {
-                    @Override
-                    public void reset(Environment env) {
-                        env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Configuration.RECOVER_WITH_WARNINGS);
-                    }
-                });
-                if ("error".equals(value)) {
-                    env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Configuration.DO_NOT_RECOVER);
-                } else {
-                    env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Configuration.RECOVER_SILENTLY);
-                }
-                return true;
+                throw new IllegalStateException("on-multiple-match is no longer recognized");
+//                env.resetActions.add(new Environment.ResetAction() {
+//                    @Override
+//                    public void reset(Environment env) {
+//                        env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Mode.RECOVER_WITH_WARNINGS);
+//                    }
+//                });
+//                if ("error".equals(value)) {
+//                    env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Mode.DO_NOT_RECOVER);
+//                } else {
+//                    env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Mode.RECOVER_SILENTLY);
+//                }
+//                return true;
 
             case "ignore_doc_failure":
-                env.resetActions.add(new Environment.ResetAction() {
-                    @Override
-                    public void reset(Environment env) {
-                        env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Configuration.RECOVER_WITH_WARNINGS);
-                    }
-                });
-                if (inverse) {
-                    env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Configuration.DO_NOT_RECOVER);
-                } else {
-                    env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Configuration.RECOVER_SILENTLY);
-                }
-                return true;
+                return inverse;
 
             case "combinations_for_numbering":
                 if (value.equals("COPTIC EPACT DIGIT ONE") || value.equals("SINHALA ARCHAIC DIGIT ONE") || value.equals("MENDE KIKAKUI DIGIT ONE")) {
@@ -1412,30 +1406,13 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 return value.equals("6.0"); // Avoid running Unicode 9.0 tests - they are slow!
 
             case "default_html_version": {
-                return value.equals("4");
+                return value.equals("5");
             }
 
             default:
                 println("**** dependency not recognized for HE: " + type);
                 return false;
         }
-    }
-
-    public boolean unavailableInXX(String type, String value) {
-        if (type.equals("feature") && value.equals("higher_order_functions")) {
-            return true;
-        }
-        if (type.equals("feature") && value.equals("streaming")) {
-            return true;
-        }
-        if (type.equals("year_component_values") &&
-                (value.equals("support year above 9999") ||
-                         value.equals("support negative year") ||
-                         value.equals("support year zero")
-                        )) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -1494,6 +1471,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             this.serialized = serialized;
         }
 
+        @Override
         public Destination apply(URI uri) {
             if (serialized) {
                 StringWriter stringWriter = new StringWriter();
@@ -1534,13 +1512,15 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             this.serialized = serialized;
         }
 
+        @Override
         public OutputResolver newInstance() {
             return new OutputResolver(proc, outcome, serialized);
         }
 
+        @Override
         public Result resolve(String href, String base) throws XPathException {
             try {
-                uri = new URI(base).resolve(href);
+                uri = ResolveURI.makeAbsolute(href, base);
                 if (serialized) {
                     //destination = proc.newSerializer();
                     stringWriter = new StringWriter();
@@ -1562,6 +1542,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             }
         }
 
+        @Override
         public void close(Result result) throws XPathException {
             if (uri != null) {
                 if (serialized) {

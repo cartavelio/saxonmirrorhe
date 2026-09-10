@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,6 @@
 package net.sf.saxon.resource;
 
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
@@ -28,8 +27,8 @@ import java.net.URLConnection;
 
 public class BinaryResource implements Resource {
 
-    private String href = null;
-    private String contentType = null;
+    private String href;
+    private String contentType;
     private byte[] data;
     private URLConnection connection = null;
 
@@ -37,16 +36,12 @@ public class BinaryResource implements Resource {
      * ResourceFactory suitable for creating a BinaryResource
      */
 
-    public static final ResourceFactory FACTORY = new ResourceFactory() {
-        public Resource makeResource(Configuration config, AbstractResourceCollection.InputDetails details) throws XPathException {
-            return new BinaryResource(details);
-        }
-    };
+    public static final ResourceFactory FACTORY = (config, details) -> new BinaryResource(details);
 
     /**
      * Create a binary resource
      *
-     * @param in  details about the resource
+     * @param in details about the resource
      */
 
     public BinaryResource(AbstractResourceCollection.InputDetails in) {
@@ -73,6 +68,7 @@ public class BinaryResource implements Resource {
 
     /**
      * Get the content of the resource as an array of bytes
+     *
      * @return the content (if it has been set using setData())
      */
 
@@ -86,6 +82,7 @@ public class BinaryResource implements Resource {
      * @return the URI of the resource
      */
 
+    @Override
     public String getResourceURI() {
         return href;
     }
@@ -128,7 +125,8 @@ public class BinaryResource implements Resource {
 
     /**
      * Utility method to construct an array of bytes from the content of an InputStream
-     * @param in the input stream. The method consumes the input stream but does not close it.
+     *
+     * @param in   the input stream. The method consumes the input stream but does not close it.
      * @param path file name or URI used only for diagnostics
      * @return byte array representing the content of the InputStream
      * @throws XPathException if a failure occurs obtaining a connection or reading the stream
@@ -151,6 +149,7 @@ public class BinaryResource implements Resource {
         }
     }
 
+    @Override
     public Item getItem(XPathContext context) throws XPathException {
         if (data != null) {
             return new Base64BinaryValue(data);
@@ -170,6 +169,7 @@ public class BinaryResource implements Resource {
 
     }
 
+    @Override
     public String getContentType() {
         return contentType;
     }

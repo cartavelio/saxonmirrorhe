@@ -1,18 +1,21 @@
 package internaltests;
 
-import junit.framework.TestCase;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by mike on 07/12/15.
  */
-public class AxiomTests extends TestCase {
+public class AxiomTests {
 
+    @Test
     public void testDescendantAxis() {
 
         OMFactory factory = OMAbstractFactory.getOMFactory();
@@ -25,7 +28,7 @@ public class AxiomTests extends TestCase {
             Object o = iter.next();
             count++;
         }
-        assertEquals("Two nodes", 2, count);
+        assertEquals(2, count, "Two nodes");
         System.err.println(count);
     }
 }

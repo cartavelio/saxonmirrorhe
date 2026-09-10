@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -44,6 +44,7 @@ public final class CastableExpression extends CastingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
 
@@ -54,7 +55,11 @@ public final class CastableExpression extends CastingExpression {
         Expression operand = getBaseExpression();
         ItemType sourceItemType = operand.getItemType();
 
-        AtomicType atomizedType = (AtomicType) sourceItemType.getAtomizedItemType().getPrimitiveItemType();
+        PlainType atomizedItemType = sourceItemType.getAtomizedItemType();
+        if (atomizedItemType == null) {
+            throw new XPathException("Operand of 'castable as' cannot be atomized", "XPTY0004");
+        }
+        AtomicType atomizedType = (AtomicType)atomizedItemType.getPrimitiveItemType();
         if (!(atomizedType == BuiltInAtomicType.ANY_ATOMIC)) {
             converter = visitor.getConfiguration().getConversionRules().getConverter(atomizedType, getTargetType());
             if (converter == null) {
@@ -102,6 +107,7 @@ public final class CastableExpression extends CastingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         optimizeChildren(visitor, contextInfo);
         if (getBaseExpression() instanceof Literal) {
@@ -149,6 +155,7 @@ public final class CastableExpression extends CastingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.BOOLEAN;
     }
@@ -166,11 +173,13 @@ public final class CastableExpression extends CastingExpression {
     }
 
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         CastableExpression ce = new CastableExpression(getBaseExpression().copy(rebindings), getTargetType(), allowsEmpty());
         ExpressionTool.copyLocationInfo(this, ce);
@@ -183,10 +192,12 @@ public final class CastableExpression extends CastingExpression {
      * Evaluate the expression
      */
 
+    @Override
     public BooleanValue evaluateItem(XPathContext context) throws XPathException {
         return BooleanValue.get(effectiveBooleanValue(context));
     }
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         // This method does its own atomization so that it can distinguish between atomization
         // failures and casting failures
@@ -249,6 +260,7 @@ public final class CastableExpression extends CastingExpression {
         return !(converter.convert(value) instanceof ValidationFailure);
     }
 
+    @Override
     public String getExpressionName() {
         return "castable";
     }
@@ -269,12 +281,15 @@ public final class CastableExpression extends CastingExpression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        out.startElement("castable", this);
-        out.emitAttribute("as", getTargetType().toExportString());
-        out.emitAttribute("emptiable", allowsEmpty() ? "1" : "0");
-        getBaseExpression().export(out);
-        out.endElement();
+        export(out, "castable");
+//        out.startElement("castable", this);
+//        out.emitAttribute("as", getTargetType().toExportString());
+//        out.emitAttribute("code", getTargetType().getBasicAlphaCode());
+//        out.emitAttribute("emptiable", allowsEmpty() ? "1" : "0");
+//        getBaseExpression().export(out);
+//        out.endElement();
     }
 
 }

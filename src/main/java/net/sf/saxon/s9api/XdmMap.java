@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -214,11 +214,13 @@ public class XdmMap extends XdmFunctionItem {
     /**
      * Return a mutable Java Map containing the same entries as this map.
      *
-     * @return a mutable Map from atomic values to (sequence) values, containing the
-     * same entries as this map
+     * @return a mutable Map from atomic values to (sequence) values, containing a copy of the
+     * entries in this map. Changes to the returned map have no effect on the original
+     * {@code XdmMap}.
      * @since 9.6.
      */
 
+    @Override
     public Map<XdmAtomicValue, XdmValue> asMap() {
         return new HashMap<>(asImmutableMap());
     }
@@ -239,6 +241,7 @@ public class XdmMap extends XdmFunctionItem {
      *
      * @return <tt>true</tt> if this map contains no key-value mappings
      */
+    @Override
     public boolean isEmpty() {
         return getUnderlyingValue().isEmpty();
     }
@@ -272,7 +275,7 @@ public class XdmMap extends XdmFunctionItem {
         if (key == null) {
             throw new NullPointerException();
         }
-        GroundedValue<?> v = getUnderlyingValue().get(key.getUnderlyingValue());
+        GroundedValue v = getUnderlyingValue().get(key.getUnderlyingValue());
         return v == null ? null : XdmValue.wrap(v);
     }
 
@@ -292,7 +295,7 @@ public class XdmMap extends XdmFunctionItem {
         if (key == null) {
             throw new NullPointerException();
         }
-        GroundedValue<?> v = getUnderlyingValue().get(new StringValue(key));
+        GroundedValue v = getUnderlyingValue().get(new StringValue(key));
         return v == null ? null : XdmValue.wrap(v);
     }
 
@@ -309,7 +312,7 @@ public class XdmMap extends XdmFunctionItem {
      * @throws NullPointerException if the supplied key is null
      */
     public XdmValue get(long key) {
-        GroundedValue<?> v = getUnderlyingValue().get(new Int64Value(key));
+        GroundedValue v = getUnderlyingValue().get(new Int64Value(key));
         return v == null ? null : XdmValue.wrap(v);
     }
 
@@ -327,7 +330,7 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public XdmValue get(double key) {
-        GroundedValue<?> v = getUnderlyingValue().get(new DoubleValue(key));
+        GroundedValue v = getUnderlyingValue().get(new DoubleValue(key));
         return v == null ? null : XdmValue.wrap(v);
     }
 

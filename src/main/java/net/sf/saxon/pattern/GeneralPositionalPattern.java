@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -90,6 +90,7 @@ public class GeneralPositionalPattern extends Pattern {
      *
      */
 
+    @Override
     public Pattern simplify() throws XPathException {
         positionExpr = positionExpr.simplify();
         return this;
@@ -103,6 +104,7 @@ public class GeneralPositionalPattern extends Pattern {
      * @return the optimised Pattern
      */
 
+    @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
 
         // analyze each component of the pattern
@@ -172,6 +174,7 @@ public class GeneralPositionalPattern extends Pattern {
      * @return the dependencies, as a bit-significant mask
      */
 
+    @Override
     public int getDependencies() {
         // the only dependency that's interesting is a dependency on local variables
         return positionExpr.getDependencies() &
@@ -185,6 +188,7 @@ public class GeneralPositionalPattern extends Pattern {
      * @param nextFree    the next slot that is free to be allocated @return the next slot that is free to be allocated
      */
 
+    @Override
     public int allocateSlots(SlotManager slotManager, int nextFree) {
         return ExpressionTool.allocateSlots(positionExpr, nextFree, slotManager);
     }
@@ -196,7 +200,8 @@ public class GeneralPositionalPattern extends Pattern {
      * @return true if the pattern matches, else false
      */
 
-    public boolean matches(Item<?> item, XPathContext context) throws XPathException {
+    @Override
+    public boolean matches(Item item, XPathContext context) throws XPathException {
         return item instanceof NodeInfo && matchesBeneathAnchor((NodeInfo) item, null, context);
     }
 
@@ -211,6 +216,7 @@ public class GeneralPositionalPattern extends Pattern {
      * @return true if the node matches the Pattern, false otherwise
      */
 
+    @Override
     public boolean matchesBeneathAnchor(NodeInfo node, NodeInfo anchor, XPathContext context) throws XPathException {
         return internalMatches(node, anchor, context);
     }
@@ -220,12 +226,12 @@ public class GeneralPositionalPattern extends Pattern {
      */
 
     private boolean internalMatches(NodeInfo node, NodeInfo anchor, XPathContext context) throws XPathException {
-        if (!nodeTest.matchesNode(node)) {
+        if (!nodeTest.test(node)) {
             return false;
         }
 
         XPathContext c2 = context.newMinorContext();
-        ManualIterator<NodeInfo> iter = new ManualIterator<>(node);
+        ManualIterator iter = new ManualIterator(node);
         c2.setCurrentIterator(iter);
 
         try {
@@ -233,7 +239,7 @@ public class GeneralPositionalPattern extends Pattern {
             int actualPosition = -1;
             if (usesPosition) {
                 actualPosition = getActualPosition(node, Integer.MAX_VALUE, context.getCurrentIterator());
-                ManualIterator<NodeInfo> man = new ManualIterator<>(node, actualPosition);
+                ManualIterator man = new ManualIterator(node, actualPosition);
                 XPathContext c3 = c2.newMinorContext();
                 c3.setCurrentIterator(man);
                 c = c3;
@@ -284,6 +290,7 @@ public class GeneralPositionalPattern extends Pattern {
      * @return the fingerprint of nodes matched by this pattern.
      */
 
+    @Override
     public int getFingerprint() {
         return nodeTest.getFingerprint();
     }
@@ -292,6 +299,7 @@ public class GeneralPositionalPattern extends Pattern {
      * Get an ItemType that all the nodes matching this pattern must satisfy
      */
 
+    @Override
     public ItemType getItemType() {
         return nodeTest;
     }
@@ -315,6 +323,7 @@ public class GeneralPositionalPattern extends Pattern {
      * hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         return nodeTest.hashCode() ^ positionExpr.hashCode();
     }
@@ -330,12 +339,13 @@ public class GeneralPositionalPattern extends Pattern {
      * node without changing the position in the streamed input file
      */
 
+    @Override
     public boolean isMotionless() {
-        return false;
 //        ContextItemStaticInfoEE csi = (ContextItemStaticInfoEE)getConfiguration().makeContextItemStaticInfo(getItemType(), false);
 //        csi.setContextPostureStriding();
 //        Streamability.getStreamability(positionExpr, csi, null);
 //        return Streamability.getSweep(positionExpr) == Sweep.MOTIONLESS;
+        return false;
     }
 //#endif
 
@@ -347,9 +357,11 @@ public class GeneralPositionalPattern extends Pattern {
      */
 
     /*@NotNull*/
+    @Override
     public Pattern copy(RebindingMap rebindings) {
         GeneralPositionalPattern n = new GeneralPositionalPattern(nodeTest.copy(), positionExpr.copy(rebindings));
         ExpressionTool.copyLocationInfo(this, n);
+        n.setOriginalText(getOriginalText());
         return n;
     }
 
@@ -359,108 +371,22 @@ public class GeneralPositionalPattern extends Pattern {
      * in legal pattern syntax.
      */
     @Override
-    public String toString() {
+    public String reconstruct() {
         return nodeTest + "[" + positionExpr + "]";
     }
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.genPos");
-        presenter.emitAttribute("type", nodeTest.toString());
+        presenter.emitAttribute("test", AlphaCode.fromItemType(nodeTest));
         if (!usesPosition) {
             // flag is this way around for backwards compatibility with 9.8
             presenter.emitAttribute("flags", "P");
-        }
-        if ("JS".equals(((ExpressionPresenter.ExportOptions) presenter.getOptions()).target)) {
-            try {
-                int targetVersion = ((ExpressionPresenter.ExportOptions) presenter.getOptions()).targetVersion;
-                presenter.emitAttribute("jsTest", nodeTest.generateJavaScriptItemTypeTest(AnyItemType.getInstance(), targetVersion));
-            } catch (XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw e;
-            }
         }
         positionExpr.export(presenter);
         presenter.endElement();
     }
 
-    /*
-    * Optimization
-    * Note that any replacement by a BooleanExpressionPattern based on the positionExpr
-    * REQUIRES that the position has been set appropriately in the context for its evaluation.
-    * This is NOT the case in generalized {@link net.sf.saxon.trans.Mode.getRule()},
-    * but is under {@link com.saxonica.ee.optim.ModeEE.getRule()}
-    * This should be checked.
-     *//*
-    public Pattern optimizeForName(int i) {
-        Object o = nodeTest.optimizeForName(i);
-        if (o == null) {
-            return null;
-        } else {
-            return optimizePosition();
-        }
-    }
-
-    public Pattern optimizeForType(int i) {
-        Object o = nodeTest.optimizeForType(i);
-        if (o == null) {
-            return null;
-        } else {
-            return optimizePosition();
-        }
-    }
-
-    private Pattern optimizePosition()  {
-        Expression pe = makePosition(positionExpr, nodeTest);
-        BooleanExpressionPattern p = new BooleanExpressionPattern(pe);
-        ExpressionTool.copyLocationInfo(this, p);
-        //p.setPackageData(getPackageData());
-        return p;
-    }
-
-    public Pattern applyAxis(byte axis) {
-        Expression pe = makePosition(positionExpr, nodeTest);
-        FilterExpression filter = new FilterExpression(new AxisExpression(axis, nodeTest), pe);
-        BooleanExpressionPattern p = new BooleanExpressionPattern(filter);
-        ExpressionTool.copyLocationInfo(this, p);
-        //p.setPackageData(getPackageData());
-        return p;
-    }
-
-    public static Expression makePosition(Expression expr, NodeTest nodeTest) {
-        Expression n = expr;
-        RetainedStaticContext rsc = expr.getRetainedStaticContext();
-        if (expr instanceof Literal) {
-            GroundedValue value = ((Literal) expr).getValue();
-            try {
-                if (value instanceof IntegerValue) {
-                    Expression operands[] = new Expression[1];
-                    operands[0] = new AxisExpression(AxisInfo.PRECEDING_SIBLING, nodeTest);
-                    Expression position = SystemFunction.makeCall("count", rsc, operands);
-                    n = new CompareToIntegerConstant(position, Token.FEQ,
-                            ((IntegerValue)value).longValue() - 1);
-                    return n;
-                }
-
-                Expression position = SystemFunction.makeCall("position", rsc);
-                n = new CompareToIntegerConstant(position, Token.FEQ,
-                        ((IntegerValue) ((Literal) expr).getValue()).longValue());
-            } catch (XPathException e) {
-                e.printStackTrace();
-            }
-        } else if (expr instanceof CompareToIntegerConstant) {
-            CompareToIntegerConstant c = (CompareToIntegerConstant)expr;
-            Operand op1 = expr.operands().iterator().next();
-            Expression e1 = op1.getChildExpression();
-            if (e1.isCallOn(PositionAndLast.class)) {
-                Expression position = SystemFunction.makeCall("count",
-                    rsc, new AxisExpression(AxisInfo.PRECEDING_SIBLING, nodeTest));
-                n = new CompareToIntegerConstant(position, c.getComparisonOperator(),
-                        c.getComparand() - 1);
-                return n;
-            }
-        }
-        return n;
-    }*/
 
 }
-// Copyright (c) 2012 Saxonica Limited
+// Copyright (c) 2012-2020 Saxonica Limited

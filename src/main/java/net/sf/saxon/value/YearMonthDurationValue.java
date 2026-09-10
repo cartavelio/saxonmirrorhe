@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -62,6 +62,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      */
 
     /*@NotNull*/
+    @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
         YearMonthDurationValue v = YearMonthDurationValue.fromMonths(getLengthInMonths());
         v.typeLabel = typeLabel;
@@ -75,6 +76,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * and xs:untypedAtomic. For external objects, the result is AnyAtomicType.
      */
 
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.YEAR_MONTH_DURATION;
     }
@@ -85,6 +87,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * @return ISO 8601 representation.
      */
 
+    @Override
     public CharSequence getPrimitiveStringValue() {
 
         // The canonical representation has months in the range 0-11
@@ -94,9 +97,9 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
 
         FastStringBuffer sb = new FastStringBuffer(32);
         if (negative) {
-            sb.append('-');
+            sb.cat('-');
         }
-        sb.append('P');
+        sb.cat('P');
         if (y != 0) {
             sb.append(y + "Y");
         }
@@ -140,6 +143,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * @return the result of the multiplication
      */
 
+    @Override
     public YearMonthDurationValue multiply(long factor) throws XPathException {
         // Fast path for simple cases
         if (Math.abs(factor) < 30_000 && Math.abs(months) < 30_000) {
@@ -153,6 +157,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * Multiply duration by a number.
      */
 
+    @Override
     public YearMonthDurationValue multiply(double n) throws XPathException {
         if (Double.isNaN(n)) {
             XPathException err = new XPathException("Cannot multiply a duration by NaN");
@@ -174,6 +179,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * Divide duration by a number.
      */
 
+    @Override
     public DurationValue divide(double n) throws XPathException {
         if (Double.isNaN(n)) {
             XPathException err = new XPathException("Cannot divide a duration by NaN");
@@ -198,6 +204,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * @throws XPathException if an error occurs, for example division by zero or dividing durations of different type
      */
 
+    @Override
     public BigDecimalValue divide(DurationValue other) throws XPathException {
         if (other instanceof YearMonthDurationValue) {
             BigDecimal v1 = BigDecimal.valueOf(getLengthInMonths());
@@ -219,6 +226,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * Add two year-month-durations
      */
 
+    @Override
     public DurationValue add(DurationValue other) throws XPathException {
         if (other instanceof YearMonthDurationValue) {
             return fromMonths(getLengthInMonths() +
@@ -234,6 +242,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * Subtract two year-month-durations
      */
 
+    @Override
     public DurationValue subtract(DurationValue other) throws XPathException {
         if (other instanceof YearMonthDurationValue) {
             return fromMonths(getLengthInMonths() -
@@ -249,6 +258,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * Negate a duration (same as subtracting from zero, but it preserves the type of the original duration)
      */
 
+    @Override
     public DurationValue negate() {
         return fromMonths(-getLengthInMonths());
     }
@@ -265,6 +275,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      *                            is declared as Object to satisfy the Comparable interface)
      */
 
+    @Override
     public int compareTo(YearMonthDurationValue other) {
         return Integer.compare(getLengthInMonths(), other.getLengthInMonths());
     }
@@ -280,6 +291,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * @param implicitTimezone implicit timezone in the dynamic context - not used
      */
 
+    @Override
     public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
         return this;
     }

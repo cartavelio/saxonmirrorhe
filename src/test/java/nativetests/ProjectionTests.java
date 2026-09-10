@@ -4,9 +4,11 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.optim.XQueryExpressionEE;
 import com.saxonica.ee.stream.Projector;
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.FilterFactory;
+import net.sf.saxon.event.ProxyReceiver;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.RootExpression;
 import net.sf.saxon.expr.parser.PathMap;
@@ -16,9 +18,9 @@ import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
-import net.sf.saxon.sxpath.XPathEvaluator;
-import net.sf.saxon.sxpath.XPathExpression;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.stream.StreamResult;
@@ -27,11 +29,15 @@ import java.io.File;
 import java.io.StringWriter;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  *  Tests for queries using document projection
  */
-public class ProjectionTests extends TestCase {
+public class ProjectionTests {
 
+    @Test
     public void testProjection001() {
         try {
 
@@ -63,8 +69,8 @@ public class ProjectionTests extends TestCase {
             StringWriter sw = new StringWriter();
             QueryResult.serialize(doc, new StreamResult(sw), props);
             //System.err.println(sw.toString());
-            assertTrue("contains CODE", sw.toString().contains("CODE=\"P\""));
-            assertTrue("contains CAT", sw.toString().contains("DESC=\"Paperback\""));
+            assertTrue(sw.toString().contains("CODE=\"P\""), "contains CODE");
+            assertTrue(sw.toString().contains("DESC=\"Paperback\""), "contains CAT");
 
             // Test that the projected doc omits the ITEM elements
 
@@ -72,7 +78,7 @@ public class ProjectionTests extends TestCase {
             DynamicQueryContext dqc = new DynamicQueryContext(config);
             dqc.setContextItem(doc);
             Object result = exp.evaluateSingle(dqc);
-            assertTrue("omits ITEM", result instanceof Long && (Long)result == 0);
+            assertTrue(result instanceof Long && (Long)result == 0, "omits ITEM");
 
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -80,6 +86,7 @@ public class ProjectionTests extends TestCase {
         }
     }
 
+    @Test
     public void testProjection002() {
         projection("xpath", "//CATEGORY");
         projection("xpath", "count(//ITEM)");
@@ -93,20 +100,25 @@ public class ProjectionTests extends TestCase {
     private void projection(String lang, String expr) {
         try {
 
-            String fileName = ConfigTest.DATA_DIR + "books.xml";;
+            String fileName = ConfigTest.DATA_DIR + "books.xml";
 
-            Configuration config = new Configuration();
+            Processor proc = new Processor(true);
+            //Configuration config = new Configuration();
             StreamSource source = new StreamSource(new File(fileName));
             Expression exp = null;
             if (lang.equals("xpath")) {
-                XPathEvaluator xpath = new XPathEvaluator(config);
-                XPathExpression xpexp = xpath.createExpression(expr);
-                exp = xpexp.getInternalExpression();
+                XPathCompiler comp = proc.newXPathCompiler();
+                XPathExecutable exec = comp.compile(expr);
+                exp = exec.getUnderlyingExpression().getInternalExpression();
+//                XPathEvaluator xpath = new XPathEvaluator(config);
+//                XPathExpression xpexp = xpath.createExpression(expr);
+//                exp = xpexp.getInternalExpression();
             } else if (lang.equals("xquery")) {
-                StaticQueryContext sqc = config.newStaticQueryContext();
-                sqc.setBaseURI(new File(fileName).toURI().toString());
-                XQueryExpression xqe = sqc.compileQuery(expr);
-                exp = xqe.getExpression();
+                XQueryCompiler comp = proc.newXQueryCompiler();
+                //StaticQueryContext sqc = config.newStaticQueryContext();
+                comp.setBaseURI(new File(fileName).toURI());
+                XQueryExecutable xqe = comp.compile(expr);
+                exp = xqe.getUnderlyingCompiledQuery().getExpression();
             } else {
                 throw new IllegalArgumentException("second argument must be xpath or xquery");
             }
@@ -135,7 +147,7 @@ public class ProjectionTests extends TestCase {
             SerializationProperties props = new SerializationProperties();
             props.setProperty("method", "xml");
             props.setProperty("indent", "yes");
-            Receiver serializer = config.getSerializerFactory().getReceiver(result, props);
+            Receiver serializer = proc.getUnderlyingConfiguration().getSerializerFactory().getReceiver(result, props);
             Projector projector = new Projector(contextRoot, serializer);
             Sender.send(source, projector, null);
         } catch (Exception err) {

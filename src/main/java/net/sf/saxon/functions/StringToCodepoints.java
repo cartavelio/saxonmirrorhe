@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -40,7 +40,8 @@ public class StringToCodepoints extends SystemFunction {
         return new IntegerValue[]{Int64Value.PLUS_ONE, Int64Value.makeIntegerValue(1114111)};
     }
 
-    public Sequence<Int64Value> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue val = (StringValue)arguments[0].head();
         if (val == null) {
             return EmptySequence.getInstance();

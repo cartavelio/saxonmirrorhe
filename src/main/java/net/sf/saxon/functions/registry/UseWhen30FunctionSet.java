@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -32,22 +32,22 @@ public class UseWhen30FunctionSet extends BuiltInFunctionSet {
         addXPathFunctions();
 
         register("available-system-properties", 0, AvailableSystemProperties.class, BuiltInAtomicType.QNAME,
-                 STAR, XSLT30 | USE_WHEN, LATE);
+                 STAR, LATE);
 
-        register("element-available", 1, ElementAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, XSLT | USE_WHEN, NS)
+        register("element-available", 1, ElementAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, NS)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("function-available", 1, FunctionAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, XSLT | USE_WHEN, NS | LATE)
+        register("function-available", 1, FunctionAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("function-available", 2, FunctionAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, XSLT | USE_WHEN, NS | LATE)
+        register("function-available", 2, FunctionAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("system-property", 1, SystemProperty.class, BuiltInAtomicType.STRING, ONE, XSLT | USE_WHEN, NS | LATE)
+        register("system-property", 1, SystemProperty.class, BuiltInAtomicType.STRING, ONE, NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("type-available", 1, TypeAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, XSLT | USE_WHEN, NS)
+        register("type-available", 1, TypeAvailable.class, BuiltInAtomicType.BOOLEAN, ONE, NS)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
 

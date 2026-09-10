@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,13 +10,14 @@ package net.sf.saxon.style;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.event.*;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.DocumentKey;
+import net.sf.saxon.om.NoElementsSpaceStrippingRule;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StylesheetSpaceStrippingRule;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.IPackageLoader;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -79,8 +80,9 @@ public class StylesheetModule {
      */
     public static DocumentImpl loadStylesheetModule(
             Source styleSource, boolean topLevelModule, Compilation compilation, NestedIntegerValue precedence) throws XPathException {
+
         String systemId = styleSource.getSystemId();
-        DocumentURI docURI = systemId == null ? null : new DocumentURI(systemId);
+        DocumentKey docURI = systemId == null ? null : new DocumentKey(systemId);
         if (systemId != null && compilation.getImportStack().contains(docURI)) {
             throw new XPathException("The stylesheet module includes/imports itself directly or indirectly", "XTSE0180");
         }
@@ -88,7 +90,7 @@ public class StylesheetModule {
 
         Configuration config = compilation.getConfiguration();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setErrorListener(compilation.getCompilerInfo().getErrorListener());
+        pipe.setErrorReporter(compilation.getCompilerInfo().getErrorReporter());
         LinkedTreeBuilder styleBuilder = new LinkedTreeBuilder(pipe);
         pipe.setURIResolver(compilation.getCompilerInfo().getURIResolver());
         styleBuilder.setSystemId(styleSource.getSystemId());
@@ -98,11 +100,8 @@ public class StylesheetModule {
 
         UseWhenFilter useWhenFilter = new UseWhenFilter(compilation, styleBuilder, precedence);
         useWhenFilter.setSystemId(styleSource.getSystemId());
-        StartTagBuffer startTagBuffer = new StartTagBuffer(useWhenFilter);
-        useWhenFilter.setStartTagBuffer(startTagBuffer);
-
         StylesheetSpaceStrippingRule rule = new StylesheetSpaceStrippingRule(config.getNamePool());
-        Stripper styleStripper = new Stripper(rule, startTagBuffer);
+        Stripper styleStripper = new Stripper(rule, useWhenFilter);
         CommentStripper commentStripper = new CommentStripper(styleStripper);
 
         // build the stylesheet document
@@ -128,6 +127,39 @@ public class StylesheetModule {
         }
     }
 
+    private static ParseOptions makeStylesheetParseOptions(Source styleSource, PipelineConfiguration pipe) {
+        ParseOptions options;
+        if (styleSource instanceof AugmentedSource) {
+            options = ((AugmentedSource) styleSource).getParseOptions();
+        } else {
+            options = new ParseOptions();
+        }
+        options.setSchemaValidationMode(Validation.STRIP);
+        options.setDTDValidationMode(Validation.STRIP);
+        options.setLineNumbering(true);
+        options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+        options.setErrorReporter(pipe.getErrorReporter());
+        return options;
+    }
+
+
+    private static void sendStylesheetSource(Source styleSource, Configuration config, Receiver sourcePipeline, ParseOptions options) throws XPathException {
+        boolean knownParser =
+                options.getXMLReader() != null ||
+                        options.getXMLReaderMaker() != null ||
+                        (styleSource instanceof SAXSource && ((SAXSource) styleSource).getXMLReader() != null);
+
+        if (knownParser) {
+            Sender.send(styleSource, sourcePipeline, options);
+        } else {
+            XMLReader styleParser = config.getStyleParser();
+            options.setXMLReader(styleParser);
+            Sender.send(styleSource, sourcePipeline, options);
+            config.reuseStyleParser(styleParser);
+        }
+    }
+
+
     /**
      * Build the tree representation of a stylesheet module
      *
@@ -151,7 +183,7 @@ public class StylesheetModule {
         }
 
         String systemId = styleSource.getSystemId();
-        DocumentURI docURI = systemId == null ? null : new DocumentURI(systemId);
+        DocumentKey docURI = systemId == null ? null : new DocumentKey(systemId);
         if (systemId != null && compilation.getImportStack().contains(docURI)) {
             throw new XPathException("The stylesheet module includes/imports itself directly or indirectly", "XTSE0180");
         }
@@ -160,7 +192,7 @@ public class StylesheetModule {
 
         Configuration config = compilation.getConfiguration();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setErrorListener(compilation.getCompilerInfo().getErrorListener());
+        pipe.setErrorReporter(compilation.getCompilerInfo().getErrorReporter());
 
         LinkedTreeBuilder styleBuilder = new LinkedTreeBuilder(pipe);
         pipe.setURIResolver(compilation.getCompilerInfo().getURIResolver());
@@ -175,11 +207,9 @@ public class StylesheetModule {
 
         UseWhenFilter useWhenFilter = new UseWhenFilter(compilation, styleBuilder, NestedIntegerValue.TWO);
         useWhenFilter.setSystemId(styleSource.getSystemId());
-        StartTagBuffer startTagBuffer = new StartTagBuffer(useWhenFilter);
-        useWhenFilter.setStartTagBuffer(startTagBuffer);
 
         StylesheetSpaceStrippingRule rule = new StylesheetSpaceStrippingRule(config.getNamePool());
-        Stripper styleStripper = new Stripper(rule, startTagBuffer);
+        Stripper styleStripper = new Stripper(rule, useWhenFilter);
         CommentStripper commentStripper = new CommentStripper(styleStripper);
 
         // Pipeline for compiled XSLT code
@@ -194,8 +224,7 @@ public class StylesheetModule {
 
         // build the stylesheet document
 
-        ParseOptions options;
-        options = makeStylesheetParseOptions(styleSource, pipe);
+        ParseOptions options = makeStylesheetParseOptions(styleSource, pipe);
         try {
             sendStylesheetSource(styleSource, config, sourcePipeline, options);
 
@@ -244,38 +273,6 @@ public class StylesheetModule {
         }
     }
 
-    private static ParseOptions makeStylesheetParseOptions(Source styleSource, PipelineConfiguration pipe) {
-        ParseOptions options;
-        if (styleSource instanceof AugmentedSource) {
-            options = ((AugmentedSource) styleSource).getParseOptions();
-        } else {
-            options = new ParseOptions();
-        }
-        options.setSchemaValidationMode(Validation.STRIP);
-        options.setDTDValidationMode(Validation.STRIP);
-        options.setLineNumbering(true);
-        options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-        options.setErrorListener(pipe.getErrorListener());
-        return options;
-    }
-
-
-    private static void sendStylesheetSource(Source styleSource, Configuration config, Receiver sourcePipeline, ParseOptions options) throws XPathException {
-        boolean knownParser =
-                options.getXMLReader() != null ||
-                        options.getXMLReaderMaker() != null ||
-                        (styleSource instanceof SAXSource && ((SAXSource) styleSource).getXMLReader() != null);
-
-        if (knownParser) {
-            Sender.send(styleSource, sourcePipeline, options);
-        } else {
-            XMLReader styleParser = config.getStyleParser();
-            options.setXMLReader(styleParser);
-            Sender.send(styleSource, sourcePipeline, options);
-            config.reuseStyleParser(styleParser);
-        }
-        
-    }
 
     /**
      * Get the stylesheet specification(s) associated
@@ -373,7 +370,7 @@ public class StylesheetModule {
         InputSource composite = new InputSource();
         composite.setSystemId(baseURI);
         composite.setCharacterStream(new StringReader(sb.toString()));
-        return new SAXSource(config.getStyleParser(), composite);
+        return new SAXSource(config.getSourceParser(), composite);
     }
 
     public void setImporter(StylesheetModule importer) {
@@ -446,17 +443,13 @@ public class StylesheetModule {
 
     public void spliceIncludes() throws XPathException {
 
-        boolean foundNonImport = false;
         if (topLevel == null || topLevel.size() == 0) {
-            topLevel = new ArrayList<ComponentDeclaration>(50);
+            topLevel = new ArrayList<>(50);
         }
         minImportPrecedence = precedence;
         StyleElement previousElement = rootElement;
 
-        AxisIterator kids = getStylesheetElement().iterateAxis(AxisInfo.CHILD);
-
-        NodeInfo child;
-        while ((child = kids.next()) != null) {
+        for (NodeInfo child : getStylesheetElement().children()) {
             if (child.getNodeKind() == Type.TEXT) {
                 // in an embedded stylesheet, white space nodes may still be there
                 if (!Whitespace.isWhite(child.getStringValueCS())) {
@@ -465,9 +458,8 @@ public class StylesheetModule {
                 }
 
             } else if (child instanceof DataElement) {
-                foundNonImport = true;
                 if (((DataElement) child).getNodeName().getURI().isEmpty()) {
-                    Location loc = new ExplicitLocation(child);
+                    Loc loc = new Loc(child);
                     previousElement.compileError(
                             "Top-level elements must be in a namespace: " + ((DataElement) child).getNodeName().getLocalPart() + " is not",
                             "XTSE0130", loc);
@@ -477,10 +469,6 @@ public class StylesheetModule {
                 if (child instanceof XSLGeneralIncorporate) {
                     XSLGeneralIncorporate xslinc = (XSLGeneralIncorporate) child;
                     xslinc.processAttributes();
-
-                    if (!xslinc.isImport()) {
-                        foundNonImport = true;
-                    }
 
                     // get the included stylesheet. This follows the URL, builds a tree, and splices
                     // in any indirectly-included stylesheets.
@@ -531,7 +519,6 @@ public class StylesheetModule {
                         }
                     }
                 } else {
-                    foundNonImport = true;
                     ComponentDeclaration decl = new ComponentDeclaration(this, (StyleElement) child);
                     topLevel.add(decl);
                 }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -36,13 +36,12 @@ import java.util.*;
 
 public final class AxisExpression extends Expression {
 
-    private byte axis;
+    private int axis;
     /*@Nullable*/
     private NodeTest test;
     /*@Nullable*/
     private ItemType itemType = null;
     private ContextItemStaticInfo staticInfo = ContextItemStaticInfo.DEFAULT;
-    private int computedCardinality = -1;
     private boolean doneTypeCheck = false;
     private boolean doneOptimize = false;
 
@@ -56,7 +55,7 @@ public final class AxisExpression extends Expression {
      * @see net.sf.saxon.om.AxisInfo
      */
 
-    public AxisExpression(byte axis, /*@Nullable*/ NodeTest nodeTest) {
+    public AxisExpression(int axis, /*@Nullable*/ NodeTest nodeTest) {
         this.axis = axis;
         this.test = nodeTest;
     }
@@ -67,7 +66,7 @@ public final class AxisExpression extends Expression {
      * @param axis the new axis
      */
 
-    public void setAxis(byte axis) {
+    public void setAxis(int axis) {
         this.axis = axis;
     }
 
@@ -79,6 +78,7 @@ public final class AxisExpression extends Expression {
      * in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         return "axisStep";
     }
@@ -88,6 +88,7 @@ public final class AxisExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
         Expression e2 = super.simplify();
         if (e2 != this) {
@@ -106,6 +107,7 @@ public final class AxisExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         ItemType contextItemType = contextInfo.getItemType();
         boolean noWarnings = doneOptimize || (doneTypeCheck && this.staticInfo.getItemType().equals(contextItemType));
@@ -128,15 +130,15 @@ public final class AxisExpression extends Expression {
 
         if (contextItemType.getGenre() != Genre.NODE) {
             TypeHierarchy th = config.getTypeHierarchy();
-            int relation = th.relationship(contextItemType, AnyNodeTest.getInstance());
-            if (relation == TypeHierarchy.DISJOINT) {
+            Affinity relation = th.relationship(contextItemType, AnyNodeTest.getInstance());
+            if (relation == Affinity.DISJOINT) {
                 XPathException err = new XPathException("Axis step " + this +
                                                                 " cannot be used here: the context item is not a node");
                 err.setIsTypeError(true);
                 err.setErrorCode("XPTY0020");
                 err.setLocation(getLocation());
                 throw err;
-            } else if (relation == TypeHierarchy.OVERLAPS || relation == TypeHierarchy.SUBSUMES) {
+            } else if (relation == Affinity.OVERLAPS || relation == Affinity.SUBSUMES) {
                 // need to insert a dynamic check of the context item type
                 Expression thisExp = checkPlausibility(visitor, contextInfo, !noWarnings);
                 if (Literal.isEmptySequence(thisExp)) {
@@ -204,6 +206,14 @@ public final class AxisExpression extends Expression {
             return Literal.makeEmptySequence();
         }
 
+        if (contextInfo.isParentless() && (axis == AxisInfo.PARENT || axis == AxisInfo.ANCESTOR)) {
+            if (warnings) {
+                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select anything because the context item is parentless",
+                                     getLocation());
+            }
+            return Literal.makeEmptySequence();
+        }
+
         // Test whether the axis ever selects a node of the right kind, when starting at this context node
         if (!targetUType.overlaps(testUType)) {
             if (warnings) {
@@ -216,7 +226,7 @@ public final class AxisExpression extends Expression {
         }
 
         // For an X-or-self axis, if X never selects anything, then substitute the self axis.
-        byte nonSelf = AxisInfo.excludeSelfAxis[axis];
+        int nonSelf = AxisInfo.excludeSelfAxis[axis];
         UType kind = test == null ? UType.ANY_NODE : test.getUType();
         if (axis != nonSelf) {
             UType nonSelfTarget = AxisInfo.getTargetUType(originUType, nonSelf);
@@ -497,8 +507,8 @@ public final class AxisExpression extends Expression {
                                         break;
                                     }
                                 }
-                                visitor.issueWarning(message, getLocation());
                             }
+                            visitor.issueWarning(message, getLocation());
                         }
                         return Literal.makeEmptySequence();
                     } else {
@@ -506,7 +516,7 @@ public final class AxisExpression extends Expression {
                                 test,
                                 Token.INTERSECT,
                                 new ContentTypeTest(Type.ELEMENT, schemaType, config, true));
-                        computedCardinality = ((ComplexType) contentType).getElementParticleCardinality(childfp, true);
+                        int computedCardinality = ((ComplexType) contentType).getElementParticleCardinality(childfp, true);
                         ExpressionTool.resetStaticProperties(this);
                         if (computedCardinality == StaticProperty.ALLOWS_ZERO) {
                             // this shouldn't happen, because we've already checked for this a different way.
@@ -579,7 +589,7 @@ public final class AxisExpression extends Expression {
                             NodeTest childTest = makeUnionNodeTest(usefulChildren, config.getNamePool());
                             AxisExpression first = new AxisExpression(AxisInfo.CHILD, childTest);
                             ExpressionTool.copyLocationInfo(this, first);
-                            byte nextAxis;
+                            int nextAxis;
                             if (considerSelf) {
                                 nextAxis = considerDescendants ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.SELF;
                             } else {
@@ -695,6 +705,7 @@ public final class AxisExpression extends Expression {
      * @return the original expression, rewritten if appropriate to optimize execution
      */
 
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) {
         doneOptimize = true; // This ensures no more warnings about empty axes, because (a) we've probably output the
         // warning already, and (b) we're now looking at a different expression from what the user
@@ -710,7 +721,7 @@ public final class AxisExpression extends Expression {
      * and we assume that a sequence has length 5. The resulting estimates may be used, for
      * example, to reorder the predicates in a filter expression so cheaper predicates are
      * evaluated first.
-     * @return
+     * @return the estimated cost
      */
     @Override
     public double getCost() {
@@ -744,6 +755,7 @@ public final class AxisExpression extends Expression {
      * get HashCode for comparing two expressions
      */
 
+    @Override
     public int computeHashCode() {
         // generate an arbitrary hash code that depends on the axis and the node test
         int h = 9375162 + axis << 20;
@@ -764,11 +776,11 @@ public final class AxisExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         AxisExpression a2 = new AxisExpression(axis, test);
         a2.itemType = itemType;
         a2.staticInfo = staticInfo;
-        a2.computedCardinality = computedCardinality;
         a2.doneTypeCheck = doneTypeCheck;
         a2.doneOptimize = doneOptimize;
         ExpressionTool.copyLocationInfo(this, a2);
@@ -781,6 +793,7 @@ public final class AxisExpression extends Expression {
      * property bit is set, it is true, but if it is unset, the value is unknown.
      */
 
+    @Override
     public int computeSpecialProperties() {
         return StaticProperty.CONTEXT_DOCUMENT_NODESET |
                 StaticProperty.SINGLE_DOCUMENT_NODESET |
@@ -823,6 +836,7 @@ public final class AxisExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public final ItemType getItemType() {
         if (itemType != null) {
             return itemType;
@@ -879,11 +893,8 @@ public final class AxisExpression extends Expression {
      * Determine the cardinality of the result of this expression
      */
 
+    @Override
     public final int computeCardinality() {
-        if (computedCardinality != -1) {
-            // This takes care of the case where cardinality was computed during type checking of the child axis
-            return computedCardinality;
-        }
         NodeTest originNodeType;
         NodeTest nodeTest = test;
         ItemType contextItemType = staticInfo.getItemType();
@@ -938,6 +949,7 @@ public final class AxisExpression extends Expression {
      * axes.
      */
 
+    @Override
     public boolean isSubtreeExpression() {
         return AxisInfo.isSubtreeAxis[axis];
     }
@@ -948,7 +960,7 @@ public final class AxisExpression extends Expression {
      * @return the axis number, for example {@link net.sf.saxon.om.AxisInfo#CHILD}
      */
 
-    public byte getAxis() {
+    public int getAxis() {
         return axis;
     }
 
@@ -973,6 +985,7 @@ public final class AxisExpression extends Expression {
      * expression is the first operand of a path expression or filter expression
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         if (pathMapNodeSet == null) {
             ContextItemExpression cie = new ContextItemExpression();
@@ -1013,7 +1026,7 @@ public final class AxisExpression extends Expression {
             test = AnyNodeTest.getInstance();
         }
         if (test instanceof AnyNodeTest && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
-            test = AnyChildNodeTest.getInstance();
+            test = MultipleNodeKindTest.CHILD_NODE;
         }
         int kind = test.getPrimitiveType();
         if (axis == AxisInfo.SELF) {
@@ -1063,7 +1076,8 @@ public final class AxisExpression extends Expression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         Item item = context.getContextItem();
         if (item == null) {
             // Might as well do the test anyway, whether or not contextMaybeUndefined is set
@@ -1123,25 +1137,11 @@ public final class AxisExpression extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("axis", this);
         destination.emitAttribute("name", AxisInfo.axisName[axis]);
-        destination.emitAttribute("nodeTest", test == null ? "node()" : test.toString());
-        if ("JS".equals(((ExpressionPresenter.ExportOptions) destination.getOptions()).target)) {
-            NodeTest known = AnyNodeTest.getInstance();
-            if (axis == AxisInfo.ATTRIBUTE) {
-                known = NodeKindTest.makeNodeKindTest(Type.ATTRIBUTE);
-            } else if (axis == AxisInfo.NAMESPACE) {
-                known = NodeKindTest.makeNodeKindTest(Type.NAMESPACE);
-            }
-            int targetVersion = ((ExpressionPresenter.ExportOptions) destination.getOptions()).targetVersion;
-            try {
-                destination.emitAttribute("jsTest", test == null ? "return true;" : test.generateJavaScriptItemTypeTest(known, targetVersion));
-            } catch (XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw e;
-            }
-        }
+        destination.emitAttribute("nodeTest", AlphaCode.fromItemType(test == null ? AnyNodeTest.getInstance() : test));
         destination.endElement();
     }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -59,6 +59,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      * @return the document node
      */
 
+    @Override
     public NodeInfo getRootNode() {
         return this;
     }
@@ -98,6 +99,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      * Get the configuration previously set using setConfiguration
      */
 
+    @Override
     public Configuration getConfiguration() {
         return config;
     }
@@ -109,23 +111,15 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      *         registered
      */
 
+    @Override
     public NamePool getNamePool() {
         return config.getNamePool();
     }
 
 
+    @Override
     public void setSystemId(String uri) {
         ((Document)node).setBaseURI(uri);
-    }
-
-    /**
-     * Ask whether the document contains any nodes whose type annotation is anything other than
-     * UNTYPED
-     *
-     * @return true if the document contains elements whose type is other than UNTYPED
-     */
-    public boolean isTyped() {
-        return false;
     }
 
     /**
@@ -135,6 +129,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      * @return the unique number identifying this document within the name pool
      */
 
+    @Override
     public long getDocumentNumber() {
         return documentNumber;
     }
@@ -150,6 +145,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo selectID(String id, boolean getParent) {
         if (idIndex == null) {
             Element elem;
@@ -195,6 +191,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      *         information is not available then an empty iterator is returned
      */
 
+    @Override
     public Iterator<String> getUnparsedEntityNames() {
         return Collections.emptyIterator();
     }
@@ -206,6 +203,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      * @return null: XOM does not provide access to unparsed entities
      */
 
+    @Override
     public String[] getUnparsedEntity(String name) {
         return null;
     }
@@ -220,6 +218,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      *             document during its construction.
      * @since 9.9
      */
+    @Override
     public void setSpaceStrippingRule(SpaceStrippingRule rule) {
         this.spaceStrippingRule = rule;
     }
@@ -234,6 +233,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      * indicating that no space stripping has been applied
      * @since 9.9
      */
+    @Override
     public SpaceStrippingRule getSpaceStrippingRule() {
         return spaceStrippingRule;
     }
@@ -249,6 +249,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      *              removes the existing value for the property.
      */
 
+    @Override
     public void setUserData(String key, Object value) {
         if (userData == null) {
             userData = new HashMap<>(4);
@@ -268,6 +269,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
      * @return the value of the property, or null if the property has not been defined.
      */
 
+    @Override
     public Object getUserData(String key) {
         if (userData == null) {
             return null;

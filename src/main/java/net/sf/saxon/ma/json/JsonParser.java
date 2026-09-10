@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,7 +16,6 @@ import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.StringToDouble;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.value.Whitespace;
 
 import java.util.Map;
 
@@ -61,7 +60,7 @@ public class JsonParser {
      */
     public void parse(String input, int flags, JsonHandler handler, XPathContext context) throws XPathException {
         if (input.isEmpty()) {
-            invalidJSON("An empty string is not valid JSON", ERR_GRAMMAR);
+            invalidJSON("An empty string is not valid JSON", ERR_GRAMMAR, 1);
         }
 
         JsonTokenizer t = new JsonTokenizer(input);
@@ -69,14 +68,14 @@ public class JsonParser {
 
         parseConstruct(handler, t, flags, context);
 
-        if (t.next() != JsonTokenizer.EOF) {
-            invalidJSON("Unexpected token beyond end of JSON input", ERR_GRAMMAR);
+        if (t.next() != JsonToken.EOF) {
+            invalidJSON("Unexpected token beyond end of JSON input", ERR_GRAMMAR, t.lineNumber);
         }
 
     }
 
 
-    public static int getFlags(Map<String, Sequence<?>> options, XPathContext context, Boolean allowValidate) throws XPathException {
+    public static int getFlags(Map<String, Sequence> options, XPathContext context, Boolean allowValidate) throws XPathException {
         int flags = 0;
         BooleanValue debug = (BooleanValue) options.get("debug");
         if (debug != null && debug.getBooleanValue()) {
@@ -149,39 +148,39 @@ public class JsonParser {
             System.err.println("token:" + tokenizer.currentToken + " :" + tokenizer.currentTokenValue);
         }
         switch (tokenizer.currentToken) {
-            case JsonTokenizer.LCURLY:
+            case LCURLY:
                 parseObject(handler, tokenizer, flags, context);
                 break;
 
-            case JsonTokenizer.LSQB:
+            case LSQB:
                 parseArray(handler, tokenizer, flags, context);
                 break;
 
-            case JsonTokenizer.NUMERIC_LITERAL:
+            case NUMERIC_LITERAL:
                 String lexical = tokenizer.currentTokenValue.toString();
-                double d = parseNumericLiteral(lexical, flags);
+                double d = parseNumericLiteral(lexical, flags, tokenizer.lineNumber);
                 handler.writeNumeric(lexical, d);
                 break;
 
-            case JsonTokenizer.TRUE:
+            case TRUE:
                 handler.writeBoolean(true);
                 break;
 
-            case JsonTokenizer.FALSE:
+            case FALSE:
                 handler.writeBoolean(false);
                 break;
 
-            case JsonTokenizer.NULL:
+            case NULL:
                 handler.writeNull();
                 break;
 
-            case JsonTokenizer.STRING_LITERAL:
+            case STRING_LITERAL:
                 String literal = tokenizer.currentTokenValue.toString();
-                handler.writeString(unescape(literal, flags, ERR_GRAMMAR));
+                handler.writeString(unescape(literal, flags, ERR_GRAMMAR, tokenizer.lineNumber));
                 break;
 
             default:
-                invalidJSON("Unexpected symbol: " + tokenizer.currentTokenValue, ERR_GRAMMAR);
+                invalidJSON("Unexpected symbol: " + tokenizer.currentTokenValue, ERR_GRAMMAR, tokenizer.lineNumber);
         }
     }
 
@@ -198,22 +197,22 @@ public class JsonParser {
     private void parseObject(JsonHandler handler, JsonTokenizer tokenizer, int flags, XPathContext context) throws XPathException {
         boolean liberal = (flags & LIBERAL) != 0;
         handler.startMap();
-        int tok = tokenizer.next();
-        while (tok != JsonTokenizer.RCURLY) {
-            if (tok != JsonTokenizer.STRING_LITERAL && !(tok == JsonTokenizer.UNQUOTED_STRING && liberal)) {
-                invalidJSON("Property name must be a string literal", ERR_GRAMMAR);
+        JsonToken tok = tokenizer.next();
+        while (tok != JsonToken.RCURLY) {
+            if (tok != JsonToken.STRING_LITERAL && !(tok == JsonToken.UNQUOTED_STRING && liberal)) {
+                invalidJSON("Property name must be a string literal", ERR_GRAMMAR, tokenizer.lineNumber);
             }
             String key = tokenizer.currentTokenValue.toString();
-            key = unescape(key, flags, ERR_GRAMMAR);
+            key = unescape(key, flags, ERR_GRAMMAR, tokenizer.lineNumber);
             String reEscaped = handler.reEscape(key);
             tok = tokenizer.next();
-            if (tok != JsonTokenizer.COLON) {
-                invalidJSON("Missing colon after \"" + Err.wrap(key) + "\"", ERR_GRAMMAR);
+            if (tok != JsonToken.COLON) {
+                invalidJSON("Missing colon after \"" + Err.wrap(key) + "\"", ERR_GRAMMAR, tokenizer.lineNumber);
             }
             tokenizer.next();
             boolean duplicate = handler.setKey(key, reEscaped);
             if (duplicate && ((flags & DUPLICATES_REJECTED) != 0)) {
-                invalidJSON("Duplicate key value \"" + Err.wrap(key) + "\"", ERR_DUPLICATE);
+                invalidJSON("Duplicate key value \"" + Err.wrap(key) + "\"", ERR_DUPLICATE, tokenizer.lineNumber);
             }
             try {
                 if (!duplicate || ((flags & (DUPLICATES_LAST | DUPLICATES_RETAINED)) != 0)) {
@@ -225,22 +224,22 @@ public class JsonParser {
                     parseConstruct(h2, tokenizer, flags, context);
                 }
             } catch (StackOverflowError e) {
-                invalidJSON("Objects are too deeply nested", ERR_LIMITS);
+                invalidJSON("Objects are too deeply nested", ERR_LIMITS, tokenizer.lineNumber);
             }
             tok = tokenizer.next();
-            if (tok == JsonTokenizer.COMMA) {
+            if (tok == JsonToken.COMMA) {
                 tok = tokenizer.next();
-                if (tok == JsonTokenizer.RCURLY) {
+                if (tok == JsonToken.RCURLY) {
                     if (liberal) {
                         break;  // tolerate the trailing comma
                     } else {
-                        invalidJSON("Trailing comma after entry in object", ERR_GRAMMAR);
+                        invalidJSON("Trailing comma after entry in object", ERR_GRAMMAR, tokenizer.lineNumber);
                     }
                 }
-            } else if (tok == JsonTokenizer.RCURLY) {
+            } else if (tok == JsonToken.RCURLY) {
                 break;
             } else {
-                invalidJSON("Unexpected token after value of \"" + Err.wrap(key) + "\" property", ERR_GRAMMAR);
+                invalidJSON("Unexpected token after value of \"" + Err.wrap(key) + "\" property", ERR_GRAMMAR, tokenizer.lineNumber);
             }
         }
         handler.endMap();
@@ -259,8 +258,8 @@ public class JsonParser {
     private void parseArray(JsonHandler handler, JsonTokenizer tokenizer, int flags, XPathContext context) throws XPathException {
         boolean liberal = (flags & LIBERAL) != 0;
         handler.startArray();
-        int tok = tokenizer.next();
-        if (tok == JsonTokenizer.RSQB) {
+        JsonToken tok = tokenizer.next();
+        if (tok == JsonToken.RSQB) {
             handler.endArray();
             return;
         }
@@ -268,23 +267,23 @@ public class JsonParser {
             try {
                 parseConstruct(handler, tokenizer, flags, context);
             } catch (StackOverflowError e) {
-                invalidJSON("Arrays are too deeply nested", ERR_LIMITS);
+                invalidJSON("Arrays are too deeply nested", ERR_LIMITS, tokenizer.lineNumber);
             }
             tok = tokenizer.next();
-            if (tok == JsonTokenizer.COMMA) {
+            if (tok == JsonToken.COMMA) {
                 tok = tokenizer.next();
-                if (tok == JsonTokenizer.RSQB) {
+                if (tok == JsonToken.RSQB) {
                     if (liberal) {
                         break;// tolerate the trailing comma
                     } else {
-                        invalidJSON("Trailing comma after entry in array", ERR_GRAMMAR);
+                        invalidJSON("Trailing comma after entry in array", ERR_GRAMMAR, tokenizer.lineNumber);
                     }
                 }
-            } else if (tok == JsonTokenizer.RSQB) {
+            } else if (tok == JsonToken.RSQB) {
                 break;
             } else {
                 invalidJSON("Unexpected token (" + toString(tok, tokenizer.currentTokenValue.toString()) +
-                                    ") after entry in array", ERR_GRAMMAR);
+                                    ") after entry in array", ERR_GRAMMAR, tokenizer.lineNumber);
             }
         }
         handler.endArray();
@@ -299,12 +298,12 @@ public class JsonParser {
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs (such as invalid JSON input)
      */
 
-    private double parseNumericLiteral(String token, int flags) throws XPathException {
+    private double parseNumericLiteral(String token, int flags, int lineNumber) throws XPathException {
         try {
             if ((flags & LIBERAL) == 0) {
                 // extra checks on the number disabled by choosing spec="liberal"
                 if (token.startsWith("+")) {
-                    invalidJSON("Leading + sign not allowed: " + token, ERR_GRAMMAR);
+                    invalidJSON("Leading + sign not allowed: " + token, ERR_GRAMMAR, lineNumber);
                 } else {
                     String t = token;
                     if (t.startsWith("-")) {
@@ -312,19 +311,19 @@ public class JsonParser {
                     }
                     if (t.startsWith("0") &&
                             !(t.equals("0") || t.startsWith("0.") || t.startsWith("0e") || t.startsWith("0E"))) {
-                        invalidJSON("Redundant leading zeroes not allowed: " + token, ERR_GRAMMAR);
+                        invalidJSON("Redundant leading zeroes not allowed: " + token, ERR_GRAMMAR, lineNumber);
                     }
                     if (t.endsWith(".") || t.contains(".e") || t.contains(".E")) {
-                        invalidJSON("Empty fractional part not allowed", ERR_GRAMMAR);
+                        invalidJSON("Empty fractional part not allowed", ERR_GRAMMAR, lineNumber);
                     }
                     if (t.startsWith(".")) {
-                        invalidJSON("Empty integer part not allowed", ERR_GRAMMAR);
+                        invalidJSON("Empty integer part not allowed", ERR_GRAMMAR, lineNumber);
                     }
                 }
             }
             return StringToDouble.getInstance().stringToNumber(token);
         } catch (NumberFormatException e) {
-            invalidJSON("Invalid numeric literal: " + e.getMessage(), ERR_GRAMMAR);
+            invalidJSON("Invalid numeric literal: " + e.getMessage(), ERR_GRAMMAR, lineNumber);
             return Double.NaN;
         }
     }
@@ -339,7 +338,7 @@ public class JsonParser {
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs (such as invalid JSON input)
      */
 
-    public static String unescape(String literal, int flags, String errorCode) throws XPathException {
+    public static String unescape(String literal, int flags, String errorCode, int lineNumber) throws XPathException {
         if (literal.indexOf('\\') < 0) {
             return literal;
         }
@@ -353,34 +352,34 @@ public class JsonParser {
                 }
                 switch (literal.charAt(i)) {
                     case '"':
-                        buffer.append('"');
+                        buffer.cat('"');
                         break;
                     case '\\':
-                        buffer.append('\\');
+                        buffer.cat('\\');
                         break;
                     case '/':
-                        buffer.append('/');
+                        buffer.cat('/');
                         break;
                     case 'b':
-                        buffer.append('\b');
+                        buffer.cat('\b');
                         break;
                     case 'f':
-                        buffer.append('\f');
+                        buffer.cat('\f');
                         break;
                     case 'n':
-                        buffer.append('\n');
+                        buffer.cat('\n');
                         break;
                     case 'r':
-                        buffer.append('\r');
+                        buffer.cat('\r');
                         break;
                     case 't':
-                        buffer.append('\t');
+                        buffer.cat('\t');
                         break;
                     case 'u':
                         try {
                             String hex = literal.substring(i + 1, i + 5);
                             int code = Integer.parseInt(hex, 16);
-                            buffer.append((char) code);
+                            buffer.cat((char) code);
                             i += 4;
                         } catch (Exception e) {
                             if (liberal) {
@@ -392,7 +391,7 @@ public class JsonParser {
                         break;
                     default:
                         if (liberal) {
-                            buffer.append(literal.charAt(i));
+                            buffer.cat(literal.charAt(i));
                         } else {
                             char next = literal.charAt(i);
                             String xx = next < 256 ? next + "" : "x" + Integer.toHexString(next);
@@ -400,7 +399,7 @@ public class JsonParser {
                         }
                 }
             } else {
-                buffer.append(c);
+                buffer.cat(c);
             }
         }
         return buffer.toString();
@@ -427,11 +426,15 @@ public class JsonParser {
      * @throws net.sf.saxon.trans.XPathException always
      */
 
-    private void invalidJSON(String message, String code)
+    private void invalidJSON(String message, String code, int lineNumber)
             throws XPathException {
-        error("Invalid JSON input: " + message, code);
+        error("Invalid JSON input on line " + lineNumber + ": " + message, code);
     }
 
+    private enum JsonToken {
+        LSQB, RSQB, LCURLY, RCURLY, STRING_LITERAL, NUMERIC_LITERAL, TRUE,
+        FALSE, NULL, COLON, COMMA, UNQUOTED_STRING, EOF
+    }
 
     /**
      * Inner class to do the tokenization
@@ -441,24 +444,11 @@ public class JsonParser {
 
         private String input;
         private int position;
-        public int currentToken;
+        private int lineNumber = 1;
+        public JsonToken currentToken;
         public FastStringBuffer currentTokenValue = new FastStringBuffer(FastStringBuffer.C64);
 
-        public final static int LSQB = 1;
-        public final static int RSQB = 2;
-        public static final int LCURLY = 3;
-        public static final int RCURLY = 4;
-        public static final int STRING_LITERAL = 5;
-        public static final int NUMERIC_LITERAL = 6;
-        public static final int TRUE = 7;
-        public static final int FALSE = 8;
-        public static final int NULL = 9;
-        public static final int COLON = 10;
-        public static final int COMMA = 11;
-        public static final int UNQUOTED_STRING = 12;  // for "liberal" parsing only
-        public static final int EOF = 999;
-
-        public JsonTokenizer(String input) {
+        JsonTokenizer(String input) {
             this.input = input;
             this.position = 0;
             // Ignore a leading BOM
@@ -467,40 +457,52 @@ public class JsonParser {
             }
         }
 
-        public int next() throws XPathException {
+        public JsonToken next() throws XPathException {
             currentToken = readToken();
             return currentToken;
         }
 
-        private int readToken() throws XPathException {
+        private JsonToken readToken() throws XPathException {
             if (position >= input.length()) {
-                return EOF;
+                return JsonToken.EOF;
             }
-            while (Whitespace.isWhitespace(input.charAt(position))) {
-                if (++position >= input.length()) {
-                    return EOF;
+            ws: while (true) {
+                char c = input.charAt(position);
+                switch (c) {
+                    case '\n':
+                    case '\r':
+                        lineNumber++;
+                        // drop through
+                    case ' ':
+                    case '\t':
+                        if (++position >= input.length()) {
+                            return JsonToken.EOF;
+                        }
+                        break;
+                    default:
+                        break ws;
                 }
             }
             char ch = input.charAt(position++);
             switch (ch) {
                 case '[':
-                    return LSQB;
+                    return JsonToken.LSQB;
                 case '{':
-                    return LCURLY;
+                    return JsonToken.LCURLY;
                 case ']':
-                    return RSQB;
+                    return JsonToken.RSQB;
                 case '}':
-                    return RCURLY;
+                    return JsonToken.RCURLY;
                 case '"':
                     currentTokenValue.setLength(0);
                     boolean afterBackslash = false;
                     while (true) {
                         if (position >= input.length()) {
-                            invalidJSON("Unclosed quotes in string literal", ERR_GRAMMAR);
+                            invalidJSON("Unclosed quotes in string literal", ERR_GRAMMAR, lineNumber);
                         }
                         char c = input.charAt(position++);
                         if (c < 32) {
-                            invalidJSON("Unescaped control character (x" + Integer.toHexString(c) + ")", ERR_GRAMMAR);
+                            invalidJSON("Unescaped control character (x" + Integer.toHexString(c) + ")", ERR_GRAMMAR, lineNumber);
                         }
                         if (afterBackslash && c == 'u') {
                             try {
@@ -508,21 +510,21 @@ public class JsonParser {
                                 //noinspection ResultOfMethodCallIgnored
                                 Integer.parseInt(hex, 16);
                             } catch (Exception e) {
-                                invalidJSON("\\u must be followed by four hex characters", ERR_GRAMMAR);
+                                invalidJSON("\\u must be followed by four hex characters", ERR_GRAMMAR, lineNumber);
                             }
                         }
                         if (c == '"' && !afterBackslash) {
                             break;
                         } else {
-                            currentTokenValue.append(c);
+                            currentTokenValue.cat(c);
                             afterBackslash = c == '\\' && !afterBackslash;
                         }
                     }
-                    return STRING_LITERAL;
+                    return JsonToken.STRING_LITERAL;
                 case ':':
-                    return COLON;
+                    return JsonToken.COLON;
                 case ',':
-                    return COMMA;
+                    return JsonToken.COMMA;
                 case '-':
                 case '+': // for liberal parsing
                 case '.': // for liberal parsing
@@ -537,12 +539,12 @@ public class JsonParser {
                 case '8':
                 case '9':
                     currentTokenValue.setLength(0);
-                    currentTokenValue.append(ch);
+                    currentTokenValue.cat(ch);
                     if (position < input.length()) {   // We could be in ECMA mode when there is a single digit
                         while (true) {
                             char c = input.charAt(position);
                             if ((c >= '0' && c <= '9') || c == '-' || c == '+' || c == '.' || c == 'e' || c == 'E') {
-                                currentTokenValue.append(c);
+                                currentTokenValue.cat(c);
                                 if (++position >= input.length()) {
                                     break;
                                 }
@@ -551,16 +553,16 @@ public class JsonParser {
                             }
                         }
                     }
-                    return NUMERIC_LITERAL;
+                    return JsonToken.NUMERIC_LITERAL;
                 default: {
                     // Allow unquoted strings in liberal mode
                     if (NameChecker.isNCNameChar(ch)) {
                         currentTokenValue.setLength(0);
-                        currentTokenValue.append(ch);
+                        currentTokenValue.cat(ch);
                         while (position < input.length()) {
                             char c = input.charAt(position);
                             if (NameChecker.isNCNameChar(c)) {
-                                currentTokenValue.append(c);
+                                currentTokenValue.cat(c);
                                 position++;
                             } else {
                                 break;
@@ -569,19 +571,19 @@ public class JsonParser {
                         String val = currentTokenValue.toString();
                         switch (val) {
                             case "true":
-                                return TRUE;
+                                return JsonToken.TRUE;
                             case "false":
-                                return FALSE;
+                                return JsonToken.FALSE;
                             case "null":
-                                return NULL;
+                                return JsonToken.NULL;
                             default:
-                                return UNQUOTED_STRING;
+                                return JsonToken.UNQUOTED_STRING;
                         }
                     } else {
                         char c = input.charAt(--position);
                         invalidJSON("Unexpected character '" + c + "' (\\u" +
-                                            Integer.toHexString(c) + ") at position " + position, ERR_GRAMMAR);
-                        return -1;
+                                            Integer.toHexString(c) + ") at position " + position, ERR_GRAMMAR, lineNumber);
+                        return JsonToken.EOF;
                     }
                 }
             }
@@ -589,31 +591,31 @@ public class JsonParser {
     }
 
 
-    public static String toString(int token, String currentTokenValue) {
+    public static String toString(JsonToken token, String currentTokenValue) {
         switch (token) {
-            case JsonTokenizer.LSQB:
+            case LSQB:
                 return "[";
-            case JsonTokenizer.RSQB:
+            case RSQB:
                 return "]";
-            case JsonTokenizer.LCURLY:
+            case LCURLY:
                 return "{";
-            case JsonTokenizer.RCURLY:
+            case RCURLY:
                 return "}";
-            case JsonTokenizer.STRING_LITERAL:
+            case STRING_LITERAL:
                 return "string (\"" + currentTokenValue + "\")";
-            case JsonTokenizer.NUMERIC_LITERAL:
+            case NUMERIC_LITERAL:
                 return "number (" + currentTokenValue + ")";
-            case JsonTokenizer.TRUE:
+            case TRUE:
                 return "true";
-            case JsonTokenizer.FALSE:
+            case FALSE:
                 return "false";
-            case JsonTokenizer.NULL:
+            case NULL:
                 return "null";
-            case JsonTokenizer.COLON:
+            case COLON:
                 return ":";
-            case JsonTokenizer.COMMA:
+            case COMMA:
                 return ",";
-            case JsonTokenizer.EOF:
+            case EOF:
                 return "<eof>";
             default:
                 return "<" + token + ">";
@@ -623,4 +625,4 @@ public class JsonParser {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

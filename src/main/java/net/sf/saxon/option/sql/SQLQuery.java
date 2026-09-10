@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,24 +9,27 @@ package net.sf.saxon.option.sql;
 
 import com.saxonica.functions.sql.SQLFunctionSet;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.event.SequenceOutputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SimpleExpression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.QName;
+import net.sf.saxon.sapling.SaplingElement;
+import net.sf.saxon.sapling.SaplingText;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.Untyped;
+import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.StringValue;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -75,33 +78,37 @@ public class SQLQuery extends ExtensionInstruction {
 
     boolean disable = false;    // true means disable-output-escaping="yes"
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         // Attributes for SQL-statement
-        String dbCol = getAttributeValue("", "column");
+        AttributeMap atts = attributes();
+        AttributeInfo dbCol = atts.get("", "column");
         if (dbCol == null) {
             reportAbsence("column");
+        } else {
+            column = makeAttributeValueTemplate(dbCol.getValue(), dbCol);
         }
-        column = makeAttributeValueTemplate(dbCol, getAttributeList().getIndex("", "column"));
 
-        String dbTab = getAttributeValue("", "table");
+        AttributeInfo dbTab = atts.get("", "table");
         if (dbTab == null) {
             reportAbsence("table");
-            dbTab = "saxon-dummy-table";
+            table = new StringLiteral("saxon-dummy-table");
+        } else {
+            table = makeAttributeValueTemplate(dbTab.getValue(), dbTab);
         }
-        table = makeAttributeValueTemplate(dbTab, getAttributeList().getIndex("", "table"));
 
-        String dbWhere = getAttributeValue("", "where");
+        AttributeInfo dbWhere = atts.get("", "where");
         if (dbWhere == null) {
             where = new StringLiteral(StringValue.EMPTY_STRING);
         } else {
-            where = makeAttributeValueTemplate(dbWhere, getAttributeList().getIndex("", "where"));
+            where = makeAttributeValueTemplate(dbWhere.getValue(), dbWhere);
         }
 
-        String connectAtt = getAttributeValue("", "connection");
+        AttributeInfo connectAtt = atts.get("", "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {
-            connection = makeExpression(connectAtt, getAttributeList().getIndex("", "connection"));
+            connection = makeExpression(connectAtt.getValue(), connectAtt);
         }
 
         // Atributes for row & column element names
@@ -139,6 +146,7 @@ public class SQLQuery extends ExtensionInstruction {
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
         column = typeCheck("column", column);
@@ -147,6 +155,7 @@ public class SQLQuery extends ExtensionInstruction {
         connection = typeCheck("connection", connection);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return new QueryInstruction(connection,
                 column, table, where,
@@ -161,7 +170,7 @@ public class SQLQuery extends ExtensionInstruction {
         public static final int WHERE = 3;
         String rowTag;
         String colTag;
-        int options;
+        int options = ReceiverOption.NONE;
 
         public QueryInstruction(Expression connection,
                                 Expression column,
@@ -174,7 +183,7 @@ public class SQLQuery extends ExtensionInstruction {
             setArguments(sub);
             this.rowTag = rowTag;
             this.colTag = colTag;
-            this.options = disable ? ReceiverOptions.DISABLE_ESCAPING : 0;
+            this.options = disable ? ReceiverOption.DISABLE_ESCAPING : ReceiverOption.NONE;
         }
 
         private QueryInstruction(){}
@@ -184,14 +193,17 @@ public class SQLQuery extends ExtensionInstruction {
          * This method indicates which of the three is provided.
          */
 
+        @Override
         public int getImplementationMethod() {
             return Expression.PROCESS_METHOD;
         }
 
+        @Override
         public String getExpressionType() {
             return "sql:query";
         }
 
+        @Override
         public Expression copy(RebindingMap rebindings) {
             QueryInstruction qi2 = new QueryInstruction();
             qi2.copyOperandsFrom(this);
@@ -201,7 +213,8 @@ public class SQLQuery extends ExtensionInstruction {
             return qi2;
         }
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments /*@NotNull*/) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments /*@NotNull*/) throws XPathException {
             // Prepare the SQL statement (only do this once)
 
             Controller controller = context.getController();
@@ -212,17 +225,17 @@ public class SQLQuery extends ExtensionInstruction {
 
 
             Set<String> validNames = new HashSet<>();
-            NodeName rowCode;
+            QName rowCode;
             if (rowTag.equals("#auto")) {
                 if (NameChecker.isValidNCName(dbTab)) {
-                    rowCode = new NoNamespaceName(dbTab);
+                    rowCode = new QName(dbTab);
                 } else {
-                    rowCode = new NoNamespaceName("row");
+                    rowCode = new QName("row");
                 }
             } else {
-                rowCode = new NoNamespaceName(rowTag);
+                rowCode = new QName(rowTag);
             }
-            NodeName colCode = "#auto".equals(colTag) ? null : new NoNamespaceName(colTag);
+            QName colCode = "#auto".equals(colTag) ? null : new QName(colTag);
 
             PreparedStatement ps = null;
             ResultSet rs = null;
@@ -247,17 +260,18 @@ public class SQLQuery extends ExtensionInstruction {
                 ResultSetMetaData metaData = rs.getMetaData();
 
                 // -- Print out Result
-                SequenceOutputter out = context.getController().allocateSequenceOutputter(50);
+
                 String result = "";
                 int icol = rs.getMetaData().getColumnCount();
+                List<NodeInfo> resultElements = new ArrayList<>();
                 while (rs.next()) {                            // next row
                     //System.out.print("<- SQL : "+ rowStart);
-                    out.startElement(rowCode, Untyped.getInstance(), getLocation(), 0);
+                    SaplingElement rowElem = new SaplingElement(rowCode);
                     for (int col = 1; col <= icol; col++) {     // next column
                         // Read result from RS only once, because
                         // of JDBC-Specifications
                         result = rs.getString(col);
-                        NodeName colName = colCode;
+                        QName colName = colCode;
                         String sqlName = null;
                         boolean nameOK = false;
                         if (colName == null) {
@@ -269,31 +283,28 @@ public class SQLQuery extends ExtensionInstruction {
                                 validNames.add(sqlName);
                             }
                             if (nameOK) {
-                                colName = new NoNamespaceName(sqlName);
+                                colName = new QName(sqlName);
                             } else {
-                                colName = new NoNamespaceName("col");
+                                colName = new QName("col");
                             }
                         } else {
                             nameOK = true;
                         }
-                        out.startElement(colName, Untyped.getInstance(), getLocation(), 0);
+                        SaplingElement colElem = new SaplingElement(colName);
                         if (sqlName != null && !nameOK) {
-                            out.attribute(new NoNamespaceName("name"), BuiltInAtomicType.UNTYPED_ATOMIC, sqlName, getLocation(), 0);
+                            colElem = colElem.withAttr("name", sqlName);
                         }
                         if (result != null) {
-                            out.characters(result, getLocation(), options);
+                            colElem = colElem.withChild(new SaplingText(result));
                         }
-                        out.endElement();
+                        rowElem = rowElem.withChild(colElem);
                     }
-                    //System.out.println(rowEnd);
-                    out.endElement();
+                    resultElements.add(rowElem.toNodeInfo(getConfiguration()));
                 }
-                //rs.close();
-
                 if (!connection.getAutoCommit()) {
                     connection.commit();
                 }
-                return SequenceTool.toLazySequence(out.iterate());
+                return new SequenceExtent(resultElements);
 
             } catch (SQLException ex) {
                 de = new XPathException("(SQL) " + ex.getMessage());

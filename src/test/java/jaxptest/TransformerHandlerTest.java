@@ -1,7 +1,7 @@
 package jaxptest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -13,10 +13,13 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  *
  */
-public class TransformerHandlerTest extends TestCase {
+public class TransformerHandlerTest {
 
 //    public void testStreamingViaJaxp() {
 //
@@ -34,7 +37,7 @@ public class TransformerHandlerTest extends TestCase {
 //
 //            TransformerFactory factory = new StreamingTransformerFactory();
 //            Transformer transformer = factory.newTransformer(new StreamSource(new StringReader(xsl)));
-//            transformer.setErrorListener(new StandardErrorListener() {
+//            transformer.setErrorReporter(new StandardErrorListener() {
 //                @Override
 //                public void warning(TransformerException exception) {
 //                    System.err.println(exception.getMessage());
@@ -71,7 +74,7 @@ public class TransformerHandlerTest extends TestCase {
 //
 //            TransformerFactory factory = new StreamingTransformerFactory();
 //            Transformer transformer = factory.newTransformer(new StreamSource(new StringReader(xsl)));
-//            transformer.setErrorListener(new StandardErrorListener() {
+//            transformer.setErrorReporter(new StandardErrorListener() {
 //                @Override
 //                public void warning(TransformerException exception) {
 //                    System.err.println(exception.getMessage());
@@ -119,6 +122,7 @@ public class TransformerHandlerTest extends TestCase {
 //
 //    }
 
+    @Test
     public void testTransformerHandlerWithUnparsedEntities() {
         // See http://stackoverflow.com/questions/43387074/accessing-unparsed-entities-in-xslt-with-a-saxtransformerfactory-and-transformer
         // See Saxon bug 3201

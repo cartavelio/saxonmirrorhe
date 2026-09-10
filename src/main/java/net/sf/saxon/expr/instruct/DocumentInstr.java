@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -71,6 +71,7 @@ public class DocumentInstr extends ParentNodeConstructor {
      * This method indicates which of these methods is prefered. For instructions this is the process() method.
      */
 
+    @Override
     public int getImplementationMethod() {
         return Expression.EVALUATE_METHOD;
     }
@@ -105,6 +106,7 @@ public class DocumentInstr extends ParentNodeConstructor {
      * @throws XPathException
      */
 
+    @Override
     protected void checkContentSequence(StaticContext env) throws XPathException {
         checkContentSequence(env, getContentOperand(), getValidationOptions());
     }
@@ -120,7 +122,7 @@ public class DocumentInstr extends ParentNodeConstructor {
         int validation = validationOptions == null ? Validation.PRESERVE : validationOptions.getSchemaValidationMode();
         SchemaType type = validationOptions == null ? null : validationOptions.getTopLevelType();
         int elementCount = 0;
-        boolean isXSLT = content.getChildExpression().getPackageData().getHostLanguage() == Configuration.XSLT;
+        boolean isXSLT = content.getChildExpression().getPackageData().isXSLT();
         for (Operand o : components) {
             Expression component = o.getChildExpression();
             ItemType it = component.getItemType();
@@ -213,6 +215,7 @@ public class DocumentInstr extends ParentNodeConstructor {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         DocumentInstr doc = new DocumentInstr(textOnly, constantText);
         ExpressionTool.copyLocationInfo(this, doc);
@@ -227,22 +230,22 @@ public class DocumentInstr extends ParentNodeConstructor {
      * @return the in
      */
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return NodeKindTest.DOCUMENT;
     }
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         if (preservingTypes && !textOnly) {
-            Receiver out = context.getReceiver();
-            out.startDocument(0);
-            getContentExpression().process(context);
-            out.endDocument();
+            output.startDocument(ReceiverOption.NONE);
+            getContentExpression().process(output, context);
+            output.endDocument();
             return null;
         } else {
             Item item = evaluateItem(context);
             if (item != null) {
-                Receiver out = context.getReceiver();
-                out.append(item, getLocation(), ReceiverOptions.ALL_NAMESPACES);
+                output.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
             }
             return null;
         }
@@ -252,10 +255,10 @@ public class DocumentInstr extends ParentNodeConstructor {
      * Evaluate as an item.
      */
 
+    @Override
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
         Controller controller = context.getController();
         Configuration config = controller.getConfiguration();
-        assert controller != null;
 
         NodeInfo root;
         if (textOnly) {
@@ -267,14 +270,13 @@ public class DocumentInstr extends ParentNodeConstructor {
                 SequenceIterator iter = getContentExpression().iterate(context);
                 Item item;
                 while ((item = iter.next()) != null) {
-                    sb.append(item.getStringValueCS());
+                    sb.cat(item.getStringValueCS());
                 }
                 textValue = sb.condense();
             }
             root = TextFragmentValue.makeTextFragment(config, textValue, getStaticBaseURIString());
         } else {
             try {
-                Receiver saved = context.getReceiver();
                 PipelineConfiguration pipe = controller.makePipelineConfiguration();
                 pipe.setXPathContext(context);
 
@@ -292,16 +294,15 @@ public class DocumentInstr extends ParentNodeConstructor {
                 pipe.setHostLanguage(getPackageData().getHostLanguage());
                 builder.setPipelineConfiguration(pipe);
 
-                Receiver out = ComplexContentOutputter.makeComplexContentReceiver(builder, getValidationOptions());
-                context.setReceiver(out);
+                ComplexContentOutputter out =
+                        ComplexContentOutputter.makeComplexContentReceiver(builder, getValidationOptions());
                 out.open();
-                out.startDocument(0);
+                out.startDocument(ReceiverOption.NONE);
 
-                getContentExpression().process(context);
+                getContentExpression().process(out, context);
 
                 out.endDocument();
                 out.close();
-                context.setReceiver(saved);
                 root = builder.getCurrentRoot();
             } catch (XPathException e) {
                 e.maybeSetLocation(getLocation());
@@ -318,6 +319,7 @@ public class DocumentInstr extends ParentNodeConstructor {
      * (the string "document-constructor")
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_DOCUMENT;
     }
@@ -327,6 +329,7 @@ public class DocumentInstr extends ParentNodeConstructor {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("doc", this);
         if (!out.isRelocatable()) {

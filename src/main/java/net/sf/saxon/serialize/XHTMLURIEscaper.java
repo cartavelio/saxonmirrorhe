@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,13 +8,17 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.codenorm.Normalizer;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.type.SchemaType;
 
 import java.util.HashSet;
 
@@ -99,36 +103,52 @@ public class XHTMLURIEscaper extends HTMLURIEscaper {
     }
 
     /**
-     * Notify an attribute. Attributes are notified after the startElement event, and before any
-     * children. Namespaces and attributes may be intermingled.
-     *
-     * @param attName    The name of the attribute
-     * @param typeCode   The type of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     * @param properties Bit significant value. The following bits are defined:
-     *                   <dl>
-     *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
-     *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
-     *                   </dl>
-     * @throws IllegalStateException: attempt to output an attribute when there is no open element
-     *                                start tag
+     * Notify the start of an element
+     *  @param nameCode
+     * @param type
+     * @param attributes
+     * @param namespaces
+     * @param location
+     * @param properties
      */
+    @Override
+    public void startElement(NodeName nameCode, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
 
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-        if (escapeURIAttributes &&
-                isURLAttribute(currentElement, attName) &&
-                (properties & ReceiverOptions.DISABLE_ESCAPING) == 0) {
-            CharSequence normalized = isAllAscii(value)
-                    ? value
-                    : Normalizer.make(Normalizer.C, getConfiguration()).normalize(value);
-
-            getNextReceiver().attribute(
-                    attName, typeCode, escapeURL(normalized, true, getConfiguration()), locationId,
-                    properties | ReceiverOptions.DISABLE_CHARACTER_MAPS);
-        } else {
-            getNextReceiver().attribute(
-                    attName, typeCode, value, locationId, properties);
+        currentElement = nameCode;
+        AttributeMap atts2 = attributes;
+        if (escapeURIAttributes) {
+            try {
+                atts2 = attributes.apply(att -> {
+                    if (!ReceiverOption.contains(att.getProperties(), ReceiverOption.DISABLE_ESCAPING)) {
+                        NodeName attName = att.getNodeName();
+                        if (isUrlAttribute(nameCode, attName)) {
+                            String value = att.getValue();
+                            try {
+                                CharSequence normalized = (isAllAscii(value)
+                                                               ? value
+                                                               : Normalizer.make(Normalizer.C, getConfiguration()).normalize(value));
+                                return new AttributeInfo(
+                                        attName,
+                                        att.getType(),
+                                        escapeURL(normalized, true, getConfiguration()).toString(),
+                                        att.getLocation(),
+                                        att.getProperties() | ReceiverOption.DISABLE_CHARACTER_MAPS);
+                            } catch (XPathException e) {
+                                throw new UncheckedXPathException(e);
+                            }
+                        } else {
+                            return att;
+                        }
+                    } else {
+                        return att;
+                    }
+                });
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
+
+        nextReceiver.startElement(nameCode, type, atts2, namespaces, location, properties);
     }
 
     private static boolean isAllAscii(/*@NotNull*/ CharSequence value) {

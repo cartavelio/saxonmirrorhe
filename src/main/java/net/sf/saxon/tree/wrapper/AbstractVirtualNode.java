@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,14 +7,15 @@
 
 package net.sf.saxon.tree.wrapper;
 
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
+
+import java.util.function.Predicate;
 
 
 /**
@@ -34,6 +35,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return the TreeInfo
      * @since 9.7
      */
+    @Override
     public TreeInfo getTreeInfo() {
         return docWrapper;
     }
@@ -42,6 +44,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * Get the underlying node, to implement the VirtualNode interface
      */
 
+    @Override
     public NodeInfo getUnderlyingNode() {
         return node;
     }
@@ -77,6 +80,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return The underlying node.
      */
 
+    @Override
     public Object getRealNode() {
         Object u = this;
         do {
@@ -91,6 +95,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return one of the values Node.ELEMENT, Node.TEXT, Node.ATTRIBUTE, etc.
      */
 
+    @Override
     public int getNodeKind() {
         return node.getNodeKind();
     }
@@ -104,6 +109,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @since 8.5
      */
 
+    @Override
     public AtomicSequence atomize() throws XPathException {
         // The default implementation atomizes the base node
         return node.atomize();
@@ -115,6 +121,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return the type annotation of the base node
      */
 
+    @Override
     public SchemaType getSchemaType() {
         return node.getSchemaType();
     }
@@ -162,10 +169,12 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      */
 
     /*@Nullable*/
+    @Override
     public String getSystemId() {
         return node.getSystemId();
     }
 
+    @Override
     public void setSystemId(String uri) {
         node.setSystemId(uri);
     }
@@ -176,6 +185,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * currently take any account of xml:base attributes.
      */
 
+    @Override
     public String getBaseURI() {
         return node.getBaseURI();
     }
@@ -186,6 +196,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return the line number of the node in its original source document; or -1 if not available
      */
 
+    @Override
     public int getLineNumber() {
         return node.getLineNumber();
     }
@@ -196,6 +207,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return the column number of the node in its original source document; or -1 if not available
      */
 
+    @Override
     public int getColumnNumber() {
         return node.getColumnNumber();
     }
@@ -205,6 +217,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
         return this;
     }
@@ -219,6 +232,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      *         return true, and the two nodes will produce the same result for generateId())
      */
 
+    @Override
     public int compareOrder(/*@NotNull*/ NodeInfo other) {
         if (other instanceof AbstractVirtualNode) {
             return node.compareOrder(((AbstractVirtualNode) other).node);
@@ -235,6 +249,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return the string value of the node
      */
 
+    @Override
     public final String getStringValue() {
         return getStringValueCS().toString();
     }
@@ -244,6 +259,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * the version of the method that returns a String.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         // default implementation returns the string value of the base node
         return node.getStringValueCS();
@@ -256,6 +272,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      *         un unnamed namespace node, which returns "".
      */
 
+    @Override
     public String getLocalPart() {
         return node.getLocalPart();
     }
@@ -268,6 +285,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      *         For a node with an empty prefix, return an empty string.
      */
 
+    @Override
     public String getURI() {
         return node.getURI();
     }
@@ -279,6 +297,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return The prefix of the name of the node.
      */
 
+    @Override
     public String getPrefix() {
         return node.getPrefix();
     }
@@ -291,6 +310,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      *         For a node with no name, return an empty string.
      */
 
+    @Override
     public String getDisplayName() {
         return node.getDisplayName();
     }
@@ -304,7 +324,8 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      */
 
     /*@NotNull*/
-    public AxisIterator iterateAxis(byte axisNumber, NodeTest nodeTest) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         return new Navigator.AxisFilter(iterateAxis(axisNumber), nodeTest);
     }
 
@@ -318,6 +339,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      *         if this node is not an element.
      * @since 9.4
      */
+    @Override
     public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
         return node.getAttributeValue(uri, local);
     }
@@ -328,6 +350,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return the NodeInfo representing the root of the tree
      */
 
+    @Override
     public NodeInfo getRoot() {
         NodeInfo p = this;
         while (true) {
@@ -345,6 +368,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * <code>getEnumeration(Axis.CHILD, AnyNodeTest.getInstance()).hasNext()</code></p>
      */
 
+    @Override
     public boolean hasChildNodes() {
         return node.hasChildNodes();
     }
@@ -359,6 +383,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      *               unique across all documents.
      */
 
+    @Override
     public void generateId(FastStringBuffer buffer) {
         // Note: giving the node the same ID as its underlying node is slightly questionable; depends on usage
         node.generateId(buffer);
@@ -379,10 +404,26 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      *         <p>For a node other than an element, the method returns null.</p>
      */
 
+    @Override
+    @SuppressWarnings("deprecation")
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
         return node.getDeclaredNamespaces(buffer);
     }
 
+    /**
+     * Get all the namespace bindings that are in-scope for this element.
+     * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+     * a binding to the default namespace (represented by a prefix of ""). It will never include
+     * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+     * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+     * <p>For a node other than an element, returns null.</p>
+     *
+     * @return the in-scope namespaces for an element, or null for any other kind of node.
+     */
+    @Override
+    public NamespaceMap getAllNamespaces() {
+        return node.getAllNamespaces();
+    }
 
     /**
      * Determine whether this node has the is-id property
@@ -390,6 +431,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return true if the node is an ID
      */
 
+    @Override
     public boolean isId() {
         return node.isId();
     }
@@ -400,6 +442,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return true if the node is an IDREF or IDREFS element or attribute
      */
 
+    @Override
     public boolean isIdref() {
         return node.isIdref();
     }
@@ -410,6 +453,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      * @return true if the node has the is-nilled property
      */
 
+    @Override
     public boolean isNilled() {
         return node.isNilled();
     }

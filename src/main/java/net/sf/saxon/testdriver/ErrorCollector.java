@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,21 +8,23 @@
 package net.sf.saxon.testdriver;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.StandardErrorListener;
+import net.sf.saxon.lib.StandardErrorReporter;
+import net.sf.saxon.s9api.QName;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.QuitParsingException;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 
 import javax.xml.transform.TransformerException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ErrorCollector extends StandardErrorListener {
+public class ErrorCollector extends StandardErrorReporter {
 
-    private Set<String> errorCodes = new HashSet<String>();
+    private Set<String> errorCodes = new HashSet<>();
     private boolean foundWarnings = false;
     private boolean madeEarlyExit = false;
 
-    public TransformerException lastException;
+    public XmlProcessingError lastError;
 
     /**
      * Receive notification of a warning.
@@ -35,56 +37,38 @@ public class ErrorCollector extends StandardErrorListener {
      *
      * @param exception The warning information encapsulated in a
      *                  transformer exception.
-     * @see javax.xml.transform.TransformerException
+     * @see TransformerException
      */
     @Override
-    public void warning(TransformerException exception) {
-        if (exception instanceof QuitParsingException) {
-            System.err.println("** Early exit from parsing");
-            madeEarlyExit = true;
-        } else {
-            foundWarnings = true;
-        }
+    protected void warning(XmlProcessingError exception) {
+        foundWarnings = true;
         super.warning(exception);
+        if (exception instanceof XmlProcessingException
+                && ((XmlProcessingException)exception).getXPathException() instanceof QuitParsingException) {
+            madeEarlyExit = true;
+        }
     }
 
     @Override
-    public void error(TransformerException exception) {
-        lastException = exception;
+    protected void error(XmlProcessingError exception) {
+        lastError = exception;
         addErrorCode(exception);
         super.error(exception);
     }
 
-    @Override
-    public void fatalError(TransformerException exception) {
-        addErrorCode(exception);
-        super.fatalError(exception);
-    }
-
-    /**
-     * Make a clean copy of this ErrorListener. This is necessary because the
-     * standard error listener is stateful (it remembers how many errors there have been)
-     *
-     * @param hostLanguage the host language (not used by this implementation)
-     * @return a copy of this error listener
-     */
-    @Override
-    public StandardErrorListener makeAnother(int hostLanguage) {
-        return this;
-    }
-
-    private void addErrorCode(TransformerException exception) {
-        if (exception instanceof XPathException) {
-            String errorCode = ((XPathException) exception).getErrorCodeLocalPart();
-            if (errorCode != null) {
-                String ns = ((XPathException) exception).getErrorCodeNamespace();
-                if (ns != null && !NamespaceConstant.ERR.equals(ns)) {
-                    errorCode = "Q{" + ns + "}" + errorCode;
-                }
-                errorCodes.add(errorCode);
+    private void addErrorCode(XmlProcessingError exception) {
+        String code;
+        QName errorCode = exception.getErrorCode();
+        if (errorCode != null) {
+            String ns = errorCode.getNamespaceURI();
+            if (ns == null || NamespaceConstant.ERR.equals(ns)) {
+                code = errorCode.getLocalName();
             } else {
-                errorCodes.add("error-with-no-error-code");
+                code = errorCode.getEQName();
             }
+            errorCodes.add(code);
+        } else {
+            errorCodes.add("error-with-no-error-code");
         }
     }
 
@@ -99,4 +83,5 @@ public class ErrorCollector extends StandardErrorListener {
     public boolean isMadeEarlyExit() {
         return madeEarlyExit;
     }
+
 }

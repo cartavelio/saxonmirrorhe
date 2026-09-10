@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,18 +7,12 @@
 
 package net.sf.saxon.serialize;
 
-import net.sf.saxon.event.EventBuffer;
-import net.sf.saxon.event.ProxyReceiver;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
-import net.sf.saxon.om.CopyOptions;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
@@ -56,6 +50,7 @@ public class UncommittedSerializer extends ProxyReceiver {
         this.properties = params;
     }
 
+    @Override
     public void open() throws XPathException {
         committed = false;
     }
@@ -64,6 +59,7 @@ public class UncommittedSerializer extends ProxyReceiver {
      * End of document
      */
 
+    @Override
     public void close() throws XPathException {
         // empty output: must send a beginDocument()/endDocument() pair to the content handler
         if (!committed) {
@@ -76,6 +72,7 @@ public class UncommittedSerializer extends ProxyReceiver {
      * Produce character output using the current Writer. <BR>
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (committed) {
             getNextReceiver().characters(chars, locationId, properties);
@@ -94,6 +91,7 @@ public class UncommittedSerializer extends ProxyReceiver {
      * Processing Instruction
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         if (committed) {
             getNextReceiver().processingInstruction(target, data, locationId, properties);
@@ -109,6 +107,7 @@ public class UncommittedSerializer extends ProxyReceiver {
      * Output a comment
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (committed) {
             getNextReceiver().comment(chars, locationId, properties);
@@ -124,13 +123,13 @@ public class UncommittedSerializer extends ProxyReceiver {
      * Output an element start tag. <br>
      * This can only be called once: it switches to a substitute output generator for XML, XHTML, or HTML,
      * depending on the element name.
-     * @param elemName   The element name (tag)
-     * @param typeCode   The type annotation
-     * @param location Location of the instruction emitting this event
-     * @param properties Bit field holding special properties of the element
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
+            throws XPathException {
         if (!committed) {
             String name = elemName.getLocalPart();
             String uri = elemName.getURI();
@@ -147,7 +146,7 @@ public class UncommittedSerializer extends ProxyReceiver {
                 switchToMethod("xml");
             }
         }
-        getNextReceiver().startElement(elemName, typeCode, location, properties);
+        getNextReceiver().startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     @Override
@@ -195,13 +194,10 @@ public class UncommittedSerializer extends ProxyReceiver {
 
     /**
      * Append an arbitrary item (node or atomic value) to the output
-     *
      * @param item           the item to be appended
      * @param locationId     the location of the calling instruction, for diagnostics
      * @param copyNamespaces if the item is an element node, this indicates whether its namespaces
-     *                       need to be copied. Values are {@link ReceiverOptions#ALL_NAMESPACES},
-     *                       {@link ReceiverOptions#LOCAL_NAMESPACES}; the default (0) means
-     *                       no namespaces
+*                       need to be copied. Values are {@link ReceiverOption#ALL_NAMESPACES}; the default (0) means
      */
     @Override
     public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {

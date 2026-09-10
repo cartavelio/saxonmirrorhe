@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -105,12 +105,12 @@ public class ExpandedStreamResult {
             //streamResult.setOutputStream(outputStream);
             mustClose = true;
         } catch (FileNotFoundException | URISyntaxException | IllegalArgumentException fnf) {
-            // for example, the system ID doesn't use the file: scheme
             throw new XPathException(fnf);
         }
 
         return outputStream;
     }
+
 
     public static File makeWritableOutputFile(String uriString) throws URISyntaxException, XPathException {
         URI uri = new URI(uriString);
@@ -141,6 +141,7 @@ public class ExpandedStreamResult {
         }
         return file;
     }
+
 
     /**
      * Determine whether the Emitter wants a Writer for character output or
@@ -229,7 +230,7 @@ public class ExpandedStreamResult {
                     throw new XPathException("Encoding " + encoding + " is not supported", "SESU0007");
 //                    XPathException de = new XPathException("Encoding " + encoding + " is not supported: using UTF8");
 //                    de.setErrorCode("SESU0007");
-//                    getPipelineConfiguration().getErrorListener().error(de);
+//                    getPipelineConfiguration().getErrorReporter().error(de);
 //                    encoding = "UTF8";
 //                    characterSet = UTF8CharacterSet.getInstance();
 //                    allCharactersEncodable = true;

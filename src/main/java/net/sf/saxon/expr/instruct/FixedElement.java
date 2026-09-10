@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,8 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.Validation;
@@ -22,6 +23,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 
+import java.util.function.BiConsumer;
+
 
 /**
  * An instruction that creates an element node whose name is known statically.
@@ -33,7 +36,7 @@ import net.sf.saxon.type.*;
 public class FixedElement extends ElementCreator {
 
     private NodeName elementName;
-    /*@NotNull*/ protected NamespaceBinding[] namespaceBindings;
+    /*@NotNull*/ protected NamespaceMap namespaceBindings;
     private ItemType itemType;
 
     /**
@@ -48,14 +51,14 @@ public class FixedElement extends ElementCreator {
      * @param validation                  Validation mode to be applied, for example STRICT, LAX, SKIP
      */
     public FixedElement(NodeName elementName,
-                        NamespaceBinding[] namespaceBindings,
+                        NamespaceMap namespaceBindings,
                         boolean inheritNamespacesToChildren,
                         boolean inheritNamespacesFromParent,
                         SchemaType schemaType,
                         int validation) {
         this.elementName = elementName;
         this.namespaceBindings = namespaceBindings;
-        this.inheritNamespacesToChildren = inheritNamespacesToChildren;
+        this.bequeathNamespacesToChildren = inheritNamespacesToChildren;
         this.inheritNamespacesFromParent = inheritNamespacesFromParent;
         setValidationAction(validation, schemaType);
         preservingTypes = schemaType == null && validation == Validation.PRESERVE;
@@ -76,8 +79,8 @@ public class FixedElement extends ElementCreator {
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
-        final Configuration config = getConfiguration();
         preservingTypes |= !getPackageData().isSchemaAware();
         return super.simplify();
     }
@@ -91,6 +94,7 @@ public class FixedElement extends ElementCreator {
      *
      */
 
+    @Override
     protected void checkContentSequence(StaticContext env) throws XPathException {
         super.checkContentSequence(env);
         itemType = computeFixedElementItemType(this, env,
@@ -98,6 +102,7 @@ public class FixedElement extends ElementCreator {
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         Expression e = super.optimize(visitor, contextItemType);
         if (e != this) {
@@ -110,27 +115,27 @@ public class FixedElement extends ElementCreator {
         // (b) this element doesn't specify xsl:inherit-namespaces="no"
         // (c) the child element is incapable of creating attributes in a non-null namespace
 
-        if (!inheritNamespacesToChildren) {
+        if (!bequeathNamespacesToChildren) {
             return this;
         }
-        if (namespaceBindings.length == 0) {
-            return this;
-        }
-        if (getContentExpression() instanceof FixedElement) {
-            FixedElement fixedContent = (FixedElement) getContentExpression();
-            if (elementName.isInSameNamespace(fixedContent.getElementName())) {
-                fixedContent.removeRedundantNamespaces(visitor, namespaceBindings);
-            }
-            return this;
-        }
-        if (getContentExpression() instanceof Block) {
-            for (Operand o : getContentExpression().operands()) {
-                Expression exp = o.getChildExpression();
-                if (exp instanceof FixedElement && elementName.isInSameNamespace(((FixedElement) exp).getElementName())) {
-                    ((FixedElement) exp).removeRedundantNamespaces(visitor, namespaceBindings);
-                }
-            }
-        }
+//        if (!namespaceBindings.isEmpty()) {
+//            if (getContentExpression() instanceof FixedElement) {
+//                FixedElement fixedContent = (FixedElement) getContentExpression();
+//                if (elementName.isInSameNamespace(fixedContent.getElementName())) {
+//                    fixedContent.removeRedundantNamespaces(visitor, namespaceBindings);
+//                }
+//                return this;
+//            }
+//            if (getContentExpression() instanceof Block) {
+//                for (Operand o : getContentExpression().operands()) {
+//                    Expression exp = o.getChildExpression();
+//                    if (exp instanceof FixedElement &&
+//                            elementName.isInSameNamespace(((FixedElement) exp).getElementName())) {
+//                        ((FixedElement) exp).removeRedundantNamespaces(visitor, namespaceBindings);
+//                    }
+//                }
+//            }
+//        }
         return this;
     }
 
@@ -142,17 +147,17 @@ public class FixedElement extends ElementCreator {
      * @param parentNamespaces the namespaces that are output by the parent element
      */
 
-    private void removeRedundantNamespaces(ExpressionVisitor visitor, NamespaceBinding[] parentNamespaces) {
+    private void removeRedundantNamespaces(ExpressionVisitor visitor, NamespaceMap parentNamespaces) {
         // It's only safe to remove any namespaces if the element is incapable of creating any attribute nodes
         // in a non-null namespace
         // This is because namespaces created on this element take precedence over namespaces created by namespace
         // fixup based on the prefix used in the attribute name (see atrs24)
-        if (namespaceBindings.length == 0) {
+        if (namespaceBindings.isEmpty()) {
             return;
         }
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         ItemType contentType = getContentExpression().getItemType();
-        boolean ok = th.relationship(contentType, NodeKindTest.ATTRIBUTE) == TypeHierarchy.DISJOINT;
+        boolean ok = th.relationship(contentType, NodeKindTest.ATTRIBUTE) == Affinity.DISJOINT;
         if (!ok) {
             // if the content might include attributes, discount any that are known to be in the null namespace
             if (getContentExpression() instanceof Block) {
@@ -166,7 +171,7 @@ public class FixedElement extends ElementCreator {
                         }
                     } else {
                         ItemType childType = exp.getItemType();
-                        if (th.relationship(childType, NodeKindTest.ATTRIBUTE) != TypeHierarchy.DISJOINT) {
+                        if (th.relationship(childType, NodeKindTest.ATTRIBUTE) != Affinity.DISJOINT) {
                             ok = false;
                             break;
                         }
@@ -175,30 +180,14 @@ public class FixedElement extends ElementCreator {
             }
         }
         if (ok) {
-            int removed = 0;
-            for (int i = 0; i < namespaceBindings.length; i++) {
-                for (NamespaceBinding parentNamespace : parentNamespaces) {
-                    if (namespaceBindings[i] == parentNamespace) {
-                        namespaceBindings[i] = null;
-                        removed++;
-                        break;
-                    }
+            NamespaceMap reduced = namespaceBindings;
+            // TODO: implement difference() operation on NamespaceMap
+            for (NamespaceBinding childNamespace : namespaceBindings) {
+                if (childNamespace.getURI().equals(parentNamespaces.getURI(childNamespace.getPrefix()))) {
+                    reduced = reduced.remove(childNamespace.getPrefix());
                 }
             }
-            if (removed > 0) {
-                if (removed == namespaceBindings.length) {
-                    namespaceBindings = NamespaceBinding.EMPTY_ARRAY;
-                } else {
-                    NamespaceBinding[] ns2 = new NamespaceBinding[namespaceBindings.length - removed];
-                    int j = 0;
-                    for (NamespaceBinding namespaceBinding : namespaceBindings) {
-                        if (namespaceBinding != null) {
-                            ns2[j++] = namespaceBinding;
-                        }
-                    }
-                    namespaceBindings = ns2;
-                }
-            }
+            namespaceBindings = reduced;
         }
     }
 
@@ -212,14 +201,10 @@ public class FixedElement extends ElementCreator {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
-        NamespaceBinding[] ns2 = namespaceBindings;
-        if (namespaceBindings.length != 0) {
-            ns2 = new NamespaceBinding[namespaceBindings.length];
-            System.arraycopy(namespaceBindings, 0, ns2, 0, ns2.length);
-        }
-        FixedElement fe = new FixedElement(elementName, ns2, inheritNamespacesToChildren,
-                inheritNamespacesFromParent, getSchemaType(), getValidationAction());
+        FixedElement fe = new FixedElement(elementName, namespaceBindings, bequeathNamespacesToChildren,
+                                           inheritNamespacesFromParent, getSchemaType(), getValidationAction());
         fe.setContentExpression(getContentExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, fe);
         return fe;
@@ -356,6 +341,7 @@ public class FixedElement extends ElementCreator {
      * @return the item type
      */
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (itemType == null) {
             return super.getItemType();
@@ -372,6 +358,7 @@ public class FixedElement extends ElementCreator {
      * @return the name code for the element name
      */
 
+    @Override
     public NodeName getElementName(XPathContext context, NodeInfo copiedNode) {
         return elementName;
     }
@@ -380,6 +367,22 @@ public class FixedElement extends ElementCreator {
         return elementName;
     }
 
+
+    /**
+     * Get the properties of this object to be included in trace messages, by supplying
+     * the property values to a supplied consumer function
+     *
+     * @param consumer the function to which the properties should be supplied, as (property name,
+     *                 value) pairs.
+     */
+    @Override
+    public void gatherProperties(BiConsumer<String, Object> consumer) {
+        consumer.accept("name", getElementName());
+    }
+
+
+
+    @Override
     public String getNewBaseURI(XPathContext context, NodeInfo copiedNode) {
         return getStaticBaseURIString();
     }
@@ -432,24 +435,17 @@ public class FixedElement extends ElementCreator {
             Expression attValue = fat.getSelect();
             if (attValue instanceof StringLiteral) {
                 try {
-                    NamePool pool = env.getConfiguration().getNamePool();
                     String[] parts = NameChecker.getQNameParts(
                             ((StringLiteral) attValue).getStringValue());
                     // The only namespace bindings we can trust are those declared on this element
                     // We could also trust those on enclosing LREs in the same function/template,
                     // but it's not a big win to go looking for them.
-                    String uri = null;
-                    for (NamespaceBinding namespaceBinding : namespaceBindings) {
-                        String prefix = namespaceBinding.getPrefix();
-                        if (prefix.equals(parts[0])) {
-                            uri = namespaceBinding.getURI();
-                            break;
-                        }
-                    }
+                    String uri = namespaceBindings.getURI(parts[0]);
                     if (uri == null) {
                         return null;
+                    } else {
+                        return env.getConfiguration().getSchemaType(new StructuredQName("", uri, parts[1]));
                     }
-                    return env.getConfiguration().getSchemaType(new StructuredQName("", uri, parts[1]));
                 } catch (QNameException e) {
                     throw new XPathException(e.getMessage());
                 }
@@ -466,6 +462,7 @@ public class FixedElement extends ElementCreator {
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         if (parentType instanceof SimpleType) {
             XPathException err = new XPathException("Element " + elementName.getDisplayName() +
@@ -493,7 +490,7 @@ public class FixedElement extends ElementCreator {
         try {
             int fp = elementName.obtainFingerprint(getConfiguration().getNamePool());
             type = ((ComplexType) parentType).getElementParticleType(fp, true);
-        } catch (SchemaException e) {
+        } catch (MissingComponentException e) {
             throw new XPathException(e);
         }
         if (type == null) {
@@ -519,27 +516,25 @@ public class FixedElement extends ElementCreator {
 
     /**
      * Callback from the superclass ElementCreator to output the namespace nodes
-     *
-     * @param context    The evaluation context (not used)
      * @param out        The receiver to handle the output
-     * @param nameCode   the name of this element
+     * @param nodeName   the name of this element
      * @param copiedNode in the case of xsl:copy, the node being copied
      */
 
-    public void outputNamespaceNodes(XPathContext context, Receiver out, NodeName nameCode, NodeInfo copiedNode)
+    @Override
+    public void outputNamespaceNodes(Outputter out, NodeName nodeName, NodeInfo copiedNode)
             throws XPathException {
-        for (NamespaceBinding namespaceBinding : namespaceBindings) {
-            out.namespace(namespaceBinding, 0);
+        for (NamespaceBinding ns : namespaceBindings) {
+            out.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
         }
     }
 
     /**
      * Callback to get a list of the intrinsic namespaces that need to be generated for the element.
-     * The result is an array of namespace codes, the codes either occupy the whole array or are
-     * terminated by a -1 entry. A result of null is equivalent to a zero-length array.
+     * @return the namespace bindings that must be generated for the new element node
      */
 
-    public NamespaceBinding[] getActiveNamespaces() {
+    public NamespaceMap getActiveNamespaces() {
         return namespaceBindings;
     }
 
@@ -548,6 +543,7 @@ public class FixedElement extends ElementCreator {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("elem", this);
         out.emitAttribute("name", elementName.getDisplayName());
@@ -563,15 +559,17 @@ public class FixedElement extends ElementCreator {
             out.emitAttribute("flags", flags);
         }
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
-        if (namespaceBindings.length > 0) {
+        if (!namespaceBindings.isEmpty()) {
             for (NamespaceBinding ns : namespaceBindings) {
                 String prefix = ns.getPrefix();
-                fsb.append(prefix.isEmpty() ? "#" : prefix);
-                if (!ns.getURI().equals(getRetainedStaticContext().getURIForPrefix(prefix, true))) {
-                    fsb.append('=');
-                    fsb.append(ns.getURI());
+                if (!prefix.equals("xml")) {
+                    fsb.append(prefix.isEmpty() ? "#" : prefix);
+                    if (!ns.getURI().equals(getRetainedStaticContext().getURIForPrefix(prefix, true))) {
+                        fsb.cat('=');
+                        fsb.append(ns.getURI());
+                    }
+                    fsb.cat(' ');
                 }
-                fsb.append(' ');
             }
             fsb.setLength(fsb.length() - 1);
             out.emitAttribute("namespaces", fsb.toString());

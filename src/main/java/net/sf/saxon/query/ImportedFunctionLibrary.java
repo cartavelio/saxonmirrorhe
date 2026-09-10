@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -78,6 +78,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      */
 
     /*@Nullable*/
+    @Override
     public Expression bind(/*@NotNull*/ SymbolicName.F symbolicName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         final StructuredQName functionName = symbolicName.getComponentName();
         final String uri = functionName.getURI();
@@ -101,6 +102,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      */
 
     /*@Nullable*/
+    @Override
     public XQueryFunction getDeclaration(/*@NotNull*/ StructuredQName functionName, int staticArgs) {
         String uri = functionName.getURI();
         if (namespaces.contains(uri)) {
@@ -119,6 +121,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      */
 
     /*@NotNull*/
+    @Override
     public FunctionLibrary copy() {
         ImportedFunctionLibrary lib = new ImportedFunctionLibrary(importingModule, baseLibrary);
         for (String ns : namespaces) {
@@ -137,8 +140,6 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
         this.importingModule = importingModule;
     }
 
-//#ifdefined HOF
-
     /**
      * Test whether a function with a given name and arity is available; if so, return a function
      * item that can be dynamically called.
@@ -153,6 +154,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      *          in the event of certain errors, for example attempting to get a function
      *          that is private
      */
+    @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         if (namespaces.contains(functionName.getComponentName().getURI())) {
             return baseLibrary.getFunctionItem(functionName, staticContext);
@@ -160,8 +162,6 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
             return null;
         }
     }
-//#endif
-
 
     /**
      * Test whether a function with a given name and arity is available
@@ -170,6 +170,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      * @param functionName the qualified name of the function being called
      * @return true if a function of this name and arity is available for calling
      */
+    @Override
     public boolean isAvailable(SymbolicName.F functionName) {
         return namespaces.contains(functionName.getComponentName().getURI()) && baseLibrary.isAvailable(functionName);
     }

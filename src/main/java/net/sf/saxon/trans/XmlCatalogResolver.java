@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -32,22 +32,22 @@ public class XmlCatalogResolver {
                 @Override
                 public void message(int level, String message) {
                     if (level <= getDebug()) {
-                        config.getStandardErrorOutput().println(message);
+                        config.getLogger().info(message);
                     }
                 }
 
                 @Override
                 public void message(int level, String message, String spec) {
                     if (level <= getDebug()) {
-                        config.getStandardErrorOutput().println(message + ": " + spec);
+                        config.getLogger().info(message + ": " + spec);
                     }
                 }
 
                 @Override
                 public void message(int level, String message, String spec1, String spec2) {
                     if (level <= getDebug()) {
-                        config.getStandardErrorOutput().println(message + ": " + spec1);
-                        config.getStandardErrorOutput().println("\t" + spec2);
+                        config.getLogger().info(message + ": " + spec1);
+                        config.getLogger().info("\t" + spec2);
                     }
                 }
             };

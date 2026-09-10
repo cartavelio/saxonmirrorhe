@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,10 +7,13 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.om.EnumSetTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+
+import java.util.EnumSet;
 
 /**
  * ItemMappingIterator applies a mapping function to each item in a sequence.
@@ -21,11 +24,11 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
  * output item.</p>
  */
 
-public class ItemMappingIterator<F extends Item<?>, T extends Item<?>>
-        implements SequenceIterator<T>, LookaheadIterator<T>, LastPositionFinder {
+public class ItemMappingIterator
+        implements SequenceIterator, LookaheadIterator, LastPositionFinder {
 
-    private SequenceIterator<? extends F> base;
-    private ItemMappingFunction<F, T> action;
+    private SequenceIterator base;
+    private ItemMappingFunction action;
     private boolean oneToOne = false;
 
     /**
@@ -36,7 +39,7 @@ public class ItemMappingIterator<F extends Item<?>, T extends Item<?>>
      * @param action the mapping function to be applied.
      */
 
-    public ItemMappingIterator(SequenceIterator<F> base, ItemMappingFunction<F, T> action) {
+    public ItemMappingIterator(SequenceIterator base, ItemMappingFunction action) {
         this.base = base;
         this.action = action;
     }
@@ -50,7 +53,7 @@ public class ItemMappingIterator<F extends Item<?>, T extends Item<?>>
      * @param oneToOne true if this iterator is one-to-one
      */
 
-    public ItemMappingIterator(SequenceIterator<? extends F> base, ItemMappingFunction<F, T> action, boolean oneToOne) {
+    public ItemMappingIterator(SequenceIterator base, ItemMappingFunction action, boolean oneToOne) {
         this.base = base;
         this.action = action;
         this.oneToOne = oneToOne;
@@ -83,7 +86,7 @@ public class ItemMappingIterator<F extends Item<?>, T extends Item<?>>
      * @return the iterator over the input sequence
      */
 
-    protected SequenceIterator<? extends F> getBaseIterator() {
+    protected SequenceIterator getBaseIterator() {
         return base;
     }
 
@@ -92,24 +95,26 @@ public class ItemMappingIterator<F extends Item<?>, T extends Item<?>>
      * @return the mapping function
      */
 
-    protected ItemMappingFunction<F, T> getMappingFunction() {
+    protected ItemMappingFunction getMappingFunction() {
         return action;
     }
 
+    @Override
     public boolean hasNext() {
         // Must only be called if this is a lookahead iterator, which will only be true if the base iterator
         // is a lookahead iterator and one-to-one is true
         return ((LookaheadIterator) base).hasNext();
     }
 
-    public T next() throws XPathException {
+    @Override
+    public Item next() throws XPathException {
         while (true) {
-            F nextSource = base.next();
+            Item nextSource = base.next();
             if (nextSource == null) {
                 return null;
             }
             // Call the supplied mapping function
-            T current = action.mapItem(nextSource);
+            Item current = action.mapItem(nextSource);
             if (current != null) {
                 return current;
             }
@@ -117,10 +122,12 @@ public class ItemMappingIterator<F extends Item<?>, T extends Item<?>>
         }
     }
 
+    @Override
     public void close() {
         base.close();
     }
 
+    @Override
     public int getLength() throws XPathException {
         // Must only be called if this is a last-position-finder iterator, which will only be true if the base iterator
         // is a last-position-finder iterator and one-to-one is true
@@ -131,18 +138,21 @@ public class ItemMappingIterator<F extends Item<?>, T extends Item<?>>
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link net.sf.saxon.om.SequenceIterator#GROUNDED},
-     *         {@link net.sf.saxon.om.SequenceIterator#LAST_POSITION_FINDER},
-     *         and {@link net.sf.saxon.om.SequenceIterator#LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED},
+     *         {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
+    @Override
+    public EnumSet<Property> getProperties() {
         if (oneToOne) {
-            return base.getProperties() & (LOOKAHEAD | LAST_POSITION_FINDER);
+            return EnumSetTool.intersect(
+                    base.getProperties(),
+                    EnumSet.of(Property.LAST_POSITION_FINDER, Property.LOOKAHEAD));
         } else {
-            return 0;
+            return EnumSet.noneOf(Property.class);
         }
     }
 }

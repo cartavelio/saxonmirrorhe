@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.Err;
@@ -25,9 +24,9 @@ import java.util.List;
  * not nodes.
  */
 
-public final class DocumentOrderIterator implements SequenceIterator<NodeInfo>, Sortable {
+public final class DocumentOrderIterator implements SequenceIterator {
 
-    private SequenceIterator<NodeInfo> iterator;
+    private SequenceIterator iterator;
     private List<NodeInfo> sequence;
     private ItemOrderComparer comparer;
     private NodeInfo current = null;
@@ -40,13 +39,12 @@ public final class DocumentOrderIterator implements SequenceIterator<NodeInfo>, 
      * that is not a node
      */
 
-    public DocumentOrderIterator(SequenceIterator<?> base, ItemOrderComparer comparer) throws XPathException {
+    public DocumentOrderIterator(SequenceIterator base, ItemOrderComparer comparer) throws XPathException {
 
         this.comparer = comparer;
 
-        int len = (base.getProperties() & SequenceIterator.LAST_POSITION_FINDER) == 0
-                ? 50
-                : ((LastPositionFinder) base).getLength();
+        int len = base.getProperties().contains(Property.LAST_POSITION_FINDER)
+                ? ((LastPositionFinder) base).getLength() : 50;
         sequence = new ArrayList<>(len);
         base.forEachOrFail(item -> {
             if (item instanceof NodeInfo) {
@@ -58,44 +56,18 @@ public final class DocumentOrderIterator implements SequenceIterator<NodeInfo>, 
 
         //System.err.println("SORT into document order: sequence length = " + sequence.size());
         if (sequence.size() > 1) {
-            GenericSorter.quickSort(0, sequence.size(), this);
+            sequence.sort(comparer);
         }
         iterator = new ListIterator<>(sequence);
-    }
-
-    /**
-     * Private constructor used only by getAnother()
-     */
-
-    private DocumentOrderIterator() {
-    }
-
-    /**
-     * Compare two nodes in document sequence
-     * (needed to implement the Sortable interface)
-     */
-
-    public int compare(int a, int b) {
-        //System.err.println("compare " + a + " with " + b + " = " + comparer.compare(sequence.get(a), sequence.get(b)));
-        return comparer.compare(sequence.get(a), sequence.get(b));
-    }
-
-    /**
-     * Swap two nodes (needed to implement the Sortable interface)
-     */
-
-    public void swap(int a, int b) {
-        NodeInfo temp = sequence.get(a);
-        sequence.set(a, sequence.get(b));
-        sequence.set(b, temp);
     }
 
     // Implement the SequenceIterator as a wrapper around the underlying iterator
     // over the sequenceExtent, but looking ahead to remove duplicates.
 
+    @Override
     public NodeInfo next() throws XPathException {
         while (true) {
-            NodeInfo next = iterator.next();
+            NodeInfo next = (NodeInfo)iterator.next();
             if (next == null) {
                 current = null;
                 return null;
@@ -105,23 +77,6 @@ public final class DocumentOrderIterator implements SequenceIterator<NodeInfo>, 
                 return current;
             }
         }
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
-
-    public void close() {
     }
 
 }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,9 +11,6 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.VersionedPackageName;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
@@ -33,15 +30,14 @@ public class XSLPackage extends XSLModuleRoot {
 
     /**
      * Initialise a new ElementImpl with an element name
-     *
-     * @param elemName       Integer representing the element name, with namespaces resolved
+     *  @param elemName       Integer representing the element name, with namespaces resolved
      * @param elementType    the schema type of the element node
      * @param atts           The attribute list: always null
      * @param parent         The parent node
      * @param sequenceNumber Integer identifying this element within the document
      */
     @Override
-    public void initialise(NodeName elemName, SchemaType elementType, AttributeCollectionImpl atts, NodeInfo parent, int sequenceNumber) {
+    public void initialise(NodeName elemName, SchemaType elementType, AttributeMap atts, NodeInfo parent, int sequenceNumber) {
         super.initialise(elemName, elementType, atts, parent, sequenceNumber);
         declaredModes = getLocalPart().equals("package");
     }
@@ -53,11 +49,7 @@ public class XSLPackage extends XSLModuleRoot {
 
     public String getName() {
         if (nameAtt == null) {
-            try {
-                prepareAttributes();
-            } catch (XPathException e) {
-                nameAtt = "default";
-            }
+            prepareAttributes();
         }
         return nameAtt;
     }
@@ -69,11 +61,7 @@ public class XSLPackage extends XSLModuleRoot {
 
     public int getVersion() {
         if (version == -1) {
-            try {
-                prepareAttributes();
-            } catch (XPathException e) {
-                version = 30;
-            }
+            prepareAttributes();
         }
         return version;
     }
@@ -88,11 +76,7 @@ public class XSLPackage extends XSLModuleRoot {
      */
     public PackageVersion getPackageVersion() {
         if (packageVersion == null) {
-            try {
-                prepareAttributes();
-            } catch (XPathException e) {
-                packageVersion = PackageVersion.ONE;
-            }
+            prepareAttributes();
         }
         return packageVersion;
     }
@@ -100,7 +84,7 @@ public class XSLPackage extends XSLModuleRoot {
 
 
     @Override
-    protected void prepareAttributes() throws XPathException {
+    protected void prepareAttributes() {
         if (prepared) {
             // already done
             return;
@@ -109,12 +93,12 @@ public class XSLPackage extends XSLModuleRoot {
 
         String inputTypeAnnotationsAtt = null;
         String packageVersionAtt = null;
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String lexicalName = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String lexicalName = attName.getDisplayName();
+            String value = att.getValue();
             if (lexicalName.equals("name") && getLocalPart().equals("package")) {
-                nameAtt = Whitespace.trim(atts.getValue(a));
+                nameAtt = Whitespace.trim(value);
             } else if (lexicalName.equals("id")) {
                 // no action
             } else if (lexicalName.equals("version")) {
@@ -122,15 +106,15 @@ public class XSLPackage extends XSLModuleRoot {
                     processVersionAttribute("");
                 }
             } else if (lexicalName.equals("package-version") && getLocalPart().equals("package")) {
-                packageVersionAtt = Whitespace.trim(atts.getValue(a));
+                packageVersionAtt = Whitespace.trim(value);
 
             } else if (lexicalName.equals("declared-modes") && getLocalPart().equals("package")) {
-                declaredModes = processBooleanAttribute("declared-modes", atts.getValue(a));
+                declaredModes = processBooleanAttribute("declared-modes", value);
 
             } else if (lexicalName.equals("input-type-annotations")) {
-                inputTypeAnnotationsAtt = atts.getValue(a);
+                inputTypeAnnotationsAtt = value;
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -176,12 +160,7 @@ public class XSLPackage extends XSLModuleRoot {
     @Override
     public boolean isDeclaredModes() {
         if (nameAtt == null) {
-            try {
-                prepareAttributes();
-            } catch (XPathException e) {
-                // it will be reported later
-                nameAtt = null;
-            }
+            prepareAttributes();
         }
         return declaredModes;
     }
@@ -193,35 +172,36 @@ public class XSLPackage extends XSLModuleRoot {
      */
 
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
-
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)kids.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             if (child.getNodeKind() == Type.TEXT ||
                     (child instanceof StyleElement && ((StyleElement) child).isDeclaration()) ||
                     child instanceof DataElement ) {
                 // all is well
-            } else if (getLocalPart().equals("package") &&
-                    (fp == StandardNames.XSL_USE_PACKAGE || fp == StandardNames.XSL_EXPOSE)) {
-                // all is well
-            } else if (!NamespaceConstant.XSLT.equals(child.getURI()) && !"".equals(child.getURI())) {
-                // elements in other namespaces are allowed and ignored
-            } else if (child instanceof AbsentExtensionElement && ((StyleElement) child).forwardsCompatibleModeIsEnabled()) {
-                // this is OK: an unknown XSLT element is allowed in forwards compatibility mode
-            } else if (NamespaceConstant.XSLT.equals(child.getURI())) {
-                if (child instanceof AbsentExtensionElement) {
-                    // then the error will be reported later
+            } else if (child instanceof StyleElement) {
+                if (getLocalPart().equals("package") &&
+                        (fp == StandardNames.XSL_USE_PACKAGE || fp == StandardNames.XSL_EXPOSE)) {
+                    // all is well
+                } else if (!NamespaceConstant.XSLT.equals(child.getURI()) && !"".equals(child.getURI())) {
+                    // elements in other namespaces are allowed and ignored
+                } else if (child instanceof AbsentExtensionElement && ((StyleElement) child).forwardsCompatibleModeIsEnabled()) {
+                    // this is OK: an unknown XSLT element is allowed in forwards compatibility mode
+                } else if (NamespaceConstant.XSLT.equals(child.getURI())) {
+                    if (child instanceof AbsentExtensionElement) {
+                        // then the error will be reported later
+                    } else {
+                        ((StyleElement) child).compileError(
+                                "Element " + child.getDisplayName() +
+                                        " must not appear directly within " + getDisplayName(), "XTSE0010");
+                    }
+
                 } else {
-                    ((StyleElement) child).compileError(
-                            "Element " + child.getDisplayName() +
-                                    " must not appear directly within " + getDisplayName(), "XTSE0010");
+                    ((StyleElement) child).compileError("Element " + child.getDisplayName() +
+                                                                " must not appear directly within " + getDisplayName() +
+                                                                " because it is not in a namespace", "XTSE0130");
                 }
-            } else {
-                ((StyleElement) child).compileError("Element " + child.getDisplayName() +
-                        " must not appear directly within " + getDisplayName() +
-                        " because it is not in a namespace", "XTSE0130");
             }
         }
 

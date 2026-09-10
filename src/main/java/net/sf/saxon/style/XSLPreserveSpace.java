@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,16 +35,16 @@ public class XSLPreserveSpace extends StyleElement {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
             if (f.equals("elements")) {
-                elements = atts.getValue(a);
+                elements = att.getValue();
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
         if (elements == null) {
@@ -53,6 +53,7 @@ public class XSLPreserveSpace extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         checkEmpty();
         checkTopLevel("XTSE0010", false);
@@ -70,6 +71,7 @@ public class XSLPreserveSpace extends StyleElement {
         }
     }
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl)  {
         Stripper.StripRuleTarget preserve =
                 getFingerprint() == StandardNames.XSL_PRESERVE_SPACE ? Stripper.PRESERVE : Stripper.STRIP;
@@ -92,7 +94,6 @@ public class XSLPreserveSpace extends StyleElement {
                 if (s.equals("*")) {
                     nt = NodeKindTest.ELEMENT;
                     rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
-
                 } else if (s.startsWith("Q{")) {
                     int brace = s.indexOf('}');
                     if (brace < 0) {
@@ -101,7 +102,7 @@ public class XSLPreserveSpace extends StyleElement {
                         compileError("Missing local part in EQName");
                     } else {
                         String uri = s.substring(2, brace);
-                        String local = s.substring(brace + 1);
+                        String local = s.substring(brace+1);
                         if (local.equals("*")) {
                             nt = new NamespaceTest(getNamePool(), Type.ELEMENT, uri);
                         } else {
@@ -109,7 +110,6 @@ public class XSLPreserveSpace extends StyleElement {
                         }
                         rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
                     }
-
                 } else if (s.endsWith(":*")) {
                     if (s.length() == 2) {
                         compileError("No prefix before ':*'");

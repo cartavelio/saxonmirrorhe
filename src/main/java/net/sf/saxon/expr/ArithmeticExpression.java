@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.compat.ArithmeticExpression10;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.compat.ArithmeticExpression10;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StandardNames;
@@ -48,6 +48,7 @@ public class ArithmeticExpression extends BinaryExpression {
      *         in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         return "arithmetic";
     }
@@ -89,6 +90,7 @@ public class ArithmeticExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         resetLocalStaticProperties();
@@ -117,7 +119,7 @@ public class ArithmeticExpression extends BinaryExpression {
             type0 = BuiltInAtomicType.DOUBLE;
         } else if (/*!(operand0 instanceof UntypedAtomicConverter)*/
                 (getLhsExpression().getSpecialProperties() & StaticProperty.NOT_UNTYPED_ATOMIC) == 0 &&
-                        th.relationship(type0, BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT) {
+                        th.relationship(type0, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT) {
             setLhsExpression(UntypedSequenceConverter.makeUntypedSequenceConverter(config, getLhsExpression(), BuiltInAtomicType.DOUBLE));
             type0 = (AtomicType) getLhsExpression().getItemType().getPrimitiveItemType();
         }
@@ -137,9 +139,16 @@ public class ArithmeticExpression extends BinaryExpression {
             type1 = BuiltInAtomicType.DOUBLE;
         } else if (/*!(operand1 instanceof UntypedAtomicConverter) &&*/
                 (getRhsExpression().getSpecialProperties() & StaticProperty.NOT_UNTYPED_ATOMIC) == 0 &&
-                        th.relationship(type1, BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT) {
+                        th.relationship(type1, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT) {
             setRhsExpression(UntypedSequenceConverter.makeUntypedSequenceConverter(config, getRhsExpression(), BuiltInAtomicType.DOUBLE));
             type1 = (AtomicType) getRhsExpression().getItemType().getPrimitiveItemType();
+        }
+
+        if (itemType0.getUType().union(itemType1.getUType()).overlaps(UType.EXTENSION)) {
+            XPathException de = new XPathException("Arithmetic operators are not defined for external objects");
+            de.setLocation(getLocation());
+            de.setErrorCode("XPTY0004");
+            throw de;
         }
 
         if (getLhsExpression() != oldOp0) {
@@ -155,12 +164,7 @@ public class ArithmeticExpression extends BinaryExpression {
             return Literal.makeEmptySequence();
         }
 
-        if (type0.isExternalType() || type1.isExternalType()) {
-            XPathException de = new XPathException("Arithmetic operators are not defined for external objects");
-            de.setLocation(getLocation());
-            de.setErrorCode("XPTY0004");
-            throw de;
-        }
+
 
         if (operator == Token.NEGATE) {
             if (getRhsExpression() instanceof Literal && ((Literal) getRhsExpression()).getValue() instanceof NumericValue) {
@@ -286,10 +290,11 @@ public class ArithmeticExpression extends BinaryExpression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables that need to be rebound
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ArithmeticExpression ae = new ArithmeticExpression(getLhsExpression().copy(rebindings), operator, getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, ae);
@@ -352,6 +357,7 @@ public class ArithmeticExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public PlainType getItemType() {
         if (itemType != null) {
             return itemType;
@@ -376,7 +382,7 @@ public class ArithmeticExpression extends BinaryExpression {
                 // be a duration)
                 TypeHierarchy th = getConfiguration().getTypeHierarchy();
                 if ((operator == Token.PLUS || operator == Token.MINUS) &&
-                        (th.isSubType(t2, NumericType.getInstance()) || th.isSubType(t1, NumericType.getInstance()))) {
+                        (NumericType.isNumericType(t2) || NumericType.isNumericType(t1))) {
                     resultType = NumericType.getInstance();
                 }
             }
@@ -389,7 +395,7 @@ public class ArithmeticExpression extends BinaryExpression {
      * inference rules defined in the XSLT 3.0 specification.
      *
      * @return the static item type of the expression according to the XSLT 3.0 defined rules
-     * @param contextItemType
+     * @param contextItemType static information about the context item
      */
     @Override
     public UType getStaticUType(UType contextItemType) {
@@ -417,8 +423,8 @@ public class ArithmeticExpression extends BinaryExpression {
      * Evaluate the expression.
      */
 
+    @Override
     public AtomicValue evaluateItem(XPathContext context) throws XPathException {
-
         AtomicValue v0 = (AtomicValue) getLhsExpression().evaluateItem(context);
         if (v0 == null) {
             return null;

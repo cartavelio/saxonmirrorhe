@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,12 +18,12 @@ import net.sf.saxon.trans.XPathException;
  */
 
 
-public class IntersectionEnumeration implements SequenceIterator<NodeInfo> {
+public class IntersectionEnumeration implements SequenceIterator {
 
-    private SequenceIterator<? extends NodeInfo> e1;
-    private SequenceIterator<? extends NodeInfo> e2;
-    /*@Nullable*/ private NodeInfo nextNode1 = null;
-    private NodeInfo nextNode2 = null;
+    private SequenceIterator e1;
+    private SequenceIterator e2;
+    /*@Nullable*/ private NodeInfo nextNode1;
+    private NodeInfo nextNode2;
     private ItemOrderComparer comparer;
 
     /**
@@ -35,7 +35,7 @@ public class IntersectionEnumeration implements SequenceIterator<NodeInfo> {
      * @throws XPathException if an error occurs, for example reading from the input sequence
      */
 
-    public IntersectionEnumeration(SequenceIterator<? extends NodeInfo> p1, SequenceIterator<? extends NodeInfo> p2,
+    public IntersectionEnumeration(SequenceIterator p1, SequenceIterator p2,
                                    ItemOrderComparer comparer) throws XPathException {
         e1 = p1;
         e2 = p2;
@@ -56,11 +56,12 @@ public class IntersectionEnumeration implements SequenceIterator<NodeInfo> {
      * @throws XPathException if a failure occurs reading from the input sequence
      */
 
-    private NodeInfo next(SequenceIterator<? extends NodeInfo> iter) throws XPathException {
-        return iter.next();
+    private NodeInfo next(SequenceIterator iter) throws XPathException {
+        return (NodeInfo)iter.next();
         // rely on type-checking to prevent a ClassCastException
     }
 
+    @Override
     public NodeInfo next() throws XPathException {
         // main merge loop: iterate whichever sequence has the lower value, returning when a pair
         // is found that match.
@@ -85,23 +86,11 @@ public class IntersectionEnumeration implements SequenceIterator<NodeInfo> {
         return null;
     }
 
+    @Override
     public void close() {
         e1.close();
         e2.close();
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIterator#GROUNDED}, {@link SequenceIterator#LAST_POSITION_FINDER},
-     *         and {@link SequenceIterator#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 }
 

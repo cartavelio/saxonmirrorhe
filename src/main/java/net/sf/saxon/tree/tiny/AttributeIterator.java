@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,15 +15,17 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
+import java.util.EnumSet;
+
 /**
  * AttributeIterator is an iterator over all the attribute nodes of an Element in the TinyTree.
  */
 
-final class AttributeIterator implements AxisIterator, AtomizedValueIterator<NodeInfo> {
+final class AttributeIterator implements AxisIterator, AtomizedValueIterator {
 
-    private TinyTree tree;
-    private int element;
-    private NodeTest nodeTest;
+    private final TinyTree tree;
+    private final int element;
+    private final NodeTest nodeTest;
     private int index;
     private int currentNodeNr;
 
@@ -79,6 +81,7 @@ final class AttributeIterator implements AxisIterator, AtomizedValueIterator<Nod
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         if (moveToNext()) {
             return tree.getAttributeNode(currentNodeNr);
@@ -94,6 +97,7 @@ final class AttributeIterator implements AxisIterator, AtomizedValueIterator<Nod
      * @throws net.sf.saxon.trans.XPathException
      *          if a failure occurs reading or atomizing the next value
      */
+    @Override
     public AtomicSequence nextAtomizedValue() throws XPathException {
         if (moveToNext()) {
             return tree.getTypedValueOfAttribute(null, currentNodeNr);
@@ -106,14 +110,14 @@ final class AttributeIterator implements AxisIterator, AtomizedValueIterator<Nod
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
     @Override
-    public int getProperties() {
-        return SequenceIterator.ATOMIZING;
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.ATOMIZING);
     }
 }
 

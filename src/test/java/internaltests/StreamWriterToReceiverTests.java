@@ -1,9 +1,9 @@
 package internaltests;
 
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -11,11 +11,15 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Tests for the StreamWriterToReciever class
  */
-public class StreamWriterToReceiverTests extends TestCase {
+public class StreamWriterToReceiverTests {
 
+    @Test
     public void testStreamWriterToReceiver001() {
         try {
             StringWriter out = new StringWriter();
@@ -25,15 +29,13 @@ public class StreamWriterToReceiverTests extends TestCase {
             sw.writeEmptyElement("doc");
             sw.writeEndDocument();
             assertTrue(out.toString().contains("<doc/>"));
-        } catch (XMLStreamException e) {
-            e.printStackTrace();
-            fail();
-        } catch (XPathException e) {
+        } catch (XMLStreamException | XPathException e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver002() {
         try {
             StringWriter out = new StringWriter();
@@ -53,6 +55,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver003() {
         try {
             StringWriter out = new StringWriter();
@@ -73,6 +76,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver004() {
         try {
             StringWriter out = new StringWriter();
@@ -91,6 +95,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver005() {
         try {
             StringWriter out = new StringWriter();
@@ -109,6 +114,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver006() {
         try {
             StringWriter out = new StringWriter();
@@ -130,6 +136,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver007() {
         try {
             StringWriter out = new StringWriter();
@@ -151,6 +158,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver008() {
         try {
             StringWriter out = new StringWriter();
@@ -175,6 +183,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver009() {
         try {
             StringWriter out = new StringWriter();
@@ -196,6 +205,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver010() {
         try {
             StringWriter out = new StringWriter();
@@ -218,6 +228,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver011() {
         try {
             StringWriter out = new StringWriter();
@@ -242,6 +253,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver012() {
         try {
             StringWriter out = new StringWriter();
@@ -261,6 +273,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver013() {
         try {
             StringWriter out = new StringWriter();
@@ -283,6 +296,7 @@ public class StreamWriterToReceiverTests extends TestCase {
         }
     }
 
+    @Test
     public void testStreamWriterToReceiver014() {
         try {
             StringWriter out = new StringWriter();
@@ -307,27 +321,6 @@ public class StreamWriterToReceiverTests extends TestCase {
     }
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
 
 
 

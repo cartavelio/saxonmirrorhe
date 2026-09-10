@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,10 +8,9 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.event.SequenceWriter;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -50,10 +49,12 @@ class MessageListenerProxy extends SequenceWriter {
 
     /**
      * Start of a document node.
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
-        terminate = (properties & ReceiverOptions.TERMINATE) != 0;
+        terminate = ReceiverOption.contains(properties, ReceiverOption.TERMINATE);
         locationId = null;
         errorCode = null;
         super.startDocument(properties);
@@ -62,18 +63,16 @@ class MessageListenerProxy extends SequenceWriter {
 
     /**
      * Output an element start tag.
-     *  @param nameCode   The element name code - a code held in the Name Pool
-     * @param typeCode   Integer code identifying the type of this element. Zero identifies the default
-     *                   type, that is xs:anyType
-     * @param location
-     * @param properties bit-significant flags indicating any special information
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         if (this.locationId == null) {
             this.locationId = location;
         }
-        super.startElement(nameCode, typeCode, location, properties);
+        super.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     @Override
@@ -89,13 +88,12 @@ class MessageListenerProxy extends SequenceWriter {
 
     /**
      * Produce text content output.
-     *
      * @param s          The String to be output
      * @param locationId the location of the node in the source, or of the instruction that created it
      * @param properties bit-significant flags for extra information, e.g. disable-output-escaping  @throws net.sf.saxon.trans.XPathException
-     *          for any failure
      */
 
+    @Override
     public void characters(CharSequence s, Location locationId, int properties) throws XPathException {
         if (this.locationId == null) {
             this.locationId = locationId;
@@ -108,6 +106,7 @@ class MessageListenerProxy extends SequenceWriter {
      * Append an item to the sequence, performing any necessary type-checking and conversion
      */
 
+    @Override
     public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
         if (this.locationId == null) {
             this.locationId = locationId;
@@ -121,10 +120,11 @@ class MessageListenerProxy extends SequenceWriter {
      * @param item the item to be written to the sequence
      */
 
+    @Override
     public void write(Item item) throws XPathException {
         Location loc;
         if (locationId == null) {
-            loc = ExplicitLocation.UNKNOWN_LOCATION;
+            loc = Loc.NONE;
         } else {
             loc = locationId.saveLocation();
         }

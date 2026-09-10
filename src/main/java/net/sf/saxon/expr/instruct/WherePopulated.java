@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,8 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.WherePopulatedOutputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.ma.map.MapItem;
@@ -23,7 +25,7 @@ import net.sf.saxon.value.StringValue;
 /**
  * A compiled xsl:where-populated instruction (formerly xsl:conditional-content).
  */
-public class WherePopulated extends UnaryExpression implements ItemMappingFunction<Item<?>, Item<?>> {
+public class WherePopulated extends UnaryExpression implements ItemMappingFunction {
 
 
     /**
@@ -55,6 +57,7 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
     }
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         return new WherePopulated(getBaseExpression().copy(rebindings));
     }
@@ -69,7 +72,7 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
      */
     @Override
     public int getImplementationMethod() {
-        return ITERATE_METHOD;
+        return ITERATE_METHOD | PROCESS_METHOD;
     }
 
     @Override
@@ -89,8 +92,23 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
      *                                           expression
      */
     @Override
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         return new ItemMappingIterator(getBaseExpression().iterate(context), this);
+    }
+
+    /**
+     * Process the instruction, without returning any tail calls
+     *
+     *
+     * @param output the destination for the result
+     * @param context The dynamic context, giving access to the current node,
+     *                the current variables, etc.
+     * @throws XPathException if a dynamic error occurs
+     */
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
+        WherePopulatedOutputter filter = new WherePopulatedOutputter(output);
+        getBaseExpression().process(filter, context);
     }
 
     /**
@@ -100,6 +118,7 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
      * @return either the output item, or null.
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
      */
+    @Override
     public Item mapItem(Item item) throws XPathException {
         return isDeemedEmpty(item) ? null : item;
     }
@@ -134,16 +153,18 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
      * Get a name identifying the kind of expression, in terms meaningful to a user.
      *
      * @return a name identifying the kind of expression, in terms meaningful to a user.
-     * The name will always be in the form of a lexical XML QName, and should match the name used
-     * in export() output displaying the expression.
+     * The name will always be in the form of a lexical XML QName, and should usually match
+     * the name used in export() output displaying the expression, unless compatibility constraints
+     * intervene.
      */
     @Override
     public String getExpressionName() {
-        return "condCont";
+        return "wherePop";
     }
 
 
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("condCont", this);
         getBaseExpression().export(out);

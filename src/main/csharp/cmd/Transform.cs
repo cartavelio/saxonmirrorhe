@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Text;
-using net.sf.saxon;
-using System.Reflection;
-using net.sf.saxon.dotnet;
 
 namespace Saxon.Cmd
 {
@@ -50,7 +46,7 @@ namespace Saxon.Cmd
          * @throws java.lang.Exception
          */
 
-        public static void Main(string[] args)
+        public static void Main(String[] args)
         {
             new DotNetTransform().doTransform(args, "Transform");
         }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
@@ -8,12 +8,12 @@
 package nativetests;
 
 import com.saxonica.config.ProfessionalConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -21,7 +21,9 @@ import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.Vector;
 
-public class ImportFunctionTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class ImportFunctionTest {
     private static Processor processor = new Processor(true);
 
     public static void main(String[] args) throws SaxonApiException, IOException, URISyntaxException {
@@ -29,6 +31,7 @@ public class ImportFunctionTest extends TestCase {
         main.testImportFunctions();
     }
 
+    @Test
     public void testImportFunctions() throws SaxonApiException, IOException, URISyntaxException {
         try {
             importFunctions();

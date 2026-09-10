@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,6 +17,7 @@ import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.Current;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.style.ExpressionContext;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -34,6 +35,7 @@ public abstract class Pattern extends PseudoExpression {
 
     private double priority = 0.5;
     private boolean recoverable = true;
+    private String originalText;
 
     /**
      * Static factory method to make a Pattern by parsing a String. <br>
@@ -53,7 +55,7 @@ public abstract class Pattern extends PseudoExpression {
         }
         int lineNumber = env instanceof ExpressionContext ? ((ExpressionContext) env).getStyleElement().getLineNumber() : -1;
         PatternParser parser = (PatternParser) env.getConfiguration().newExpressionParser("PATTERN", false, languageLevel);
-        ((XPathParser) parser).setLanguage(XPathParser.XSLT_PATTERN, 30);
+        ((XPathParser) parser).setLanguage(XPathParser.ParsedLanguage.XSLT_PATTERN, 30);
         Pattern pat = parser.parsePattern(pattern, env);
         pat.setRetainedStaticContext(env.makeRetainedStaticContext());
         // System.err.println("Simplified [" + pattern + "] to " + pat.getClass() + " default prio = " + pat.getDefaultPriority());
@@ -97,6 +99,7 @@ public abstract class Pattern extends PseudoExpression {
      * @param forStreaming true if we are generating code for streaming
      */
 
+    @Override
     public boolean isLiftable(boolean forStreaming) {
         return false;
     }
@@ -127,7 +130,7 @@ public abstract class Pattern extends PseudoExpression {
      */
 
     public void setOriginalText(String text) {
-        /*originalText = text;*/
+        originalText = text;
     }
 
     /**
@@ -171,11 +174,9 @@ public abstract class Pattern extends PseudoExpression {
             // Typically happens when this is a pseudo-pattern used for scannable expressions when streaming
             throw ex;
         }
-        XPathException err = new XPathException("An error occurred matching pattern {" + this + "}: ", ex);
-        err.setXPathContext(context);
-        err.setErrorCodeQName(ex.getErrorCodeQName());
-        err.setLocation(getLocation());
-        context.getController().recoverableError(err);
+        context.getController().warning("An error occurred matching pattern {" + this + "}: " + ex.getMessage(),
+                                        ex.getErrorCodeQName().getEQName(),
+                                        getLocation());
     }
 
 
@@ -185,6 +186,7 @@ public abstract class Pattern extends PseudoExpression {
      *
      */
 
+    @Override
     public Pattern simplify() throws XPathException {
         return this;
     }
@@ -198,6 +200,7 @@ public abstract class Pattern extends PseudoExpression {
      * @return the optimised Pattern
      */
 
+    @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
         return this;
@@ -211,6 +214,7 @@ public abstract class Pattern extends PseudoExpression {
      * @return the dependencies, as a bit-significant mask
      */
 
+    @Override
     public int getDependencies() {
         return 0;
     }
@@ -248,6 +252,7 @@ public abstract class Pattern extends PseudoExpression {
      * @throws XPathException if an error occurs during pattern matching
      */
 
+    @Override
     public final boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         return matches(context.getContextItem(), context);
     }
@@ -263,7 +268,7 @@ public abstract class Pattern extends PseudoExpression {
      *                        treat this the same as a false result)
      */
 
-    public abstract boolean matches(Item<?> item, XPathContext context) throws XPathException;
+    public abstract boolean matches(Item item, XPathContext context) throws XPathException;
 
     /**
      * Determine whether this pattern matches a given Node within the subtree rooted at a given
@@ -291,25 +296,27 @@ public abstract class Pattern extends PseudoExpression {
      * @return an iterator over the selected nodes in the document.
      */
 
-    public SequenceIterator<? extends NodeInfo> selectNodes(TreeInfo document, final XPathContext context) throws XPathException {
+    public SequenceIterator selectNodes(TreeInfo document, final XPathContext context) throws XPathException {
         NodeInfo doc = document.getRootNode();
         final UType uType = getUType();
         if (UType.DOCUMENT.subsumes(uType)) {
             if (matches(doc, context)) {
                 return SingletonIterator.makeIterator(doc);
             } else {
-                return new EmptyIterator.OfNodes();
+                return EmptyIterator.ofNodes();
             }
         } else if (UType.ATTRIBUTE.subsumes(uType)) {
             AxisIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
-            MappingFunction<NodeInfo, NodeInfo> atts = item -> item.iterateAxis(AxisInfo.ATTRIBUTE);
-            SequenceIterator<NodeInfo> allAttributes = new MappingIterator<>(allElements, atts);
-            return new ItemMappingIterator<>(allAttributes, item -> matches(item, context) ? item : null);
+            MappingFunction atts = item -> ((NodeInfo)item).iterateAxis(AxisInfo.ATTRIBUTE);
+            SequenceIterator allAttributes = new MappingIterator(allElements, atts);
+            ItemMappingFunction selection = item -> matches(item, context) ? (NodeInfo)item : null;
+            return new ItemMappingIterator(allAttributes, selection);
         } else if (UType.NAMESPACE.subsumes(uType)) {
             AxisIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
-            MappingFunction<NodeInfo, NodeInfo> atts = item -> item.iterateAxis(AxisInfo.NAMESPACE);
-            SequenceIterator<NodeInfo> allNamespaces = new MappingIterator<>(allElements, atts);
-            return new ItemMappingIterator<>(allNamespaces, item -> matches(item, context) ? item : null);
+            MappingFunction atts = item -> ((NodeInfo)item).iterateAxis(AxisInfo.NAMESPACE);
+            SequenceIterator allNamespaces = new MappingIterator(allElements, atts);
+            ItemMappingFunction selection = item -> matches(item, context) ? (NodeInfo) item : null;
+            return new ItemMappingIterator(allNamespaces, selection);
 
         } else if (UType.CHILD_NODE_KINDS.subsumes(uType)) {
             NodeTest nodeTest;
@@ -319,29 +326,30 @@ public abstract class Pattern extends PseudoExpression {
                 nodeTest = new MultipleNodeKindTest(uType);
             }
             AxisIterator allChildren = doc.iterateAxis(AxisInfo.DESCENDANT, nodeTest);
-            return new ItemMappingIterator<>(allChildren, item -> matches(item, context) ? item : null);
+            ItemMappingFunction selection = item -> matches(item, context) ? (NodeInfo)item : null;
+            return new ItemMappingIterator(allChildren, selection);
         } else {
-            byte axis = uType.subsumes(UType.DOCUMENT) ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.DESCENDANT;
+            int axis = uType.subsumes(UType.DOCUMENT) ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.DESCENDANT;
             AxisIterator allChildren = doc.iterateAxis(axis);
-            MappingFunction<NodeInfo, NodeInfo> processElement = item -> {
-                AxisIterator mapper = SingleNodeIterator.makeIterator(item);
+            MappingFunction processElement = item -> {
+                AxisIterator mapper = SingleNodeIterator.makeIterator((NodeInfo)item);
                 if (uType.subsumes(UType.NAMESPACE)) {
-                    mapper = new ConcatenatingAxisIterator(mapper, item.iterateAxis(AxisInfo.NAMESPACE));
+                    mapper = new ConcatenatingAxisIterator(mapper, ((NodeInfo)item).iterateAxis(AxisInfo.NAMESPACE));
                 }
                 if (uType.subsumes(UType.ATTRIBUTE)) {
-                    mapper = new ConcatenatingAxisIterator(mapper, item.iterateAxis(AxisInfo.ATTRIBUTE));
+                    mapper = new ConcatenatingAxisIterator(mapper, ((NodeInfo) item).iterateAxis(AxisInfo.ATTRIBUTE));
                 }
                 return mapper;
             };
-            SequenceIterator<NodeInfo> attributesOrSelf = new MappingIterator<>(allChildren, processElement);
-            ItemMappingFunction<NodeInfo, NodeInfo> test = item -> {
+            SequenceIterator attributesOrSelf = new MappingIterator(allChildren, processElement);
+            ItemMappingFunction test = item -> {
                 if (matches(item, context)) {
-                    return item;
+                    return (NodeInfo)item;
                 } else {
                     return null;
                 }
             };
-            return new ItemMappingIterator<>(attributesOrSelf, test);
+            return new ItemMappingIterator(attributesOrSelf, test);
 
         }
     }
@@ -373,6 +381,7 @@ public abstract class Pattern extends PseudoExpression {
      * @return an ItemType, as specific as possible, which all the matching items satisfy
      */
 
+    @Override
     public abstract ItemType getItemType();
 
     /**
@@ -398,23 +407,47 @@ public abstract class Pattern extends PseudoExpression {
     }
 
     /**
+     * Get the original text of the pattern, if known
+     * @return the original text of the pattern as written; this may be null
+     * in the case of a pattern constructed programmatically
+     */
+
+    public String getOriginalText() {
+        return originalText;
+    }
+
+    /**
      * Get a string representation of the pattern. This will be in a form similar to the
      * original pattern text, but not necessarily identical. It is not guaranteed to be
      * in legal pattern syntax.
      */
 
     public String toString() {
+        if (originalText != null) {
+            return originalText;
+        } else {
+            return reconstruct();
+
+        }
+    }
+
+    /**
+     * Reconstruct a string representation of the pattern in cases where the original
+     * string is not available
+     */
+
+    public String reconstruct() {
         return "pattern matching " + getItemType();
     }
 
     /**
      * Get the host language (XSLT, XQuery, XPath) used to implement the code in this container
      *
-     * @return typically {@link net.sf.saxon.Configuration#XSLT} or {@link net.sf.saxon.Configuration#XQUERY}
+     * @return typically {@link HostLanguage#XSLT} or {@link HostLanguage#XQUERY}
      */
 
-    public int getHostLanguage() {
-        return Configuration.XSLT;
+    public HostLanguage getHostLanguage() {
+        return HostLanguage.XSLT;
     }
 
     /**
@@ -431,6 +464,12 @@ public abstract class Pattern extends PseudoExpression {
         return null;
     }
 
+    @Override
+    public Pattern toPattern(Configuration config) {
+        return this;
+    }
+
+    @Override
     public abstract void export(ExpressionPresenter presenter) throws XPathException;
 
 //    /**
@@ -451,6 +490,7 @@ public abstract class Pattern extends PseudoExpression {
 //        }
 //    }
 
+    @Override
     public abstract Pattern copy(RebindingMap rebindings);
 
     /**

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -66,6 +66,7 @@ public final class AnyURIValue extends StringValue {
      */
 
     /*@NotNull*/
+    @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
         AnyURIValue v = new AnyURIValue(value);
         v.typeLabel = typeLabel;
@@ -73,6 +74,7 @@ public final class AnyURIValue extends StringValue {
     }
 
     /*@NotNull*/
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.ANY_URI;
     }
@@ -115,7 +117,7 @@ public final class AnyURIValue extends StringValue {
                 betweenBrackets = false;
             }
             if (c != '%' || betweenBrackets) {
-                sb.append(c);
+                sb.cat(c);
                 if (++i >= n) {
                     break;
                 }
@@ -135,7 +137,7 @@ public final class AnyURIValue extends StringValue {
                 }
             }
             bb.flip();
-            sb.append(utf8.decode(bb));
+            sb.cat(utf8.decode(bb));
         }
 
         return sb.toString();

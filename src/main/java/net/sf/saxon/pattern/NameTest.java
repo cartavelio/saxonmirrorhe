@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -115,6 +115,7 @@ public class NameTest extends NodeTest implements QNameTest {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return uType;
     }
@@ -147,6 +148,7 @@ public class NameTest extends NodeTest implements QNameTest {
         }
     }
 
+    @Override
     public IntPredicate getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         final int[] nameCodeArray = tree.getNameCodeArray();
@@ -162,7 +164,8 @@ public class NameTest extends NodeTest implements QNameTest {
      * @param node the node to be matched
      */
 
-    public boolean matchesNode(NodeInfo node) {
+    @Override
+    public boolean test(NodeInfo node) {
         if (node.getNodeKind() != nodeKind) {
             return false;
         }
@@ -195,6 +198,7 @@ public class NameTest extends NodeTest implements QNameTest {
      * @return true if the name matches
      */
 
+    @Override
     public boolean matches(StructuredQName qname) {
         computeUriAndLocal();
         return qname.getLocalPart().equals(localName) && qname.hasURI(uri);
@@ -204,6 +208,7 @@ public class NameTest extends NodeTest implements QNameTest {
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
+    @Override
     public final double getDefaultPriority() {
         return 0.0;
     }
@@ -212,6 +217,7 @@ public class NameTest extends NodeTest implements QNameTest {
      * Get the fingerprint required
      */
 
+    @Override
     public int getFingerprint() {
         return fingerprint;
     }
@@ -233,6 +239,7 @@ public class NameTest extends NodeTest implements QNameTest {
      * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
      */
 
+    @Override
     public int getPrimitiveType() {
         return nodeKind;
     }
@@ -244,6 +251,7 @@ public class NameTest extends NodeTest implements QNameTest {
      */
 
     /*@NotNull*/
+    @Override
     public Optional<IntSet> getRequiredNodeNames() {
         return Optional.of(new IntSingletonSet(fingerprint));
     }
@@ -303,6 +311,23 @@ public class NameTest extends NodeTest implements QNameTest {
                 ((NameTest) other).fingerprint == fingerprint;
     }
 
+    @Override
+    public String getFullAlphaCode() {
+        return getBasicAlphaCode() + " n" + getMatchingNodeName().getEQName();
+    }
+
+    /**
+     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
+     *
+     * @return a string representation of the QNameTest, suitable for use in export files. The format is
+     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
+     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
+     */
+    @Override
+    public String exportQNameTest() {
+        return getMatchingNodeName().getEQName();
+    }
+
     /**
      * Generate Javascript code to test if a name matches the test.
      *
@@ -312,49 +337,10 @@ public class NameTest extends NodeTest implements QNameTest {
      * uri and local.
      * @param targetVersion the version of Saxon-JS being targeted
      */
+    @Override
     public String generateJavaScriptNameTest(int targetVersion) {
         computeUriAndLocal();
         return "q.uri==='" + ExpressionPresenter.jsEscape(uri) + "'&&q.local==='" + localName + "'";
-    }
-
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     * @param knownToBe NodeTest that the item is known to conform to (no run-time test needed)
-     * @param targetVersion the version of Saxon-JS being targeted
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     *
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) {
-
-        boolean knownKind = knownToBe.getUType() == this.getUType();
-        if (nodeKind == Type.ATTRIBUTE && getNamespaceURI().equals("")) {
-            // Optimization
-            String nt = "item.name==='" + getLocalPart() + "'";
-            return "return " + (knownKind ? nt : "SaxonJS.U.isAttr(item) && " + nt);
-        }
-        String instNode = "";
-        if (!knownKind) {
-            if (knownToBe instanceof NodeTest) {
-                instNode = "item.nodeType===" + nodeKind + " && ";
-            } else if (nodeKind == Type.ATTRIBUTE) {
-                instNode = "SaxonJS.U.isAttr(item) && ";
-            } else if (nodeKind == Type.NAMESPACE) {
-                instNode = "SaxonJS.U.isNamespaceNode(item) && ";
-            } else {
-                instNode = "SaxonJS.U.isNode(item) && item.nodeType===" + nodeKind + " && ";
-            }
-        }
-        if (targetVersion == 1) {
-            return "var q=SaxonJS.U.nameOfNode(item); return " + instNode + generateJavaScriptNameTest(targetVersion) + ";";
-        } else {
-            computeUriAndLocal();
-            return "return " + instNode +
-                    "SaxonJS.U.hasLocalName(item,'" + localName + "')&&SaxonJS.U.hasURI(item,'" +
-                    ExpressionPresenter.jsEscape(uri) + "')";
-        }
     }
 
     /**
@@ -375,6 +361,7 @@ public class NameTest extends NodeTest implements QNameTest {
         return Optional.of("The node has the wrong name");
     }
 
+    @Override
     public String toShortString() {
         switch (nodeKind) {
             case Type.ELEMENT:

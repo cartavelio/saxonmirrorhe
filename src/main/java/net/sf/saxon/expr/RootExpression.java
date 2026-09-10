@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -33,6 +33,7 @@ public class RootExpression extends Expression {
 
 
     private boolean contextMaybeUndefined = true;
+    private boolean doneWarnings = false;
 
     public RootExpression() {
     }
@@ -42,17 +43,21 @@ public class RootExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, /*@Nullable*/ ContextItemStaticInfo contextInfo) throws XPathException {
+        TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         if (contextInfo == null || contextInfo.getItemType() == null || contextInfo.getItemType().equals(ErrorType.getInstance())) {
             XPathException err = new XPathException(noContextMessage() + ": the context item is absent");
             err.setErrorCode("XPDY0002");
             err.setIsTypeError(true);
             err.setLocation(getLocation());
             throw err;
-        } else {
-            contextMaybeUndefined = contextInfo.isPossiblyAbsent();
+        } else if (!doneWarnings && contextInfo.isParentless()
+                && th.relationship(contextInfo.getItemType(),NodeKindTest.DOCUMENT) == Affinity.DISJOINT) {
+            visitor.issueWarning(noContextMessage() + ": the context item is parentless and is not a document node", getLocation());
+            doneWarnings = true;
         }
-        TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
+        contextMaybeUndefined = contextInfo.isPossiblyAbsent();
         if (th.isSubType(contextInfo.getItemType(), NodeKindTest.DOCUMENT)) {
             // this rewrite is important for streamability analysis
             ContextItemExpression cie = new ContextItemExpression();
@@ -61,8 +66,8 @@ public class RootExpression extends Expression {
             return cie;
         }
 
-        int relation = th.relationship(contextInfo.getItemType(), AnyNodeTest.getInstance());
-        if (relation == TypeHierarchy.DISJOINT) {
+        Affinity relation = th.relationship(contextInfo.getItemType(), AnyNodeTest.getInstance());
+        if (relation == Affinity.DISJOINT) {
             XPathException err = new XPathException(noContextMessage() + ": the context item is not a node");
             err.setErrorCode("XPTY0020");
             err.setIsTypeError(true);
@@ -88,11 +93,13 @@ public class RootExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         // repeat the check: in XSLT insufficient information is available the first time
         return typeCheck(visitor, contextItemType);
     }
 
+    @Override
     public int computeSpecialProperties() {
         return StaticProperty.ORDERED_NODESET |
                 StaticProperty.CONTEXT_DOCUMENT_NODESET |
@@ -131,6 +138,7 @@ public class RootExpression extends Expression {
      * Specify that the expression returns a singleton
      */
 
+    @Override
     public final int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -142,6 +150,7 @@ public class RootExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return NodeKindTest.DOCUMENT;
     }
@@ -177,6 +186,7 @@ public class RootExpression extends Expression {
      * get HashCode for comparing two expressions
      */
 
+    @Override
     public int computeHashCode() {
         return "RootExpression".hashCode();
     }
@@ -213,6 +223,7 @@ public class RootExpression extends Expression {
      * StaticProperty.CURRENT_NODE
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         return StaticProperty.DEPENDS_ON_CONTEXT_DOCUMENT;
     }
@@ -225,6 +236,7 @@ public class RootExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         RootExpression exp = new RootExpression();
         ExpressionTool.copyLocationInfo(this, exp);
@@ -254,6 +266,7 @@ public class RootExpression extends Expression {
      *         expression is the first operand of a path expression or filter expression
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         if (pathMapNodeSet == null) {
             ContextItemExpression cie = new ContextItemExpression();
@@ -283,6 +296,7 @@ public class RootExpression extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("root", this);
         destination.endElement();
@@ -296,14 +310,17 @@ public class RootExpression extends Expression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         return SingletonIterator.makeIterator(getNode(context));
     }
 
+    @Override
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
         return getNode(context);
     }
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         return getNode(context) != null;
     }

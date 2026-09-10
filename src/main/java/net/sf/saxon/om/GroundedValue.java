@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,18 +7,22 @@
 
 package net.sf.saxon.om;
 
+import net.sf.saxon.expr.SingletonIntersectExpression;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A value that exists in memory and that can be directly addressed
  * @since 9.5.  Generified in 9.9.
  */
-public interface GroundedValue<T extends Item<?>> extends Sequence<T>, Iterable<T> {
+public interface GroundedValue extends Sequence {
 
     /**
      * Get an iterator over all the items in the sequence. This differs from the superclass method
@@ -29,7 +33,8 @@ public interface GroundedValue<T extends Item<?>> extends Sequence<T>, Iterable<
      * {@link java.util.Iterator}) over all the items in this Sequence.
      */
 
-    UnfailingIterator<T> iterate();
+    @Override
+    UnfailingIterator iterate();
 
     /**
      * Get the n'th item in the value, counting from zero (0)
@@ -38,14 +43,15 @@ public interface GroundedValue<T extends Item<?>> extends Sequence<T>, Iterable<
      * @return the n'th item if it exists, or null if the requested position is out of range
      */
 
-    T itemAt(int n);
+    Item itemAt(int n);
 
     /**
      * Get the first item of the sequence. This differs from the parent interface in not allowing an exception
      * @return the first item of the sequence, or null if the sequence is empty
      */
 
-    T head();
+    @Override
+    Item head();
 
     /**
      * Get a subsequence of the value
@@ -60,7 +66,7 @@ public interface GroundedValue<T extends Item<?>> extends Sequence<T>, Iterable<
      * @return the required subsequence.
      */
 
-    GroundedValue<T> subsequence(int start, int length);
+    GroundedValue subsequence(int start, int length);
 
     /**
      * Get the size of the value (the number of items in the value, considered as a sequence)
@@ -113,7 +119,7 @@ public interface GroundedValue<T extends Item<?>> extends Sequence<T>, Iterable<
      * @return the simplified sequence
      */
 
-    default GroundedValue<T> reduce() {
+    default GroundedValue reduce() {
         return this;
     }
 
@@ -125,7 +131,8 @@ public interface GroundedValue<T extends Item<?>> extends Sequence<T>, Iterable<
      * @return this {@link GroundedValue}
      */
 
-    default GroundedValue<T> materialize() {
+    @Override
+    default GroundedValue materialize() {
         return this;
     }
 
@@ -138,41 +145,54 @@ public interface GroundedValue<T extends Item<?>> extends Sequence<T>, Iterable<
         return Err.depictSequence(this).toString();
     }
 
-    /**
-     * Get the contents of this value in the form of a Java {@link java.lang.Iterable},
-     * so that it can be used in a for-each expression. For {@link GroundedValue} and all
-     * its subclasses, the class implements {@link java.lang.Iterable} directly, so this
-     * method returns this object itself.
-     *
-     * @return an Iterable containing the same sequence of items
-     */
+    default Iterable<? extends Item> asIterable() {
+        // For .NEU - don't use a lambda expression here
+        return new Iterable<Item>() {
+            @Override
+            public Iterator<Item> iterator() {
+                final UnfailingIterator base = iterate();
+                return new Iterator<Item>() {
 
-    default Iterable<T> asIterable() {
-        return this;
+                    Item pending = null;
+
+                    @Override
+                    public boolean hasNext() {
+                        pending = base.next();
+                        return pending != null;
+                    }
+
+                    @Override
+                    public Item next() {
+                        return pending;
+                    }
+                };
+            }
+        };
     }
 
     /**
-     * Get an iterator (a Java {@link java.util.Iterator}) over the items in this sequence.
-     * @return an iterator over the items in this sequence.
+     * Determine whether a particular node is present in the value
+     * @param sought the sought-after node
+     * @return true if the sought node is present
+     * @throws XPathException This should never happen
      */
 
-    default Iterator<T> iterator() {
-        final UnfailingIterator<T> base = iterate();
-        return new Iterator<T>() {
+    default boolean containsNode(NodeInfo sought) throws XPathException {
+        return SingletonIntersectExpression.containsNode(iterate(), sought);
+    }
 
-            T pending = null;
+    /**
+     * Append two or more grounded values to form a new grounded value
+     * @param others one or more grounded values that are to be concatenated with this
+     *               one, in order
+     * @return the concatenation of the supplied sequences (none of which is modified by the operation)
+     */
 
-            @Override
-            public boolean hasNext() {
-                pending = base.next();
-                return pending != null;
-            }
-
-            @Override
-            public T next() {
-                return pending;
-            }
-        };
+    default GroundedValue concatenate(GroundedValue... others) {
+        List<GroundedValue> c = new ArrayList<>();
+        c.add(this);
+        Collections.addAll(c, others);
+        return new Chain(c);
     }
 }
 

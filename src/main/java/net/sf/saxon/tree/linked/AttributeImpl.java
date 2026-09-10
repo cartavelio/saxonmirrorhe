@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,13 +8,15 @@
 package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.type.Type;
 
 /**
  * A node in the "linked" tree representing an attribute. Note that this is
@@ -25,8 +27,6 @@ import net.sf.saxon.type.*;
  * is deleted, and are retained when an attribute is renamed.</p>
  * <p>This object no longer caches information such as the name code and string value, because
  * these would become invalid when the element node is modified.</p>
- *
- * @author Michael H. Kay
  */
 
 public class AttributeImpl extends NodeImpl {
@@ -43,6 +43,10 @@ public class AttributeImpl extends NodeImpl {
         setSiblingPosition(index);
     }
 
+    private AttributeInfo getAttributeInfo() {
+        return getRawParent().attributes().itemAt(getSiblingPosition());
+    }
+
     /**
      * Get the name of the node. Returns null for an unnamed node
      *
@@ -54,7 +58,7 @@ public class AttributeImpl extends NodeImpl {
             // implies this node is deleted
             return null;
         }
-        return ((ElementImpl) getRawParent()).getAttributeList().getNodeName(getSiblingPosition());
+        return getAttributeInfo().getNodeName();
     }
 
     /**
@@ -67,7 +71,7 @@ public class AttributeImpl extends NodeImpl {
             // implies this node is deleted
             return -1;
         }
-        return ((ElementImpl) getRawParent()).getAttributeList().getFingerprint(getSiblingPosition());
+        return getNodeName().obtainFingerprint(getNamePool());
     }
 
     /**
@@ -76,8 +80,9 @@ public class AttributeImpl extends NodeImpl {
      * @return the type annotation of the node, if any
      */
 
+    @Override
     public SchemaType getSchemaType() {
-        return ((ElementImpl) getRawParent()).getAttributeList().getTypeAnnotation(getSiblingPosition());
+        return getAttributeInfo().getType();
     }
 
 
@@ -87,12 +92,9 @@ public class AttributeImpl extends NodeImpl {
      * @return true if the node is an ID
      */
 
+    @Override
     public boolean isId() {
-        try {
-            return getFingerprint() == StandardNames.XML_ID || getSchemaType().isIdType();
-        } catch (MissingComponentException e) {
-            return false;
-        }
+        return getAttributeInfo().isId();
     }
 
     /**
@@ -101,9 +103,9 @@ public class AttributeImpl extends NodeImpl {
      * @return true if the node is an IDREF or IDREFS element or attribute
      */
 
+    @Override
     public boolean isIdref() {
-        AttributeCollection alist = ((ElementImpl) getRawParent()).getAttributeList();
-        if ((alist.getProperties(getSiblingPosition()) & ReceiverOptions.IS_IDREF) != 0) {
+        if (ReceiverOption.contains(getAttributeInfo().getProperties(), ReceiverOption.IS_IDREF)) {
             return true;
         }
         return ElementImpl.isIdRefNode(this);
@@ -143,6 +145,7 @@ public class AttributeImpl extends NodeImpl {
      * the top word the same as their owner and the bottom half reflecting their relative position.
      */
 
+    @Override
     protected long getSequenceNumber() {
         long parseq = getRawParent().getSequenceNumber();
         return (parseq == -1L ? parseq : parseq + 0x8000 + getSiblingPosition());
@@ -155,6 +158,7 @@ public class AttributeImpl extends NodeImpl {
      * @return Node.ATTRIBUTE
      */
 
+    @Override
     public final int getNodeKind() {
         return Type.ATTRIBUTE;
     }
@@ -165,8 +169,9 @@ public class AttributeImpl extends NodeImpl {
      * @return the attribute value
      */
 
+    @Override
     public String getStringValue() {
-        return ((ElementImpl) getRawParent()).getAttributeList().getValue(getSiblingPosition());
+        return getAttributeInfo().getValue();
     }
 
     /**
@@ -174,6 +179,7 @@ public class AttributeImpl extends NodeImpl {
      */
 
     /*@Nullable*/
+    @Override
     public NodeImpl getNextSibling() {
         return null;
     }
@@ -183,6 +189,7 @@ public class AttributeImpl extends NodeImpl {
      */
 
     /*@Nullable*/
+    @Override
     public NodeImpl getPreviousSibling() {
         return null;
     }
@@ -192,8 +199,9 @@ public class AttributeImpl extends NodeImpl {
      */
 
     /*@NotNull*/
+    @Override
     public NodeImpl getPreviousInDocument() {
-        return (NodeImpl) getParent();
+        return getParent();
     }
 
     /**
@@ -201,9 +209,10 @@ public class AttributeImpl extends NodeImpl {
      */
 
     /*@Nullable*/
+    @Override
     public NodeImpl getNextInDocument(NodeImpl anchor) {
         if (anchor == this) return null;
-        return ((NodeImpl) getParent()).getNextInDocument(anchor);
+        return getParent().getNextInDocument(anchor);
     }
 
     /**
@@ -212,32 +221,39 @@ public class AttributeImpl extends NodeImpl {
      * @param buffer a buffer to which the generated ID will be written
      */
 
+    @Override
     public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
         getParent().generateId(buffer);
-        buffer.append('a');
+        buffer.cat('a');
         buffer.append(Integer.toString(getSiblingPosition()));
     }
 
     /**
-     * Copy this node to a given outputter
+     * Copy this node to a given outputter.
+     * @throws IllegalArgumentException this method is not supported for attribute nodes
      */
 
+    @Override
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) throws XPathException {
-        SimpleType typeCode = (CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS) ?
-                ((SimpleType) getSchemaType()) : BuiltInAtomicType.UNTYPED_ATOMIC);
-        out.attribute(NameOfNode.makeName(this), typeCode, getStringValue(), locationId, 0);
+        throw new IllegalArgumentException();
     }
 
     /**
      * Delete this node (that is, detach it from its parent)
      */
 
+    @Override
     public void delete() {
-        if (getRawParent() != null) {
-            getRawParent().removeAttribute(this);
+        if (!isDeleted()) {
+            if (getRawParent() != null) {
+                getRawParent().removeAttribute(this);
+//                AttributeMap oldAtts = getRawParent().attributes();
+//                AttributeMap newAtts = oldAtts.remove(getNodeName());
+//                getRawParent().setAttributes(newAtts);
+            }
+            setRawParent(null);
+            setSiblingPosition(-1);
         }
-        setRawParent(null);
-        setSiblingPosition(-1);
     }
 
     /**
@@ -248,9 +264,10 @@ public class AttributeImpl extends NodeImpl {
      * @return true if this node has been deleted
      */
 
+    @Override
     public boolean isDeleted() {
         // Note that the attribute node may be represented by more than one object
-        return getSiblingPosition() == -1 || getFingerprint() == -1 || (getRawParent() != null && getRawParent().isDeleted());
+        return getRawParent() == null || getAttributeInfo() instanceof AttributeInfo.Deleted || getRawParent().isDeleted();
     }
 
     /**
@@ -268,6 +285,7 @@ public class AttributeImpl extends NodeImpl {
      *                                  or if two of the replacement nodes have the same name
      */
 
+    @Override
     public void replace(/*@NotNull*/ NodeInfo[] replacement, boolean inherit) {
         if (isDeleted()) {
             throw new IllegalStateException("Cannot replace a deleted node");
@@ -281,7 +299,7 @@ public class AttributeImpl extends NodeImpl {
             if (n.getNodeKind() != Type.ATTRIBUTE) {
                 throw new IllegalArgumentException("Replacement nodes must be attributes");
             }
-            element.addAttribute(NameOfNode.makeName(n), BuiltInAtomicType.UNTYPED_ATOMIC, n.getStringValue(), 0);
+            element.addAttribute(NameOfNode.makeName(n), BuiltInAtomicType.UNTYPED_ATOMIC, n.getStringValue(), ReceiverOption.NONE);
         }
     }
 
@@ -291,10 +309,14 @@ public class AttributeImpl extends NodeImpl {
      * @param newNameCode the NamePool code of the new name
      */
 
+    @Override
     public void rename(NodeName newNameCode) {
         // The attribute node itself is transient; we need to update the attribute collection held in the parent
-        if (getRawParent() != null) {
-            ((AttributeCollectionImpl) ((ElementImpl) getRawParent()).getAttributeList()).renameAttribute(getSiblingPosition(), newNameCode);
+        ElementImpl owner = (ElementImpl)getRawParent();
+        if (owner != null && !isDeleted()) {
+            AttributeInfo att = getAttributeInfo();
+            owner.setAttributeInfo(getSiblingPosition(),
+                                   new AttributeInfo(newNameCode, BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), att.getProperties()));
             String newURI = newNameCode.getURI();
             if (!newURI.isEmpty()) {
                 // new attribute name is in a namespace
@@ -302,7 +324,7 @@ public class AttributeImpl extends NodeImpl {
                 NamespaceBinding newBinding = new NamespaceBinding(newPrefix, newURI);
                 String oldURI = ((ElementImpl) getRawParent()).getURIForPrefix(newPrefix, false);
                 if (oldURI == null) {
-                    getRawParent().addNamespace(newBinding, false);
+                    owner.addNamespace(newBinding);
                 } else if (!oldURI.equals(newURI)) {
                     throw new IllegalArgumentException(
                             "Namespace binding of new name conflicts with existing namespace binding");
@@ -311,10 +333,13 @@ public class AttributeImpl extends NodeImpl {
         }
     }
 
+    @Override
     public void replaceStringValue(CharSequence stringValue) {
-        if (getRawParent() != null) {
-            AttributeCollectionImpl atts = (AttributeCollectionImpl) ((ElementImpl) getRawParent()).getAttributeList();
-            atts.replaceAttribute(getSiblingPosition(), stringValue);
+        ElementImpl owner = (ElementImpl)getRawParent();
+        if (owner != null && !isDeleted()) {
+            AttributeInfo att = getAttributeInfo();
+            owner.setAttributeInfo(getSiblingPosition(),
+                                   new AttributeInfo(att.getNodeName(), att.getType(), stringValue.toString(), att.getLocation(), att.getProperties()));
         }
     }
 
@@ -324,11 +349,14 @@ public class AttributeImpl extends NodeImpl {
      * This method implements the upd:removeType() primitive defined in the XQuery Update specification
      */
 
+    @Override
     public void removeTypeAnnotation() {
-        if (getRawParent() != null) {
-            AttributeCollectionImpl atts = (AttributeCollectionImpl) ((ElementImpl) getRawParent()).getAttributeList();
-            atts.setTypeAnnotation(getSiblingPosition(), BuiltInAtomicType.UNTYPED_ATOMIC);
-            getRawParent().removeTypeAnnotation();
+        ElementImpl owner = (ElementImpl) getRawParent();
+        if (owner != null && !isDeleted()) {
+            AttributeInfo att = getAttributeInfo();
+            owner.setAttributeInfo(getSiblingPosition(),
+                                   new AttributeInfo(att.getNodeName(), BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), att.getProperties()));
+            owner.removeTypeAnnotation();
         }
     }
 
@@ -342,10 +370,17 @@ public class AttributeImpl extends NodeImpl {
      *                 isNilled properties)
      */
 
+    @Override
     public void setTypeAnnotation(SchemaType type) {
-        if (getRawParent() != null) {
-            AttributeCollectionImpl atts = (AttributeCollectionImpl) ((ElementImpl) getRawParent()).getAttributeList();
-            atts.setTypeAnnotation(getSiblingPosition(), (SimpleType)type);
+        if (!(type instanceof SimpleType)) {
+            throw new IllegalArgumentException("Attribute type must be a simple type");
+        }
+        final ElementImpl owner = (ElementImpl)getRawParent();
+        if (owner != null && !isDeleted()) {
+            AttributeInfo att = getAttributeInfo();
+            owner.setAttributeInfo(getSiblingPosition(),
+                                   new AttributeInfo(att.getNodeName(), (SimpleType)type, att.getValue(), att.getLocation(), att.getProperties()));
+            owner.removeTypeAnnotation();
         }
     }
 }

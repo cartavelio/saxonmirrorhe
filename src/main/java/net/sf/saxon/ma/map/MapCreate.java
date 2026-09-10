@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -23,9 +23,10 @@ import net.sf.saxon.trans.XPathException;
  */
 public class MapCreate extends SystemFunction {
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
 
-        SequenceIterator<?> iter = arguments[0].iterate();
+        SequenceIterator iter = arguments[0].iterate();
         MapItem baseMap = (MapItem) iter.next();
         if (baseMap == null) {
             return new HashTrieMap();
@@ -48,9 +49,10 @@ public class MapCreate extends SystemFunction {
 
     }
 
+    @Override
     public String getStreamerName() {
         return "NewMap";
     }
 }
 
-// Copyright (c) 2010-2014 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

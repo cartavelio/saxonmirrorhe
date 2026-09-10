@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -28,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
+import static net.sf.saxon.expr.flwor.Clause.ClauseName.GROUP_BY;
 
 /**
  * This class represents an "group by" clause in a FLWOR expression
@@ -55,8 +58,8 @@ public class GroupByClause extends Clause {
     }
 
     @Override
-    public int getClauseKey() {
-        return GROUPBYCLAUSE;
+    public ClauseName getClauseKey() {
+        return GROUP_BY;
     }
 
     @Override
@@ -66,6 +69,7 @@ public class GroupByClause extends Clause {
     }
 
 
+    @Override
     public GroupByClause copy(FLWORExpression flwor, RebindingMap rebindings) {
         GroupByClause g2 = new GroupByClause(config);
         g2.setLocation(getLocation());
@@ -88,7 +92,7 @@ public class GroupByClause extends Clause {
      */
 
     public void initRetainedTupleExpression(FLWORExpression flwor, TupleExpression expr) {
-        retainedTupleOp = new Operand(flwor, expr, OperandRole.REPEAT_NAVIGATE_CONSTRAINED);
+        retainedTupleOp = new Operand(flwor, expr, OperandRole.FLWOR_TUPLE_CONSTRAINED);
     }
 
     /**
@@ -140,7 +144,7 @@ public class GroupByClause extends Clause {
      */
 
     public void initGroupingTupleExpression(FLWORExpression flwor, TupleExpression expr) {
-        groupingTupleOp = new Operand(flwor, expr, OperandRole.REPEAT_NAVIGATE_CONSTRAINED);
+        groupingTupleOp = new Operand(flwor, expr, OperandRole.FLWOR_TUPLE_CONSTRAINED);
     }
 
     /**
@@ -184,6 +188,7 @@ public class GroupByClause extends Clause {
      * @return the variable bindings
      */
 
+    @Override
     public LocalVariableBinding[] getRangeVariables() {
         return bindings;
     }
@@ -216,13 +221,14 @@ public class GroupByClause extends Clause {
      * output to another tuple stream
      *
      * @param destination the output tuple stream
+     * @param output the destination for the result
      * @param context the dynamic evaluation context
      * @return the push tuple stream that implements the functionality of this clause of the FLWOR
      *         expression
      */
     @Override
-    public TuplePush getPushStream(TuplePush destination, XPathContext context) {
-        return new GroupByClausePush(destination, this, context);
+    public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
+        return new GroupByClausePush(output, destination, this, context);
     }
 
     /**
@@ -285,22 +291,22 @@ public class GroupByClause extends Clause {
 
     public void processGroup(List<ObjectToBeGrouped> group, XPathContext context) throws XPathException {
         LocalVariableBinding[] bindings = getRangeVariables();
-        Sequence<?>[] groupingValues = group.get(0).groupingValues.getMembers();
+        Sequence[] groupingValues = group.get(0).groupingValues.getMembers();
         for (int j = 0; j < groupingValues.length; j++) {
-            Sequence<?> v = groupingValues[j];
+            Sequence v = groupingValues[j];
             context.setLocalVariable(bindings[j].getLocalSlotNumber(), v);
         }
         for (int j = groupingValues.length; j < bindings.length; j++) {
-            List<Item<?>> concatenatedValue = new ArrayList<>();
+            List<Item> concatenatedValue = new ArrayList<>();
             for (ObjectToBeGrouped otbg : group) {
-                Sequence<?> val = otbg.retainedValues.getMembers()[j - groupingValues.length];
-                SequenceIterator<?> si = val.iterate();
-                Item<?> it;
+                Sequence val = otbg.retainedValues.getMembers()[j - groupingValues.length];
+                SequenceIterator si = val.iterate();
+                Item it;
                 while ((it = si.next()) != null) {
                     concatenatedValue.add(it);
                 }
             }
-            SequenceExtent<Item<?>> se = new SequenceExtent<>(concatenatedValue);
+            SequenceExtent se = new SequenceExtent(concatenatedValue);
             context.setLocalVariable(bindings[j].getLocalSlotNumber(), se);
         }
     }
@@ -386,4 +392,4 @@ public class GroupByClause extends Clause {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
@@ -22,7 +22,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.value.StringValue;
 
 /**
  * An instruction derived from an xsl:attribute element in stylesheet, or from
@@ -62,7 +61,7 @@ public final class ComputedAttribute extends AttributeCreator {
         }
         setSchemaType(schemaType);
         setValidationAction(validationAction);
-        setOptions(0);
+        setOptions(ReceiverOption.NONE);
         this.allowNameAsQName = allowNameAsQName;
     }
 
@@ -71,14 +70,16 @@ public final class ComputedAttribute extends AttributeCreator {
      * (This option is set in XQuery, but not in XSLT)
      */
 
+    @Override
     public void setRejectDuplicates() {
-        setOptions(getOptions() | ReceiverOptions.REJECT_DUPLICATES);
+        setOptions(getOptions() | ReceiverOption.REJECT_DUPLICATES);
     }
 
     /**
      * Get the name of this instruction
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_ATTRIBUTE;
     }
@@ -139,6 +140,7 @@ public final class ComputedAttribute extends AttributeCreator {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return NodeKindTest.ATTRIBUTE;
     }
@@ -149,6 +151,7 @@ public final class ComputedAttribute extends AttributeCreator {
      * @return the static cardinality (exactly one)
      */
 
+    @Override
     public int getCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_ONE;
     }
@@ -170,12 +173,14 @@ public final class ComputedAttribute extends AttributeCreator {
      * @return a set of flags indicating static properties of this expression
      */
 
+    @Override
     public int computeSpecialProperties() {
         return super.computeSpecialProperties() |
                 StaticProperty.SINGLE_DOCUMENT_NODESET;
     }
 
 
+    @Override
     public void localTypeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         nameOp.typeCheck(visitor, contextItemType);
 
@@ -188,9 +193,9 @@ public final class ComputedAttribute extends AttributeCreator {
             setNameExp(config.getTypeChecker(false).staticTypeCheck(getNameExp(),
                                                                                         SequenceType.SINGLE_ATOMIC, role, visitor));
             ItemType nameItemType = getNameExp().getItemType();
-            boolean maybeString = th.relationship(nameItemType, BuiltInAtomicType.STRING) != TypeHierarchy.DISJOINT ||
-                    th.relationship(nameItemType, BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT;
-            boolean maybeQName = th.relationship(nameItemType, BuiltInAtomicType.QNAME) != TypeHierarchy.DISJOINT;
+            boolean maybeString = th.relationship(nameItemType, BuiltInAtomicType.STRING) != Affinity.DISJOINT ||
+                    th.relationship(nameItemType, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT;
+            boolean maybeQName = th.relationship(nameItemType, BuiltInAtomicType.QNAME) != Affinity.DISJOINT;
             if (!(maybeString || maybeQName)) {
                 XPathException err = new XPathException(
                         "The attribute name must be either an xs:string, an xs:QName, or untyped atomic");
@@ -207,11 +212,6 @@ public final class ComputedAttribute extends AttributeCreator {
 
         if (getNamespaceExp() != null) {
             namespaceOp.typeCheck(visitor, contextItemType);
-
-//            Deleted MHK Aug 2014 because the namespace expression is an AVT and therefore necessarily a string
-//            role = new RoleLocator(RoleLocator.INSTRUCTION, "attribute/namespace", 0);
-//            namespace = config.getTypeChecker().staticTypeCheck(
-//                    namespace, SequenceType.SINGLE_STRING, false, role, visitor);
         }
 
         if (Literal.isAtomic(getNameExp())) {
@@ -250,6 +250,7 @@ public final class ComputedAttribute extends AttributeCreator {
 
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         Expression exp = super.optimize(visitor, contextItemType);
         if (exp != this) {
@@ -276,6 +277,7 @@ public final class ComputedAttribute extends AttributeCreator {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ComputedAttribute exp = new ComputedAttribute(
                 getNameExp() == null ? null : getNameExp().copy(rebindings),
@@ -296,6 +298,7 @@ public final class ComputedAttribute extends AttributeCreator {
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         if (parentType instanceof SimpleType) {
             String msg = "Attributes are not permitted here: ";
@@ -320,6 +323,7 @@ public final class ComputedAttribute extends AttributeCreator {
      * @throws XPathException if a dynamic error occurs (for example, if the attribute name is invalid)
      */
 
+    @Override
     public NodeName evaluateNodeName(XPathContext context) throws XPathException {
         NamePool pool = context.getNamePool();
 
@@ -331,22 +335,29 @@ public final class ComputedAttribute extends AttributeCreator {
 
         if (nameValue instanceof StringValue) {
             // this will always be the case in XSLT
-            CharSequence rawName = nameValue.getStringValueCS();
-            rawName = Whitespace.trimWhitespace(rawName); // required in XSLT; possibly wrong in XQuery
-            try {
-                String[] parts = NameChecker.getQNameParts(rawName);
-                prefix = parts[0];
-                localName = parts[1];
-            } catch (QNameException err) {
-                String errorCode = isXSLT() ? "XTDE0850" : "XQDY0074";
-                XPathException err1 = new XPathException("Invalid attribute name: " + rawName, errorCode, this.getLocation());
-                throw dynamicError(getLocation(), err1, context);
-            }
-            if (rawName.toString().equals("xmlns")) {
-                if (getNamespaceExp() == null) {
-                    String errorCode = isXSLT() ? "XTDE0855" : "XQDY0044";
-                    XPathException err = new XPathException("Invalid attribute name: " + rawName, errorCode, this.getLocation());
-                    throw dynamicError(getLocation(), err, context);
+            String rawName = nameValue.getStringValue();
+            rawName = Whitespace.trimWhitespace(rawName).toString(); // required in XSLT; possibly wrong in XQuery
+            if (rawName.startsWith("Q{") && allowNameAsQName) { // not allowed in XSLT; a little unclear in XQuery
+                StructuredQName qn = StructuredQName.fromEQName(rawName);
+                prefix = "";
+                localName = qn.getLocalPart();
+                uri = qn.getURI();
+            } else {
+                try {
+                    String[] parts = NameChecker.getQNameParts(rawName);
+                    prefix = parts[0];
+                    localName = parts[1];
+                } catch (QNameException err) {
+                    String errorCode = isXSLT() ? "XTDE0850" : "XQDY0074";
+                    XPathException err1 = new XPathException("Invalid attribute name: " + rawName, errorCode, this.getLocation());
+                    throw dynamicError(getLocation(), err1, context);
+                }
+                if (rawName.toString().equals("xmlns")) {
+                    if (getNamespaceExp() == null) {
+                        String errorCode = isXSLT() ? "XTDE0855" : "XQDY0044";
+                        XPathException err = new XPathException("Invalid attribute name: " + rawName, errorCode, this.getLocation());
+                        throw dynamicError(getLocation(), err, context);
+                    }
                 }
             }
             if (prefix.equals("xmlns")) {
@@ -468,6 +479,7 @@ public final class ComputedAttribute extends AttributeCreator {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("compAtt", this);
         if (getValidationAction() != Validation.SKIP) {

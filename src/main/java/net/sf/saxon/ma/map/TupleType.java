@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,11 +12,14 @@ import net.sf.saxon.value.SequenceType;
 
 /**
  * An instance of this class represents a specific tuple item type, for example
- * tuple(x: xs:double, y: element(employee)).
+ * tuple(x as xs:double, y as element(employee)).
  *
  * Tuple types are a Saxon extension introduced in Saxon 9.8. The syntax for constructing
  * a tuple type requires Saxon-PE or higher, but the supporting code is included in
  * Saxon-HE for convenience.
+ *
+ * Extended in 10.0 to distinguish extensible vs non-extensible tuple types. Extensible tuple
+ * types permit fields other than those listed to appear; non-extensible tuple types do not.
  */
 public interface TupleType extends FunctionItemType {
 
@@ -36,14 +39,6 @@ public interface TupleType extends FunctionItemType {
     SequenceType getFieldType(String field);
 
     /**
-     * Ask whether a particular field is optional (that is, allowed to be absent from the map)
-     * @param field the name of the field
-     * @return true if the field is optional
-     */
-
-    boolean isOptional(String field);
-
-    /**
      * Ask whether the tuple type is extensible, that is, whether fields other than those named are permitted
      * @return true if fields other than the named fields are permitted to appear
      */
@@ -53,4 +48,4 @@ public interface TupleType extends FunctionItemType {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

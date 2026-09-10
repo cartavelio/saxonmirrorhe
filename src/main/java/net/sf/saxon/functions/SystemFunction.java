@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,9 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RetainedStaticContext;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
@@ -127,7 +125,12 @@ public abstract class SystemFunction extends AbstractFunction {
     public Expression makeOptimizedFunctionCall (
             ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments)
             throws XPathException {
-        return fixArguments(arguments);
+        Optimizer opt = visitor.obtainOptimizer();
+        if (opt.isOptionSet(OptimizerOptions.CONSTANT_FOLDING)) {
+            return fixArguments(arguments);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -150,7 +153,7 @@ public abstract class SystemFunction extends AbstractFunction {
      * @return the value to be returned when this argument is an empty sequence, or null if unknown / not applicable
      */
 
-    protected Sequence<?> resultIfEmpty(int arg) {
+    protected Sequence resultIfEmpty(int arg) {
         return details.resultIfEmpty[arg];
     }
 
@@ -210,6 +213,7 @@ public abstract class SystemFunction extends AbstractFunction {
      * @return the qualified name
      */
 
+    @Override
     public StructuredQName getFunctionName() {
         return details.name;
     }
@@ -221,6 +225,7 @@ public abstract class SystemFunction extends AbstractFunction {
      *
      * @return a description of the function for use in error messages
      */
+    @Override
     public String getDescription() {
         return details.name.getDisplayName();
     }
@@ -232,6 +237,7 @@ public abstract class SystemFunction extends AbstractFunction {
      * @return the arity of the function
      */
 
+    @Override
     public int getArity() {
         return arity;
     }
@@ -241,6 +247,7 @@ public abstract class SystemFunction extends AbstractFunction {
      *
      * @return an array of OperandRole objects, one for each argument
      */
+    @Override
     public OperandRole[] getOperandRoles() {
         OperandRole[] roles = new OperandRole[getArity()];
         OperandUsage[] usages = details.usage;
@@ -357,6 +364,7 @@ public abstract class SystemFunction extends AbstractFunction {
      * @return the function item's type
      */
 
+    @Override
     public FunctionItemType getFunctionItemType() {
         SequenceType resultType = SequenceType.makeSequenceType(getResultItemType(), details.cardinality);
         return new SpecificFunctionType(details.argumentTypes, resultType);
@@ -445,8 +453,9 @@ public abstract class SystemFunction extends AbstractFunction {
      * @throws XPathException if a dynamic error occurs within the function
      */
 
-    public static Sequence<?> dynamicCall(Function f, XPathContext context, Sequence[] args) throws XPathException {
+    public static Sequence dynamicCall(Function f, XPathContext context, Sequence[] args) throws XPathException {
         context = f.makeNewContext(context, null);
+        context.setCurrentOutputUri(null);
         return f.call(context, args);
     }
 
@@ -456,6 +465,7 @@ public abstract class SystemFunction extends AbstractFunction {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("fnRef");
         StructuredQName qName = getFunctionName();
@@ -477,6 +487,7 @@ public abstract class SystemFunction extends AbstractFunction {
         return caller;
     }
 
+    @Override
     public boolean isTrustedResultType() {
         return true;
     }

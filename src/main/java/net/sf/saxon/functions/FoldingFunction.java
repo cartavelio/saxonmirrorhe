@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -40,7 +40,8 @@ public abstract class FoldingFunction extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence[] additionalArgs = new Sequence[arguments.length - 1];
         System.arraycopy(arguments, 1, additionalArgs, 0, additionalArgs.length);
         Fold fold = getFold(context, additionalArgs);
@@ -55,6 +56,7 @@ public abstract class FoldingFunction extends SystemFunction {
         return fold.result();
     }
 
+    @Override
     public String getStreamerName() {
         return "Fold";
     }

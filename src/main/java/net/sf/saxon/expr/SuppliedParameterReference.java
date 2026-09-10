@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,7 +11,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.lib.StandardErrorListener;
+import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -67,11 +67,13 @@ public class SuppliedParameterReference extends Expression {
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         return this;
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         return this;
     }
@@ -84,6 +86,7 @@ public class SuppliedParameterReference extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (type != null) {
             return type.getPrimaryType();
@@ -102,6 +105,7 @@ public class SuppliedParameterReference extends Expression {
      *         dependencies. The flags are documented in class net.sf.saxon.value.StaticProperty
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         return StaticProperty.DEPENDS_ON_LOCAL_VARIABLES;
     }
@@ -113,6 +117,7 @@ public class SuppliedParameterReference extends Expression {
      *         in advance.
      */
 
+    @Override
     public int computeCardinality() {
         if (type != null) {
             return type.getCardinality();
@@ -129,6 +134,7 @@ public class SuppliedParameterReference extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         SuppliedParameterReference exp = new SuppliedParameterReference(slotNumber);
         ExpressionTool.copyLocationInfo(this, exp);
@@ -155,14 +161,14 @@ public class SuppliedParameterReference extends Expression {
      * @return the value of the variable, if it is defined
      */
 
-    public Sequence<?> evaluateVariable(XPathContext c) {
+    public Sequence evaluateVariable(XPathContext c) {
         if (slotNumber == -1) {
             return c.getStackFrame().popDynamicValue();
         }
         try {
             return c.evaluateLocalVariable(slotNumber);
         } catch (AssertionError e) {
-            StandardErrorListener.printStackTrace(c, c.getConfiguration().getLogger(), 2);
+            new StandardDiagnostics().printStackTrace(c, c.getConfiguration().getLogger(), 2);
             throw new AssertionError(e.getMessage() + ". No value has been set for parameter " + slotNumber);
         }
     }
@@ -176,7 +182,8 @@ public class SuppliedParameterReference extends Expression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         return evaluateVariable(context).iterate();
     }
 
@@ -196,6 +203,7 @@ public class SuppliedParameterReference extends Expression {
      *          expression
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         return evaluateVariable(context).head();
     }
@@ -218,6 +226,7 @@ public class SuppliedParameterReference extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("supplied", this);
         destination.emitAttribute("slot", slotNumber + "");

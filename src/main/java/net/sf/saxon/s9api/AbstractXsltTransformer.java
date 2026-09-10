@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -43,7 +43,6 @@ abstract class AbstractXsltTransformer {
     protected Processor processor;
     protected XsltController controller;
     protected boolean baseOutputUriWasSet = false;
-    private ResultDocumentResolver resultDocumentHandler = null;
     private MessageListener messageListener;
     private MessageListener2 messageListener2;
 
@@ -67,7 +66,7 @@ abstract class AbstractXsltTransformer {
      * @param uri the base output URI
      */
 
-    public void setBaseOutputURI(String uri) {
+    public synchronized void setBaseOutputURI(String uri) {
         controller.setBaseOutputURI(uri);
         baseOutputUriWasSet = uri != null;
     }
@@ -117,11 +116,11 @@ abstract class AbstractXsltTransformer {
      */
 
     public void setErrorListener(ErrorListener listener) {
-        controller.setErrorListener(listener);
+        controller.setErrorReporter(new ErrorReporterToListener(listener));
     }
 
     /**
-     * Get the ErrorListener being used during this compilation episode
+     * Get the ErrorListener being used during this transformation
      *
      * @return listener The error listener in use. This is notified of all dynamic errors detected during the
      * transformation. If no user-supplied ErrorListener has been set the method will return a system-supplied
@@ -131,12 +130,24 @@ abstract class AbstractXsltTransformer {
      */
 
     public ErrorListener getErrorListener() {
-        UnfailingErrorListener uel = controller.getErrorListener();
-        if (uel instanceof DelegatingErrorListener) {
-            return ((DelegatingErrorListener) uel).getBaseErrorListener();
+        ErrorReporter uel = controller.getErrorReporter();
+        if (uel instanceof ErrorReporterToListener) {
+            return ((ErrorReporterToListener) uel).getErrorListener();
         } else {
-            return uel;
+            return null;
         }
+    }
+
+    /**
+     * Set a callback that will be used when reporting a dynamic error or warning
+     */
+
+    public void setErrorReporter(ErrorReporter reporter) {
+        controller.setErrorReporter(reporter);
+    }
+
+    public ErrorReporter getErrorReporter() {
+        return controller.getErrorReporter();
     }
 
     /**
@@ -183,7 +194,8 @@ abstract class AbstractXsltTransformer {
                         throw xe;
                     }
                     try {
-                        return destination.getReceiver(context.getReceiver().getPipelineConfiguration(), properties);
+                        PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
+                        return destination.getReceiver(pipe, properties);
                     } catch (SaxonApiException e) {
                         throw XPathException.makeXPathException(e);
                     }
@@ -201,9 +213,10 @@ abstract class AbstractXsltTransformer {
      * to the standard error stream.
      *
      * @param listener the MessageListener to be used
+     * @deprecated since 10.0 - use {@link #setMessageListener(MessageListener2)}
      */
 
-    public void setMessageListener(MessageListener listener) {
+    public synchronized void setMessageListener(MessageListener listener) {
         this.messageListener = listener;
         controller.setMessageFactory(() -> new MessageListenerProxy(listener, controller.makePipelineConfiguration()));
     }
@@ -220,7 +233,7 @@ abstract class AbstractXsltTransformer {
      * @param listener the MessageListener to be used
      */
 
-    public void setMessageListener(MessageListener2 listener) {
+    public synchronized void setMessageListener(MessageListener2 listener) {
         this.messageListener2 = listener;
         controller.setMessageFactory(() -> new MessageListener2Proxy(listener, controller.makePipelineConfiguration()));
     }
@@ -457,8 +470,9 @@ abstract class AbstractXsltTransformer {
         SerializationProperties params = controller.getExecutable().getPrimarySerializationProperties();
         receiver = destination.getReceiver(pipe, params);
         if (Configuration.isAssertionsEnabled()) {
-            receiver = new RegularSequenceChecker(receiver);
+            receiver = new RegularSequenceChecker(receiver, true);
         }
+        //receiver = new TracingFilter(receiver);
         receiver.getPipelineConfiguration().setController(controller);
 
         if (baseOutputUriWasSet) {
@@ -493,15 +507,9 @@ abstract class AbstractXsltTransformer {
 
     protected Receiver getReceivingTransformer(XsltController controller, GlobalParameterSet parameters, Destination finalDestination) throws SaxonApiException {
         Configuration config = controller.getConfiguration();
-//        try {
-//            controller.initializeController(parameters);
-//        } catch (XPathException e) {
-//            throw new SaxonApiException(e);
-//        }
         if (controller.getInitialMode().isDeclaredStreamable()) {
             Receiver sOut = getDestinationReceiver(controller, finalDestination);
             try {
-                //sOut.open();
                 controller.initializeController(parameters);
                 return controller.getStreamingReceiver(controller.getInitialMode(), sOut);
             } catch (TransformerException e) {
@@ -518,6 +526,8 @@ abstract class AbstractXsltTransformer {
             }
             return new TreeReceiver(stripper) {
                 boolean closed = false;
+
+                @Override
                 public void close() throws XPathException {
                     if (!closed) {
                         try {

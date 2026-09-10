@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -155,24 +155,6 @@ public interface ComplexType extends SchemaType {
      */
 
     int getElementParticleCardinality(int elementName, boolean considerExtensions) throws MissingComponentException;
-
-    /**
-     * Find an element particle within this complex type definition having a given element name
-     * (identified by elementName), and return the cardinality associated with that element particle,
-     * that is, the number of times the element can occur within this complex type. The value is one of
-     * {@link net.sf.saxon.expr.StaticProperty#EXACTLY_ONE}, {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ZERO_OR_ONE},
-     * {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ZERO_OR_MORE}, {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ONE_OR_MORE},
-     * If there is no such particle, return {@link net.sf.saxon.expr.StaticProperty#EMPTY}.
-     *
-     * @param elementName        Identifies the name of the child element within this content model
-     * @param considerExtensions True if types derived from this type by extension are to be included in the search
-     * @return the cardinality associated with the child element particle with the given name.
-     * If there is no such particle, return {@link net.sf.saxon.expr.StaticProperty#EMPTY}.
-     * @deprecated - retained for backwards compatibility
-     */
-
-    int getElementParticleCardinality(StructuredQName elementName, boolean considerExtensions)
-            throws SchemaException, ValidationException;
 
     /**
      * Find an attribute use within this complex type definition having a given attribute name

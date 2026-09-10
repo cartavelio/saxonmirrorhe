@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -19,7 +19,7 @@ import net.sf.saxon.trans.XPathException;
  * <p>It maps an item of class F to a sequence of items of class T, returned as an iterator.</p>
  */
 
-public interface MappingFunction<F extends Item<?>, T extends Item<?>> {
+public interface MappingFunction {
 
     /**
      * Map one item to a sequence.
@@ -31,7 +31,7 @@ public interface MappingFunction<F extends Item<?>, T extends Item<?>> {
      */
 
     /*@Nullable*/
-    SequenceIterator<? extends T> map(F item) throws XPathException;
+    SequenceIterator map(Item item) throws XPathException;
 
 }
 

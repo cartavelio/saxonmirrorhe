@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -52,6 +52,7 @@ final class FollowingIterator implements AxisIterator {
     }
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         if (pending != null) {
             NodeInfo p = pending;
@@ -89,9 +90,9 @@ final class FollowingIterator implements AxisIterator {
             assert current != null;
             TinyNodeImpl here;
             if (current instanceof TinyTextualElement.TinyTextualElementText) {
-                here = (TinyNodeImpl)current.getParent();
+                here = (TinyNodeImpl) current.getParent();
             } else {
-                here = (TinyNodeImpl)current;
+                here = (TinyNodeImpl) current;
             }
             nodeNr = here.nodeNr + 1;
         }
@@ -106,12 +107,12 @@ final class FollowingIterator implements AxisIterator {
                 TinyTextualElement e = (TinyTextualElement)tree.getNode(nodeNr);
                 NodeInfo t = e.getTextNode();
                 if (matcher.test(nodeNr)) {
-                    if (test.matchesNode(t)) {
+                    if (test.test(t)) {
                         pending = t;
                     }
                     position++;
                     return current = tree.getNode(nodeNr);
-                } else if (test.matchesNode(t)) {
+                } else if (test.test(t)) {
                     position++;
                     return current = t;
                 }

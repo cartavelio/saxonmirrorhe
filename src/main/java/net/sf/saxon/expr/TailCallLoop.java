@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -52,6 +53,7 @@ public final class TailCallLoop extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
         return this;
@@ -63,6 +65,7 @@ public final class TailCallLoop extends UnaryExpression {
      * process() methods natively.
      */
 
+    @Override
     public int getImplementationMethod() {
         return getBaseExpression().getImplementationMethod();
     }
@@ -80,6 +83,7 @@ public final class TailCallLoop extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
        throw new UnsupportedOperationException("TailCallLoop.copy()");
         /*TailCallLoop e2 = new TailCallLoop(containingFunction);
@@ -92,11 +96,12 @@ public final class TailCallLoop extends UnaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         final XPathContextMajor cm = (XPathContextMajor) context;
         while (true) {
-            SequenceIterator<?> iter = getBaseExpression().iterate(cm);
-            GroundedValue<?> extent = iter.materialize();
+            SequenceIterator iter = getBaseExpression().iterate(cm);
+            GroundedValue extent = iter.materialize();
             TailCallInfo tail = cm.getTailCallInfo();
             if (tail == null) {
                 return extent.iterate();
@@ -114,6 +119,7 @@ public final class TailCallLoop extends UnaryExpression {
      * Evaluate as an Item.
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         final XPathContextMajor cm = (XPathContextMajor) context;
         while (true) {
@@ -147,22 +153,23 @@ public final class TailCallLoop extends UnaryExpression {
     /**
      * Process the function body
      *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
      */
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
         final XPathContextMajor cm = (XPathContextMajor) context;
         Expression operand = getBaseExpression();
         while (true) {
-            operand.process(context);
+            operand.process(output, context);
             TailCallInfo tail = cm.getTailCallInfo();
             if (tail == null) {
                 return;
             } else {
                 UserFunction target = establishTargetFunction(tail, cm);
                 if (target != containingFunction) {
-                    SequenceTool.process(tailCallDifferentFunction(target, cm), cm, operand.getLocation());
+                    SequenceTool.process(tailCallDifferentFunction(target, cm), output, operand.getLocation());
                     return;
                 }
                 // otherwise, loop round to execute the tail call
@@ -182,7 +189,7 @@ public final class TailCallLoop extends UnaryExpression {
      */
 
     /*@Nullable*/
-    private Sequence<?> tailCallDifferentFunction(UserFunction userFunction, XPathContextMajor cm) throws XPathException {
+    private Sequence tailCallDifferentFunction(UserFunction userFunction, XPathContextMajor cm) throws XPathException {
         cm.resetStackFrameMap(userFunction.getStackFrameMap(), userFunction.getArity());
         try {
             return userFunction.getEvaluator().evaluate(userFunction.getBody(), cm);
@@ -197,6 +204,7 @@ public final class TailCallLoop extends UnaryExpression {
     /**
      * Determine the data type of the items returned by the expression
      */
+    @Override
     public ItemType getItemType() {
         return getBaseExpression().getItemType();
     }
@@ -207,6 +215,7 @@ public final class TailCallLoop extends UnaryExpression {
      * @return the expression name, as a string
      */
 
+    @Override
     public String getExpressionName() {
         return "tailCallLoop";
     }

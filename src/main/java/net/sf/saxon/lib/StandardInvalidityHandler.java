@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,19 +8,14 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.instruct.*;
+import net.sf.saxon.om.AbsolutePath;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.trace.InstructionInfo;
-import net.sf.saxon.trans.KeyDefinition;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
-import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.EmptySequence;
 
-import javax.xml.transform.SourceLocator;
 import javax.xml.transform.dom.DOMLocator;
 
 /**
@@ -32,7 +27,7 @@ import javax.xml.transform.dom.DOMLocator;
  * to the supplied {@link Configuration} as the default destination.
  */
 
-public class StandardInvalidityHandler implements InvalidityHandler {
+public class StandardInvalidityHandler extends StandardDiagnostics implements InvalidityHandler {
 
     private Configuration config;
     private Logger logger;
@@ -44,6 +39,7 @@ public class StandardInvalidityHandler implements InvalidityHandler {
 
     public StandardInvalidityHandler(Configuration config) {
         this.config = config;
+        this.logger = config.getLogger();
     }
 
     /**
@@ -57,14 +53,19 @@ public class StandardInvalidityHandler implements InvalidityHandler {
     }
 
     /**
-     * Get the error output stream
+     * Get the Logger used for displaying messages
      *
-     * @return the error output stream
+     * @return the registered Logger. This defaults to the Logger supplied by the {@link Configuration}
      */
 
     public Logger getLogger() {
         return logger;
     }
+
+    /**
+     * Get the Saxon Configuration object
+     * @return the configuration
+     */
 
     public Configuration getConfiguration(){
         return config;
@@ -76,6 +77,7 @@ public class StandardInvalidityHandler implements InvalidityHandler {
      * @param systemId optional; may be used to represent the destination of any report produced
      * @throws XPathException if initialization of the invalidity handler fails for any reason
      */
+    @Override
     public void startReporting(String systemId) throws XPathException {
         // no action
     }
@@ -85,6 +87,7 @@ public class StandardInvalidityHandler implements InvalidityHandler {
      * @param failure Information about the nature of the invalidity
      */
 
+    @Override
     public void reportInvalidity(Invalidity failure) throws XPathException{
         Logger localLogger = logger;
         if (localLogger == null) {
@@ -102,7 +105,7 @@ public class StandardInvalidityHandler implements InvalidityHandler {
                 //wordWrap(validationLocation.isEmpty() ? "" : "\n  " + validationLocation) +
                 wordWrap(contextLocation.isEmpty() ? "" : "\n  " + contextLocation) +
                 wordWrap(constraintReference == null ? "" : "\n  " + constraintReference) +
-                StandardErrorListener.getOffenderListText((ValidationFailure)failure);
+                formatListOfOffendingNodes((ValidationFailure)failure);
 
         localLogger.error(finalMessage);
     }
@@ -118,90 +121,34 @@ public class StandardInvalidityHandler implements InvalidityHandler {
     public String getLocationMessage(Invalidity err) {
         String locMessage = "";
         String systemId = null;
-        NodeInfo node = ((ValidationFailure)err).getInvalidNode();
-        String path;
+        NodeInfo node = err.getInvalidNode();
+        AbsolutePath path;
         String nodeMessage = null;
-        int lineNumber = -1;
-        SourceLocator loc = err;
-        if (loc instanceof DOMLocator) {
-            nodeMessage = "at " + ((DOMLocator) loc).getOriginatingNode().getNodeName() + ' ';
-        } else if (loc instanceof ValidationException && loc.getLineNumber() == -1 && (path = ((ValidationException) loc).getPath()) != null) {
+        int lineNumber = err.getLineNumber();
+        if (err instanceof DOMLocator) {
+            nodeMessage = "at " + ((DOMLocator) err).getOriginatingNode().getNodeName() + ' ';
+        } else if (lineNumber == -1 && (path = err.getPath()) != null) {
             nodeMessage = "at " + path + ' ';
-        } else if (loc instanceof Instruction) {
-            String instructionName = StandardErrorListener.getInstructionName((Instruction) loc);
-            if (!"".equals(instructionName)) {
-                nodeMessage = "at " + instructionName + ' ';
-            }
-            systemId = loc.getSystemId();
-            lineNumber = loc.getLineNumber();
-        } else if (loc instanceof Actor) {
-            String kind = "procedure";
-            if (loc instanceof UserFunction) {
-                kind = "function";
-            } else if (loc instanceof NamedTemplate) {
-                kind = "template";
-            } else if (loc instanceof AttributeSet) {
-                kind = "attribute-set";
-            } else if (loc instanceof KeyDefinition) {
-                kind = "key";
-            }
-            systemId = loc.getSystemId();
-            lineNumber = loc.getLineNumber();
-            nodeMessage = "at " + kind + " ";
-            StructuredQName name = ((InstructionInfo) loc).getObjectName();
-            if (name != null) {
-                nodeMessage += name.toString();
-                nodeMessage += " ";
-            }
-        }
-        if (lineNumber == -1) {
-            lineNumber = loc.getLineNumber();
-        }
-        boolean containsLineNumber = lineNumber != -1;
-        if (node != null) {
+        } else if (node != null) {
             nodeMessage = "at " + Navigator.getPath(node) + ' ';
         }
+        boolean containsLineNumber = lineNumber != -1;
         if (nodeMessage != null) {
             locMessage += nodeMessage;
         }
         if (containsLineNumber) {
             locMessage += "on line " + lineNumber + ' ';
-            if (loc.getColumnNumber() != -1) {
-                locMessage += "column " + loc.getColumnNumber() + ' ';
+            if (err.getColumnNumber() != -1) {
+                locMessage += "column " + err.getColumnNumber() + ' ';
             }
         }
 
-        if (systemId != null && systemId.isEmpty()) {
-            systemId = null;
-        }
-        if (systemId == null) {
-            systemId = loc.getSystemId();
-        }
+        systemId = err.getSystemId();
+      
         if (systemId != null && systemId.length() != 0) {
-            locMessage += (containsLineNumber ? "of " : "in ") + abbreviatePath(systemId) + ':';
+            locMessage += (containsLineNumber ? "of " : "in ") + abbreviateLocationURI(systemId) + ':';
         }
         return locMessage;
-    }
-
-    /**
-     * Abbreviate a URI (if requested)
-     *
-     * @param uri the URI to be abbreviated
-     * @return the abbreviated URI, unless full path names were requested, in which case
-     *         the URI as supplied
-     */
-
-    /*@Nullable*/
-    public static String abbreviatePath(String uri) {
-        if (uri == null) {
-            return "*unknown*";
-        }
-        int slash = uri.lastIndexOf('/');
-        if (slash >= 0 && slash < uri.length() - 1) {
-            return uri.substring(slash + 1);
-        } else {
-            return uri;
-        }
     }
 
     /**
@@ -218,24 +165,16 @@ public class StandardInvalidityHandler implements InvalidityHandler {
     }
 
     /**
-     * Wordwrap an error message into lines of 72 characters or less (if possible)
-     *
-     * @param message the message to be word-wrapped
-     * @return the message after applying word-wrapping
-     */
-
-    private static String wordWrap(String message) {
-        return StandardErrorListener.wordWrap(message);
-    }
-
-    /**
      * Get the constraint reference as a string for inserting into an error message.
+     * The default implementation formats a message containing the values of
+     * {@link Invalidity#getSchemaPart()}, {@link Invalidity#getConstraintName()},
+     * and {@link Invalidity#getConstraintClauseNumber()}.
      *
-     * @return the reference as a message, or null if no information is available
+     * @return the constraint reference as a message, or null if no information is available
      */
 
     /*@Nullable*/
-    public static String getConstraintReferenceMessage(Invalidity err) {
+    public String getConstraintReferenceMessage(Invalidity err) {
         if (err.getSchemaPart() == -1) {
             return null;
         }
@@ -251,7 +190,8 @@ public class StandardInvalidityHandler implements InvalidityHandler {
      * @return a value (or null). This will be the value returned as the value of
      * the variable $err:value during try/catch processing
      */
-    public Sequence<?> endReporting() throws XPathException {
+    @Override
+    public Sequence endReporting() throws XPathException {
         return EmptySequence.getInstance();
     }
 }

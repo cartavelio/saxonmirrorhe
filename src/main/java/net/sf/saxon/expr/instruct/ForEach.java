@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,22 +8,18 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.TraceListener;
-import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ErrorType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.tree.iter.PrependSequenceIterator;
+import net.sf.saxon.tree.util.Orphan;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
-
 
 /**
  * Handler for xsl:for-each elements in a stylesheet. The same class handles the "!" operator in XPath 3.0,
@@ -31,11 +27,12 @@ import net.sf.saxon.value.Cardinality;
  * is known that the rhs delivers atomic values.
  */
 
-public class ForEach extends Instruction implements ContextMappingFunction<Item<?>>, ContextSwitchingExpression {
+public class ForEach extends Instruction implements ContextMappingFunction, ContextSwitchingExpression {
 
     protected boolean containsTailCall;
     protected Operand selectOp;
     protected Operand actionOp;
+    protected Operand separatorOp;
     protected Operand threadsOp;
     protected boolean isInstruction;
 
@@ -66,6 +63,18 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
             threadsOp = new Operand(this, threads, OperandRole.SINGLE_ATOMIC);
         }
         this.containsTailCall = containsTailCall && action instanceof TailCallReturner;
+    }
+
+    /**
+     * Set the separator expression (Saxon extension)
+     */
+
+    public void setSeparatorExpression(Expression separator) {
+        separatorOp = new Operand(this, separator, OperandRole.SINGLE_ATOMIC);
+    }
+
+    public Expression getSeparatorExpression() {
+        return separatorOp == null ? null : separatorOp.getChildExpression();
     }
 
     /**
@@ -160,11 +169,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
 
     @Override
     public Iterable<Operand> operands() {
-        if (threadsOp == null) {
-            return operandList(selectOp, actionOp);
-        } else {
-            return operandList(selectOp, actionOp, threadsOp);
-        }
+        return operandSparseList(selectOp, actionOp, separatorOp, threadsOp);
     }
 
     /**
@@ -173,6 +178,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      * @return the code for name xsl:for-each
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_FOR_EACH;
     }
@@ -184,6 +190,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      *         if sorting was requested.
      */
 
+    @Override
     public Expression getSelectExpression() {
         return getSelect();
     }
@@ -213,6 +220,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      *
      * @return the subexpression evaluated in the context set by the controlling expression
      */
+    @Override
     public Expression getActionExpression() {
         return getAction();
     }
@@ -234,6 +242,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      */
 
     /*@NotNull*/
+    @Override
     public final ItemType getItemType() {
         return getAction().getItemType();
     }
@@ -262,12 +271,14 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      * (Nodes created by the condition can't contribute to the result).
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         int props = getAction().getSpecialProperties();
         return (props & StaticProperty.NO_NODES_NEWLY_CREATED) == 0;
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         selectOp.typeCheck(visitor, contextInfo);
@@ -289,6 +300,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         selectOp.optimize(visitor, contextInfo);
 
@@ -351,6 +363,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      *         expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         PathMap.PathMapNodeSet target = getSelect().addToPathMap(pathMap, pathMapNodeSet);
         return getAction().addToPathMap(pathMap, target);
@@ -364,8 +377,12 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ForEach f2 = new ForEach(getSelect().copy(rebindings), getAction().copy(rebindings), containsTailCall, getThreads());
+        if (separatorOp != null) {
+            f2.setSeparatorExpression(getSeparatorExpression().copy(rebindings));
+        }
         ExpressionTool.copyLocationInfo(this, f2);
         f2.setInstruction(isInstruction());
         return f2;
@@ -400,6 +417,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      * @return true if this is an updating expression
      */
 
+    @Override
     public boolean isUpdatingExpression() {
         return getAction().isUpdatingExpression();
     }
@@ -411,6 +429,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      * @throws XPathException if the expression has a non-permitted updating subexpression
      */
 
+    @Override
     public void checkForUpdatingSubexpressions() throws XPathException {
         if (getSelect().isUpdatingExpression()) {
             XPathException err = new XPathException(
@@ -427,6 +446,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      * process() methods natively.
      */
 
+    @Override
     public int getImplementationMethod() {
         return ITERATE_METHOD | PROCESS_METHOD | Expression.WATCH_METHOD | Expression.ITEM_FEED_METHOD;
     }
@@ -439,17 +459,19 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         getAction().checkPermittedContents(parentType, false);
     }
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         Controller controller = context.getController();
         assert controller != null;
 
         XPathContextMajor c2 = context.newContext();
         c2.setOrigin(this);
-        FocusIterator<?> iter = c2.trackFocus(getSelect().iterate(context));
+        FocusIterator iter = c2.trackFocus(getSelect().iterate(context));
         c2.setCurrentTemplateRule(null);
 
         Expression action = getAction();
@@ -462,7 +484,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
                     return null;
                 }
                 listener.startCurrentItem(item);
-                TailCall tc = ((TailCallReturner) action).processLeavingTail(c2);
+                TailCall tc = ((TailCallReturner) action).processLeavingTail(output, c2);
                 listener.endCurrentItem(item);
                 return tc;
             } else {
@@ -470,26 +492,52 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
                 if (item == null) {
                     return null;
                 }
-                return ((TailCallReturner) action).processLeavingTail(c2);
+                return ((TailCallReturner) action).processLeavingTail(output, c2);
             }
         } else {
-            PipelineConfiguration pipe = c2.getReceiver().getPipelineConfiguration();
+            PipelineConfiguration pipe = output.getPipelineConfiguration();
             pipe.setXPathContext(c2);
-            if (controller.isTracing()) {
+            NodeInfo separator = null;
+            if (separatorOp != null) {
+                separator = makeSeparator(context);
+            }
+            if (controller.isTracing() || separator != null) {
                 TraceListener listener = controller.getTraceListener();
-                assert listener != null;
                 Item item;
+                boolean first = true;
                 while ((item = iter.next()) != null) {
-                    listener.startCurrentItem(item);
-                    action.process(c2);
-                    listener.endCurrentItem(item);
+                    if (controller.isTracing()) {
+                        assert listener != null;
+                        listener.startCurrentItem(item);
+                    }
+                    if (separator != null) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            output.append(separator);
+                        }
+                    }
+                    action.process(output, c2);
+                    if (controller.isTracing()) {
+                        listener.endCurrentItem(item);
+                    }
                 }
             } else {
-                iter.forEachOrFail(item -> action.process(c2));
+                iter.forEachOrFail(item -> action.process(output, c2));
             }
             pipe.setXPathContext(context);
         }
         return null;
+    }
+
+    protected NodeInfo makeSeparator(XPathContext context) throws XPathException {
+        NodeInfo separator;
+        CharSequence sepValue = separatorOp.getChildExpression().evaluateAsString(context);
+        Orphan orphan = new Orphan(context.getConfiguration());
+        orphan.setNodeKind(Type.TEXT);
+        orphan.setStringValue(sepValue);
+        separator = orphan;
+        return separator;
     }
 
     /**
@@ -503,10 +551,23 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         XPathContextMinor c2 = context.newMinorContext();
         c2.trackFocus(getSelect().iterate(context));
-        return new ContextMappingIterator<>(this, c2);
+        if (separatorOp == null) {
+            return new ContextMappingIterator(this, c2);
+        } else {
+            NodeInfo separator = makeSeparator(context);
+            ContextMappingFunction mapper = cxt -> {
+               if (cxt.getCurrentIterator().position() == 1) {
+                   return ForEach.this.map(cxt);
+               } else {
+                   return new PrependSequenceIterator(separator, ForEach.this.map(cxt));
+               }
+            };
+            return new ContextMappingIterator(mapper, c2);
+        }
     }
 
     /**
@@ -518,7 +579,8 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      *         item maps to
      */
 
-    public SequenceIterator<?> map(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator map(XPathContext context) throws XPathException {
         return getAction().iterate(context);
     }
 
@@ -533,6 +595,7 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      * @throws UnsupportedOperationException     if the expression is not an updating expression
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         XPathContextMinor c2 = context.newMinorContext();
         c2.trackFocus(getSelect().iterate(context));
@@ -548,10 +611,15 @@ public class ForEach extends Instruction implements ContextMappingFunction<Item<
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("forEach", this);
         getSelect().export(out);
         getAction().export(out);
+        if (separatorOp != null) {
+            out.setChildRole("separator");
+            separatorOp.getChildExpression().export(out);
+        }
         explainThreads(out);
         out.endElement();
     }

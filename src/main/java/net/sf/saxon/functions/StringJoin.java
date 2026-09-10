@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,16 +7,15 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.One;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.CharSequenceConsumer;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.Cardinality;
@@ -26,7 +25,7 @@ import net.sf.saxon.value.StringValue;
  * fn:string-join(string* $sequence, string $separator)
  */
 
-public class StringJoin extends FoldingFunction {
+public class StringJoin extends FoldingFunction implements PushableFunction {
 
     private boolean returnEmptyIfEmpty;
 
@@ -103,6 +102,25 @@ public class StringJoin extends FoldingFunction {
         return new StringJoinFold(separator);
     }
 
+    @Override
+    public void process(Outputter destination, XPathContext context, Sequence[] arguments) throws XPathException {
+        CharSequence separator = arguments.length > 1 ? arguments[1].head().getStringValueCS() : "";
+        CharSequenceConsumer output = destination.getStringReceiver(false);
+        output.open();
+        boolean first = true;
+        SequenceIterator iter = arguments[0].iterate();
+        Item it;
+        while ((it = iter.next()) != null) {
+            if (first) {
+                first = false;
+            } else {
+                output.cat(separator);
+            }
+            output.cat(it.getStringValueCS());
+        }
+        output.close();
+    }
+
     private class StringJoinFold implements Fold {
 
         private int position = 0;
@@ -118,15 +136,14 @@ public class StringJoin extends FoldingFunction {
          * Process one item in the input sequence, returning a new copy of the working data
          *
          * @param item the item to be processed from the input sequence
-         * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void processItem(Item item) {
             if (position == 0) {
-                data.append(item.getStringValueCS());
+                data.cat(item.getStringValueCS());
                 position = 1;
             } else {
-                data.append(separator);
-                data.append(item.getStringValueCS());
+                data.cat(separator).append(item.getStringValueCS());
             }
         }
 
@@ -135,6 +152,7 @@ public class StringJoin extends FoldingFunction {
          * result without reading the whole input should return true; this will be followed
          * by a call on result() to deliver the final result.
          */
+        @Override
         public boolean isFinished() {
             return false;
         }
@@ -143,7 +161,8 @@ public class StringJoin extends FoldingFunction {
          * Compute the final result of the function, when all the input has been processed
          * @return the result of the function
          */
-        public ZeroOrOne<StringValue> result()  {
+        @Override
+        public ZeroOrOne result()  {
             if (position == 0 && returnEmptyIfEmpty) {
                 return ZeroOrOne.empty();
             } else {
@@ -152,6 +171,7 @@ public class StringJoin extends FoldingFunction {
         }
     }
 
+    @Override
     public String getCompilerName() {
         return "StringJoinCompiler";
     }

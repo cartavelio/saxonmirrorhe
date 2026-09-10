@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,11 +7,10 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
@@ -55,15 +54,13 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
 
     /**
      * Notify the start of an element
-     *  @param elemName   integer code identifying the name of the element within the name pool.
-     * @param typeCode   integer code identifying the element's type within the name pool.
-     * @param location
-     * @param properties properties of the element node
      */
     @Override
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         sep();
-        super.startElement(elemName, typeCode, location, properties);
+        super.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     /**
@@ -95,13 +92,10 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
 
     /**
      * Append an arbitrary item (node or atomic value) to the output
-     *
      * @param item           the item to be appended
      * @param locationId     the location of the calling instruction, for diagnostics
      * @param copyNamespaces if the item is an element node, this indicates whether its namespaces
-     *                       need to be copied. Values are {@link ReceiverOptions#ALL_NAMESPACES},
-     *                       {@link ReceiverOptions#LOCAL_NAMESPACES}; the default (0) means
-     *                       no namespaces
+*                       need to be copied. Values are {@link ReceiverOption#ALL_NAMESPACES}; the default (0) means
      */
     @Override
     public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
@@ -110,7 +104,7 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
         } else {
             if (item instanceof AtomicValue) {
                 sep();
-                nextReceiver.characters(item.getStringValueCS(), locationId, 0);
+                nextReceiver.characters(item.getStringValueCS(), locationId, ReceiverOption.NONE);
             } else {
                 decompose(item, locationId, copyNamespaces);
             }
@@ -129,11 +123,12 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
 
     /**
      * Output the separator, assuming we are at the top level and not at the start
+     * @throws XPathException if outputting the separator fails
      */
 
-    public void sep() throws XPathException {
+    private void sep() throws XPathException {
         if (level == 0 && !first) {
-            super.characters(separator, ExplicitLocation.UNKNOWN_LOCATION, 0);
+            super.characters(separator, Loc.NONE, ReceiverOption.NONE);
         } else {
             first = false;
         }

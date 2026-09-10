@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -53,6 +53,7 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return uType;
     }
@@ -68,6 +69,11 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
     public Optional<IntSet> getRequiredNodeNames() {
         // See bug 3713
         return Optional.empty();
+    }
+
+    @Override
+    public String getFullAlphaCode() {
+        return getBasicAlphaCode() + " nQ{" + uri + "}*";
     }
 
     /**
@@ -90,6 +96,7 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
         return name != null && name.hasURI(uri);
     }
 
+    @Override
     public IntPredicate getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         final int[] nameCodeArray = tree.getNameCodeArray();
@@ -109,7 +116,8 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
      * @param node the node to be matched
      */
 
-    public boolean matchesNode(NodeInfo node) {
+    @Override
+    public boolean test(NodeInfo node) {
         return node.getNodeKind() == nodeKind && node.getURI().equals(uri);
     }
 
@@ -120,6 +128,7 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
      * @return true if the name matches, false if not
      */
 
+    @Override
     public boolean matches(StructuredQName qname) {
         return qname.hasURI(uri);
     }
@@ -128,6 +137,7 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
+    @Override
     public final double getDefaultPriority() {
         return -0.25;
     }
@@ -139,6 +149,7 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
      * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
      */
 
+    @Override
     public int getPrimitiveType() {
         return nodeKind;
     }
@@ -184,6 +195,18 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
     }
 
     /**
+     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
+     *
+     * @return a string representation of the QNameTest, suitable for use in export files. The format is
+     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
+     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
+     */
+    @Override
+    public String exportQNameTest() {
+        return "Q{" + uri + "}*";
+    }
+
+    /**
      * Generate Javascript code to test if a name matches the test.
      *
      * @return JS code as a string. The generated code will be used
@@ -193,29 +216,9 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
      * @param targetVersion the version of Saxon-JS being targeted
      */
 
+    @Override
     public String generateJavaScriptNameTest(int targetVersion) {
         return "q.uri==='" + ExpressionPresenter.jsEscape(uri) + "'";
-    }
-
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @param knownToBe An item type that the supplied item is known to conform to; the generated code
-     *                  can assume that the item is an instance of this type.
-     * @param targetVersion The version of Saxon-JS for which code is being generated. Currently either 1 or 2.
-
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) {
-        if (targetVersion == 1) {
-            return "var q=SaxonJS.U.nameOfNode(item); return SaxonJS.U.isNode(item) && item.nodeType===" + nodeKind + "&&" + generateJavaScriptNameTest(targetVersion);
-        } else {
-            return "return SaxonJS.U.isNode(item) && item.nodeType===" + nodeKind + " && SaxonJS.U.hasURI(item, '" +
-                    ExpressionPresenter.jsEscape(uri) + "');";
-        }
     }
 
     /**

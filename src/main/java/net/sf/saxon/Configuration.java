@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -32,7 +32,10 @@ import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.resource.*;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.Xslt30Transformer;
+import net.sf.saxon.sapling.SaplingDocument;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.CharacterSetFactory;
@@ -63,12 +66,14 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 
 /**
@@ -124,7 +129,9 @@ public class Configuration implements SourceResolver, NotationSet {
     private CollationURIResolver collationResolver = new StandardCollationURIResolver();
     private String defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
 
-    protected CollectionFinder collectionFinder = new StandardCollectionFinder();
+    private Predicate<URI> allowedUriTest = uri -> true;
+    private final StandardCollectionFinder standardCollectionFinder = new StandardCollectionFinder();
+    private CollectionFinder collectionFinder = standardCollectionFinder;
     private EnvironmentVariableResolver environmentVariableResolver = new StandardEnvironmentVariableResolver();
     private String defaultCollection = null;
     private ParseOptions defaultParseOptions = new ParseOptions();
@@ -133,6 +140,11 @@ public class Configuration implements SourceResolver, NotationSet {
     private StaticQueryContextFactory staticQueryContextFactory = new StaticQueryContextFactory();
     protected OptimizerOptions optimizerOptions = OptimizerOptions.FULL_HE_OPTIMIZATION;
     protected CompilerInfo defaultXsltCompilerInfo = makeCompilerInfo();
+    private java.util.function.Function<Configuration, ? extends ErrorReporter> errorReporterFactory = config -> {
+        StandardErrorReporter reporter = new StandardErrorReporter();
+        reporter.setLogger(config.getLogger());
+        return reporter;
+    };
 
     private String label = null;
 
@@ -150,6 +162,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private IntSet enabledProperties = new IntHashSet(64);
 
     private List<ExternalObjectModel> externalObjectModels = new ArrayList<>(4);
+    protected IndependentContext staticContextForSystemFunctions;
 
     private DocumentPool globalDocumentPool = new DocumentPool();
     private IntegratedFunctionLibrary integratedFunctionLibrary = new IntegratedFunctionLibrary();
@@ -157,7 +170,6 @@ public class Configuration implements SourceResolver, NotationSet {
     private NamePool namePool = new NamePool();
 
     protected Optimizer optimizer = null;
-
 
     private SerializerFactory serializerFactory = new SerializerFactory(this);
     private volatile ConcurrentLinkedQueue<XMLReader> sourceParserPool = new ConcurrentLinkedQueue<>();
@@ -197,24 +209,6 @@ public class Configuration implements SourceResolver, NotationSet {
     private TreeStatistics treeStatistics = new TreeStatistics();
 
     /**
-     * Constant indicating that the processor should take the recovery action
-     * when a recoverable error occurs, with no warning message.
-     */
-    public static final int RECOVER_SILENTLY = 0;
-    /**
-     * Constant indicating that the processor should produce a warning
-     * when a recoverable error occurs, and should then take the recovery
-     * action and continue.
-     */
-    public static final int RECOVER_WITH_WARNINGS = 1;
-    /**
-     * Constant indicating that when a recoverable error occurs, the
-     * processor should not attempt to take the defined recovery action,
-     * but should terminate with an error.
-     */
-    public static final int DO_NOT_RECOVER = 2;
-
-    /**
      * Constant indicating the XML Version 1.0
      */
 
@@ -225,32 +219,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public static final int XML11 = 11;
-
-    /**
-     * Constant indicating that the host language is XSLT
-     */
-    public static final int XSLT = 50;
-
-    /**
-     * Constant indicating that the host language is XQuery
-     */
-    public static final int XQUERY = 51;
-
-    /**
-     * Constant indicating that the "host language" is XML Schema
-     */
-    public static final int XML_SCHEMA = 52;
-
-    /**
-     * Constant indicating that the host language is Java: that is, this is a free-standing
-     * Java application with no XSLT or XQuery content
-     */
-    public static final int JAVA_APPLICATION = 53;
-
-    /**
-     * Constant indicating that the host language is XPATH itself - that is, a free-standing XPath environment
-     */
-    public static final int XPATH = 54;
+    
 
     /**
      * Language versions for XML Schema
@@ -294,6 +263,15 @@ public class Configuration implements SourceResolver, NotationSet {
             throw new RuntimeException("Cannot instantiate a Configuration", e);
         }
     }
+
+//#if DOTNET==true
+    /**
+     * Declare a mapping from a specific namespace URI to a .NET class
+     * @param uri - the namespace URI of the function name
+     * @param type - the .NET class that implements the functions in this namespace
+     */
+    public void bindExtensions(String uri , cli.System.Type type) { }
+//#endif
 
     /**
      * Read a resource file issued with the Saxon product
@@ -418,12 +396,13 @@ public class Configuration implements SourceResolver, NotationSet {
     /**
      * Factory method to construct a Configuration object by reading a configuration file.
      * This version of the method creates a configuration that is "compatible" with the
-     * supplied configuration, in that it shares the same NamePool and DocumentNumberAllocator,
-     * and also the same licensing details. (This is used by fn:transform)
+     * supplied configuration, in that it shares the same NamePool and DocumentNumberAllocator.
+     * (This is used by fn:transform)
      *
      * @param source Source object containing the configuration file
      * @param baseConfiguration an existing configuration whose NamePool and DocumentNumberAllocator
-     *                          will be used in the new Configuration
+     *                          will be used in the new Configuration; the license details from
+     *                          the base configuration will also be shared
      * @return the resulting Configuration
      * @throws net.sf.saxon.trans.XPathException if the configuration file cannot be read
      *                                           or is invalid
@@ -481,9 +460,6 @@ public class Configuration implements SourceResolver, NotationSet {
         return assertsEnabled;
     }
 
-//#if DOTNET==true
-    //public void bindExtensions(String uri , cli.System.Type type) { }
-//#endif
 
     /**
      * Read the configuration file an construct a new Configuration (the real one)
@@ -511,12 +487,11 @@ public class Configuration implements SourceResolver, NotationSet {
     protected void init() {
         Version.platform.initialize(this);
         defaultXsltCompilerInfo.setURIResolver(getSystemURIResolver());
-        StandardEntityResolver resolver = new StandardEntityResolver();
-        resolver.setConfiguration(this);
+        StandardEntityResolver resolver = new StandardEntityResolver(this);
         defaultParseOptions.setEntityResolver(resolver);
         internalSetBooleanProperty(Feature.PREFER_JAXP_PARSER, true);
         internalSetBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS, true);
-        internalSetBooleanProperty(Feature.DISABLE_XSL_EVALUATE, true);
+        internalSetBooleanProperty(Feature.DISABLE_XSL_EVALUATE, false);
         //internalSetBooleanProperty(FeatureKeys.STABLE_COLLECTION_URI, true);
 
 
@@ -810,6 +785,47 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
+     * Set a Predicate that is applied to a URI to determine whether the standard resource resolvers
+     * ({@link URIResolver}, {@link UnparsedTextURIResolver}, {@link SchemaURIResolver},
+     * {@link CollationURIResolver}, {@link ModuleURIResolver}) should accept it.
+     *
+     * <p>It is possible to set a predicate by means of the configuration property
+     * {@link Feature#ALLOWED_PROTOCOLS}. This method, however, allows an arbitrary predicate to
+     * be supplied.</p>
+     *
+     * <p>The predicate is only applicable to resolvers that choose to use it. This includes
+     * all the standard Saxon-supplied resolvers, but user-supplied resolvers can bypass this
+     * check.</p>
+     *
+     * @param test a condition that a URI must satisfy if access to a resource with this URI
+     *             is to be permitted
+     */
+
+    public void setAllowedUriTest(Predicate<URI> test) {
+        this.allowedUriTest = test;
+    }
+
+    /**
+     * Get the Predicate that is applied to a URI to determine whether the standard resource resolvers
+     * ({@link URIResolver}, {@link UnparsedTextURIResolver}, {@link SchemaURIResolver},
+     * {@link CollationURIResolver}, {@link ModuleURIResolver}) should accept it.
+     *
+     * <p>It is possible to set a predicate by means of the configuration property
+     * {@link Feature#ALLOWED_PROTOCOLS}.</p>
+     *
+     * <p>The predicate is only applicable to resolvers that choose to use it. This includes
+     * all the standard Saxon-supplied resolvers, but user-supplied resolvers can bypass this
+     * check.</p>
+     *
+     * @return a condition that a URI must satisfy if access to a resource with this URI
+     *      is to be permitted
+     */
+
+    public Predicate<URI> getAllowedUriTest() {
+        return this.allowedUriTest;
+    }
+
+    /**
      * Get the URIResolver used in this configuration
      *
      * @return the URIResolver. If no URIResolver has been set explicitly, the
@@ -884,41 +900,12 @@ public class Configuration implements SourceResolver, NotationSet {
         throw new XPathException("Class " + className + " is not a URIResolver");
     }
 
-    /**
-     * Get the ErrorListener used in this configuration. If no ErrorListener
-     * has been supplied explicitly, the default ErrorListener is used.
-     *
-     * @return the ErrorListener. Note that this is not necessarily the ErrorListener that was supplied
-     * to the {@link #setErrorListener(ErrorListener)} method; if that was not an {@link UnfailingErrorListener},
-     * it will have been wrapped in a {@link DelegatingErrorListener}, and it is the DelegatingErrorListener
-     * that this method returns.
-     * @since 8.4
-     */
-
-    public UnfailingErrorListener getErrorListener() {
-        UnfailingErrorListener listener = defaultParseOptions.getErrorListener();
-        if (listener == null) {
-            listener = new StandardErrorListener();
-            ((StandardErrorListener) listener).setLogger(traceOutput);
-            ((StandardErrorListener) listener).setRecoveryPolicy(defaultXsltCompilerInfo.getRecoveryPolicy());
-            defaultParseOptions.setErrorListener(listener);
-        }
-        return listener;
+    public void setErrorReporterFactory(java.util.function.Function<Configuration, ? extends ErrorReporter> factory) {
+        errorReporterFactory = factory;
     }
-
-    /**
-     * Set the ErrorListener to be used in this configuration. The ErrorListener
-     * is informed of all static and dynamic errors detected, and can decide whether
-     * run-time warnings are to be treated as fatal.
-     *
-     * @param listener the ErrorListener to be used
-     * @since 8.4
-     */
-
-    public void setErrorListener(ErrorListener listener) {
-        defaultParseOptions.setErrorListener(listener);
-        getDefaultXsltCompilerInfo().setErrorListener(listener);   // bug 2215
-        getDefaultStaticQueryContext().setErrorListener(listener);
+    
+    public ErrorReporter makeErrorReporter() {
+        return errorReporterFactory.apply(this);
     }
 
     public Logger getLogger() {
@@ -934,28 +921,10 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public void reportFatalError(XPathException err) {
         if (!err.hasBeenReported()) {
-            getErrorListener().fatalError(err);
+            makeErrorReporter().report(new XmlProcessingException(err));
             err.setHasBeenReported(true);
         }
     }
-
-    /**
-     * Set the standard error output to be used in all cases where no more specific destination
-     * is defined. This defaults to System.err.
-     *
-     * @param out the stream to be used for error output where no more specific destination
-     *            has been supplied. The caller is responsible for closing this stream after use
-     *            (if necessary).
-     * @since 9.3
-     */
-
-    public void setStandardErrorOutput(PrintStream out) {
-        if (!(traceOutput instanceof StandardLogger)) {
-            traceOutput = new StandardLogger();
-        }
-        ((StandardLogger) traceOutput).setPrintStream(out);
-    }
-
 
     /**
      * Register a new logger to be used in the Saxon event logging mechanism
@@ -970,13 +939,32 @@ public class Configuration implements SourceResolver, NotationSet {
         traceOutput = logger;
     }
 
+    /**
+     * Set the standard error output to be used in all cases where no more specific destination
+     * is defined. This defaults to System.err.
+     *
+     * <p>The method has no effect unless the {@link Configuration#getLogger()} object
+     * is an instance of {@link StandardLogger}. In that case it calls
+     * {@link StandardLogger#setPrintStream(PrintStream)}</p>
+     *
+     * @param out the stream to be used for error output where no more specific destination
+     *            has been supplied. The caller is responsible for closing this stream after use
+     *            (if necessary).
+     * @since 9.3
+     */
+
+    public void setStandardErrorOutput(PrintStream out) {
+        if (traceOutput instanceof StandardLogger) {
+            ((StandardLogger) traceOutput).setPrintStream(out);
+        }
+    }
 
     /**
      * Get the standard error output to be used in all cases where no more specific destination
      * is defined. This defaults to System.err.
      *
-     * @return the stream to be used for error output where no more specific destination
-     * has been supplied
+     * @return If the {@link Configuration#getLogger()} object is an instance of {@link StandardLogger},
+     * then the value of  {@link StandardLogger#getPrintStream()}; otherwise {@code System.err}.
      * @since 9.3
      */
 
@@ -984,10 +972,9 @@ public class Configuration implements SourceResolver, NotationSet {
         if (traceOutput instanceof StandardLogger) {
             return ((StandardLogger) traceOutput).getPrintStream();
         } else {
-            return null;
+            return System.err;
         }
     }
-
 
     /**
      * Set the XML version to be used by default for validating characters and names.
@@ -1151,7 +1138,7 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Get the Tree Model used by this Configuration. This is either
+     * Get the Tree Model used by this Configuration. This is typically
      * {@link Builder#LINKED_TREE}, {@link Builder#TINY_TREE}, or {@link Builder#TINY_TREE_CONDENSED}.
      * The default is <code>Builder.TINY_TREE</code>.
      *
@@ -1164,7 +1151,7 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Set the Tree Model used by this Configuration. This is either
+     * Set the Tree Model used by this Configuration. This is typically
      * {@link Builder#LINKED_TREE} or {@link Builder#TINY_TREE}, or {@link Builder#TINY_TREE_CONDENSED}.
      * The default is <code>Builder.TINY_TREE</code>.
      *
@@ -1494,6 +1481,18 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
+     * Instantiate a Saxon extension function. This generally requires Saxon-PE or higher,
+     * so it will fail with this Configuration
+     * @param localName the local name of the function in the Saxon namespace
+     * @param arity the function arity
+     * @return the system function with this name and arity
+     */
+
+    public SystemFunction bindSaxonExtensionFunction(String localName, int arity) throws XPathException {
+        throw new UnsupportedOperationException("The extension function saxon:" + localName + "#" + arity + " requires Saxon-PE or higher");
+    }
+
+    /**
      * Add the registered extension binders to a function library.
      * This method is intended primarily for internal use
      *
@@ -1513,27 +1512,41 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param arity the arity of the required function
      * @return the requested function, or null if there is no such function. Note that some functions
      * (those with particular context dependencies) may be unsuitable for dynamic calling.
-     * @throws XPathException if dynamic function calls are not permitted by this Saxon Configuration
      */
 
-    public Function getSystemFunction(StructuredQName name, int arity) throws XPathException {
-        throw new XPathException("Dynamic functions require Saxon-PE or higher");
+    public Function getSystemFunction(StructuredQName name, int arity)  {
+        try {
+            if (staticContextForSystemFunctions == null) {
+                staticContextForSystemFunctions = new IndependentContext(this);
+            }
+            FunctionLibraryList lib = new FunctionLibraryList();
+            lib.addFunctionLibrary(XPath31FunctionSet.getInstance());
+            lib.addFunctionLibrary(getBuiltInExtensionLibraryList());
+            lib.addFunctionLibrary(new ConstructorFunctionLibrary(this));
+            lib.addFunctionLibrary(getIntegratedFunctionLibrary());
+            SymbolicName.F symbolicName = new SymbolicName.F(name, arity);
+            return lib.getFunctionItem(symbolicName, staticContextForSystemFunctions);
+        } catch (XPathException e) {
+            return null;
+        }
     }
 
     /**
      * Make a UserFunction object.
      * This method is for internal use.
      *
-     * @param memoFunction  true if the function is to be a memo function, This option is ignored
-     *                      in Saxon-HE.
+     * @param memoFunction  true if the function is to be a memo function.
      * @param streamability the declared streamability of the function
-     * @return a new UserFunction object
+     * @return the newly created user-defined function
      */
 
     public UserFunction newUserFunction(boolean memoFunction, FunctionStreamability streamability) {
-        return new UserFunction();
+        if (memoFunction) {
+            return new MemoFunction();
+        } else {
+            return new UserFunction();
+        }
     }
-
     /**
      * Register a collation. Collation URIs registered using this interface will be
      * picked up before calling the CollationURIResolver.
@@ -1695,7 +1708,7 @@ public class Configuration implements SourceResolver, NotationSet {
      *
      * @param uri the URI of the default collection. Calling the collection() function
      *            with no arguments is equivalent to calling collection() with this URI as an argument.
-     *            The URI will be dereferenced by passing it to the registered CollectionURIResolver.
+     *            The URI will be dereferenced by passing it to the registered CollectionFinder.
      *            If null is supplied, any existing default collection is removed.
      * @since 9.2
      */
@@ -1709,52 +1722,13 @@ public class Configuration implements SourceResolver, NotationSet {
      * been registered.
      *
      * @return the default collection URI. This is dereferenced in the same way as a normal
-     * collection URI (via the CollectionURIResolver) to return a sequence of nodes
+     * collection URI (via the CollectionFinder) to return a sequence of nodes
      * @since 9.2
      */
 
     /*@Nullable*/
     public String getDefaultCollection() {
         return defaultCollection;
-    }
-
-    /**
-     * Set a CollectionURIResolver to be used to resolve collection URIs (that is,
-     * the URI supplied in a call to the collection() function).
-     * <p>Collection URIs are always resolved at run-time, using the CollectionURIResolver
-     * in force at the time the collection() function is called.</p>
-     * <p>Calling this method has the effect of calling {@link #setCollectionFinder(CollectionFinder)}
-     * with a <code>CollectionFinder</code> that wraps this <code>CollectionURIResolver</code>. </p>
-     *
-     * @param resolver the collection URI resolver to be used. This replaces any collection
-     *                 URI resolver previously registered.  The value must not be null.
-     * @since 8.5
-     * @deprecated since 9.7. Use {@link #setCollectionFinder(CollectionFinder)}
-     */
-
-    public void setCollectionURIResolver(/*@NotNull*/ CollectionURIResolver resolver) {
-        setCollectionFinder(new CollectionURIResolverWrapper(resolver));
-    }
-
-    /**
-     * Get the collection URI resolver associated with this configuration. This will
-     * return the CollectionURIResolver previously set using the {@link #setCollectionURIResolver}
-     * method; if this has not been called, it returns the system-defined collection URI resolver
-     * <p>Calling this method has the effect of calling {@link #getCollectionFinder()}; if the result
-     * is a <code>CollectionFinder</code> that wraps a <code>CollectionURIResolver</code>, then
-     * the wrapped <code>CollectionURIFinder is returned.</code></p>
-     *
-     * @return the registered CollectionURIResolver
-     * @since 8.5
-     * @deprecated since 9.7. Use {@link #getCollectionFinder()}
-     */
-
-    /*@NotNull*/
-    public CollectionURIResolver getCollectionURIResolver() {
-        if (collectionFinder instanceof CollectionURIResolverWrapper) {
-            return ((CollectionURIResolverWrapper) collectionFinder).getCollectionURIResolver();
-        }
-        return null;
     }
 
     /**
@@ -1782,21 +1756,37 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Register a specific URI and bind it to a specific ResourceCollection. This method only works
-     * if the {@link CollectionFinder} in use is a {@link StandardCollectionFinder}.
+     * Get the standard collection finder. This is always an instance of {@link StandardCollectionFinder}
+     * and there is no way of changing it. It is available for calling from a user-supplied collection
+     * finder as a way to delegate processing, in the event that the user-supplied collection finder
+     * wants to handle some collection URIs its own way, and others in the standard way
+     * @return the standard collection finder
+     */
+
+    public StandardCollectionFinder getStandardCollectionFinder() {
+        return standardCollectionFinder;
+    }
+
+    /**
+     * Register a specific URI and bind it to a specific ResourceCollection. This method modifies
+     * the standard collection finder (as returned by {@link #getStandardCollectionFinder()},
+     * and it also modifies the user-supplied collection finder (as returned by
+     * {@link #getCollectionFinder()} if and only if this is an instance of the class
+     * {@link StandardCollectionFinder}.
      *
      * @param collectionURI the collection URI to be registered. Must not be null.
      * @param collection    the ResourceCollection to be associated with this URI. Must not be null.
-     * @throws IllegalStateException if the {@link CollectionFinder} in use is not a
-     *                               {@link StandardCollectionFinder}
-     * @since 9.7.0.2
+     * @since 9.7.0.2. Modified in 10.0 to work on the standard collection finder in all cases,
+     * so there is no failure if the user-supplied collection finder does not implement
+     * the {@link StandardCollectionFinder} interface.
      */
 
     public void registerCollection(String collectionURI, ResourceCollection collection) {
-        if (!(collectionFinder instanceof StandardCollectionFinder)) {
-            throw new IllegalStateException("Current CollectionFinder is not a StandardCollectionFinder");
+        standardCollectionFinder.registerCollection(collectionURI, collection);
+        if (collectionFinder instanceof StandardCollectionFinder
+                && collectionFinder != standardCollectionFinder) {
+            ((StandardCollectionFinder) collectionFinder).registerCollection(collectionURI, collection);
         }
-        ((StandardCollectionFinder) collectionFinder).registerCollection(collectionURI, collection);
     }
 
     /**
@@ -2103,9 +2093,6 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public CompilerInfo getDefaultXsltCompilerInfo() {
-        if (defaultXsltCompilerInfo.getErrorListener() == null) {
-            defaultXsltCompilerInfo.setErrorListener(getErrorListener());
-        }
         return defaultXsltCompilerInfo;
     }
 
@@ -2161,43 +2148,12 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Determine how recoverable run-time errors are to be handled. This applies
-     * only if the standard ErrorListener is used.
-     *
-     * @return the current recovery policy. The options are {@link #RECOVER_SILENTLY},
-     * {@link #RECOVER_WITH_WARNINGS}, or {@link #DO_NOT_RECOVER}.
-     * @since 8.4
+     * Ask whether streamability checking is enabled for this configuration
+     * @return  always false for Saxon-HE
      */
 
-    public int getRecoveryPolicy() {
-        return defaultXsltCompilerInfo.getRecoveryPolicy();
-    }
-
-    /**
-     * Determine how recoverable run-time errors are to be handled. This applies
-     * only if the standard ErrorListener is used. The recovery policy applies to
-     * errors classified in the XSLT 2.0 specification as recoverable dynamic errors,
-     * but only in those cases where Saxon provides a choice over how the error is handled:
-     * in some cases, Saxon makes the decision itself.
-     *
-     * @param recoveryPolicy the recovery policy to be used. The options are {@link #RECOVER_SILENTLY},
-     *                       {@link #RECOVER_WITH_WARNINGS}, or {@link #DO_NOT_RECOVER}.
-     * @since 8.4
-     */
-
-    public void setRecoveryPolicy(int recoveryPolicy) {
-        defaultXsltCompilerInfo.setRecoveryPolicy(recoveryPolicy);
-    }
-
-    /**
-     * Get the streamability rules to be applied.
-     *
-     * @return 0 indicating that streaming is not available with this Saxon Configuration
-     * @since 9.6
-     */
-
-    public int getStreamability() {
-        return 0;
+    public boolean isStreamabilityEnabled() {
+        return false;
     }
 
     /**
@@ -2418,9 +2374,9 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws XPathException if (for example) a dynamic error occurs while priming the queue
      */
 
-    public <F extends Item<?>, T extends Item<?>> SequenceIterator<T> getMultithreadedItemMappingIterator(
-            SequenceIterator<F> base, ItemMappingFunction<F, T> action) throws XPathException {
-        return new ItemMappingIterator<>(base, action);
+    public SequenceIterator getMultithreadedItemMappingIterator(
+            SequenceIterator base, ItemMappingFunction action) throws XPathException {
+        return new ItemMappingIterator(base, action);
     }
 
     /**
@@ -2463,12 +2419,13 @@ public class Configuration implements SourceResolver, NotationSet {
      * Determine whether a warning is to be output when running against a stylesheet labelled
      * as version="1.0". The XSLT specification requires such a warning unless the user disables it.
      *
-     * @return true if these messages are to be output.
+     * @return always false.
      * @since 8.4
+     * @deprecated since 10.0; the method has had no effect since Saxon 9.8
      */
 
     public boolean isVersionWarning() {
-        return defaultXsltCompilerInfo.isVersionWarning();
+        return false;
     }
 
     /**
@@ -2476,12 +2433,13 @@ public class Configuration implements SourceResolver, NotationSet {
      * not match the XSLT processor version. (In the case where the stylesheet version is "1.0",
      * the XSLT specification requires such a warning unless the user disables it.)
      *
-     * @param warn true if these warning messages are to be output.
+     * @param warn ignored.
      * @since 8.4
+     * @deprecated since 10.0; the method has had no effect since Saxon 9.8
      */
 
     public void setVersionWarning(boolean warn) {
-        defaultXsltCompilerInfo.setVersionWarning(warn);
+        // no action
     }
 
     /**
@@ -2802,22 +2760,6 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Determine whether whitespace-only text nodes are to be stripped unconditionally
-     * from source documents.
-     *
-     * @param stripsAllWhiteSpace if all whitespace-only text nodes are to be stripped. Passing
-     *                            the value false causes no change to the current settings.
-     * @since 8.4
-     * @deprecated since 9.8: use getParseOptions().setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance())
-     */
-
-    public void setStripsAllWhiteSpace(boolean stripsAllWhiteSpace) {
-        if (stripsAllWhiteSpace) {
-            defaultParseOptions.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
-        }
-    }
-
-    /**
      * Get an XML parser for source documents.
      * <p>This method is intended primarily for internal use.</p>
      *
@@ -2965,8 +2907,7 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = makeParser(getStyleParserClass());
         } else {
             parser = loadParser();
-            StandardEntityResolver resolver = new StandardEntityResolver();
-            resolver.setConfiguration(this);
+            StandardEntityResolver resolver = new StandardEntityResolver(this);
             parser.setEntityResolver(resolver);
         }
         try {
@@ -3079,14 +3020,14 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param root          the xs:schema element in the stylesheet
      * @param expected      the target namespace expected; null if there is no
      *                      expectation.
-     * @param errorListener The destination for error messages. May be null, in which case
+     * @param errorReporter The destination for error messages. May be null, in which case
      *                      the errorListener registered with this Configuration is used.
      * @return the actual target namespace of the schema
      * @throws net.sf.saxon.type.SchemaException if the schema cannot be processed
      */
 
     /*@Nullable*/
-    public String readInlineSchema(NodeInfo root, String expected, ErrorListener errorListener)
+    public String readInlineSchema(NodeInfo root, String expected, ErrorReporter errorReporter)
             throws SchemaException {
         needEnterpriseEdition();
         return null;
@@ -3114,7 +3055,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void addSchemaSource(Source schemaSource) throws SchemaException {
-        addSchemaSource(schemaSource, getErrorListener());
+        addSchemaSource(schemaSource, makeErrorReporter());
     }
 
     /**
@@ -3122,11 +3063,11 @@ public class Configuration implements SourceResolver, NotationSet {
      * this EnterpriseConfiguration.
      *
      * @param schemaSource  the JAXP Source object identifying the schema document to be loaded
-     * @param errorListener the ErrorListener to be notified of any errors in the schema.
+     * @param errorReporter the ErrorListener to be notified of any errors in the schema.
      * @throws SchemaException if the schema cannot be read or parsed or if it is invalid
      */
 
-    public void addSchemaSource(Source schemaSource, ErrorListener errorListener) throws SchemaException {
+    public void addSchemaSource(Source schemaSource, ErrorReporter errorReporter) throws SchemaException {
         needEnterpriseEdition();
     }
 
@@ -3209,8 +3150,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public Iterator<? extends SchemaType> getExtensionsOfType(SchemaType type) {
-        Set<SchemaType> e = Collections.emptySet();
-        return e.iterator();
+        return Collections.emptyIterator();
     }
 
     /**
@@ -3355,6 +3295,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @since 9.3
      */
 
+    @Override
     public boolean isDeclaredNotation(String uri, String local) {
         return false;
     }
@@ -3378,7 +3319,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /**
      * Set validation reporting options. Called by instructions that invoke validation
-     * to set up an appropriat invalidity handler
+     * to set up an appropriate invalidity handler
      *
      * @param context the XPath evaluation context
      * @param options the parser options, to be updated
@@ -3421,8 +3362,8 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public Receiver getElementValidator(Receiver receiver,
-                                                ParseOptions validationOptions,
-                                                Location locationId)
+                                        ParseOptions validationOptions,
+                                        Location locationId)
             throws XPathException {
         return receiver;
     }
@@ -3515,7 +3456,7 @@ public class Configuration implements SourceResolver, NotationSet {
                 throw new XPathException("XQuery Update is supported only in Saxon-EE");
             } else if (languageVersion == 31 || languageVersion == 30 || languageVersion == 10) {
                 XQueryParser parser = new XQueryParser();
-                parser.setLanguage(XPathParser.XQUERY, 31);
+                parser.setLanguage(XPathParser.ParsedLanguage.XQUERY, 31);
                 return parser;
             } else {
                 throw new XPathException("Unknown XQuery version " + languageVersion);
@@ -3523,7 +3464,7 @@ public class Configuration implements SourceResolver, NotationSet {
         } else if ("XP".equals(language)) {
             if (languageVersion == 31 || languageVersion == 30 || languageVersion == 305 || languageVersion == 20) {
                 XPathParser parser = new XPathParser();
-                parser.setLanguage(XPathParser.XPATH, languageVersion);
+                parser.setLanguage(XPathParser.ParsedLanguage.XPATH, languageVersion);
                 return parser;
             } else {
                 throw new XPathException("Unknown XPath version " + languageVersion);
@@ -3541,7 +3482,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /**
      * Get a new ExpressionPresenter capable of exporting a compiled stylesheet
-     * @param target the target environment, e.g. EE, JS, JS2
+     * @param target the target environment, e.g. EE, JS
      * @param destination the destination for the output file
      * @param rootPackage the root package of the export
      * @return a suitable Expression Presenter
@@ -3596,17 +3537,18 @@ public class Configuration implements SourceResolver, NotationSet {
     /**
      * Create a streaming transformer
      *
-     * @param context the initial XPath context
      * @param mode    the initial mode, which must be a streaming mode
      * @param ordinaryParams the parameters that are not tunnel parameters
      * @param tunnelParams the tunnel parameters
+     * @param output the destination for the result
+     * @param context the initial XPath context
      * @return a Receiver to which the streamed input document will be pushed
      * @throws XPathException if a streaming transformer cannot be created (which
      *                        is always the case in Saxon-HE and Saxon-PE)
      */
 
     /*@NotNull*/
-    public Receiver makeStreamingTransformer(XPathContext context, Mode mode, ParameterSet ordinaryParams, ParameterSet tunnelParams) throws XPathException {
+    public Receiver makeStreamingTransformer(Mode mode, ParameterSet ordinaryParams, ParameterSet tunnelParams, Outputter output, XPathContext context) throws XPathException {
         throw new XPathException("Streaming is only available in Saxon-EE");
     }
 
@@ -3632,7 +3574,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return a suitable factory function
      */
 
-    public java.util.function.Function<SequenceIterator<?>, FocusTrackingIterator<?>> getFocusTrackerFactory(
+    public java.util.function.Function<SequenceIterator, FocusTrackingIterator> getFocusTrackerFactory(
             Executable exec, boolean multithreaded) {
         return FocusTrackingIterator::new;
     }
@@ -3702,24 +3644,6 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Generate a function sequence coercer, that is, an expression which converts a sequence of function
-     * items to a sequence of function items satisfying a given required type; the coerced functions call the
-     * original function with arguments converted as necessary, or fail if conversion is not possible
-     *
-     * @param type the required function type
-     * @param exp  the expression that delivers a sequence of function items
-     * @param role diagnostic information
-     * @return an expression that converts the supplied sequence of functions to the required function type
-     * @throws XPathException if conversion is not possible
-     */
-
-    public Expression makeFunctionSequenceCoercer(SpecificFunctionType type, Expression exp,
-                                                  RoleDiagnostic role)
-            throws XPathException {
-        throw new XPathException("Function coercion requires Saxon-PE or higher");
-    }
-
-    /**
      * Factory method to make a ContextItemStaticInfo
      *
      * @param itemType       the item type of the context item. If the context item is absent, set this to
@@ -3754,7 +3678,11 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public XQueryExpression makeXQueryExpression(Expression exp, QueryModule mainModule, boolean streaming) throws XPathException {
-        return new XQueryExpression(exp, mainModule, false);
+        XQueryExpression xqe = new XQueryExpression(exp, mainModule, false);
+        if (mainModule.getCodeInjector() != null) {
+            mainModule.getCodeInjector().process(xqe);
+        }
+        return xqe;
     }
 
     /**
@@ -3767,10 +3695,10 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws XPathException if a failure occurs constructing the Closure
      */
 
-    public Sequence<?> makeClosure(Expression expression, int ref, XPathContext context) throws XPathException {
+    public Sequence makeClosure(Expression expression, int ref, XPathContext context) throws XPathException {
         if (getBooleanProperty(Feature.EAGER_EVALUATION)) {
             // Using eager evaluation can make for easier debugging
-            SequenceIterator<?> iter = expression.iterate(context);
+            SequenceIterator iter = expression.iterate(context);
             return iter.materialize();
         }
 
@@ -3792,7 +3720,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws XPathException if evaluation of the expression fails
      */
 
-    public GroundedValue<?> makeSequenceExtent(Expression expression, int ref, XPathContext context) throws XPathException {
+    public GroundedValue makeSequenceExtent(Expression expression, int ref, XPathContext context) throws XPathException {
         return expression.iterate(context).materialize();
     }
 
@@ -3814,8 +3742,20 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public Expression makeEvaluateInstruction(XSLEvaluate source, ComponentDeclaration decl) throws XPathException {
-        return new ErrorExpression(new XPathException("xsl:evaluate is not available in this configuration", "XTDE3175"));
-        // Should not be called: xsl:evaluate is not supported in Saxon-HE
+        Expression xpath = source.getTargetExpression();
+        SequenceType requiredType = source.getRequiredType();
+        Expression contextItem = source.getContextItemExpression();
+        Expression baseUri = source.getBaseUriExpression();
+        Expression namespaceContext = source.getNamespaceContextExpression();
+        Expression schemaAware = source.getSchemaAwareExpression();
+        Expression withParams = source.getWithParamsExpression();
+        EvaluateInstr inst = new EvaluateInstr(xpath, requiredType, contextItem, baseUri, namespaceContext, schemaAware);
+        WithParam[] params = source.getWithParamInstructions(inst, source.getCompilation(), decl, false);
+        inst.setActualParams(params);
+        inst.setDynamicParams(withParams);
+        inst.setDefaultXPathNamespace(source.getDefaultXPathNamespace());
+        inst.setOptionsExpression(source.getOptionsExpression());
+        return inst;
     }
 
     /**
@@ -3846,7 +3786,10 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param model The external object model.
      *              This can either be one of the system-supplied external
      *              object models for JDOM, XOM, or DOM, or a user-supplied external object model.
-     *              <p>This method is intended for advanced users only, and is subject to change.</p>
+     * @see net.sf.saxon.option.axiom.AxiomObjectModel
+     * @see net.sf.saxon.option.dom4j.DOM4JObjectModel
+     * @see net.sf.saxon.option.jdom2.JDOM2ObjectModel
+     * @see net.sf.saxon.option.xom.XOMObjectModel
      */
 
     public void registerExternalObjectModel(ExternalObjectModel model) {
@@ -3889,7 +3832,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     /*@Nullable*/
-    public ExternalObjectModel getExternalObjectModel(Class nodeClass) {
+    public ExternalObjectModel getExternalObjectModel(Class<?> nodeClass) {
         for (ExternalObjectModel model : externalObjectModels) {
             PJConverter converter = model.getPJConverter(nodeClass);
             if (converter != null) {
@@ -3918,7 +3861,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return the corresponding JavaExternalObjectType
      */
 
-    public synchronized JavaExternalObjectType getJavaExternalObjectType(Class theClass) {
+    public synchronized JavaExternalObjectType getJavaExternalObjectType(Class<?> theClass) {
         return new JavaExternalObjectType(this, theClass);
     }
 
@@ -3953,13 +3896,24 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws UnsupportedOperationException except in subclasses
      */
 
-    public MapItem externalObjectAsMap(ObjectValue value, String required) {
+    public MapItem externalObjectAsMap(ObjectValue<?> value, String required) {
         throw new UnsupportedOperationException();
     }
 
-    public Expression makeObjectLookupExpression(Expression lhs, Expression rhs) {
+    /**
+     * Make an object lookup expression: supports the construct X?Y where X is an external Java object.
+     * Requires Saxon-PE or higher
+     *
+     * @param lhs the left-hand operand
+     * @param rhs the right-hand operand
+     * @return the constructed expression
+     * @throws XPathException if anything goes wrong
+     */
+
+    public Expression makeObjectLookupExpression(Expression lhs, Expression rhs) throws XPathException {
         throw new UnsupportedOperationException();
     }
+
 
     /**
      * Get a NodeInfo corresponding to a DOM or other external Node,
@@ -4062,9 +4016,16 @@ public class Configuration implements SourceResolver, NotationSet {
         PipelineConfiguration pipe = new PipelineConfiguration(this);
         pipe.setURIResolver(getURIResolver());
         pipe.setParseOptions(new ParseOptions(defaultParseOptions));
-        pipe.setErrorListener(getErrorListener());
+        pipe.setErrorReporter(makeErrorReporter());
         return pipe;
     }
+
+    /**
+     * Make a SchemaURIResolver that wraps a supplied URIResolver
+     *
+     * @return a new SchemaURIResolver (or null if this is not an EnterpriseConfiguration)
+     * @since 10.0
+     */
 
     public SchemaURIResolver makeSchemaURIResolver(URIResolver resolver) {
         return null;
@@ -4123,6 +4084,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     /*@Nullable*/
+    @Override
     public Source resolveSource(Source source, Configuration config) throws XPathException {
         if (source instanceof AugmentedSource) {
             return source;
@@ -4148,6 +4110,9 @@ public class Configuration implements SourceResolver, NotationSet {
         if (source instanceof EventSource) {
             return source;
         }
+        if (source instanceof SaplingDocument) {
+            return source;
+        }
         return null;
     }
 
@@ -4168,7 +4133,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws XPathException if any errors occur during document parsing or validation. Detailed
      *                        errors occurring during schema validation will be written to the ErrorListener associated
      *                        with the AugmentedSource, if supplied, or with the Configuration otherwise.
-     * @since 9.7; based on the original {@link #buildDocument(Source)} method, but adapted to return the
+     * @since 9.7; based on the original buildDocument(Source) method, but adapted to return the
      * TreeInfo containing information about the constructed tree, including a reference to its root node.
      */
 
@@ -4204,7 +4169,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return the constructed document as a TreeInfo
      * @throws XPathException if parsing fails, or if the Source represents a node other than
      *                        a document node
-     * @since 9.7; based on the original {@link #buildDocument(Source, ParseOptions)} method, but adapted to return the
+     * @since 9.7; based on the original buildDocument(Source, ParseOptions) method, but adapted to return the
      * TreeInfo containing information about the constructed tree, including a reference to its root node.
      */
 
@@ -4247,7 +4212,7 @@ public class Configuration implements SourceResolver, NotationSet {
             builder.setLineNumbering(lineNumbering);
             builder.setPipelineConfiguration(pipe);
             builder.setSystemId(source.getSystemId());
-            Sender.send(source, new NamespaceReducer(builder), options);
+            Sender.send(source, builder, options);
 
             // Get the constructed document
 
@@ -4271,68 +4236,6 @@ public class Configuration implements SourceResolver, NotationSet {
             }
         }
 
-    }
-
-    /**
-     * Build a document tree, using options set on this Configuration and on the supplied source
-     * object. Options set on the source object override options set in the Configuration. The Source
-     * object must be one of the kinds of source recognized by Saxon, or a source that can be resolved
-     * using the registered {@link SourceResolver}.
-     *
-     * @param source the Source to be used. This may be an {@link AugmentedSource}, allowing options
-     *               to be specified for the way in which this document will be built. If an AugmentedSource
-     *               is supplied then options set in the AugmentedSource take precedence over options
-     *               set in the Configuration.
-     *               <p>From Saxon 9.2, this method always creates a new tree, it never wraps or returns
-     *               an existing tree.</p>
-     *               <p>If any error occurs reading or parsing the supplied Source, the error is notified
-     *               to the {@link ErrorListener} registered with this {@link Configuration}.</p>
-     * @return the document node of the constructed document. The class DocumentInfo is retained
-     * as the result class for this method in order to preserve backwards compatibility for common use cases
-     * of this function
-     * @throws XPathException if any errors occur during document parsing or validation. Detailed
-     *                        errors occurring during schema validation will be written to the ErrorListener associated
-     *                        with the AugmentedSource, if supplied, or with the Configuration otherwise.
-     * @since 8.9. Modified in 9.0 to avoid copying a supplied document where this is not
-     * necessary. Modified in 9.2 so that this interface always constructs a new tree; it never
-     * wraps an existing document, even if an AugmentedSource that requests wrapping is supplied.
-     * In 9.7 the method is retained to provide a semblance of backwards compatibility for common
-     * use cases; to achieve this, DocumentInfo is changed from an interface implemented by all document
-     * nodes, to a wrapper object around the actual root of the tree.
-     * @deprecated since 9.7: use {@link #buildDocumentTree(Source)}.
-     */
-
-    public DocumentInfo buildDocument(Source source) throws XPathException {
-        TreeInfo tree = buildDocumentTree(source);
-        NodeInfo root = tree.getRootNode();
-        return new DocumentInfo(root);
-    }
-
-    /**
-     * Build a document, using specified options for parsing and building. This method always
-     * constructs a new tree, it never wraps an existing document (regardless of anything in
-     * the parseOptions)
-     *
-     * @param source       the source of the document to be constructed. If this is an
-     *                     AugmentedSource, then any parser options contained in the AugmentedSource take precedence
-     *                     over options specified in the parseOptions argument.
-     * @param parseOptions options for parsing and constructing the document. Any options that
-     *                     are not explicitly set in parseOptions default first to the values supplied in the source
-     *                     argument if it is an AugmentedSource, and then to the values set in this Configuration.
-     *                     The supplied parseOptions object is not modified.
-     * @return the document node of the constructed document
-     * @throws XPathException if parsing fails, or if the Source represents a node other than
-     *                        a document node
-     * @since 9.2. In 9.7 the method is retained to provide a semblance of backwards compatibility for common
-     * use cases; to achieve this, DocumentInfo is changed from an interface implemented by all document
-     * nodes, to a wrapper object around the actual root of the tree.
-     * @deprecated since 9.7: use {@link #buildDocumentTree(Source, ParseOptions)}.
-     */
-
-    public DocumentInfo buildDocument(Source source, ParseOptions parseOptions) throws XPathException {
-        TreeInfo tree = buildDocumentTree(source, parseOptions);
-        NodeInfo root = tree.getRootNode();
-        return new DocumentInfo(root);
     }
 
     /**
@@ -4437,7 +4340,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * TransformerFactory implementation, and is provided
      * to enable setting of Configuration properties using URIs without instantiating a TransformerFactory:
      * specifically, this may be useful when running XQuery, and it is also used by the Validator API
-     *
+     * @param <T> the type of value required for this particular feature
      * @param feature  the property to be set. See the class {@link Feature} for
      *              constants representing the property names that can be set.
      * @param value the value of the property. Note that boolean values may be supplied either as a Boolean,
@@ -4462,7 +4365,9 @@ public class Configuration implements SourceResolver, NotationSet {
             internalSetBooleanProperty(feature, value);
         } else {
             switch (feature.code) {
-
+                case FeatureCode.ALLOWED_PROTOCOLS:
+                    allowedUriTest = ProtocolRestricter.make((String)value);
+                    break;
                 case FeatureCode.COLLATION_URI_RESOLVER:
                     if (!(value instanceof CollationURIResolver)) {
                         throw new IllegalArgumentException(
@@ -4474,19 +4379,6 @@ public class Configuration implements SourceResolver, NotationSet {
                 case FeatureCode.COLLATION_URI_RESOLVER_CLASS:
                     setCollationURIResolver(
                             (CollationURIResolver) instantiateClassName(name, value, CollationURIResolver.class));
-                    break;
-
-                case FeatureCode.COLLECTION_URI_RESOLVER:
-                    if (!(value instanceof CollectionURIResolver)) {
-                        throw new IllegalArgumentException(
-                                "COLLECTION_URI_RESOLVER value must be an instance of net.sf.saxon.lib.CollectionURIResolver");
-                    }
-                    setCollectionURIResolver((CollectionURIResolver) value);
-                    break;
-
-                case FeatureCode.COLLECTION_URI_RESOLVER_CLASS:
-                    setCollectionURIResolver(
-                            (CollectionURIResolver) instantiateClassName(name, value, CollectionURIResolver.class));
                     break;
 
                 case FeatureCode.COLLECTION_FINDER:
@@ -4555,7 +4447,7 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
 
                 case FeatureCode.ERROR_LISTENER_CLASS:
-                    setErrorListener((ErrorListener) instantiateClassName(name, value, ErrorListener.class));
+                    // No action, obsolete
                     break;
 
                 case FeatureCode.LINE_NUMBERING: {
@@ -4633,26 +4525,11 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
 
                 case FeatureCode.RECOVERY_POLICY:
-                    setRecoveryPolicy(requireInteger(name, value));
+                    // Obsolete: no action
                     break;
 
                 case FeatureCode.RECOVERY_POLICY_NAME:
-                    if (!(value instanceof String)) {
-                        throw new IllegalArgumentException("RECOVERY_POLICY_NAME value must be a String");
-                    }
-                    int rval;
-                    if (value.equals("recoverSilently")) {
-                        rval = RECOVER_SILENTLY;
-                    } else if (value.equals("recoverWithWarnings")) {
-                        rval = RECOVER_WITH_WARNINGS;
-                    } else if (value.equals("doNotRecover")) {
-                        rval = DO_NOT_RECOVER;
-                    } else {
-                        throw new IllegalArgumentException(
-                                "Unrecognized value of RECOVERY_POLICY_NAME = '" + value +
-                                        "': must be 'recoverSilently', 'recoverWithWarnings', or 'doNotRecover'");
-                    }
-                    setRecoveryPolicy(rval);
+                    // Obsolete: no action
                     break;
 
                 case FeatureCode.REGEX_BACKTRACKING_LIMIT:
@@ -4792,7 +4669,7 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
 
                 case FeatureCode.VERSION_WARNING:
-                    setVersionWarning(requireBoolean(name, value));
+                    // no action
                     break;
 
                 case FeatureCode.XINCLUDE:
@@ -4849,7 +4726,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
                 case FeatureCode.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE:
                     XPathParser parser = new XPathParser();
-                    parser.setLanguage(XPathParser.SEQUENCE_TYPE, 31);
+                    parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 31);
                     try {
                         SequenceType type = parser.parseSequenceType(value.toString(), new IndependentContext(this));
                         if (type.getCardinality() != StaticProperty.EXACTLY_ONE) {
@@ -4872,9 +4749,10 @@ public class Configuration implements SourceResolver, NotationSet {
 
                 case FeatureCode.XQUERY_VERSION:
                     if (!"3.1".equals(value)) {
-                        getErrorListener().warning(new XPathException("XQuery version ignored: only \"3.1\" is recognized"));
+                        makeErrorReporter().report(
+                                new XmlProcessingIncident("XQuery version ignored: only \"3.1\" is recognized").asWarning());
                     }
-                    getDefaultStaticQueryContext().setLanguageVersion(31);
+                    //getDefaultStaticQueryContext().setLanguageVersion(31);
                     break;
 
                 case FeatureCode.XML_VERSION:
@@ -4927,21 +4805,11 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
 
                 case FeatureCode.XSLT_VERSION:
-                    int v = 0;
-                    if ("1.0".equals(value)) {
-                        v = 10;
-                    } else if ("2.0".equals(value)) {
-                        v = 20;
-                    } else if ("2.1".equals(value)) {
-                        v = 30;
-                    } else if ("3.0".equals(value)) {
-                        v = 30;
-                    } else if ("0.0".equals(value)) {
-                        v = 0;
-                    } else {
-                        throw new IllegalArgumentException("XSLT version must be 0.0, 1.0, 2.0, or 3.0");
+                    if (!"3.0".equals(value)) {
+                        makeErrorReporter().report(
+                                new XmlProcessingIncident("XSLT version ignored: only \"3.0\" is recognized").asWarning());
                     }
-                    getDefaultXsltCompilerInfo().setXsltVersion(v);
+                    //getDefaultXsltCompilerInfo().setXsltVersion(v);
                     break;
 
                 default:
@@ -5032,7 +4900,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * false: no error is thrown.
      */
 
-    public boolean getBooleanProperty(Feature feature) {
+    public boolean getBooleanProperty(Feature<?> feature) {
         return enabledProperties.contains(feature.code);
     }
 
@@ -5094,6 +4962,7 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
 
+
     static {
         booleanFeatures.add(Feature.ALLOW_EXTERNAL_FUNCTIONS);
         booleanFeatures.add(Feature.ALLOW_MULTITHREADING);
@@ -5128,6 +4997,8 @@ public class Configuration implements SourceResolver, NotationSet {
         booleanFeatures.add(Feature.USE_PI_DISABLE_OUTPUT_ESCAPING);
         booleanFeatures.add(Feature.USE_TYPED_VALUE_CACHE);
         booleanFeatures.add(Feature.XQUERY_MULTIPLE_MODULE_IMPORTS);
+        booleanFeatures.add(Feature.RETAIN_NODE_FOR_DIAGNOSTICS);
+        booleanFeatures.add(Feature.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS);
     }
 
 
@@ -5153,7 +5024,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /**
      * Get a property of the configuration
-     *
+     * @param <T> the type of value returned for this particular feature
      * @param feature the required property. See the class {@link Feature} for
      *                constants representing the properties that can be requested.
      * @return the value of the property. Note that boolean values are returned as a Boolean,
@@ -5170,17 +5041,18 @@ public class Configuration implements SourceResolver, NotationSet {
         }
         switch (feature.code) {
 
+            case FeatureCode.ALLOWED_PROTOCOLS:
+                if (allowedUriTest instanceof ProtocolRestricter) {
+                    return (T)allowedUriTest.toString();
+                } else {
+                    return (T)"all";
+                }
+
             case FeatureCode.COLLATION_URI_RESOLVER:
                 return (T) getCollationURIResolver();
 
             case FeatureCode.COLLATION_URI_RESOLVER_CLASS:
                 return (T) getCollationURIResolver().getClass().getName();
-
-            case FeatureCode.COLLECTION_URI_RESOLVER:
-                return (T) getCollectionURIResolver();
-
-            case FeatureCode.COLLECTION_URI_RESOLVER_CLASS:
-                return (T) getCollectionURIResolver().getClass().getName();
 
             case FeatureCode.CONFIGURATION:
                 return (T)this;
@@ -5204,7 +5076,8 @@ public class Configuration implements SourceResolver, NotationSet {
                 return (T) Boolean.valueOf(defaultParseOptions.getDTDValidationMode() == Validation.LAX);
 
             case FeatureCode.ERROR_LISTENER_CLASS:
-                return (T) getErrorListener().getClass().getName();
+                // Obsolete
+                return (T) null;
 
             case FeatureCode.ENTITY_RESOLVER_CLASS:
                 EntityResolver er = defaultParseOptions.getEntityResolver();
@@ -5251,19 +5124,10 @@ public class Configuration implements SourceResolver, NotationSet {
                 return (T) Boolean.valueOf(getSystemURIResolver().queryParametersAreRecognized());
 
             case FeatureCode.RECOVERY_POLICY:
-                return (T) Integer.valueOf(getRecoveryPolicy());
+                return (T) Integer.valueOf(0);
 
             case FeatureCode.RECOVERY_POLICY_NAME:
-                switch (getRecoveryPolicy()) {
-                    case RECOVER_SILENTLY:
-                        return (T) "recoverSilently";
-                    case RECOVER_WITH_WARNINGS:
-                        return (T) "recoverWithWarnings";
-                    case DO_NOT_RECOVER:
-                        return (T) "doNotRecover";
-                    default:
-                        throw new IllegalStateException();
-                }
+                return (T) "recoverWithWarnings";
 
             case FeatureCode.REGEX_BACKTRACKING_LIMIT:
                 return (T) Integer.valueOf(regexBacktrackingLimit);
@@ -5341,7 +5205,7 @@ public class Configuration implements SourceResolver, NotationSet {
                 return (T) Boolean.valueOf(isValidationWarnings());
 
             case FeatureCode.VERSION_WARNING:
-                return (T) Boolean.valueOf(isVersionWarning());
+                return (T) Boolean.valueOf(false);
 
             case FeatureCode.XINCLUDE:
                 return (T) Boolean.valueOf(isXIncludeAware());
@@ -5433,7 +5297,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return true if the option is switched on
      */
 
-    public boolean isGenerateByteCode(int hostLanguage) {
+    public boolean isGenerateByteCode(HostLanguage hostLanguage) {
         return false;
     }
 
@@ -5447,7 +5311,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param hostLanguage one of XSLT or XQUERY
      * @return true if the option is switched on
      */
-    public boolean isDeferredByteCode(int hostLanguage) {
+    public boolean isDeferredByteCode(HostLanguage hostLanguage) {
         return false;
     }
 
@@ -5472,14 +5336,31 @@ public class Configuration implements SourceResolver, NotationSet {
         }
     }
 
+    /**
+     * Create a package loader, for reloading SEF files, appropriate to the Saxon edition being used
+     * @return a package loader
+     */
+
     public IPackageLoader makePackageLoader() {
         return new PackageLoaderHE(this);
     }
 
+    /**
+     * Register a report generator for reporting invalidities detected in the course
+     * of schema validation
+     * @return a report generator.
+     * @throws UnsupportedOperationException (always) in Saxon-HE
+     */
+
     public InvalidityReportGenerator createValidityReporter() {
-        throw new UnsupportedOperationException("Loading compiled packages requires Saxon-EE (even when no license is needed)");
+        throw new UnsupportedOperationException("Schema validation requires Saxon-EE");
     }
 
+    /**
+     * Get the threshold for generating byte code
+     * @return a value indicating the number of times an expression should be evaluated intepretatively before
+     * it is optimized by generating bytecode
+     */
     public int getCountDown() {
         return byteCodeThreshold;
     }
@@ -5548,7 +5429,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param hostLanguage eg Configuration.XSLT
      * @return a CompilerService, or null
      */
-    public ICompilerService makeCompilerService(int hostLanguage) {
+    public ICompilerService makeCompilerService(HostLanguage hostLanguage) {
         return null;
     }
 
@@ -5572,7 +5453,8 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Get the associated label for this configuration
+     * Get the associated label for this configuration (typically, the value of the <code>@label</code>
+     * attribute in the configuration file)
      *
      * @return the associated label
      */

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -44,6 +44,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      * @return true iff s1 contains s2
      */
 
+    @Override
     public boolean contains(String s1, String s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
         CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
@@ -60,6 +61,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      * @return true iff s1 ends with s2
      */
 
+    @Override
     public boolean endsWith(String s1, String s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
         CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
@@ -76,6 +78,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      * @return true iff s1 starts with s2
      */
 
+    @Override
     public boolean startsWith(String s1, String s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
         CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
@@ -92,6 +95,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      * @return the part of s1 that follows the first occurrence of s2
      */
 
+    @Override
     public String substringAfter(String s1, String s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
         CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
@@ -114,6 +118,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      * @return the part of s1 that precedes the first occurrence of s2
      */
 
+    @Override
     public String substringBefore(String s1, String s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
         CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
@@ -238,6 +243,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      * @param s
      */
 
+    @Override
     public AtomicMatchKey getCollationKey(CharSequence s) {
         return new CollationMatchKey(getRuleBasedCollator().getCollationKey(s.toString()));
     }

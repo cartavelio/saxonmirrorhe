@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,16 +15,17 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceExtent;
 
+import java.util.EnumSet;
 import java.util.List;
 
 /**
  * Class ListIterator, iterates over a sequence of items held in a Java List
  */
 
-public class ListIterator<T extends Item<?>>
-        implements UnfailingIterator<T>, LastPositionFinder, LookaheadIterator<T>, GroundedIterator<T>, ReversibleIterator<T> {
+public class ListIterator<T extends Item>
+        implements UnfailingIterator, LastPositionFinder, LookaheadIterator, GroundedIterator, ReversibleIterator {
 
-    private int index = 0;
+    private int index;
     protected List<T> list;
 
     /**
@@ -38,11 +39,13 @@ public class ListIterator<T extends Item<?>>
         this.list = list;
     }
 
+    @Override
     public boolean hasNext() {
         return index < list.size();
     }
 
     /*@Nullable*/
+    @Override
     public T next() {
         if (index >= list.size()) {
             return null;
@@ -50,6 +53,7 @@ public class ListIterator<T extends Item<?>>
         return list.get(index++);
     }
 
+    @Override
     public int getLength() {
         return list.size();
     }
@@ -58,14 +62,15 @@ public class ListIterator<T extends Item<?>>
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return GROUNDED | LAST_POSITION_FINDER | LOOKAHEAD;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD, Property.GROUNDED, Property.LAST_POSITION_FINDER);
     }
 
     /**
@@ -76,12 +81,13 @@ public class ListIterator<T extends Item<?>>
      */
 
     /*@Nullable*/
-    public GroundedValue<T> materialize() {
+    @Override
+    public GroundedValue materialize() {
         return SequenceExtent.makeSequenceExtent(list);
     }
 
     @Override
-    public GroundedValue<T> getResidue()  {
+    public GroundedValue getResidue()  {
         List<T> l2 = list;
         if (index != 0) {
             l2 = l2.subList(index, l2.size());
@@ -89,11 +95,12 @@ public class ListIterator<T extends Item<?>>
         return SequenceExtent.makeSequenceExtent(l2);
     }
 
-    public SequenceIterator<T> getReverseIterator() {
+    @Override
+    public SequenceIterator getReverseIterator() {
         return new ReverseListIterator<>(list);
     }
 
-    public static class Atomic extends ListIterator<AtomicValue> implements AtomicIterator {
+    public static class Atomic extends ListIterator<AtomicValue> implements AtomicIterator<AtomicValue> {
         public Atomic (List<AtomicValue> list) {
             super(list);
         }
@@ -104,6 +111,7 @@ public class ListIterator<T extends Item<?>>
             super(list);
         }
 
+        @Override
         public NodeInfo next() {
             return super.next();
         }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -32,12 +32,13 @@ public class ParseIetfDate extends SystemFunction implements Callable {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public ZeroOrOne<DateTimeValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue stringValue = (StringValue) arguments[0].head();
         if (stringValue == null) {
             return ZeroOrOne.empty();
         }
-        return new ZeroOrOne<>(parse(stringValue.getStringValue(), context));
+        return new ZeroOrOne(parse(stringValue.getStringValue(), context));
     }
 
     private String[] dayNames = new String[]{
@@ -253,7 +254,7 @@ public class ParseIetfDate extends SystemFunction implements Callable {
         TimeValue time = timeValue.get(0);
         if (time.getHour() == 24) {
             date = DateValue.tomorrow(date.getYear(), date.getMonth(), date.getDay());
-            time = new TimeValue((byte) 0, (byte) 0, (byte) 0, 0, time.getTimezoneInMinutes());
+            time = new TimeValue((byte) 0, (byte) 0, (byte) 0, 0, time.getTimezoneInMinutes(), "");
         }
         return DateTimeValue.makeDateTimeValue(date, time);
     }
@@ -519,4 +520,4 @@ public class ParseIetfDate extends SystemFunction implements Callable {
 }
 
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

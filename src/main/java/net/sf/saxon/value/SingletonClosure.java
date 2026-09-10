@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -31,7 +31,7 @@ import net.sf.saxon.tree.iter.UnfailingIterator;
  * of these context variables.</p>
  */
 
-public class SingletonClosure extends Closure implements Sequence<Item<?>> {
+public class SingletonClosure extends Closure implements Sequence {
 
     private boolean built = false;
     /*@Nullable*/ private Item value = null;
@@ -56,7 +56,8 @@ public class SingletonClosure extends Closure implements Sequence<Item<?>> {
      */
 
     /*@NotNull*/
-    public UnfailingIterator<Item<?>> iterate() throws XPathException {
+    @Override
+    public UnfailingIterator iterate() throws XPathException {
         return SingletonIterator.makeIterator(asItem());
     }
 
@@ -68,7 +69,7 @@ public class SingletonClosure extends Closure implements Sequence<Item<?>> {
      */
 
     /*@Nullable*/
-    public Item<?> asItem() throws XPathException {
+    public Item asItem() throws XPathException {
         if (!built) {
             value = expression.evaluateItem(savedXPathContext);
             built = true;
@@ -83,7 +84,7 @@ public class SingletonClosure extends Closure implements Sequence<Item<?>> {
      */
 
     /*@Nullable*/
-    public Item<?> itemAt(int n) throws XPathException {
+    public Item itemAt(int n) throws XPathException {
         if (n != 0) {
             return null;
         }
@@ -105,8 +106,9 @@ public class SingletonClosure extends Closure implements Sequence<Item<?>> {
      * @return the corresponding value
      */
 
-    public ZeroOrOne<Item<?>> materialize() throws XPathException {
-        return new ZeroOrOne<>(asItem());
+    @Override
+    public ZeroOrOne materialize() throws XPathException {
+        return new ZeroOrOne(asItem());
     }
 
     @Override

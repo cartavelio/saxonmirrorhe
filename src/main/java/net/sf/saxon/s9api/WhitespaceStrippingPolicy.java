@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,10 +7,7 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.event.FilterFactory;
-import net.sf.saxon.event.ProxyReceiver;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.Stripper;
+import net.sf.saxon.event.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -128,6 +125,7 @@ public class WhitespaceStrippingPolicy {
     /*@NotNull*/
     protected FilterFactory makeStripper() {
         return new FilterFactory() {
+            @Override
             public ProxyReceiver makeFilter(Receiver next) {
                 return new Stripper(stripperRules, next);
             }

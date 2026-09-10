@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -138,7 +138,17 @@ public class DateValue extends GDateValue implements Comparable {
     }
 
     /**
-     * Create a DateValue
+     * Create a DateValue (with no timezone) from a Java LocalDate object
+     * @param localDate the supplied local date
+     * @since 10.0
+     */
+
+    public DateValue(LocalDate localDate) {
+        this(localDate.getYear(), (byte)localDate.getMonthValue(), (byte)localDate.getDayOfMonth());
+    }
+
+    /**
+     * Create a DateValue from a Java GregorianCalendar object
      *
      * @param calendar the absolute date/time value
      * @param tz       The timezone offset from GMT in minutes, positive or negative; or the special
@@ -200,6 +210,7 @@ public class DateValue extends GDateValue implements Comparable {
      * and xs:untypedAtomic. For external objects, the result is AnyAtomicType.
      */
 
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.DATE;
     }
@@ -252,6 +263,7 @@ public class DateValue extends GDateValue implements Comparable {
      * @return ISO 8601 representation.
      */
 
+    @Override
     public CharSequence getPrimitiveStringValue() {
 
         FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
@@ -259,13 +271,13 @@ public class DateValue extends GDateValue implements Comparable {
         if (year <= 0) {
             yr = -yr + (hasNoYearZero ? 1 : 0);           // no year zero in lexical space for XSD 1.0
             if (yr != 0) {
-                sb.append('-');
+                sb.cat('-');
             }
         }
         appendString(sb, yr, yr > 9999 ? (yr + "").length() : 4);
-        sb.append('-');
+        sb.cat('-');
         appendTwoDigits(sb, month);
-        sb.append('-');
+        sb.cat('-');
         appendTwoDigits(sb, day);
 
         if (hasTimezone()) {
@@ -285,6 +297,7 @@ public class DateValue extends GDateValue implements Comparable {
      *         of casting to string according to the XPath 2.0 rules
      */
 
+    @Override
     public CharSequence getCanonicalLexicalRepresentation() {
         DateValue target = this;
         if (hasTimezone()) {
@@ -305,6 +318,7 @@ public class DateValue extends GDateValue implements Comparable {
      */
 
     /*@NotNull*/
+    @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
         DateValue v = new DateValue(year, month, day, getTimezoneInMinutes(), hasNoYearZero);
         v.typeLabel = typeLabel;
@@ -320,6 +334,7 @@ public class DateValue extends GDateValue implements Comparable {
      *         was required to the original value
      */
 
+    @Override
     public DateValue adjustTimezone(int timezone) {
         DateTimeValue dt = toDateTime().adjustTimezone(timezone);
         return new DateValue(dt.getYear(), dt.getMonth(), dt.getDay(), dt.getTimezoneInMinutes(), hasNoYearZero);
@@ -335,6 +350,7 @@ public class DateValue extends GDateValue implements Comparable {
      *          a subclass thereof
      */
 
+    @Override
     public DateValue add(DurationValue duration) throws XPathException {
         if (duration instanceof DayTimeDurationValue) {
             long microseconds = ((DayTimeDurationValue) duration).getLengthInMicroseconds();
@@ -385,6 +401,7 @@ public class DateValue extends GDateValue implements Comparable {
      * @throws XPathException for example if one value is a date and the other is a time
      */
 
+    @Override
     public DayTimeDurationValue subtract(/*@NotNull*/ CalendarValue other, /*@Nullable*/ XPathContext context) throws XPathException {
         if (!(other instanceof DateValue)) {
             XPathException err = new XPathException("First operand of '-' is a date, but the second is not");
@@ -407,6 +424,7 @@ public class DateValue extends GDateValue implements Comparable {
      *                            no timezone is available)
      */
 
+    @Override
     public int compareTo(Object v2) {
         try {
             return compareTo((DateValue) v2, MISSING_TIMEZONE);
@@ -556,6 +574,15 @@ public class DateValue extends GDateValue implements Comparable {
         }
         int inc = firstDay < 5 ? 1 : 0;   // implements the First Thursday rule
         return ((day + firstDay - 2) / 7) + inc;
+    }
+
+    /**
+     * Convert the value to a Java {@link LocalDate} value, dropping any timezone information
+     * @return the corresponding Java {@link LocalDate}; any timezone information is simply discarded
+     */
+
+    public LocalDate toLocalDate() {
+        return LocalDate.of(getYear(), getMonth(), getDay());
     }
 
 }

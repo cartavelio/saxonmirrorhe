@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -75,6 +75,7 @@ public class SystemProperty extends SystemFunction implements Callable {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
+    @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
 
         StringValue name = (StringValue) arguments[0].head();
@@ -154,15 +155,9 @@ public class SystemProperty extends SystemFunction implements Callable {
                                     config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT) &&
                                     !config.getConfigurationProperty(Feature.STREAMABILITY).equals("off"));
                 case "supports-dynamic-evaluation":
-                    return yesOrNo(
-                            !"JS".equals(edition) &&
-                                    config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION) &&
-                                    !config.getBooleanProperty(Feature.DISABLE_XSL_EVALUATE));
+                    return yesOrNo(!config.getBooleanProperty(Feature.DISABLE_XSL_EVALUATE));
                 case "supports-higher-order-functions":
-                    return yesOrNo(
-                            !"JS".equals(edition) &&
-                                    !"HE".equals(edition) &&
-                                    config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION));
+                    return "yes";
                 case "xpath-version":
                     return "3.1";
                 case "xsd-version":

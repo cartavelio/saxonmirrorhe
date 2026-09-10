@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,6 +10,8 @@ package net.sf.saxon.expr.flwor;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.trans.XPathException;
+
+import java.util.Collections;
 
 /**
  * This class represents the tuple stream delivered as the output of a trace clause in a
@@ -43,7 +45,7 @@ public class TraceClausePull extends TuplePull {
         if (controller.isTracing()) {
             ClauseInfo baseInfo = new ClauseInfo(baseClause);
             baseInfo.setNamespaceResolver(traceClause.getNamespaceResolver());
-            controller.getTraceListener().enter(baseInfo, context);
+            controller.getTraceListener().enter(baseInfo, Collections.emptyMap(), context);
             boolean b = base.nextTuple(context);
             controller.getTraceListener().leave(baseInfo);
             return b;

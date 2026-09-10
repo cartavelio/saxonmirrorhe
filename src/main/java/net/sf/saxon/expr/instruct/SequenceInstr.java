@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,11 +7,11 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -72,6 +72,7 @@ public class SequenceInstr extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
         return this;
@@ -93,6 +94,7 @@ public class SequenceInstr extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().optimize(visitor, contextInfo);
         return this;
@@ -100,6 +102,7 @@ public class SequenceInstr extends UnaryExpression {
 
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         return new SequenceInstr(getBaseExpression().copy(rebindings));
     }
@@ -132,13 +135,15 @@ public class SequenceInstr extends UnaryExpression {
     /**
      * Process the instruction, without returning any tail calls
      *
+     *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
      *                the current variables, etc.
      * @throws XPathException if a dynamic error occurs
      */
     @Override
-    public void process(XPathContext context) throws XPathException {
-        getBaseExpression().process(context);
+    public void process(Outputter output, XPathContext context) throws XPathException {
+        getBaseExpression().process(output, context);
     }
 
     /**
@@ -155,12 +160,13 @@ public class SequenceInstr extends UnaryExpression {
      *                                           expression
      */
     @Override
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         return getBaseExpression().iterate(context);
     }
 
 
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         getBaseExpression().export(out);
     }

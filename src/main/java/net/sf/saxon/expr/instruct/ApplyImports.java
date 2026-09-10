@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
@@ -34,6 +35,7 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
     /**
      * Get the name of this instruction for diagnostic and tracing purposes
      */
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_APPLY_IMPORTS;
     }
@@ -46,6 +48,7 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ApplyImports ai2 = new ApplyImports();
         ai2.setActualParams(WithParam.copy(ai2, getActualParams(), rebindings));
@@ -55,7 +58,8 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
     }
 
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
 
         Controller controller = context.getController();
         assert controller != null;
@@ -84,7 +88,7 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
         Mode mode = modeComponent.getActor();
         Rule rule = mode.getRule(currentItem, min, max, context);
         if (rule == null) {             // use the default action for the node
-            mode.getBuiltInRuleSet().process(currentItem, params, tunnels, context, getLocation());
+            mode.getBuiltInRuleSet().process(currentItem, params, tunnels, output, context, getLocation());
         } else {
             XPathContextMajor c2 = context.newContext();
             TemplateRule nh = (TemplateRule) rule.getAction();
@@ -97,7 +101,7 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
             c2.setCurrentTemplateRule(rule);
             c2.setCurrentComponent(modeComponent);
             c2.setCurrentMergeGroupIterator(null);
-            nh.apply(c2);
+            nh.apply(output, c2);
         }
         return null;
         // We never treat apply-imports as a tail call, though we could
@@ -108,6 +112,7 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("applyImports", this);
         out.emitAttribute("flags", "i");  // used to mean "allow any item" i.e. non-nodes

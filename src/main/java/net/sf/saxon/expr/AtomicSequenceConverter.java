@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,15 +21,15 @@ import net.sf.saxon.value.StringValue;
 
 
 /**
- * An AtomicSequenceConverter is an expression that performs a cast on each member of
- * a supplied sequence
+ * An AtomicSequenceConverter is an expression that performs a cast (or other supplied conversion)
+ * on each member of a supplied sequence
  */
 
 public class AtomicSequenceConverter extends UnaryExpression {
 
     public static ToStringMappingFunction TO_STRING_MAPPER = new ToStringMappingFunction();
 
-    private PlainType requiredItemType;
+    protected PlainType requiredItemType;
     protected Converter converter;
     private RoleDiagnostic roleDiagnostic; // may be null
 
@@ -79,6 +79,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
             // source type not known statically; create a converter that decides at run-time
             converter = new Converter(rules) {
                 /*@NotNull*/
+                @Override
                 public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
                     Converter converter = rules.getConverter(input.getPrimitiveType(), (AtomicType) requiredItemType);
                     if (converter == null) {
@@ -92,6 +93,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
         return converter;
     }
 
+    @Override
     protected OperandRole getOperandRole() {
         return OperandRole.ATOMIC_SEQUENCE;
     }
@@ -156,6 +158,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
         Expression operand = getBaseExpression().simplify();
         setBaseExpression(operand);
@@ -166,7 +169,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
             Configuration config = getConfiguration();
             allocateConverterStatically(config, true);
             if (converter != null) {
-                GroundedValue<?> val = iterate(new EarlyEvaluationContext(config)).materialize();
+                GroundedValue val = iterate(new EarlyEvaluationContext(config)).materialize();
                 return Literal.makeLiteral(val, operand);
             }
         }
@@ -178,6 +181,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
         Configuration config = visitor.getConfiguration();
@@ -256,6 +260,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      * @return {@link StaticProperty#NO_NODES_NEWLY_CREATED}.
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties() | StaticProperty.NO_NODES_NEWLY_CREATED;
         if (requiredItemType == BuiltInAtomicType.UNTYPED_ATOMIC) {
@@ -280,6 +285,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         AtomicSequenceConverter atomicConverter = new AtomicSequenceConverter(getBaseExpression().copy(rebindings), requiredItemType);
         ExpressionTool.copyLocationInfo(this, atomicConverter);
@@ -293,18 +299,19 @@ public class AtomicSequenceConverter extends UnaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<? extends AtomicValue> iterate(final XPathContext context) throws XPathException {
-        SequenceIterator<?> base = getBaseExpression().iterate(context);
+    @Override
+    public SequenceIterator iterate(final XPathContext context) throws XPathException {
+        SequenceIterator base = getBaseExpression().iterate(context);
         Converter conv = getConverterDynamically(context);
         if (conv == Converter.ToStringConverter.INSTANCE) {
-            return new ItemMappingIterator<>(base, TO_STRING_MAPPER, true);
+            return new ItemMappingIterator(base, TO_STRING_MAPPER, true);
         } else {
             AtomicSequenceMappingFunction mapper = new AtomicSequenceMappingFunction();
             mapper.setConverter(conv);
             if (roleDiagnostic != null) {
                 mapper.setErrorCode(roleDiagnostic.getErrorCode());
             }
-            return new ItemMappingIterator<>((SequenceIterator<? extends AtomicValue>)base, mapper, true);
+            return new ItemMappingIterator(base, mapper, true);
         }
     }
 
@@ -312,7 +319,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      * Mapping function wrapped around a converter
      */
 
-    public static class AtomicSequenceMappingFunction implements ItemMappingFunction<AtomicValue, AtomicValue> {
+    public static class AtomicSequenceMappingFunction implements ItemMappingFunction {
         private Converter converter;
         private String errorCode;
 
@@ -324,8 +331,9 @@ public class AtomicSequenceConverter extends UnaryExpression {
             this.errorCode = code;
         }
 
-        public AtomicValue mapItem(AtomicValue item) throws XPathException {
-            ConversionResult result = converter.convert(item);
+        @Override
+        public AtomicValue mapItem(Item item) throws XPathException {
+            ConversionResult result = converter.convert((AtomicValue)item);
             if (errorCode != null && result instanceof ValidationFailure) {
                 ((ValidationFailure)result).setErrorCode(errorCode);
             }
@@ -338,8 +346,9 @@ public class AtomicSequenceConverter extends UnaryExpression {
      */
 
     public static class ToStringMappingFunction
-            implements ItemMappingFunction<Item<?>, StringValue> {
-        public StringValue mapItem(Item<?> item) {
+            implements ItemMappingFunction {
+        @Override
+        public StringValue mapItem(Item item) {
             return StringValue.makeStringValue(item.getStringValueCS());
         }
     }
@@ -349,6 +358,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      * Evaluate as an Item. This should only be called if the AtomicSequenceConverter has cardinality zero-or-one
      */
 
+    @Override
     public AtomicValue evaluateItem(XPathContext context) throws XPathException {
         Converter conv = getConverterDynamically(context);
         AtomicValue item = (AtomicValue) getBaseExpression().evaluateItem(context);
@@ -371,6 +381,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return requiredItemType;
     }
@@ -379,6 +390,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      * Determine the static cardinality of the expression
      */
 
+    @Override
     public int computeCardinality() {
         return getBaseExpression().getCardinality();
     }
@@ -425,10 +437,11 @@ public class AtomicSequenceConverter extends UnaryExpression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("convert", this);
-        destination.emitAttribute("from", getBaseExpression().getItemType().toExportString());
-        destination.emitAttribute("to", requiredItemType.toExportString());
+        destination.emitAttribute("from", AlphaCode.fromItemType(getBaseExpression().getItemType()));
+        destination.emitAttribute("to", AlphaCode.fromItemType(requiredItemType));
         if (converter instanceof Converter.PromoterToDouble || converter instanceof Converter.PromoterToFloat) {
             destination.emitAttribute("flags", "p");
         }

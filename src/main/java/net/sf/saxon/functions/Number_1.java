@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,8 +35,8 @@ public class Number_1 extends ScalarSystemFunction {
     }
 
     @Override
-    public ZeroOrOne<NumericValue> resultWhenEmpty() {
-        return new One<>(DoubleValue.NaN);
+    public ZeroOrOne resultWhenEmpty() {
+        return new One(DoubleValue.NaN);
     }
 
     /**
@@ -44,6 +44,7 @@ public class Number_1 extends ScalarSystemFunction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheckCaller(FunctionCall caller, ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) {
         if (caller.getArg(0).isCallOn(Number_1.class)) {
             // happens through repeated rewriting
@@ -109,6 +110,7 @@ public class Number_1 extends ScalarSystemFunction {
         }
     }
 
+    @Override
     public String getCompilerName() {
         return "NumberFnCompiler";
     }

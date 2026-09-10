@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,13 +10,14 @@ package net.sf.saxon.option.axiom;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.GenericTreeInfo;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.Type;
 import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
+
+import java.util.function.Predicate;
 
 /**
  * The document node in an AXIOM tree
@@ -76,6 +77,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      *
      * @return 0 for the first child, 1 for the second child, etc.
      */
+    @Override
     public int getSiblingPosition() {
         return 0;
     }
@@ -91,6 +93,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      * @see net.sf.saxon.type.Type
      * @since 8.4
      */
+    @Override
     public int getNodeKind() {
         return Type.DOCUMENT;
     }
@@ -136,6 +139,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      * containing the node, or null if not known or not applicable.
      * @since 8.4
      */
+    @Override
     public String getSystemId() {
         return getTreeInfo().getSystemId();
     }
@@ -149,6 +153,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      *
      * @param systemId The system identifier as a URL string.
      */
+    @Override
     public void setSystemId(String systemId) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -157,6 +162,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      * Get the NodeInfo object representing the parent of this node
      */
 
+    @Override
     public NodeInfo getParent() {
         return null;
     }
@@ -169,6 +175,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      * @return the local part of the name. For an unnamed node, returns "".
      */
 
+    @Override
     public String getLocalPart() {
         return "";
     }
@@ -180,6 +187,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      * @return The prefix of the name of the node.
      */
 
+    @Override
     public String getPrefix() {
         return "";
     }
@@ -192,6 +200,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      * for a node with an empty prefix, return an empty string.
      */
 
+    @Override
     public String getURI() {
         return "";
     }
@@ -204,6 +213,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      * empty string.
      */
 
+    @Override
     public String getDisplayName() {
         return "";
     }
@@ -216,18 +226,19 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      * then the method returns this node.
      * @since 8.4
      */
+    @Override
     public NodeInfo getRoot() {
         return this;
     }
 
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
-        return EmptyIterator.OfNodes.THE_INSTANCE;
+    protected AxisIterator iterateAttributes(Predicate<? super NodeInfo> nodeTest) {
+        return EmptyIterator.ofNodes();
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
-        return EmptyIterator.OfNodes.THE_INSTANCE;
+    protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
+        return EmptyIterator.ofNodes();
     }
 
     /**
@@ -242,6 +253,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      * produce the same result for generateId())
      */
 
+    @Override
     public int compareOrder(NodeInfo other) {
         return other == this ? 0 : -1;
     }
@@ -260,6 +272,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
             this.docWrapper = docWrapper;
         }
 
+        @Override
         public NodeInfo next() {
             if (currentOMNode == null) {
                 return null;
@@ -288,6 +301,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
             this.docWrapper = docWrapper;
         }
 
+        @Override
         public NodeInfo next() {
             if (currentOMNode == null) {
                 return null;

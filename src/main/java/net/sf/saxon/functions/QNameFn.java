@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -62,6 +62,7 @@ public class QNameFn extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
+    @Override
     public QNameValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return expandedQName(
                 (StringValue) arguments[0].head(),
@@ -69,6 +70,7 @@ public class QNameFn extends SystemFunction {
         );
     }
 
+    @Override
     public String getCompilerName() {
         return "QNameFnCompiler";
     }

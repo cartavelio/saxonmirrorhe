@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2013 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -33,6 +33,8 @@ public final class MultipleNodeKindTest extends NodeTest {
     public final static MultipleNodeKindTest LEAF =
             new MultipleNodeKindTest(UType.TEXT.union(UType.COMMENT).union(UType.PI).union(UType.NAMESPACE).union(UType.ATTRIBUTE));
 
+    public final static MultipleNodeKindTest CHILD_NODE =
+            new MultipleNodeKindTest(UType.ELEMENT.union(UType.TEXT).union(UType.COMMENT).union(UType.PI));
 
     UType uType;
     int nodeKindMask;
@@ -68,6 +70,7 @@ public final class MultipleNodeKindTest extends NodeTest {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return uType;
     }
@@ -92,6 +95,7 @@ public final class MultipleNodeKindTest extends NodeTest {
         return (nodeKindMask & (1<<nodeKind)) != 0;
     }
 
+    @Override
     public IntPredicate getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         return nodeNr -> {
@@ -111,7 +115,8 @@ public final class MultipleNodeKindTest extends NodeTest {
      * @param node the node to be matched
      */
 
-    public boolean matchesNode(NodeInfo node) {
+    @Override
+    public boolean test(NodeInfo node) {
         int nodeKind = node.getNodeKind();
         return (nodeKindMask & (1<<nodeKind)) != 0;
     }
@@ -122,6 +127,7 @@ public final class MultipleNodeKindTest extends NodeTest {
      * for a template with no explicit priority attribute.
      */
 
+    @Override
     public double getDefaultPriority() {
         return -0.5;
     }
@@ -134,6 +140,7 @@ public final class MultipleNodeKindTest extends NodeTest {
         return fsb.toString();
     }
 
+    @Override
     public String toExportString() {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
         LinkedList<PrimitiveUType> types = new LinkedList<>(uType.decompose());
@@ -145,11 +152,11 @@ public final class MultipleNodeKindTest extends NodeTest {
         if (list.size() == 1) {
             fsb.append(list.get(0).toItemType().toString());
         } else {
-            fsb.append('(');
+            fsb.cat('(');
             fsb.append(list.removeFirst().toItemType().toString());
-            fsb.append('|');
+            fsb.cat('|');
             format(list, fsb, show);
-            fsb.append(')');
+            fsb.cat(')');
         }
     }
 
@@ -164,55 +171,6 @@ public final class MultipleNodeKindTest extends NodeTest {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof MultipleNodeKindTest && uType.equals(((MultipleNodeKindTest)obj).uType);
-    }
-
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @param knownToBe An item type that the supplied item is known to conform to; the generated code
-     *                  can assume that the item is an instance of this type.
-     * @param targetVersion The version of Saxon-JS for which code is being generated. Currently either 1 or 2.
-
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) {
-        FastStringBuffer fsb = new FastStringBuffer(256);
-        fsb.append("return SaxonJS.U.isNode(item) && (");
-        String or = "";
-        UType u = uType;
-        if (UType.DOCUMENT.overlaps(u)) {
-            fsb.append(or + "item.nodeType===9||item.nodeType===11");
-            or = "||";
-        }
-        if (UType.ELEMENT.overlaps(u)) {
-            fsb.append(or + "item.nodeType===1");
-            or = "||";
-        }
-        if (UType.ATTRIBUTE.overlaps(u)) {
-            fsb.append(or + "item.nodeType===2");
-            or = "||";
-        }
-        if (UType.TEXT.overlaps(u)) {
-            fsb.append(or + "item.nodeType===3");
-            or = "||";
-        }
-        if (UType.COMMENT.overlaps(u)) {
-            fsb.append(or + "item.nodeType===8");
-            or = "||";
-        }
-        if (UType.PI.overlaps(u)) {
-            fsb.append(or + "item.nodeType===7");
-            or = "||";
-        }
-        if (UType.NAMESPACE.overlaps(u)) {
-            fsb.append(or + "item.nodeType===13");
-            or = "||";
-        }
-        fsb.append(");");
-        return fsb.toString().replace("false||", "");
     }
 
 

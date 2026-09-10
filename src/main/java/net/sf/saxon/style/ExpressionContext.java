@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@ package net.sf.saxon.style;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
@@ -21,6 +21,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -35,12 +36,11 @@ import java.util.Set;
  * in the stylesheet.
  */
 
-public class ExpressionContext implements XSLTStaticContext {
+public class ExpressionContext implements StaticContext {
 
     private StyleElement element;
     private StructuredQName attributeName;
     private Location containingLocation = null;
-    private NamespaceResolver namespaceResolver = null;
     private RetainedStaticContext retainedStaticContext = null;
 
 
@@ -61,6 +61,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * Get the system configuration
      */
 
+    @Override
     public Configuration getConfiguration() {
         return element.getConfiguration();
     }
@@ -70,6 +71,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * @return the containing XSLT package
      */
 
+    @Override
     public StylesheetPackage getPackageData() {
         return element.getPackageData();
     }
@@ -88,6 +90,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * Construct a dynamic context for early evaluation of constant subexpressions
      */
 
+    @Override
     public XPathContext makeEarlyEvaluationContext() {
         return new EarlyEvaluationContext(getConfiguration());
     }
@@ -100,6 +103,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * @return a RetainedStaticContext object: either a newly created one, or one that is
      * reused from a previous invocation.
      */
+    @Override
     public RetainedStaticContext makeRetainedStaticContext() {
         if (retainedStaticContext == null) {
             if (element.changesRetainedStaticContext() || !(element.getParent() instanceof StyleElement)) {
@@ -118,6 +122,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * attribute holding the XPath expression in question.
      */
 
+    @Override
     public Location getContainingLocation() {
         if (containingLocation == null) {
             if (attributeName == null) {
@@ -133,14 +138,16 @@ public class ExpressionContext implements XSLTStaticContext {
      * Issue a compile-time warning
      */
 
+    @Override
     public void issueWarning(String s, Location locator) {
-        element.issueWarning(new XPathException(s, SaxonErrorCode.SXWN9000, locator));
+        element.compileWarning(s, SaxonErrorCode.SXWN9000, locator);
     }
 
     /**
      * Get the System ID of the entity containing the expression (used for diagnostics)
      */
 
+    @Override
     public String getSystemId() {
         return element.getSystemId();
     }
@@ -151,6 +158,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * Used by the document() function.
      */
 
+    @Override
     public String getStaticBaseURI() {
         return element.getBaseURI();
     }
@@ -162,11 +170,9 @@ public class ExpressionContext implements XSLTStaticContext {
      */
 
 
+    @Override
     public NamespaceResolver getNamespaceResolver() {
-        if (namespaceResolver == null) {
-            namespaceResolver = element.makeNamespaceContext();
-        }
-        return namespaceResolver;
+        return element.getAllNamespaces();
     }
 
     /**
@@ -177,6 +183,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * @since 9.3
      */
 
+    @Override
     public ItemType getRequiredContextItemType() {
         return AnyItemType.getInstance();
     }
@@ -189,6 +196,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * formats are not supported in this environment.
      */
 
+    @Override
     public DecimalFormatManager getDecimalFormatManager() {
         return element.getCompilation().getPrincipalStylesheetModule().getDecimalFormatManager();
     }
@@ -214,6 +222,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * @throws XPathException if the variable has not been declared
      */
 
+    @Override
     public Expression bindVariable(StructuredQName qName) throws XPathException {
         SourceBinding sourceBinding = element.bindVariable(qName);
         if (sourceBinding == null) {
@@ -262,13 +271,13 @@ public class ExpressionContext implements XSLTStaticContext {
         }
 
         VariableReference var;
-        if (sourceBinding.hasProperty(SourceBinding.IMPLICITLY_DECLARED)) {
+        if (sourceBinding.hasProperty(SourceBinding.BindingProperty.IMPLICITLY_DECLARED)) {
             // Used for the $value variable in xsl:accumulator-rule
             SuppliedParameterReference supRef = new SuppliedParameterReference(0);
             supRef.setSuppliedType(sourceBinding.getDeclaredType());
             return supRef;
         }
-        if (sourceBinding.hasProperty(SourceBinding.GLOBAL)) {
+        if (sourceBinding.hasProperty(SourceBinding.BindingProperty.GLOBAL)) {
             var = new GlobalVariableReference(qName);
             //SourceBinding binding = ((XSLGlobalVariable) sourceBinding.getSourceElement()).sourceBinding;
             GlobalVariable compiledVar = ((XSLGlobalVariable) sourceBinding.getSourceElement()).getCompiledVariable();
@@ -292,6 +301,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * context
      */
 
+    @Override
     public FunctionLibrary getFunctionLibrary() {
         FunctionLibrary lib = element.getContainingPackage().getFunctionLibrary();
         StyleElement containingOverride = element.findAncestorElement(StandardNames.XSL_OVERRIDE);
@@ -306,32 +316,10 @@ public class ExpressionContext implements XSLTStaticContext {
     }
 
     /**
-     * Determine if an extension element is available
-     *
-     * @throws XPathException if the name is invalid or the prefix is not declared
-     */
-
-    public boolean isElementAvailable(String qname) throws XPathException {
-        try {
-            String[] parts = NameChecker.getQNameParts(qname);
-            String uri;
-            if (parts[0].isEmpty()) {
-                uri = getDefaultElementNamespace();
-            } else {
-                uri = element.getURIForPrefix(parts[0], false);
-            }
-            return element.getCompilation().getStyleNodeFactory(true).isElementAvailable(uri, parts[1], true);
-        } catch (QNameException e) {
-            XPathException err = new XPathException("Invalid element name. " + e.getMessage());
-            err.setErrorCode("XTDE1440");
-            throw err;
-        }
-    }
-
-    /**
      * Get the default collation. Return null if no default collation has been defined
      */
 
+    @Override
     public String getDefaultCollationName() {
         return element.getDefaultCollationName();
     }
@@ -341,6 +329,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * Return NamespaceConstant.NULL for the non-namespace
      */
 
+    @Override
     public String getDefaultElementNamespace() {
         return element.getDefaultXPathNamespace();
     }
@@ -349,6 +338,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * Get the default function namespace
      */
 
+    @Override
     public String getDefaultFunctionNamespace() {
         return NamespaceConstant.FN;
     }
@@ -357,6 +347,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * Determine whether Backwards Compatible Mode is used
      */
 
+    @Override
     public boolean isInBackwardsCompatibleMode() {
         return element.xPath10ModeIsEnabled();
     }
@@ -370,6 +361,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * @since 9.7
      */
 
+    @Override
     public int getXPathVersion() {
         return getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
     }
@@ -381,6 +373,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * @return true if a schema for this namespace has been imported
      */
 
+    @Override
     public boolean isImportedSchema(String namespace) {
         //if (Configuration.USE_PACKAGE_BINDING) {
         return element.getPrincipalStylesheetModule().isImportedSchema(namespace);
@@ -395,6 +388,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * @return a Set, the set of URIs representing the names of imported schemas
      */
 
+    @Override
     public Set<String> getImportedSchemaNamespaces() {
         return element.getPrincipalStylesheetModule().getImportedSchemaTable();
     }
@@ -406,6 +400,7 @@ public class ExpressionContext implements XSLTStaticContext {
      * on key() used in XSLT, and system-generated calls on key() which may
      * also appear in XQuery and XPath
      */
+    @Override
     public KeyManager getKeyManager() {
         return element.getCompilation().getPrincipalStylesheetModule().getKeyManager();
     }
@@ -433,6 +428,17 @@ public class ExpressionContext implements XSLTStaticContext {
         return getPackageData().obtainTypeAliasManager().getItemType(typeName);
     }
 
-
+    /**
+     * Get the matching policy for unprefixed element names in axis steps. This is a Saxon extension.
+     * The value can be any of {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE} (the default),
+     * which uses the value of {@link #getDefaultElementNamespace()}, or {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE_OR_NONE},
+     * which matches both the namespace given in {@link #getDefaultElementNamespace()} and the null namespace,
+     * or {@link UnprefixedElementMatchingPolicy#ANY_NAMESPACE}, which matches any namespace (that is, it
+     * matches by local name only).
+     */
+    @Override
+    public UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
+        return element.getCompilation().getCompilerInfo().getUnprefixedElementMatchingPolicy();
+    }
 }
 

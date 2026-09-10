@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -41,6 +41,7 @@ public abstract class SuperId extends SystemFunction {
      * @param arguments the actual arguments to the call
      */
 
+    @Override
     public int getSpecialProperties(Expression[] arguments) {
         int prop = StaticProperty.ORDERED_NODESET |
                 StaticProperty.SINGLE_DOCUMENT_NODESET |
@@ -63,13 +64,13 @@ public abstract class SuperId extends SystemFunction {
      * @throws XPathException if an error occurs
      */
 
-    public static SequenceIterator<?> getIdSingle(TreeInfo doc, String idrefs, int operation) throws XPathException {
+    public static SequenceIterator getIdSingle(TreeInfo doc, String idrefs, int operation) throws XPathException {
         if (Whitespace.containsWhitespace(idrefs)) {
             Whitespace.Tokenizer tokens = new Whitespace.Tokenizer(idrefs);
             IdMappingFunction map = new IdMappingFunction();
             map.document = doc;
             map.operation = operation;
-            SequenceIterator result = new MappingIterator<>(tokens, map);
+            SequenceIterator result = new MappingIterator(tokens, map);
             return new DocumentOrderIterator(result, LocalOrderComparer.getInstance());
         } else {
             return SingletonIterator.makeIterator(doc.selectID(idrefs, operation == ELEMENT_WITH_ID));
@@ -89,11 +90,11 @@ public abstract class SuperId extends SystemFunction {
      */
 
     public static SequenceIterator getIdMultiple(
-        TreeInfo doc, SequenceIterator<?> idrefs, int operation) throws XPathException {
+        TreeInfo doc, SequenceIterator idrefs, int operation) throws XPathException {
         IdMappingFunction map = new IdMappingFunction();
         map.document = doc;
         map.operation = operation;
-        SequenceIterator<?> result = new MappingIterator<>(idrefs, map);
+        SequenceIterator result = new MappingIterator(idrefs, map);
         return new DocumentOrderIterator(result, LocalOrderComparer.getInstance());
     }
 
@@ -106,7 +107,8 @@ public abstract class SuperId extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo start = arguments.length == 1 ? getContextNode(context) : (NodeInfo) arguments[1].head();
         NodeInfo arg1 = start.getRoot();
         if (arg1.getNodeKind() != Type.DOCUMENT) {
@@ -114,17 +116,17 @@ public abstract class SuperId extends SystemFunction {
                     " the tree being searched must be one whose root is a document node", "FODC0001", context);
         }
         TreeInfo doc = arg1.getTreeInfo();
-        SequenceIterator<?> result;
+        SequenceIterator result;
         if (arguments[0] instanceof AtomicValue) {
             result = getIdSingle(doc, ((AtomicValue)arguments[0]).getStringValue(), getOp());
         } else {
-            SequenceIterator<?> idrefs = arguments[0].iterate();
+            SequenceIterator idrefs = arguments[0].iterate();
             result = getIdMultiple(doc, idrefs, getOp());
         }
         return SequenceTool.toLazySequence(result);
     }
 
-    private static class IdMappingFunction implements MappingFunction<Item<?>, Item<?>> {
+    private static class IdMappingFunction implements MappingFunction {
 
         public TreeInfo document;
         private int operation;
@@ -134,7 +136,8 @@ public abstract class SuperId extends SystemFunction {
          * (implements the MappingFunction interface)
          */
 
-        public SequenceIterator<?> map(Item item) {
+        @Override
+        public SequenceIterator map(Item item) {
 
             String idrefs = Whitespace.trim(item.getStringValueCS());
 
@@ -146,7 +149,7 @@ public abstract class SuperId extends SystemFunction {
                 IdMappingFunction submap = new IdMappingFunction();
                 submap.document = document;
                 submap.operation = operation;
-                return new MappingIterator<>(tokens, submap);
+                return new MappingIterator(tokens, submap);
 
             } else {
                 return SingletonIterator.makeIterator(document.selectID(idrefs, operation == ELEMENT_WITH_ID));

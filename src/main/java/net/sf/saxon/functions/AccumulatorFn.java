@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -30,10 +30,9 @@ public abstract class AccumulatorFn extends SystemFunction {
     public abstract Phase getPhase();
 
 
-    private Sequence<?> getAccumulatorValue(String name, Phase phase, XPathContext context) throws XPathException {
+    private Sequence getAccumulatorValue(String name, Phase phase, XPathContext context) throws XPathException {
         AccumulatorRegistry registry = getRetainedStaticContext().getPackageData().getAccumulatorRegistry();
         Accumulator accumulator = getAccumulator(name, registry);
-
         Item node = context.getContextItem();
         if (node == null) {
             throw new XPathException("No context item for evaluation of accumulator function", "XTDE3350", context);
@@ -46,7 +45,7 @@ public abstract class AccumulatorFn extends SystemFunction {
             throw new XPathException("Context item for evaluation of accumulator function must not be an attribute or namespace node", "XTTE3360", context);
         }
 
-        Sequence<?> streamedAccVal = registry.getStreamingAccumulatorValue((NodeInfo) node, accumulator, phase);
+        Sequence streamedAccVal = registry.getStreamingAccumulatorValue((NodeInfo) node, accumulator, phase);
         if (streamedAccVal != null) {
             return streamedAccVal;
         }
@@ -63,7 +62,8 @@ public abstract class AccumulatorFn extends SystemFunction {
 
     /**
      * Get the accumulator, given its name
-     * @param name the name (as written - a lexical EQName)
+     *
+     * @param name     the name (as written - a lexical EQName)
      * @param registry the accumulator registry, or null if there are no accumulators registered
      * @return the accumulator
      * @throws XPathException the the accumulator is not recognised or if the name is invalid
@@ -90,6 +90,7 @@ public abstract class AccumulatorFn extends SystemFunction {
      * @return the best available item type that the function will return
      */
 
+    @Override
     public ItemType getResultItemType(Expression[] args) {
         try {
             if (args[0] instanceof StringLiteral) {
@@ -123,6 +124,7 @@ public abstract class AccumulatorFn extends SystemFunction {
         return super.getCardinality(args);
     }
 
+
     /**
      * Call the Callable.
      *
@@ -144,7 +146,8 @@ public abstract class AccumulatorFn extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         String name = arguments[0].head().getStringValue();
         return getAccumulatorValue(name, getPhase(), context);
     }
@@ -166,6 +169,7 @@ public abstract class AccumulatorFn extends SystemFunction {
             return Phase.AFTER;
         }
 
+        @Override
         public String getStreamerName() {
             return "AccumulatorAfter";
         }

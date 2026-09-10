@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -45,7 +45,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * that the values are normalized, for example it is acceptable to specify months=18. The values of
      * the individual components must all be non-negative.
      * <p>Note: For historic reasons this constructor only supports microsecond precision. To get nanosecond
-     * precision, use the constructor {@link DurationValue#DurationValue(int, int, int, int, int, long, int, AtomicType)}.</p>
+     * precision, use the constructor {@link #DurationValue(int, int, int, int, int, long, int, AtomicType)}.</p>
      *
      * @param positive     true if the duration is positive, false if negative. For a negative duration
      *                     the components are all supplied as positive integers (or zero).
@@ -74,7 +74,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * the individual components must all be non-negative.
      * <p>Note: for historic reasons this constructor was written to expect microseconds rather than nanoseconds.
      * To supply nanoseconds, use the alternative constructor
-     * {@link DurationValue#DurationValue(int, int, int, int, int, long, int, AtomicType)}.</p>
+     * {@link #DurationValue(int, int, int, int, int, long, int, AtomicType)}.</p>
      *
      * @param positive     true if the duration is positive, false if negative. For a negative duration
      *                     the components are all supplied as positive integers (or zero).
@@ -167,6 +167,22 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         negative = someNegative;
         normalizeZeroDuration();
         typeLabel = type;
+    }
+
+    protected static void formatFractionalSeconds(FastStringBuffer sb, int seconds, long nanosecs) {
+        String mss = nanosecs + "";
+        if (seconds == 0) {
+            mss = "0000000000" + mss;
+            mss = mss.substring(mss.length() - 10);
+        }
+        sb.append(mss.substring(0, mss.length() - 9));
+        sb.cat('.');
+        int lastSigDigit = mss.length() - 1;
+        while (mss.charAt(lastSigDigit) == '0') {
+            lastSigDigit--;
+        }
+        sb.append(mss.substring(mss.length() - 9, lastSigDigit + 1));
+        sb.cat('S');
     }
 
 
@@ -397,6 +413,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *                  the value actually conforms to this type.
      */
 
+    @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
         if (negative) {
             return new DurationValue(0, -months, 0, 0, 0, -seconds, -nanoseconds, typeLabel);
@@ -412,6 +429,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * and xs:untypedAtomic. For external objects, the result is AnyAtomicType.
      */
 
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.DURATION;
     }
@@ -551,6 +569,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @return ISO 8601 representation.
      */
 
+    @Override
     public CharSequence getPrimitiveStringValue() {
 
         // Note, Schema does not define a canonical representation. We omit all zero components, unless
@@ -562,7 +581,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
 
         FastStringBuffer sb = new FastStringBuffer(32);
         if (negative) {
-            sb.append('-');
+            sb.cat('-');
         }
         int years = getYears();
         int months = getMonths();
@@ -594,20 +613,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
             if (seconds != 0 && nanoseconds == 0) {
                 sb.append(seconds + "S");
             } else {
-                long ms = (seconds * 1_000_000_000L) + nanoseconds;
-                String mss = ms + "";
-                if (seconds == 0) {
-                    mss = "0000000000" + mss;
-                    mss = mss.substring(mss.length() - 10);
-                }
-                sb.append(mss.substring(0, mss.length() - 9));
-                sb.append('.');
-                int lastSigDigit = mss.length() - 1;
-                while (mss.charAt(lastSigDigit) == '0') {
-                    lastSigDigit--;
-                }
-                sb.append(mss.substring(mss.length() - 9, lastSigDigit + 1));
-                sb.append('S');
+                formatFractionalSeconds(sb, seconds, (seconds * 1_000_000_000L) + nanoseconds);
             }
         }
 
@@ -634,6 +640,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @param component the required component
      */
 
+    @Override
     public AtomicValue getComponent(AccessorFn.Component component) {
         switch (component) {
             case YEAR:
@@ -681,6 +688,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     /*@Nullable*/
+    @Override
     public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
         return ordered ? null : this;
     }
@@ -814,6 +822,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     /*@NotNull*/
+    @Override
     public Comparable getSchemaComparable() {
         return getSchemaComparable(this);
     }
@@ -864,6 +873,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
          *         {@link net.sf.saxon.om.SequenceTool#INDETERMINATE_ORDERING} if there is no defined order
          */
 
+        @Override
         public int compareTo(DurationComparable other) {
             //DurationComparable other = ;
 //            if (o instanceof DurationComparable) {

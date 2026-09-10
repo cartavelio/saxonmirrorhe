@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,6 +11,7 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 
+import java.util.EnumSet;
 import java.util.List;
 
 
@@ -21,13 +22,11 @@ import java.util.List;
  */
 
 
-public class ReverseListIterator<T extends Item<?>> implements UnfailingIterator<T>,
-        ReversibleIterator<T>, LookaheadIterator<T>, LastPositionFinder {
+public class ReverseListIterator<T extends Item> implements UnfailingIterator,
+        ReversibleIterator, LookaheadIterator, LastPositionFinder {
 
-    List<T> items;
-    int index = 0;
-    int start;
-    int end;         // item after the last to be output
+    private final List<T> items;
+    private int index;
 
     /**
      * Create an iterator a slice of an array
@@ -50,11 +49,13 @@ public class ReverseListIterator<T extends Item<?>> implements UnfailingIterator
      * @return true if there are more items in the sequence
      */
 
+    @Override
     public boolean hasNext() {
         return index >= 0;
     }
 
     /*@Nullable*/
+    @Override
     public T next() {
         if (index >= 0) {
             return items.get(index--);
@@ -63,25 +64,24 @@ public class ReverseListIterator<T extends Item<?>> implements UnfailingIterator
         }
     }
 
+    @Override
     public int getLength() {
         return items.size();
-    }
-
-    public void close() {
     }
 
     /**
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return LAST_POSITION_FINDER;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LAST_POSITION_FINDER);
     }
 
     /**
@@ -92,7 +92,8 @@ public class ReverseListIterator<T extends Item<?>> implements UnfailingIterator
      * @return a new ArrayIterator
      */
 
-    public SequenceIterator<T> getReverseIterator() {
+    @Override
+    public SequenceIterator getReverseIterator() {
         return new ListIterator<>(items);
     }
 }

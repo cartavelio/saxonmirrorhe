@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,7 +14,6 @@ import net.sf.saxon.type.SchemaType;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.XMLReader;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import java.util.List;
@@ -150,32 +149,6 @@ public class AugmentedSource implements Source {
 
     public ParseOptions getParseOptions() {
         return options;
-    }
-
-    /**
-     * Set the space-stripping action to be applied to the source document
-     *
-     * @param stripAction one of {@link net.sf.saxon.value.Whitespace#IGNORABLE},
-     *                    {@link net.sf.saxon.value.Whitespace#ALL}, or {@link net.sf.saxon.value.Whitespace#NONE}
-     * @since 8.8
-     * @deprecated since 9.8 - use getParseOptions().setSpaceStrippingRules()
-     */
-
-    public void setStripSpace(int stripAction) {
-        options.setStripSpace(stripAction);
-    }
-
-    /**
-     * Get the space-stripping action to be applied to the source document
-     *
-     * @return one of {@link net.sf.saxon.value.Whitespace#IGNORABLE},
-     *         {@link net.sf.saxon.value.Whitespace#ALL}, or {@link net.sf.saxon.value.Whitespace#NONE}
-     * @since 8.8
-     * @deprecated since 9.8 - use getParseOptions().getSpaceStrippingRules()
-     */
-
-    public int getStripSpace() {
-        return options.getStripSpace();
     }
 
     /**
@@ -414,6 +387,7 @@ public class AugmentedSource implements Source {
      * @since 8.8, changed in 9.7 it no longer modifies the original source object
      */
 
+    @Override
     public void setSystemId(String id) {
         systemID = id;
     }
@@ -426,6 +400,7 @@ public class AugmentedSource implements Source {
      * @since 8.8
      */
 
+    @Override
     public String getSystemId() {
         return systemID != null ? systemID : source.getSystemId();
     }
@@ -493,26 +468,26 @@ public class AugmentedSource implements Source {
     }
 
     /**
-     * Set an ErrorListener to be used when parsing
+     * Set an ErrorReporter to be used when parsing
      *
-     * @param listener the ErrorListener to be used
-     * @since 8.9
+     * @param listener the ErrorReporter to be used
+     * @since 8.9. Changed in 10.0 to use an ErrorReporter rather than ErrorListener
      */
 
-    public void setErrorListener(ErrorListener listener) {
-        options.setErrorListener(listener);
+    public void setErrorReporter(ErrorReporter listener) {
+        options.setErrorReporter(listener);
     }
 
     /**
-     * Get the ErrorListener that will be used when parsing
+     * Get the ErrorReporter that will be used when parsing
      *
-     * @return the ErrorListener, if one has been set using {@link #setErrorListener},
+     * @return the ErrorReporter, if one has been set using {@link #setErrorReporter},
      *         otherwise null.
-     * @since 8.9
+     * @since 8.9. Changed in 10.0 to use an ErrorReporter rather than ErrorListener
      */
 
-    public UnfailingErrorListener getErrorListener() {
-        return options.getErrorListener();
+    public ErrorReporter getErrorReporter() {
+        return options.getErrorReporter();
     }
 
 

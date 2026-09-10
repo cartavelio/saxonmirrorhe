@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -43,6 +43,7 @@ public class Put extends SystemFunction {
              * @param pul     the pending update list to which the results should be written
              */
 
+            @Override
             public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
                 NodeInfo node = (NodeInfo) getArg(0).evaluateItem(context);
                 int kind = node.getNodeKind();
@@ -75,7 +76,8 @@ public class Put extends SystemFunction {
          *          if a dynamic error occurs during the evaluation of the expression
          */
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         throw new XPathException("Dynamic evaluation of fn:put() is not supported");
     }
 

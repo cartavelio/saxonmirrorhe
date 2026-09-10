@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,11 +7,13 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.instruct.ValueOf;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -19,11 +21,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AdjacentTextNodeMergingIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Type;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 
@@ -56,6 +54,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
         }
     }
 
+    @Override
     protected OperandRole getOperandRole() {
         return OperandRole.SAME_FOCUS_ACTION;
     }
@@ -78,7 +77,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
         // This wrapper expression is unnecessary if the base expression cannot return text nodes,
         // or if it can return at most one item
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-        if (th.relationship(getBaseExpression().getItemType(), NodeKindTest.TEXT) == TypeHierarchy.DISJOINT) {
+        if (th.relationship(getBaseExpression().getItemType(), NodeKindTest.TEXT) == Affinity.DISJOINT) {
             Expression base = getBaseExpression();
             base.setParentExpression(getParentExpression());
             return base;
@@ -118,7 +117,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
                         maybeEmpty = true;
                     }
                 } else {
-                    maybetext = th.relationship(action.getItemType(), NodeKindTest.TEXT) != TypeHierarchy.DISJOINT;
+                    maybetext = th.relationship(action.getItemType(), NodeKindTest.TEXT) != Affinity.DISJOINT;
                     maybeEmpty |= maybetext;
                 }
                 if (prevtext && maybetext) {
@@ -178,10 +177,11 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings  variables that need to be rebound
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         AdjacentTextNodeMerger a2 = new AdjacentTextNodeMerger(getBaseExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, a2);
@@ -193,6 +193,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
      * This method indicates which of these methods is prefered.
      */
 
+    @Override
     public int getImplementationMethod() {
         return Expression.PROCESS_METHOD | Expression.ITERATE_METHOD | ITEM_FEED_METHOD | WATCH_METHOD;
     }
@@ -225,43 +226,8 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         return new AdjacentTextNodeMergingIterator(getBaseExpression().iterate(context));
-    }
-
-    /**
-     * Process the instruction, without returning any tail calls
-     *
-     * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
-     */
-
-    public void process(XPathContext context, Location locationId, int options) throws XPathException {
-        Receiver out = context.getReceiver();
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
-        SequenceIterator iter = getBaseExpression().iterate(context);
-        boolean prevText = false;
-        Item item;
-        while ((item = iter.next()) != null) {
-            if (isTextNode(item)) {
-                CharSequence s = item.getStringValueCS();
-                if (s.length() > 0) {
-                    fsb.append(s);
-                    prevText = true;
-                }
-
-            } else {
-                if (prevText) {
-                    out.characters(fsb, locationId, options);
-                }
-                prevText = false;
-                fsb.setLength(0);
-                out.append(item, locationId, options);
-            }
-        }
-        if (prevText) {
-            out.characters(fsb, locationId, options);
-        }
     }
 
 

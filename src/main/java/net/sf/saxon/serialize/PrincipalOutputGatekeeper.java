@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,9 +9,8 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.Destination;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.trans.XPathException;
@@ -49,6 +48,7 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
         this.controller = controller;
     }
 
+    @Override
     public void open() throws XPathException {
         if (closed) {
             String uri = getSystemId().equals(XsltController.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(no URI supplied)" : getSystemId();
@@ -61,6 +61,7 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
         open = true;
     }
 
+    @Override
     public synchronized void startDocument(int properties) throws XPathException {
         if (!open) {
             open();
@@ -69,21 +70,27 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
         nextReceiver.startDocument(properties);
     }
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         useAsPrimary();
-        nextReceiver.startElement(nameCode, typeCode, location, properties);
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
+    @Override
     public synchronized void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         useAsPrimary();
         nextReceiver.characters(chars, locationId, properties);
     }
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         useAsPrimary();
         nextReceiver.processingInstruction(target, data, locationId, properties);
     }
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         useAsPrimary();
         nextReceiver.comment(chars, locationId, properties);
@@ -145,6 +152,7 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
     }
 
 
+    @Override
     public void close() throws XPathException {
         closed = true;
         if (usedAsPrimaryResult) {

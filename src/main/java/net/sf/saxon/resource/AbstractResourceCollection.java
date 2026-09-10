@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,11 +13,11 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.SpaceStrippingRule;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.XMLReader;
 
-import javax.xml.transform.TransformerException;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,6 +40,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
         this.config = config;
     }
 
+    @Override
     public String getCollectionURI() {
         return collectionURI;
     }
@@ -55,6 +56,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
      * {@link FeatureKeys#STABLE_COLLECTION_URI} is set.
      */
 
+    @Override
     public boolean isStable(XPathContext context) {
         if (params == null) {
             return false;
@@ -115,43 +117,28 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
             //        final PipelineConfiguration oldPipe = context.getConfiguration().makePipelineConfiguration();
             //        oldPipe.setController(context.getController());
             //        final PipelineConfiguration newPipe = new PipelineConfiguration(oldPipe);
-            final UnfailingErrorListener oldErrorListener =
-                    controller == null ? new StandardErrorListener() : controller.getErrorListener();
+            final ErrorReporter oldErrorListener =
+                    controller == null ? new StandardErrorReporter() : controller.getErrorReporter();
 
             setupErrorHandlingForCollection(options, onError, oldErrorListener);
         }
         return options;
     }
 
-    public static void setupErrorHandlingForCollection(ParseOptions options, int onError, UnfailingErrorListener oldErrorListener) {
+    public static void setupErrorHandlingForCollection(ParseOptions options, int onError, ErrorReporter oldErrorListener) {
         if (onError == URIQueryParameters.ON_ERROR_IGNORE) {
-            options.setErrorListener(new UnfailingErrorListener() {
-                public void warning(TransformerException exception) {
-                }
-
-                public void error(TransformerException exception) {
-                }
-
-                public void fatalError(TransformerException exception) {
-                }
-            });
+            options.setErrorReporter(error -> {});
         } else if (onError == URIQueryParameters.ON_ERROR_WARNING) {
-            options.setErrorListener(new UnfailingErrorListener() {
-                public void warning(TransformerException exception) {
-                    oldErrorListener.warning(exception);
+            options.setErrorReporter(error -> {
+                if (error.isWarning()) {
+                    oldErrorListener.report(error);
+                } else {
+                    oldErrorListener.report(error.asWarning());
+                    XmlProcessingIncident supp = new XmlProcessingIncident("The document will be excluded from the collection").asWarning();
+                    supp.setLocation(error.getLocation());
+                    oldErrorListener.report(supp);
                 }
-
-                public void error(TransformerException exception) {
-                    oldErrorListener.warning(exception);
-                    XPathException supp = new XPathException("The document will be excluded from the collection");
-                    supp.setLocator(exception.getLocator());
-                    oldErrorListener.warning(supp);
-                }
-
-                public void fatalError(TransformerException exception) {
-                    error(exception);
-                }
-            });
+            } );
         }
     }
 
@@ -191,7 +178,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
 
         public String obtainCharacterContent() throws XPathException {
             if (characterContent != null) {
-                 return characterContent;
+                return characterContent;
             } else if (binaryContent != null && encoding != null) {
                 try {
                     return new String(binaryContent, encoding);
@@ -221,7 +208,11 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
             inputDetails.resourceUri = resourceURI;
             URI uri = new URI(resourceURI);
             if ("file".equals(uri.getScheme())) {
-                inputDetails.contentType = guessContentTypeFromName(resourceURI);
+                if (params != null && params.getContentType() != null) {
+                    inputDetails.contentType = params.getContentType();
+                } else {
+                    inputDetails.contentType = guessContentTypeFromName(resourceURI);
+                }
             } else {
                 URL url = uri.toURL();
                 URLConnection connection = url.openConnection();
@@ -261,7 +252,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
             }
             return inputDetails;
 
-        } catch(URISyntaxException | IOException e){
+        } catch (URISyntaxException | IOException e) {
             throw new XPathException(e);
         }
 
@@ -311,8 +302,8 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
      * making decisions about the type of resource. This method can be overridden in a user-defined
      * subclass.
      *
-     * @param config      The Saxon configuration
-     * @param details     Details of the input.
+     * @param config  The Saxon configuration
+     * @param details Details of the input.
      * @return a newly created Resource representing the content of this entry in the ZIP or JAR file
      */
 
@@ -339,7 +330,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
         }
         if (basicResource instanceof BinaryResource) {
             InputDetails details = new InputDetails();
-            details.binaryContent = ((BinaryResource)basicResource).getData();
+            details.binaryContent = ((BinaryResource) basicResource).getData();
             details.contentType = mediaType;
             details.resourceUri = basicResource.getResourceURI();
             return factory.makeResource(config, details);
@@ -357,6 +348,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
 
     /**
      * Default method to make a resource, given a resource URI
+     *
      * @param resourceURI the resource URI
      * @return the corresponding resource
      */
@@ -381,6 +373,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
      * default (returned by this method if not overridden) is false.
      */
 
+    @Override
     public boolean stripWhitespace(SpaceStrippingRule rules) {
         return false;
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,14 +15,10 @@ import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.functions.CurrentGroupCall;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Type;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -79,6 +75,7 @@ public class VennExpression extends BinaryExpression {
      *         in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         switch (operator) {
             case Token.UNION:
@@ -99,6 +96,7 @@ public class VennExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public final ItemType getItemType() {
         final ItemType t1 = getLhsExpression().getItemType();
         if (operator == Token.UNION) {
@@ -135,6 +133,7 @@ public class VennExpression extends BinaryExpression {
      * Determine the static cardinality of the expression
      */
 
+    @Override
     public final int computeCardinality() {
         final int c1 = getLhsExpression().getCardinality();
         final int c2 = getRhsExpression().getCardinality();
@@ -176,6 +175,7 @@ public class VennExpression extends BinaryExpression {
      * property bit is set, it is true, but if it is unset, the value is unknown.
      */
 
+    @Override
     public int computeSpecialProperties() {
         final int prop0 = getLhsExpression().getSpecialProperties();
         final int prop1 = getRhsExpression().getSpecialProperties();
@@ -274,6 +274,7 @@ public class VennExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, final ContextItemStaticInfo contextInfo) throws XPathException {
 
         Configuration config = visitor.getConfiguration();
@@ -296,7 +297,7 @@ public class VennExpression extends BinaryExpression {
             TypeHierarchy th = config.getTypeHierarchy();
             ItemType t0 = getLhsExpression().getItemType();
             ItemType t1 = getRhsExpression().getItemType();
-            if (th.relationship(t0, t1) == TypeHierarchy.DISJOINT) {
+            if (th.relationship(t0, t1) == Affinity.DISJOINT) {
                 if (operator == Token.INTERSECT) {
                     return Literal.makeEmptySequence();
                 } else {
@@ -330,6 +331,7 @@ public class VennExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         Expression e = super.optimize(visitor, contextItemType);
         if (e != this) {
@@ -508,7 +510,7 @@ public class VennExpression extends BinaryExpression {
     }
 
     private boolean operandsAreDisjoint(TypeHierarchy th) {
-        return th.relationship(getLhsExpression().getItemType(), getRhsExpression().getItemType()) == TypeHierarchy.DISJOINT;
+        return th.relationship(getLhsExpression().getItemType(), getRhsExpression().getItemType()) == Affinity.DISJOINT;
     }
 
     /**
@@ -540,6 +542,7 @@ public class VennExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         VennExpression exp = new VennExpression(getLhsExpression().copy(rebindings), operator, getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
@@ -565,6 +568,7 @@ public class VennExpression extends BinaryExpression {
      * @param arg which argument: 0 for the lhs, 1 for the rhs
      */
 
+    @Override
     protected OperandRole getOperandRole(int arg) {
         return OperandRole.SAME_FOCUS_ACTION;
     }
@@ -596,6 +600,7 @@ public class VennExpression extends BinaryExpression {
         return false;
     }
 
+    @Override
     public int computeHashCode() {
         return getLhsExpression().hashCode() ^ getRhsExpression().hashCode();
     }
@@ -661,11 +666,10 @@ public class VennExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(final XPathContext c) throws XPathException {
-        SequenceIterator<? extends NodeInfo> i1 =
-                (SequenceIterator<? extends NodeInfo>)getLhsExpression().iterate(c);
-        SequenceIterator<? extends NodeInfo> i2 =
-                (SequenceIterator<? extends NodeInfo>)getRhsExpression().iterate(c);
+    @Override
+    public SequenceIterator iterate(final XPathContext c) throws XPathException {
+        SequenceIterator i1 = getLhsExpression().iterate(c);
+        SequenceIterator i2 = getRhsExpression().iterate(c);
         switch (operator) {
             case Token.UNION:
                 return new UnionEnumeration(i1, i2,
@@ -685,6 +689,7 @@ public class VennExpression extends BinaryExpression {
      * is reduced to an OR expression, for efficiency
      */
 
+    @Override
     public boolean effectiveBooleanValue(final XPathContext context) throws XPathException {
         if (operator == Token.UNION) {
             // NOTE: this optimization was probably already done statically

@@ -51,17 +51,8 @@
     XML documents that can be used as input to your query. You don't need to do this: if the query
     loads its source documents using the <code>doc()</code> function then this will be done
     automatically, but doing it yourself gives you more control. A document node at the root of
-    a tree is represented in Saxon by the {@link net.sf.saxon.om.DocumentInfo} interface.
-    The <code>Configuration</code> provides a convenience method, <code>buildDocument()</code>,
-    that allows an instance of <code>DocumentInfo</code> to be constructed. The input parameter to
-    this is defined by the class <code>javax.xml.transform.Source</code>, which is part of the
-    standard Java JAXP API: the <code>Source</code> interface is an umbrella for different kinds of
-    XML document source, including a <code>StreamSource</code> which parses raw XML from a byte
-    or character stream, <code>SAXSource</code> which takes the input from a SAX parser (or an
-    object that is simulating a SAX parser), and <code>DOMSource</code> which provides the input
-    from a DOM. Saxon-PE also provides wrappers for third-party document models, for example a
-    {@link net.sf.saxon.option.jdom.DocumentWrapper} which allows
-    the input to be taken from a JDOM document.</p>
+    a tree is represented in Saxon by the {@link net.sf.saxon.om.TreeInfo} interface.
+    </p>
 
 <p>To execute your compiled query, you need to create a {@link net.sf.saxon.query.DynamicQueryContext} object
     that holds the run-time context information. The main things you can set in the run-time context are:</p>

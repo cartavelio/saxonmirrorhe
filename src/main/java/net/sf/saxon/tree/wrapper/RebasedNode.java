@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -64,6 +64,7 @@ public class RebasedNode extends AbstractVirtualNode implements WrappingFunction
      */
 
     /*@NotNull*/
+    @Override
     public RebasedNode makeWrapper(NodeInfo node, VirtualNode parent) {
         RebasedNode wrapper = new RebasedNode(node, (RebasedNode) parent);
         wrapper.docWrapper = this.docWrapper;
@@ -121,6 +122,7 @@ public class RebasedNode extends AbstractVirtualNode implements WrappingFunction
      *         return true, and the two nodes will produce the same result for generateId())
      */
 
+    @Override
     public int compareOrder(/*@NotNull*/ NodeInfo other) {
         if (other instanceof RebasedNode) {
             return node.compareOrder(((RebasedNode) other).node);
@@ -134,6 +136,7 @@ public class RebasedNode extends AbstractVirtualNode implements WrappingFunction
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo getParent() {
         if (parent == null) {
             NodeInfo realParent = node.getParent();
@@ -152,7 +155,8 @@ public class RebasedNode extends AbstractVirtualNode implements WrappingFunction
      */
 
     /*@Nullable*/
-    public AxisIterator iterateAxis(byte axisNumber) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber) {
         return new WrappingIterator(node.iterateAxis(axisNumber), this, null);
     }
 

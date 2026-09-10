@@ -1,7 +1,7 @@
 package xqjtests;
 
-import junit.framework.TestCase;
 import com.saxonica.xqj.SaxonXQDataSource;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 
 import javax.xml.transform.Transformer;
@@ -14,6 +14,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * Class containing demo testcase.
@@ -21,7 +23,7 @@ import java.util.Properties;
  * @author Hans-Jurgen
  *
  */
-public class RennauChainedQueries extends TestCase {
+public class RennauChainedQueries {
 
 	/**
 	 * Test demonstrating problem with chained queries.
@@ -36,6 +38,7 @@ public class RennauChainedQueries extends TestCase {
      * on class NodeOverNodeInfo.
 	 *
 	 */
+    @Test
 	public void testChainedQueries() {
 		try {
 			String inputDoc =

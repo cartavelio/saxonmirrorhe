@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -70,6 +70,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
 
     /*@NotNull*/
+    @Override
     public VirtualNode makeWrapper(NodeInfo node, VirtualNode parent) {
         TypeStrippedNode wrapper = new TypeStrippedNode(node, (TypeStrippedNode) parent);
         wrapper.docWrapper = this.docWrapper;
@@ -86,6 +87,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
 
     /*@NotNull*/
+    @Override
     public AtomicSequence atomize() throws XPathException {
         return new UntypedAtomicValue(getStringValueCS());
     }
@@ -130,6 +132,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      *         return true, and the two nodes will produce the same result for generateId())
      */
 
+    @Override
     public int compareOrder(/*@NotNull*/ NodeInfo other) {
         if (other instanceof TypeStrippedNode) {
             return node.compareOrder(((TypeStrippedNode) other).node);
@@ -143,6 +146,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo getParent() {
         if (parent == null) {
             NodeInfo realParent = node.getParent();
@@ -161,7 +165,8 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
 
     /*@Nullable*/
-    public AxisIterator iterateAxis(byte axisNumber) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber) {
         return new WrappingIterator(node.iterateAxis(axisNumber), this, null);
     }
 
@@ -170,6 +175,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      * Copy this node to a given outputter (deep copy)
      */
 
+    @Override
     public void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
         node.copy(out, copyOptions & ~CopyOptions.TYPE_ANNOTATIONS, locationId);
     }

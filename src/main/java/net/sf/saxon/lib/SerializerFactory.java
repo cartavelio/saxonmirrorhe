@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -222,6 +222,7 @@ public class SerializerFactory {
             }
             ParseOptions options = new ParseOptions();
             options.setSchemaValidationMode(Validation.LAX);
+            options.setDTDValidationMode(Validation.SKIP);
             TreeInfo doc = config.buildDocumentTree(source);
             SerializationParamsHandler ph = new SerializationParamsHandler();
             ph.setSerializationParams(doc.getRootNode());
@@ -305,7 +306,7 @@ public class SerializerFactory {
                     return customizeAdaptiveSerializer(je, props, characterMapExpander, normalizer);
                 }
                 default: {
-                    if (method.startsWith("{" + NamespaceConstant.SAXON + "}")) {
+                    if (method.startsWith("Q{" + NamespaceConstant.SAXON + "}")) {
                         CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
                         ProxyReceiver normalizer = makeUnicodeNormalizer(pipe, props);
                         target = createSaxonSerializationMethod(
@@ -315,16 +316,12 @@ public class SerializerFactory {
                         }
                     } else {
                         Receiver userReceiver;
-                        if (pipe == null) {
-                            throw new XPathException("Unsupported serialization method " + method);
+                        userReceiver = createUserDefinedOutputMethod(method, props, pipe);
+                        if (userReceiver instanceof Emitter) {
+                            emitter = (Emitter) userReceiver;
+                            target = params.makeSequenceNormalizer(emitter);
                         } else {
-                            userReceiver = createUserDefinedOutputMethod(method, props, pipe);
-                            if (userReceiver instanceof Emitter) {
-                                emitter = (Emitter) userReceiver;
-                                target = params.makeSequenceNormalizer(emitter);
-                            } else {
-                                return params.makeSequenceNormalizer(userReceiver);
-                            }
+                            return params.makeSequenceNormalizer(userReceiver);
                         }
                     }
                 }
@@ -386,8 +383,6 @@ public class SerializerFactory {
                 ((AdaptiveEmitter) result).setOutputProperties(props);
             }
             return (AdaptiveEmitter) result;
-        } else if (result instanceof ComplexContentOutputter) {
-            return (ComplexContentOutputter)result;
         } else if (result instanceof Receiver) {
             Receiver receiver = (Receiver) result;
             receiver.setSystemId(result.getSystemId());
@@ -396,7 +391,7 @@ public class SerializerFactory {
                 return receiver;
                 // TODO: handle item-separator
             } else {
-                return new ComplexContentOutputter(receiver);
+                return new TreeReceiver(receiver);
             }
         } else if (result instanceof SAXResult) {
             ContentHandlerProxy proxy = newContentHandlerProxy();
@@ -476,6 +471,7 @@ public class SerializerFactory {
         if (!"no".equals(props.getProperty(OutputKeys.INDENT))) {
             target = newHTMLIndenter(target, props);
         }
+        target = new NamespaceDifferencer(target, props);
         target = injectUnicodeNormalizer(params, target);
         target = injectCharacterMapExpander(params, target, true);
         String cdataElements = props.getProperty(OutputKeys.CDATA_SECTION_ELEMENTS);
@@ -591,6 +587,7 @@ public class SerializerFactory {
         if (!"no".equals(props.getProperty(OutputKeys.INDENT))) {
             target = newXHTMLIndenter(target, props);
         }
+        target = new NamespaceDifferencer(target, props);
         target = injectUnicodeNormalizer(params, target);
         target = injectCharacterMapExpander(params, target, true);
         String cdataElements = props.getProperty(OutputKeys.CDATA_SECTION_ELEMENTS);
@@ -637,7 +634,7 @@ public class SerializerFactory {
      * Create a serialization pipeline to implement the XML output method. This method is protected
      * so that it can be customized in a user-written SerializerFactory
      *
-     * @param emitter              the emitter at the end of the pipeline (created using the method {@link #newXHTMLEmitter}
+     * @param emitter              the emitter at the end of the pipeline (created using the method {@link #newXMLEmitter}
      * @param params               the serialization properties
      * @return a Receiver acting as the entry point to the serialization pipeline
      * @throws XPathException if a failure occurs
@@ -653,6 +650,7 @@ public class SerializerFactory {
         } else {
             target = emitter;
         }
+        target = new NamespaceDifferencer(target, props);
         if ("1.0".equals(props.getProperty(OutputKeys.VERSION)) &&
                 config.getXMLVersion() == Configuration.XML11) {
             // Check result meets XML 1.0 constraints if configuration allows XML 1.1 input but
@@ -1051,11 +1049,13 @@ public class SerializerFactory {
 
     /**
      * Check that a supplied output property is valid, and normalize the value (specifically in the case of boolean
-     * values where yes|true|1 are normalized to "yes", and no|false|0 are normalized to "no").
+     * values where yes|true|1 are normalized to "yes", and no|false|0 are normalized to "no"). Clark names in the
+     * value (<code>{uri}local</code>) are normalized to EQNames (<code>Q{uri}local</code>)
      *
      * @param key     the name of the property, in Clark format
      * @param value   the value of the property. This may be set to null, in which case no validation takes place.
-     *                The value must be in JAXP format, that is, with lexical QNames expanded to Clark names
+     *                The value must be in JAXP format, that is, with lexical QNames expanded to either EQNames or
+     *                Clark names.
      * @return normalized value of the property, or null if the supplied value is null
      * @throws XPathException if the property name or value is invalid
      */
@@ -1064,6 +1064,12 @@ public class SerializerFactory {
         if (!key.startsWith("{")) {
             switch (key) {
                 case SaxonOutputKeys.ALLOW_DUPLICATE_NAMES:
+                case SaxonOutputKeys.ESCAPE_URI_ATTRIBUTES:
+                case SaxonOutputKeys.INCLUDE_CONTENT_TYPE:
+                case OutputKeys.INDENT:
+                case OutputKeys.OMIT_XML_DECLARATION:
+
+                case SaxonOutputKeys.UNDECLARE_PREFIXES:
                     if (value != null) {
                         value = checkYesOrNo(key, value);
                     }
@@ -1079,8 +1085,10 @@ public class SerializerFactory {
                     }
                     break;
                 case OutputKeys.CDATA_SECTION_ELEMENTS:
+                case SaxonOutputKeys.SUPPRESS_INDENTATION:
+                case SaxonOutputKeys.USE_CHARACTER_MAPS:
                     if (value != null) {
-                        checkListOfClarkNames(key, value);
+                        value = checkListOfEQNames(key, value);
                     }
                     break;
                 case OutputKeys.DOCTYPE_PUBLIC:
@@ -1096,24 +1104,9 @@ public class SerializerFactory {
                 case OutputKeys.ENCODING:
                     // no constraints
                     break;
-                case SaxonOutputKeys.ESCAPE_URI_ATTRIBUTES:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
                 case SaxonOutputKeys.HTML_VERSION:
                     if (value != null) {
                         checkDecimal(key, value);
-                    }
-                    break;
-                case SaxonOutputKeys.INCLUDE_CONTENT_TYPE:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
-                case OutputKeys.INDENT:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
                     }
                     break;
                 case SaxonOutputKeys.ITEM_SEPARATOR:
@@ -1123,7 +1116,7 @@ public class SerializerFactory {
                 case OutputKeys.METHOD:
                 case SaxonOutputKeys.JSON_NODE_OUTPUT_METHOD:
                     if (value != null) {
-                        checkMethod(key, value);
+                        value = checkMethod(key, value);
                     }
                     break;
                 case OutputKeys.MEDIA_TYPE:
@@ -1134,37 +1127,16 @@ public class SerializerFactory {
                         checkNormalizationForm(value);
                     }
                     break;
-                case OutputKeys.OMIT_XML_DECLARATION:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
+                case SaxonOutputKeys.PARAMETER_DOCUMENT:
+                    // no checking
                     break;
                 case OutputKeys.STANDALONE:
                     if (value != null && !value.equals("omit")) {
                         value = checkYesOrNo(key, value);
                     }
                     break;
-                case SaxonOutputKeys.SUPPRESS_INDENTATION:
-                    if (value != null) {
-                        checkListOfClarkNames(key, value);
-                    }
-                    break;
-                case SaxonOutputKeys.UNDECLARE_PREFIXES:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
-                case SaxonOutputKeys.USE_CHARACTER_MAPS:
-                    if (value != null) {
-                        checkListOfClarkNames(key, value);
-                    }
-                    break;
                 case OutputKeys.VERSION:
                     // no constraints
-
-                    break;
-                case SaxonOutputKeys.PARAMETER_DOCUMENT:
-                    // no checking
                     break;
                 default:
                     throw new XPathException("Unknown serialization parameter " + Err.wrap(key), "XQST0109");
@@ -1179,17 +1151,13 @@ public class SerializerFactory {
                     // return
                     break;
                 case SaxonOutputKeys.SUPPLY_SOURCE_LOCATOR:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
                 case SaxonOutputKeys.UNFAILING:
                     if (value != null) {
                         value = checkYesOrNo(key, value);
                     }
                     break;
                 default:
-                    throw new XPathException("Serialization parameter " + Err.wrap(key) + " not available in Saxon-HE", "XQST0109");
+                    throw new XPathException("Serialization parameter " + Err.wrap(key, Err.EQNAME) + " is not available in Saxon-HE", "XQST0109");
             }
         } else {
             //return;
@@ -1207,19 +1175,22 @@ public class SerializerFactory {
         }
     }
 
-    private void checkMethod(String key, String value) throws XPathException {
+    private String checkMethod(String key, String value) throws XPathException {
         if (!"xml".equals(value) && !"html".equals(value) && !"xhtml".equals(value) && !"text".equals(value)) {
             if (!SaxonOutputKeys.JSON_NODE_OUTPUT_METHOD.equals(key) && ("json".equals(value) || "adaptive".equals(value))) {
-                return;
+                return value;
             }
-            if (isValidClarkName(value)) {
+            if (value.startsWith("{")) {
+                value = "Q" + value;
+            }
+            if (isValidEQName(value)) {
                 checkExtensions(value);
             } else {
                 throw new XPathException("Invalid value (" + value + ") for serialization method: " +
-                                                 "must be xml|html|xhtml|text|json|adaptive, or a QName in '{uri}local' form", "SEPM0016");
+                                                 "must be xml|html|xhtml|text|json|adaptive, or a QName in 'Q{uri}local' form", "SEPM0016");
             }
         }
-
+        return value;
     }
 
     private static void checkNormalizationForm(String value) throws XPathException {
@@ -1229,14 +1200,23 @@ public class SerializerFactory {
         }
     }
 
-    private static boolean isValidClarkName(/*@NotNull*/ String value) {
-        if (value.isEmpty() || value.charAt(0) != '{') {
+    private static boolean isValidEQName(String value) {
+        Objects.requireNonNull(value);
+        if (value.isEmpty() || !value.startsWith("Q{")) {
             return false;
         }
-        int closer = value.indexOf('}');
-        return closer >= 1 &&
+        int closer = value.indexOf('}', 2);
+        return closer >= 2 &&
                 closer != value.length() - 1 &&
                 NameChecker.isValidNCName(value.substring(closer + 1));
+    }
+
+    private static boolean isValidClarkName(/*@NotNull*/ String value) {
+        if (value.startsWith("{")) {
+            return isValidEQName("Q" + value);
+        } else {
+            return isValidEQName("Q{}" + value);
+        }
     }
 
     protected static void checkNonNegativeInteger(String key, String value) throws XPathException {
@@ -1257,30 +1237,48 @@ public class SerializerFactory {
         }
     }
 
-    protected static void checkListOfClarkNames(String key, String value) throws XPathException {
+    protected static String checkListOfEQNames(String key, String value) throws XPathException {
         StringTokenizer tok = new StringTokenizer(value, " \t\n\r", false);
+        StringBuilder builder = new StringBuilder();
         while (tok.hasMoreTokens()) {
             String s = tok.nextToken();
-            if (isValidClarkName(s) || NameChecker.isValidNCName(s)) {
-                // ok
+            if (isValidEQName(s) || NameChecker.isValidNCName(s)) {
+                builder.append(s);
+            } else if (isValidClarkName(s)) {
+                if (s.startsWith("{")) {
+                    builder.append("Q").append(s);
+                } else {
+                    builder.append("Q{}").append(s);
+                }
             } else {
                 throw new XPathException("Value of " + Err.wrap(key) +
-                                                 " must be a list of QNames in '{uri}local' notation", "SEPM0016");
+                                                 " must be a list of QNames in 'Q{uri}local' notation", "SEPM0016");
             }
+            builder.append(" ");
         }
+        return builder.toString();
     }
 
-    protected static void checkListOfClarkNamesAllowingStar(String key, String value) throws XPathException {
+    protected static String checkListOfEQNamesAllowingStar(String key, String value) throws XPathException {
+        StringBuilder builder = new StringBuilder();
         StringTokenizer tok = new StringTokenizer(value, " \t\n\r", false);
         while (tok.hasMoreTokens()) {
             String s = tok.nextToken();
-            if ("*".equals(s) || isValidClarkName(s) || NameChecker.isValidNCName(s)) {
-                // ok
+            if ("*".equals(s) || isValidEQName(s) || NameChecker.isValidNCName(s)) {
+                builder.append(s);
+            } else if (isValidClarkName(s)) {
+                if (s.startsWith("{")) {
+                    builder.append("Q").append(s);
+                } else {
+                    builder.append("Q{}").append(s);
+                }
             } else {
                 throw new XPathException("Value of " + Err.wrap(key) +
-                                                 " must be a list of QNames in '{uri}local' notation", "SEPM0016");
+                                                 " must be a list of QNames in 'Q{uri}local' notation", "SEPM0016");
             }
+            builder.append(" ");
         }
+        return builder.toString().trim();
     }
 
     private static Pattern publicIdPattern = Pattern.compile("^[\\s\\r\\na-zA-Z0-9\\-'()+,./:=?;!*#@$_%]*$");
@@ -1340,7 +1338,7 @@ public class SerializerFactory {
     }
 
     protected void checkExtensions(String key /*@Nullable*/) throws XPathException {
-        throw new XPathException("Serialization property " + Err.wrap(key) + " is not available in Saxon-HE");
+        throw new XPathException("Serialization property " + Err.wrap(key, Err.EQNAME) + " is not available in Saxon-HE");
     }
 
     protected Comparator<AtomicValue> getPropertySorter(String sortSpecification) throws XPathException {

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.streams.Step;
@@ -72,17 +72,13 @@ public class XdmFunctionItem extends XdmItem {
      * function, provided a licensed Processor is used.
      * @return the requested function, or null if there is no such function. Note that some functions
      * (those with particular context dependencies) may be unsuitable for dynamic calling.
-     * @throws SaxonApiException if dynamic function calls are not permitted by this Saxon Configuration
+     * @throws SaxonApiException no longer thrown, but retained in the declaration for backwards compatibility
      */
 
     public static XdmFunctionItem getSystemFunction(Processor processor, QName name, int arity) throws SaxonApiException {
-        try {
-            Configuration config = processor.getUnderlyingConfiguration();
-            Function f = config.getSystemFunction(name.getStructuredQName(), arity);
-            return f==null ? null : new XdmFunctionItem(f);
-        } catch (XPathException e) {
-            throw new SaxonApiException(e);
-        }
+        Configuration config = processor.getUnderlyingConfiguration();
+        Function f = config.getSystemFunction(name.getStructuredQName(), arity);
+        return f==null ? null : new XdmFunctionItem(f);
     }
 
     /**
@@ -121,6 +117,7 @@ public class XdmFunctionItem extends XdmItem {
     public Step<XdmItem> asStep(Processor processor) {
         if (getArity() == 1) {
             return new Step<XdmItem>() {
+                @Override
                 public Stream<? extends XdmItem> apply(XdmItem arg) {
                     try {
                         return XdmFunctionItem.this.call(processor, arg).stream();
@@ -152,14 +149,14 @@ public class XdmFunctionItem extends XdmItem {
         try {
             Function fi = (Function) getUnderlyingValue();
             FunctionItemType type = fi.getFunctionItemType();
-            Sequence<?>[] argVals = new Sequence[arguments.length];
+            Sequence[] argVals = new Sequence[arguments.length];
             TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
             for (int i = 0; i < arguments.length; i++) {
                 net.sf.saxon.value.SequenceType required = type.getArgumentTypes()[i];
-                Sequence<?> val = arguments[i].getUnderlyingValue();
+                Sequence val = arguments[i].getUnderlyingValue();
                 if (!required.matches(val, th)) {
                     RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "", i);
-                    val = th.applyFunctionConversionRules(val, required, role, ExplicitLocation.UNKNOWN_LOCATION);
+                    val = th.applyFunctionConversionRules(val, required, role, Loc.NONE);
                 }
                 argVals[i] = val;
             }
@@ -168,16 +165,16 @@ public class XdmFunctionItem extends XdmItem {
             XPathContext context = controller.newXPathContext();
             context = fi.makeNewContext(context, controller);
 
-            Sequence<?> result = fi.call(context, argVals);
+            Sequence result = fi.call(context, argVals);
             if (!fi.isTrustedResultType()) {
                 result = result.materialize();
                 net.sf.saxon.value.SequenceType required = type.getResultType();
                 if (!required.matches(result, th)) {
                     RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
-                    result = th.applyFunctionConversionRules(result.materialize(), required, role, ExplicitLocation.UNKNOWN_LOCATION);
+                    result = th.applyFunctionConversionRules(result.materialize(), required, role, Loc.NONE);
                 }
             }
-            Sequence<?> se = result.iterate().materialize();
+            Sequence se = result.iterate().materialize();
             return XdmValue.wrap(se);
         } catch (XPathException e) {
             throw new SaxonApiException(e);

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,14 +16,14 @@ import net.sf.saxon.expr.instruct.Bindery;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
-import net.sf.saxon.resource.CollectionURIResolverWrapper;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trace.TraceEventMulticaster;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
@@ -38,7 +38,6 @@ import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntHashMap;
 import org.xml.sax.SAXParseException;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.URIResolver;
@@ -50,8 +49,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-
-import static net.sf.saxon.om.SequenceIterator.GROUNDED;
 
 /**
  * The Controller underpins Saxon's implementation of the JAXP Transformer class, and represents
@@ -76,7 +73,6 @@ import static net.sf.saxon.om.SequenceIterator.GROUNDED;
  * to implement the JAXP interface, it has been possible to make it less monolithic, so some of the
  * things it did are now done elsewhere: for example, it no longer handles global parameters</p>
  *
- * @author Michael H. Kay
  * @since 8.4. From 9.6 this class should no longer be considered a public API. In 9.9, the class
  * was split into two: XSLT-specific functionality has been moved into the subclass {@link XsltController}.
  */
@@ -86,7 +82,7 @@ public class Controller implements ContextOriginator {
     private Configuration config;
     protected Executable executable;
 
-    protected Item<?> globalContextItem;
+    protected Item globalContextItem;
     private boolean globalContextItemPreset;
     private Map<PackageData, Bindery> binderies;
     private GlobalParameterSet globalParameters;
@@ -101,7 +97,8 @@ public class Controller implements ContextOriginator {
     protected String principalResultURI;
     private UnparsedTextURIResolver unparsedTextResolver;
     private String defaultCollectionURI;
-    protected UnfailingErrorListener errorListener;
+    private ErrorReporter errorReporter = new StandardErrorReporter();
+    //protected UnfailingErrorListener errorListener;
     private TreeModel treeModel = TreeModel.TINY_TREE;
     private DocumentPool sourceDocumentPool;
     private IntHashMap<Map<Long, KeyIndex>> localIndexes;
@@ -120,9 +117,9 @@ public class Controller implements ContextOriginator {
     public final static String ANONYMOUS_PRINCIPAL_OUTPUT_URI = "dummy:/anonymous/principal/result";
     private StylesheetCache stylesheetCache = null;
 
-    private Function<SequenceIterator<?>, FocusTrackingIterator<?>> focusTrackerFactory = FocusTrackingIterator::new;
+    private Function<SequenceIterator, FocusTrackingIterator> focusTrackerFactory = FocusTrackingIterator::new;
 
-    private Function<SequenceIterator<?>, FocusTrackingIterator<?>> multiThreadedFocusTrackerFactory;
+    private Function<SequenceIterator, FocusTrackingIterator> multiThreadedFocusTrackerFactory;
 
     /**
      * Create a Controller and initialise variables. Note: XSLT applications should
@@ -182,16 +179,8 @@ public class Controller implements ContextOriginator {
         standardURIResolver = config.getSystemURIResolver();
         userURIResolver = config.getURIResolver();
         unparsedTextResolver = config.getUnparsedTextURIResolver();
-        setErrorListener(config.getErrorListener());
         validationMode = config.getSchemaValidationMode();
-        if (errorListener instanceof StandardErrorListener) {
-            // if using a standard error listener, make a fresh one
-            // for each transformation, because it is stateful - and also because the
-            // host language is now known (a Configuration can serve multiple host languages)
-            Logger ps = ((StandardErrorListener) errorListener).getLogger();
-            errorListener = ((StandardErrorListener) errorListener).makeAnother(executable.getHostLanguage());
-            ((StandardErrorListener) errorListener).setLogger(ps);
-        }
+        errorReporter = new StandardErrorReporter();
 
         traceListener = null;
         traceFunctionDestination = config.getLogger();
@@ -251,7 +240,7 @@ public class Controller implements ContextOriginator {
      * even if there is a default defined in the stylesheet or query.
      */
 
-    public Sequence<?> getParameter(StructuredQName name) {
+    public Sequence getParameter(StructuredQName name) {
         return globalParameters.get(name);
     }
 
@@ -265,11 +254,12 @@ public class Controller implements ContextOriginator {
      * {@link #setApplyFunctionConversionRulesToExternalVariables(boolean)}} is set, the supplied
      * value is converted to the required type. Otherwise, the supplied value is checked
      * against the required type.
+     * @throws XPathException if a problem is found with the supplied parameter value
      */
 
-    public GroundedValue<?> getConvertedParameter(StructuredQName name, SequenceType requiredType, XPathContext context)
+    public GroundedValue getConvertedParameter(StructuredQName name, SequenceType requiredType, XPathContext context)
             throws XPathException {
-        GroundedValue<?> val =
+        GroundedValue val =
                 globalParameters.convertParameterValue(name, requiredType, convertParameters, context);
         if (val != null) {
 
@@ -359,21 +349,27 @@ public class Controller implements ContextOriginator {
     /**
      * Allocate a SequenceOutputter for a new output destination.
      *
+     * @return the allocated SequenceOutputter
+     */
+
+    public SequenceCollector allocateSequenceOutputter() {
+        PipelineConfiguration pipe = makePipelineConfiguration();
+        return new SequenceCollector(pipe, 20);
+    }
+
+    /**
+     * Allocate a SequenceCollector for a new output destination.
+     *
      * @param size the estimated size of the output sequence
      * @return SequenceOutputter the allocated SequenceOutputter
      */
 
-    /*@NotNull*/
-    public synchronized SequenceOutputter allocateSequenceOutputter(int size) {
+    public SequenceCollector allocateSequenceOutputter(int size) {
         PipelineConfiguration pipe = makePipelineConfiguration();
-        return new SequenceOutputter(pipe, size);
+        return new SequenceCollector(pipe, size);
     }
 
-    /*@NotNull*/
-    public synchronized SequenceOutputter allocateSequenceOutputter() {
-        PipelineConfiguration pipe = makePipelineConfiguration();
-        return new SequenceOutputter(pipe, 20);
-    }
+
 
     ///////////////////////////////////////////////////////////////////////////////
 
@@ -391,7 +387,7 @@ public class Controller implements ContextOriginator {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         pipe.setURIResolver(userURIResolver == null ? standardURIResolver : userURIResolver);
         pipe.getParseOptions().setSchemaValidationMode(validationMode); // added in 9.7
-        pipe.getParseOptions().setErrorListener(errorListener); // added in 9.7.0.4
+        pipe.getParseOptions().setErrorReporter(errorReporter); // added in 9.7.0.4
         pipe.setController(this);
         final Executable executable = getExecutable();
         if (executable != null) {
@@ -401,52 +397,44 @@ public class Controller implements ContextOriginator {
         return pipe;
     }
 
+//    /**
+//     * Set the error listener.
+//     *
+//     * @param listener the ErrorListener to be used
+//     */
+//
+//    public void setErrorReporter(ErrorListener listener) {
+//        if (listener instanceof UnfailingErrorListener) {
+//            errorListener = (UnfailingErrorListener) listener;
+//        } else {
+//            errorListener = new DelegatingErrorListener(listener);
+//        }
+//    }
+//
+//    /**
+//     * Get the error listener.
+//     *
+//     * @return the ErrorListener in use. Note that this is not necessarily the ErrorListener that was supplied
+//     * to the {@link #setErrorReporter(ErrorListener)} method; if that was not an {@link UnfailingErrorListener},
+//     * it will have been wrapped in a {@link DelegatingErrorListener}, and it is the DelegatingErrorListener
+//     * that this method returns.
+//     */
+//
+//    public UnfailingErrorListener getErrorReporter() {
+//        return errorListener;
+//    }
+
     /**
-     * Set the error listener.
-     *
-     * @param listener the ErrorListener to be used
+     * Set a callback that will be used when reporting a dynamic error or warning
+     * @param reporter the error reporter to be notified
      */
 
-    public void setErrorListener(ErrorListener listener) {
-        if (listener instanceof UnfailingErrorListener) {
-            errorListener = (UnfailingErrorListener) listener;
-        } else {
-            errorListener = new DelegatingErrorListener(listener);
-        }
+    public void setErrorReporter(ErrorReporter reporter) {
+        errorReporter = reporter;
     }
 
-    /**
-     * Get the error listener.
-     *
-     * @return the ErrorListener in use. Note that this is not necessarily the ErrorListener that was supplied
-     * to the {@link #setErrorListener(ErrorListener)} method; if that was not an {@link UnfailingErrorListener},
-     * it will have been wrapped in a {@link DelegatingErrorListener}, and it is the DelegatingErrorListener
-     * that this method returns.
-     */
-
-    public UnfailingErrorListener getErrorListener() {
-        return errorListener;
-    }
-
-    /**
-     * Report a recoverable error. This is an XSLT concept: by default, such an error results in a warning
-     * message, and processing continues. In XQuery, however, there are no recoverable errors so a fatal
-     * error is reported.
-     * <p>This method is intended for internal use only.</p>
-     *
-     * @param err An exception holding information about the error
-     * @throws XPathException if the error listener decides not to
-     *                        recover from the error
-     */
-
-    public void recoverableError(XPathException err) throws XPathException {
-        if (executable.getHostLanguage() == Configuration.XQUERY) {
-            throw err;
-        } else if (executable.getHostLanguage() == Configuration.XSLT) {
-            errorListener.warning(err);
-        } else {
-            errorListener.error(err);
-        }
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
     }
 
     /**
@@ -458,13 +446,13 @@ public class Controller implements ContextOriginator {
     public void reportFatalError(XPathException err) {
         if (!err.hasBeenReported()) {
             if (err.getHostLanguage() == null) {
-                if (executable.getHostLanguage() == Configuration.XSLT) {
+                if (executable.getHostLanguage() == HostLanguage.XSLT) {
                     err.setHostLanguage("XSLT");
-                } else if (executable.getHostLanguage() == Configuration.XQUERY) {
+                } else if (executable.getHostLanguage() == HostLanguage.XQUERY) {
                     err.setHostLanguage("XQuery");
                 }
             }
-            getErrorListener().fatalError(err);
+            getErrorReporter().report(new XmlProcessingException(err));
             err.setHasBeenReported(true);
         }
     }
@@ -478,7 +466,8 @@ public class Controller implements ContextOriginator {
      */
 
     public void warning(String message, String errorCode, Location locator) {
-        getErrorListener().warning(new XPathException(message, errorCode, locator));
+        XmlProcessingIncident warning = new XmlProcessingIncident(message, errorCode, locator).asWarning();
+        errorReporter.report(warning);
     }
 
     protected void handleXPathException(XPathException err) throws XPathException {
@@ -515,7 +504,7 @@ public class Controller implements ContextOriginator {
     public Executable getExecutable() {
         return executable;
     }
-
+    
     /**
      * Get the document pool. This is used only for source documents, not for stylesheet modules.
      * <p>This method is intended for internal use only.</p>
@@ -594,11 +583,15 @@ public class Controller implements ContextOriginator {
             }
             if (contextItem instanceof NodeInfo) {
                 // In XSLT, apply strip-space and strip-type-annotations options
-                contextItem = prepareInputTree((NodeInfo) contextItem);
+                NodeInfo node = (NodeInfo) contextItem;
+                contextItem = prepareInputTree(node);
+                if (node.getNodeKind() == Type.DOCUMENT && node.getSystemId() != null) {
+                    getDocumentPool().add(node.getTreeInfo(), node.getSystemId());
+                }
             }
         }
-        if (globalContextItem instanceof NodeInfo) {
-            NodeInfo startNode = (NodeInfo) globalContextItem;
+        if (contextItem instanceof NodeInfo) {
+            NodeInfo startNode = (NodeInfo) contextItem;
             if (startNode.getConfiguration() == null) {
                 // must be a non-standard document implementation
                 throw new XPathException("The supplied source document must be associated with a Configuration");
@@ -640,7 +633,7 @@ public class Controller implements ContextOriginator {
      */
 
     /*@Nullable*/
-    public Item<?> getGlobalContextItem() {
+    public Item getGlobalContextItem() {
         return globalContextItem;
         // See W3C bug 5224, which points out that the rules for XQuery 1.0 weren't clearly defined
     }
@@ -709,39 +702,6 @@ public class Controller implements ContextOriginator {
 
     public UnparsedTextURIResolver getUnparsedTextURIResolver() {
         return unparsedTextResolver;
-    }
-
-    /**
-     * Set the CollectionURIResolver used for resolving collection URIs.
-     * Defaults to the CollectionURIResolver registered with the Configuration
-     *
-     * @param resolver the resolver for references to collections
-     * @since 9.4
-     * @deprecated since 9.7. Use {@link #setCollectionFinder(CollectionFinder)}
-     */
-
-    public void setCollectionURIResolver(CollectionURIResolver resolver) {
-        setCollectionFinder(new CollectionURIResolverWrapper(resolver));
-    }
-
-    /**
-     * Get the CollectionURIResolver used for resolving references to collections.
-     * If none has been set on the Controller, returns the
-     * CollectionURIResolver registered with the Configuration
-     *
-     * @return the resolver for references to collections
-     * @since 9.4
-     * @deprecated since 9.7. Use {@link #getCollectionFinder()}
-     */
-
-    /*@NotNull*/
-    public CollectionURIResolver getCollectionURIResolver() {
-        CollectionFinder finder = getCollectionFinder();
-        if (finder instanceof CollectionURIResolverWrapper) {
-            return ((CollectionURIResolverWrapper) finder).getCollectionURIResolver();
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -997,9 +957,9 @@ public class Controller implements ContextOriginator {
      *            in the document pool with this as its document URI.
      * @throws XPathException if an error occurs
      */
-    public void registerDocument(TreeInfo doc, DocumentURI uri) throws XPathException {
+    public void registerDocument(TreeInfo doc, DocumentKey uri) throws XPathException {
         if (!getExecutable().isSchemaAware() && !Untyped.getInstance().equals(doc.getRootNode().getSchemaType())) {
-            boolean isXSLT = getExecutable().getHostLanguage() == Configuration.XSLT;
+            boolean isXSLT = getExecutable().getHostLanguage() == HostLanguage.XSLT;
             String message;
             if (isXSLT) {
                 message = "The source document has been schema-validated, but" +
@@ -1166,7 +1126,6 @@ public class Controller implements ContextOriginator {
 
     public void initializeController(GlobalParameterSet params) throws XPathException {
 
-
         // get a new bindery, to clear out any variables from previous runs
 
         binderies = new HashMap<>();
@@ -1177,7 +1136,7 @@ public class Controller implements ContextOriginator {
             executable.checkSuppliedParameters(params);
         } catch (XPathException e) {
             if (!e.hasBeenReported()) {
-                getErrorListener().fatalError(e);
+                getErrorReporter().report(new XmlProcessingException(e));
                 throw e;
             }
         }
@@ -1357,7 +1316,7 @@ public class Controller implements ContextOriginator {
         //globalContextItem = doc;
         sourceBuilder.reset();
         if (source.getSystemId() != null) {
-            registerDocument(doc.getTreeInfo(), new DocumentURI(source.getSystemId()));
+            registerDocument(doc.getTreeInfo(), new DocumentKey(source.getSystemId()));
         }
         doc.getTreeInfo().setSpaceStrippingRule(spaceStrippingRule);
         return doc;
@@ -1579,7 +1538,7 @@ public class Controller implements ContextOriginator {
      * @return a factory function that is used to create FocusTrackingIterator instances
      */
 
-    public Function<SequenceIterator<?>, FocusTrackingIterator<?>> getFocusTrackerFactory(boolean multithreaded) {
+    public Function<SequenceIterator, FocusTrackingIterator> getFocusTrackerFactory(boolean multithreaded) {
         return multithreaded && multiThreadedFocusTrackerFactory != null ?
                 multiThreadedFocusTrackerFactory :
                 focusTrackerFactory;
@@ -1593,7 +1552,7 @@ public class Controller implements ContextOriginator {
      * @param focusTrackerFactory a factory function that is used to create FocusTrackingIterator instances
      */
 
-    public void setFocusTrackerFactory(Function<SequenceIterator<?>, FocusTrackingIterator<?>> focusTrackerFactory) {
+    public void setFocusTrackerFactory(Function<SequenceIterator, FocusTrackingIterator> focusTrackerFactory) {
         this.focusTrackerFactory = focusTrackerFactory;
     }
 
@@ -1606,7 +1565,7 @@ public class Controller implements ContextOriginator {
      * @param focusTrackerFactory a factory function that is used to create FocusTrackingIterator instances
      */
 
-    public void setMultithreadedFocusTrackerFactory(Function<SequenceIterator<?>, FocusTrackingIterator<?>> focusTrackerFactory) {
+    public void setMultithreadedFocusTrackerFactory(Function<SequenceIterator, FocusTrackingIterator> focusTrackerFactory) {
         this.multiThreadedFocusTrackerFactory = focusTrackerFactory;
     }
 
@@ -1618,11 +1577,11 @@ public class Controller implements ContextOriginator {
 
     public void setMemoizingFocusTrackerFactory() {
         setFocusTrackerFactory(base -> {
-            FocusTrackingIterator<?> fti;
-            if ((base.getProperties() & GROUNDED) == 0 &&
+            FocusTrackingIterator fti;
+            if (!base.getProperties().contains(SequenceIterator.Property.GROUNDED) &&
                     !(base instanceof GroupIterator) && !(base instanceof RegexIterator)) {
                 try {
-                    MemoSequence<?> ms = new MemoSequence<>(base);
+                    MemoSequence ms = new MemoSequence(base);
                     fti = FocusTrackingIterator.track(ms.iterate());
                 } catch (XPathException e) {
                     fti = FocusTrackingIterator.track(base);

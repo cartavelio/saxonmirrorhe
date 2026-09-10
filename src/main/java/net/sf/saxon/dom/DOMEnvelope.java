@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -36,7 +36,7 @@ import javax.xml.xpath.XPathConstants;
 
 public class DOMEnvelope implements ExternalObjectModel {
 
-    private static DOMEnvelope THE_INSTANCE = new DOMEnvelope();
+    private static final DOMEnvelope THE_INSTANCE = new DOMEnvelope();
 
     /**
      * Get the singular instance (this class is stateless)
@@ -62,6 +62,7 @@ public class DOMEnvelope implements ExternalObjectModel {
      * @return by convention (but not necessarily) the class that implements a document node in the relevant
      * external model
      */
+    @Override
     public String getDocumentClassName() {
         return "org.w3c.dom.Document";
     }
@@ -71,20 +72,24 @@ public class DOMEnvelope implements ExternalObjectModel {
      * an XPath implementation
      */
 
+    @Override
     public String getIdentifyingURI() {
         return XPathConstants.DOM_OBJECT_MODEL;
     }
 
+    @Override
     public PJConverter getPJConverter(Class<?> targetClass) {
         if (NodeOverNodeInfo.class.isAssignableFrom(targetClass)) {
             return new PJConverter() {
-                public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+                @Override
+                public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
                     return DOMObjectModel.convertXPathValueToObject(value, targetClass);
                 }
             };
         } else if (NodeList.class.isAssignableFrom(targetClass)) {
             return new PJConverter() {
-                public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+                @Override
+                public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
                     return DOMObjectModel.convertXPathValueToObject(value, targetClass);
                 }
             };
@@ -93,14 +98,17 @@ public class DOMEnvelope implements ExternalObjectModel {
         }
     }
 
+    @Override
     public JPConverter getJPConverter(Class sourceClass, Configuration config) {
         if (NodeOverNodeInfo.class.isAssignableFrom(sourceClass)) {
             return new JPConverter() {
                 /*@Nullable*/
-                public Sequence<?> convert(Object object, XPathContext context) {
+                @Override
+                public Sequence convert(Object object, XPathContext context) {
                     return convertObjectToXPathValue(object);
                 }
 
+                @Override
                 public ItemType getItemType() {
                     return AnyNodeTest.getInstance();
                 }
@@ -120,6 +128,7 @@ public class DOMEnvelope implements ExternalObjectModel {
      *         returns a collection of nodes in this object model
      */
 
+    @Override
     public PJConverter getNodeListCreator(Object node) {
         //return getPJConverter(NodeList.class);
         return null;
@@ -154,8 +163,10 @@ public class DOMEnvelope implements ExternalObjectModel {
      * a sequence of events. If the Result is not recognised, return null.
      * <p>This implementation always returns null: it is not possible to construct an instance
      * of this object model implementation directly as the result of a JAXP transformation.</p>
+     * @return always null in this implementation
      */
 
+    @Override
     public Receiver getDocumentBuilder(Result result) {
         return null;
     }
@@ -168,6 +179,7 @@ public class DOMEnvelope implements ExternalObjectModel {
      * a "NodeOverNodeInfo".</p>
      */
 
+    @Override
     public boolean sendSource(Source source, Receiver receiver) throws XPathException {
         if (source instanceof DOMSource) {
             Node startNode = ((DOMSource) source).getNode();
@@ -185,6 +197,7 @@ public class DOMEnvelope implements ExternalObjectModel {
      * source does not belong to this object model, return null
      */
 
+    @Override
     public NodeInfo unravel(Source source, Configuration config) {
 
         if (source instanceof DOMSource) {
@@ -207,7 +220,7 @@ public class DOMEnvelope implements ExternalObjectModel {
      * @return the value after conversion
      */
 
-    private Sequence<?> convertObjectToXPathValue(Object object)  {
+    private Sequence convertObjectToXPathValue(Object object)  {
         if (object instanceof NodeList) {
             // NodeList needs great care, because Xerces element nodes implement the NodeList interface,
             // with the actual list being the children of the node in question. So we only recognize a

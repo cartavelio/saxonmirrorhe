@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,12 +7,15 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+
+import static net.sf.saxon.expr.flwor.Clause.ClauseName.TRACE;
 
 /**
  * A "trace" clause in a FLWOR expression, added by a TraceCodeInjector for diagnostic
@@ -29,9 +32,9 @@ public class TraceClause extends Clause {
      * @param target    the clause whose evaluation is being traced
      */
 
-    public TraceClause(Clause target, NamespaceResolver nsResolver) {
+    public TraceClause(FLWORExpression expression, Clause target) {
         this.target = target;
-        this.nsResolver = nsResolver;
+        this.nsResolver = expression.getRetainedStaticContext();
     }
 
     /**
@@ -56,12 +59,13 @@ public class TraceClause extends Clause {
 
 
     @Override
-    public int getClauseKey() {
+    public ClauseName getClauseKey() {
         return TRACE;
     }
 
+    @Override
     public TraceClause copy(FLWORExpression flwor, RebindingMap rebindings) {
-        return new TraceClause(target, nsResolver);
+        return new TraceClause(flwor, target);
     }
 
     /**
@@ -82,13 +86,14 @@ public class TraceClause extends Clause {
      * output to another tuple stream
      *
      * @param destination the output tuple stream
+     * @param output the destination for the result
      * @param context     the dynamic evaluation context
      * @return the push tuple stream that implements the functionality of this clause of the FLWOR
      *         expression
      */
     @Override
-    public TuplePush getPushStream(TuplePush destination, XPathContext context) {
-        return new TraceClausePush(destination, this, target);
+    public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
+        return new TraceClausePush(output, destination, this, target);
     }
 
     /**

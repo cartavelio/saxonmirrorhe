@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.Count;
@@ -17,6 +18,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
@@ -27,6 +29,8 @@ import net.sf.saxon.z.IntHashMap;
 
 import java.util.Iterator;
 import java.util.List;
+
+import static net.sf.saxon.expr.flwor.Clause.ClauseName.WINDOW;
 
 /**
  * Implements an XQuery 3.0 sliding or tumbling window clause within a FLWOR expression
@@ -39,7 +43,7 @@ public class WindowClause extends Clause {
     private Operand startConditionOp;
     private Operand endConditionOp;
     private IntHashMap<LocalVariableBinding> windowVars = new IntHashMap<>(10);
-    private ItemTypeCheckingFunction<Item<?>> itemTypeChecker;
+    private ItemTypeCheckingFunction itemTypeChecker;
     private boolean windowMustBeSingleton;
 
     public static final int WINDOW_VAR = 0;
@@ -56,7 +60,7 @@ public class WindowClause extends Clause {
     }
 
     @Override
-    public int getClauseKey() {
+    public ClauseName getClauseKey() {
         return WINDOW;
     }
 
@@ -131,7 +135,7 @@ public class WindowClause extends Clause {
         return windowVars.get(role);
     }
 
-    public ItemTypeCheckingFunction<Item<?>> getItemTypeChecker() {
+    public ItemTypeCheckingFunction getItemTypeChecker() {
         return itemTypeChecker;
     }
 
@@ -146,21 +150,21 @@ public class WindowClause extends Clause {
         ItemType supplied = getSequence().getItemType();
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
-        int rel = th.relationship(required, supplied);
+        Affinity rel = th.relationship(required, supplied);
         switch (rel) {
-            case TypeHierarchy.SAME_TYPE:
-            case TypeHierarchy.SUBSUMES:
+            case SAME_TYPE:
+            case SUBSUMES:
                 // no action
                 break;
-            case TypeHierarchy.OVERLAPS:
-            case TypeHierarchy.SUBSUMED_BY:
+            case OVERLAPS:
+            case SUBSUMED_BY:
                 RoleDiagnostic role = new RoleDiagnostic(
                         RoleDiagnostic.VARIABLE,
                         getVariableBinding(WindowClause.WINDOW_VAR).getVariableQName().getDisplayName(), 0);
-                itemTypeChecker = new ItemTypeCheckingFunction<>(
+                itemTypeChecker = new ItemTypeCheckingFunction(
                         required, role, getLocation(), config);
                 break;
-            case TypeHierarchy.DISJOINT:
+            case DISJOINT:
                 String message = "The items in the window will always be instances of "
                         + supplied + ", never of the required type " + required;
                 throw new XPathException(message, "XPTY0004", getLocation());
@@ -178,10 +182,10 @@ public class WindowClause extends Clause {
             throw new XPathException("Required type of window allows only a single item; window has length " + w.contents.size(),
                                      "XPTY0004", getLocation());
         }
-        ItemTypeCheckingFunction<Item<?>> checker = getItemTypeChecker();
+        ItemTypeCheckingFunction checker = getItemTypeChecker();
         if (checker != null) {
-            SequenceIterator<?> check =
-                    new ItemMappingIterator<>(new ListIterator<>(w.contents), checker);
+            SequenceIterator check =
+                    new ItemMappingIterator(new ListIterator<>(w.contents), checker);
             Count.count(check); // a convenient way to consume the iterator and thus perform the checking
         }
     }
@@ -220,13 +224,14 @@ public class WindowClause extends Clause {
      * output to another tuple stream
      *
      * @param destination the output tuple stream
+     * @param output the destination for the result
      * @param context     the dynamic evaluation context
      * @return the push tuple stream that implements the functionality of this clause of the FLWOR
      *         expression
      */
     @Override
-    public TuplePush getPushStream(TuplePush destination, XPathContext context) {
-        return new WindowClausePush(destination, this);
+    public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
+        return new WindowClausePush(output, destination, this);
     }
 
     /**
@@ -372,7 +377,7 @@ public class WindowClause extends Clause {
         return clause.getEndCondition().effectiveBooleanValue(context);
     }
 
-    protected static Sequence<?> makeValue(/*@Nullable*/ Item item) {
+    protected static Sequence makeValue(/*@Nullable*/ Item item) {
         if (item == null) {
             return EmptySequence.getInstance();
         } else {
@@ -395,7 +400,7 @@ public class WindowClause extends Clause {
         public int endPosition = 0;
         public Item endPreviousItem;
         public Item endNextItem;
-        public List<Item<?>> contents;
+        public List<Item> contents;
         public boolean isDespatched = false;
 
         /**
@@ -420,4 +425,4 @@ public class WindowClause extends Clause {
     }
 }
 
-// Copyright (c) 2011-2018 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

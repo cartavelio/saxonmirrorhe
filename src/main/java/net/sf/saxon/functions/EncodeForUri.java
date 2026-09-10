@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -30,7 +30,7 @@ public class EncodeForUri extends ScalarSystemFunction {
     }
 
     @Override
-    public ZeroOrOne<? extends AtomicValue> resultWhenEmpty() {
+    public ZeroOrOne resultWhenEmpty() {
         return ZERO_LENGTH_STRING;
     }
 
@@ -51,11 +51,11 @@ public class EncodeForUri extends ScalarSystemFunction {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
-                sb.append(c);
+                sb.cat(c);
             } else if (c <= 0x20 || c >= 0x7f) {
                 escapeChar(c, (i + 1) < s.length() ? s.charAt(i + 1) : ' ', sb);
             } else if (allowedPunctuation.indexOf(c) >= 0) {
-                sb.append(c);
+                sb.cat(c);
             } else {
                 escapeChar(c, ' ', sb);
             }
@@ -80,9 +80,9 @@ public class EncodeForUri extends ScalarSystemFunction {
         int used = UTF8CharacterSet.getUTF8Encoding(c, c2, array);
         for (int b = 0; b < used; b++) {
             int v = (int) array[b] & 0xff;
-            sb.append('%');
-            sb.append(hex.charAt(v / 16));
-            sb.append(hex.charAt(v % 16));
+            sb.cat('%');
+            sb.cat(hex.charAt(v / 16));
+            sb.cat(hex.charAt(v % 16));
         }
     }
 

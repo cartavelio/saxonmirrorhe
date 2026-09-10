@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -60,6 +60,7 @@ public class ConsumingOperand extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getBaseExpression().getItemType();
     }
@@ -74,6 +75,7 @@ public class ConsumingOperand extends UnaryExpression {
      *         dependencies. The flags are documented in class net.sf.saxon.value.StaticProperty
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         return getBaseExpression().getIntrinsicDependencies();
     }
@@ -85,6 +87,7 @@ public class ConsumingOperand extends UnaryExpression {
      *         in advance.
      */
 
+    @Override
     public int computeCardinality() {
         return getBaseExpression().getCardinality();
     }
@@ -97,6 +100,7 @@ public class ConsumingOperand extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ConsumingOperand exp = new ConsumingOperand(getBaseExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
@@ -124,11 +128,11 @@ public class ConsumingOperand extends UnaryExpression {
      * @throws net.sf.saxon.trans.XPathException if the variable is undefined
      */
 
-    public Sequence<?> evaluate(XPathContext c) throws XPathException {
+    public Sequence evaluate(XPathContext c) throws XPathException {
         if (c.getStackFrame().holdsDynamicValue()) {
             return c.getStackFrame().popDynamicValue();
         } else {
-            return new LazySequence<>(getBaseExpression().iterate(c));
+            return new LazySequence(getBaseExpression().iterate(c));
         }
     }
 
@@ -141,7 +145,8 @@ public class ConsumingOperand extends UnaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         return evaluate(context).iterate();
     }
 
@@ -161,6 +166,7 @@ public class ConsumingOperand extends UnaryExpression {
      *          expression
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         return evaluate(context).head();
     }
@@ -182,6 +188,7 @@ public class ConsumingOperand extends UnaryExpression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("consume", this);
         getBaseExpression().export(destination);

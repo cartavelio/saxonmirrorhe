@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2017 Saxonica Limited.
+// Copyright (c) 2017-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,12 @@
 
 package net.sf.saxon.tree.util;
 
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
+
+import java.util.function.Predicate;
 
 
 /**
@@ -87,6 +90,7 @@ public abstract class SteppingNavigator {
             this.anchor = anchor;
         }
 
+        @Override
         public N step(N node) {
             return getFollowingNode(node, anchor);
         }
@@ -101,7 +105,7 @@ public abstract class SteppingNavigator {
     private static class FollowingFilteredNodeStepper<N extends SteppingNode<N>> implements Stepper<N> {
 
         N anchor;
-        NodeTest test;
+        Predicate<? super NodeInfo> test;
 
         /**
          * Create a stepper to step successively through selected nodes in a subtree
@@ -110,15 +114,16 @@ public abstract class SteppingNavigator {
          * @param test   the test that returned nodes must satisfy
          */
 
-        FollowingFilteredNodeStepper(N anchor, NodeTest test) {
+        FollowingFilteredNodeStepper(N anchor, Predicate<? super NodeInfo> test) {
             this.anchor = anchor;
             this.test = test;
         }
 
+        @Override
         public N step(N node) {
             do {
                 node = getFollowingNode(node, anchor);
-            } while (node != null && !test.matchesNode(node));
+            } while (node != null && !test.test(node));
             return node;
         }
     }
@@ -150,6 +155,7 @@ public abstract class SteppingNavigator {
             this.local = local;
         }
 
+        @Override
         public N step(N node) {
             return node.getSuccessorElement(anchor, uri, local);
         }
@@ -178,6 +184,7 @@ public abstract class SteppingNavigator {
             this.fingerprint = fingerprint;
         }
 
+        @Override
         public N step(N node) {
             do {
                 node = getFollowingNode(node, anchor);
@@ -206,10 +213,10 @@ public abstract class SteppingNavigator {
          * @param test        the node-test that selected nodes must satisfy
          */
 
-        public DescendantAxisIterator(N start, boolean includeSelf, NodeTest test) {
+        public DescendantAxisIterator(N start, boolean includeSelf, Predicate<? super NodeInfo> test) {
             this.start = start;
 
-            if (!(includeSelf && test.matchesNode(start))) {
+            if (!(includeSelf && test.test(start))) {
                 // initialize currNode to the start node if and only if this is NOT a descendant-or-self scan
                 current = start;
             }
@@ -217,7 +224,7 @@ public abstract class SteppingNavigator {
             if (test == null || test == AnyNodeTest.getInstance()) {
                 stepper = new FollowingNodeStepper<>(start);
             } else if (test instanceof NameTest) {
-                if (test.getPrimitiveType() == Type.ELEMENT) {
+                if (((NameTest)test).getPrimitiveType() == Type.ELEMENT) {
                     NameTest nt = (NameTest) test;
                     if (start.hasFingerprint()) {
                         stepper = new FollowingFingerprintedElementStepper<>(start, nt.getFingerprint());
@@ -228,20 +235,20 @@ public abstract class SteppingNavigator {
                     stepper = new FollowingFilteredNodeStepper<>(start, test);
                 }
             } else if (test instanceof NodeKindTest) {
-                if (test.getPrimitiveType() == Type.ELEMENT) {
+                if (((NodeKindTest)test).getPrimitiveType() == Type.ELEMENT) {
                     stepper = new FollowingElementStepper<>(start, null, null);
                 } else {
                     stepper = new FollowingFilteredNodeStepper<>(start, test);
                 }
             } else if (test instanceof LocalNameTest) {
-                if (test.getPrimitiveType() == Type.ELEMENT) {
+                if (((LocalNameTest)test).getPrimitiveType() == Type.ELEMENT) {
                     LocalNameTest nt = (LocalNameTest) test;
                     stepper = new FollowingElementStepper<>(start, null, nt.getLocalName());
                 } else {
                     stepper = new FollowingFilteredNodeStepper<>(start, test);
                 }
             } else if (test instanceof NamespaceTest) {
-                if (test.getPrimitiveType() == Type.ELEMENT) {
+                if (((NamespaceTest)test).getPrimitiveType() == Type.ELEMENT) {
                     NamespaceTest nt = (NamespaceTest) test;
                     stepper = new FollowingElementStepper<>(start, nt.getNamespaceURI(), null);
                 } else {
@@ -253,6 +260,7 @@ public abstract class SteppingNavigator {
         }
 
 
+        @Override
         public N next() {
             if (current == null) {
                 // implies includeSelf: first time round, return the start node
@@ -264,12 +272,6 @@ public abstract class SteppingNavigator {
             return current = curr;
         }
 
-        public void close() {
-        }
-
-        public int getProperties() {
-            return 0;
-        }
     }
 }
 

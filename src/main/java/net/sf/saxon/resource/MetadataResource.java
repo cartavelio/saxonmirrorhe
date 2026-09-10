@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -26,31 +26,34 @@ import java.util.Map;
  */
 public class MetadataResource implements Resource {
 
-    private Map<String, GroundedValue<?>> properties;
+    private Map<String, GroundedValue> properties;
     private String resourceURI;
     private Resource content;
 
-    public MetadataResource(String resourceURI, Resource content, Map<String, GroundedValue<?>> properties) {
+    public MetadataResource(String resourceURI, Resource content, Map<String, GroundedValue> properties) {
         this.resourceURI = resourceURI;
         this.content = content;
         this.properties = properties;
     }
 
+    @Override
     public String getContentType() {
         return content.getContentType();
     }
 
+    @Override
     public String getResourceURI() {
         return resourceURI;
     }
 
+    @Override
     public Item getItem(XPathContext context)  {
 
         // Create a map for the result
         DictionaryMap map = new DictionaryMap();
 
         // Add the custom properties of the resource
-        for (Map.Entry<String, GroundedValue<?>> entry : properties.entrySet()) {
+        for (Map.Entry<String, GroundedValue> entry : properties.entrySet()) {
              map.initialPut(entry.getKey(), entry.getValue());
         }
 

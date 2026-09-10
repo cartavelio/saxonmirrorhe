@@ -2,6 +2,7 @@
 using System.IO;
 using System.Xml;
 using JConfiguration = net.sf.saxon.Configuration;
+using JAttributeMap = net.sf.saxon.om.AttributeMap; 
 using JPipelineConfiguration = net.sf.saxon.@event.PipelineConfiguration;
 using JReceiver = net.sf.saxon.@event.Receiver;
 using JProperties = java.util.Properties;
@@ -9,9 +10,10 @@ using JCharSequence = java.lang.CharSequence;
 using JXPathException = net.sf.saxon.trans.XPathException;
 using JCharacterMapIndex = net.sf.saxon.serialize.CharacterMapIndex;
 using JSchemaType = net.sf.saxon.type.SchemaType;
-using JLocation = net.sf.saxon.expr.parser.Location;
+using JLocation = net.sf.saxon.s9api.Location;
 using JProxyReceiver = net.sf.saxon.@event.ProxyReceiver;
 using JNodeName = net.sf.saxon.om.NodeName;
+using JNamespaceMap = net.sf.saxon.om.NamespaceMap;
 using JItem = net.sf.saxon.om.Item;
 using JNodeInfo = net.sf.saxon.om.NodeInfo;
 using JDotNetDomBuilder = net.sf.saxon.dotnet.DotNetDomBuilder;
@@ -845,6 +847,7 @@ namespace Saxon.Api
 		/// This is supplied so that the destination can
         /// use information from the configuration (for example, a reference to the name pool)
 		/// to construct or configure the returned <c>Receiver</c>.</param>
+		/// <param name="params1"></param>
         
 		public JReceiver GetReceiver(JPipelineConfiguration pipe, JSerializationProperties params1)
         {
@@ -864,9 +867,12 @@ namespace Saxon.Api
 		/// This is supplied so that the destination can
         /// use information from the configuration (for example, a reference to the name pool)
 		/// to construct or configure the returned <c>Receiver</c>.</param>
+		/// <param name="value2">Serialization parameters known to the caller of the method; typically, output
+        ///  properties defined in a stylesheet or query. These will mainly be of interest if the destination is performing serialization, but
+        ///  soem properties (such as <c>item-separator</c>) are also used in other situations.</param>
         public override JReceiver getReceiver(JPipelineConfiguration pipe, JSerializationProperties value2)
         {
-            return GetReceiver(pipe, value2);
+            return GetReceiver(pipe, value2); 
         }
 
         /// <summary>
@@ -886,6 +892,61 @@ namespace Saxon.Api
         public JDestination GetUnderlyingDestination()
         {
             return this;
+        }
+    }
+
+    /*
+    /// <summary>
+    /// A completely general functional interface for functions that take
+    /// no argument, return void, and potentially throw a Exception
+    /// </summary>
+    public interface IAction {
+
+        /// <summary>
+        /// Perform the requested action
+        /// </summary>
+        void Act();
+
+    } */
+
+    /*internal class ActionImpl: net.sf.saxon.s9api.Action {
+
+        private IAction action;
+        public ActionImpl(IAction actioni) {
+            action = actioni;
+        }
+
+        public void act()
+        {
+            try
+            {
+                action.Act();
+
+            }
+            catch (net.sf.saxon.s9api.SaxonApiException ex) {
+
+                throw new DynamicError(ex);
+            }
+
+        }
+
+    }*/
+
+
+    internal class AbstractDestination : XmlDestination
+    {
+        private Xslt30Transformer xslt30Transformer;
+        private XmlDestination destination;
+
+        internal AbstractDestination(Xslt30Transformer xslt30Transformer, XmlDestination destination)
+        {
+            this.xslt30Transformer = xslt30Transformer;
+            this.destination = destination;
+        }
+
+        JDestination XmlDestination.GetUnderlyingDestination()
+        {
+            return xslt30Transformer.GetUnderlyingXslt30Transformer.asDocumentDestination(destination.GetUnderlyingDestination());
         }
     }
 
@@ -981,11 +1042,6 @@ namespace Saxon.Api
             return destination;
         }
 
-        public void closeAndNotify()
-        {
-            destination.closeAndNotify();
-        }
-
 
         /// <summary>
         /// Set the base URI of the resource being written to this destination
@@ -1005,16 +1061,13 @@ namespace Saxon.Api
             return destination.getDestinationBaseURI();
         }
 
-        public void onClose(JAction a)
-        {
-            destination.onClose(a);
-        }
+
 
         /// <summary>
         /// Close the destination, allowing resources to be released. Saxon calls this
         /// method when it has finished writing to the destination.
         /// </summary>
-        public void close()
+        public void Close()
         {
             destination.close();
         }
@@ -1072,17 +1125,19 @@ namespace Saxon.Api
             /// Notify the start of an element
             /// </summary>
             /// <param name="nameCode"></param>
-            /// <param name="typeCode"></param>
+			/// <param name="typeCode"></param>
+			/// <param name="attributes"></param>
+			/// <param name="namespaces"></param>
             /// <param name="location"></param>
             /// <param name="properties"></param>
-            public override void startElement(JNodeName nameCode, JSchemaType typeCode, JLocation location, int properties)
+            public override void startElement(JNodeName nameCode, JSchemaType typeCode, JAttributeMap attributes, JNamespaceMap namespaces, JLocation location, int properties)
             {
                 if (ended)
                 {
                     JXPathException e = new JXPathException("Only a single root node can be written to an XdmDestination");
                     throw new DynamicError(e);
                 }
-                base.startElement(nameCode, typeCode, location, properties);
+                base.startElement(nameCode, typeCode, attributes, namespaces, location, properties);
                 level++;
             }
 
@@ -1171,7 +1226,7 @@ namespace Saxon.Api
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.

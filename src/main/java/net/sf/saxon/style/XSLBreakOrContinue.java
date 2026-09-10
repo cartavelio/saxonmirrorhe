@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,10 +7,7 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.om.*;
 import net.sf.saxon.tree.iter.AxisIterator;
 
 /**
@@ -26,6 +23,7 @@ public abstract class XSLBreakOrContinue extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -36,21 +34,19 @@ public abstract class XSLBreakOrContinue extends StyleElement {
      * Must be supplied in a subclass
      */
 
-    public void prepareAttributes() throws XPathException {
-        AttributeCollection atts = getAttributeList();
-        for (int a = 0; a < atts.getLength(); a++) {
-            checkUnknownAttribute(atts.getNodeName(a));
+    @Override
+    public void prepareAttributes() {
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            checkUnknownAttribute(attName);
         }
     }
 
     /**
      * Test that this xsl:next-iteration or xsl:break instruction appears in a valid position
-     *
-     * @throws net.sf.saxon.trans.XPathException
-     *
      */
 
-    protected void validatePosition() throws XPathException {
+    protected void validatePosition()  {
         NodeInfo inst = this;
         boolean isLast = true;
         while (true) {

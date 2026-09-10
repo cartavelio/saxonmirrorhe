@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -26,8 +26,8 @@ import java.net.URI;
 /**
  * A document builder holds properties controlling how a Saxon document tree should be built, and
  * provides methods to invoke the tree construction.
- * <p>This class has no public constructor.  Users should construct a DocumentBuilder
- * by calling the factory method {@link net.sf.saxon.s9api.Processor#newDocumentBuilder()}.</p>
+ * <p>This class has no public constructor.  To construct a {@code DocumentBuilder},
+ * use the factory method {@link net.sf.saxon.s9api.Processor#newDocumentBuilder()}.</p>
  * <p>All documents used in a single Saxon query, transformation, or validation episode must
  * be built with the same {@link net.sf.saxon.Configuration}. However, there is no requirement that they
  * should use the same <code>DocumentBuilder</code>.</p>
@@ -430,6 +430,7 @@ public class DocumentBuilder {
             this.builder = b;
         }
 
+        @Override
         public XdmNode getDocumentNode() {
             return new XdmNode(builder.getCurrentRoot());
         }

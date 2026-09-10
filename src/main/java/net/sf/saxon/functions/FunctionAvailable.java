@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -22,7 +22,7 @@ import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.NumericValue;
 
 /**
- * This class supports the XSLT element-available and function-available functions.
+ * This class implements the XSLT function-available functions.
  */
 
 public class FunctionAvailable extends SystemFunction {
@@ -58,13 +58,12 @@ public class FunctionAvailable extends SystemFunction {
             StaticContext env = visitor.getStaticContext();
             boolean b = false;
 
-            QNameParser qp = new QNameParser(getRetainedStaticContext());
-            qp.setAcceptEQName(true);
-            qp.setDefaultNamespace(env.getDefaultFunctionNamespace());
-            qp.setErrorOnBadSyntax("XTDE1400");
-            qp.setErrorOnUnresolvedPrefix("XTDE1400");
+            QNameParser qp = new QNameParser(getRetainedStaticContext())
+                    .withAcceptEQName(true)
+                    .withErrorOnBadSyntax("XTDE1400")
+                    .withErrorOnUnresolvedPrefix("XTDE1400");
 
-            StructuredQName functionName = qp.parse(lexicalQName);
+            StructuredQName functionName = qp.parse(lexicalQName, env.getDefaultFunctionNamespace());
 
             int minArity = 0;
             int maxArity = 20;
@@ -138,6 +137,7 @@ public class FunctionAvailable extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
+    @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         String lexicalQName = arguments[0].head().getStringValue();
         int arity = -1;

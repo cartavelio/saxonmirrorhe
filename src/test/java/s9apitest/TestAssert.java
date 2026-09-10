@@ -1,15 +1,18 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * test that xsl:assert assertions can be enabled and disabled at run-time and compile-time
  */
-public class TestAssert extends TestCase {
+public class TestAssert {
 
     String xsl =
         "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
@@ -20,6 +23,7 @@ public class TestAssert extends TestCase {
             "</xsl:template>" +
             "</xsl:transform>";
 
+    @Test
     public void testDisabledByDefault() {
         try {
             // Run code with a failing assertion, which is no problem because assertions are disabled by default
@@ -37,6 +41,7 @@ public class TestAssert extends TestCase {
         }
     }
 
+    @Test
     public void testEnabledAtCompileTime() {
         try {
             // Run code with a failing assertion, which causes failure because assertions are enabled
@@ -54,6 +59,7 @@ public class TestAssert extends TestCase {
         }
     }
 
+    @Test
     public void testDisabledAtRunTime() {
         try {
             // Run code with a failing assertion, which causes failure because assertions are enabled

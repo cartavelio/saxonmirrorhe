@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -26,6 +26,7 @@ public class ContextItemStaticInfo {
     private ItemType itemType;
     private boolean contextMaybeUndefined;
     private Expression contextSettingExpression;
+    private boolean parentless;
 
     /**
      * Create a ContextItemStaticInfo
@@ -91,6 +92,14 @@ public class ContextItemStaticInfo {
 
     public boolean isStrictStreamabilityRules() {
         return false;
+    }
+
+    public void setParentless(boolean parentless) {
+        this.parentless = parentless;
+    }
+
+    public boolean isParentless() {
+        return parentless;
     }
 
     /**

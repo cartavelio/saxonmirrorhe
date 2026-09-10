@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,6 +18,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
@@ -37,7 +38,7 @@ public interface MapItem extends Function {
      * @return the value associated with the given key, or null if the key is not present in the map.
      */
 
-    GroundedValue<?> get(AtomicValue key);
+    GroundedValue get(AtomicValue key);
 
     /**
      * Get the size of the map
@@ -61,7 +62,7 @@ public interface MapItem extends Function {
      * @return a set containing all the key values present in the map, in unpredictable order
      */
 
-    AtomicIterator keys();
+    AtomicIterator<? extends AtomicValue> keys();
 
     /**
      * Get the set of all key-value pairs in the map
@@ -80,7 +81,7 @@ public interface MapItem extends Function {
      * @return the new map containing the additional entry
      */
 
-    MapItem addEntry(AtomicValue key, GroundedValue<?> value);
+    MapItem addEntry(AtomicValue key, GroundedValue value);
 
     /**
      * Remove an entry from the map
@@ -129,18 +130,23 @@ public interface MapItem extends Function {
     default String toShortString() {
         StringBuilder sb = new StringBuilder();
         sb.append("map{");
-        int count = 0;
-        for (KeyValuePair kvp : keyValuePairs()) {
-            if (count++ > 2) {
-                sb.append(" ...");
-                break;
+        int size = size();
+        if (size == 0) {
+            sb.append("}");
+        } else if (size <= 5) {
+            int pos = 0;
+            for (KeyValuePair pair : keyValuePairs()) {
+                if (pos++ > 0) {
+                    sb.append(",");
+                }
+                sb.append(Err.depict(pair.key))
+                        .append(":")
+                        .append(Err.depictSequence(pair.value));
             }
-            sb.append(kvp.key.toShortString());
-            sb.append(":");
-            sb.append(kvp.value.toShortString());
-            sb.append(", ");
+            sb.append("}");
+        } else {
+            sb.append("(:size ").append(size).append(":)}");
         }
-        sb.append("}");
         return sb.toString();
     }
 
@@ -159,6 +165,7 @@ public interface MapItem extends Function {
      *
      * @return false (it is not an array)
      */
+    @Override
     default boolean isArray() {
         return false;
     }
@@ -168,6 +175,7 @@ public interface MapItem extends Function {
      *
      * @return true (it is a map)
      */
+    @Override
     default boolean isMap() {
         return true;
     }
@@ -190,6 +198,7 @@ public interface MapItem extends Function {
      * @return the result of atomization
      * @throws XPathException if atomization is not allowed for this kind of item
      */
+    @Override
     default AtomicSequence atomize() throws XPathException {
         throw new XPathException("Cannot atomize a map (" + toShortString() + ")", "FOTY0013");
     }
@@ -203,13 +212,13 @@ public interface MapItem extends Function {
      * be efficiently determined
      */
 
-    static boolean isKnownToConform(Sequence<?> value, ItemType itemType) {
+    static boolean isKnownToConform(Sequence value, ItemType itemType) {
         // Problem is we don't have access to a TypeHierarchy object...
         if (itemType == AnyItemType.getInstance()) {
             return true;
         }
         try {
-            SequenceIterator<?> iter = value.iterate();
+            SequenceIterator iter = value.iterate();
             Item item;
             while ((item = iter.next()) != null) {
                 if (item instanceof AtomicValue) {
@@ -222,7 +231,7 @@ public interface MapItem extends Function {
                     }
                 } else if (item instanceof NodeInfo) {
                     if (itemType instanceof NodeTest) {
-                        if (!((NodeTest) itemType).matchesNode((NodeInfo) item)) {
+                        if (!((NodeTest) itemType).test((NodeInfo) item)) {
                             return false;
                         }
                     } else {
@@ -247,7 +256,7 @@ public interface MapItem extends Function {
      * values in the sequence are known to conform to this type; otherwise item().
      */
 
-    static ItemType getItemTypeOfSequence(Sequence<?> val) {
+    static ItemType getItemTypeOfSequence(Sequence val) {
         try {
             Item first = val.head();
             if (first == null) {
@@ -277,6 +286,7 @@ public interface MapItem extends Function {
      *
      * @return an array of OperandRole objects, one for each argument
      */
+    @Override
     default OperandRole[] getOperandRoles() {
         return new OperandRole[]{OperandRole.SINGLE_ATOMIC};
     }
@@ -288,6 +298,7 @@ public interface MapItem extends Function {
      *
      * @return the function item's type
      */
+    @Override
     default FunctionItemType getFunctionItemType(/*@Nullable*/) {
         return MapType.ANY_MAP_TYPE;
     }
@@ -297,6 +308,7 @@ public interface MapItem extends Function {
      *
      * @return the function name, or null for an anonymous inline function
      */
+    @Override
     default StructuredQName getFunctionName() {
         return null;
     }
@@ -308,6 +320,7 @@ public interface MapItem extends Function {
      *
      * @return a description of the function for use in error messages
      */
+    @Override
     default String getDescription() {
         return "map";
     }
@@ -317,6 +330,7 @@ public interface MapItem extends Function {
      *
      * @return the number of arguments in the function signature
      */
+    @Override
     default int getArity() {
         return 1;
     }
@@ -329,6 +343,7 @@ public interface MapItem extends Function {
      * @return a suitable context for evaluating the function (which may or may
      * not be the same as the caller's context)
      */
+    @Override
     default XPathContext makeNewContext(XPathContext callingContext, ContextOriginator originator) {
         return callingContext;
     }
@@ -342,9 +357,10 @@ public interface MapItem extends Function {
      * @throws XPathException if an error occurs evaluating
      *                        the supplied argument
      */
-    default Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException {
+    @Override
+    default Sequence call(XPathContext context, Sequence[] args) throws XPathException {
         AtomicValue key = (AtomicValue) args[0].head();
-        Sequence<?> value = get(key);
+        Sequence value = get(key);
         if (value == null) {
             return EmptySequence.getInstance();
         } else {
@@ -367,6 +383,7 @@ public interface MapItem extends Function {
      * @see #getStringValueCS
      * @since 8.4
      */
+    @Override
     default String getStringValue() {
         throw new UnsupportedOperationException("A map has no string value");
     }
@@ -388,6 +405,7 @@ public interface MapItem extends Function {
      * @see #getStringValue
      * @since 8.4
      */
+    @Override
     default CharSequence getStringValueCS() {
         throw new UnsupportedOperationException("A map has no string value");
     }
@@ -419,14 +437,15 @@ public interface MapItem extends Function {
      *
      * @param other the other function item
      */
+    @Override
     default boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
             AtomicIterator keys = keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
-                Sequence<?> thisValue = get(key);
-                Sequence<?> otherValue = ((MapItem) other).get(key);
+                Sequence thisValue = get(key);
+                Sequence otherValue = ((MapItem) other).get(key);
                 if (otherValue == null) {
                     return false;
                 }
@@ -441,10 +460,12 @@ public interface MapItem extends Function {
     }
 
     /*@Nullable*/
+    @Override
     default MapItem itemAt(int n) {
         return n == 0 ? this : null;
     }
 
+    @Override
     default boolean effectiveBooleanValue() throws XPathException {
         throw new XPathException("A map item has no effective boolean value");
     }
@@ -473,6 +494,7 @@ public interface MapItem extends Function {
     /**
      * Export information about this function item to the export() or explain() output
      */
+    @Override
     default void export(ExpressionPresenter out) throws XPathException {
         out.startElement("map");
         out.emitAttribute("size", "" + size());
@@ -483,6 +505,7 @@ public interface MapItem extends Function {
         out.endElement();
     }
 
+    @Override
     default boolean isTrustedResultType() {
         return true;
     }
@@ -490,4 +513,4 @@ public interface MapItem extends Function {
 
 }
 
-// Copyright (c) 2011-2016 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

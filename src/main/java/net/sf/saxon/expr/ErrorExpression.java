@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,7 +13,9 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -27,10 +29,7 @@ import net.sf.saxon.type.ItemType;
 
 public class ErrorExpression extends Expression {
 
-    private XPathException exception;
-    private String message;
-    private String errorCode;
-    private boolean isTypeError;
+    private XmlProcessingError exception;
     private Expression original;
 
     /**
@@ -50,9 +49,8 @@ public class ErrorExpression extends Expression {
      */
 
     public ErrorExpression(String message, String errorCode, boolean isTypeError) {
-        this.message = message;
-        this.errorCode = errorCode;
-        this.isTypeError = isTypeError;
+        this(new XmlProcessingIncident(message, errorCode));
+        ((XmlProcessingIncident)exception).setTypeError(isTypeError);
     }
 
     /**
@@ -62,10 +60,8 @@ public class ErrorExpression extends Expression {
      * @param exception the error to be thrown when this expression is evaluated
      */
 
-    public ErrorExpression(XPathException exception) {
+    public ErrorExpression(XmlProcessingError exception) {
         this.exception = exception;
-        this.message = exception.getMessage();
-        this.errorCode = exception.getErrorCodeLocalPart();
     }
 
     /**
@@ -74,20 +70,20 @@ public class ErrorExpression extends Expression {
      * @return the exception to be thrown when the expression is evaluated
      */
 
-    public XPathException getException() {
+    public XmlProcessingError getException() {
         return exception;
     }
 
     public boolean isTypeError() {
-        return exception == null ? isTypeError : exception.isTypeError();
+        return exception.isTypeError();
     }
 
     public String getMessage() {
-        return exception == null ? message : exception.getMessage();
+        return exception.getMessage();
     }
 
     public String getErrorCodeLocalPart() {
-        return exception == null ? errorCode : exception.getErrorCodeLocalPart();
+        return exception.getErrorCode().getLocalName();
     }
 
     /**
@@ -105,11 +101,13 @@ public class ErrorExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         return this;
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         return this;
     }
@@ -132,25 +130,25 @@ public class ErrorExpression extends Expression {
      * was first parsed.
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         if (exception != null) {
             // copy the exception for thread-safety, because we want to add context information
-            XPathException err = new XPathException(exception);
-            err.setLocation(exception.getLocator());
+            XPathException err = new XPathException(exception.getMessage());
+            err.setLocation(exception.getLocation());
             err.maybeSetLocation(getLocation());
-            err.setErrorCodeQName(exception.getErrorCodeQName());
-            err.setXPathContext(exception.getXPathContext());
+            if (exception.getErrorCode() != null) {
+                err.setErrorCodeQName(exception.getErrorCode().getStructuredQName());
+            }
             err.maybeSetContext(context);
             err.setIsTypeError(exception.isTypeError());
-            err.setIsStaticError(exception.isStaticError());
-            err.setIsGlobalError(exception.isGlobalError());
+//            err.setIsStaticError(exception.isStaticError());
+//            err.setIsGlobalError(exception.isGlobalError());
             throw err;
         } else {
-            XPathException err = new XPathException(message);
+            XPathException err = XPathException.fromXmlProcessingError(exception);
             err.setLocation(getLocation());
-            err.setErrorCode(errorCode);
             err.setXPathContext(context);
-            err.setIsTypeError(isTypeError);
             throw err;
         }
     }
@@ -161,7 +159,8 @@ public class ErrorExpression extends Expression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         evaluateItem(context);
         return null;    // to fool the compiler
     }
@@ -173,6 +172,7 @@ public class ErrorExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return AnyItemType.getInstance();
     }
@@ -181,6 +181,7 @@ public class ErrorExpression extends Expression {
      * Determine the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
         // we return a liberal value, so that we never get a type error reported
@@ -189,17 +190,11 @@ public class ErrorExpression extends Expression {
 
     @Override
     public Expression copy(RebindingMap rebindings) {
-        if (exception != null) {
-            ErrorExpression e2 = new ErrorExpression(exception);
-            e2.setOriginalExpression(original);
-            ExpressionTool.copyLocationInfo(this, e2);
-            return e2;
-        } else {
-            ErrorExpression e2 = new ErrorExpression(message, errorCode, isTypeError);
-            e2.setOriginalExpression(original);
-            ExpressionTool.copyLocationInfo(this, e2);
-            return e2;
-        }
+        ErrorExpression e2 = new ErrorExpression(exception);
+        e2.setOriginalExpression(original);
+        ExpressionTool.copyLocationInfo(this, e2);
+        return e2;
+
     }
 
     /**
@@ -219,7 +214,7 @@ public class ErrorExpression extends Expression {
         if (original != null) {
             return original.toString();
         } else {
-            return "error(\"" + message + "\")";
+            return "error(\"" + getMessage() + "\")";
         }
     }
 
@@ -228,7 +223,7 @@ public class ErrorExpression extends Expression {
         if (original != null) {
             return original.toShortString();
         } else {
-            return "error(\"" + message + "\")";
+            return "error(\"" + getMessage() + "\")";
         }
     }
 
@@ -238,11 +233,12 @@ public class ErrorExpression extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("error", this);
-        destination.emitAttribute("message", exception == null ? message : exception.getMessage());
-        destination.emitAttribute("code", exception == null ? errorCode : exception.getErrorCodeLocalPart());
-        destination.emitAttribute("isTypeErr", isTypeError?"0":"1");
+        destination.emitAttribute("message", exception.getMessage());
+        destination.emitAttribute("code", exception.getErrorCode().getLocalName());
+        destination.emitAttribute("isTypeErr", exception.isTypeError()?"0":"1");
         destination.endElement();
     }
 

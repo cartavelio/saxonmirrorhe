@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,17 +8,14 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.InstructionInfo;
-import net.sf.saxon.trace.LocationKind;
+import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
@@ -26,16 +23,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * A wrapper expression used to trace expressions in XPath and XQuery.
+ * A wrapper expression used to trace expressions in XSLT and XQuery.
  */
 
-public class TraceExpression extends Instruction implements InstructionInfo {
+public class TraceExpression extends Instruction implements Traceable {
 
     private Operand baseOp;
-    private StructuredQName objectName;
-    private int constructType;
-    /*@Nullable*/ private NamespaceResolver namespaceResolver = null;
-    private HashMap<String, Object> properties = new HashMap<String, Object>(10);
+    private HashMap<String, Object> properties = new HashMap<>(10);
 
     /**
      * Create a trace expression that traces execution of a given child expression
@@ -45,15 +39,16 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      */
     public TraceExpression(Expression child) {
         baseOp = new Operand(this, child, OperandRole.SAME_FOCUS_ACTION);
-        setProperty("expression", child);
+        adoptChildExpression(child);
+        child.gatherProperties((k, v) -> properties.put(k, v));
     }
 
     public Expression getChild() {
         return baseOp.getChildExpression();
     }
 
-    public void setChild(Expression child) {
-        baseOp.setChildExpression(child);
+    public Expression getBody() {
+        return baseOp.getChildExpression();
     }
 
     @Override
@@ -61,69 +56,6 @@ public class TraceExpression extends Instruction implements InstructionInfo {
         return baseOp;
     }
 
-    /**
-     * Set the type of construct. This will generally be a constant
-     * in class {@link LocationKind}
-     *
-     * @param type an integer code for the type of construct being traced
-     */
-
-    public void setConstructType(int type) {
-        constructType = type;
-    }
-
-    /**
-     * Get the construct type. This will generally be a constant
-     * in class {@link LocationKind}
-     */
-    public int getConstructType() {
-        return constructType;
-    }
-
-    /**
-     * Set the namespace context for the instruction being traced. This is needed if the
-     * tracelistener wants to evaluate XPath expressions in the context of the current instruction
-     *
-     * @param resolver The namespace resolver, or null if none is needed
-     */
-
-    public void setNamespaceResolver(/*@Nullable*/ NamespaceResolver resolver) {
-        namespaceResolver = resolver;
-    }
-
-    /**
-     * Get the namespace resolver to supply the namespace context of the instruction
-     * that is being traced
-     *
-     * @return the namespace resolver, or null if none is in use
-     */
-
-    /*@Nullable*/
-    public NamespaceResolver getNamespaceResolver() {
-        return namespaceResolver;
-    }
-
-    /**
-     * Set a name identifying the object of the expression, for example a function name, template name,
-     * variable name, key name, element name, etc. This is used only where the name is known statically.
-     *
-     * @param qName the name of the object, or null if not applicable
-     */
-
-    public void setObjectName(StructuredQName qName) {
-        objectName = qName;
-    }
-
-    /**
-     * Get a name identifying the object of the expression, for example a function name, template name,
-     * variable name, key name, element name, etc. This is used only where the name is known statically.
-     *
-     * @return the name of the object, or null if not applicable
-     */
-
-    public StructuredQName getObjectName() {
-        return objectName;
-    }
 
     /**
      * Set a named property of the instruction/expression
@@ -143,6 +75,7 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      * @return the value of the property
      */
 
+    @Override
     public Object getProperty(String name) {
         return properties.get(name);
     }
@@ -155,6 +88,7 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      * @return an iterator over the properties
      */
 
+    @Override
     public Iterator<String> getProperties() {
         return properties.keySet().iterator();
     }
@@ -182,24 +116,12 @@ public class TraceExpression extends Instruction implements InstructionInfo {
         return "TraceExpr";
     }
 
-    /**
-     * Get the InstructionInfo details about the construct. This is to satisfy the InstructionInfoProvider
-     * interface.
-     *
-     * @return the instruction details
-     */
-
-    public InstructionInfo getInstructionInfo() {
-        return this;
-    }
-
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         TraceExpression t = new TraceExpression(getChild().copy(rebindings));
         t.setLocation(getLocation());   // Bug 3034
-        t.objectName = objectName;
-        t.namespaceResolver = namespaceResolver;
-        t.constructType = constructType;
+        t.properties = properties;
         return t;
     }
 
@@ -229,8 +151,7 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      * Check to ensure that this expression does not contain any inappropriate updating subexpressions.
      * This check is overridden for those expressions that permit updating subexpressions.
      *
-     * @throws net.sf.saxon.trans.XPathException
-     *          if the expression has a non-permitted updating subexpression
+     * @throws net.sf.saxon.trans.XPathException if the expression has a non-permitted updating subexpression
      */
 
     @Override
@@ -238,6 +159,7 @@ public class TraceExpression extends Instruction implements InstructionInfo {
         getChild().checkForUpdatingSubexpressions();
     }
 
+    @Override
     public int getImplementationMethod() {
         return getChild().getImplementationMethod();
     }
@@ -247,24 +169,26 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      * This outputs the trace information via the registered TraceListener,
      * and invokes the instruction being traced.
      *
+     *
+     * @param output the destination for the result
      * @param context the dynamic execution context
      * @return either null, or a tail call that the caller must invoke on return
-     * @throws net.sf.saxon.trans.XPathException
-     *
+     * @throws XPathException if execution of the target expression fails
      */
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         Controller controller = context.getController();
         assert controller != null;
         TraceListener listener = controller.getTraceListener();
+        Expression child = getChild();
         if (controller.isTracing()) {
             assert listener != null;
-            listener.enter(getInstructionInfo(), context);
-        }
-        // Don't attempt tail call optimization when tracing, the results are too confusing
-        getChild().process(context);
-        if (controller.isTracing()) {
-            assert listener != null;
-            listener.leave(getInstructionInfo());
+            listener.enter(child, properties, context);
+            // Don't attempt tail call optimization when tracing, the results are too confusing
+            child.process(output, context);
+            listener.leave(child);
+        } else {
+            child.process(output, context);
         }
         return null;
     }
@@ -276,6 +200,7 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getChild().getItemType();
     }
@@ -286,12 +211,13 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      * actually evaluating the result.
      *
      * @return one of the values Cardinality.ONE_OR_MORE,
-     *         Cardinality.ZERO_OR_MORE, Cardinality.EXACTLY_ONE,
-     *         Cardinality.ZERO_OR_ONE, Cardinality.EMPTY. This default
-     *         implementation returns ZERO_OR_MORE (which effectively gives no
-     *         information).
+     * Cardinality.ZERO_OR_MORE, Cardinality.EXACTLY_ONE,
+     * Cardinality.ZERO_OR_ONE, Cardinality.EMPTY. This default
+     * implementation returns ZERO_OR_MORE (which effectively gives no
+     * information).
      */
 
+    @Override
     public int getCardinality() {
         return getChild().getCardinality();
     }
@@ -306,9 +232,10 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      * expression.
      *
      * @return a set of bit-significant flags identifying the dependencies of
-     *         the expression
+     * the expression
      */
 
+    @Override
     public int getDependencies() {
         return getChild().getDependencies();
     }
@@ -317,6 +244,7 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      * Determine whether this instruction potentially creates new nodes.
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         return !getChild().hasSpecialProperty(StaticProperty.NO_NODES_NEWLY_CREATED);
     }
@@ -324,6 +252,7 @@ public class TraceExpression extends Instruction implements InstructionInfo {
     /**
      * Return the estimated cost of evaluating an expression. For a TraceExpression we return zero,
      * because ideally we don't want trace expressions to affect optimization decisions.
+     *
      * @return zero
      */
     @Override
@@ -340,24 +269,27 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      *
      * @param context The context in which the expression is to be evaluated
      * @return the node or atomic value that results from evaluating the
-     *         expression; or null to indicate that the result is an empty
-     *         sequence
-     * @throws net.sf.saxon.trans.XPathException
-     *          if any dynamic error occurs evaluating the
-     *          expression
+     * expression; or null to indicate that the result is an empty
+     * sequence
+     * @throws net.sf.saxon.trans.XPathException if any dynamic error occurs evaluating the
+     *                                           expression
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         Controller controller = context.getController();
         assert controller != null;
+        Expression child = getChild();
         if (controller.isTracing()) {
-            controller.getTraceListener().enter(getInstructionInfo(), context);
+            TraceListener listener = controller.getTraceListener();
+
+            listener.enter(child, properties, context);
+            Item result = child.evaluateItem(context);
+            listener.leave(child);
+            return result;
+        } else {
+            return child.evaluateItem(context);
         }
-        Item result = getChild().evaluateItem(context);
-        if (controller.isTracing()) {
-            controller.getTraceListener().leave(getInstructionInfo());
-        }
-        return result;
     }
 
     /**
@@ -369,26 +301,30 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      *
      * @param context supplies the context for evaluation
      * @return a SequenceIterator that can be used to iterate over the result
-     *         of the expression
-     * @throws net.sf.saxon.trans.XPathException
-     *          if any dynamic error occurs evaluating the
-     *          expression
+     * of the expression
+     * @throws net.sf.saxon.trans.XPathException if any dynamic error occurs evaluating the
+     *                                           expression
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         Controller controller = context.getController();
         assert controller != null;
+        Expression child = getChild();
         if (controller.isTracing()) {
-            controller.getTraceListener().enter(getInstructionInfo(), context);
+            TraceListener listener = controller.getTraceListener();
+            listener.enter(child, properties, context);
+            SequenceIterator result = child.iterate(context);
+            listener.leave(child);
+            return result;
+        } else {
+            return child.iterate(context);
         }
-        SequenceIterator result = getChild().iterate(context);
-        if (controller.isTracing()) {
-            controller.getTraceListener().leave(getInstructionInfo());
-        }
-        return result;
+
     }
 
+    @Override
     public int getInstructionNameCode() {
         if (getChild() instanceof Instruction) {
             return ((Instruction) getChild()).getInstructionNameCode();
@@ -398,10 +334,12 @@ public class TraceExpression extends Instruction implements InstructionInfo {
     }
 
     /**
-     * Diagnostic print of expression structure. The abstract expression tree
-     * is written to the supplied output destination.
+     * Export the expression structure. The abstract expression tree
+     * is written to the supplied output destination. Note: trace expressions
+     * are omitted from the generated SEF file.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         getChild().export(out);
     }
@@ -415,36 +353,18 @@ public class TraceExpression extends Instruction implements InstructionInfo {
      * @param pul     the pending update list to which the results should be written
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         Controller controller = context.getController();
         assert controller != null;
         if (controller.isTracing()) {
-            controller.getTraceListener().enter(getInstructionInfo(), context);
+            TraceListener listener = controller.getTraceListener();
+            listener.enter(getChild(), properties, context);
+            getChild().evaluatePendingUpdates(context, pul);
+            listener.leave(getChild());
+        } else {
+            getChild().evaluatePendingUpdates(context, pul);
         }
-        getChild().evaluatePendingUpdates(context, pul);
-        if (controller.isTracing()) {
-            controller.getTraceListener().leave(getInstructionInfo());
-        }
-    }
-
-    public String getSystemId() {
-        return getLocation().getSystemId();
-    }
-
-    public int getColumnNumber() {
-        return getLocation().getColumnNumber();
-    }
-
-    public String getPublicId() {
-        return getLocation().getPublicId();
-    }
-
-    public int getLineNumber() {
-        return getLocation().getLineNumber();
-    }
-
-    public Location saveLocation() {
-        return this;
     }
 
     /**

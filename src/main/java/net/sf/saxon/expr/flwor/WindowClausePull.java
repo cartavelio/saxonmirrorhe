@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,7 +35,7 @@ public class WindowClausePull extends TuplePull {
     private List<WindowClause.Window> currentWindows = new ArrayList<>();
 
 
-    public WindowClausePull(TuplePull source, WindowClause windowClause, XPathContext context) {
+    WindowClausePull(TuplePull source, WindowClause windowClause, XPathContext context) {
         this.windowClause = windowClause;
         this.source = source;
         this.context = context;
@@ -215,7 +215,7 @@ public class WindowClausePull extends TuplePull {
      * @throws XPathException if anything goes wrong
      */
 
-    public void processWindow(WindowClause.Window w, XPathContext context) throws XPathException {
+    private void processWindow(WindowClause.Window w, XPathContext context) throws XPathException {
 
         WindowClause clause = windowClause;
         LocalVariableBinding binding;
@@ -268,4 +268,4 @@ public class WindowClausePull extends TuplePull {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

@@ -3,21 +3,20 @@ package s9apitest;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SchemaURIResolver;
-import net.sf.saxon.lib.UnfailingErrorListener;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ValidationException;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -38,11 +37,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Tests for the s9api schema validation interface
  */
-public class TestValidator extends TestCase {
+public class TestValidator {
 
+    @Test
     public void testReportMultipleErrors() {
 
         // This validation run should report exactly two validation errors.
@@ -70,14 +75,17 @@ public class TestValidator extends TestCase {
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
 
             ErrorListener listener = new ErrorListener() {
+                @Override
                 public void error(TransformerException exception)  {
                     errorList.add(exception);
                 }
 
+                @Override
                 public void fatalError(TransformerException exception) throws TransformerException {
                     throw exception;
                 }
 
+                @Override
                 public void warning(TransformerException exception)  {
                     errorList.add(exception);
                 }
@@ -113,18 +121,80 @@ public class TestValidator extends TestCase {
         }
     }
 
+    @Test
+    public void testErrorListenerBug4744() {
+
+        // This validation run should report exactly two validation errors.
+
+
+
+        final List<TransformerException> errorList = new ArrayList<>();
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new File("/Users/mike/bugs/2020/4744-Skorek/UniqueKeyBug.xsd"));
+            StreamSource source_xml = new StreamSource(new File("/Users/mike/bugs/2020/4744-Skorek/UniqueKeyBug.xml"));
+            ErrorListener listener = new ErrorListener() {
+                @Override
+                public void error(TransformerException exception) {
+                    errorList.add(exception);
+                }
+
+                @Override
+                public void fatalError(TransformerException exception) throws TransformerException {
+                    throw exception;
+                }
+
+                @Override
+                public void warning(TransformerException exception) {
+                    errorList.add(exception);
+                }
+            };
+
+            SchemaValidator sv = sm.newSchemaValidator();
+            sv.setErrorListener(listener);
+            sm.load(source_xsd);
+
+
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            serializer.setOutputStream(out);
+            sv.setDestination(serializer);
+
+
+            sv.validate(source_xml);
+
+            out.close();
+            //fail("Validation errors not detected");
+
+        } catch (SaxonApiException sapie) {
+            try {
+                out.close();
+            } catch (IOException ee) {
+                fail();
+            }
+            assertEquals(1, errorList.size());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
     /**
      * Test that multiple base URIs derived from a multiple-entity input document are
      * preserved through validation
      */
 
+    @Test
     public void testValidationWithEntities() {
         try {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
             XdmNode doc = builder.build(new File(ConfigTest.DATA_DIR + "book-wrapper.xml"));
-            assertEquals("3 distinct base URIs in input", 3, getAllBaseUris(doc).size());
-            assertTrue("input doc base URI", doc.getBaseURI().toString().endsWith("book-wrapper.xml"));
+            assertEquals(3, getAllBaseUris(doc).size(), "3 distinct base URIs in input");
+            assertTrue(doc.getBaseURI().toString().endsWith("book-wrapper.xml"), "input doc base URI");
 
             SchemaManager mgr = proc.getSchemaManager();
             mgr.load(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd")));
@@ -135,8 +205,8 @@ public class TestValidator extends TestCase {
 
             XdmNode validDoc = dest.getXdmNode();
 
-            assertEquals("3 distinct base URIs in output", 3, getAllBaseUris(validDoc).size());
-            assertTrue("validated doc base URI", doc.getBaseURI().toString().endsWith("book-wrapper.xml"));
+            assertEquals(3, getAllBaseUris(validDoc).size(), "3 distinct base URIs in output");
+            assertTrue(doc.getBaseURI().toString().endsWith("book-wrapper.xml"), "validated doc base URI");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -157,10 +227,12 @@ public class TestValidator extends TestCase {
     }
 
 
+    @Test
     public void testMultipleSchemaImportsOn() {
         multipleSchemaImports(true);
     }
 
+    @Test
     public void testMultipleSchemaImportsOff() {
         multipleSchemaImports(false);
     }
@@ -211,10 +283,12 @@ public class TestValidator extends TestCase {
     // Test effect of multiple-schema-imports when A imports B, B imports C, and A and C have the same
     // target namespace
 
+    @Test
     public void testCycleMultipleSchemaImportsOn() {
         cycleMultipleSchemaImports(true);
     }
 
+    @Test
     public void testCycleMultipleSchemaImportsOff() {
         cycleMultipleSchemaImports(false);
     }
@@ -280,6 +354,7 @@ public class TestValidator extends TestCase {
     }
 
 
+    @Test
     public void testSchemaAwareQueryUsingSCM() {
         try {
             Processor proc = new Processor(true);
@@ -305,15 +380,18 @@ public class TestValidator extends TestCase {
         }
     }
 
+    @Test
     public void testImportUsingSchemaUriResolver() {
         try {
             Processor p = new Processor(true);
             p.setConfigurationProperty(Feature.SCHEMA_URI_RESOLVER, new SchemaURIResolver() {
 
+                @Override
                 public void setConfiguration(Configuration config) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
 
+                @Override
                 public Source[] resolve(String targetNamespace, String baseURI, String[] locations) {
                     if (targetNamespace.equals("http://two/")) {
                         return new Source[]{new StreamSource(new StringReader(
@@ -351,6 +429,7 @@ public class TestValidator extends TestCase {
         }
     }
 
+    @Test
     public void testAssertionsHidingComments() {
 
         // This validation run should report exactly two validation errors.
@@ -406,6 +485,7 @@ public class TestValidator extends TestCase {
         }
     }
 
+    @Test
     public void testAssertionsSeeingComments() {
 
         String valid_xml = "<?xml version='1.0'?><request><a/><!--comment--><b/></request>";
@@ -456,6 +536,56 @@ public class TestValidator extends TestCase {
         }
     }
 
+    private void assertionUsingXPath3(boolean allow) {
+
+        String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:element name=\"request\">\n" +
+                "\t\t<xs:complexType>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t\t<xs:assert test='child::node() => count() = 3'/>\n" +
+                "\t\t</xs:complexType>\n" +
+                "\t</xs:element>\n" +
+                "</xs:schema>";
+
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, true);
+            proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
+            proc.setConfigurationProperty(Feature.XPATH_VERSION_FOR_XSD, allow ? 31 : 20);
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
+
+            SchemaValidator sv = sm.newSchemaValidator();
+            try {
+                sm.load(source_xsd);
+                if (!allow) {
+                    fail("unexpected success");
+                }
+            } catch (SaxonApiException e) {
+                if (allow) {
+                    fail(e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAssertionUsingXPath31allowed() {
+        assertionUsingXPath3(true);
+    }
+
+    @Test
+    public void testAssertionUsingXPath31notAllowed() {
+        assertionUsingXPath3(false);
+    }
+
+    @Test
     public void testAssertionsOnBadData() {
 
         // This validation run should report exactly two validation errors. Bug 4172
@@ -501,58 +631,12 @@ public class TestValidator extends TestCase {
     }
 
 
-    private void assertionUsingXPath3(boolean allow) {
-
-        String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
-                "\t<xs:element name=\"request\">\n" +
-                "\t\t<xs:complexType>\n" +
-                "\t\t\t<xs:sequence>\n" +
-                "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
-                "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
-                "\t\t\t</xs:sequence>\n" +
-                "\t\t\t<xs:assert test='child::node() => count() = 3'/>\n" +
-                "\t\t</xs:complexType>\n" +
-                "\t</xs:element>\n" +
-                "</xs:schema>";
-
-        try {
-            Processor proc = new Processor(true);
-            proc.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, true);
-            proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
-            proc.setConfigurationProperty(Feature.XPATH_VERSION_FOR_XSD, allow ? 31 : 20);
-            SchemaManager sm = proc.getSchemaManager();
-            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
-
-            SchemaValidator sv = sm.newSchemaValidator();
-            try {
-                sm.load(source_xsd);
-                if (!allow) {
-                    fail("unexpected success");
-                }
-            } catch (SaxonApiException e) {
-                if (allow) {
-                    fail(e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-    }
-
-    public void testAssertionUsingXPath31allowed() {
-        assertionUsingXPath3(true);
-    }
-
-    public void testAssertionUsingXPath31notAllowed() {
-        assertionUsingXPath3(false);
-    }
-
     /**
      * Test the effect of changing a schema to add members to a substitution group.
      * See bug 2174.
      */
 
+    @Test
     public void testSchemaChange() {
         try {
             String sch1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -596,7 +680,7 @@ public class TestValidator extends TestCase {
                 sm.load(new StreamSource(new StringReader(sch2)));
                 fail("Unexpected success");
             } catch (SaxonApiException e) {
-                assertTrue("expectedError", e.getMessage().contains("It is not possible to add to the substitution group"));
+                assertTrue(e.getMessage().contains("It is not possible to add to the substitution group"), "expectedError");
             }
 //            System.err.println("Schema 2 OK");
 //            try {
@@ -612,6 +696,7 @@ public class TestValidator extends TestCase {
         }
     }
 
+    @Test
     public void testImplicitSchemaImportsOption() {
 
         String source_xml = "<?xml version='1.0'?><e xmlns='http://y.com/ns'><f/></e>";
@@ -638,6 +723,7 @@ public class TestValidator extends TestCase {
 
             SchemaManager sm = proc.getSchemaManager();
             sm.setSchemaURIResolver(new SchemaURIResolver() {
+                @Override
                 public Source[] resolve(String targetNamespace, String baseURI, String[] locations) {
                     if (targetNamespace.equals("http://x.com/ns")) {
                         return new StreamSource[]{new StreamSource(new StringReader(xsd2))};
@@ -646,6 +732,7 @@ public class TestValidator extends TestCase {
                     }
                 }
 
+                @Override
                 public void setConfiguration(Configuration config) {
 
                 }
@@ -676,6 +763,7 @@ public class TestValidator extends TestCase {
     }
 
 
+    @Test
     public void testValidationReporting() {
         SchemaValidator validator = null;
         Serializer dest = null;
@@ -734,7 +822,7 @@ public class TestValidator extends TestCase {
         } finally {
             if (dest != null) {
                 System.out.println(sw);
-                assertTrue(sw.toString(), true);
+                assertTrue(true, sw.toString());
 
             }
 
@@ -743,6 +831,7 @@ public class TestValidator extends TestCase {
 
     }
 
+    @Test
     public void testValidationReporting2() {
         SchemaValidator validator = null;
         Serializer dest = null;
@@ -791,7 +880,7 @@ public class TestValidator extends TestCase {
 
             dest = proc.newSerializer();
             dest.setOutputProperty(Serializer.Property.INDENT, "yes");
-            dest.setOutputFile(new File(ConfigTest.DATA_DIR + "/validationReport.xml"));
+            dest.setOutputFile(new File(ConfigTest.TEMP_DIR + "/validationReport.xml"));
 
             // dest.setOutputWriter(writer);
             validator.setValidityReporting(dest);//ConfigTest.DATA_DIR+"/validationReort.xml");
@@ -800,10 +889,10 @@ public class TestValidator extends TestCase {
             source2.setSystemId("http://doc2");
             validator.validate(source2);
             System.err.println("Doc 1 OK");
-            File file = new File(ConfigTest.DATA_DIR + "/validationReport.xml");
+            File file = new File(ConfigTest.TEMP_DIR + "/validationReport.xml");
             XdmNode resultdoc = proc.newDocumentBuilder().build(file);
             System.out.println(resultdoc.getStringValue());
-            assertTrue("File exists: ", file.exists());
+            assertTrue(file.exists(), "File exists: ");
 
         } catch (SaxonApiException sapie) {
             System.err.println(sapie.getMessage());
@@ -820,6 +909,7 @@ public class TestValidator extends TestCase {
     /**
      * Test validating multiple documents with reporting feature on
      */
+    @Test
     public void testValidationReporting3() {
         SchemaValidator validator = null;
         Serializer dest = null;
@@ -880,7 +970,7 @@ public class TestValidator extends TestCase {
         } finally {
             if (dest != null) {
                 System.out.println(sw);
-                assertTrue(sw.toString(), true);
+                assertTrue(true, sw.toString());
 
             }
 
@@ -893,6 +983,7 @@ public class TestValidator extends TestCase {
     /**
      * Test validating multiple documents with reporting feature off
      */
+    @Test
     public void testValidationReporting4() {
         SchemaValidator validator = null;
         Serializer dest = null;
@@ -953,7 +1044,7 @@ public class TestValidator extends TestCase {
         } finally {
             if (dest != null) {
                 System.out.println(sw);
-                assertTrue(sw.toString(), true);
+                assertTrue(true, sw.toString());
 
             }
 
@@ -970,26 +1061,31 @@ public class TestValidator extends TestCase {
         public int warnings = 0;
         public int errors = 0;
         public int fatals = 0;
+        @Override
         public void warning(SAXParseException we) {
             warnings++;
             System.out.println("Warning: " + we);
         }
 
+        @Override
         public void fatalError(SAXParseException fe) {
             fatals++;
             System.out.println("Fatal error: " + fe);
         }
 
+        @Override
         public void error(SAXParseException ee)  {
             errors++;
             System.out.println("Error: " + ee);
         }
     }
 
+    @Test
     public void testSchemaListenerSaxon() throws SAXException, IOException {
         runSchemaListener(new com.saxonica.ee.jaxp.SchemaFactoryImpl());
     }
 
+    @Test
     public void testSchemaListenerXerces() throws SAXException, IOException {
         runSchemaListener(SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema",
                                                     "org.apache.xerces.jaxp.validation.XMLSchemaFactory",
@@ -1012,11 +1108,12 @@ public class TestValidator extends TestCase {
         newValidator.validate(new SAXSource(new InputSource(new FileInputStream(xmlFile))));
         // Note: no exception expected
 
-        assertEquals("warnings", 0, errorHandler.warnings);
-        assertTrue("errors", errorHandler.errors >= 5);
-        assertEquals("fatals", 0, errorHandler.fatals);
+        assertEquals(0, errorHandler.warnings, "warnings");
+        assertTrue(errorHandler.errors >= 5, "errors");
+        assertEquals(0, errorHandler.fatals, "fatals");
     }
 
+    @Test
     public void testMillicomErrorListener() {
         String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "SubsidyTrackingFactXSD11.xsd",
@@ -1035,6 +1132,7 @@ public class TestValidator extends TestCase {
 
     }
 
+    @Test
     public void testLeak() {
         try {
             final Processor processor = new Processor(true);
@@ -1058,18 +1156,22 @@ public class TestValidator extends TestCase {
         }
     }
 
+    @Test
     public void testMultipleSchemaImportsTT() {
         loadMultiple(true, true);
     }
 
+    @Test
     public void testMultipleSchemaImportsTF() {
         loadMultiple(true, false);
     }
 
+    @Test
     public void testMultipleSchemaImportsFT() {
         loadMultiple(false, true);
     }
 
+    @Test
     public void testMultipleSchemaImportsFF() {
         loadMultiple(false, false);
     }
@@ -1122,88 +1224,8 @@ public class TestValidator extends TestCase {
 
     }
 
-    /**
-     * Test the effect of changing a schema to add members to a substitution group.
-     * See bug 3531.
-     */
 
-    public void testMergeSubstitutionGroups() {
-        try {
-
-            String sch0 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
-                    "  <element name=\"FamilyMember\" type=\"string\" abstract='true'/>\n" +
-                    "  <element name=\"Family\">\n" +
-                    "    <complexType>\n" +
-                    "      <sequence>\n" +
-                    "        <element ref=\"fam:FamilyMember\" maxOccurs=\"unbounded\"/>\n" +
-                    "      </sequence>\n" +
-                    "    </complexType>\n" +
-                    "  </element>  \n" +
-                    "</schema>";
-
-            String sch1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
-                    "  <include schemaLocation='sch0.xsd'/>" +
-                    "  <element name=\"Parent\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
-                    "</schema>";
-
-            String sch2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
-                    "  <include schemaLocation='sch0.xsd'/>" +
-                    "  <element name=\"Child\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
-                    "</schema>";
-
-            String doc1 = "<Family xmlns=\"http://myexample/family\">\n" +
-                    "  <Parent>John</Parent>\n" +
-                    "  <Child>Alice</Child>\n" +
-                    "</Family>";
-
-
-            Processor proc = new Processor(true);
-            proc.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, true);
-            SchemaManager sm = proc.getSchemaManager();
-            sm.setSchemaURIResolver(new SchemaURIResolver() {
-                @Override
-                public void setConfiguration(Configuration config) {
-
-                }
-
-                @Override
-                public Source[] resolve(String targetNamespace, String baseURI, String[] locations)  {
-                    Source[] result = new Source[locations.length];
-                    for (int i = 0; i < locations.length; i++) {
-                        switch (locations[i]) {
-                            case "sch0.xsd":
-                                result[i] = new StreamSource(new StringReader(sch0), "http://example.com/sch0.xsd");
-                                break;
-                            case "sch1.xsd":
-                                result[i] = new StreamSource(new StringReader(sch1), "http://example.com/sch1.xsd");
-                                break;
-                            case "sch2.xsd":
-                                result[i] = new StreamSource(new StringReader(sch0), "http://example.com/sch2.xsd");
-                                break;
-                            default:
-                                result[i] = null;
-                                break;
-                        }
-                    }
-                    return result;
-                }
-            });
-            sm.load(new StreamSource(new StringReader(sch1)));
-            System.err.println("Schema 1 OK");
-            sm.load(new StreamSource(new StringReader(sch2)));
-            sm.newSchemaValidator().validate(new StreamSource(new StringReader(doc1)));
-            System.err.println("Doc 1 OK");
-
-
-        } catch (SaxonApiException sapie) {
-            System.err.println(sapie.getMessage());
-            fail();
-        }
-    }
-
+    @Test
     public void testValidateTransformationOutput() {
 
         // This validation run should report exactly two validation errors.
@@ -1245,7 +1267,7 @@ public class TestValidator extends TestCase {
             xsltCompiler.setSchemaAware(true);
             Xslt30Transformer exec = xsltCompiler.compile(new StreamSource(new StringReader(xsl))).load30();
 
-            exec.setErrorListener(new UnfailingErrorListener() {
+            exec.setErrorListener(new ErrorListener() {
                 @Override
                 public void warning(TransformerException exception) {
 
@@ -1272,8 +1294,8 @@ public class TestValidator extends TestCase {
             fail("Validation errors not detected");
 
         } catch (SaxonApiException sapie) {
-            assertEquals("No of errors", 4, errors.size()); // 3 validation errors plus one summary fatal error
-            assertEquals("ContextPath", "/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes());
+            assertEquals(4, errors.size(), "No of errors"); // 3 validation errors plus one summary fatal error
+            assertEquals("/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
 
         } catch (Exception e) {
             fail(e.getMessage());
@@ -1299,13 +1321,15 @@ public class TestValidator extends TestCase {
 
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, byteCodeOn);
+            proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, byteCodeOn);
+            proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR + "Saxon-bytecode");
             SchemaManager sm = proc.getSchemaManager();
             sm.load(new StreamSource(new StringReader(sch1)));
             XQueryCompiler comp = proc.newXQueryCompiler();
             comp.setSchemaAware(true);
-            XQueryExecutable qry = comp.compile("import schema namespace s='http://myexample/family\'; sum(for $i in 1 to 100000 return s:percentage($i div 100 mod 10 + 10))");
+            XQueryExecutable qry = comp.compile("import schema namespace s='http://myexample/family'; sum(for $i in 1 to 100000 return s:percentage($i div 100 mod 10 + 10))");
             XdmItem result = qry.load().evaluateSingle();
-            assertEquals("result", "1499500", result.getStringValue());
+            assertEquals("1499500", result.getStringValue(), "result");
             //System.err.println(result.getStringValue());
         } catch (SaxonApiException sapie) {
             System.err.println(sapie.getMessage());
@@ -1313,10 +1337,13 @@ public class TestValidator extends TestCase {
         }
     }
 
+    @Test
+    @Tag("bytecode")
     public void testByteCodeOn() {
         testByteCode(true);
     }
 
+    @Test
     public void testByteCodeOff() {
         testByteCode(false);
     }
@@ -1353,13 +1380,14 @@ public class TestValidator extends TestCase {
             SchemaFactory proc = new SchemaFactoryImpl();
             proc.setProperty(Feature.GENERATE_BYTE_CODE.name, byteCodeOn);
             //proc.setProperty(Feature.DEBUG_BYTE_CODE.name, byteCodeOn);
+            proc.setProperty(Feature.DEBUG_BYTE_CODE_DIR.name, ConfigTest.TEMP_DIR + "Saxon-bytecode");
             Schema sch = proc.newSchema(new StreamSource(new StringReader(sch1)));
             Validator val = sch.newValidator();
             StringBuilder sb = new StringBuilder();
             sb.append("<doc xmlns='http://myexample/family'>");
-            for (int i=10; i<200; i++) {
-                for (int j=10; j<=99; j++)
-                sb.append("<d>").append(i).append('.').append(j).append("</d>");
+            for (int i = 10; i < 200; i++) {
+                for (int j = 10; j <= 99; j++)
+                    sb.append("<d>").append(i).append('.').append(j).append("</d>");
             }
             sb.append("</doc>");
             val.validate(new StreamSource(new StringReader(sb.toString())));
@@ -1370,30 +1398,17 @@ public class TestValidator extends TestCase {
         }
     }
 
+    @Test
+    @Tag("bytecode")
     public void testByteCodeJaxpOn() {
         testByteCodeJaxp(true);
     }
 
+    @Test
     public void testByteCodeJaxpOff() {
         testByteCodeJaxp(false);
     }
 
 
-
-    public void testBug4507() {
-        try {
-            Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(
-                    new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/schema.xsd")));
-            SchemaValidator val = sm.newSchemaValidator();
-            val.validate(new StreamSource(
-                    new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/data.xml")));
-            Instrumentation.report();
-        } catch (SaxonApiException e) {
-            fail();
-        }
-    }
-    
 }
 

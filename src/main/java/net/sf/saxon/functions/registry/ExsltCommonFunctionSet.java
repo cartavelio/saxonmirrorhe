@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -36,10 +36,10 @@ public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        register("node-set", 1, NodeSetFn.class, AnyItemType.getInstance(), OPT, 0, 0)
+        register("node-set", 1, NodeSetFn.class, AnyItemType.getInstance(), OPT, 0)
                 .arg(0, AnyItemType.getInstance(), OPT, EMPTY);
 
-        register("object-type", 1, ObjectTypeFn.class, BuiltInAtomicType.STRING, ONE, 0, 0)
+        register("object-type", 1, ObjectTypeFn.class, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), ONE, null);
 
     }
@@ -59,7 +59,8 @@ public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
      */
 
     public static class NodeSetFn extends SystemFunction {
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             return arguments[0];
         }
     }
@@ -69,7 +70,8 @@ public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
      */
 
     public static class ObjectTypeFn extends SystemFunction {
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             final TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
             Item value = arguments[0].head();
             ItemType type = SequenceTool.getItemType(value, th);
@@ -77,7 +79,7 @@ public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
                 return new StringValue("node-set");
             } else if (th.isSubType(type, BuiltInAtomicType.STRING)) {
                 return new StringValue("string");
-            } else if (th.isSubType(type, NumericType.getInstance())) {
+            } else if (NumericType.isNumericType(type)) {
                 return new StringValue("number");
             } else if (th.isSubType(type, BuiltInAtomicType.BOOLEAN)) {
                 return new StringValue("boolean");
@@ -91,4 +93,4 @@ public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

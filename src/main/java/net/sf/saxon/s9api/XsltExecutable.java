@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -142,8 +142,8 @@ public class XsltExecutable {
      *
      * @param destination the destination for the XML document containing the diagnostic representation
      *                    of the compiled stylesheet. The stream will be closed when writing has finished.
-     * @param target the target environment. The only values currently recognized are "JS" and "JS2,
-     *               which export the package for running under Saxon-JS 1.0 or 2.0 respectively.
+     * @param target the target environment. The only value currently recognized is "JS",
+     *               which exports the package for running under Saxon-JS 2.0.
      * @since 9.7
      */
 

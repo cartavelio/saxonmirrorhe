@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -29,6 +29,7 @@ public abstract class TreatFn extends SystemFunction implements Callable {
      * Return the error code to be used for type errors
      */
 
+    @Override
     public abstract String getErrorCodeForTypeErrors();
 
     public abstract int getRequiredCardinality();
@@ -36,12 +37,13 @@ public abstract class TreatFn extends SystemFunction implements Callable {
 
 
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
-        SequenceIterator<?> iterator = arguments[0].iterate();
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        SequenceIterator iterator = arguments[0].iterate();
         int card = getRequiredCardinality();
         RoleDiagnostic role = makeRoleDiagnostic();
-        iterator = new CardinalityCheckingIterator<>(iterator, card, role, null);
-        return new LazySequence<>(iterator);
+        iterator = new CardinalityCheckingIterator(iterator, card, role, null);
+        return new LazySequence(iterator);
     }
 
     public RoleDiagnostic makeRoleDiagnostic() {
@@ -50,35 +52,42 @@ public abstract class TreatFn extends SystemFunction implements Callable {
         return role;
     }
 
+    @Override
     public String getStreamerName() {
         return "TreatFn";
     }
 
     public static class ExactlyOne extends TreatFn {
+        @Override
         public int getRequiredCardinality() {
             return StaticProperty.EXACTLY_ONE;
         }
 
+        @Override
         public String getErrorCodeForTypeErrors() {
             return "FORG0005";
         }
     }
 
     public static class OneOrMore extends TreatFn {
+        @Override
         public int getRequiredCardinality() {
             return StaticProperty.ALLOWS_ONE_OR_MORE;
         }
 
+        @Override
         public String getErrorCodeForTypeErrors() {
             return "FORG0004";
         }
     }
 
     public static class ZeroOrOne extends TreatFn {
+        @Override
         public int getRequiredCardinality() {
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
         }
 
+        @Override
         public String getErrorCodeForTypeErrors() {
             return "FORG0003";
         }

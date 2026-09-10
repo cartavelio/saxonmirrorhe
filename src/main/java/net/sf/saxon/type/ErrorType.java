@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -45,6 +45,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return UType.VOID;
     }
@@ -57,6 +58,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
 
     /*@NotNull*/
+    @Override
     public String getName() {
         return "error";
     }
@@ -68,6 +70,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *         of an anonymous type, and in the case of a global type defined in a no-namespace schema.
      */
 
+    @Override
     public String getTargetNamespace() {
         return NamespaceConstant.SCHEMA;
     }
@@ -78,33 +81,28 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return an EQName identifying the type. In the case of an anonymous type, an internally-generated
      *         name is returned
      */
+    @Override
     public String getEQName() {
         return "Q{" + NamespaceConstant.SCHEMA + "}error";
     }
 
 
 
+    @Override
     public boolean containsListType() {
         return false;
     }
 
+    @Override
     public Iterable<PlainType> getPlainMemberTypes() {
         return Collections.emptySet();
-    }
-
-    /**
-     * Return true if this is an external object type, that is, a Saxon-defined type for external
-     * Java or .NET objects
-     */
-
-    public boolean isExternalType() {
-        return false;
     }
 
     /**
      * Determine whether this is a built-in type or a user-defined type
      */
 
+    @Override
     public boolean isBuiltInType() {
         return true;
     }
@@ -119,6 +117,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return the redefinition level
      */
 
+    @Override
     public int getRedefinitionLevel() {
         return 0;
     }
@@ -130,6 +129,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
 
     /*@Nullable*/
+    @Override
     public String getSystemId() {
         return null;
     }
@@ -148,6 +148,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
     /**
      * Get the validation status - always valid
      */
+    @Override
     public ValidationStatus getValidationStatus() {
         return VALIDATED;
     }
@@ -159,6 +160,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
 
     /*@NotNull*/
+    @Override
     public SchemaType getBaseType() {
         return AnySimpleType.getInstance();
     }
@@ -181,6 +183,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return true if this SchemaType is a complex type
      */
 
+    @Override
     public boolean isComplexType() {
         return false;
     }
@@ -191,6 +194,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return true if this SchemaType is a simple type
      */
 
+    @Override
     public boolean isSimpleType() {
         return true;
     }
@@ -201,6 +205,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return the fingerprint.
      */
 
+    @Override
     public int getFingerprint() {
         return StandardNames.XS_ERROR;
     }
@@ -220,7 +225,8 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return a StructuredQName identifying the type.  In the case of an anonymous type, an internally-generated
      * name is returned
      */
-    public StructuredQName getStructuredQName() {
+    @Override
+    public StructuredQName getTypeName() {
         return new StructuredQName("xs", NamespaceConstant.SCHEMA, "error");
     }
 
@@ -231,6 +237,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
 
     /*@NotNull*/
+    @Override
     public String getDescription() {
         return "xs:error";
     }
@@ -242,6 +249,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
 
     /*@NotNull*/
+    @Override
     public String getDisplayName() {
         return "xs:error";
     }
@@ -252,6 +260,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * can happen when there are multiple includes of the same file)
      */
 
+    @Override
     public boolean isSameType(SchemaType other) {
         return other instanceof ErrorType;
     }
@@ -265,6 +274,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
 
     /*@NotNull*/
+    @Override
     public AtomicSequence atomize(/*@NotNull*/ NodeInfo node) {
         return new UntypedAtomicValue(node.getStringValueCS());
     }
@@ -278,6 +288,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *          if the derivation is not allowed
      */
 
+    @Override
     public void checkTypeDerivationIsOK(/*@NotNull*/ SchemaType type, int block) throws SchemaException {
         if (type == this || type == AnySimpleType.getInstance()) {
             return;
@@ -291,6 +302,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return false, this is not (necessarily) an atomic type
      */
 
+    @Override
     public boolean isAtomicType() {
         return false;
     }
@@ -303,6 +315,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * node, however, can still allow a list.
      */
 
+    @Override
     public boolean isIdType() {
         return false;
     }
@@ -313,10 +326,12 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * from IDREF or IDREFS by restriction, list, or union
      */
 
+    @Override
     public boolean isIdRefType() {
         return false;
     }
 
+    @Override
     public boolean isAnonymousType() {
         return false;
     }
@@ -327,6 +342,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *
      * @return false (it isn't a list type)
      */
+    @Override
     public boolean isListType() {
         return false;
     }
@@ -336,6 +352,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *
      * @return true (this is a union type with no members)
      */
+    @Override
     public boolean isUnionType() {
         return true;
     }
@@ -346,6 +363,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return xs:anySimpleType
      */
     /*@NotNull*/
+    @Override
     public SchemaType getBuiltInBaseType() {
         return this;
     }
@@ -366,6 +384,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
 
     /*@NotNull*/
+    @Override
     public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules) throws ValidationException {
         throw new ValidationFailure("Cast to xs:error always fails").makeException();
     }
@@ -376,6 +395,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *
      * @return a StringConverter to do the conversion, or null if no built-in converter is available.
      */
+    @Override
     public StringConverter getStringConverter(ConversionRules rules) {
         return null;
     }
@@ -393,6 +413,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *                                       resolver is supplied
      */
     /*@NotNull*/
+    @Override
     public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
         return new ValidationFailure("No content is ever valid against the type xs:error");
     }
@@ -402,6 +423,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *
      * @return false
      */
+    @Override
     public boolean isNamespaceSensitive() {
         return false;
     }
@@ -413,6 +435,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return the value of the 'block' attribute for this type
      */
 
+    @Override
     public int getBlock() {
         return 0;
     }
@@ -424,6 +447,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return a numeric code representing the derivation method, for example {@link net.sf.saxon.type.SchemaType#DERIVATION_RESTRICTION}
      */
 
+    @Override
     public int getDerivationMethod() {
         return SchemaType.DERIVATION_RESTRICTION;
     }
@@ -436,6 +460,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return true if this kind of derivation is allowed
      */
 
+    @Override
     public boolean allowsDerivation(int derivation) {
         return false;
     }
@@ -446,6 +471,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return the types of derivation that are not permitted, as a bit-significant integer
      *         containing bits such as {@link net.sf.saxon.type.SchemaType#DERIVATION_EXTENSION}
      */
+    @Override
     public int getFinalProhibitions() {
         return SchemaType.DERIVATION_EXTENSION | SchemaType.DERIVATION_RESTRICTION | SchemaType.DERIVATION_LIST |
                 SchemaType.DERIVATION_UNION;
@@ -458,6 +484,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *         {@link net.sf.saxon.value.Whitespace#REPLACE}.
      */
 
+    @Override
     public int getWhitespaceAction() {
         return Whitespace.COLLAPSE;
     }
@@ -471,6 +498,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
 *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
      */
 
+    @Override
     public void analyzeContentExpression(Expression expression, int kind) throws XPathException {
         throw new XPathException("No expression can ever return a value of type xs:error");
     }
@@ -483,6 +511,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return the value after preprocessing
      */
 
+    @Override
     public CharSequence preprocess(CharSequence input) {
         return input;
     }
@@ -497,14 +526,17 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @return the value after postprocessing
      */
 
+    @Override
     public CharSequence postprocess(CharSequence input) {
         return input;
     }
 
+    @Override
     public boolean isPlainType() {
         return true;
     }
 
+    @Override
     public boolean matches(Item item, TypeHierarchy th) {
         return false;
     }
@@ -514,26 +546,32 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
         return false;
     }
 
+    @Override
     public AtomicType getPrimitiveItemType() {
         return this;
     }
 
+    @Override
     public int getPrimitiveType() {
         return Type.ITEM;
     }
 
+    @Override
     public double getDefaultPriority() {
         return -1000;
     }
 
+    @Override
     public AtomicType getAtomizedItemType() {
         return BuiltInAtomicType.UNTYPED_ATOMIC;
     }
 
+    @Override
     public boolean isAtomizable(TypeHierarchy th) {
         return false;
     }
 
+    @Override
     public SequenceType getResultTypeOfCast() {
         // The return type is chosen so that use of the error() function will never give a static type error,
         // on the basis that item()? overlaps every other type, and it's almost impossible to make any
@@ -571,6 +609,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *         the nature of the error.
      * @throws UnsupportedOperationException in the case of an external object type
      */
+    @Override
     public ValidationFailure validate(AtomicValue primValue, CharSequence lexicalValue, ConversionRules rules) {
         return new ValidationFailure("No value is valid against type xs:error");
     }
@@ -584,6 +623,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *                   optimistic is true, false if it is false.
      * @return true if ordering operations are permitted
      */
+    @Override
     public boolean isOrdered(boolean optimistic) {
         return false;
     }
@@ -592,6 +632,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * Determine whether the type is abstract, that is, whether it cannot have instances that are not also
      * instances of some concrete subtype
      */
+    @Override
     public boolean isAbstract() {
         return true;
     }
@@ -603,6 +644,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *
      * @return true if the type is considered primitive under the above rules
      */
+    @Override
     public boolean isPrimitiveType() {
         return false;
     }
@@ -613,7 +655,8 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *
      * @return the name of the atomic type, or null if the type is anonymous.
      */
-    public StructuredQName getTypeName() {
+    @Override
+    public StructuredQName getStructuredQName() {
         return new StructuredQName("xs", NamespaceConstant.SCHEMA, "error");
     }
 
@@ -633,20 +676,6 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
     }
 
     /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @param knownToBe
-     * @param targetVersion
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) {
-        return "return false;";
-    }
-
-    /**
      * Get extra diagnostic information about why a supplied item does not conform to this
      * item type, if available. If extra information is returned, it should be in the form of a complete
      * sentence, minus the closing full stop. No information should be returned for obvious cases.
@@ -661,7 +690,6 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
     }
 
     //#ifdefined SCHEMA
-
     /**
      * Get the schema component in the form of a function item. This allows schema information
      * to be made visible to XSLT or XQuery code. The function makes available the contents of the
@@ -672,10 +700,11 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *
      * @return the schema component represented as a function from property names to property values.
      */
+    @Override
     public Function getComponentAsFunction() {
         return UserSimpleType.getComponentAsFunction(this);
     }
-//#endif
+    //#endif
 
 }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -39,6 +39,7 @@ public final class LastItemExpression extends SingleItemFilter {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         LastItemExpression exp = new LastItemExpression(getBaseExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
@@ -63,6 +64,7 @@ public final class LastItemExpression extends SingleItemFilter {
      */
 
     /*@Nullable*/
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         SequenceIterator forwards = getBaseExpression().iterate(context);
         if (forwards instanceof ReversibleIterator) {
@@ -80,6 +82,7 @@ public final class LastItemExpression extends SingleItemFilter {
     }
 
 
+    @Override
     public String getExpressionName() {
         return "lastOf";
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,20 +12,18 @@ import net.sf.saxon.Version;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.CodeInjector;
-import net.sf.saxon.lib.Logger;
-import net.sf.saxon.lib.StandardErrorListener;
-import net.sf.saxon.lib.StandardLogger;
-import net.sf.saxon.lib.TraceListener2;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
-import java.util.Iterator;
+import java.util.Map;
 
 /**
  * This is the standard trace listener used when the -T option is specified on the command line.
@@ -33,7 +31,7 @@ import java.util.Iterator;
  * differ in that they present the trace output in terms of constructs used in the relevant host language.
  */
 
-public abstract class AbstractTraceListener implements TraceListener2 {
+public abstract class AbstractTraceListener extends StandardDiagnostics implements TraceListener {
     protected int indent = 0;
     private int detail = 2; // none=0; low=1; normal=2; high=3
     protected Logger out = new StandardLogger();
@@ -60,6 +58,7 @@ public abstract class AbstractTraceListener implements TraceListener2 {
      * Called at start
      */
 
+    @Override
     public void open(Controller controller) {
         out.info("<trace " +
                 "saxon-version=\"" + Version.getProductVersion() + "\" " +
@@ -73,6 +72,7 @@ public abstract class AbstractTraceListener implements TraceListener2 {
      * Called at end
      */
 
+    @Override
     public void close() {
         indent--;
         out.info("</trace>");
@@ -82,48 +82,37 @@ public abstract class AbstractTraceListener implements TraceListener2 {
      * Called when an instruction in the stylesheet gets processed
      */
 
-    public void enter(/*@NotNull*/ InstructionInfo info, XPathContext context) {
-        int infotype = info.getConstructType();
-        StructuredQName qName = info.getObjectName();
-        String tag = tag(infotype);
-        if (level(info) > detail || tag == null) {
-            // this TraceListener ignores some events to reduce the volume of output
-            return;
-        }
-        String file = StandardErrorListener.abbreviatePath(info.getSystemId());
-        String msg = AbstractTraceListener.spaces(indent) + '<' + tag;
-        String name = (String) info.getProperty("name");
-        if (name != null) {
-            msg += " name=\"" + escape(name) + '"';
-        } else if (qName != null) {
-            msg += " name=\"" + escape(qName.getDisplayName()) + '"';
-        }
-        Iterator props = info.getProperties();
-        while (props.hasNext()) {
-            String prop = (String) props.next();
-            Object val = info.getProperty(prop);
-            if (prop.startsWith("{")) {
-                // It's a QName in Clark notation: we'll strip off the namespace
-                int rcurly = prop.indexOf('}');
-                if (rcurly > 0) {
-                    prop = prop.substring(rcurly + 1);
+    @Override
+    public void enter(Traceable info, Map<String, Object> properties, XPathContext context) {
+        if (isApplicable(info)) {
+            Location loc = info.getLocation();
+            String tag = tag(info);
+            String file = abbreviateLocationURI(loc.getSystemId());
+            StringBuilder msg = new StringBuilder(AbstractTraceListener.spaces(indent) + '<' + tag);
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                Object val = entry.getValue();
+                if (val instanceof StructuredQName) {
+                    val = ((StructuredQName)val).getDisplayName();
+                } else if (val instanceof StringValue) {
+                    val = ((StringValue)val).getStringValue();
+                }
+                if (val != null) {
+                    msg.append(' ').append(entry.getKey()).append("=\"").append(escape(val.toString())).append('"');
                 }
             }
-            if (val != null && !prop.equals("name") && !prop.equals("expression")) {
-                msg += ' ' + prop + "=\"" + escape(val.toString()) + '"';
+
+            msg.append(" line=\"").append(loc.getLineNumber()).append('"');
+
+            int col = loc.getColumnNumber();
+            if (col >= 0) {
+                msg.append(" column=\"").append(loc.getColumnNumber()).append('"');
             }
+
+            msg.append(" module=\"").append(escape(file)).append('"');
+            msg.append(">");
+            out.info(msg.toString());
+            indent++;
         }
-
-        msg += " line=\"" + info.getLineNumber() + '"';
-
-        int col = info.getColumnNumber();
-        if (col >= 0) {
-            msg += " column=\"" + info.getColumnNumber() + '"';
-        }
-
-        msg += " module=\"" + escape(file) + "\">";
-        out.info(msg);
-        indent++;
     }
 
     /**
@@ -155,7 +144,7 @@ public abstract class AbstractTraceListener implements TraceListener2 {
             } else if (c == '\t') {
                 sb.append("&#x9;");
             } else {
-                sb.append(c);
+                sb.cat(c);
             }
         }
         return sb.toString();
@@ -163,24 +152,26 @@ public abstract class AbstractTraceListener implements TraceListener2 {
 
     /**
      * Called after an instruction of the stylesheet got processed
+     * @param info
      */
 
-    public void leave(/*@NotNull*/ InstructionInfo info) {
-        int infotype = info.getConstructType();
-        String tag = tag(infotype);
-        if (level(info) > detail || tag == null) {
-            // this TraceListener ignores some events to reduce the volume of output
-            return;
+    @Override
+    public void leave(Traceable info) {
+        if (isApplicable(info)) {
+            String tag = tag(info);
+            indent--;
+            out.info(AbstractTraceListener.spaces(indent) + "</" + tag + '>');
         }
-        indent--;
-        out.info(AbstractTraceListener.spaces(indent) + "</" + tag + '>');
     }
 
-    protected abstract String tag(int construct);
+    protected boolean isApplicable(Traceable info) {
+        return level(info) <= detail;
+    }
 
-    protected int level(InstructionInfo info) {
-        int construct = info.getConstructType();
-        if (construct == StandardNames.XSL_FUNCTION ||construct == StandardNames.XSL_TEMPLATE) {
+    protected abstract String tag(Traceable info);
+
+    protected int level(Traceable info) {
+        if (info instanceof TraceableComponent) {
             return 1;
         } if (info instanceof Instruction) {
             return 2;
@@ -193,12 +184,13 @@ public abstract class AbstractTraceListener implements TraceListener2 {
      * Called when an item becomes the context item
      */
 
+    @Override
     public void startCurrentItem(Item item) {
         if (item instanceof NodeInfo && detail > 0) {
             NodeInfo curr = (NodeInfo) item;
             out.info(AbstractTraceListener.spaces(indent) + "<source node=\"" + Navigator.getPath(curr)
                     + "\" line=\"" + curr.getLineNumber()
-                    + "\" file=\"" + StandardErrorListener.abbreviatePath(curr.getSystemId())
+                    + "\" file=\"" + abbreviateLocationURI(curr.getSystemId())
                     + "\">");
         }
         indent++;
@@ -208,6 +200,7 @@ public abstract class AbstractTraceListener implements TraceListener2 {
      * Called after a node of the source tree got processed
      */
 
+    @Override
     public void endCurrentItem(Item item) {
         indent--;
         if (item instanceof NodeInfo && detail > 0) {
@@ -234,6 +227,7 @@ public abstract class AbstractTraceListener implements TraceListener2 {
      * @param stream the output destination for tracing output
      */
 
+    @Override
     public void setOutputDestination(Logger stream) {
         out = stream;
     }
@@ -252,6 +246,7 @@ public abstract class AbstractTraceListener implements TraceListener2 {
      * @param mode the mode in operation
      * @param item the item that was checked against
      */
+    @Override
     public void endRuleSearch(Object rule, Mode mode, Item item) {
         // do nothing
     }
@@ -259,6 +254,7 @@ public abstract class AbstractTraceListener implements TraceListener2 {
     /**
      * Method called when a search for a template rule is about to start
      */
+    @Override
     public void startRuleSearch() {
         // do nothing
     }

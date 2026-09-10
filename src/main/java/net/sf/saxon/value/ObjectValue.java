@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -75,6 +75,7 @@ public class ObjectValue<T> implements ExternalObject<T> {
      * @see #getStringValueCS
      * @since 8.4
      */
+    @Override
     public String getStringValue() {
         return value.toString();
     }
@@ -96,6 +97,7 @@ public class ObjectValue<T> implements ExternalObject<T> {
      * @see #getStringValue
      * @since 8.4
      */
+    @Override
     public CharSequence getStringValueCS() {
         return value.toString();
     }
@@ -106,6 +108,7 @@ public class ObjectValue<T> implements ExternalObject<T> {
      * @return the result of atomization. For an external object this is defined
      * to be the result of the toString() method, as an xs:string value.
      */
+    @Override
     public StringValue atomize() {
         return new StringValue(getStringValue());
     }
@@ -118,6 +121,7 @@ public class ObjectValue<T> implements ExternalObject<T> {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType(/*@Nullable*/ TypeHierarchy th) {
         return th.getConfiguration().getJavaExternalObjectType(value.getClass());
     }
@@ -139,6 +143,7 @@ public class ObjectValue<T> implements ExternalObject<T> {
      *
      * @return true (always)
      */
+    @Override
     public boolean effectiveBooleanValue() {
         return true;
     }

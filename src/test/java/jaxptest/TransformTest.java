@@ -2,7 +2,6 @@ package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
 import com.saxonica.config.StreamingTransformerFactory;
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardErrorListener;
@@ -10,6 +9,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.Attributes2Impl;
@@ -25,11 +25,14 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  *
  */
-public class TransformTest extends TestCase {
+public class TransformTest {
 
+    @Test
     public void testStreamingViaJaxp() {
 
         try {
@@ -66,6 +69,7 @@ public class TransformTest extends TestCase {
         }
     }
 
+    @Test
     public void testStreamingTransformerFactory() {
         try {
             String xsl = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>"
@@ -92,8 +96,8 @@ public class TransformTest extends TestCase {
             StreamingTransformerFactory strf = new StreamingTransformerFactory();
             strf.setAttribute(FeatureKeys.TIMING, true);
             Transformer _transformer = strf.newTransformer(src);
-            _transformer.setParameter("input-uri", "file:///Users/mike/Desktop/temp/test.xml");
-            InputStream is = new FileInputStream(new File("/Users/mike/Desktop/temp/test.xml"));
+            _transformer.setParameter("input-uri", new File(ConfigTest.DATA_DIR + "books.xml").toURI().toString());
+            InputStream is = new FileInputStream(new File(ConfigTest.DATA_DIR + "books.xml"));
             Reader reader = new InputStreamReader(is, "ISO-8859-1");
             OutputStream out = System.out;
             _transformer.transform(new StreamSource(reader), new StreamResult(System.out));
@@ -103,6 +107,7 @@ public class TransformTest extends TestCase {
         }
     }
 
+    @Test
     public void testStreamingTransformerHandler() {
         try {
             String xsl =
@@ -145,6 +150,7 @@ public class TransformTest extends TestCase {
         }
     }
 
+    @Test
     public void testStreamingViaJaxpNoGlobalContext() {
 
         try {
@@ -183,6 +189,7 @@ public class TransformTest extends TestCase {
         }
     }
 
+    @Test
     public void testStripSpace() {
 
         String xml = "<doc>"
@@ -210,6 +217,7 @@ public class TransformTest extends TestCase {
 
     }
 
+    @Test
     public void testJsonSerialization() {
         // See Saxon bug 3225
         try {
@@ -247,6 +255,7 @@ public class TransformTest extends TestCase {
     }
 
 
+    @Test
     public void testJsonSerialization2() {
         // See Saxon bug 3225
         try {
@@ -283,6 +292,7 @@ public class TransformTest extends TestCase {
         }
     }
 
+    @Test
     public void testAdaptiveSerialization() {
         // See Saxon bug 3225
         try {
@@ -319,6 +329,7 @@ public class TransformTest extends TestCase {
         }
     }
 
+    @Test
     public void testStaticParameters() {
         // See Saxon bug 3225
         try {
@@ -354,6 +365,7 @@ public class TransformTest extends TestCase {
         }
     }
 
+    @Test
     public void testJitErrorHandling() {
         // See Saxon bug 3702. There's a static error in the template, which gets found
         // during execution (because of JIT): so what happens during a second execution
@@ -397,6 +409,7 @@ public class TransformTest extends TestCase {
         }
     }
 
+    @Test
     public void testTransformerReuse() {
         // See Saxon bug 4019. Check that global variables are reset when transformer is reused
         try {
@@ -425,9 +438,9 @@ public class TransformTest extends TestCase {
                     writer = new StringWriter();
                     transformer.transform(xmlSource, new StreamResult(writer));
                     if (i==0) {
-                        assertEquals("test"+i, "<out val=\"A\"/>", writer.toString());
+                        assertEquals("<out val=\"A\"/>", writer.toString(), "test" + i);
                     } else {
-                        assertEquals("test"+i, "<out val=\"B\"/>", writer.toString());
+                        assertEquals("<out val=\"B\"/>", writer.toString(), "test" + i);
                     }
                 } catch (TransformerException e) {
                     fail();
@@ -440,25 +453,10 @@ public class TransformTest extends TestCase {
         }
     }
 
-    public void testTransformFromSef() throws TransformerException {
-
-        TransformerFactory tFactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", null);
-        Transformer transformer = tFactory.newTransformer(new StreamSource(new File("/Users/mike/Desktop/temp/test.sef")));
-
-        final StringWriter writer = new StringWriter();
-        StreamResult standardResult = new StreamResult(writer);
-        transformer.transform(new StreamSource(new StringReader("<a/>")), standardResult);
-
-        assertEquals(writer.toString(), "xxx");
-
-    }
-
 
 }
 
 
-// Contributor(s): none.
-//
 
 
 

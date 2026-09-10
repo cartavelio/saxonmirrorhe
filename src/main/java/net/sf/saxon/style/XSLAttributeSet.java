@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,14 +13,11 @@ import net.sf.saxon.expr.instruct.AttributeSet;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UseAttributeSet;
 import net.sf.saxon.expr.parser.Optimizer;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.trace.LocationKind;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.value.Whitespace;
 
@@ -61,11 +58,13 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
      * Get the corresponding Procedure object that results from the compilation of this
      * StylesheetProcedure
      */
+    @Override
     public AttributeSet getActor() {
         return (AttributeSet)getPrincipalStylesheetModule().getStylesheetPackage().getComponent(
             new SymbolicName(StandardNames.XSL_ATTRIBUTE_SET, getObjectName())).getActor();
     }
 
+    @Override
     public SymbolicName getSymbolicName() {
         return new SymbolicName(StandardNames.XSL_ATTRIBUTE_SET, getObjectName());
     }
@@ -77,6 +76,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
      * @throws XPathException if the components are not compatible (differing signatures)
      */
 
+    @Override
     public void checkCompatibility(Component component) throws XPathException {
         if (((AttributeSet)component.getActor()).isDeclaredStreamable() && !isDeclaredStreamable()) {
             compileError("The overridden attribute set is declared streamable, " +
@@ -116,24 +116,31 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
     }
 
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         useAtt = null;
         String streamableAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("name")) {
-                nameAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("use-attribute-sets")) {
-                useAtt = atts.getValue(a);
-            } else if (f.equals("streamable")) {
-                streamableAtt = atts.getValue(a);
-            } else if (f.equals("visibility")) {
-                visibilityAtt = Whitespace.trim(atts.getValue(a));
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
+            switch (f) {
+                case "name":
+                    nameAtt = Whitespace.trim(value);
+                    break;
+                case "use-attribute-sets":
+                    useAtt = value;
+                    break;
+                case "streamable":
+                    streamableAtt = value;
+                    break;
+                case "visibility":
+                    visibilityAtt = Whitespace.trim(value);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
 
@@ -153,13 +160,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
             streamable = processStreamableAtt(streamableAtt);
         }
 
-        try {
-            setObjectName(makeQName(nameAtt));
-        } catch (XPathException err) {
-            setObjectName(new StructuredQName("", "", "attribute-set-error-name"));
-            err.setLocation(new AttributeLocation(this, StructuredQName.fromClarkName("name")));
-            throw err;
-        }
+        setObjectName(makeQName(nameAtt, null, "name"));
 
     }
 
@@ -171,20 +172,17 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
      * @return the name of the object declared in this element, if any
      */
 
+    @Override
     public StructuredQName getObjectName() {
         StructuredQName o = super.getObjectName();
         if (o == null) {
-            try {
-                prepareAttributes();
-                o = getObjectName();
-            } catch (XPathException err) {
-                o = new StructuredQName("saxon", NamespaceConstant.SAXON, "badly-named-attribute-set");
-                setObjectName(o);
-            }
+            prepareAttributes();
+            o = getObjectName();
         }
         return o;
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
 
         if (validated) {
@@ -195,9 +193,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
 
         stackFrameMap = getConfiguration().makeSlotManager();
 
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while ((child = kids.next()) != null) {
+        for (NodeInfo child : children()) {
             if (child instanceof XSLAttribute) {
                 if (visibility == Visibility.ABSTRACT) {
                     compileError("An abstract attribute-set must contain no xsl:attribute instructions");
@@ -224,6 +220,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
         return useAttributeSetNames;
     }
 
+    @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
         top.indexAttributeSet(decl);
     }
@@ -274,6 +271,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
      * Get details of stack frame
      */
 
+    @Override
     public SlotManager getSlotManager() {
         return stackFrameMap;
     }
@@ -285,6 +283,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
      * @param decl        this attribute set declaration
      * @throws XPathException if a failure is detected
      */
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
 
         if (isActionCompleted(ACTION_COMPILE)) {
@@ -344,26 +343,18 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
      * @param declaration this attribute set declaration
      */
 
+    @Override
     public void optimize(ComponentDeclaration declaration) throws XPathException {
         // Already done earlier
     }
 
 
     /**
-     * Get the type of construct. This will be a constant in
-     * class {@link LocationKind}. This method is part of
-     * the {@link net.sf.saxon.trace.InstructionInfo} interface
-     */
-
-    public int getConstructType() {
-        return StandardNames.XSL_ATTRIBUTE_SET;
-    }
-
-    /**
      * Generate byte code if appropriate
      *
      * @param opt the optimizer
      */
+    @Override
     public void generateByteCode(Optimizer opt) {}
 
 //    private void checkStreamability() throws XPathException {

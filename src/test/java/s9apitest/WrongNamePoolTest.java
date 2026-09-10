@@ -1,15 +1,17 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.SaxonErrorCode;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedReader;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class WrongNamePoolTest extends TestCase {
+
+public class WrongNamePoolTest {
 
 
 
@@ -74,6 +76,7 @@ public class WrongNamePoolTest extends TestCase {
          return node;
 	}
 
+    @Test
 	public void testWrongNamePool() throws Exception
 	{
 

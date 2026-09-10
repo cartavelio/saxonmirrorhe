@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -31,7 +31,7 @@ import net.sf.saxon.tree.iter.ManualIterator;
  * of these context variables.</p>
  */
 
-public class Closure implements Sequence<Item<?>>, ContextOriginator {
+public class Closure implements Sequence, ContextOriginator {
 
     protected Expression expression;
     /*@Nullable*/ protected XPathContextMajor savedXPathContext;
@@ -41,7 +41,7 @@ public class Closure implements Sequence<Item<?>>, ContextOriginator {
     // to the reservoir. It only ever has one instance (for each Closure) and each
     // item is read only once.
 
-    protected SequenceIterator<?> inputIterator;
+    protected SequenceIterator inputIterator;
 
     /**
      * Constructor should not be called directly, instances should be made using the make() method.
@@ -63,7 +63,7 @@ public class Closure implements Sequence<Item<?>>, ContextOriginator {
      */
 
     /*@NotNull*/
-    public static Sequence<?> make(
+    public static Sequence make(
             Expression expression, XPathContext context, int ref) throws XPathException {
         return context.getConfiguration().makeClosure(expression, ref, context);
     }
@@ -78,14 +78,13 @@ public class Closure implements Sequence<Item<?>>, ContextOriginator {
 
         if ((expression.getDependencies() & StaticProperty.DEPENDS_ON_LOCAL_VARIABLES) != 0) {
             StackFrame localStackFrame = context.getStackFrame();
-            Sequence<?>[] local = localStackFrame.getStackFrameValues();
+            Sequence[] local = localStackFrame.getStackFrameValues();
             int[] slotsUsed = expression.getSlotsUsed();  // computed on first call
             if (local != null) {
                 final SlotManager stackFrameMap = localStackFrame.getStackFrameMap();
                 final Sequence[] savedStackFrame =
                         new Sequence[stackFrameMap.getNumberOfVariables()];
                 for (int i : slotsUsed) {
-                    assert i < local.length;
                     if (local[i] instanceof Closure) {
                         int cdepth = ((Closure) local[i]).depth;
                         if (cdepth >= 10) {
@@ -104,15 +103,14 @@ public class Closure implements Sequence<Item<?>>, ContextOriginator {
         // Make a copy of the context item
         FocusIterator currentIterator = context.getCurrentIterator();
         if (currentIterator != null) {
-            Item<?> contextItem = currentIterator.current();
-            ManualIterator<?> single = new ManualIterator<>(contextItem);
+            Item contextItem = currentIterator.current();
+            ManualIterator single = new ManualIterator(contextItem);
             savedXPathContext.setCurrentIterator(single);
             // we don't save position() and last() because we have no way
             // of restoring them. So the caller must ensure that a Closure is not
             // created if the expression depends on position() or last()
         }
 
-        savedXPathContext.setReceiver(null);
     }
 
     /**
@@ -124,7 +122,8 @@ public class Closure implements Sequence<Item<?>>, ContextOriginator {
      *          in the situation where the sequence is evaluated lazily, and
      *          evaluation of the first item causes a dynamic error.
      */
-    public Item<?> head() throws XPathException {
+    @Override
+    public Item head() throws XPathException {
         return iterate().next();
     }
 
@@ -150,11 +149,12 @@ public class Closure implements Sequence<Item<?>>, ContextOriginator {
      */
 
     /*@NotNull*/
-    public SequenceIterator<Item<?>> iterate() throws XPathException {
+    @Override
+    public SequenceIterator iterate() throws XPathException {
 
         if (inputIterator == null) {
             inputIterator = expression.iterate(savedXPathContext);
-            return (SequenceIterator<Item<?>>)inputIterator;
+            return inputIterator;
         } else {
             // In an ideal world this shouldn't happen: if the value is needed more than once, we should
             // have chosen a MemoClosure.
@@ -177,12 +177,12 @@ public class Closure implements Sequence<Item<?>>, ContextOriginator {
      * @throws XPathException if an error occurs doing the lazy evaluation
      */
 
-    public GroundedValue<?> reduce() throws XPathException {
+    public GroundedValue reduce() throws XPathException {
         return iterate().materialize();
     }
 
     @Override
-    public Sequence<Item<?>> makeRepeatable() throws XPathException {
+    public Sequence makeRepeatable() throws XPathException {
         return materialize();
     }
 }

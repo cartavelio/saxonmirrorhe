@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -20,16 +20,14 @@ import net.sf.saxon.trans.XPathException;
  * the iterations returned by the mapping function: often referred to as a flat-map operation.
  * <p>This is related to the {@link MappingIterator} class: it differs in that it
  * sets each item being processed as the context item</p>
- * @param <T> the type of items returned by the mapping iterator (that is, the same
- *           as the type of items returned by the mapping function).
  */
 
-public final class ContextMappingIterator<T extends Item<?>> implements SequenceIterator<T> {
+public final class ContextMappingIterator implements SequenceIterator {
 
-    private FocusIterator<?> base;
-    private ContextMappingFunction<T> action;
+    private FocusIterator base;
+    private ContextMappingFunction action;
     private XPathContext context;
-    private SequenceIterator<? extends T> stepIterator = null;
+    private SequenceIterator stepIterator = null;
 
     /**
      * Construct a ContextMappingIterator that will apply a specified ContextMappingFunction to
@@ -40,14 +38,15 @@ public final class ContextMappingIterator<T extends Item<?>> implements Sequence
      *                by context.getCurrentIterator() in turn.
      */
 
-    public ContextMappingIterator(ContextMappingFunction<T> action, XPathContext context) {
+    public ContextMappingIterator(ContextMappingFunction action, XPathContext context) {
         base = context.getCurrentIterator();
         this.action = action;
         this.context = context;
     }
 
-    public T next() throws XPathException {
-        T nextItem;
+    @Override
+    public Item next() throws XPathException {
+        Item nextItem;
         while (true) {
             if (stepIterator != null) {
                 nextItem = stepIterator.next();
@@ -76,6 +75,7 @@ public final class ContextMappingIterator<T extends Item<?>> implements Sequence
         return nextItem;
     }
 
+    @Override
     public void close() {
         base.close();
         if (stepIterator != null) {
@@ -83,19 +83,6 @@ public final class ContextMappingIterator<T extends Item<?>> implements Sequence
         }
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link net.sf.saxon.om.SequenceIterator#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator#LAST_POSITION_FINDER},
-     *         and {@link net.sf.saxon.om.SequenceIterator#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 
 }
 

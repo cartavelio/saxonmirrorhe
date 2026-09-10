@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,8 +8,10 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -29,24 +31,25 @@ public class XSLContextItem extends StyleElement {
     private boolean absentFocus = false;
 
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         String asAtt = null;
         String useAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+                NodeName attName = att.getNodeName();
+                String f = attName.getDisplayName();
+                String value = att.getValue();
             switch (f) {
                 case "as":
-                    asAtt = Whitespace.trim(atts.getValue(a));
+                    asAtt = Whitespace.trim(value);
                     break;
                 case "use":
-                    useAtt = Whitespace.trim(atts.getValue(a));
+                    useAtt = Whitespace.trim(value);
                     break;
                 default:
-                    checkUnknownAttribute(atts.getNodeName(a));
+                    checkUnknownAttribute(attName);
                     break;
             }
         }
@@ -95,6 +98,7 @@ public class XSLContextItem extends StyleElement {
      * @throws XPathException if any error is found during validation
      */
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         if (!(getParent() instanceof XSLTemplate)) {
             compileError("xsl:context-item can appear only as a child of xsl:template");
@@ -106,7 +110,7 @@ public class XSLContextItem extends StyleElement {
         }
         ((XSLTemplate)getParent()).setContextItemRequirements(requiredType, mayBeOmitted, absentFocus);
         iterateAxis(AxisInfo.PRECEDING_SIBLING).forEachOrFail(prec -> {
-            if (prec.getNodeKind() != Type.TEXT || !Whitespace.isWhite(prec.getStringValueCS())) {
+            if (((NodeInfo)prec).getNodeKind() != Type.TEXT || !Whitespace.isWhite(prec.getStringValueCS())) {
                 compileError("xsl:context-item must be the first child of xsl:template");
             }
         });

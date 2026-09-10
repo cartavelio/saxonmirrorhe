@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.StandardNames;
@@ -94,6 +95,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      * the name is defined dynamically
      */
 
+    @Override
     public SymbolicName getSymbolicName() {
         return calledTemplateName == null ? null : new SymbolicName(StandardNames.XSL_TEMPLATE, calledTemplateName);
     }
@@ -102,6 +104,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
         return template.getDeclaringComponent();
     }
 
+    @Override
     public Component getFixedTarget() {
         Component c = getTarget();
         Visibility v = c.getVisibility();
@@ -119,6 +122,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      */
 
     /*@NotNull*/
+    @Override
     public WithParam[] getActualParams() {
         return actualParams;
     }
@@ -130,6 +134,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      */
 
     /*@NotNull*/
+    @Override
     public WithParam[] getTunnelParams() {
         return tunnelParams;
     }
@@ -167,6 +172,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      * Return the name of this instruction.
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_CALL_TEMPLATE;
     }
@@ -180,6 +186,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      *             can be found.
      */
 
+    @Override
     public void setBindingSlot(int slot) {
         bindingSlot = slot;
     }
@@ -192,6 +199,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      *         can be found.
      */
 
+    @Override
     public int getBindingSlot() {
         return bindingSlot;
     }
@@ -206,6 +214,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
         WithParam.simplify(actualParams);
         WithParam.simplify(tunnelParams);
@@ -213,6 +222,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         WithParam.typeCheck(actualParams, visitor, contextInfo);
         WithParam.typeCheck(tunnelParams, visitor, contextInfo);
@@ -240,6 +250,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         WithParam.optimize(visitor, actualParams, contextItemType);
         WithParam.optimize(visitor, tunnelParams, contextItemType);
@@ -253,6 +264,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      * @return the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         if (template == null) {
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
@@ -268,6 +280,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (template == null) {
             return AnyItemType.getInstance();
@@ -284,6 +297,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         CallTemplate ct = new CallTemplate(template, calledTemplateName, useTailRecursion, isWithinDeclaredStreamableConstruct);
         ExpressionTool.copyLocationInfo(this, ct);
@@ -292,6 +306,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
         return ct;
     }
 
+    @Override
     public int getIntrinsicDependencies() {
         // we could go to the called template and find which parts of the context it depends on, but this
         // would create the risk of infinite recursion. So we just assume that the dependencies exist
@@ -304,6 +319,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      * This implementation currently returns true unconditionally.
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         return true;
     }
@@ -320,11 +336,14 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
     /**
      * Process this instruction, without leaving any tail calls.
      *
+     *
+     * @param output the destination for the result
      * @param context the dynamic context for this transformation
      * @throws XPathException if a dynamic error occurs
      */
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
 
         NamedTemplate t;
         Component target = getFixedTarget();
@@ -345,17 +364,18 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
         c2.openStackFrame(t.getStackFrameMap());
         c2.setLocalParameters(assembleParams(context, actualParams));
         c2.setTunnelParameters(assembleTunnelParams(context, tunnelParams));
-        c2.setCurrentMergeGroupIterator(null);
         if (isWithinDeclaredStreamableConstruct) {
             c2.setCurrentGroupIterator(null);
         }
+        c2.setCurrentMergeGroupIterator(null);
+
         try {
-            TailCall tc = t.expand(c2);
+            TailCall tc = t.expand(output, c2);
             while (tc != null) {
                 tc = tc.processLeavingTail();
             }
         } catch (StackOverflowError e) {
-            XPathException err = new XPathException(
+            XPathException err = new XPathException.StackOverflow(
                     "Too many nested template or function calls. The stylesheet may be looping.",
                     SaxonErrorCode.SXLM0001, getLocation());
             err.setXPathContext(context);
@@ -368,12 +388,15 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      * an xsl:call-template or xsl:apply-templates instruction) then the tail call will not
      * actually be evaluated, but will be returned in a TailCall object for the caller to execute.
      *
+     *
+     * @param output the destination for the result
      * @param context the dynamic context for this transformation
      * @return an object containing information about the tail call to be executed by the
      *         caller. Returns null if there is no tail call.
      */
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         if (useTailRecursion) {
             Component targetComponent;
             if (bindingSlot >= 0) {
@@ -406,14 +429,15 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
             // clear all the local variables: they are no longer needed
             Arrays.fill(context.getStackFrame().getStackFrameValues(), null);
 
-            return new CallTemplatePackage(targetComponent, params, tunnels, this, context);
+            return new CallTemplatePackage(targetComponent, params, tunnels, this, output, context);
 
         } else {
-            process(context);
+            process(output, context);
             return null;
         }
     }
 
+    @Override
     public StructuredQName getObjectName() {
         return template == null ? null : template.getTemplateName();
     }
@@ -423,6 +447,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("callT", this);
         String flags = "";
@@ -462,6 +487,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
         private ParameterSet params;
         private ParameterSet tunnelParams;
         private CallTemplate instruction;
+        private Outputter output;
         private XPathContext evaluationContext;
 
         /**
@@ -480,6 +506,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
                                    ParameterSet params,
                                    ParameterSet tunnelParams,
                                    CallTemplate instruction,
+                                   Outputter output,
                                    XPathContext evaluationContext) {
             this.targetComponent = targetComponent;
             if (!(targetComponent.getActor() instanceof NamedTemplate)) {
@@ -488,6 +515,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
             this.params = params;
             this.tunnelParams = tunnelParams;
             this.instruction = instruction;
+            this.output = output;
             this.evaluationContext = evaluationContext;
         }
 
@@ -501,6 +529,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
          * @throws XPathException if a dynamic error occurs
          */
 
+        @Override
         public TailCall processLeavingTail() throws XPathException {
             // TODO: the idea of tail call optimization is to reuse the caller's stack frame rather than
             // creating a new one. We're doing this for the Java stack, but not for the context stack where
@@ -512,11 +541,12 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
             c2.setOrigin(instruction);
             c2.setLocalParameters(params);
             c2.setTunnelParameters(tunnelParams);
-            c2.setCurrentMergeGroupIterator(null);
             c2.openStackFrame(template.getStackFrameMap());
+            c2.setCurrentMergeGroupIterator(null);
 
             // System.err.println("Tail call on template");
-            return template.expand(c2);
+
+            return template.expand(output, c2);
         }
     }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,6 @@
 package net.sf.saxon.testdriver;
 
 
-import net.sf.saxon.lib.StandardEntityResolver;
 import org.xml.sax.*;
 import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.AttributesImpl;
@@ -50,7 +49,6 @@ public class CanonicalXML extends DefaultHandler implements LexicalHandler {
         out = new StringWriter();
 
         parser.setContentHandler(this);
-        parser.setEntityResolver(StandardEntityResolver.getInstance());
         try {
             parser.setProperty("http://xml.org/sax/properties/lexical-handler", this);
         } catch (SAXNotSupportedException err) {    // this just means we won't see the comments
@@ -136,6 +134,7 @@ public class CanonicalXML extends DefaultHandler implements LexicalHandler {
      *                                  wrapping another exception.
      * @see org.xml.sax.ContentHandler#startPrefixMapping
      */
+    @Override
     public void startPrefixMapping(String prefix, String uri) throws SAXException {
         namespaces.addAttribute("", prefix, (prefix.equals("") ? "xmlns" : "xmlns:" + prefix), "CDATA", uri);
         if (!"".equals(uri)) {
@@ -172,6 +171,7 @@ public class CanonicalXML extends DefaultHandler implements LexicalHandler {
      *                                  wrapping another exception.
      * @see org.xml.sax.ContentHandler#startElement
      */
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         flushChars();
         write("<");
@@ -220,10 +220,12 @@ public class CanonicalXML extends DefaultHandler implements LexicalHandler {
         }
     }
 
+    @Override
     public void ignorableWhitespace(char[] cbuf, int start, int len) {
         characters(cbuf, start, len);
     }
 
+    @Override
     public void characters(char[] cbuf, int start, int len) {
         while (len-- > 0) {
             appendChar(cbuf[start++]);
@@ -337,6 +339,7 @@ public class CanonicalXML extends DefaultHandler implements LexicalHandler {
      *                                  wrapping another exception.
      * @see org.xml.sax.ContentHandler#endElement
      */
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         flushChars();
         write("</");
@@ -344,6 +347,7 @@ public class CanonicalXML extends DefaultHandler implements LexicalHandler {
         write(">");
     }
 
+    @Override
     public void processingInstruction(String target, String data) throws SAXException {
         flushChars();
         write("<?");
@@ -354,9 +358,11 @@ public class CanonicalXML extends DefaultHandler implements LexicalHandler {
     }
 
 
+    @Override
     public void startDocument() {
     }
 
+    @Override
     public void endDocument() throws SAXException {
         try {
             flushChars();
@@ -366,30 +372,37 @@ public class CanonicalXML extends DefaultHandler implements LexicalHandler {
         }
     }
 
+    @Override
     public void startDTD(String name, String publicId, String systemId) throws SAXException {
         //
     }
 
+    @Override
     public void endDTD() throws SAXException {
         //
     }
 
+    @Override
     public void startEntity(String name) throws SAXException {
         //
     }
 
+    @Override
     public void endEntity(String name) throws SAXException {
         //
     }
 
+    @Override
     public void startCDATA() throws SAXException {
         //
     }
 
+    @Override
     public void endCDATA() throws SAXException {
         //
     }
 
+    @Override
     public void comment(char ch[], int start, int length) throws SAXException {
         flushChars();
         write("<!--");

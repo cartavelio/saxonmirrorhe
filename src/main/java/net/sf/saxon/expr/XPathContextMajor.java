@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,9 +13,8 @@ import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.sort.GroupIterator;
-import net.sf.saxon.lib.DelegatingErrorListener;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StandardURIResolver;
-import net.sf.saxon.lib.UnfailingErrorListener;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trans.XPathException;
@@ -25,7 +24,6 @@ import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
 import java.util.Arrays;
 
@@ -49,7 +47,7 @@ public class XPathContextMajor extends XPathContextMinor {
     private ThreadManager threadManager = null;
 
     private URIResolver uriResolver;
-    private UnfailingErrorListener errorListener;
+    private ErrorReporter errorReporter;
     private Component currentComponent;
     XPathException currentException;
 
@@ -84,13 +82,13 @@ public class XPathContextMajor extends XPathContextMinor {
      * @param exec the Executable
      */
 
-    public XPathContextMajor(Item<?> item, Executable exec) {
+    public XPathContextMajor(Item item, Executable exec) {
         controller = exec instanceof PreparedStylesheet ?
                 new XsltController(exec.getConfiguration(), (PreparedStylesheet)exec) :
                 new Controller(exec.getConfiguration(), exec);
         if (item != null) {
-            UnfailingIterator<?> iter = SingletonIterator.makeIterator(item);
-            currentIterator = new FocusTrackingIterator<>(iter);
+            UnfailingIterator iter = SingletonIterator.makeIterator(item);
+            currentIterator = new FocusTrackingIterator(iter);
             try {
                 currentIterator.next();
             } catch (XPathException e) {
@@ -106,6 +104,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * to the top of a stack, and contains a pointer to the previous context.
      */
 
+    @Override
     public XPathContextMajor newContext() {
         XPathContextMajor c = new XPathContextMajor();
         c.controller = controller;
@@ -114,7 +113,6 @@ public class XPathContextMajor extends XPathContextMinor {
         c.localParameters = localParameters;
         c.tunnelParameters = tunnelParameters;
         c.last = last;
-        c.currentReceiver = currentReceiver;
         c.currentDestination = currentDestination;
         c.currentMode = currentMode;
         c.currentTemplate = currentTemplate;
@@ -127,7 +125,7 @@ public class XPathContextMajor extends XPathContextMinor {
         c.temporaryOutputState = temporaryOutputState;
         c.threadManager = threadManager;
         c.currentComponent = currentComponent;
-        c.errorListener = errorListener;
+        c.errorReporter = errorReporter;
         c.uriResolver = uriResolver;
         return c;
     }
@@ -151,7 +149,6 @@ public class XPathContextMajor extends XPathContextMinor {
         c.localParameters = p.getLocalParameters();
         c.tunnelParameters = p.getTunnelParameters();
         c.last = prev.last;
-        c.currentReceiver = prev.currentReceiver;
         c.currentDestination = prev.currentDestination;
         c.currentMode = p.getCurrentMode();
         c.currentTemplate = p.getCurrentTemplateRule();
@@ -162,7 +159,7 @@ public class XPathContextMajor extends XPathContextMinor {
         c.tailCallInfo = null;
         c.threadManager = ((XPathContextMajor) p).threadManager;
         c.currentComponent = ((XPathContextMajor) p).currentComponent;
-        c.errorListener = ((XPathContextMajor) p).errorListener;
+        c.errorReporter = ((XPathContextMajor) p).errorReporter;
         c.uriResolver = ((XPathContextMajor) p).uriResolver;
         c.temporaryOutputState = prev.temporaryOutputState;
         return c;
@@ -170,7 +167,7 @@ public class XPathContextMajor extends XPathContextMinor {
 
     /**
      * Make a copy of the supplied context for use in a new thread (typically for
-     * an asynchronous xsl:result-document
+     * an asynchronous xsl:result-document)
      *
      * @param prev the context to be copied
      * @return the copy of the context
@@ -196,6 +193,7 @@ public class XPathContextMajor extends XPathContextMinor {
      *
      * @return the current thread manager. This will be null if not running XSLT under Saxon-EE
      */
+    @Override
     public ThreadManager getThreadManager() {
         return threadManager;
     }
@@ -219,6 +217,7 @@ public class XPathContextMajor extends XPathContextMinor {
      *                        error.
      */
 
+    @Override
     public void waitForChildThreads() throws XPathException {
         if (threadManager != null) {
             threadManager.waitForChildThreads();
@@ -232,6 +231,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @return the supplied parameters
      */
 
+    @Override
     public ParameterSet getLocalParameters() {
         if (localParameters == null) {
             localParameters = new ParameterSet();
@@ -255,6 +255,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @return the supplied tunnel parameters
      */
 
+    @Override
     public ParameterSet getTunnelParameters() {
         return tunnelParameters;
     }
@@ -307,7 +308,7 @@ public class XPathContextMajor extends XPathContextMinor {
                         "Attempting to set more local variables (" + variables.length +
                                 ") than the stackframe can accommodate (" + map.getNumberOfVariables() + ")");
             }
-            stackFrame.slots = (Sequence<?>[])new Sequence[map.getNumberOfVariables()];
+            stackFrame.slots = (Sequence[])new Sequence[map.getNumberOfVariables()];
             System.arraycopy(variables, 0, stackFrame.slots, 0, variables.length);
         }
     }
@@ -323,8 +324,8 @@ public class XPathContextMajor extends XPathContextMinor {
     public void resetStackFrameMap(SlotManager map, int numberOfParams) {
         stackFrame.map = map;
         if (stackFrame.slots.length != map.getNumberOfVariables()) {
-            Sequence<?>[] v2 =
-                    (Sequence<?>[])new Sequence[map.getNumberOfVariables()];
+            Sequence[] v2 =
+                    (Sequence[])new Sequence[map.getNumberOfVariables()];
             System.arraycopy(stackFrame.slots, 0, v2, 0, numberOfParams);
             stackFrame.slots = v2;
         } else {
@@ -374,7 +375,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @param variables the parameter to be supplied to the user function
      */
 
-    public void requestTailCall(TailCallLoop.TailCallInfo targetFn, Sequence<?>[] variables) {
+    public void requestTailCall(TailCallLoop.TailCallInfo targetFn, Sequence[] variables) {
         if (variables != null) {
             if (variables.length > stackFrame.slots.length) {
                 stackFrame.slots = Arrays.copyOf(variables, variables.length);
@@ -442,6 +443,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @return the current mode. May return null if the current mode is the default mode.
      */
 
+    @Override
     public Component.M getCurrentMode() {
         Component.M m = currentMode;
         if (m == null) {
@@ -474,6 +476,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @return the current template
      */
 
+    @Override
     public Rule getCurrentTemplateRule() {
         return currentTemplate;
     }
@@ -496,6 +499,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @return the current grouped collection
      */
 
+    @Override
     public GroupIterator getCurrentGroupIterator() {
         return currentGroupIterator;
     }
@@ -518,6 +522,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @return the current grouped collection
      */
 
+    @Override
     public GroupIterator getCurrentMergeGroupIterator() {
         return currentMergeGroupIterator;
     }
@@ -540,6 +545,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @return the current regular expressions iterator
      */
 
+    @Override
     public RegexIterator getCurrentRegexIterator() {
         return currentRegexIterator;
     }
@@ -555,6 +561,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @return ParameterSet.NOT_SUPPLIED, ParameterSet.SUPPLIED, or ParameterSet.SUPPLIED_AND_CHECKED
      */
 
+    @Override
     public int useLocalParameter(
             StructuredQName paramName, int slotNumber, boolean isTunnel) throws XPathException {
 
@@ -566,7 +573,7 @@ public class XPathContextMajor extends XPathContextMinor {
         if (index < 0) {
             return ParameterSet.NOT_SUPPLIED;
         }
-        Sequence<?> val = params.getValue(index);
+        Sequence val = params.getValue(index);
         stackFrame.slots[slotNumber] = val;
         boolean checked = params.isTypeChecked(index);
         return checked ? ParameterSet.SUPPLIED_AND_CHECKED : ParameterSet.SUPPLIED;
@@ -600,40 +607,35 @@ public class XPathContextMajor extends XPathContextMinor {
      * @since 9.6
      */
 
+    @Override
     public URIResolver getURIResolver() {
         return uriResolver == null ? controller.getURIResolver() : uriResolver;
     }
 
     /**
-     * Set the error listener. The ErrorListener is set locally to this XPathContext
+     * Set the error reporter. The ErrorReporter is set locally to this XPathContext
      * object.
      *
-     * @param listener the ErrorListener to be used
-     * @since 9.6
+     * @param reporter the ErrorReporter to be used
+     * @since 9.6. Changed in 10.0 to use the ErrorReporter interface in place of ErrorListener
      */
 
-    public void setErrorListener(ErrorListener listener) {
-        if (listener instanceof UnfailingErrorListener) {
-            errorListener = (UnfailingErrorListener) listener;
-        } else {
-            errorListener = new DelegatingErrorListener(listener);
-        }
+    public void setErrorReporter(ErrorReporter reporter) {
+        this.errorReporter = reporter;
     }
 
     /**
-     * Get the error listener. If no ErrorListener
-     * has been set locally, the ErrorListener in the Controller is returned; this in turn defaults
-     * to the ErrorListener set in the Configuration.
+     * Get the error reporter. If no ErrorReporter
+     * has been set locally, the ErrorReporter in the Controller is returned; this in turn defaults
+     * to the ErrorReporter set in the Configuration.
      *
-     * @return the ErrorListener in use. Note that this is not necessarily the ErrorListener that was supplied
-     * to the {@link #setErrorListener(ErrorListener)} method; if that was not an {@link UnfailingErrorListener},
-     * it will have been wrapped in a {@link DelegatingErrorListener}, and it is the DelegatingErrorListener
-     * that this method returns.
-     * @since 9.6
+     * @return the ErrorReporter in use.
+     * @since 9.6. Changed in 10.0 to use an ErrorReporter rather than ErrorListener
      */
 
-    public UnfailingErrorListener getErrorListener() {
-        return errorListener == null ? controller.getErrorListener() : errorListener;
+    @Override
+    public ErrorReporter getErrorReporter() {
+        return errorReporter == null ? controller.getErrorReporter() : errorReporter;
     }
 
     /**
@@ -652,6 +654,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @return the current exception, or null if there is none defined
      */
 
+    @Override
     public XPathException getCurrentException() {
         return currentException;
     }
@@ -660,6 +663,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * Get the current component
      */
 
+    @Override
     public Component getCurrentComponent() {
         return currentComponent;
     }
@@ -692,6 +696,7 @@ public class XPathContextMajor extends XPathContextMinor {
      *                    executed
      * @return the component to be invoked
      */
+    @Override
     public Component getTargetComponent(int bindingSlot) {
         try {
             ComponentBinding binding = currentComponent.getComponentBindings().get(bindingSlot);

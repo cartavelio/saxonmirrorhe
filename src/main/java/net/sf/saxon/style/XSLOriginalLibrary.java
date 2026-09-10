@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -38,6 +38,7 @@ public class XSLOriginalLibrary implements FunctionLibrary {
 
     private XSLOriginalLibrary() {}
 
+    @Override
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         try {
             Function target = getFunctionItem(functionName, env);
@@ -52,15 +53,18 @@ public class XSLOriginalLibrary implements FunctionLibrary {
         }
     }
 
+    @Override
     public boolean isAvailable(SymbolicName.F functionName) {
         // xsl:original is not recognized by function-available() - W3C bug 28122
         return false;
     }
 
+    @Override
     public FunctionLibrary copy() {
         return this;
     }
 
+    @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext env) throws XPathException {
         if (functionName.getComponentKind() == StandardNames.XSL_FUNCTION &&
             functionName.getComponentName().hasURI(NamespaceConstant.XSLT) &&

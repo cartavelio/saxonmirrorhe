@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -19,6 +19,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
+import static net.sf.saxon.type.Affinity.*;
 
 /**
  * This class provides Saxon's type checking capability. It contains a method,
@@ -112,8 +113,8 @@ public class TypeChecker {
             if (reqItemType == null || suppliedItemType == null) {
                 throw new NullPointerException();
             }
-            int relation = th.relationship(reqItemType, suppliedItemType);
-            itemTypeOK = relation == TypeHierarchy.SAME_TYPE || relation == TypeHierarchy.SUBSUMES;
+            Affinity relation = th.relationship(reqItemType, suppliedItemType);
+            itemTypeOK = relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMES;
         }
 
 
@@ -167,7 +168,7 @@ public class TypeChecker {
                 if (suppliedItemType.equals(BuiltInAtomicType.UNTYPED_ATOMIC)
                         && !(reqItemType.equals(BuiltInAtomicType.UNTYPED_ATOMIC) || reqItemType.equals(BuiltInAtomicType.ANY_ATOMIC))) {
 
-                    if (((SimpleType) reqItemType).isNamespaceSensitive()) {
+                    if (((PlainType) reqItemType).isNamespaceSensitive()) {
                         // See spec bug 11964
                         XPathException err = new XPathException("An untyped atomic value cannot be converted to a QName or NOTATION as required for the " + role.getMessage(), "XPTY0117", supplied.getLocation());
                         err.setIsTypeError(true);
@@ -203,7 +204,7 @@ public class TypeChecker {
                         && !exp.hasSpecialProperty(StaticProperty.NOT_UNTYPED_ATOMIC)) {
 
                     Expression conversion;
-                    if (((SimpleType) reqItemType).isNamespaceSensitive()) {
+                    if (((PlainType) reqItemType).isNamespaceSensitive()) {
                         conversion = UntypedSequenceConverter.makeUntypedSequenceRejector(config, exp, (PlainType) reqItemType);
                     } else {
                         UntypedSequenceConverter usc = UntypedSequenceConverter.makeUntypedSequenceConverter(config, exp, (PlainType) reqItemType);
@@ -232,7 +233,7 @@ public class TypeChecker {
                 if (reqItemType instanceof AtomicType) {
                     int rt = ((AtomicType) reqItemType).getFingerprint();
                     if (rt == StandardNames.XS_DOUBLE &&
-                            th.relationship(suppliedItemType, NumericType.getInstance()) != TypeHierarchy.DISJOINT) {
+                            th.relationship(suppliedItemType, NumericType.getInstance()) != DISJOINT) {
                         Expression cexp = makePromoterToDouble(exp);
                         if (cexp instanceof AtomicSequenceConverter) {
                             ((AtomicSequenceConverter) cexp).setRoleDiagnostic(role);
@@ -250,7 +251,7 @@ public class TypeChecker {
                         suppliedCard = -1;
 
                     } else if (rt == StandardNames.XS_FLOAT &&
-                            th.relationship(suppliedItemType, NumericType.getInstance()) != TypeHierarchy.DISJOINT &&
+                            th.relationship(suppliedItemType, NumericType.getInstance()) != DISJOINT &&
                             !th.isSubType(suppliedItemType, BuiltInAtomicType.DOUBLE)) {
                         Expression cexp = makePromoterToFloat(exp);
                         if (cexp instanceof AtomicSequenceConverter) {
@@ -296,8 +297,8 @@ public class TypeChecker {
 
             } else if (reqItemType instanceof FunctionItemType && !((FunctionItemType) reqItemType).isMapType()
                     && !((FunctionItemType) reqItemType).isArrayType()) {
-                int r = th.relationship(suppliedItemType, th.getGenericFunctionItemType());
-                if (r != TypeHierarchy.DISJOINT) {
+                Affinity r = th.relationship(suppliedItemType, th.getGenericFunctionItemType());
+                if (r != DISJOINT) {
                     if (!(suppliedItemType instanceof FunctionItemType)) {
                         exp = new ItemChecker(exp, th.getGenericFunctionItemType(), role);
                         suppliedItemType = th.getGenericFunctionItemType();
@@ -358,13 +359,13 @@ public class TypeChecker {
         // Try a static type check. We only throw it out if the call cannot possibly succeed, unless
         // pessimistic type checking is enabled
 
-        int relation = itemTypeOK ? TypeHierarchy.SUBSUMED_BY : th.relationship(suppliedItemType, reqItemType);
+        Affinity relation = itemTypeOK ? SUBSUMED_BY : th.relationship(suppliedItemType, reqItemType);
 
         if (reqCard == StaticProperty.ALLOWS_ZERO) {
             //  No point doing any item checking if no items are allowed in the result
-            relation = TypeHierarchy.SAME_TYPE;
+            relation = SAME_TYPE;
         }
-        if (relation == TypeHierarchy.DISJOINT) {
+        if (relation == DISJOINT) {
             // The item types may be disjoint, but if both the supplied and required types permit
             // an empty sequence, we can't raise a static error. Raise a warning instead.
             if (Cardinality.allowsZero(suppliedCard) &&
@@ -387,7 +388,7 @@ public class TypeChecker {
         // unless the value is already known in which case we might as well report
         // the error now.
 
-        if (!(relation == TypeHierarchy.SAME_TYPE || relation == TypeHierarchy.SUBSUMED_BY)) {
+        if (!(relation == SAME_TYPE || relation == SUBSUMED_BY)) {
             if (exp instanceof Literal) {
                 // Try a more detailed check, since for maps, functions etc getItemType() can be imprecise
                 if (req.matches(((Literal) exp).getValue(), th)) {
@@ -492,8 +493,8 @@ public class TypeChecker {
         // NOTE: we don't currently do any static inference regarding the content type
         if (!itemTypeOK) {
             suppliedItemType = exp.getItemType();
-            int relation = th.relationship(reqItemType, suppliedItemType);
-            itemTypeOK = relation == TypeHierarchy.SAME_TYPE || relation == TypeHierarchy.SUBSUMES;
+            Affinity relation = th.relationship(reqItemType, suppliedItemType);
+            itemTypeOK = relation == SAME_TYPE || relation == SUBSUMES;
         }
 
         // If both the cardinality and item type are statically OK, return now.
@@ -532,8 +533,8 @@ public class TypeChecker {
 
         // Try a static type check. We only throw it out if the call cannot possibly succeed.
 
-        int relation = th.relationship(suppliedItemType, reqItemType);
-        if (relation == TypeHierarchy.DISJOINT) {
+        Affinity relation = th.relationship(suppliedItemType, reqItemType);
+        if (relation == DISJOINT) {
             // The item types may be disjoint, but if both the supplied and required types permit
             // an empty sequence, we can't raise a static error. Raise a warning instead.
             if (Cardinality.allowsZero(suppliedCard) &&
@@ -558,7 +559,7 @@ public class TypeChecker {
         // unless the value is already known in which case we might as well report
         // the error now.
 
-        if (!(relation == TypeHierarchy.SAME_TYPE || relation == TypeHierarchy.SUBSUMED_BY)) {
+        if (!(relation == SAME_TYPE || relation == SUBSUMED_BY)) {
             Expression cexp = new ItemChecker(exp, reqItemType, role);
             cexp.adoptChildExpression(exp);
             exp = cexp;
@@ -595,10 +596,10 @@ public class TypeChecker {
 
     /*@Nullable*/
     public static XPathException testConformance(
-            Sequence<?> val, SequenceType requiredType, XPathContext context)
+            Sequence val, SequenceType requiredType, XPathContext context)
             throws XPathException {
         ItemType reqItemType = requiredType.getPrimaryType();
-        SequenceIterator<?> iter = val.iterate();
+        SequenceIterator iter = val.iterate();
         int count = 0;
         Item item;
         while ((item = iter.next()) != null) {
@@ -651,12 +652,12 @@ public class TypeChecker {
             return null;
         }
         ItemType t = exp.getItemType();
-        if (th.relationship(t, Type.NODE_TYPE) == TypeHierarchy.DISJOINT &&
-                th.relationship(t, BuiltInAtomicType.BOOLEAN) == TypeHierarchy.DISJOINT &&
-                th.relationship(t, BuiltInAtomicType.STRING) == TypeHierarchy.DISJOINT &&
-                th.relationship(t, BuiltInAtomicType.ANY_URI) == TypeHierarchy.DISJOINT &&
-                th.relationship(t, BuiltInAtomicType.UNTYPED_ATOMIC) == TypeHierarchy.DISJOINT &&
-                th.relationship(t, NumericType.getInstance()) == TypeHierarchy.DISJOINT &&
+        if (th.relationship(t, Type.NODE_TYPE) == DISJOINT &&
+                th.relationship(t, BuiltInAtomicType.BOOLEAN) == DISJOINT &&
+                th.relationship(t, BuiltInAtomicType.STRING) == DISJOINT &&
+                th.relationship(t, BuiltInAtomicType.ANY_URI) == DISJOINT &&
+                th.relationship(t, BuiltInAtomicType.UNTYPED_ATOMIC) == DISJOINT &&
+                th.relationship(t, NumericType.getInstance()) == DISJOINT &&
                 !(t instanceof JavaExternalObjectType)) {
             XPathException err = new XPathException(
                     "Effective boolean value is defined only for sequences containing " +

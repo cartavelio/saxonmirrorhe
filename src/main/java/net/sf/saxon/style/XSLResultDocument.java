@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -99,6 +99,7 @@ public class XSLResultDocument extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -109,13 +110,13 @@ public class XSLResultDocument extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
-        AttributeCollection atts = getAttributeList();
-
+    @Override
+    public void prepareAttributes() {
         String formatAttribute = null;
         String hrefAttribute = null;
         String validationAtt = null;
@@ -123,31 +124,33 @@ public class XSLResultDocument extends StyleElement {
         String useCharacterMapsAtt = null;
 
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            StructuredQName name = atts.getNodeName(a).getStructuredQName();
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            StructuredQName name = attName.getStructuredQName();
+            String value = att.getValue();
             String f = name.getClarkName();
             if (f.equals("format")) {
-                formatAttribute = Whitespace.trim(atts.getValue(a));
-                formatExpression = makeAttributeValueTemplate(formatAttribute, a);
+                formatAttribute = Whitespace.trim(value);
+                formatExpression = makeAttributeValueTemplate(formatAttribute, att);
             } else if (f.equals("href")) {
-                hrefAttribute = Whitespace.trim(atts.getValue(a));
-                href = makeAttributeValueTemplate(hrefAttribute, a);
+                hrefAttribute = Whitespace.trim(value);
+                href = makeAttributeValueTemplate(hrefAttribute, att);
             } else if (f.equals("validation")) {
-                validationAtt = Whitespace.trim(atts.getValue(a));
+                validationAtt = Whitespace.trim(value);
             } else if (f.equals("type")) {
-                typeAtt = Whitespace.trim(atts.getValue(a));
+                typeAtt = Whitespace.trim(value);
             } else if (f.equals("use-character-maps")) {
-                useCharacterMapsAtt = Whitespace.trim(atts.getValue(a));
+                useCharacterMapsAtt = Whitespace.trim(value);
             } else if (fans.contains(f) || (f.startsWith("{") && !StandardNames.SAXON_ASYCHRONOUS.equals(f))) {
                 // this is a serialization attribute
-                String val = atts.getValue(a);
+                String val = value;
                 if (!f.equals(SaxonOutputKeys.ITEM_SEPARATOR) && !f.equals(SaxonOutputKeys.NEWLINE)) {
-                    val = Whitespace.trim(atts.getValue(a));
+                    val = Whitespace.trim(value);
                 }
-                Expression exp = makeAttributeValueTemplate(val, a);
+                Expression exp = makeAttributeValueTemplate(val, att);
                 serializationAttributes.put(name, exp);
             } else if (name.getLocalPart().equals("asynchronous") && name.hasURI(NamespaceConstant.SAXON)) {
-                async = processBooleanAttribute("saxon:asynchronous", atts.getValue(a));
+                async = processBooleanAttribute("saxon:asynchronous", value);
                 if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
                     async = false;
                 } else if (!"EE".equals(getConfiguration().getEditionCode())) {
@@ -156,18 +159,14 @@ public class XSLResultDocument extends StyleElement {
                     async = false;
                 }
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
         if (formatAttribute != null) {
             if (formatExpression instanceof StringLiteral) {
-                try {
-                    formatQName = makeQName(((StringLiteral) formatExpression).getStringValue());
-                    formatExpression = null;
-                } catch (XPathException err) {
-                    compileError(err.getMessage(), "XTDE1460");
-                }
+                formatQName = makeQName(((StringLiteral) formatExpression).getStringValue(), "XTDE1460", "format");
+                formatExpression = null;
             } else {
                 getPrincipalStylesheetModule().setNeedsDynamicOutputProperties(true);
             }
@@ -197,6 +196,7 @@ public class XSLResultDocument extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         if (href != null && !getConfiguration().getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
             compileError("xsl:result-document is disabled when extension functions are disabled");
@@ -220,6 +220,7 @@ public class XSLResultDocument extends StyleElement {
     public static StructuredQName BUILD_TREE = new StructuredQName("", "", "build-tree");
 
     /*@Nullable*/
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 
         // Check that the call is not within xsl:variable or xsl:function.

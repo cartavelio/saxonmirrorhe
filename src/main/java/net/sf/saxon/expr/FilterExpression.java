@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,6 +11,7 @@ package net.sf.saxon.expr;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.functions.LocalName_1;
 import net.sf.saxon.functions.PositionAndLast;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
@@ -39,6 +40,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
     private boolean filterIsSingletonBoolean;   // true if the filter expression always returns a single boolean
     private boolean filterIsIndependent;        // true if the filter expression does not
     // depend on the context item or position. (It may depend on last()).
+    public boolean doneReorderingPredicates = false;
     public static final int FILTERED = 10000;
 
     public final static OperandRole FILTER_PREDICATE =
@@ -93,6 +95,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      * in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         return "filter";
     }
@@ -104,6 +107,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         // special case the expression B[. instance of x]
         if (getFilter() instanceof InstanceOfExpression &&
@@ -133,13 +137,14 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      * @return the base expression being filtered
      */
 
+    @Override
     public Expression getSelectExpression() {
         return getBase();
     }
 
     /**
-     * @return the boolean of filter is positional
-     * @see com.saxonica.ee.bytecode.FilterExpressionCompiler
+     * Ask if the filter is positional (used from bytecode)
+     * @return true filter is positional
      */
     public boolean isFilterIsPositional() {
         return filterIsPositional;
@@ -151,6 +156,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      * @return the subexpression evaluated in the context set by the controlling expression
      */
 
+    @Override
     public Expression getActionExpression() {
         return getFilter();
     }
@@ -197,6 +203,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
 
         setBase(getBase().simplify());
@@ -241,6 +248,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Configuration config = visitor.getConfiguration();
         final TypeHierarchy th = config.getTypeHierarchy();
@@ -301,6 +309,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         final Configuration config = visitor.getConfiguration();
         final Optimizer opt = visitor.obtainOptimizer();
@@ -335,12 +344,26 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             }
         }
 
+        // rewrite axis::*[local-name() = 'literal'] as axis::*:local (people write this a lot in XSLT 1.0)
+
+        if (getBase() instanceof AxisExpression
+                && ((AxisExpression)getBase()).getNodeTest() == NodeKindTest.ELEMENT
+                && getFilter() instanceof CompareToStringConstant
+                && ((CompareToStringConstant) getFilter()).getSingletonOperator() == Token.FEQ
+                && ((CompareToStringConstant) getFilter()).getLhsExpression().isCallOn(LocalName_1.class)
+                && ((SystemFunctionCall)((CompareToStringConstant) getFilter()).getLhsExpression()).getArg(0) instanceof ContextItemExpression) {
+            AxisExpression ax2 = new AxisExpression(((AxisExpression) getBase()).getAxis(),
+                                       new LocalNameTest(config.getNamePool(), Type.ELEMENT, ((CompareToStringConstant) getFilter()).getComparand()));
+            ExpressionTool.copyLocationInfo(this, ax2);
+            return ax2;
+        }
+
         // if the result of evaluating the filter cannot include numeric values, then we can use
         // its effective boolean value
 
         ItemType filterType = getFilter().getItemType();
         if (!th.isSubType(filterType, BuiltInAtomicType.BOOLEAN)
-                && th.relationship(filterType, NumericType.getInstance()) == TypeHierarchy.DISJOINT) {
+                && th.relationship(filterType, NumericType.getInstance()) == Affinity.DISJOINT) {
             Expression f = SystemFunction.makeCall("boolean", getRetainedStaticContext(), getFilter());
             setFilter(f.optimize(visitor, baseItemType));
         }
@@ -444,17 +467,17 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         // If there are two non-positional filters, consider changing their order based on the estimated cost
         // of evaluation, so we evaluate the cheapest predicates first
 
-        if (!filterIsPositional && getLhsExpression() instanceof FilterExpression &&
-                !((FilterExpression) getLhsExpression()).isFilterIsPositional()) {
-            Expression f2 = opt.reorderPredicates(this, visitor, contextItemType);
+        if (!filterIsPositional && !doneReorderingPredicates && !(getParentExpression() instanceof FilterExpression)) {
+            FilterExpression f2 = opt.reorderPredicates(this, visitor, contextItemType);
             if (f2 != this) {
+                f2.doneReorderingPredicates = true;
                 return f2;
             }
         }
 
-        final Sequence<?> sequence = tryEarlyEvaluation(visitor);
+        final Sequence sequence = tryEarlyEvaluation(visitor);
         if (sequence != null) {
-            GroundedValue<?> value = sequence.materialize();
+            GroundedValue value = sequence.materialize();
             return Literal.makeLiteral(value, this);
         }
 
@@ -508,7 +531,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
     }
 
 
-    private Sequence<?> tryEarlyEvaluation(ExpressionVisitor visitor) {
+    private Sequence tryEarlyEvaluation(ExpressionVisitor visitor) {
         // Attempt early evaluation of a filter expression if the base sequence is constant and the
         // filter depends only on the context. (This can't be done if, for example, the predicate uses
         // local variables, even variables declared within the predicate)
@@ -537,6 +560,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      * expression is the first operand of a path expression or filter expression
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         PathMap.PathMapNodeSet target = getBase().addToPathMap(pathMap, pathMapNodeSet);
         getFilter().addToPathMap(pathMap, target);
@@ -596,7 +620,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 return result;
             }
         }
-        if (th.isSubType(getFilter().getItemType(), NumericType.getInstance()) &&
+        if (NumericType.isNumericType(getFilter().getItemType()) &&
                 !Cardinality.allowsMany(getFilter().getCardinality()) &&
                 (getFilter().getDependencies() & StaticProperty.DEPENDS_ON_FOCUS) == 0) {
             Expression result = new SubscriptExpression(getBase(), getFilter());
@@ -612,10 +636,10 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             int operator = ((ComparisonExpression) getFilter()).getSingletonOperator();
             Expression comparand;
             if (lhs.isCallOn(PositionAndLast.Position.class)
-                    && th.isSubType(rhs.getItemType(), NumericType.getInstance())) {
+                    && NumericType.isNumericType(rhs.getItemType())) {
                 comparand = rhs;
             } else if (rhs.isCallOn(PositionAndLast.Position.class)
-                    && th.isSubType(lhs.getItemType(), NumericType.getInstance())) {
+                    && NumericType.isNumericType(lhs.getItemType())) {
                 comparand = lhs;
                 operator = Token.inverse(operator);
             } else {
@@ -917,7 +941,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 type instanceof AnyItemType ||
                 type.equals(BuiltInAtomicType.INTEGER) ||
                 type.equals(NumericType.getInstance()) ||
-                th.isSubType(type, NumericType.getInstance()) ||
+                NumericType.isNumericType(type) ||
                 isExplicitlyPositional(exp);
     }
 
@@ -941,6 +965,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      * filter predicate is guaranteed to select at most one item from the sequence being filtered
      */
 
+    @Override
     public int computeCardinality() {
         if (getFilter() instanceof Literal && ((Literal) getFilter()).getValue() instanceof NumericValue) {
             if (((NumericValue) ((Literal) getFilter()).getValue()).compareTo(1) == 0 &&
@@ -978,6 +1003,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      * @return the static properties of the expression, as a bit-significant value
      */
 
+    @Override
     public int computeSpecialProperties() {
         return getBase().getSpecialProperties();
     }
@@ -1004,6 +1030,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      * @return the hash code
      */
 
+    @Override
     public int computeHashCode() {
         return "FilterExpression".hashCode() + getBase().hashCode() + getFilter().hashCode();
     }
@@ -1051,7 +1078,8 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
 
         // Fast path where the filter value is independent of the focus
 
@@ -1070,19 +1098,19 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                         int pos = ((NumericValue)first).asSubscript();
                         if (pos != -1) {
                             if (getBase() instanceof VariableReference) {
-                                Sequence<?> baseVal = ((VariableReference) getBase()).evaluateVariable(context);
+                                Sequence baseVal = ((VariableReference) getBase()).evaluateVariable(context);
                                 if (baseVal instanceof MemoClosure) {
-                                    Item<?> m = ((MemoClosure) baseVal).itemAt(pos - 1);
+                                    Item m = ((MemoClosure) baseVal).itemAt(pos - 1);
                                     return m == null ? EmptyIterator.emptyIterator() : m.iterate();
                                 } else {
-                                    Item<?> m = baseVal.materialize().itemAt(pos - 1);
+                                    Item m = baseVal.materialize().itemAt(pos - 1);
                                     return m == null ? EmptyIterator.emptyIterator() : m.iterate();
                                 }
                             } else if (getBase() instanceof Literal) {
-                                Item<?> i = ((Literal) getBase()).getValue().itemAt(pos - 1);
+                                Item i = ((Literal) getBase()).getValue().itemAt(pos - 1);
                                 return i == null ? EmptyIterator.emptyIterator() : i.iterate();
                             } else {
-                                SequenceIterator<?> baseIter = getBase().iterate(context);
+                                SequenceIterator baseIter = getBase().iterate(context);
                                 return SubsequenceIterator.make(baseIter, pos, pos);
                             }
                         }
@@ -1121,7 +1149,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
 
         // get an iterator over the base nodes
 
-        SequenceIterator<?> baseIter = getBase().iterate(context);
+        SequenceIterator baseIter = getBase().iterate(context);
 
         // quick exit for an empty sequence
 
@@ -1130,9 +1158,9 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         }
 
         if (filterIsPositional && !filterIsSingletonBoolean) {
-            return new FilterIterator<>(baseIter, getFilter(), context);
+            return new FilterIterator(baseIter, getFilter(), context);
         } else {
-            return new FilterIterator.NonNumeric<>(baseIter, getFilter(), context);
+            return new FilterIterator.NonNumeric(baseIter, getFilter(), context);
         }
 
     }
@@ -1147,6 +1175,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         FilterExpression fe = new FilterExpression(getBase().copy(rebindings), getFilter().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, fe);
@@ -1190,6 +1219,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      * @param out the ExpressionPresenter to be used
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("filter", this);
         String flags = "";

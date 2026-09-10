@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -26,6 +26,7 @@ import net.sf.saxon.value.SequenceExtent;
 
 public class Reverse extends SystemFunction {
 
+    @Override
     public int getSpecialProperties(Expression[] arguments) {
         int baseProps = arguments[0].getSpecialProperties();
         if ((baseProps & StaticProperty.REVERSE_DOCUMENT_ORDER) != 0) {
@@ -70,17 +71,18 @@ public class Reverse extends SystemFunction {
 //    }
 
 
-    public static <T extends Item<?>> SequenceIterator<T> getReverseIterator(SequenceIterator<T> forwards) throws XPathException {
+    public static <T extends Item> SequenceIterator getReverseIterator(SequenceIterator forwards) throws XPathException {
         if (forwards instanceof ReversibleIterator) {
-            return ((ReversibleIterator<T>) forwards).getReverseIterator();
+            return ((ReversibleIterator) forwards).getReverseIterator();
         } else {
-            SequenceExtent<T> extent = new SequenceExtent<>(forwards);
+            SequenceExtent extent = new SequenceExtent(forwards);
             return extent.reverseIterate();
         }
     }
 
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         return SequenceTool.toLazySequence(getReverseIterator(arguments[0].iterate()));
     }
 
@@ -108,6 +110,7 @@ public class Reverse extends SystemFunction {
 
     }
 
+    @Override
     public String getStreamerName() {
         return "Reverse";
     }

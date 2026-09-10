@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -134,13 +134,13 @@ public class CharacterMap {
                     int s = UTF16CharacterSet.combinePair(c, d);
                     String rep = charMap.get(s);
                     if (rep == null) {
-                        buffer.append(c);
-                        buffer.append(d);
+                        buffer.cat(c);
+                        buffer.cat(d);
                     } else {
                         if (insertNulls) {
-                            buffer.append((char) 0);
+                            buffer.cat((char) 0);
                             buffer.append(rep);
-                            buffer.append((char) 0);
+                            buffer.cat((char) 0);
                         } else {
                             buffer.append(rep);
                         }
@@ -148,19 +148,19 @@ public class CharacterMap {
                 } else {
                     String rep = charMap.get(c);
                     if (rep == null) {
-                        buffer.append(c);
+                        buffer.cat(c);
                     } else {
                         if (insertNulls) {
-                            buffer.append((char) 0);
+                            buffer.cat((char) 0);
                             buffer.append(rep);
-                            buffer.append((char) 0);
+                            buffer.cat((char) 0);
                         } else {
                             buffer.append(rep);
                         }
                     }
                 }
             } else {
-                buffer.append(c);
+                buffer.cat(c);
             }
         }
         return buffer;

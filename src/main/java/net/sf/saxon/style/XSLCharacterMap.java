@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,12 +7,11 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.z.IntHashMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +56,7 @@ public class XSLCharacterMap extends StyleElement {
     public StructuredQName getCharacterMapName() {
         StructuredQName name = getObjectName();
         if (name == null) {
-            try {
-                return makeQName(getAttributeValue("", "name"));
-            } catch (Exception err) {
-                // the error will be reported later
-                return new StructuredQName("", "", "unnamedCharacterMap_" + hashCode());
-            }
+            return makeQName(getAttributeValue("", "name"), null, "name");
         }
         return name;
     }
@@ -83,25 +77,24 @@ public class XSLCharacterMap extends StyleElement {
 
     /**
      * Validate the attributes on this instruction
-     *
-     * @throws XPathException
      */
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         String name = null;
         use = null;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getDisplayName();
             if (f.equals("name")) {
-                name = Whitespace.trim(atts.getValue(a));
+                name = Whitespace.trim(value);
             } else if (f.equals("use-character-maps")) {
-                use = atts.getValue(a);
+                use = value;
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -110,16 +103,11 @@ public class XSLCharacterMap extends StyleElement {
             name = "unnamedCharacterMap_" + hashCode();
         }
 
-        try {
-            setObjectName(makeQName(name));
-        } catch (XPathException err) {
-            compileError(err.getMessage(), "XTSE0020");
-            name = "unnamedCharacterMap_" + hashCode();
-            setObjectName(new StructuredQName("", "", name));
-        }
+        setObjectName(makeQName(name, null, "name"));
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
 
         if (validated) {
@@ -132,18 +120,18 @@ public class XSLCharacterMap extends StyleElement {
 
         // check that the only children are xsl:output-character elements
 
-        iterateAxis(AxisInfo.CHILD).forEachOrFail(child -> {
+        for (NodeInfo child : children()) {
             if (!(child instanceof XSLOutputCharacter)) {
                 compileError("Only xsl:output-character is allowed within xsl:character-map", "XTSE0010");
             }
-        });
+        };
 
         // check that there isn't another character-map with the same name and import
         // precedence
 
         PrincipalStylesheetModule psm = getPrincipalStylesheetModule();
         ComponentDeclaration other = psm.getCharacterMap(getObjectName());
-        if (other != null && other.getSourceElement() != this) {
+        if (other != null /* error path: see character-map-027 */ && other.getSourceElement() != this) {
             if (decl.getPrecedence() == other.getPrecedence()) {
                 compileError("There are two character-maps with the same name and import precedence", "XTSE1580");
             } else if (decl.getPrecedence() < other.getPrecedence()) {
@@ -233,17 +221,13 @@ public class XSLCharacterMap extends StyleElement {
                 charmap.assemble(map);
             }
         }
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        while (true) {
-            Item child = kids.next();
-            if (child == null) {
-                return;
-            }
+        for (NodeInfo child : children()) {
             XSLOutputCharacter oc = (XSLOutputCharacter) child;
             map.put(oc.getCodePoint(), oc.getReplacementString());
         }
     }
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
         // no action
     }

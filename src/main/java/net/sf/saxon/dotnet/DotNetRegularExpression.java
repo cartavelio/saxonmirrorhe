@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,12 +11,13 @@ import cli.System.ArgumentException;
 import cli.System.Text.RegularExpressions.Match;
 import cli.System.Text.RegularExpressions.Regex;
 import cli.System.Text.RegularExpressions.RegexOptions;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.value.StringValue;
+
+import java.util.function.Function;
 
 /**
  * A compiled regular expression implemented using the .NET regex package
@@ -58,6 +59,7 @@ public class DotNetRegularExpression implements RegularExpression {
      * to matched subgroups.
      */
 
+    @Override
     public RegexIterator analyze(CharSequence input) {
         return new DotNetRegexIterator(input.toString(), pattern);
     }
@@ -69,6 +71,7 @@ public class DotNetRegularExpression implements RegularExpression {
      * @return true if the string matches, false otherwise
      */
 
+    @Override
     public boolean containsMatch(CharSequence input) {
         return pattern.IsMatch(input.toString());
     }
@@ -80,6 +83,7 @@ public class DotNetRegularExpression implements RegularExpression {
      * @return true if the string matches, false otherwise
      */
 
+    @Override
     public boolean matches(CharSequence input) {
         Match m = pattern.Match(input.toString());
         return (m.get_Success() && m.get_Length() == input.length());
@@ -96,6 +100,7 @@ public class DotNetRegularExpression implements RegularExpression {
      *          if the replacement string is invalid
      */
 
+    @Override
     public CharSequence replace(CharSequence input, CharSequence replacement) throws XPathException {
         // preprocess the replacement string: .NET uses $$ to represent $, and doesn't treat \ specially
         // The calling code will already have validated the replacement string, so we can assume for example
@@ -105,7 +110,7 @@ public class DotNetRegularExpression implements RegularExpression {
             final char ch = replacement.charAt(i);
             if (ch == '\\') {
                 if (replacement.charAt(i + 1) == '\\') {
-                    sb.append('\\');
+                    sb.cat('\\');
                 } else if (replacement.charAt(i + 1) == '$') {
                     sb.append("$$");
                 } else {
@@ -128,13 +133,29 @@ public class DotNetRegularExpression implements RegularExpression {
                 }
                 processGroupReference(n, sb);
             } else {
-                sb.append(ch);
+                sb.cat(ch);
             }
         }
         //System.err.println("original replacement string: " + replacement);
         //System.err.println("processed replacement string: " + sb);
         return pattern.Replace(input.toString(), sb.toString());
     }
+
+    /**
+     * Replace all substrings of a supplied input string that match the regular expression
+     * with a replacement string.
+     *
+     * @param input       the input string on which replacements are to be performed
+     * @param replacement a function that is called once for each matching substring, and
+     *                    that returns a replacement for that substring
+     * @return the result of performing the replacement
+     * @throws XPathException if the replacement string is invalid
+     */
+    @Override
+    public CharSequence replaceWith(CharSequence input, Function<CharSequence, CharSequence> replacement) throws XPathException {
+        throw new XPathException("saxon:replace-with() is not supported with the .NET regex engine");
+    }
+
 
     /**
      * Translate a group reference in the replacement string from XPath notation into .NET notation
@@ -167,7 +188,8 @@ public class DotNetRegularExpression implements RegularExpression {
      * @return a SequenceIterator containing the resulting tokens, as objects of type StringValue
      */
 
-    public SequenceIterator<StringValue> tokenize(CharSequence input) {
+    @Override
+    public AtomicIterator tokenize(CharSequence input) {
         return new DotNetTokenIterator(input, pattern);
     }
 
@@ -241,7 +263,6 @@ public class DotNetRegularExpression implements RegularExpression {
             if (inFlags.charAt(i) == 'x') {
                 return true;
             }
-            ;
         }
         return false;
     }
@@ -258,7 +279,6 @@ public class DotNetRegularExpression implements RegularExpression {
             if (inFlags.charAt(i) == 'i') {
                 return true;
             }
-            ;
         }
         return false;
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -29,6 +29,7 @@ public final class NoNamespaceName implements NodeName {
      *
      * @return the prefix. Returns the empty string if the name is unprefixed.
      */
+    @Override
     public String getPrefix() {
         return "";
     }
@@ -38,6 +39,7 @@ public final class NoNamespaceName implements NodeName {
      *
      * @return the URI. Returns the empty string to represent the no-namespace
      */
+    @Override
     public String getURI() {
         return "";
     }
@@ -47,6 +49,7 @@ public final class NoNamespaceName implements NodeName {
      *
      * @return the local part of the QName
      */
+    @Override
     public String getLocalPart() {
         return localName;
     }
@@ -56,6 +59,7 @@ public final class NoNamespaceName implements NodeName {
      *
      * @return the lexical QName
      */
+    @Override
     public String getDisplayName() {
         return localName;
     }
@@ -65,17 +69,9 @@ public final class NoNamespaceName implements NodeName {
      *
      * @return the name in the form of a StructuredQName
      */
+    @Override
     public StructuredQName getStructuredQName() {
         return new StructuredQName("", "", getLocalPart());
-    }
-
-    /**
-     * Test whether this name is in the same namespace as another name
-     *
-     * @return true if the two names are in the same namespace
-     */
-    public boolean isInSameNamespace(NodeName other) {
-        return other.getURI().isEmpty();
     }
 
     /**
@@ -84,6 +80,7 @@ public final class NoNamespaceName implements NodeName {
      * @param ns the namespace to be tested against
      * @return true if the name is in the specified namespace
      */
+    @Override
     public boolean hasURI(String ns) {
         return ns.isEmpty();
     }
@@ -94,6 +91,7 @@ public final class NoNamespaceName implements NodeName {
      *
      * @return the corresponding NamespaceBinding
      */
+    @Override
     public NamespaceBinding getNamespaceBinding() {
         return NamespaceBinding.DEFAULT_UNDECLARATION;
     }
@@ -104,6 +102,7 @@ public final class NoNamespaceName implements NodeName {
      * @return true if the methods getFingerprint() and getNameCode() will
      *         return a result other than -1
      */
+    @Override
     public boolean hasFingerprint() {
         return nameCode != -1;
     }
@@ -114,6 +113,7 @@ public final class NoNamespaceName implements NodeName {
      *
      * @return the fingerprint if known; otherwise -1
      */
+    @Override
     public int getFingerprint() {
         return nameCode & NamePool.FP_MASK;
     }
@@ -124,6 +124,7 @@ public final class NoNamespaceName implements NodeName {
      * @param namePool the NamePool used to allocate the name
      * @return a nameCode for this name, newly allocated if necessary
      */
+    @Override
     public int obtainFingerprint(NamePool namePool) {
         if (nameCode == -1) {
             return nameCode = namePool.allocateFingerprint("", localName);
@@ -163,6 +164,7 @@ public final class NoNamespaceName implements NodeName {
      * @param other the value to compare with
      * @return true if the two values are indentical, false otherwise
      */
+    @Override
     public boolean isIdentical(IdentityComparable other) {
         return other instanceof NodeName &&
                 this.equals(other) &&
@@ -174,6 +176,7 @@ public final class NoNamespaceName implements NodeName {
      *
      * @return a hashCode suitable for use when testing for identity.
      */
+    @Override
     public int identityHashCode() {
         return hashCode() ^ getPrefix().hashCode();
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -29,15 +29,18 @@ public abstract class ImmutableHashTrieMap<K, V>
     }
 
 
+    @Override
     public ImmutableHashTrieMap<K, V> put(K key, V value) {
         return put(0, key, value);
     }
 
 
+    @Override
     public ImmutableHashTrieMap<K, V> remove(K key) {
         return remove(0, key);
     }
 
+    @Override
     public V get(K key) {
         return get(0, key);
     }
@@ -91,6 +94,7 @@ public abstract class ImmutableHashTrieMap<K, V>
             return null;
         }
 
+        @Override
         public Iterator<Tuple2<K, V>> iterator() {
             return Collections.<Tuple2<K, V>>emptySet().iterator();
         }
@@ -152,6 +156,7 @@ public abstract class ImmutableHashTrieMap<K, V>
             return null;
         }
 
+        @Override
         public Iterator<Tuple2<K, V>> iterator() {
             return Collections.singleton(new Tuple2<>(key, value)).iterator();
         }
@@ -244,21 +249,25 @@ public abstract class ImmutableHashTrieMap<K, V>
             return null;
         }
 
+        @Override
         public Iterator<Tuple2<K, V>> iterator() {
             return new Iterator<Tuple2<K, V>>() {
                 private ImmutableList<Tuple2<K, V>> curList =
                         ListHashNode.this.entries;
 
+                @Override
                 public boolean hasNext() {
                     return !curList.isEmpty();
                 }
 
+                @Override
                 public Tuple2<K, V> next() {
                     Tuple2<K, V> retVal = curList.head();
                     curList = curList.tail();
                     return retVal;
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
@@ -392,12 +401,14 @@ public abstract class ImmutableHashTrieMap<K, V>
             return subnodes[bucket].get(shift + BITS, key);
         }
 
+        @Override
         public Iterator<Tuple2<K, V>> iterator() {
             return new Iterator<Tuple2<K, V>>() {
                 private int bucket = 0;
                 private Iterator<Tuple2<K, V>> childIterator =
                         subnodes[0].iterator();
 
+                @Override
                 public boolean hasNext() {
                     if (childIterator.hasNext()) {
                         return true;
@@ -413,10 +424,12 @@ public abstract class ImmutableHashTrieMap<K, V>
                     return false;
                 }
 
+                @Override
                 public Tuple2<K, V> next() {
                     return childIterator.next();
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
@@ -471,6 +484,7 @@ public abstract class ImmutableHashTrieMap<K, V>
             return null;
         }
 
+        @Override
         public Iterator<Tuple2<K, V>> iterator() {
             return subnode.iterator();
         }

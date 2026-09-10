@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -105,6 +105,8 @@ public class FormatDate extends SystemFunction implements Callable {
         Numberer numberer = config.makeNumberer(language, place);
         FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
         if (!languageDefaulted && numberer.getClass() == Numberer_en.class && !language.startsWith("en")) {
+            // See bug #4582. We're not outputting the prefix in cases where ICU is used for numbering.
+            // But the test on numberer.defaultedLocale() below may catch it...
             sb.append("[Language: en]");
         }
         if (numberer.defaultedLocale() != null) {
@@ -115,7 +117,7 @@ public class FormatDate extends SystemFunction implements Callable {
         int i = 0;
         while (true) {
             while (i < format.length() && format.charAt(i) != '[') {
-                sb.append(format.charAt(i));
+                sb.cat(format.charAt(i));
                 if (format.charAt(i) == ']') {
                     i++;
                     if (i == format.length() || format.charAt(i) != ']') {
@@ -133,7 +135,7 @@ public class FormatDate extends SystemFunction implements Callable {
             // look for '[['
             i++;
             if (i < format.length() && format.charAt(i) == '[') {
-                sb.append('[');
+                sb.cat('[');
                 i++;
             } else {
                 int close = i < format.length() ? format.indexOf("]", i) : -1;
@@ -144,8 +146,8 @@ public class FormatDate extends SystemFunction implements Callable {
                     throw e;
                 }
                 String componentFormat = format.substring(i, close);
-                sb.append(formatComponent(value, Whitespace.removeAllWhitespace(componentFormat),
-                                          numberer, place, context));
+                sb.cat(formatComponent(value, Whitespace.removeAllWhitespace(componentFormat),
+                                       numberer, place, context));
                 i = close + 1;
             }
         }
@@ -496,9 +498,9 @@ public class FormatDate extends SystemFunction implements Callable {
                 if (primary.endsWith("1") && min != primary.length()) {
                     FastStringBuffer sb = new FastStringBuffer(min + 1);
                     for (int i = 1; i < min; i++) {
-                        sb.append('0');
+                        sb.cat('0');
                     }
-                    sb.append('1');
+                    sb.cat('1');
                     primary = sb.toString();
                 }
             }
@@ -803,7 +805,8 @@ public class FormatDate extends SystemFunction implements Callable {
     }
 
 
-    public ZeroOrOne<StringValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
         CalendarValue value = (CalendarValue) arguments[0].head();
         if (value == null) {
             return ZeroOrOne.empty();
@@ -832,7 +835,7 @@ public class FormatDate extends SystemFunction implements Callable {
         if (calendarVal != null) {
             result = adjustCalendar(calendarVal, result, context);
         }
-        return new ZeroOrOne<>(new StringValue(result));
+        return new ZeroOrOne(new StringValue(result));
     }
 
 }

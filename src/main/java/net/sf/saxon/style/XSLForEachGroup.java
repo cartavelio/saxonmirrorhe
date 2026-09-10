@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,7 +16,8 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -48,6 +49,7 @@ public final class XSLForEachGroup extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -56,6 +58,7 @@ public final class XSLForEachGroup extends StyleElement {
      * Specify that xsl:sort is a permitted child
      */
 
+    @Override
     protected boolean isPermittedChild(StyleElement child) {
         return child instanceof XSLSort;
     }
@@ -66,13 +69,13 @@ public final class XSLForEachGroup extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
-
-        AttributeCollection atts = getAttributeList();
+    @Override
+    public void prepareAttributes() {
 
         String selectAtt = null;
         String groupByAtt = null;
@@ -81,32 +84,45 @@ public final class XSLForEachGroup extends StyleElement {
         String endingAtt = null;
         String collationAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
-            } else if (f.equals("group-by")) {
-                groupByAtt = atts.getValue(a);
-                groupBy = makeExpression(groupByAtt, a);
-            } else if (f.equals("group-adjacent")) {
-                groupAdjacentAtt = atts.getValue(a);
-                groupAdjacent = makeExpression(groupAdjacentAtt, a);
-            } else if (f.equals("group-starting-with")) {
-                startingAtt = atts.getValue(a);
-            } else if (f.equals("group-ending-with")) {
-                endingAtt = atts.getValue(a);
-            } else if (f.equals("collation")) {
-                collationAtt = Whitespace.trim(atts.getValue(a));
-                collationName = makeAttributeValueTemplate(collationAtt, a);
-            } else if (f.equals("bind-group")) {
-                compileError("The bind-group attribute has been dropped from the XSLT 3.0 specification", "XTSE0090");
-            } else if (f.equals("bind-grouping-key")) {
-                compileError("The bind-grouping-key attribute has been dropped from the XSLT 3.0 specification", "XTSE0090");
-            } else if (f.equals("composite")) {
-                composite = processBooleanAttribute("composite", atts.getValue(a));
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
+            switch (f) {
+                case "select":
+                    selectAtt = value;
+                    select = makeExpression(selectAtt, att);
+                    break;
+                case "group-by":
+                    groupByAtt = value;
+                    groupBy = makeExpression(groupByAtt, att);
+                    break;
+                case "group-adjacent":
+                    groupAdjacentAtt = value;
+                    groupAdjacent = makeExpression(groupAdjacentAtt, att);
+                    break;
+                case "group-starting-with":
+                    startingAtt = value;
+                    break;
+                case "group-ending-with":
+                    endingAtt = value;
+                    break;
+                case "collation":
+                    collationAtt = Whitespace.trim(value);
+                    collationName = makeAttributeValueTemplate(collationAtt, att);
+                    break;
+                case "bind-group":
+                    compileError("The bind-group attribute has been dropped from the XSLT 3.0 specification", "XTSE0090");
+                    break;
+                case "bind-grouping-key":
+                    compileError("The bind-grouping-key attribute has been dropped from the XSLT 3.0 specification", "XTSE0090");
+                    break;
+                case "composite":
+                    composite = processBooleanAttribute("composite", value);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
 
@@ -165,6 +181,7 @@ public final class XSLForEachGroup extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         checkSortComesFirst(false);
         TypeChecker tc = getConfiguration().getTypeChecker(false);
@@ -216,6 +233,7 @@ public final class XSLForEachGroup extends StyleElement {
 
     }
 
+    @Override
     public Expression compile(Compilation compilation, ComponentDeclaration decl) throws XPathException {
 
         StringCollator collator = null;

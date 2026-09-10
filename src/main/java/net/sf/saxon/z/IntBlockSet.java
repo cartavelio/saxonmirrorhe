@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,22 +35,32 @@ public class IntBlockSet implements IntSet {
         this.endPoint = endPoint;
     }
 
+    @Override
     public IntSet copy() {
         return this;
     }
 
+    @Override
     public IntSet mutableCopy() {
         return new IntRangeSet(new int[]{startPoint}, new int[]{endPoint});
     }
 
+    @Override
+    public boolean isMutable() {
+        return false;
+    }
+
+    @Override
     public int size() {
         return endPoint - startPoint;
     }
 
+    @Override
     public boolean isEmpty() {
         return size() == 0;
     }
 
+    @Override
     public boolean contains(int value) {
         return value >= startPoint && value <= endPoint;
     }
@@ -60,10 +70,12 @@ public class IntBlockSet implements IntSet {
      * @throws UnsupportedOperationException (always)
      */
 
+    @Override
     public boolean remove(int value) {
         throw new UnsupportedOperationException("remove");
     }
 
+    @Override
     public void clear() {
         throw new UnsupportedOperationException("clear");
     }
@@ -75,6 +87,7 @@ public class IntBlockSet implements IntSet {
      * @throws UnsupportedOperationException (always)
      */
 
+    @Override
     public boolean add(int value) {
         throw new UnsupportedOperationException("add");
     }
@@ -83,6 +96,7 @@ public class IntBlockSet implements IntSet {
      * Get an iterator over the values
      */
 
+    @Override
     public IntIterator iterator() {
         return mutableCopy().iterator();
     }

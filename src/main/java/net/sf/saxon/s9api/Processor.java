@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,16 +9,16 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
-import net.sf.saxon.event.NamespaceReducer;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.event.TreeReceiver;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.sort.RuleBasedSubstringMatcher;
 import net.sf.saxon.expr.sort.SimpleCollation;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
@@ -71,9 +71,12 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create a Processor based on an existing Configuration. This constructor is useful for transition,
-     * when new components of an application are to use s9api interfaces but existing components use lower-level
-     * interfaces.
+     * Create a Processor based on an existing Configuration. This constructor is useful
+     * when new components of an application are to use s9api interfaces but existing
+     * components use older interfaces (for example, JAXP). It is also useful in cases where,
+     * for example, multiple configurations need to be built using the same configuration file
+     * or sharing license data: in such cases, the Configuration can be manually built, and
+     * then wrapped in a Processor.
      *
      * @param config the Configuration to be used by this processor
      * @since 9.3
@@ -207,6 +210,21 @@ public class Processor implements Configuration.ApiProvider {
         Serializer s = new Serializer(this);
         s.setOutputFile(file);
         return s;
+    }
+
+    /**
+     * Get a new {@link Push} provider. The returned {@link Push} object allows the client
+     * application to construct events (such as {@code startElement()}, {@code text()},
+     * and {@code endElement()}) and send them to a specified {@link Destination}.
+     *
+     * @return a new recipient of {@link Push} events.
+     * @throws SaxonApiException if the {@link Destination} is not able to handle the request.
+     */
+
+    public Push newPush(Destination destination) throws SaxonApiException {
+        PipelineConfiguration pipe = getUnderlyingConfiguration().makePipelineConfiguration();
+        SerializationProperties props = new SerializationProperties();
+        return new PushToReceiver(destination.getReceiver(pipe, props));
     }
 
     /**
@@ -471,12 +489,11 @@ public class Processor implements Configuration.ApiProvider {
                 ((Serializer)destination).serializeXdmValue(value);
             } else {
                 Receiver out = destination.getReceiver(config.makePipelineConfiguration(), config.obtainDefaultSerializationProperties());
-                out = new NamespaceReducer(out);
-                TreeReceiver tree = new TreeReceiver(out);
+                ComplexContentOutputter tree = new ComplexContentOutputter(out);
                 tree.open();
-                tree.startDocument(0);
+                tree.startDocument(ReceiverOption.NONE);
                 for (XdmItem item : value) {
-                    tree.append(item.getUnderlyingValue(), ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.ALL_NAMESPACES);
+                    tree.append(item.getUnderlyingValue(), Loc.NONE, ReceiverOption.ALL_NAMESPACES);
                 }
                 tree.endDocument();
                 tree.close();
@@ -625,11 +642,11 @@ public class Processor implements Configuration.ApiProvider {
         public ExtensionFunctionCall makeCallExpression() {
             return new ExtensionFunctionCall() {
                 @Override
-                public Sequence<?> call(
+                public Sequence call(
                         /*@NotNull*/ XPathContext context, Sequence[] arguments) throws XPathException {
                     XdmValue[] args = new XdmValue[arguments.length];
                     for (int i = 0; i < args.length; i++) {
-                        GroundedValue<?> val = (GroundedValue<?>)arguments[i].materialize();
+                        GroundedValue val = (GroundedValue)arguments[i].materialize();
                         args[i] = XdmValue.wrap(val);
                     }
                     try {

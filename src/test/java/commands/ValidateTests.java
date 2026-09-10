@@ -2,22 +2,32 @@ package commands;
 
 import com.saxonica.Validate;
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XdmAtomicValue;
 import net.sf.saxon.s9api.XdmItem;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JUnit tests on Validate Command Line options
  */
-public class ValidateTests extends TestCase {
+public class ValidateTests {
+    private static String TEMPDIR = ConfigTest.DATA_DIR + "temp/";
 
+    public void setUp() {
+        System.err.println("TEMP:" + TEMPDIR);
+    }
+
+    @Test
     public void testSchemaValidation() {
 
-        String args[] = {
+        String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
                 "-t"};
         try {
@@ -29,9 +39,10 @@ public class ValidateTests extends TestCase {
         }
     }
 
+    @Test
     public void testBasicInstanceValidation() {
 
-        String args[] = {
+        String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
                 "-t"};
@@ -44,11 +55,12 @@ public class ValidateTests extends TestCase {
         }
     }
 
+    @Test
     public void testExportSCM() {
 
-        String args[] = {
+        String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
-                "-scmout:" + ConfigTest.DATA_DIR + "books.scm",
+                "-scmout:" + TEMPDIR + "books.scm",
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
@@ -59,10 +71,11 @@ public class ValidateTests extends TestCase {
         }
     }
 
+    @Test
     public void testImportSCM() {
 
-        String args[] = {
-                "-scmin:" + ConfigTest.DATA_DIR + "books.scm",
+        String[] args = {
+                "-scmin:" + TEMPDIR + "books.scm",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
                 "-t"};
         try {
@@ -74,8 +87,9 @@ public class ValidateTests extends TestCase {
         }
     }
 
+    @Test
     public void testValidationWithParams() {
-        String args[] = {
+        String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "schema-with-param.xsd",
                 "-s:" + ConfigTest.DATA_DIR + "birthdays.xml",
                 "-xsdversion:1.1",
@@ -91,8 +105,9 @@ public class ValidateTests extends TestCase {
         }
     }
 
+    @Test
     public void testValidationFailureWithParams() {
-        String args[] = {
+        String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "schema-with-param.xsd",
                 "-s:" + ConfigTest.DATA_DIR + "birthdays.xml",
                 "-xsdversion:1.1",
@@ -108,8 +123,9 @@ public class ValidateTests extends TestCase {
         }
     }
 
+    @Test
     public void testTypeAlternativeWithParams() {
-        String args[] = {
+        String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "schema-with-param.xsd",
                 "-s:" + ConfigTest.DATA_DIR + "stayAtHome.xml",
                 "-xsdversion:1.1",
@@ -124,8 +140,9 @@ public class ValidateTests extends TestCase {
         }
     }
 
+    @Test
     public void testTypeAlternativeWithParams2() {
-        String args[] = {
+        String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "schema-with-param.xsd",
                 "-s:" + ConfigTest.DATA_DIR + "goToWork.xml",
                 "-xsdversion:1.1",
@@ -140,8 +157,9 @@ public class ValidateTests extends TestCase {
         }
     }
 
+    @Test
     public void testTypeAlternativeWithParamsFailure() {
-        String args[] = {
+        String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "schema-with-param.xsd",
                 "-s:" + ConfigTest.DATA_DIR + "goToWork.xml",
                 "-xsdversion:1.1",
@@ -156,21 +174,22 @@ public class ValidateTests extends TestCase {
         }
     }
 
+    @Test
     public void testStatsReporting() {
 
-        new File(ConfigTest.DATA_DIR + "validation-report.xml").delete();
+        new File(TEMPDIR + "validation-report.xml").delete();
 
-        String args[] = {
+        String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-stats:" + ConfigTest.DATA_DIR + "validation-report.xml",
+                "-stats:" + TEMPDIR + "validation-report.xml",
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
-            assertTrue(rc == 0);
+            assertEquals(0, rc);
             Processor proc = new Processor(false);
             XdmItem report = proc.newDocumentBuilder().build(
-                    new File(ConfigTest.DATA_DIR + "validation-report.xml"));
+                    new File(TEMPDIR + "validation-report.xml"));
             XPathCompiler compiler = proc.newXPathCompiler();
             XdmAtomicValue result = (XdmAtomicValue) compiler.evaluateSingle(
                     "count(/schemaCoverage/component)", report);

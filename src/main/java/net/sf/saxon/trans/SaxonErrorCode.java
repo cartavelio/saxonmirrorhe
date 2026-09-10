@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -41,6 +41,12 @@ public class SaxonErrorCode {
     public static final String SXCH0004 = "SXCH0004";
 
     /**
+     * SXCH0005: invalid pseudo-attribute syntax
+     */
+
+    public static final String SXCH0005 = "SXCH0005";
+
+    /**
      * SXRE0001: stack overflow within regular expression evaluation
      */
 
@@ -58,12 +64,6 @@ public class SaxonErrorCode {
      */
 
     public static final String SXSE0002 = "SXSE0002";
-
-    /**
-     * SXST0001: static errors found during JIT compilation of template rule
-     */
-
-    public static final String SXST0001 = "SXST0001";
 
     /**
      * SXXP0003: error reported by XML parser while parsing source document. This error code means that an
@@ -106,6 +106,12 @@ public class SaxonErrorCode {
      */
 
     public static final String SXXP0005 = "SXXP0005";
+
+    /**
+     * SXXP0006: general error in schema processing/validation
+     */
+
+    public static final String SXXP0006 = "SXXP0006";
 
     /**
      * SXSQ0001: value of argument to SQL instruction is not a JDBC Connection object
@@ -174,6 +180,12 @@ public class SaxonErrorCode {
     public static final String SXJM0002 = "SXJM0002";
 
     /**
+     * SXOR0001: XSD saxon:ordered constraint not satisfied
+     */
+
+    public static final String SXOR0001 = "SXOR0001";
+
+    /**
      * SXJX0001: integer in input to octets-to-base64Binary or octets-to-hexBinary is out of range 0-255
      */
 
@@ -228,10 +240,16 @@ public class SaxonErrorCode {
     public static final String SXRD0003 = "SXRD0003";
 
     /**
-     * SXRD0004: Failure to create an output stream for an output destination
+     * SXRD0004: Unwritable file given as the result destination
      */
 
     public static final String SXRD0004 = "SXRD0004";
+
+    /**
+     * SXST0001: Static error in template rule, found during JIT compilation
+     */
+
+    public static final String SXST0001 = "SXST0001";
 
     /**
      * SXST0060: Template in a streaming mode is not streamable

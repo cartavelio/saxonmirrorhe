@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,11 +13,12 @@ package net.sf.saxon;
 
 public final class Version {
 
-    private static final int[] STRUCTURED_VERSION = {9, 9, 1, 8};
-    private static final String VERSION = "9.9.1.8";
-    private static final String BUILD = "030415"; //mmddhh
-    private static final String RELEASE_DATE = "2020-10-22";
-    private static final String MAJOR_RELEASE_DATE = "2018-09-27";
+    private static final int MAJOR_VERSION = 10;
+    private static final int MINOR_VERSION = 3;
+    private static final int BUILD = 102815; //mddhh
+    private static final String MAJOR_RELEASE_DATE = "2020-03-16";
+    private static final String MINOR_RELEASE_DATE = "2020-10-28";
+
 
     private Version() {
         // class is never instantiated
@@ -45,10 +46,10 @@ public final class Version {
     }
 
     /**
-     * Get the specific variant and version number of the product
+     * Get the version number of the schema-aware version of the product
      *
-     * @param edition the Saxon edition code, e.g. "EE", "HE", or "JS"
-     * @return the version number of this version of Saxon, as a string, for example "EE 9.9.0.1"
+     * @param edition the Saxon edition code, e.g. "EE" or "JS"
+     * @return the version number of this version of Saxon, as a string
      */
 
     public static String getProductVariantAndVersion(String edition) {
@@ -58,23 +59,25 @@ public final class Version {
     /**
      * Get the user-visible version number of this version of the product
      *
-     * @return the version number of this version of Saxon, as a string: for example "9.9.0.1"
+     * @return the version number of this version of Saxon, as a string: for example "10.1"
      */
 
     public static String getProductVersion() {
-        return VERSION;
+        return MAJOR_VERSION + "." + MINOR_VERSION;
     }
 
     /**
-     * Get the four components of the structured version number. This is used in the .NET product
-     * to locate an assembly in the dynamic assembly cache: the assumption is that the third
-     * and fourth components represent implementation changes rather than interface changes
+     * Get the components of the structured version number. This is used in the .NET product
+     * to locate an assembly in the dynamic assembly cache; it is also used by XQJ. The caller can assume
+     * that there will always be at least two components. The current implementation in Saxon 10
+     * returns [10, n, b] where n is the minor version number (initially 0, incremented for each
+     * maintenance release), and b is the build number, which is typically a six-digit number.
      *
-     * @return the four components of the version number, as an array: for example {9, 0, 1, 1}
+     * @return the three components of the version number, as an array: for example {9, 0, 1, 1}
      */
 
     public static int[] getStructuredVersionNumber() {
-        return STRUCTURED_VERSION;
+        return new int[]{MAJOR_VERSION, MINOR_VERSION, BUILD};
     }
 
     /**
@@ -85,7 +88,7 @@ public final class Version {
      */
 
     public static String getReleaseDate() {
-        return RELEASE_DATE;
+        return MINOR_RELEASE_DATE;
     }
 
     /**
@@ -157,16 +160,13 @@ public final class Version {
             platform = new net.sf.saxon.dotnet.DotNetPlatform();
         //#endif
 //#else
-      //#if PE!=true && EE!=true && DOTNET != true && SAXONC == true
-            platform = new net.sf.saxon.option.cpp.NativePlatform();
-       //#else
             platform = new net.sf.saxon.java.JavaPlatform();
-        //#endif
+
         //#if PE==true && DOTNET != true && SAXONC == true
-                platform = new com.saxonica.config.NativePlatformPE();
+                platform = new com.saxonica.config.JavaPlatformC();
         //#endif
         //#if EE==true && DOTNET != true && SAXONC==true
-                platform = new com.saxonica.config.NativePlatformPE();
+                platform = new com.saxonica.config.JavaPlatformC();
         //#endif
         //#if PE==true && SAXONC != true
             platform = new com.saxonica.config.JavaPlatformPE();

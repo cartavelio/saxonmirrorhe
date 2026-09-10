@@ -1,13 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 package net.sf.saxon.functions;
-
-//import com.saxonica.expr.JavaExtensionFunctionCall;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
@@ -19,6 +17,7 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -93,6 +92,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      *          with the declared argument types of the function.
      */
 
+    @Override
     public void checkArguments(/*@NotNull*/ ExpressionVisitor visitor) throws XPathException {
         ExtensionFunctionDefinition definition = function.getDefinition();
         checkArgumentCount(definition.getMinimumNumberOfArguments(), definition.getMaximumNumberOfArguments());
@@ -129,6 +129,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Expression exp = super.typeCheck(visitor, contextInfo);
         if (exp instanceof IntegratedFunctionCall) {
@@ -151,6 +152,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      * @return for this class: always null
      */
 
+    @Override
     public Expression preEvaluate(ExpressionVisitor visitor) {
         return this;
     }
@@ -168,6 +170,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return resultType.getPrimaryType();
     }
@@ -180,6 +183,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      *         {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ZERO_OR_MORE}
      */
 
+    @Override
     protected int computeCardinality() {
         return resultType.getCardinality();
     }
@@ -194,6 +198,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      *         dependencies. The flags are documented in class net.sf.saxon.value.StaticProperty
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         ExtensionFunctionDefinition definition = function.getDefinition();
         return definition.dependsOnFocus() ? StaticProperty.DEPENDS_ON_FOCUS : 0;
@@ -208,6 +213,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      * @return the special properties, as a bit-significant integer
      */
 
+    @Override
     protected int computeSpecialProperties() {
         ExtensionFunctionDefinition definition = function.getDefinition();
         return definition.hasSideEffects() ? StaticProperty.HAS_SIDE_EFFECTS : StaticProperty.NO_NODES_NEWLY_CREATED;
@@ -221,6 +227,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ExtensionFunctionCall newCall = function.getDefinition().makeCallExpression();
         newCall.setDefinition(function.getDefinition());
@@ -242,10 +249,11 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("ifCall", this);
         out.emitAttribute("name", getFunctionName());
-        out.emitAttribute("type", resultType.toExportString());
+        out.emitAttribute("type", resultType.toAlphaCode());
         for (Operand o : operands()) {
             o.getChildExpression().export(out);
         }
@@ -269,7 +277,8 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(final XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(final XPathContext context) throws XPathException {
         ExtensionFunctionDefinition definition = function.getDefinition();
         Sequence[] argValues = new Sequence[getArity()];
         for (int i = 0; i < argValues.length; i++) {
@@ -279,7 +288,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         final Configuration config = context.getConfiguration();
         final TypeHierarchy th = config.getTypeHierarchy();
 
-        SequenceIterator<?> result;
+        SequenceIterator result;
         try {
             result = function.call(context, argValues).iterate();
         } catch (XPathException e) {
@@ -289,23 +298,23 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         if (!definition.trustResultType()) {
             int card = resultType.getCardinality();
             if (card != StaticProperty.ALLOWS_ZERO_OR_MORE) {
-                result = new CardinalityCheckingIterator<>(result, card, role, getLocation());
+                result = new CardinalityCheckingIterator(result, card, role, getLocation());
             }
             final ItemType type = resultType.getPrimaryType();
             if (type != AnyItemType.getInstance()) {
-                result = new ItemMappingIterator<>(result,
-                                                   (ItemMappingFunction<Item<?>, Item<?>>) item -> {
-                                                       if (!type.matches(item, th)) {
-                                                           String msg = role.composeErrorMessage(type, item, th);
-                                                           XPathException err = new XPathException(msg, "XPTY0004");
-                                                           err.setLocation(getLocation());
-                                                           throw err;
-                                                       }
-                                                       return item;
-                                                   }, true);
+                result = new ItemMappingIterator(result,
+                                                 item -> {
+                                                     if (!type.matches(item, th)) {
+                                                         String msg = role.composeErrorMessage(type, item, th);
+                                                         XPathException err = new XPathException(msg, "XPTY0004");
+                                                         err.setLocation(getLocation());
+                                                         throw err;
+                                                     }
+                                                     return item;
+                                                 }, true);
             }
-            if (th.relationship(type, AnyNodeTest.getInstance()) != TypeHierarchy.DISJOINT) {
-                result = new ItemMappingIterator<>(
+            if (th.relationship(type, AnyNodeTest.getInstance()) != Affinity.DISJOINT) {
+                result = new ItemMappingIterator(
                         result,
                         new ConfigurationCheckingFunction(context.getConfiguration()), true);
             }
@@ -325,6 +334,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      *          expression
      */
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         Sequence[] argValues = new Sequence[getArity()];
         for (int i = 0; i < argValues.length; i++) {
@@ -338,7 +348,8 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         }
     }
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         return function.call(context, arguments);
     }
 
@@ -348,7 +359,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      * under the right Configuration
      */
 
-    public static class ConfigurationCheckingFunction implements ItemMappingFunction<Item<?>, Item<?>> {
+    public static class ConfigurationCheckingFunction implements ItemMappingFunction {
 
         private Configuration config;
 
@@ -363,6 +374,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
          * @return either the output item, or null.
          */
 
+        @Override
         public Item mapItem(Item item) throws XPathException {
             if (item instanceof NodeInfo && !config.isCompatible(((NodeInfo) item).getConfiguration())) {
                 throw new XPathException(

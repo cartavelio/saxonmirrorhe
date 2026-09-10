@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -141,8 +141,8 @@ public class XsltPackage {
      * Save this compiled package to filestore for a particular target environment
      *
      * @param file the file to which the compiled package should be saved
-     * @param target the target environment. The only values currently recognized are "JS" and "JS2,
-     *               which export the package for running under Saxon-JS 1.0 or 2.0 respectively.
+     * @param target the target environment. The only value currently recognized is "JS",
+     *               which exports the package for running under Saxon-JS 2.0.
      * @throws SaxonApiException if the compiled package cannot be saved to the specified
      *                           location, or if the package was compiled with just-in-time
      *                           compilation enabled.

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -31,6 +31,7 @@ public class TemplatesImpl implements Templates {
      *
      * @return A valid non-null instance of a Transformer.
      */
+    @Override
     public Transformer newTransformer() {
         if (forceStreaming) {
             return new StreamingTransformerImpl(executable, executable.load30());
@@ -66,6 +67,7 @@ public class TemplatesImpl implements Templates {
      *
      * @return A Properties object, never null.
      */
+    @Override
     public Properties getOutputProperties() {
         Properties details = executable.getUnderlyingCompiledStylesheet().getPrimarySerializationProperties().getProperties();
         return new Properties(details);

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,12 +7,15 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
+
+import static net.sf.saxon.expr.flwor.Clause.ClauseName.COUNT;
 
 /**
  * A "count" clause in a FLWOR expression
@@ -22,10 +25,11 @@ public class CountClause extends Clause {
     private LocalVariableBinding rangeVariable;
 
     @Override
-    public int getClauseKey() {
+    public ClauseName getClauseKey() {
         return COUNT;
     }
 
+    @Override
     public CountClause copy(FLWORExpression flwor, RebindingMap rebindings) {
         CountClause c2 = new CountClause();
         c2.rangeVariable = rangeVariable.copy();
@@ -71,13 +75,14 @@ public class CountClause extends Clause {
      * output to another tuple stream
      *
      * @param destination the output tuple stream
+     * @param output the destination for the result
      * @param context
      * @return the push tuple stream that implements the functionality of this clause of the FLWOR
      *         expression
      */
     @Override
-    public TuplePush getPushStream(TuplePush destination, XPathContext context) {
-        return new CountClausePush(destination, this);
+    public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
+        return new CountClausePush(output, destination, this);
     }
 
     /**
@@ -116,6 +121,6 @@ public class CountClause extends Clause {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

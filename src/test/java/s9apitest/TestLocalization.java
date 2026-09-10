@@ -1,17 +1,22 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JUnit tests for the s9api XQueryCompiler
  */
-public class TestLocalization extends TestCase {
+public class TestLocalization {
 
+    @Test
     public void testCollationLangUsingIcu() {
         collationLang(true);
     }
 
+    @Test
     public void testCollationLangUsingJava() {
         collationLang(false);
     }
@@ -23,7 +28,7 @@ public class TestLocalization extends TestCase {
             XQueryExecutable exec = c.compile(
                     "compare('z', 'ä', 'http://www.w3.org/2013/collation/UCA?lang=de')");
             XdmValue val = exec.load().evaluate();
-            assertEquals(((XdmAtomicValue) val).getLongValue(), 1);
+            assertEquals(1, ((XdmAtomicValue) val).getLongValue());
             exec = c.compile(
                     "compare('z', 'ä', 'http://www.w3.org/2013/collation/UCA?lang=sv')");
             val = exec.load().evaluate();
@@ -33,10 +38,12 @@ public class TestLocalization extends TestCase {
         }
     }
 
+    @Test
     public void testCollationStrengthUsingIcu() {
         collationStrength(true);
     }
 
+    @Test
     public void testCollationStrengthUsingJava() {
         collationStrength(false);
     }
@@ -48,7 +55,7 @@ public class TestLocalization extends TestCase {
             XQueryExecutable exec = c.compile(
                     "compare('z', 'Z', 'http://www.w3.org/2013/collation/UCA?lang=en;strength=primary')");
             XdmValue val = exec.load().evaluate();
-            assertEquals(((XdmAtomicValue) val).getLongValue(), 0);
+            assertEquals(0, ((XdmAtomicValue) val).getLongValue());
             exec = c.compile(
                     "compare('z', 'Z', 'http://www.w3.org/2013/collation/UCA?lang=sv;strenth=identical')");
             val = exec.load().evaluate();
@@ -58,10 +65,12 @@ public class TestLocalization extends TestCase {
         }
     }
 
+    @Test
     public void testCollationDecompositionUsingIcu() {
         collationDecomposition(true);
     }
 
+    @Test
     public void testCollationDecompositionUsingJava() {
         collationDecomposition(false);
     }
@@ -97,20 +106,22 @@ public class TestLocalization extends TestCase {
         }
     }
 
-    public void testHyphenationICU() {
-        assertEquals("a", "Twenty Two", s22(true, "en-GB"));
-        assertEquals("b", "Twenty Two", s22(true, "en-US"));
-        assertEquals("c", "Twenty-Two", s22(true, "en-x-hyphen"));
-        assertEquals("d", "Twenty-Two", s22(true, "en-GB-x-hyphen"));
-        assertEquals("e", "Twenty-Two", s22(true, "en-US-x-hyphen"));
+    @Test
+    public void testHyphenationICU(){
+        assertEquals("Twenty Two", s22(true, "en-GB"), "a");
+        assertEquals("Twenty Two", s22(true, "en-US"), "b");
+        assertEquals("Twenty-Two", s22(true, "en-x-hyphen"), "c");
+        assertEquals("Twenty-Two", s22(true, "en-GB-x-hyphen"), "d");
+        assertEquals("Twenty-Two", s22(true, "en-US-x-hyphen"), "e");
     }
 
-    public void testHyphenationSansICU() {
-        assertEquals("p", "Twenty Two", s22(false, "en-GB"));
-        assertEquals("q", "Twenty Two", s22(false, "en-US"));
-        assertEquals("r", "Twenty-Two", s22(false, "en-x-hyphen"));
-        assertEquals("s", "Twenty-Two", s22(false, "en-GB-x-hyphen"));
-        assertEquals("t", "Twenty-Two", s22(false, "en-US-x-hyphen"));
+    @Test
+    public void testHyphenationSansICU(){
+        assertEquals("Twenty Two", s22(false, "en-GB"), "p");
+        assertEquals("Twenty Two", s22(false, "en-US"), "q");
+        assertEquals("Twenty-Two", s22(false, "en-x-hyphen"), "r");
+        assertEquals("Twenty-Two", s22(false, "en-GB-x-hyphen"), "s");
+        assertEquals("Twenty-Two", s22(false, "en-US-x-hyphen"), "t");
     }
 
     private String s22o(boolean useICU, String lang) {
@@ -127,24 +138,26 @@ public class TestLocalization extends TestCase {
         }
     }
 
+    @Test
     public void testHyphenationOrdinalICU() {
-        assertEquals("a", "Twenty Third", s22o(true, "en-GB"));
-        assertEquals("b", "Twenty Third", s22o(true, "en-US"));
-        assertEquals("c", "Twenty-Third", s22o(true, "en-x-hyphen"));
-        assertEquals("d", "Twenty-Third", s22o(true, "en-GB-x-hyphen"));
-        assertEquals("e", "Twenty-Third", s22o(true, "en-US-x-hyphen"));
-        assertEquals("f", "Twenty Third", s22o(true, "en-x-nohyphen"));
+        assertEquals("Twenty Third", s22o(true, "en-GB"), "a");
+        assertEquals("Twenty Third", s22o(true, "en-US"), "b");
+        assertEquals("Twenty-Third", s22o(true, "en-x-hyphen"), "c");
+        assertEquals("Twenty-Third", s22o(true, "en-GB-x-hyphen"), "d");
+        assertEquals("Twenty-Third", s22o(true, "en-US-x-hyphen"), "e");
+        assertEquals("Twenty Third", s22o(true, "en-x-nohyphen"), "f");
     }
 
+    @Test
     public void testHyphenationOrdinalSansICU() {
         // inconsistent for backwards compatibility
-        assertEquals("p", "Twenty-Third", s22o(false, "en-GB"));
+        assertEquals("Twenty-Third", s22o(false, "en-GB"), "p");
         // inconsistent for backwards compatibility
-        assertEquals("q", "Twenty-Third", s22o(false, "en-US"));
-        assertEquals("r", "Twenty-Third", s22o(false, "en-x-hyphen"));
-        assertEquals("s", "Twenty-Third", s22o(false, "en-GB-x-hyphen"));
-        assertEquals("t", "Twenty-Third", s22o(false, "en-US-x-hyphen"));
-        assertEquals("u", "Twenty Third", s22o(false, "en-x-nohyphen"));
+        assertEquals("Twenty-Third", s22o(false, "en-US"), "q");
+        assertEquals("Twenty-Third", s22o(false, "en-x-hyphen"), "r");
+        assertEquals("Twenty-Third", s22o(false, "en-GB-x-hyphen"), "s");
+        assertEquals("Twenty-Third", s22o(false, "en-US-x-hyphen"), "t");
+        assertEquals("Twenty Third", s22o(false, "en-x-nohyphen"), "u");
     }
 
 

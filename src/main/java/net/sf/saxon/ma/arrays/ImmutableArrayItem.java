@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,6 @@ package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.ma.parray.ImmList;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
 
@@ -22,13 +21,13 @@ import java.util.Arrays;
 
 public class ImmutableArrayItem extends AbstractArrayItem {
 
-    private ImmList<GroundedValue<?>> vector;
+    private ImmList<GroundedValue> vector;
 
     public ImmutableArrayItem(SimpleArrayItem other) {
         this.vector = ImmList.fromList(other.getMembers());
     }
 
-    private ImmutableArrayItem(ImmList<GroundedValue<?>> vector) {
+    private ImmutableArrayItem(ImmList<GroundedValue> vector) {
         this.vector = vector;
     }
     
@@ -37,13 +36,10 @@ public class ImmutableArrayItem extends AbstractArrayItem {
      *
      * @param index the position of the member to retrieve (zero-based)
      * @return the value at the given position.
-     * @throws XPathException if the index is out of range
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     @Override
-    public GroundedValue<?> get(int index) throws XPathException {
-        if (index < 0 || index >= vector.size()) {
-            throw new XPathException("Array index (" + (index + 1) + ") out of range (1 to " + vector.size() + ")", "FOAY0001");
-        }
+    public GroundedValue get(int index) {
         return vector.get(index);
     }
 
@@ -53,14 +49,11 @@ public class ImmutableArrayItem extends AbstractArrayItem {
      * @param index    the position of the member to replace (zero-based)
      * @param newValue the replacement value
      * @return the value at the given position.
-     * @throws XPathException if the index is out of range
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     @Override
-    public ArrayItem put(int index, GroundedValue newValue) throws XPathException {
-        if (index < 0 || index >= vector.size()) {
-            throw new XPathException("Array index (" + (index + 1) + ") out of range (1 to " + vector.size() + ")", "FOAY0001");
-        }
-        ImmList<GroundedValue<?>> v2 = vector.replace(index, newValue);
+    public ArrayItem put(int index, GroundedValue newValue)  {
+        ImmList<GroundedValue> v2 = vector.replace(index, newValue);
         return v2 == vector ? this : new ImmutableArrayItem(v2);
     }
 
@@ -73,8 +66,8 @@ public class ImmutableArrayItem extends AbstractArrayItem {
      * @throws IndexOutOfBoundsException if position is out of range
      */
     @Override
-    public ArrayItem insert(int position, GroundedValue<?> member) {
-        ImmList<GroundedValue<?>> v2 = vector.insert(position, member);
+    public ArrayItem insert(int position, GroundedValue member) {
+        ImmList<GroundedValue> v2 = vector.insert(position, member);
         return new ImmutableArrayItem(v2);
     }
 
@@ -106,7 +99,7 @@ public class ImmutableArrayItem extends AbstractArrayItem {
      * @return an iterator over the members of the array
      */
     @Override
-    public Iterable<GroundedValue<?>> members() {
+    public Iterable<GroundedValue> members() {
         return vector;
     }
 
@@ -135,13 +128,13 @@ public class ImmutableArrayItem extends AbstractArrayItem {
         if (other.arrayLength() == 0) {
             return this;
         }
-        ImmList<GroundedValue<?>> v1;
+        ImmList<GroundedValue> v1;
         if (other instanceof ImmutableArrayItem) {
             v1 = ((ImmutableArrayItem)other).vector;
         } else {
             v1 = new ImmutableArrayItem((SimpleArrayItem)other).vector;
         }
-        ImmList<GroundedValue<?>> v2 = vector.appendList(v1);
+        ImmList<GroundedValue> v2 = vector.appendList(v1);
         return new ImmutableArrayItem(v2);
     }
 
@@ -155,7 +148,7 @@ public class ImmutableArrayItem extends AbstractArrayItem {
     @Override
     public ArrayItem remove(int index) {
         //try {
-        ImmList<GroundedValue<?>> v2 = vector.remove(index);
+        ImmList<GroundedValue> v2 = vector.remove(index);
             return v2 == vector ? this : new ImmutableArrayItem(v2);
 //        } catch (IndexOutOfBoundsException e) {
 //            throw new XPathException(e.getMessage(), "FOAR0001");
@@ -178,7 +171,7 @@ public class ImmutableArrayItem extends AbstractArrayItem {
             p[i++] = ii.next();
         }
         Arrays.sort(p);
-        ImmList<GroundedValue<?>> v2 = vector;
+        ImmList<GroundedValue> v2 = vector;
         for (int j=p.length-1; j>=0; j--) {
             v2 = v2.remove(p[j]);
         }

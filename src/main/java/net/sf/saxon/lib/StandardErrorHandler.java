@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,13 +7,15 @@
 
 package net.sf.saxon.lib;
 
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import javax.xml.transform.ErrorListener;
+import java.util.Objects;
 
 /**
  * A default implementation of the SAX ErrorHandler interface. Used by Saxon to catch XML parsing errors
@@ -26,17 +28,14 @@ public class StandardErrorHandler implements org.xml.sax.ErrorHandler {
     // Implement the org.xml.sax.ErrorHandler interface.
     ////////////////////////////////////////////////////////////////////////////
 
-    private ErrorListener errorListener;
+    private ErrorReporter errorReporter;
     private int warningCount = 0;
     private int errorCount = 0;
     private int fatalErrorCount = 0;
     private boolean silent = false;
 
-    public StandardErrorHandler(ErrorListener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        errorListener = listener;
+    public StandardErrorHandler(ErrorReporter reporter) {
+        errorReporter = Objects.requireNonNull(reporter);
     }
 
     /**
@@ -52,11 +51,12 @@ public class StandardErrorHandler implements org.xml.sax.ErrorHandler {
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void warning(SAXParseException e) {
         try {
             warningCount++;
             if (!silent) {
-                errorListener.warning(XPathException.makeXPathException(e));
+                errorReporter.report(new XmlProcessingException(XPathException.makeXPathException(e)).asWarning());
             }
         } catch (Exception ignored) {
         }
@@ -66,6 +66,7 @@ public class StandardErrorHandler implements org.xml.sax.ErrorHandler {
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void error(SAXParseException e) throws SAXException {
         //System.err.println("ErrorHandler.error " + e.getMessage());
         errorCount++;
@@ -78,6 +79,7 @@ public class StandardErrorHandler implements org.xml.sax.ErrorHandler {
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void fatalError(/*@NotNull*/ SAXParseException e) throws SAXException {
         //System.err.println("ErrorHandler.fatalError " + e.getMessage());
         fatalErrorCount++;
@@ -96,16 +98,14 @@ public class StandardErrorHandler implements org.xml.sax.ErrorHandler {
 
     protected void reportError(SAXParseException e, boolean isFatal) {
         try {
-            ExplicitLocation loc =
-                    new ExplicitLocation(e.getSystemId(), e.getLineNumber(), e.getColumnNumber());
-            XPathException err = new XPathException("Error reported by XML parser", loc, e);
-            err.setErrorCode(SaxonErrorCode.SXXP0003);
-            if (isFatal) {
-                errorListener.fatalError(err);
-            } else {
-                errorListener.error(err);
+            Loc loc = new Loc(e.getSystemId(), e.getLineNumber(), e.getColumnNumber());
+            if (errorReporter != null) {
+                XmlProcessingIncident err = new XmlProcessingIncident(" Error reported by XML parser: "+ e.getMessage(), SaxonErrorCode.SXXP0003, loc);
+                err.setCause(e);
+                errorReporter.report(err);
             }
-        } catch (Exception ignored) {
+        } catch (Exception unexpected) {
+            throw new AssertionError(unexpected);
         }
     }
 

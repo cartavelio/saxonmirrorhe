@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
@@ -20,7 +21,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
@@ -74,6 +74,7 @@ public class LookupExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (isClassified) {
             if (isArrayLookup) {
@@ -86,7 +87,11 @@ public class LookupExpression extends BinaryExpression {
                 if (mapType instanceof TupleItemType && getRhsExpression() instanceof StringLiteral) {
                     String fieldName = ((StringLiteral) getRhsExpression()).getStringValue();
                     SequenceType fieldType = ((TupleItemType) mapType).getFieldType(fieldName);
-                    return fieldType == null ? ErrorType.getInstance() : fieldType.getPrimaryType();
+                    if (fieldType == null) {
+                        return ((TupleItemType) mapType).isExtensible() ? AnyItemType.getInstance() : ErrorType.getInstance();
+                    } else {
+                        return fieldType.getPrimaryType();
+                    }
                 } else if (mapType instanceof MapType) {
                     return ((MapType) mapType).getValueType().getPrimaryType();
                 }
@@ -113,17 +118,21 @@ public class LookupExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
 
+        // Running typeCheck on the first operand can lose static type information if it's declared
+        // with a tuple type. So check this first.
+        ItemType originalType = getLhsExpression().getItemType();
         // Check the first operand
         getLhs().typeCheck(visitor, contextInfo);
 
         ItemType containerType = getLhsExpression().getItemType();
         isArrayLookup = containerType instanceof ArrayItemType;
-        boolean isTupleLookup = containerType instanceof TupleType;
+        boolean isTupleLookup = containerType instanceof TupleType || originalType instanceof TupleType;
         isMapLookup = containerType instanceof MapType || isTupleLookup;
         if (containerType instanceof AnyExternalObjectType) {
             config.checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, "use of lookup expressions on external objects", -1);
@@ -133,9 +142,9 @@ public class LookupExpression extends BinaryExpression {
         isSingleContainer = getLhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
 
         if (!isArrayLookup && !isMapLookup) {
-            if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == TypeHierarchy.DISJOINT &&
-                    th.relationship(containerType, ArrayItemType.getInstance()) == TypeHierarchy.DISJOINT &&
-                    th.relationship(containerType, AnyExternalObjectType.THE_INSTANCE) == TypeHierarchy.DISJOINT) {
+            if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT &&
+                    th.relationship(containerType, ArrayItemType.getInstance()) == Affinity.DISJOINT &&
+                    th.relationship(containerType, AnyExternalObjectType.THE_INSTANCE) == Affinity.DISJOINT) {
                 XPathException err = new XPathException("The left-hand operand of '?' must be a map or an array; the supplied expression is of type " + containerType, "XPTY0004");
                 err.setLocation(getLocation());
                 err.setIsTypeError(true);
@@ -157,12 +166,15 @@ public class LookupExpression extends BinaryExpression {
         isSingleEntry = getRhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
 
         if (isTupleLookup && getRhsExpression() instanceof StringLiteral) {
-            String fieldName = ((StringLiteral)getRhsExpression()).getStringValue();
-            if (((TupleType)containerType).getFieldType(fieldName) == null) {
-                XPathException err = new XPathException("Field " + fieldName + " is not defined in the tuple type", SaxonErrorCode.SXTT0001);
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                throw err;
+            TupleType tt = (TupleType)(containerType instanceof TupleType ? containerType : originalType);
+            if (!tt.isExtensible()) {
+                String fieldName = ((StringLiteral) getRhsExpression()).getStringValue();
+                if (tt.getFieldType(fieldName) == null) {
+                    XPathException err = new XPathException("Field " + fieldName + " is not defined in the tuple type", "XPTY0004");
+                    err.setIsTypeError(true);
+                    err.setLocation(getLocation());
+                    throw err;
+                }
             }
         }
 
@@ -170,6 +182,7 @@ public class LookupExpression extends BinaryExpression {
         return this;
     }
 
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getLhs().optimize(visitor, contextInfo);
         getRhs().optimize(visitor, contextInfo);
@@ -184,7 +197,7 @@ public class LookupExpression extends BinaryExpression {
      * and we assume that a sequence has length 5. The resulting estimates may be used, for
      * example, to reorder the predicates in a filter expression so cheaper predicates are
      * evaluated first.
-     * @return
+     * @return a rough estimate of the cost of evaluation
      */
     @Override
     public double getCost() {
@@ -209,12 +222,13 @@ public class LookupExpression extends BinaryExpression {
      * Copy an expression. This makes a deep copy.
      *
      * @param rebindings a mutable list of (old binding, new binding) pairs
-     *    that is used to update the bindings held in any
-     *    local variable references that are copied.
+     *                   that is used to update the bindings held in any
+     *                   local variable references that are copied.
      * @return the copy of the original expression
      */
 
     /*@NotNull*/
+    @Override
     public LookupExpression copy(RebindingMap rebindings) {
         LookupExpression exp = new LookupExpression(getLhsExpression().copy(rebindings), getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
@@ -230,6 +244,7 @@ public class LookupExpression extends BinaryExpression {
      * Determine the static cardinality of the expression
      */
 
+    @Override
     public int computeCardinality() {
         if (isSingleContainer && isSingleEntry) {
             if (isArrayLookup) {
@@ -242,14 +257,14 @@ public class LookupExpression extends BinaryExpression {
                 if (mapType instanceof TupleItemType && getRhsExpression() instanceof StringLiteral) {
                     String fieldName = ((StringLiteral) getRhsExpression()).getStringValue();
                     SequenceType fieldType = ((TupleItemType) mapType).getFieldType(fieldName);
-                    boolean isOptional = ((TupleItemType) mapType).isOptional(fieldName);
-                    int card = fieldType.getCardinality();
-                    if (isOptional) {
-                        card = Cardinality.union(card, StaticProperty.ALLOWS_ZERO);
+                    if (fieldType == null) {
+                        return ((TupleItemType) mapType).isExtensible() ? StaticProperty.ALLOWS_ZERO_OR_MORE : StaticProperty.ALLOWS_ZERO;
+                    } else {
+                        return fieldType.getCardinality();
                     }
-                    return fieldType == null ? StaticProperty.ALLOWS_ZERO : card;
                 } else if (mapType instanceof MapType) {
-                    return ((MapType) mapType).getValueType().getCardinality();
+                    return (Cardinality.union(((MapType) mapType).getValueType().getCardinality(),
+                                              StaticProperty.ALLOWS_ZERO));
                 }
             }
         }
@@ -272,6 +287,7 @@ public class LookupExpression extends BinaryExpression {
      * get HashCode for comparing two expressions
      */
 
+    @Override
     public int computeHashCode() {
         return "LookupExpression".hashCode() ^ getLhsExpression().hashCode() ^ getRhsExpression().hashCode();
     }
@@ -283,24 +299,38 @@ public class LookupExpression extends BinaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(final XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(final XPathContext context) throws XPathException {
         Configuration config = context.getConfiguration();
         if (isArrayLookup) {
             if (isSingleContainer && isSingleEntry) {
                 ArrayItem array = (ArrayItem) getLhsExpression().evaluateItem(context);
                 IntegerValue subscript = (IntegerValue) getRhsExpression().evaluateItem(context);
-                return array.get((int) subscript.longValue() - 1).iterate();
+                int index = ArrayFunctionSet.checkSubscript(subscript, array.arrayLength());
+                return array.get(index - 1).iterate();
             } else if (isSingleEntry) {
-                SequenceIterator<?> baseIterator = getLhsExpression().iterate(context);
-                int subscript = (int) ((IntegerValue) getRhsExpression().evaluateItem(context)).longValue() - 1;
-                return new MappingIterator<>(baseIterator,
-                                           baseItem -> ((ArrayItem) baseItem).get(subscript).iterate());
+                SequenceIterator baseIterator = getLhsExpression().iterate(context);
+                IntegerValue subscriptValue = (IntegerValue) getRhsExpression().evaluateItem(context);
+                int subscript = subscriptValue.asSubscript() - 1;
+                return new MappingIterator(baseIterator, baseItem -> {
+                    ArrayItem array = (ArrayItem) baseItem;
+                    if (subscript >= 0 && subscript < array.arrayLength()) {
+                        return array.get(subscript).iterate();
+                    } else {
+                        // reuse the diagnostic logic
+                        ArrayFunctionSet.checkSubscript(subscriptValue, array.arrayLength());
+                        return null; // shouldn't happen
+                    }
+                });
             } else {
-                SequenceIterator<?> baseIterator = getLhsExpression().iterate(context);
-                GroundedValue<?> rhs = getRhsExpression().iterate(context).materialize();
-                return new MappingIterator<>(baseIterator, baseItem -> new MappingIterator<>(
-                        (SequenceIterator<?>) rhs.iterate(),
-                        index -> ((ArrayItem) baseItem).get((int) ((IntegerValue) index).longValue() - 1).iterate()));
+                SequenceIterator baseIterator = getLhsExpression().iterate(context);
+                GroundedValue rhs = getRhsExpression().iterate(context).materialize();
+                return new MappingIterator(baseIterator, baseItem -> new MappingIterator(
+                        rhs.iterate(), index -> {
+                            ArrayItem array = (ArrayItem) baseItem;
+                            int subscript = ArrayFunctionSet.checkSubscript((IntegerValue) index, array.arrayLength()) - 1;
+                            return array.get(subscript).iterate();
+                }));
             }
         } else if (isMapLookup) {
             if (isSingleContainer && isSingleEntry) {
@@ -309,31 +339,31 @@ public class LookupExpression extends BinaryExpression {
                 GroundedValue value = map.get(key);
                 return value == null ? EmptyIterator.emptyIterator() : value.iterate();
             } else if (isSingleEntry) {
-                SequenceIterator<?> baseIterator = getLhsExpression().iterate(context);
+                SequenceIterator baseIterator = getLhsExpression().iterate(context);
                 AtomicValue key = (AtomicValue) getRhsExpression().evaluateItem(context);
-                return new MappingIterator<>(baseIterator, baseItem -> {
-                    GroundedValue<?> value = ((MapItem) baseItem).get(key);
+                return new MappingIterator(baseIterator, baseItem -> {
+                    GroundedValue value = ((MapItem) baseItem).get(key);
                     return value == null ? EmptyIterator.emptyIterator() : value.iterate();
                 });
             } else {
-                SequenceIterator<?> baseIterator = getLhsExpression().iterate(context);
-                GroundedValue<?> rhs = getRhsExpression().iterate(context).materialize();
-                return new MappingIterator<>(
+                SequenceIterator baseIterator = getLhsExpression().iterate(context);
+                GroundedValue rhs = getRhsExpression().iterate(context).materialize();
+                return new MappingIterator(
                         baseIterator,
-                        baseItem -> new MappingIterator<>(rhs.iterate(), index -> {
-                            GroundedValue<?> value = ((MapItem) baseItem).get((AtomicValue) index);
+                        baseItem -> new MappingIterator(rhs.iterate(), index -> {
+                            GroundedValue value = ((MapItem) baseItem).get((AtomicValue) index);
                             return value == null ? EmptyIterator.emptyIterator() : value.iterate();
                         }));
             }
 
         } else {
-            SequenceIterator<?> baseIterator = getLhsExpression().iterate(context);
-            GroundedValue<?> rhs = getRhsExpression().iterate(context).materialize();
-            MappingFunction<? extends Item<?>, ? extends Item<?>> mappingFunction = baseItem -> {
+            SequenceIterator baseIterator = getLhsExpression().iterate(context);
+            GroundedValue rhs = getRhsExpression().iterate(context).materialize();
+            MappingFunction mappingFunction = baseItem -> {
                 if (baseItem instanceof ArrayItem) {
-                    MappingFunction<Item<?>, Item<?>> arrayAccess = index -> {
+                    MappingFunction arrayAccess = index -> {
                         if (index instanceof IntegerValue) {
-                            GroundedValue<?> member = ((ArrayItem) baseItem).get((int) ((IntegerValue) index).longValue() - 1);
+                            GroundedValue member = ((ArrayItem) baseItem).get((int) ((IntegerValue) index).longValue() - 1);
                             return member.iterate();
                         } else {
                             XPathException exception = new XPathException(
@@ -345,12 +375,12 @@ public class LookupExpression extends BinaryExpression {
                             throw exception;
                         }
                     };
-                    SequenceIterator<?> rhsIter = rhs.iterate();
-                    return new MappingIterator<>(rhsIter, arrayAccess);
+                    SequenceIterator rhsIter = rhs.iterate();
+                    return new MappingIterator(rhsIter, arrayAccess);
                 } else if (baseItem instanceof MapItem) {
-                    SequenceIterator<?> rhsIter = rhs.iterate();
-                    return new MappingIterator<>(rhsIter, key -> {
-                        GroundedValue<?> value = ((MapItem) baseItem).get((AtomicValue) key);
+                    SequenceIterator rhsIter = rhs.iterate();
+                    return new MappingIterator(rhsIter, key -> {
+                        GroundedValue value = ((MapItem) baseItem).get((AtomicValue) key);
                         return value == null ? EmptyIterator.emptyIterator() : value.iterate();
                     });
                 } else if (baseItem instanceof ObjectValue) {
@@ -390,6 +420,7 @@ public class LookupExpression extends BinaryExpression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("lookup", this);
         getLhsExpression().export(destination);
@@ -408,7 +439,7 @@ public class LookupExpression extends BinaryExpression {
     public String toString() {
         String rhs;
         if (getRhsExpression() instanceof Literal) {
-            Literal lit = (Literal)getRhsExpression();
+            Literal lit = (Literal) getRhsExpression();
             if (lit instanceof StringLiteral && NameChecker.isValidNCName(((StringLiteral) lit).getStringValue())) {
                 rhs = ((StringLiteral) lit).getStringValue();
             } else if (lit.getValue() instanceof Int64Value) {

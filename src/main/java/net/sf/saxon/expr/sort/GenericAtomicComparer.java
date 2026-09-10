@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -24,7 +24,6 @@ import net.sf.saxon.value.StringValue;
  * a separate method for testing equality of items, which can be used for data types that
  * are not ordered.
  *
- * @author Michael H. Kay
  */
 
 public class GenericAtomicComparer implements AtomicComparer {
@@ -110,6 +109,7 @@ public class GenericAtomicComparer implements AtomicComparer {
         return new GenericAtomicComparer(collator, context);
     }
 
+    @Override
     public StringCollator getCollator() {
         return collator;
     }
@@ -122,6 +122,7 @@ public class GenericAtomicComparer implements AtomicComparer {
      *         is known. The original AtomicComparer is not modified
      */
 
+    @Override
     public GenericAtomicComparer provideContext(XPathContext context) {
         return new GenericAtomicComparer(collator, context);
     }
@@ -155,6 +156,7 @@ public class GenericAtomicComparer implements AtomicComparer {
      *                                   code that tries again at run-time.
      */
 
+    @Override
     public int compareAtomicValues(AtomicValue a, AtomicValue b) throws NoDynamicContextException {
 
         // System.err.println("Comparing " + a.getClass() + "(" + a + ") with " + b.getClass() + "(" + b + ") using " + collator);
@@ -198,6 +200,7 @@ public class GenericAtomicComparer implements AtomicComparer {
      * @throws ClassCastException if the objects are not comparable
      */
 
+    @Override
     public boolean comparesEqual(AtomicValue a, AtomicValue b) throws NoDynamicContextException {
         // System.err.println("Comparing " + a.getClass() + ": " + a + " with " + b.getClass() + ": " + b);
         if (a instanceof StringValue && b instanceof StringValue) {
@@ -222,6 +225,7 @@ public class GenericAtomicComparer implements AtomicComparer {
      *
      * @return a string representation of the AtomicComparer
      */
+    @Override
     public String save() {
         return "GAC|" + collator.getCollationURI();
     }

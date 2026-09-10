@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2013 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,6 @@ package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
@@ -17,6 +16,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLFilter;
@@ -27,19 +27,26 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * JUnit tests for the s9api XsltCompiler
  */
-public class TestXsltCompiler extends TestCase {
+public class TestXsltCompiler {
 
     private void xpathVersionTest(String label, String expression, int version, boolean expectSuccess) {
         try {
@@ -63,6 +70,7 @@ public class TestXsltCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testXPathVersion20() {
         xpathVersionTest("A", "'b'||'c'", 20, false);
         xpathVersionTest("B", "(1 to 3)!(.*.)", 20, false);
@@ -74,6 +82,7 @@ public class TestXsltCompiler extends TestCase {
         xpathVersionTest("H", "let $x := 3 return $x+1", 20, false);
     }
 
+    @Test
     public void testXPathVersion30() {
         xpathVersionTest("A", "'b'||'c'" , 30, true);
         xpathVersionTest("B", "(1 to 3)!(.*.)", 30, true);
@@ -85,6 +94,7 @@ public class TestXsltCompiler extends TestCase {
         xpathVersionTest("H", "let $x := 3 return $x+1", 30, true);
     }
 
+    @Test
     public void testXPathVersion305() {
         xpathVersionTest("A", "'b'||'c'", 305, true);
         xpathVersionTest("B", "(1 to 3)!(.*.)", 305, true);
@@ -96,6 +106,7 @@ public class TestXsltCompiler extends TestCase {
         xpathVersionTest("H", "let $x := 3 return $x+1", 305, true);
     }
 
+    @Test
     public void testXPathVersion31() {
         xpathVersionTest("A", "'b'||'c'", 31, true);
         xpathVersionTest("B", "(1 to 3)!(.*.)", 31, true);
@@ -107,6 +118,7 @@ public class TestXsltCompiler extends TestCase {
         xpathVersionTest("H", "let $x := 3 return $x+1", 31, true);
     }
 
+    @Test
     public void testSampleError() {
         try {
             Processor proc = new Processor(true);
@@ -134,6 +146,7 @@ public class TestXsltCompiler extends TestCase {
         // Create a transformer for the stylesheet.
         XsltTransformer transformer = processor.NewXsltCompiler().Compile(new StringReader(s)).Load();*/
 
+    @Test
     public void testXPath30Failure() {
         List<StaticError> errors = new ArrayList<>();
         try {
@@ -160,6 +173,34 @@ public class TestXsltCompiler extends TestCase {
         }
     }
 
+    @Test
+    public void testXPath30FailureWithErrorReporter() {
+        List<XmlProcessingError> errors = new ArrayList<>();
+        try {
+            Processor proc = new Processor(false);
+            proc.setConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT, 30);
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setErrorReporter(errors::add);
+            String xsl = "<xsl:stylesheet version='3.0' " +
+                    "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
+                    "<xsl:template match=\"*[map{1:'a'}?1 = 'a']\"/>\n" +
+                    "<xsl:variable name='x' select='map{2:4}' as='map(*)*'/>" +
+                    "<xsl:variable name='y' select='[1,2,3]' as='array(*)?'/>" +
+                    "<xsl:variable name='z' select='array{1,21,3}' as='array(*)?'/>" +
+                    "</xsl:stylesheet>";
+            comp.compile(new StreamSource(new StringReader(xsl)));
+            fail("unexpected success");
+        } catch (SaxonApiException e) {
+            assertTrue(errors.size() > 1);
+            Set<String> codes = new HashSet<>();
+            for (StaticError se : errors) {
+                codes.add(se.getErrorCode().getLocalName());
+            }
+            assertTrue(codes.contains("XPST0003"));
+        }
+    }
+
+    @Test
     public void testXPath305Success() {
         try {
             Processor proc = new Processor(false);
@@ -182,6 +223,7 @@ public class TestXsltCompiler extends TestCase {
      * Test location information for run-time errors when stylesheet built as an XdmNode
      */
 
+    @Test
     public void testErrorNotificationFromParseError() {
         final List<TransformerException> warnings = new ArrayList<TransformerException>(4);
         final List<TransformerException> errors = new ArrayList<TransformerException>(4);
@@ -204,9 +246,9 @@ public class TestXsltCompiler extends TestCase {
         try {
 
             Processor proc = new Processor(true);
-            proc.getUnderlyingConfiguration().setErrorListener(listener);
 
             XsltCompiler xqcomp = proc.newXsltCompiler();
+            xqcomp.setErrorListener(listener);
 
             StringReader sr = new StringReader("<xsl:stylesheet version='2.0' " +
                     "xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:saxon='http://saxon.sf.net/'>\n" +
@@ -222,13 +264,14 @@ public class TestXsltCompiler extends TestCase {
             fail("Compilation should fail");
 
         } catch (SaxonApiException e) {
-            assertTrue("warnings", warnings.isEmpty());
-            assertTrue("errors", errors.isEmpty());
-            assertEquals("fatals", 1, fatals.size());
+            assertTrue(warnings.isEmpty(), "warnings");
+            assertTrue(errors.isEmpty(), "errors");
+            assertEquals(1, fatals.size(), "fatals");
             //e.printStackTrace();
         }
     }
 
+    @Test
     public void testMultipleSyntaxErrors() {
         final List<TransformerException> warnings = new ArrayList<TransformerException>(4);
         final List<TransformerException> errors = new ArrayList<TransformerException>(4);
@@ -251,8 +294,6 @@ public class TestXsltCompiler extends TestCase {
         try {
 
             Processor proc = new Processor(true);
-            proc.getUnderlyingConfiguration().setErrorListener(listener);
-
             XsltCompiler xqcomp = proc.newXsltCompiler();
 
             StringReader sr = new StringReader("<xsl:stylesheet version='2.0' " +
@@ -273,13 +314,14 @@ public class TestXsltCompiler extends TestCase {
             fail("Compilation should fail");
 
         } catch (SaxonApiException e) {
-            assertTrue("warnings", warnings.isEmpty());
-            assertTrue("errors", errors.isEmpty());
-            assertTrue("fatals", fatals.size() == 5);
+            assertTrue(warnings.isEmpty(), "warnings");
+            assertTrue(errors.isEmpty(), "errors");
+            assertEquals(5, fatals.size(), "fatals");
             //e.printStackTrace();
         }
     }
 
+    @Test
     public void testJITStaticErrors() {
         // Show how static errors can be detected at run-time using JIT
         final List<TransformerException> warnings = new ArrayList<>(4);
@@ -303,7 +345,6 @@ public class TestXsltCompiler extends TestCase {
         try {
 
             Processor proc = new Processor(true);
-            proc.getUnderlyingConfiguration().setErrorListener(listener);
 
             XsltCompiler xqcomp = proc.newXsltCompiler();
 
@@ -323,9 +364,9 @@ public class TestXsltCompiler extends TestCase {
             XsltExecutable exec = null;
             try {
                 exec = xqcomp.compile(new StreamSource(sr));
-                assertTrue("warnings", warnings.isEmpty());
-                assertTrue("errors", errors.isEmpty());
-                assertTrue("fatals", fatals.isEmpty());
+                assertTrue(warnings.isEmpty(), "warnings");
+                assertTrue(errors.isEmpty(), "errors");
+                assertTrue(fatals.isEmpty(), "fatals");
             } catch (SaxonApiException ce) {
                 fail("Compilation should not fail yet");
             }
@@ -338,9 +379,9 @@ public class TestXsltCompiler extends TestCase {
             }
 
         } catch (SaxonApiException e) {
-            assertTrue("warnings", warnings.isEmpty());
-            assertTrue("errors", errors.isEmpty());
-            assertEquals("fatals", 1, fatals.size());
+            assertTrue(warnings.isEmpty(), "warnings");
+            assertTrue(errors.isEmpty(), "errors");
+            assertEquals(1, fatals.size(), "fatals");
             //e.printStackTrace();
         }
     }
@@ -350,6 +391,7 @@ public class TestXsltCompiler extends TestCase {
      * Test location information for import errors
      */
 
+    @Test
     public void testErrorNotificationFromImportError() {
         final List<TransformerException> warnings = new ArrayList<TransformerException>(4);
         final List<TransformerException> errors = new ArrayList<TransformerException>(4);
@@ -370,7 +412,7 @@ public class TestXsltCompiler extends TestCase {
                 if (!exception.getMessage().contains("No such file or directory")) {
                     System.out.println("Fatal: " + exception + "\nlocation: " + exception.getLocator());
                 }
-                assertEquals(exception.getLocator().getLineNumber(), 3);
+                assertEquals(3, exception.getLocator().getLineNumber());
                 fatals.add(exception);
             }
 
@@ -378,7 +420,6 @@ public class TestXsltCompiler extends TestCase {
         try {
 
             Processor proc = new Processor(true);
-            proc.getUnderlyingConfiguration().setErrorListener(listener);
 
             XsltCompiler xqcomp = proc.newXsltCompiler();
 
@@ -394,13 +435,51 @@ public class TestXsltCompiler extends TestCase {
             fail("Compilation should fail");
 
         } catch (SaxonApiException e) {
-            assertTrue("warnings", warnings.isEmpty());
-            assertTrue("errors", errors.isEmpty());
-            assertTrue("fatals", fatals.size() == 1);
+            assertTrue(warnings.isEmpty(), "warnings");
+            assertTrue(errors.isEmpty(), "errors");
+            assertEquals(1, fatals.size(), "fatals");
             //e.printStackTrace();
         }
     }
 
+    /**
+     * Test location information for import errors
+     */
+
+    @Test
+    public void testErrorReportingFromImportError() {
+        final List<XmlProcessingError> warnings = new ArrayList<>(4);
+        final List<XmlProcessingError> errors = new ArrayList<>(4);
+
+        try {
+
+            Processor proc = new Processor(true);
+
+            XsltCompiler xqcomp = proc.newXsltCompiler();
+
+            StringReader sr = new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                                                       "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"2.0\">\n" +
+                                                       "   <xsl:import href=\"invalidRef.xsl\"/>\n" +
+                                                       "</xsl:stylesheet>");
+
+            xqcomp.setErrorReporter(error -> {
+                if (error.isWarning())
+                    warnings.add(error);
+                else
+                    errors.add(error);
+                });
+            xqcomp.compile(new StreamSource(sr));
+
+            fail("Compilation should fail");
+
+        } catch (SaxonApiException e) {
+            assertTrue(warnings.isEmpty(), "warnings");
+            assertEquals(1, errors.size(), "errors");
+        }
+    }
+
+
+    @Test
     public void testErrorLocation() {
 
             // Create a Processor instance.
@@ -424,15 +503,27 @@ public class TestXsltCompiler extends TestCase {
 
             // Attempt to compile the stylesheet and display the errors
             try {
+                compiler.setErrorReporter(error -> {
+                    if (error.getErrorCode().getLocalName().equals("XTSE0280")) {
+                        assertEquals(2, error.getLocation().getLineNumber());
+                        assertEquals(35, error.getLocation().getColumnNumber());
+                    } else if (error.getErrorCode().getLocalName().equals("XPST0008")) {
+                        assertEquals(6, error.getLocation().getLineNumber());
+                        //assertEquals(32, error.getLocation().getColumnNumber());
+                    } else {
+                        fail(error.getErrorCode().getLocalName());
+                    }
+                });
                 compiler.compile(new StreamSource(new StringReader(stylesheet), "http://localhost/stylesheet"));
-                System.err.println("Stylesheet compilation succeeded");
+                fail("Stylesheet compilation succeeded unexpectedly");
             } catch (SaxonApiException e) {
-                System.err.println("Stylesheet compilation failed");
+                System.err.println("Stylesheet compilation failed as expected");
             }
 
 
     }
 
+    @Test
     public void testCustomXmlReader() {
         try {
             // Create a Processor instance.
@@ -467,8 +558,8 @@ public class TestXsltCompiler extends TestCase {
             SAXSource source = new SAXSource(filter, new InputSource(new StringReader(stylesheet)));
             compiler.compile(source);
             System.err.println("Stylesheet compilation succeeded");
-            assertEquals(progress.size(), 1);
-            assertEquals(progress.get(0), "started");
+            assertEquals(1, progress.size());
+            assertEquals("started", progress.get(0));
         } catch (SaxonApiException e) {
             fail("Stylesheet compilation failed");
         } catch (SAXException e) {
@@ -476,6 +567,7 @@ public class TestXsltCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testPreEvaluateDocumentFunction() {
         // Bug 2963
         String stylesheet =
@@ -519,12 +611,12 @@ public class TestXsltCompiler extends TestCase {
             err.printStackTrace();
             fail("Compilation 1 should not fail");
         }
-        assertEquals("URI not accessed", 0, counter.size());
+        assertEquals(0, counter.size(), "URI not accessed");
         p.setConfigurationProperty(Feature.PRE_EVALUATE_DOC_FUNCTION, true);
         try {
             c.setParameter(new QName("call"), new XdmAtomicValue(goodQuery));
             q = c.compile(new StreamSource(new StringReader(stylesheet)));
-            assertTrue("URI accessed", counter.size() > 0);
+            assertTrue(counter.size() > 0, "URI accessed");
             //assertTrue("Compiled to Literal", q.getUnderlyingCompiledQuery().getExpression() instanceof Literal);
             //assertTrue("Compiled to NodeInfo", ((Literal) q.getUnderlyingCompiledQuery().getExpression()).getValue().head() instanceof NodeInfo);
         } catch (Exception err) {
@@ -542,34 +634,42 @@ public class TestXsltCompiler extends TestCase {
     }
 
 
+    @Test
     public void testJitEEOn() {
         testJit(new EnterpriseConfiguration(), "10", false);
     }
 
+    @Test
     public void testJitEEOnJ() {
         testJit(new EnterpriseConfiguration(), "j", false);
     }
 
+    @Test
     public void testJitEEOff() {
         testJit(new EnterpriseConfiguration(), "0", true);
     }
 
+    @Test
     public void testJitEEOffJ() {
         testJit(new EnterpriseConfiguration(), "-j", true);
     }
 
+    @Test
     public void testJitPEOn() {
         testJit(new ProfessionalConfiguration(), "10", true);
     }
 
+    @Test
     public void testJitPEOff() {
         testJit(new ProfessionalConfiguration(), "0", true);
     }
 
+    @Test
     public void testJitHEOn() {
         testJit(new Configuration(), "10", true);
     }
 
+    @Test
     public void testJitHEOff() {
         testJit(new Configuration(), "0", true);
     }
@@ -612,30 +712,143 @@ public class TestXsltCompiler extends TestCase {
 
     }
 
+    @Test
+    public void testAnyNamespaceOption() {
+        try {
+            Processor proc = new Processor(false);
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
+            String xml="<a xmlns='urn:one'><a xmlns='urn:two'/></a>";
+            String xsl = "<xsl:stylesheet version='3.0' " +
+                    "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
+                    "<xsl:template match='/'>\n" +
+                    "<out count='{count(//a)}'><xsl:apply-templates select='//a'/></out>" +
+                    "</xsl:template>" +
+                    "<xsl:template match='a'>A</xsl:template>" +
+                    "</xsl:stylesheet>";
+            XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
+            Xslt30Transformer t = exec.load30();
+            StringWriter sw = new StringWriter();
+            t.applyTemplates(new StreamSource(new StringReader(xml)), proc.newSerializer(sw));
+            System.err.println(sw);
+            assertTrue(sw.toString().contains("<out count=\"2\">AA</out>"), "result");
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testDefaultOrNullOption() {
+        try {
+            Processor proc = new Processor(false);
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE);
+            String xml = "<a xmlns='urn:one'><a xmlns=''/></a>";
+            String xsl = "<xsl:stylesheet version='3.0' " +
+                    "xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xpath-default-namespace='urn:one'>\n" +
+                    "<xsl:template match='/'>\n" +
+                    "<out count='{count(//a)}'><xsl:apply-templates select='//a'/></out>" +
+                    "</xsl:template>" +
+                    "<xsl:template match='a'>A</xsl:template>" +
+                    "</xsl:stylesheet>";
+            XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
+            Xslt30Transformer t = exec.load30();
+            StringWriter sw = new StringWriter();
+            t.applyTemplates(new StreamSource(new StringReader(xml)), proc.newSerializer(sw));
+            System.err.println(sw);
+            assertTrue(sw.toString().contains("<out count=\"2\">AA</out>"), "result");
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testSetDefaultNamespaceProgrammatically() {
+        try {
+            Processor proc = new Processor(false);
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setDefaultElementNamespace("urn:one");
+            comp.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE);
+            String xml = "<a xmlns='urn:one'><a xmlns=''/></a>";
+            String xsl = "<xsl:stylesheet version='3.0' " +
+                    "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
+                    "<xsl:template match='/'>\n" +
+                    "<out count='{count(//a)}'><xsl:apply-templates select='//a'/></out>" +
+                    "</xsl:template>" +
+                    "<xsl:template match='a'>A</xsl:template>" +
+                    "</xsl:stylesheet>";
+            XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
+            Xslt30Transformer t = exec.load30();
+            StringWriter sw = new StringWriter();
+            t.applyTemplates(new StreamSource(new StringReader(xml)), proc.newSerializer(sw));
+            System.err.println(sw);
+            assertTrue(sw.toString().contains("<out count=\"2\">AA</out>"), "result");
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testBug4326() {
+        // The essence of this bug is that a user-written URI resolver returns stylesheet
+        // modules with a base URI that is different from the one Saxon computes, which causes
+        // confusion in locating the module subsequently
+        try {
+            Processor proc = new Processor(false);
+            XsltCompiler comp = proc.newXsltCompiler();
+            String xsl1 = "<xsl:stylesheet version='3.0' " +
+                    "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
+                    "<xsl:include href='xsl2.xsl' xml:base='custard'/>\n" +
+                    "<xsl:template name='main'>\n" +
+                    "<out a='{Q{f}go()}'/>" +
+                    "</xsl:template>" +
+                    "</xsl:stylesheet>";
+            String xsl2 = "<xsl:stylesheet version='3.0' " +
+                    "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
+                    "<xsl:function name='Q{f}go'>\n" +
+                    "<xsl:sequence select='42'/>" +
+                    "</xsl:function>" +
+                    "</xsl:stylesheet>";
+            comp.setURIResolver(new URIResolver() {
+                @Override
+                public Source resolve(String href, String base) throws TransformerException {
+                    if (href.equals("xsl2.xsl")) {
+                        return new StreamSource(new StringReader(xsl2), "http://toasted-spaghetti/");
+                    } else {
+                        return null;
+                    }
+                }
+            });
+            InputSource is1 = new InputSource(new StringReader(xsl1));
+            is1.setSystemId("http://veggie-burger.com/");
+            SAXSource ss1 = new SAXSource(is1);
+            ss1.setSystemId("http://fried-chicken/suprême/");
+            XsltExecutable exec = comp.compile(ss1);
+            Xslt30Transformer trans = exec.load30();
+            StringWriter writer = new StringWriter();
+            trans.callTemplate(new QName("main"), proc.newSerializer(writer));
+            assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><out a=\"42\"/>", writer.toString(), "result");
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
     public void testErrorNotificationFromImportSchemaError() {
-        final List<TransformerException> warnings = new ArrayList<>(4);
-        final List<TransformerException> errors = new ArrayList<>(4);
-        final List<TransformerException> fatals = new ArrayList<>(4);
-        ErrorListener listener = new ErrorListener() {
+        final List<StaticError> errors = new ArrayList<>(4);
 
-            public void warning(TransformerException exception) throws TransformerException {
-                warnings.add(exception);
-            }
-
-            public void error(TransformerException exception) throws TransformerException {
-                errors.add(exception);
-            }
-
-            public void fatalError(TransformerException exception) throws TransformerException {
-                fatals.add(exception);
-            }
-
-        };
         try {
 
             Processor proc = new Processor(true);
-            
+
             XsltCompiler xqcomp = proc.newXsltCompiler();
+            xqcomp.setErrorList(errors);
 
             StringReader xsd = new StringReader("<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'><xs:element name='123'/></xs:schema>");
 
@@ -654,43 +867,25 @@ public class TestXsltCompiler extends TestCase {
                     return null;
                 }
             });
-            xqcomp.setErrorListener(listener);
             xqcomp.compile(new StreamSource(sr));
 
             fail("Compilation should fail");
 
         } catch (SaxonApiException e) {
-            assertTrue("warnings", warnings.isEmpty());
-            assertFalse("errors", errors.isEmpty());
-            assertEquals("fatals", 1, fatals.size());
-            //e.printStackTrace();
+            assertFalse(errors.isEmpty(), "errors");
         }
     }
 
+    @Test
     public void testErrorNotificationFromInlineSchemaError() {
-        final List<TransformerException> warnings = new ArrayList<>(4);
-        final List<TransformerException> errors = new ArrayList<>(4);
-        final List<TransformerException> fatals = new ArrayList<>(4);
-        ErrorListener listener = new ErrorListener() {
+        final List<StaticError> errors = new ArrayList<>(4);
 
-            public void warning(TransformerException exception)  {
-                warnings.add(exception);
-            }
-
-            public void error(TransformerException exception)  {
-                errors.add(exception);
-            }
-
-            public void fatalError(TransformerException exception)  {
-                fatals.add(exception);
-            }
-
-        };
         try {
 
             Processor proc = new Processor(true);
 
             XsltCompiler xqcomp = proc.newXsltCompiler();
+            xqcomp.setErrorList(errors);
 
             StringReader xsd = new StringReader("<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'><xs:element name='123'/></xs:schema>");
 
@@ -709,43 +904,26 @@ public class TestXsltCompiler extends TestCase {
                     return null;
                 }
             });
-            xqcomp.setErrorListener(listener);
             xqcomp.compile(new StreamSource(sr));
 
             fail("Compilation should fail");
 
         } catch (SaxonApiException e) {
-            assertTrue("warnings", warnings.isEmpty());
-            assertEquals("errors", 3, errors.size());
-            assertEquals("fatals", 1, fatals.size());
+            assertFalse(errors.isEmpty(), "errors");
             //e.printStackTrace();
         }
     }
 
+    @Test
     public void testWarningNotificationFromInlineSchema() {
-        final List<TransformerException> warnings = new ArrayList<>(4);
-        final List<TransformerException> errors = new ArrayList<>(4);
-        final List<TransformerException> fatals = new ArrayList<>(4);
-        ErrorListener listener = new ErrorListener() {
+        final List<StaticError> errors = new ArrayList<>(4);
 
-            public void warning(TransformerException exception) {
-                warnings.add(exception);
-            }
-
-            public void error(TransformerException exception) {
-                errors.add(exception);
-            }
-
-            public void fatalError(TransformerException exception) {
-                fatals.add(exception);
-            }
-
-        };
         try {
 
             Processor proc = new Processor(true);
 
             XsltCompiler xqcomp = proc.newXsltCompiler();
+            xqcomp.setErrorList(errors);
 
             StringReader xsd = new StringReader("<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'><xs:element name='123'/></xs:schema>");
 
@@ -766,19 +944,15 @@ public class TestXsltCompiler extends TestCase {
                     return null;
                 }
             });
-            xqcomp.setErrorListener(listener);
             xqcomp.compile(new StreamSource(sr));
 
             fail("Compilation should fail");
 
         } catch (SaxonApiException e) {
-            assertEquals("warnings", 1, warnings.size());
-            assertTrue("errors", errors.isEmpty());
-            assertEquals("fatals", 1, fatals.size());
+            assertFalse(errors.isEmpty(), "errors");
             //e.printStackTrace();
         }
     }
-
 
 }
 

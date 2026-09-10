@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,7 +18,10 @@ import net.sf.saxon.tree.iter.ReverseListIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -26,8 +29,8 @@ import java.util.*;
  * by allocating memory to each item in the sequence.
  */
 
-public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
-    private List<T> value;
+public class SequenceExtent implements GroundedValue {
+    private List<? extends Item> value;
 
     /**
      * Construct an sequence from an array of items. Note, the array of items is used as is,
@@ -36,7 +39,7 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      * @param items the array of items to be included in the sequence
      */
 
-    public SequenceExtent(T[] items) {
+    public SequenceExtent(Item[] items) {
         value = Arrays.asList(items);
     }
 
@@ -49,9 +52,9 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      * @param length The number of items in the new SequenceExtent
      */
 
-    public SequenceExtent(SequenceExtent<T> ext, int start, int length) {
-        value = ext.value.subList(start, start+length);
-    }
+//    public SequenceExtent(SequenceExtent ext, int start, int length) {
+//        value = ext.value.subList(start, start+length);
+//    }
 
     /**
      * Construct a SequenceExtent from a List. The members of the list must all
@@ -60,7 +63,7 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      * @param list the list of items to be included in the sequence
      */
 
-    public SequenceExtent(List<T> list) {
+    public SequenceExtent(List<? extends Item> list) {
         this.value = list;
     }
 
@@ -75,11 +78,11 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      *          SequenceIterator raises an error
      */
 
-    public SequenceExtent(SequenceIterator<T> iter) throws XPathException {
-        int len = (iter.getProperties() & SequenceIterator.LAST_POSITION_FINDER) == 0
+    public SequenceExtent(SequenceIterator iter) throws XPathException {
+        int len = !iter.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)
                 ? 20
                 : ((LastPositionFinder)iter).getLength();
-        List<T> list = new ArrayList<>(len);
+        List<Item> list = new ArrayList<>(len);
         iter.forEachOrFail(list::add);
         value = list;
     }
@@ -99,7 +102,7 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      * @deprecated since 9.9: use {@link SequenceIterator#materialize()}
      */
 
-    public static <T extends Item<?>> GroundedValue<? extends T> makeSequenceExtent(SequenceIterator<T> iter) throws XPathException {
+    public static GroundedValue makeSequenceExtent(SequenceIterator iter) throws XPathException {
         return iter.materialize();
     }
 
@@ -121,8 +124,8 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      * @deprecated since 9.9: use {@link SequenceIterator#materialize()}
      */
 
-    public static <T extends Item<?>> GroundedValue<T> fromIterator(SequenceIterator<T> iter) throws XPathException {
-        return new SequenceExtent<>(iter).reduce();
+    public static GroundedValue fromIterator(SequenceIterator iter) throws XPathException {
+        return new SequenceExtent(iter).reduce();
     }
 
     /**
@@ -139,11 +142,11 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      *                                           the iterator.
      */
 
-    public static <T extends Item<?>> GroundedValue<T> makeResidue(SequenceIterator<T> iter) throws XPathException {
-        if ((iter.getProperties() & SequenceIterator.GROUNDED) != 0) {
+    public static GroundedValue makeResidue(SequenceIterator iter) throws XPathException {
+        if (iter.getProperties().contains(SequenceIterator.Property.GROUNDED)) {
             return ((GroundedIterator) iter).getResidue();
         }
-        SequenceExtent<T> extent = new SequenceExtent<>(iter);
+        SequenceExtent extent = new SequenceExtent(iter);
         return extent.reduce();
     }
 
@@ -151,28 +154,31 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
     /**
      * Factory method to make a Value holding the contents of any List of items
      *
-     * @param input a List containing the items in the sequence
+     * @param input a List containing the items in the sequence. The caller guarantees
+     *              that this list will not be subsequently modified.
      * @return a ValueRepresentation holding the items in the list. If the
      *         sequence is empty the result will be an instance of {@link EmptySequence}. If it is of length
      *         one, the result will be an {@link Item}. In all other cases, it will be an instance of
      *         {@link SequenceExtent}.
      */
 
-    public static <T extends Item<?>> GroundedValue<T> makeSequenceExtent(/*@NotNull*/ List<T> input) {
+    public static <T extends Item> GroundedValue makeSequenceExtent(/*@NotNull*/ List<T> input) {
         int len = input.size();
         if (len == 0) {
             return EmptySequence.getInstance();
         } else if (len == 1) {
-            return (GroundedValue<T>)input.get(0);
+            return input.get(0);
         } else {
-            return new SequenceExtent<>(input);
+            return new SequenceExtent(input);
         }
     }
 
+    @Override
     public String getStringValue() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
 
+    @Override
     public CharSequence getStringValueCS() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
@@ -183,7 +189,8 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      * @return the first item in the sequence if there is one, or null if the sequence
      *         is empty
      */
-    public T head() {
+    @Override
+    public Item head() {
         return itemAt(0);
     }
 
@@ -193,6 +200,7 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      * @return the number of items in the sequence
      */
 
+    @Override
     public int getLength() {
         return value.size();
     }
@@ -224,7 +232,8 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      */
 
     /*@Nullable*/
-    public T itemAt(int n) {
+    @Override
+    public Item itemAt(int n) {
         if (n < 0 || n >= getLength()) {
             return null;
         } else {
@@ -240,7 +249,8 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      */
 
     /*@NotNull*/
-    public ListIterator<T> iterate() {
+    @Override
+    public ListIterator<? extends Item> iterate() {
         return new ListIterator<>(value);
     }
 
@@ -251,7 +261,7 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      */
 
     /*@NotNull*/
-    public UnfailingIterator<T> reverseIterate() {
+    public UnfailingIterator reverseIterate() {
         return new ReverseListIterator<>(value);
     }
 
@@ -259,6 +269,7 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      * Get the effective boolean value
      */
 
+    @Override
     public boolean effectiveBooleanValue() throws XPathException {
         int len = getLength();
         if (len == 0) {
@@ -291,14 +302,15 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      */
 
     /*@NotNull*/
-    public GroundedValue<T> subsequence(int start, int length) {
+    @Override
+    public GroundedValue subsequence(int start, int length) {
         if (start < 0) {
             start = 0;
         }
         if (start > value.size()) {
             return EmptySequence.getInstance();
         }
-        return new SequenceSlice<>(value, start, length).reduce();
+        return new SequenceSlice(value, start, length).reduce();
     }
 
     /*@NotNull*/
@@ -308,7 +320,7 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
             fsb.append(i == 0 ? "(" : ", ");
             fsb.append(value.get(i).toString());
         }
-        fsb.append(')');
+        fsb.cat(')');
         return fsb.toString();
     }
 
@@ -320,12 +332,13 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      *
      * @return the simplified sequence
      */
-    public GroundedValue<T> reduce() {
+    @Override
+    public GroundedValue reduce() {
         int len = getLength();
         if (len == 0) {
             return EmptySequence.getInstance();
         } else if (len == 1) {
-            return (GroundedValue<T>)itemAt(0);
+            return itemAt(0);
         } else {
             return this;
         }
@@ -337,7 +350,8 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      * @return an Iterable containing the same sequence of items
      */
 
-    public Iterable<T> asIterable() {
+    @Override
+    public Iterable<? extends Item> asIterable() {
         return value;
     }
 
@@ -347,8 +361,8 @@ public class SequenceExtent<T extends Item<?>> implements GroundedValue<T> {
      * @return an iterator over the items in this sequence.
      */
 
-    @Override
-    public Iterator<T> iterator() {
+    //@Override
+    public Iterator<? extends Item> iterator() {
         return value.iterator();
     }
 }

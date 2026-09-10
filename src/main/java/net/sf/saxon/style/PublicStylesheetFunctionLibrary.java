@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -56,13 +56,9 @@ public class PublicStylesheetFunctionLibrary implements FunctionLibrary {
      *                     functions could be used.
      * @return An object representing the extension function to be called, if one is found;
      *         null if no extension function was found matching the required name and arity.
-     * @throws XPathException
-     *          if a function is found with the required name and arity, but
-     *          the implementation of the function cannot be loaded or used; or if an error occurs
-     *          while searching for the function; or if this function library "owns" the namespace containing
-     *          the function call, but no function was found.
      */
 
+    @Override
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         Expression baseCall = base.bind(functionName, staticArgs, env, reasons);
         if (baseCall instanceof UserFunctionCall) {
@@ -78,8 +74,6 @@ public class PublicStylesheetFunctionLibrary implements FunctionLibrary {
 
     }
 
-//#ifdefined HOF
-
     /**
      * Test whether a function with a given name and arity is available; if so, return a function
      * item that can be dynamically called.
@@ -94,6 +88,7 @@ public class PublicStylesheetFunctionLibrary implements FunctionLibrary {
      *          in the event of certain errors, for example attempting to get a function
      *          that is private
      */
+    @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         Function baseFunction = base.getFunctionItem(functionName, staticContext);
         if (baseFunction instanceof UserFunction) {
@@ -104,8 +99,6 @@ public class PublicStylesheetFunctionLibrary implements FunctionLibrary {
         }
         return null;
     }
-//#endif
-
 
     /**
      * Test whether a function with a given name and arity is available
@@ -114,6 +107,7 @@ public class PublicStylesheetFunctionLibrary implements FunctionLibrary {
      * @param functionName the qualified name of the function being called
      * @return true if a function of this name and arity is available for calling
      */
+    @Override
     public boolean isAvailable(SymbolicName.F functionName) {
         if (base instanceof StylesheetFunctionLibrary) {
             StylesheetPackage pack = ((StylesheetFunctionLibrary)base).getStylesheetPackage();
@@ -137,6 +131,7 @@ public class PublicStylesheetFunctionLibrary implements FunctionLibrary {
      * @return a copy of this function library. This must be an instance of the original class.
      */
 
+    @Override
     public FunctionLibrary copy() {
         return this;
     }

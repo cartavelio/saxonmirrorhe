@@ -1,9 +1,10 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.AbstractTraceListener;
+import net.sf.saxon.trace.Traceable;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -11,17 +12,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.StringReader;
 
-public class TestPipeline extends TestCase {
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class TestPipeline {
+	private XsltExecutable xslt_executable1 = null;
+	private XsltExecutable xslt_executable2 = null;
+	private File xslt1 = new File(ConfigTest.DATA_DIR + "echo_given_sourcefile.xsl");
+	private File xslt2 = new File(ConfigTest.DATA_DIR + "print_elements.xsl");
 
 
+    @Test
 	public void testPipeline() {
-
-        XsltExecutable xslt_executable1 = null;
-        XsltExecutable xslt_executable2 = null;
-        File xslt1 = new File(ConfigTest.DATA_DIR + "echo_given_sourcefile.xsl");
-        File xslt2 = new File(ConfigTest.DATA_DIR + "print_elements.xsl");
-
-        // common processor
+		// common processor
 		Processor processor = new Processor(false);
 
 		// transformer1
@@ -77,6 +79,7 @@ public class TestPipeline extends TestCase {
 	}
 
 
+    @Test
     public void testPipelineWithGlobalContextItem() {
         String xsl = "<xsl:stylesheet exclude-result-prefixes=\"#all\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"2.0\">\n"
                 + "<xsl:variable name=\"supp\" as=\"xs:string\" select=\"root()/*/name()\"/>\n"
@@ -118,8 +121,9 @@ public class TestPipeline extends TestCase {
     }
 
 
+    @Test
     public void testPipelineWithGlobalContextItemWithTraceListener() {
-	    // bug 4114: stylesheet in pipeline has global variable that uses the context item
+        // bug 4114: stylesheet in pipeline has global variable that uses the context item
         String xsl = "<xsl:stylesheet exclude-result-prefixes=\"#all\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"2.0\">\n"
                 + "<xsl:variable name=\"supp\" as=\"xs:string\" select=\"root()/*/name()\"/>\n"
                 + "\n"
@@ -148,8 +152,8 @@ public class TestPipeline extends TestCase {
                 }
 
                 @Override
-                protected String tag(int construct) {
-                    return "E" + construct;
+                protected String tag(Traceable construct) {
+                    return "E" + construct.getClass();
                 }
             });
 
@@ -167,8 +171,8 @@ public class TestPipeline extends TestCase {
                 }
 
                 @Override
-                protected String tag(int construct) {
-                    return "F" + construct;
+                protected String tag(Traceable construct) {
+                    return "F" + construct.getClass();
                 }
             });
 

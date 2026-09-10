@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,15 +8,17 @@
 package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
-abstract class TreeEnumeration implements AxisIterator, LookaheadIterator<NodeInfo> {
+import java.util.EnumSet;
+import java.util.function.Predicate;
+
+abstract class TreeEnumeration implements AxisIterator, LookaheadIterator {
 
     protected NodeImpl start;
     /*@Nullable*/ protected NodeImpl next;
-    protected NodeTest nodeTest;
+    protected Predicate<? super NodeInfo> nodeTest;
     /*@Nullable*/ protected NodeImpl current = null;
     protected int position = 0;
 
@@ -29,7 +31,7 @@ abstract class TreeEnumeration implements AxisIterator, LookaheadIterator<NodeIn
      *                 are to be returned.
      */
 
-    public TreeEnumeration(NodeImpl origin, NodeTest nodeTest) {
+    public TreeEnumeration(NodeImpl origin, Predicate<? super NodeInfo> nodeTest) {
         next = origin;
         start = origin;
         this.nodeTest = nodeTest;
@@ -45,7 +47,7 @@ abstract class TreeEnumeration implements AxisIterator, LookaheadIterator<NodeIn
      */
 
     protected boolean conforms(/*@Nullable*/ NodeImpl node) {
-        return node == null || nodeTest == null || nodeTest.matchesNode(node);
+        return node == null || nodeTest == null || nodeTest.test(node);
     }
 
     /**
@@ -74,6 +76,7 @@ abstract class TreeEnumeration implements AxisIterator, LookaheadIterator<NodeIn
      * @return true if there are more items in the sequence
      */
 
+    @Override
     public boolean hasNext() {
         return next != null;
     }
@@ -84,6 +87,7 @@ abstract class TreeEnumeration implements AxisIterator, LookaheadIterator<NodeIn
      */
 
     /*@Nullable*/
+    @Override
     public final NodeInfo next() {
         if (next == null) {
             current = null;
@@ -98,24 +102,18 @@ abstract class TreeEnumeration implements AxisIterator, LookaheadIterator<NodeIn
     }
 
     /**
-     * Indicate that no more items are required from the iterator
-     */
-
-    public void close() {
-    }
-
-    /**
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return LOOKAHEAD;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD);
     }
 
 }

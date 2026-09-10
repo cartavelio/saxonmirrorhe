@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -36,7 +36,6 @@ public final class RuleManager {
     private HashMap<StructuredQName, Mode> modes;
     // tables of rules for non-default modes
     private SimpleMode omniMode = null;       //template rules that specify mode="all"
-    private int recoveryPolicy;
     private boolean unnamedModeExplicit;
     private CompilerInfo compilerInfo; // We may need access to information on the compilation as distinct from the configuration
     private int nextSequenceNumber = 0;
@@ -57,7 +56,6 @@ public final class RuleManager {
         Component c = unnamedMode.makeDeclaringComponent(Visibility.PRIVATE, stylesheetPackage);
         c.setVisibility(Visibility.PRIVATE, VisibilityProvenance.DEFAULTED);
         this.stylesheetPackage.addComponent(c);
-        this.unnamedMode.setRecoveryPolicy(recoveryPolicy);
         this.modes = new HashMap<>(5);
     }
 
@@ -88,34 +86,6 @@ public final class RuleManager {
      */
     public void setCompilerInfo(CompilerInfo compilerInfo) {
         this.compilerInfo = compilerInfo;
-    }
-
-    /**
-     * Set the policy for handling recoverable errors. Note that for some errors the decision can be
-     * made at run-time, but for the "ambiguous template match" error, the decision is (since 9.2)
-     * fixed at compile time.
-     *
-     * @param policy the recovery policy to be used. The options are {@link net.sf.saxon.Configuration#RECOVER_SILENTLY},
-     *               {@link net.sf.saxon.Configuration#RECOVER_WITH_WARNINGS}, or {@link net.sf.saxon.Configuration#DO_NOT_RECOVER}.
-     * @since 9.2
-     */
-
-    public void setRecoveryPolicy(int policy) {
-        recoveryPolicy = policy;
-        unnamedMode.setRecoveryPolicy(policy);
-    }
-
-    /**
-     * Get the policy for handling recoverable errors. Note that for some errors the decision can be
-     * made at run-time, but for the "ambiguous template match" error, the decision is (since 9.2)
-     * fixed at compile time.
-     *
-     * @return the current policy.
-     * @since 9.2
-     */
-
-    public int getRecoveryPolicy() {
-        return recoveryPolicy;
     }
 
     /**
@@ -161,7 +131,6 @@ public final class RuleManager {
         if (modeName.equals(Mode.OMNI_MODE)) {
             if (omniMode == null) {
                 omniMode = config.makeMode(modeName, compilerInfo);
-                omniMode.setRecoveryPolicy(recoveryPolicy);
             }
             return omniMode;
         }
@@ -169,7 +138,6 @@ public final class RuleManager {
         Mode m = modes.get(modeName);
         if (m == null && createIfAbsent) {
             m = config.makeMode(modeName, compilerInfo);
-            m.setRecoveryPolicy(recoveryPolicy);
             modes.put(modeName, m);
             Component c = m.makeDeclaringComponent(Visibility.PRIVATE, stylesheetPackage);
             c.setVisibility(Visibility.PRIVATE, VisibilityProvenance.DEFAULTED);
@@ -255,6 +223,7 @@ public final class RuleManager {
         }
         return 1;
     }
+
 
     /**
      * Get the template rule matching a given item whose import precedence

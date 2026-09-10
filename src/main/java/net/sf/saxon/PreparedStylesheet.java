@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,6 +10,8 @@ package net.sf.saxon;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.instruct.*;
+import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
@@ -53,21 +55,10 @@ public class PreparedStylesheet extends Executable {
     // Table of components declared in this package or imported from used packages. Key is the symbolic identifier of the
     // component; value is the component itself. Hidden components are not included in this table because their names
     // need not be unique, and because they are not available for reference by name.
-    // Currently used only for named templates
     private Map<SymbolicName, Component> componentIndex;
-
-    // manager class for accumulator rules (XSLT 3.0 only)
-//    private AccumulatorManager accumulatorManager = null;
-
-    //private FunctionLibraryList stylesheetFunctions;
-
-    //public FunctionLibraryList getStylesheetFunctions() {
-//        return stylesheetFunctions;
-//    }
 
     private StructuredQName defaultInitialTemplate;
     private StructuredQName defaultInitialMode;
-    private int recoveryPolicy;
     private String messageReceiverClassName;
     private OutputURIResolver outputURIResolver;
     private GlobalParameterSet compileTimeParams;
@@ -82,19 +73,14 @@ public class PreparedStylesheet extends Executable {
     public PreparedStylesheet(Compilation compilation) {
         super(compilation.getConfiguration());
         CompilerInfo compilerInfo = compilation.getCompilerInfo();
-        setHostLanguage(Configuration.XSLT);
+        setHostLanguage(HostLanguage.XSLT);
         if (compilerInfo.isSchemaAware()) {
             int localLic = compilation.getPackageData().getLocalLicenseId();
             getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT, "schema-aware XSLT", localLic);
             schemaAware = true;
         }
-        //setSchemaAware(compilerInfo.isSchemaAware());
-        if (compilerInfo.getErrorListener() == null) {
-            compilerInfo.setErrorListener(getConfiguration().getErrorListener());
-        }
         defaultInitialMode = compilerInfo.getDefaultInitialMode();
         defaultInitialTemplate = compilerInfo.getDefaultInitialTemplate();
-        recoveryPolicy = compilerInfo.getRecoveryPolicy();
         messageReceiverClassName = compilerInfo.getMessageReceiverClassName();
         outputURIResolver = compilerInfo.getOutputURIResolver();
         compileTimeParams = compilation.getParameters();
@@ -113,7 +99,6 @@ public class PreparedStylesheet extends Executable {
         XsltController c = new XsltController(config, this);
         c.setMessageReceiverClassName(messageReceiverClassName);
         c.setOutputURIResolver(outputURIResolver);
-        c.setRecoveryPolicy(recoveryPolicy);
         if (defaultInitialMode != null) {
             try {
                 c.setInitialMode(defaultInitialMode);
@@ -152,7 +137,7 @@ public class PreparedStylesheet extends Executable {
                 if (getCompileTimeParams().get(req) == null && (params == null || params.get(req) == null)) {
                     XPathException err = new XPathException("No value supplied for required parameter " +
                                                                     req.getDisplayName());
-                    err.setErrorCode(getHostLanguage() == Configuration.XQUERY ? "XPDY0002" : "XTDE0050");
+                    err.setErrorCode(getHostLanguage() == HostLanguage.XQUERY ? "XPDY0002" : "XTDE0050");
                     throw err;
                 }
             }
@@ -198,21 +183,6 @@ public class PreparedStylesheet extends Executable {
         return ruleManager;
     }
 
-    /**
-     * Get the named template with a given name.
-     *
-     * @param qName The template name
-     * @return The template (of highest import precedence) with this name if there is one;
-     * null if none is found.
-     */
-
-    /*@Nullable*/
-    public NamedTemplate getNamedTemplate(StructuredQName qName) {
-        if (namedTemplateTable == null) {
-            return null;
-        }
-        return namedTemplateTable.get(qName);
-    }
 
     /**
      * Register the named template with a given name
@@ -230,6 +200,7 @@ public class PreparedStylesheet extends Executable {
 
     /**
      * Get the default initial template name
+     * @return the default initial template name
      */
 
     public StructuredQName getDefaultInitialTemplateName() {
@@ -249,28 +220,6 @@ public class PreparedStylesheet extends Executable {
     public Component getComponent(SymbolicName name) {
         return componentIndex.get(name);
     }
-
-    /**
-     * Ask whether a component is invokable from outside the stylesheet
-     *
-     * @param component the component
-     * @return true if the component can be referenced from the calling application
-     */
-
-    public boolean isEligibleInitialComponent(Component component) {
-        if (component == null) {
-            return false;
-        }
-        if (component.getVisibility() == Visibility.PUBLIC || component.getVisibility() == Visibility.FINAL) {
-            return true;
-        }
-        StylesheetPackage top = getTopLevelPackage();
-        if (top.isImplicitPackage() && component.getActor().getDeclaredVisibility() == null) {
-            return true;
-        }
-        return false;
-    }
-
 
     /**
      * Ask whether a mode is eligible for invoking from outside the stylesheet
@@ -306,24 +255,10 @@ public class PreparedStylesheet extends Executable {
 
 
     /**
-     * Iterate over all the named templates defined in this Executable
-     *
-     * @return an iterator, the items returned being of class {@link NamedTemplate}
-     */
-
-    public Iterator<NamedTemplate> iterateNamedTemplates() {
-        if (namedTemplateTable == null) {
-            List<NamedTemplate> list = Collections.emptyList();
-            return list.iterator();
-        } else {
-            return namedTemplateTable.values().iterator();
-        }
-    }
-
-    /**
      * Explain the expression tree for named templates in a stylesheet
      *
      * @param presenter destination for the explanatory output
+     * @throws XPathException if writing to the output fails
      */
 
     public void explainNamedTemplates(ExpressionPresenter presenter) throws XPathException {
@@ -375,7 +310,7 @@ public class PreparedStylesheet extends Executable {
     public PreparedStylesheet getCachedStylesheet(String href, String baseURI) {
         URI abs = null;
         try {
-            abs = new URI(baseURI).resolve(href);
+            abs = ResolveURI.makeAbsolute(href, baseURI);
         } catch (URISyntaxException err) {
             //
         }
@@ -398,7 +333,7 @@ public class PreparedStylesheet extends Executable {
     public void putCachedStylesheet(String href, String baseURI, PreparedStylesheet pss) {
         URI abs = null;
         try {
-            abs = new URI(baseURI).resolve(href);
+            abs = ResolveURI.makeAbsolute(href, baseURI);
         } catch (URISyntaxException err) {
             //
         }
@@ -415,6 +350,7 @@ public class PreparedStylesheet extends Executable {
      * as a human-readable entity
      *
      * @param presenter defines the destination and format of the output
+     * @throws XPathException if output fails
      */
 
     public void explain(ExpressionPresenter presenter) throws XPathException {

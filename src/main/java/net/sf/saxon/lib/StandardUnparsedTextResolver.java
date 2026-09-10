@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -61,6 +61,7 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
      * @since 8.9
      */
 
+    @Override
     public Reader resolve(URI absoluteURI, String encoding, Configuration config) throws XPathException {
         URL absoluteURL;
         Logger err = config.getLogger();
@@ -71,6 +72,9 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
         if (!absoluteURI.isAbsolute()) {
             throw new XPathException("Resolved URI supplied to unparsed-text() is not absolute: " + absoluteURI.toString(),
                     "FOUT1170");
+        }
+        if (!config.getAllowedUriTest().test(absoluteURI)) {
+            throw new XPathException("URI scheme '" + absoluteURI.getScheme() + "' has been disallowed");
         }
         InputStream inputStream = null;
         String contentEncoding;
@@ -113,7 +117,8 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
             try {
                 absoluteURL = absoluteURI.toURL();
             } catch (MalformedURLException mue) {
-                XPathException e = new XPathException("Cannot convert absolute URI to URL", mue);
+                XPathException e = new XPathException("Cannot convert absolute URI "
+                                                              + absoluteURI + " to URL", mue);
                 e.setErrorCode("FOUT1170");
                 throw e;
             }
@@ -125,9 +130,10 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
                     connection.connect();
                 } catch (IOException ioe) {
                     if (debug) {
-                        err.error("unparsed-text(): connection failure. " + ioe.getMessage());
+                        err.error("unparsed-text(): connection failure on " + absoluteURL
+                                          + ". " + ioe.getMessage());
                     }
-                    XPathException xpe = new XPathException("Failed to read input file", ioe);
+                    XPathException xpe = new XPathException("Failed to read input file " + absoluteURL, ioe);
                     xpe.setErrorCode("FOUT1170");
                     throw xpe;
                 }
@@ -291,7 +297,7 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
                 }
                 FastStringBuffer sb = new FastStringBuffer(read);
                 for (int b = 0; b < read; b++) {
-                    sb.append((char) start[b]);
+                    sb.cat((char) start[b]);
                 }
                 String p = sb.toString();
                 int v = p.indexOf("encoding");
@@ -302,7 +308,7 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
                     }
                     sb.setLength(0);
                     while (v < p.length() && p.charAt(v) != '"' && p.charAt(v) != '\'') {
-                        sb.append(p.charAt(v++));
+                        sb.cat(p.charAt(v++));
                     }
                     if (debug) {
                         logger.info("unparsed-text(): encoding in XML declaration = " + sb.toString());

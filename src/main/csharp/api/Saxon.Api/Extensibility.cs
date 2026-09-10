@@ -13,6 +13,7 @@ using JSequenceType = net.sf.saxon.value.SequenceType;
 using JSequence = net.sf.saxon.om.Sequence;
 using JExpression = net.sf.saxon.expr.Expression;
 using JXdmSequenceType = net.sf.saxon.s9api.SequenceType;
+using JItem = net.sf.saxon.om.Item;
 using System.Collections.Generic;
 
 namespace Saxon.Api
@@ -564,6 +565,15 @@ namespace Saxon.Api
 
     }
 
+    internal class Mapper : net.sf.saxon.dotnet.DotNetIterator.Mapper
+    {
+        public object convert(object obj)
+        {
+            XdmItem i = (XdmItem)obj;
+            return (JItem)i.Unwrap();
+        }
+    }
+
     internal class WrappedExtensionFunctionCall : JExtensionFunctionCall {
 
         ExtensionFunctionCall functionCall;
@@ -593,13 +603,13 @@ namespace Saxon.Api
             }
             DynamicContext dc = new DynamicContext(context);
             IEnumerator<XdmItem> result = functionCall.Call(na, dc);
-            return new net.sf.saxon.om.LazySequence(new DotNetSequenceIterator(result));
+            return new net.sf.saxon.om.LazySequence(new net.sf.saxon.om.IteratorWrapper(new net.sf.saxon.dotnet.DotNetIterator(result, new Mapper())));
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.

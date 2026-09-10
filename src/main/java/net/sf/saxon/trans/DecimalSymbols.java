@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,7 @@
 
 package net.sf.saxon.trans;
 
-import net.sf.saxon.Configuration;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.regex.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -69,7 +69,7 @@ public class DecimalSymbols {
      * Create a DecimalSymbols object with default values for all properties
      */
 
-    public DecimalSymbols(int language, int languageLevel) {
+    public DecimalSymbols(HostLanguage language, int languageLevel) {
         intValues[DECIMAL_SEPARATOR] = '.';
         intValues[GROUPING_SEPARATOR] = ',';
         intValues[DIGIT] = '#';
@@ -85,8 +85,8 @@ public class DecimalSymbols {
         setHostLanguage(language, languageLevel);
     }
 
-    public void setHostLanguage(int language, int languageLevel) {
-        if (language == Configuration.XQUERY) {
+    public void setHostLanguage(HostLanguage language, int languageLevel) {
+        if (language == HostLanguage.XQUERY) {
             errorCodes = XQUERY_CODES;
         } else {
             errorCodes = XSLT_CODES;
@@ -395,7 +395,7 @@ public class DecimalSymbols {
     }
 
     public void export(StructuredQName name, ExpressionPresenter out) {
-        DecimalSymbols defaultSymbols = new DecimalSymbols(Configuration.XSLT, 31);
+        DecimalSymbols defaultSymbols = new DecimalSymbols(HostLanguage.XSLT, 31);
         out.startElement("decimalFormat");
         if (name != null) {
             out.emitAttribute("name", name);

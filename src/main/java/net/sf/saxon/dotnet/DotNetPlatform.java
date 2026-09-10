@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -55,7 +55,7 @@ public class DotNetPlatform implements Platform {
      * loading.
      */
 
-    private static CharsetProvider provider = new sun.nio.cs.ext.ExtendedCharsets();
+    private static final CharsetProvider provider = new sun.nio.cs.ext.ExtendedCharsets();
 
     public DotNetPlatform() {
     }
@@ -64,10 +64,9 @@ public class DotNetPlatform implements Platform {
      * Perform platform-specific initialization of the configuration
      */
 
+    @Override
     public void initialize(Configuration config) {
         config.setURIResolver(new DotNetURIResolver(new XmlUrlResolver()));
-        //config.setModuleURIResolver(new DotNetStandardModuleURIResolver(new XmlUrlResolver()));
-        //config.setCollectionURIResolver(new DotNetCollectionURIResolver());
     }
 
 
@@ -75,6 +74,7 @@ public class DotNetPlatform implements Platform {
      * Return true if this is the Java platform
      */
 
+    @Override
     public boolean isJava() {
         return false;
     }
@@ -83,6 +83,7 @@ public class DotNetPlatform implements Platform {
      * Return true if this is the .NET platform
      */
 
+    @Override
     public boolean isDotNet() {
         return true;
     }
@@ -91,6 +92,7 @@ public class DotNetPlatform implements Platform {
      * Get the platform version
      */
 
+    @Override
     public String getPlatformVersion() {
         return ".NET " + Environment.get_Version().ToString() +
                 " on " + Environment.get_OSVersion().ToString();
@@ -100,6 +102,7 @@ public class DotNetPlatform implements Platform {
      * Get a suffix letter to add to the Saxon version number to identify the platform
      */
 
+    @Override
     public String getPlatformSuffix() {
         return "N";
     }
@@ -114,13 +117,16 @@ public class DotNetPlatform implements Platform {
      * No ICU features
      */
 
+    @Override
     public boolean hasICUCollator() {
         return false;
     }
 
+    @Override
     public boolean hasICUNumberer() {
         return false;
     }
+    @Override
     public XMLReader loadParser() {
         XMLReader parser;
         try {
@@ -140,6 +146,7 @@ public class DotNetPlatform implements Platform {
      *
      * @return the parser (XMLReader)
      */
+    @Override
     public XMLReader loadParserForXmlFragments(){
         return loadParser();
     }
@@ -152,19 +159,18 @@ public class DotNetPlatform implements Platform {
      * @param input         the supplied StreamSource
      * @param validation    indicates whether schema validation is required, adn in what mode
      * @param dtdValidation true if DTD validation is required
-     * @param stripspace    defines the requird whitespace handling
      * @return the PullSource or SAXSource, initialized with a suitable parser, or the original
      *         input Source, if now special handling is required or possible. May also return an AugmentedSource
      *         that wraps one of these.
      */
 
-    public Source getParserSource(PipelineConfiguration pipe, StreamSource input, int validation, boolean dtdValidation,
-                                  int stripspace) {
-            return getParserSource(pipe,input, validation, dtdValidation, stripspace, 0);
+    @Override
+    public Source getParserSource(PipelineConfiguration pipe, StreamSource input, int validation, boolean dtdValidation) {
+            return getParserSourceInternal(pipe, input, validation, dtdValidation, 0);
     }
 
-    private Source getParserSource(PipelineConfiguration pipe, StreamSource input, int validation, boolean dtdValidation,
-                                      int stripspace, int depth) {
+    private Source getParserSourceInternal(PipelineConfiguration pipe, StreamSource input, int validation, boolean dtdValidation,
+                                           int depth) {
         if(depth > 2) {
             return input;
         }
@@ -247,7 +253,7 @@ public class DotNetPlatform implements Platform {
                 } else if (r instanceof AugmentedSource) {
                     Source r2 = ((AugmentedSource) r).getContainedSource();
                     if (r2 instanceof StreamSource) {
-                        r2 = getParserSource(pipe, (StreamSource) r2, validation, dtdValidation, stripspace, depth+1);
+                        r2 = getParserSourceInternal(pipe, (StreamSource) r2, validation, dtdValidation, depth+1);
                         return r2;
                     } else {
                         return r2;
@@ -256,7 +262,7 @@ public class DotNetPlatform implements Platform {
                     if(isSame(r, input)) {
                         return input;
                     }
-                    Source r2 = getParserSource(pipe, (StreamSource) r, validation, dtdValidation, stripspace, depth+1);
+                    Source r2 = getParserSourceInternal(pipe, (StreamSource) r, validation, dtdValidation, depth+1);
                     AugmentedSource as = AugmentedSource.makeAugmentedSource(r2);
                     as.setPleaseCloseAfterUse(true);
                     return as;
@@ -311,6 +317,7 @@ public class DotNetPlatform implements Platform {
      * @throws XPathException if a fatal error occurs
      */
 
+    @Override
     public StringCollator makeCollation(Configuration config, Properties props, String uri) throws XPathException {
         return DotNetCollationFactory.makeCollation(config, uri, props);
     }
@@ -325,6 +332,7 @@ public class DotNetPlatform implements Platform {
      * @return true if this collation can supply collation keys
      */
 
+    @Override
     public boolean canReturnCollationKeys(StringCollator collation) {
         return collation instanceof DotNetComparator ||
                 collation instanceof CodepointCollator;
@@ -339,6 +347,7 @@ public class DotNetPlatform implements Platform {
      *                            collation keys (this should have been checked in advance)
      */
 
+    @Override
     public AtomicMatchKey getCollationKey(SimpleCollation namedCollation, String value) {
         DotNetComparator c = (DotNetComparator) namedCollation.getComparator();
         return c.getCollationKey(value);
@@ -352,6 +361,7 @@ public class DotNetPlatform implements Platform {
      * @throws XPathException if the URI is malformed in some way
      */
 
+    @Override
     public StringCollator makeUcaCollator(String uri, Configuration config) throws XPathException {
         return null;
     }
@@ -369,6 +379,7 @@ public class DotNetPlatform implements Platform {
      * @throws net.sf.saxon.trans.XPathException
      *          if the regular expression or the flags are invalid
      */
+    @Override
     public RegularExpression compileRegularExpression(Configuration config, CharSequence regex, String flags, String hostLanguage, List<String> warnings) throws XPathException {
         // recognize implementation-defined flags following a semicolon in the flags string
         boolean useJava = false;
@@ -408,6 +419,7 @@ public class DotNetPlatform implements Platform {
      */
 
 
+    @Override
     public ExternalObjectType getExternalObjectType(Configuration config, String uri, String localName) {
         if (uri.equals(NamespaceConstant.DOT_NET_TYPE)) {
             return new DotNetExternalObjectType(cli.System.Type.GetType(localName), config);
@@ -425,6 +437,7 @@ public class DotNetPlatform implements Platform {
      */
 
     /*@Nullable*/
+    @Override
     public String getInstallationDirectory(String edition, Configuration config) {
         RegistryKey[] bases = {Registry.LocalMachine, Registry.CurrentUser};
         // See Saxon bug 3426425.
@@ -435,11 +448,11 @@ public class DotNetPlatform implements Platform {
                     RegistryKey regKey = base.OpenSubKey(path + edition + "-N\\Settings", false);
                     if (regKey != null) {
                         if (config.isTiming()) {
-                            config.getStandardErrorOutput().println("Found registry key at " + regKey.toString());
+                            config.getLogger().info("Found registry key at " + regKey.toString());
                         }
                         String installPath = (String) regKey.GetValue("InstallPath");
                         if (config.isTiming()) {
-                            config.getStandardErrorOutput().println("Software installation path: " + installPath);
+                            config.getLogger().info("Software installation path: " + installPath);
                         }
                         return installPath;
                     }
@@ -456,6 +469,7 @@ public class DotNetPlatform implements Platform {
      * @since 9.3
      */
 
+    @Override
     public void registerAllBuiltInObjectModels(Configuration config) {
         // No action for Saxon on .NET
     }
@@ -468,6 +482,7 @@ public class DotNetPlatform implements Platform {
      * @since 9.4
      */
 
+    @Override
     public void setDefaultSAXParserFactory(Configuration config) {
         String editionCode = "he";
 //#if PE==true
@@ -476,13 +491,15 @@ public class DotNetPlatform implements Platform {
 //#if EE==true
         editionCode = "ee";
 //#endif
-        System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl, saxon9"+editionCode+", Version="+ Version.getProductVersion()+", Culture=neutral, PublicKeyToken=e1fdd002d5083fe6");
+        System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl, saxon-"+editionCode+"-"+ Version.getProductVersion() +", Version="+ Version.getProductVersion()+", Culture=neutral, PublicKeyToken=e1fdd002d5083fe6");
     }
 
+    @Override
     public boolean JAXPStaticContextCheck(RetainedStaticContext retainedStaticContext, StaticContext sc) {
         return false;
     }
 
+    @Override
     public ModuleURIResolver makeStandardModuleURIResolver(Configuration config) {
         return new DotNetStandardModuleURIResolver(new XmlUrlResolver());
     }
@@ -495,6 +512,7 @@ public class DotNetPlatform implements Platform {
      * @return the class loader object
      * @since 9.6.0.3
      */
+    @Override
     public ClassLoader makeGeneratedClassLoader(Configuration config, Class thisClass){
         ClassLoader parentClassLoader = config.getDynamicLoader().getClassLoader();
         if (parentClassLoader == null) {

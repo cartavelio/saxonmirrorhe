@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,10 +7,7 @@
 
 package net.sf.saxon.jaxp;
 
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverWithOutputProperties;
-import net.sf.saxon.event.SequenceNormalizer;
+import net.sf.saxon.event.*;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.s9api.AbstractDestination;
 import net.sf.saxon.s9api.SaxonApiException;
@@ -45,6 +42,7 @@ public class ReceivingDestination extends AbstractDestination {
      * @return the wrapped {@code Receiver}
      */
 
+    @Override
     public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties properties) {
         if (acceptsRawOutput()) {
             return outputTarget;
@@ -59,7 +57,7 @@ public class ReceivingDestination extends AbstractDestination {
      * @return false unless one of the following conditions is true:
      *  <ol>
      *      <li>The {@code Receiver} is an instance of {@link SequenceNormalizer}</li>
-     *      <li>The {@code Receiver} implements {@link net.sf.saxon.event.ReceiverWithOutputProperties},
+     *      <li>The {@code Receiver} implements {@link ReceiverWithOutputProperties},
      *      and a call on {@code getOutputProperties(SaxonOutputPropertes.REQUIRE_WELL_FORMED)} returns "no"</li>
      *      <li>The method {#acceptRawOutput()} is implemented in a subclass of {@code ReceivingDestination},
      *      and returns false.</li>
@@ -77,6 +75,7 @@ public class ReceivingDestination extends AbstractDestination {
         return false;
     }
 
+    @Override
     public void close() throws SaxonApiException {
 //        try {
 //            outputTarget.close();

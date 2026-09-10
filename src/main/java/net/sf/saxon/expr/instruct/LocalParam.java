@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Sequence;
@@ -96,6 +97,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * @return the required type
      */
 
+    @Override
     public SequenceType getRequiredType() {
         return requiredType;
     }
@@ -177,14 +179,17 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * @return the empty cardinality.
      */
 
+    @Override
     public int getCardinality() {
         return StaticProperty.EMPTY;
     }
 
+    @Override
     public boolean isAssignable() {
         return false;
     }
 
+    @Override
     public boolean isGlobal() {
         return false;
     }
@@ -194,6 +199,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * In other cases, return -1.
      */
 
+    @Override
     public int getLocalSlotNumber() {
         return slotNumber;
     }
@@ -230,6 +236,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
     }
 
 
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         Expression e2 = super.typeCheck(visitor, contextItemType);
         if (e2 != this) {
@@ -239,6 +246,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
         return this;
     }
 
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         Expression e2 = super.optimize(visitor, contextItemType);
         if (e2 != this) {
@@ -269,6 +277,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * @return the copy of the original expression
      */
 
+    @Override
     public LocalParam copy(RebindingMap rebindings) {
         LocalParam p2 = new LocalParam();
         if (conversionOp != null) {
@@ -289,6 +298,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
         return p2;
     }
 
+    @Override
     public void addReference(VariableReference ref, boolean isLoopingReference) {
 
     }
@@ -325,7 +335,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      *          with a dynamic error
      */
 
-    public Sequence<?> getSelectValue(XPathContext context) throws XPathException {
+    public Sequence getSelectValue(XPathContext context) throws XPathException {
         Expression select = getSelectExpression();
         if (select == null) {
             throw new AssertionError("Internal error: No select expression");
@@ -338,7 +348,9 @@ public final class LocalParam extends Instruction implements LocalBinding {
             // which will already contain any code to force conversion to the required type.
             int savedOutputState = context.getTemporaryOutputState();
             context.setTemporaryOutputState(StandardNames.XSL_WITH_PARAM);
-            Sequence<?> result = evaluator.evaluate(select, context);
+            Sequence result;
+            Evaluator eval = evaluator == null ? Evaluator.EAGER_SEQUENCE : evaluator;
+            result = eval.evaluate(select, context);
             context.setTemporaryOutputState(savedOutputState);
             return result;
         }
@@ -380,6 +392,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * @return the name of this variable (a QName)
      */
 
+    @Override
     public StructuredQName getVariableQName() {
         return variableQName;
     }
@@ -417,8 +430,8 @@ public final class LocalParam extends Instruction implements LocalBinding {
         return conversionOp == null ? null : conversionOp.getChildExpression();
     }
 
-    public int getConversionEvaluationMode() {
-        return conversionEvaluator.getCode();
+    public EvaluationMode getConversionEvaluationMode() {
+        return conversionEvaluator.getEvaluationMode();
     }
 
     /**
@@ -426,6 +439,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * @return the integer name code
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_PARAM;
     }
@@ -446,13 +460,16 @@ public final class LocalParam extends Instruction implements LocalBinding {
     /**
      * Process the local parameter declaration
      *
+     *
+     * @param output the destination for the result
      * @param context the dynamic context
      * @return either null if processing is complete, or a tailcall if one is left outstanding
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs in the evaluation
      */
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         int wasSupplied = context.useLocalParameter(variableQName, slotNumber, isTunnelParam());
         switch (wasSupplied) {
             case ParameterSet.SUPPLIED_AND_CHECKED:
@@ -505,6 +522,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * Return null if unknown or not applicable
      */
 
+    @Override
     public IntegerValue[] getIntegerBoundsForVariable() {
         return null;
     }
@@ -513,7 +531,8 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * Evaluate the variable
      */
 
-    public Sequence<?> evaluateVariable(XPathContext c) {
+    @Override
+    public Sequence evaluateVariable(XPathContext c) {
         return c.evaluateLocalVariable(slotNumber);
     }
 
@@ -624,6 +643,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("param", this);
         out.emitAttribute("name", getVariableQName());
@@ -634,10 +654,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
         }
         ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
         if (getRequiredType() != SequenceType.ANY_SEQUENCE) {
-            out.emitAttribute("as", getRequiredType().toExportString());
-            if (options.target.equals("JS") && options.targetVersion == 2) {
-                out.emitAttribute("asJ", getRequiredType().toExportString2());
-            }
+            out.emitAttribute("as", getRequiredType().toAlphaCode());
         }
         if (getSelectExpression() != null) {
             out.setChildRole("select");

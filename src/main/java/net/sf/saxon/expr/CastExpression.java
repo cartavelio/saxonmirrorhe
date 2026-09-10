@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -47,6 +47,7 @@ public class CastExpression extends CastingExpression implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
         SequenceType atomicType = SequenceType.makeSequenceType(BuiltInAtomicType.ANY_ATOMIC, getCardinality());
@@ -54,7 +55,7 @@ public class CastExpression extends CastingExpression implements Callable {
         Configuration config = visitor.getConfiguration();
         final TypeHierarchy th = config.getTypeHierarchy();
         RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.TYPE_OP, "cast as", 0);
-        ItemType sourceItemType = null;
+        ItemType sourceItemType;
 
         TypeChecker tc = config.getTypeChecker(false);
         Expression operand = tc.staticTypeCheck(getBaseExpression(), atomicType, role, visitor);
@@ -75,10 +76,10 @@ public class CastExpression extends CastingExpression implements Callable {
         }
 
         PlainType sourceType = (PlainType) sourceItemType;
-        int r = th.relationship(sourceType, getTargetType());
-        if (r == TypeHierarchy.SAME_TYPE) {
+        Affinity r = th.relationship(sourceType, getTargetType());
+        if (r == Affinity.SAME_TYPE) {
             return operand;
-        } else if (r == TypeHierarchy.SUBSUMED_BY) {
+        } else if (r == Affinity.SUBSUMED_BY) {
             // It's generally true that any expression defined to return an X is allowed to return a subtype of X.
             // However, people seem to get upset if we treat the cast as a no-op.
             converter = new Converter.UpCastingConverter(getTargetType());
@@ -128,6 +129,7 @@ public class CastExpression extends CastingExpression implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         final TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         Expression e2 = super.optimize(visitor, contextInfo);
@@ -211,7 +213,9 @@ public class CastExpression extends CastingExpression implements Callable {
     }
 
     /**
-     * Perform early (compile-time) evaluation
+     * Perform early (compile-time) evaluation, if possible
+     * @return the result of pre-evaluation, or the original expression unchanged
+     * @throws XPathException if an error is found
      */
 
     protected Expression preEvaluate() throws XPathException {
@@ -245,6 +249,7 @@ public class CastExpression extends CastingExpression implements Callable {
      * Get the static cardinality of the expression
      */
 
+    @Override
     public int computeCardinality() {
         return allowsEmpty() && Cardinality.allowsZero(getBaseExpression().getCardinality())
                 ? StaticProperty.ALLOWS_ZERO_OR_ONE : StaticProperty.EXACTLY_ONE;
@@ -255,6 +260,7 @@ public class CastExpression extends CastingExpression implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getTargetType();
     }
@@ -265,7 +271,7 @@ public class CastExpression extends CastingExpression implements Callable {
      * inference rules defined in the XSLT 3.0 specification.
      *
      * @return the static item type of the expression according to the XSLT 3.0 defined rules
-     * @param contextItemType
+     * @param contextItemType static information about the context item
      */
     @Override
     public UType getStaticUType(UType contextItemType) {
@@ -312,10 +318,11 @@ public class CastExpression extends CastingExpression implements Callable {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings  variables that need to be rebound
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         CastExpression c2 = new CastExpression(getBaseExpression().copy(rebindings), getTargetType(), allowsEmpty());
         ExpressionTool.copyLocationInfo(this, c2);
@@ -338,7 +345,8 @@ public class CastExpression extends CastingExpression implements Callable {
         return EVALUATE_METHOD;
     }
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue result = doCast((AtomicValue)arguments[0].head(), context);
         return result == null ? EmptySequence.getInstance() : result;
     }
@@ -387,6 +395,7 @@ public class CastExpression extends CastingExpression implements Callable {
      */
 
     /*@Nullable*/
+    @Override
     public AtomicValue evaluateItem(XPathContext context) throws XPathException {
         try {
             AtomicValue value = (AtomicValue) getBaseExpression().evaluateItem(context);
@@ -439,12 +448,9 @@ public class CastExpression extends CastingExpression implements Callable {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        out.startElement("cast", this);
-        out.emitAttribute("as", getTargetType().toExportString());
-        out.emitAttribute("emptiable", allowsEmpty() ? "1" : "0");
-        getBaseExpression().export(out);
-        out.endElement();
+        export(out, "cast");
     }
 
     /**

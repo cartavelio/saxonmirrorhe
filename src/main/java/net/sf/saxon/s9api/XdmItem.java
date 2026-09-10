@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -45,7 +45,7 @@ public abstract class XdmItem extends XdmValue {
      * @since 9.5 (previously a protected constructor)
      */
 
-    public XdmItem(Item<?> item) {
+    public XdmItem(Item item) {
         super();
         setValue(item);
     }
@@ -53,7 +53,7 @@ public abstract class XdmItem extends XdmValue {
     // internal factory mathod to wrap an Item
 
     /*@Nullable*/
-    protected static XdmItem wrapItem(Item<?> item) {
+    protected static XdmItem wrapItem(Item item) {
         return item == null ? null : (XdmItem) XdmValue.wrap(item);
     }
 
@@ -74,7 +74,7 @@ public abstract class XdmItem extends XdmValue {
      * @since 9.8 (previously inherited from XdmValue which returns a Sequence)
      */
     @Override
-    public Item<?> getUnderlyingValue() {
+    public Item getUnderlyingValue() {
         return (Item)super.getUnderlyingValue();
     }
 
@@ -92,6 +92,17 @@ public abstract class XdmItem extends XdmValue {
 
     public String getStringValue() {
         return getUnderlyingValue().getStringValue();
+    }
+
+    /**
+     * Determine whether the item is a node or some other type of item
+     *
+     * @return true if the item is a node, false if it is an atomic value or a function (including maps and arrays)
+     * @since 10.0
+     */
+
+    public boolean isNode() {
+        return getUnderlyingValue() instanceof NodeInfo;
     }
 
     /**
@@ -133,6 +144,7 @@ public abstract class XdmItem extends XdmValue {
      * @return a Stream over the items in this value
      * @since 9.9
      */
+    @Override
     public XdmStream<? extends XdmItem> stream() {
         return new XdmStream<>(Stream.of(this));
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,18 +9,18 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashSet;
@@ -30,6 +30,8 @@ import net.sf.saxon.z.IntUniversalSet;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static net.sf.saxon.type.Affinity.*;
+
 /**
  * This class exists to provide answers to questions about the type hierarchy. Because
  * such questions are potentially expensive, it caches the answers. There is one instance of
@@ -38,31 +40,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TypeHierarchy {
 
-    private Map<ItemTypePair, Integer> map;
+    private Map<ItemTypePair, Affinity> map;
     protected Configuration config;
-
-    /**
-     * Constant denoting relationship between two types: A is the same type as B
-     */
-    public static final int SAME_TYPE = 0;
-    /**
-     * Constant denoting relationship between two types: A subsumes B
-     */
-    public static final int SUBSUMES = 1;
-    /**
-     * Constant denoting relationship between two types: A is subsumed by B
-     */
-    public static final int SUBSUMED_BY = 2;
-    /**
-     * Constant denoting relationship between two types: A overlaps B
-     */
-    public static final int OVERLAPS = 3;
-    /**
-     * Constant denoting relationship between two types: A is disjoint from B
-     */
-    public static final int DISJOINT = 4;
-
-    //private String[] relnames = {"SAME", "SUBSUMES", "SUBSUMED_BY", "OVERLAPS", "DISJOINT"};
 
     /**
      * Create the type hierarchy cache for a configuration
@@ -87,11 +66,11 @@ public class TypeHierarchy {
      *          if the value cannot be converted to the required type
      */
 
-    public Sequence<?> applyFunctionConversionRules(Sequence<?> value, SequenceType requiredType, final RoleDiagnostic role, Location locator)
+    public Sequence applyFunctionConversionRules(Sequence value, SequenceType requiredType, final RoleDiagnostic role, Location locator)
             throws XPathException {
         ItemType suppliedItemType = SequenceTool.getItemType(value, this);
 
-        SequenceIterator<?> iterator = value.iterate();
+        SequenceIterator iterator = value.iterate();
         final ItemType requiredItemType = requiredType.getPrimaryType();
 
         if (requiredItemType.isPlainType()) {
@@ -115,7 +94,7 @@ public class TypeHierarchy {
             if (relationship(suppliedItemType, BuiltInAtomicType.UNTYPED_ATOMIC) != DISJOINT &&
                     !isSubType(BuiltInAtomicType.UNTYPED_ATOMIC, requiredItemType)) {
                 final boolean nsSensitive = ((SimpleType) requiredItemType).isNamespaceSensitive();
-                ItemMappingFunction<Item<?>, Item<?>> converter;
+                ItemMappingFunction converter;
                 if (nsSensitive) {
                     converter = item -> {
                         if (item instanceof UntypedAtomicValue) {
@@ -154,13 +133,13 @@ public class TypeHierarchy {
                         }
                     };
                 }
-                iterator = new ItemMappingIterator<>(iterator, converter, true);
+                iterator = new ItemMappingIterator(iterator, converter, true);
             }
 
             // step 3: apply numeric promotion
 
             if (requiredItemType.equals(BuiltInAtomicType.DOUBLE)) {
-                ItemMappingFunction<Item<?>, Item<?>> promoter = item -> {
+                ItemMappingFunction promoter = item -> {
                     if (item instanceof NumericValue) {
                         return (DoubleValue) Converter.convert(
                                 (NumericValue)item, BuiltInAtomicType.DOUBLE, config.getConversionRules()).asAtomic();
@@ -170,9 +149,9 @@ public class TypeHierarchy {
                                 "Cannot promote non-numeric value to xs:double", "XPTY0004");
                     }
                 };
-                iterator = new ItemMappingIterator<>(iterator, promoter, true);
+                iterator = new ItemMappingIterator(iterator, promoter, true);
             } else if (requiredItemType.equals(BuiltInAtomicType.FLOAT)) {
-                ItemMappingFunction<Item<?>, Item<?>> promoter = item -> {
+                ItemMappingFunction promoter = item -> {
                     if (item instanceof DoubleValue) {
                         throw new XPathException(
                                 "Failed to convert the " + role.getMessage() + ": " +
@@ -186,21 +165,21 @@ public class TypeHierarchy {
                                 "Cannot promote non-numeric value to xs:float", "XPTY0004");
                     }
                 };
-                iterator = new ItemMappingIterator<>(iterator, promoter, true);
+                iterator = new ItemMappingIterator(iterator, promoter, true);
             }
 
             // step 4: apply URI-to-string promotion
 
             if (requiredItemType.equals(BuiltInAtomicType.STRING) &&
                     relationship(suppliedItemType, BuiltInAtomicType.ANY_URI) != DISJOINT) {
-                ItemMappingFunction<Item<?>, Item<?>> promoter = item -> {
+                ItemMappingFunction promoter = item -> {
                     if (item instanceof AnyURIValue) {
                         return new StringValue(item.getStringValueCS());
                     } else {
                         return item;
                     }
                 };
-                iterator = new ItemMappingIterator<>(iterator, promoter, true);
+                iterator = new ItemMappingIterator(iterator, promoter, true);
             }
         }
 
@@ -210,16 +189,16 @@ public class TypeHierarchy {
 
         // Add a check that the values conform to the required type
 
-        int relation = relationship(suppliedItemType, requiredItemType);
+        Affinity relation = relationship(suppliedItemType, requiredItemType);
 
         if (!(relation == SAME_TYPE || relation == SUBSUMED_BY)) {
-            ItemTypeCheckingFunction<Item<?>> itemChecker =
-                    new ItemTypeCheckingFunction<>(requiredItemType, role, locator, config);
-            iterator = new ItemMappingIterator<>(iterator, itemChecker, true);
+            ItemTypeCheckingFunction itemChecker =
+                    new ItemTypeCheckingFunction(requiredItemType, role, locator, config);
+            iterator = new ItemMappingIterator(iterator, itemChecker, true);
         }
 
         if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
-            iterator = new CardinalityCheckingIterator<>(iterator, requiredType.getCardinality(), role, locator);
+            iterator = new CardinalityCheckingIterator(iterator, requiredType.getCardinality(), role, locator);
         }
 
         return SequenceTool.toMemoSequence(iterator);
@@ -227,8 +206,7 @@ public class TypeHierarchy {
     }
 
     /**
-     * Apply function coercion when function items are supplied as arguments to a function call.
-     * This does not happen in Saxon-HE, so the implementation is subclassed in Saxon-PE/EE
+     * Apply function coercion when a function item is supplied as a parameter in a function call
      *
      * @param iterator         An iterator over the supplied value of the parameter
      * @param suppliedItemType the item type of the supplied value
@@ -237,10 +215,28 @@ public class TypeHierarchy {
      * @return an iterator over the converted value
      */
 
-    protected SequenceIterator<?> applyFunctionCoercion(SequenceIterator<?> iterator,
-                                                     ItemType suppliedItemType, ItemType requiredItemType,
-                                                     Location locator) {
-        return iterator;
+    protected SequenceIterator applyFunctionCoercion(
+            SequenceIterator iterator,
+            ItemType suppliedItemType, ItemType requiredItemType,
+            Location locator) {
+        if (requiredItemType instanceof FunctionItemType && !((FunctionItemType) requiredItemType).isMapType()
+                && !((FunctionItemType) requiredItemType).isArrayType()
+                && !(relationship(requiredItemType, suppliedItemType) == Affinity.SUBSUMES)) {
+
+            if (requiredItemType == AnyFunctionType.getInstance()) {
+                // no action (the type checking is added later)
+                return iterator;
+
+            } else {
+
+                FunctionSequenceCoercer.Coercer coercer = new FunctionSequenceCoercer.Coercer(
+                        (SpecificFunctionType) requiredItemType, config, locator);
+                return new ItemMappingIterator(iterator, coercer, true);
+            }
+
+        } else {
+            return iterator;
+        }
     }
 
     /**
@@ -264,7 +260,7 @@ public class TypeHierarchy {
      */
 
     public boolean isSubType(ItemType subtype, /*@NotNull*/ ItemType supertype) {
-        int relation = relationship(subtype, supertype);
+        Affinity relation = relationship(subtype, supertype);
         return relation == SAME_TYPE || relation == SUBSUMED_BY;
     }
 
@@ -273,17 +269,20 @@ public class TypeHierarchy {
      *
      * @param t1 the first item type
      * @param t2 the second item type
-     * @return {@link #SAME_TYPE} if the types are the same; {@link #SUBSUMES} if the first
+     * @return One of:
+     * <ul><li>{@link Affinity#SAME_TYPE} if the types are the same;</li>
+     *     <li>{@link Affinity#SUBSUMES} if the first
      *         type subsumes the second (that is, all instances of the second type are also instances
-     *         of the first); {@link #SUBSUMED_BY} if the second type subsumes the first;
-     *         {@link #OVERLAPS} if the two types overlap (have a non-empty intersection, but neither
-     *         subsumes the other); {@link #DISJOINT} if the two types are disjoint (have an empty intersection)
+     *         of the first);</li>
+     *     <li>{@link Affinity#SUBSUMED_BY} if the second type subsumes the first;</li>
+     *     <li>{@link Affinity#OVERLAPS} if the two types overlap (have a non-empty intersection, but neither
+     *         subsumes the other);</li>
+     *     <li>{@link Affinity#DISJOINT} if the two types are disjoint (have an empty intersection)</li></ul>
      */
 
-    public int relationship(/*@Nullable*/ ItemType t1, /*@NotNull*/ ItemType t2) {
-        if (t1 == null) {
-            throw new NullPointerException();
-        }
+    public Affinity relationship(/*@Nullable*/ ItemType t1, /*@NotNull*/ ItemType t2) {
+        Objects.requireNonNull(t1);
+        Objects.requireNonNull(t2);
         t1 = stabilize(t1);
         t2 = stabilize(t2);
         if (t1.equals(t2)) {
@@ -296,6 +295,15 @@ public class TypeHierarchy {
         if (t1 instanceof AnyItemType) {
             return SUBSUMES;
         }
+        if (t1 instanceof BuiltInAtomicType && t2 instanceof BuiltInAtomicType) {
+            if (t1.getBasicAlphaCode().startsWith(t2.getBasicAlphaCode())) {
+                return SUBSUMED_BY;
+            } else if (t2.getBasicAlphaCode().startsWith(t1.getBasicAlphaCode())) {
+                return SUBSUMES;
+            } else {
+                return DISJOINT;
+            }
+        }
         if (t1 instanceof ErrorType) {
             return SUBSUMED_BY;
         }
@@ -303,7 +311,7 @@ public class TypeHierarchy {
             return SUBSUMES;
         }
         ItemTypePair pair = new ItemTypePair(t1, t2);
-        Integer result = map.get(pair);
+        Affinity result = map.get(pair);
         if (result == null) {
             result = computeRelationship(t1, t2);
             map.put(pair, result);
@@ -343,14 +351,14 @@ public class TypeHierarchy {
      *
      * @param t1 the first item type
      * @param t2 the second item type
-     * @return {@link #SAME_TYPE} if the types are the same; {@link #SUBSUMES} if the first
+     * @return {@link Affinity#SAME_TYPE} if the types are the same; {@link Affinity#SUBSUMES} if the first
      *         type subsumes the second (that is, all instances of the second type are also instances
-     *         of the first); {@link #SUBSUMED_BY} if the second type subsumes the first;
-     *         {@link #OVERLAPS} if the two types overlap (have a non-empty intersection, but neither
-     *         subsumes the other); {@link #DISJOINT} if the two types are disjoint (have an empty intersection)
+     *         of the first); {@link Affinity#SUBSUMED_BY} if the second type subsumes the first;
+     *         {@link Affinity#OVERLAPS} if the two types overlap (have a non-empty intersection, but neither
+     *         subsumes the other); {@link Affinity#DISJOINT} if the two types are disjoint (have an empty intersection)
      */
 
-    private int computeRelationship(ItemType t1, ItemType t2) {
+    private Affinity computeRelationship(ItemType t1, ItemType t2) {
         //System.err.println("computeRelationship " + t1 + ", " + t2);
         requireTrueItemType(t1);
         requireTrueItemType(t2);
@@ -430,7 +438,7 @@ public class TypeHierarchy {
 
                 } else if (t1 instanceof AtomicType) {
                     // relationship (atomic, union)
-                    int r = relationship(t2, t1);
+                    Affinity r = relationship(t2, t1);
                     return inverseRelationship(r);
 
                 } else {
@@ -454,7 +462,7 @@ public class TypeHierarchy {
                         return DISJOINT;
                     } else {
                         // first find the relationship between the node kinds allowed
-                        int nodeKindRelationship;
+                        Affinity nodeKindRelationship;
                         UType m1 = t1.getUType();
                         UType m2 = t2.getUType();
                         if (!m1.overlaps(m2)) {
@@ -470,7 +478,7 @@ public class TypeHierarchy {
                         }
 
                         // Now find the relationship between the node names allowed.  See bug 3713
-                        int nodeNameRelationship;
+                        Affinity nodeNameRelationship;
                         Optional<IntSet> on1 = ((NodeTest) t1).getRequiredNodeNames();
                         Optional<IntSet> on2 = ((NodeTest) t2).getRequiredNodeNames();
 
@@ -506,7 +514,7 @@ public class TypeHierarchy {
 
                         // now find the relationship between the content types allowed
 
-                        int contentRelationship = computeContentRelationship(t1, t2, on1, on2);
+                        Affinity contentRelationship = computeContentRelationship(t1, t2, on1, on2);
 
                         // now analyse the three different relationsships
 
@@ -564,9 +572,9 @@ public class TypeHierarchy {
                     AtomicType k2 = ((MapType)t2).getKeyType();
                     SequenceType v1 = ((MapType)t1).getValueType();
                     SequenceType v2 = ((MapType)t2).getValueType();
-                    int keyRel = relationship(k1, k2);
-                    int valueRel = sequenceTypeRelationship(v1, v2);
-                    int rel = combineRelationships(keyRel, valueRel);
+                    Affinity keyRel = relationship(k1, k2);
+                    Affinity valueRel = sequenceTypeRelationship(v1, v2);
+                    Affinity rel = combineRelationships(keyRel, valueRel);
                     if (rel == SAME_TYPE || rel == SUBSUMES || rel == SUBSUMED_BY) {
                         return rel;
                     }
@@ -574,11 +582,11 @@ public class TypeHierarchy {
                     // so just fall through
                 }
                 if (t2 instanceof FunctionItemType) {
-                    int signatureRelationship = ((FunctionItemType) t1).relationship((FunctionItemType) t2, this);
+                    Affinity signatureRelationship = ((FunctionItemType) t1).relationship((FunctionItemType) t2, this);
                     if (signatureRelationship == DISJOINT) {
                         return DISJOINT;
                     } else {
-                        int assertionRelationship = SAME_TYPE;
+                        Affinity assertionRelationship = SAME_TYPE;
                         AnnotationList first = ((FunctionItemType) t1).getAnnotationAssertions();
                         AnnotationList second = ((FunctionItemType) t2).getAnnotationAssertions();
                         Set<String> namespaces = new HashSet<>();
@@ -591,7 +599,7 @@ public class TypeHierarchy {
                         for (String ns : namespaces) {
                             FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ns);
                             if (handler != null) {
-                                int localRel = SAME_TYPE;
+                                Affinity localRel = SAME_TYPE;
                                 AnnotationList firstFiltered = first.filterByNamespace(ns);
                                 AnnotationList secondFiltered = second.filterByNamespace(ns);
                                 if (firstFiltered.isEmpty()) {
@@ -628,7 +636,7 @@ public class TypeHierarchy {
         }
     }
 
-    private static int nameTestRelationship(QNameTest t1, QNameTest t2) {
+    private static Affinity nameTestRelationship(QNameTest t1, QNameTest t2) {
         if (t1.equals(t2)) {
             return SAME_TYPE;
         }
@@ -653,7 +661,7 @@ public class TypeHierarchy {
         return OVERLAPS;
     }
 
-    private static int combineRelationships(int rel1, int rel2) {
+    private static Affinity combineRelationships(Affinity rel1, Affinity rel2) {
         if (rel1 == SAME_TYPE &&
                 rel2 == SAME_TYPE) {
             return SAME_TYPE;
@@ -703,7 +711,7 @@ public class TypeHierarchy {
         for (PlainType t2 : s2) {
             boolean t2isSubsumed = false;
             for (PlainType t1 : s1) {
-                int rel = relationship(t1, t2);
+                Affinity rel = relationship(t1, t2);
                 if (rel == SUBSUMES || rel == SAME_TYPE) {
                     t2isSubsumed = true;
                     break;
@@ -726,7 +734,7 @@ public class TypeHierarchy {
     private boolean unionOverlaps(Set<? extends PlainType> s1, Set<? extends PlainType> s2) {
         for (PlainType t2 : s2) {
             for (PlainType t1 : s1) {
-                int rel = relationship(t1, t2);
+                Affinity rel = relationship(t1, t2);
                 if (rel != DISJOINT) {
                     return true;
                 }
@@ -748,8 +756,8 @@ public class TypeHierarchy {
      * @param n2 the set of element names allowed by the second type
      * @return the relationship (same type, subsumes, overlaps, subsumed-by)
      */
-    protected int computeContentRelationship(ItemType t1, ItemType t2, Optional<IntSet> n1, Optional<IntSet> n2) {
-        int contentRelationship;
+    protected Affinity computeContentRelationship(ItemType t1, ItemType t2, Optional<IntSet> n1, Optional<IntSet> n2) {
+        Affinity contentRelationship;
         if (t1 instanceof DocumentNodeTest) {
             if (t2 instanceof DocumentNodeTest) {
                 contentRelationship = relationship(((DocumentNodeTest) t1).getElementTest(),
@@ -804,15 +812,15 @@ public class TypeHierarchy {
      * @param s1 the first type
      * @param s2 the second type
      * @return the relationship, as one of the constants
-      *         {@link net.sf.saxon.type.TypeHierarchy#SAME_TYPE}, {@link net.sf.saxon.type.TypeHierarchy#SUBSUMES},
-      *         {@link net.sf.saxon.type.TypeHierarchy#SUBSUMED_BY}, {@link net.sf.saxon.type.TypeHierarchy#DISJOINT},
-     *         {@link #OVERLAPS}
+      *         {@link Affinity#SAME_TYPE}, {@link Affinity#SUBSUMES},
+      *         {@link Affinity#SUBSUMED_BY}, {@link Affinity#DISJOINT},
+     *         {@link Affinity#OVERLAPS}
      */
 
-    public int sequenceTypeRelationship(SequenceType s1, SequenceType s2) {
+    public Affinity sequenceTypeRelationship(SequenceType s1, SequenceType s2) {
         int c1 = s1.getCardinality();
         int c2 = s2.getCardinality();
-        int cardRel;
+        Affinity cardRel;
         if (c1 == c2) {
             cardRel = SAME_TYPE;
         } else if (Cardinality.subsumes(c1, c2)) {
@@ -824,10 +832,10 @@ public class TypeHierarchy {
         } else if (c2 == StaticProperty.EMPTY && !Cardinality.allowsZero(c1)) {
             return DISJOINT;
         } else {
-            cardRel = TypeHierarchy.OVERLAPS;
+            cardRel = OVERLAPS;
         }
 
-        int itemRel = relationship(s1.getPrimaryType(), s2.getPrimaryType());
+        Affinity itemRel = relationship(s1.getPrimaryType(), s2.getPrimaryType());
 
         if (itemRel == DISJOINT) {
             return DISJOINT;
@@ -850,11 +858,11 @@ public class TypeHierarchy {
       * @param s1 the first type
       * @param s2 the second type
       * @return the relationship of the two types, as one of the constants
-      *         {@link net.sf.saxon.type.TypeHierarchy#SAME_TYPE}, {@link net.sf.saxon.type.TypeHierarchy#SUBSUMES},
-      *         {@link net.sf.saxon.type.TypeHierarchy#SUBSUMED_BY}, {@link net.sf.saxon.type.TypeHierarchy#DISJOINT}
+      *         {@link Affinity#SAME_TYPE}, {@link Affinity#SUBSUMES},
+      *         {@link Affinity#SUBSUMED_BY}, {@link Affinity#DISJOINT}, {@link Affinity#OVERLAPS}
       */
 
-     public int schemaTypeRelationship(SchemaType s1, SchemaType s2) {
+     public Affinity schemaTypeRelationship(SchemaType s1, SchemaType s2) {
          if (s1.isSameType(s2)) {
              return SAME_TYPE;
          }
@@ -902,7 +910,7 @@ public class TypeHierarchy {
      }
 
 
-    public static int inverseRelationship(int relation) {
+    public static Affinity inverseRelationship(Affinity relation) {
         switch (relation) {
             case SAME_TYPE:
                 return SAME_TYPE;

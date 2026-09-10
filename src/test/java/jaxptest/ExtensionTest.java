@@ -4,18 +4,21 @@ import com.saxonica.config.JavaExtensionFunctionFactory;
 import com.saxonica.config.JavaExtensionLibrary;
 import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.expr.JavaExtensionFunctionCall;
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.option.jdom2.JDOM2DocumentWrapper;
+import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.xpath.XPathFactoryImpl;
+import org.jdom2.input.SAXBuilder;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Templates;
@@ -33,10 +36,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * tests for mapping of Java types to XPath types
  */
-public class ExtensionTest extends TestCase {
+public class ExtensionTest {
 
 
 
@@ -44,6 +51,7 @@ public class ExtensionTest extends TestCase {
      * Test that a Java map can be used as an XPath map
      */
 
+    @Test
     public void testMapParam() {
 
         HashMap<String, String> map= new HashMap<String, String>();
@@ -68,6 +76,7 @@ public class ExtensionTest extends TestCase {
      * Test conversion of Java map on untyped JAXP interface
      */
 
+    @Test
     public void testUntypedMapConversion() {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("abc", "x");
@@ -97,6 +106,7 @@ public class ExtensionTest extends TestCase {
      * Test mapping of classnames for Java array types
      */
 
+    @Test
     public void testArrayParam() {
 
         byte[] bytes = new byte[]{'x', 'y', 'z'};
@@ -121,6 +131,7 @@ public class ExtensionTest extends TestCase {
      * exslt:node-set is supported as a no-op even in Saxon-HE
      */
 
+    @Test
     public void testExsltNodeset() {
 
         try {
@@ -142,6 +153,7 @@ public class ExtensionTest extends TestCase {
     }
 
 
+    @Test
     public void testVarArgs() {
         try {
             Processor proc = new Processor(true);
@@ -157,6 +169,7 @@ public class ExtensionTest extends TestCase {
         }
     }
 
+    @Test
     public void testAtomize() {
         try {
             Processor proc = new Processor(true);
@@ -173,6 +186,7 @@ public class ExtensionTest extends TestCase {
         }
     }
 
+    @Test
     public void testVarArgsAtomize() {
         try {
             Processor proc = new Processor(true);
@@ -183,12 +197,13 @@ public class ExtensionTest extends TestCase {
                     "Q{java:jaxptest.ExtensionTest}format(';', (<a>A</a>,<b>B</b>))");
             XQueryEvaluator eval = exec.load();
             XdmItem result = eval.evaluateSingle();
-            assertEquals("result", "A;B;", result.getStringValue());
+            assertEquals("A;B;", result.getStringValue(), "result");
         } catch (SaxonApiException e) {
             fail();
         }
     }
 
+    @Test
     public void testClassNameInLocalName() {
         try {
             Processor proc = new Processor(true);
@@ -218,6 +233,7 @@ public class ExtensionTest extends TestCase {
      * Test the Java extension function factory mechanism with XQuery
      */
 
+    @Test
     public void testExtensionFactoryXQuery() {
         try {
             messages.clear();
@@ -248,6 +264,7 @@ public class ExtensionTest extends TestCase {
      * Test the Java extension function factory mechanism with XSLT
      */
 
+    @Test
     public void testExtensionFactoryXSLT() {
         try {
             messages.clear();
@@ -271,8 +288,8 @@ public class ExtensionTest extends TestCase {
             StringWriter sw = new StringWriter();
             eval.setDestination(proc.newSerializer(sw));
             eval.transform();
-            assertTrue("result", sw.toString().endsWith(">6</a>"));
-            assertEquals("messages", 2, messages.size());
+            assertTrue(sw.toString().endsWith(">6</a>"), "result");
+            assertEquals(2, messages.size(), "messages");
         } catch (SaxonApiException e) {
             fail();
         }
@@ -284,9 +301,9 @@ public class ExtensionTest extends TestCase {
     public static class CallInterceptor extends JavaExtensionFunctionCall {
 
         @Override
-        public Sequence<?> call(XPathContext context, Sequence[] argValues) throws XPathException {
+        public Sequence call(XPathContext context, Sequence[] argValues) throws XPathException {
             messages.add("before " + getDisplayName());
-            Sequence<?> result = super.call(context, argValues);
+            Sequence result = super.call(context, argValues);
             messages.add("after " + getDisplayName());
             return result;
         }
@@ -296,6 +313,7 @@ public class ExtensionTest extends TestCase {
      * Test that an externally-supplied parameter can be accessed from an extension function
      */
 
+    @Test
     public void testParameterAccess() {
         try {
             Processor proc = new Processor(true);
@@ -348,13 +366,14 @@ public class ExtensionTest extends TestCase {
         public ExtensionFunctionCall makeCallExpression() {
             return new ExtensionFunctionCall() {
 
-                public Sequence<?> call(XPathContext context, Sequence[] arguments) {
+                public Sequence call(XPathContext context, Sequence[] arguments) {
                     return new StringValue("TEST");
                 }
             };
         }
     }
 
+    @Test
     public void testIntrinsicExtension() {
         try {
             TransformerFactoryImpl factory = new TransformerFactoryImpl();
@@ -374,29 +393,47 @@ public class ExtensionTest extends TestCase {
         }
     }
 
+
+    public static org.jdom2.Document parseToJdom(String content) throws Exception {
+        SAXBuilder builder = new SAXBuilder();
+        return builder.build(new StringReader(content));
+    }
+
+    public static JDOM2DocumentWrapper parseToJdom2Wrapper(XPathContext context, String content) throws Exception {
+        SAXBuilder builder = new SAXBuilder();
+        org.jdom2.Document doc = builder.build(new StringReader(content));
+        return new JDOM2DocumentWrapper(doc, context.getConfiguration());
+    }
+
+    @Test
+    public void testJDOM2extension() {
+        try {
+            Processor proc = new Processor(true);
+            proc.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
+            XQueryEvaluator eval = proc.newXQueryCompiler().compile(
+                    "name(Q{java:jaxptest.ExtensionTest}parseToJdom('<magic/>')/*)").load();
+            XdmValue result = eval.evaluate();
+            assertEquals("magic", ((XdmAtomicValue) result).getStringValue());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testJDOM2WrapperExtension() {
+        try {
+            Processor proc = new Processor(true);
+            proc.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
+            XQueryEvaluator eval = proc.newXQueryCompiler().compile(
+                    "name(Q{java:jaxptest.ExtensionTest}parseToJdom2Wrapper('<magic/>')/*)").load();
+            XdmValue result = eval.evaluate();
+            assertEquals("magic", ((XdmAtomicValue) result).getStringValue());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
-
-
-
