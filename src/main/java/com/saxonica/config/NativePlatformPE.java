@@ -1,6 +1,5 @@
 package com.saxonica.config;
 
-import com.saxonica.Validate;
 import com.saxonica.ee.domino.DominoTreeModel;
 import com.saxonica.functions.extfn.EXPathArchive.Archive;
 import net.sf.saxon.Configuration;
@@ -114,14 +113,9 @@ public class NativePlatformPE extends NativePlatform {
            args = processorDataAccumulator.getParameterNames();
         }
 
-       int status= new Validate().doValidate(args);
+        // This attempted to do validation?
 
-       if(status == 2) {
-           return -2;
-       }
-
-
-        return status;
+        return -1;
     }
 
 
