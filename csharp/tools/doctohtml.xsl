@@ -882,7 +882,7 @@
   <xsl:template name="buildIndexPage">
     <html>
       <head>
-        <title>Saxon.Api - the Saxon Application Programming Interface for .NET</title>
+        <title>Saxon.Api - SaxonCS 13 API for .NET</title>
         <meta name="keywords" content="Saxon.Api Saxon .NET"/>
         <link rel="stylesheet" type="text/css" href="saxon-dotnetdoc.css" title="Style"/>
       </head>
@@ -896,8 +896,8 @@
           &#xa0;
         </div>
         <div class="main">
-          <h1>Saxon.Api - the SaxonCS Application Programming Interface for .NET</h1>
-          <p>This namespace contains Saxon's application programming interfaces for using XSLT, XQuery,
+          <h1>Saxon.Api - the SaxonCS 13 Application Programming Interface for .NET</h1>
+          <p>This namespace contains SaxonCS's application programming interfaces for using XSLT, XQuery,
             XPath and XSD on .NET.</p>
           <p>The top-level object is the <a href="Saxon/Api/Processor.html" class="apilink">Processor</a>;
             this allows creation of factory classes for using each of the different processing

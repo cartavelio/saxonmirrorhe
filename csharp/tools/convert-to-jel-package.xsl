@@ -21,7 +21,7 @@
             <article id="dotnetdoc-packages">
                 <section id="Saxon.Api">
                     <div>
-                        <p>This namespace contains Saxon's application programming interfaces for using XSLT, XQuery,
+                        <p>This namespace contains SaxonCS's application programming interfaces for using XSLT, XQuery,
                             XPath and XSD on .NET.</p>
                         <p>The top-level object is the <a class="cslink" href="Saxon.Api.Processor">Processor</a>;
                             this allows creation of factory classes for using each of the different processing

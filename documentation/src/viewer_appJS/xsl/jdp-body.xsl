@@ -102,7 +102,7 @@
     </xsl:template>
     
     <xsl:template match="article[@id='javadoc-packages']" mode="jdp">
-        <h1>Saxon Java API Documentation</h1>
+        <h1>Saxon 13 Java API Documentation</h1>
         <xsl:variable name="art" select="."/>
         <xsl:variable name="titles"
             select="('s9api Interfaces','Other Interfaces','External Interfaces','Other Packages')"
@@ -169,7 +169,7 @@
     </xsl:template>
     
     <xsl:template match="article[@id='dotnetdoc-packages']" mode="jdp">
-        <h1>Saxon .NET API Documentation</h1>
+        <h1>SaxonCS 13 .NET API Documentation</h1>
  
             <table border="1" style="width:100%">
                 <thead>
