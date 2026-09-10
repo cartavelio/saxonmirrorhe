@@ -14,10 +14,12 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.serialize.charcode.CharacterSet;
-import net.sf.saxon.serialize.codenorm.Normalizer;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -27,6 +29,7 @@ import net.sf.saxon.value.StringItem;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
+import java.text.Normalizer;
 import java.util.*;
 
 /**
@@ -107,11 +110,11 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
     /**
      * Set the Unicode normalizer to be used for normalizing strings.
      *
-     * @param normalizer the normalizer to be used
+     * @param form the normalization form to be used
      */
 
-    public void setNormalizer(Normalizer normalizer) {
-        emitter.setNormalizer(normalizer);
+    public void setNormalizationForm(Normalizer.Form form) {
+        emitter.setNormalizationForm(form);
     }
 
     /**

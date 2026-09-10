@@ -19,7 +19,6 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.regex.ARegularExpression;
-import net.sf.saxon.serialize.codenorm.Normalizer;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeString;
@@ -33,6 +32,7 @@ import net.sf.saxon.value.QualifiedNameValue;
 import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.Normalizer;
 import java.util.Properties;
 
 /**
@@ -63,10 +63,11 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
     /**
      * Set the Unicode normalizer to be used for normalizing strings.
      *
-     * @param normalizer the normalizer to be used
+     * @param normalizationForm the normalizationForm to be used
      */
 
-    public void setNormalizer(Normalizer normalizer) {
+    public void setNormalizationForm(Normalizer.Form normalizationForm) {
+        // TODO: should this method do something?
     }
 
     /**

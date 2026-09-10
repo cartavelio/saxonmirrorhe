@@ -567,7 +567,7 @@ public class SerializerFactory {
             JSONSerializer emitter, Properties props,
             CharacterMapExpander characterMapExpander, ProxyReceiver normalizer) throws XPathException {
         if (normalizer instanceof UnicodeNormalizer) {
-            emitter.setNormalizer(((UnicodeNormalizer)normalizer).getNormalizer());
+            emitter.setNormalizationForm(((UnicodeNormalizer)normalizer).getNormalizationForm());
         }
         if (characterMapExpander != null) {
             emitter.setCharacterMap(characterMapExpander.getCharacterMap());
@@ -590,7 +590,7 @@ public class SerializerFactory {
             AdaptiveEmitter emitter, Properties props,
             CharacterMapExpander characterMapExpander, ProxyReceiver normalizer) {
         if (normalizer instanceof UnicodeNormalizer) {
-            emitter.setNormalizer(((UnicodeNormalizer) normalizer).getNormalizer());
+            emitter.setNormalizationForm(((UnicodeNormalizer) normalizer).getNormalizationForm());
         }
         if (characterMapExpander != null) {
             emitter.setCharacterMap(characterMapExpander.getCharacterMap());
