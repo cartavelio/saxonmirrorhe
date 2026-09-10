@@ -3507,9 +3507,9 @@ public class XPathParser {
                     nextToken();
                     expect(Token.RPAR);
                     nextToken();
-                    if (!env.isImportedSchema(pool.getURI(fp))) {
-                        grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
-                    }
+//                    if (!env.isImportedSchema(pool.getURI(fp))) {
+//                        grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
+//                    }
                     SchemaDeclaration decl = env.getPackageData().getImportedSchema().getElementDecl(fp);
                     if (decl == null) {
                         grumble("There is no declaration for element " + name + " in an imported schema", "XPST0008");
@@ -3560,11 +3560,11 @@ public class XPathParser {
                     NodeTest result;
                     if (t.currentToken == Token.NAME) {
                         StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
-                        NamespaceUri uri = contentType.getNamespaceUri();
+//                        NamespaceUri uri = contentType.getNamespaceUri();
 
-                        if (!(uri.equals(NamespaceUri.SCHEMA) || env.isImportedSchema(uri))) {
-                            grumble("No schema has been imported for namespace '" + uri + '\'', "XPST0008");
-                        }
+//                        if (!(uri.equals(NamespaceUri.SCHEMA) || env.isImportedSchema(uri))) {
+//                            grumble("No schema has been imported for namespace '" + uri + '\'', "XPST0008");
+//                        }
                         SchemaType schemaType = env.getPackageData().getImportedSchema().getSchemaType(contentType);
                         if (schemaType == null) {
                             grumble("Unknown type name " + contentType.getEQName(), "XPST0008");
