@@ -374,14 +374,19 @@ public class AtomicSequenceConverter extends UnaryExpression {
      */
 
     @Override
-    public AtomicValue evaluateItem(XPathContext context) throws XPathException {
-        Converter conv = getConverterDynamically(context);
+    public AtomicValue evaluateItem(XPathContext context) throws XPathException{
+
         AtomicValue item = (AtomicValue) getBaseExpression().evaluateItem(context);
+        return convertItem(item, context);
+    }
+
+    public AtomicValue convertItem(AtomicValue item, XPathContext context) throws XPathException {
         if (item == null) {
             return null;
         }
+        Converter conv = getConverterDynamically(context);
         ConversionResult result = conv.convert(item);
-        if (roleDiagnostic != null && result instanceof ValidationFailure) {
+        if (result instanceof ValidationFailure && roleDiagnostic != null) {
             // TODO: use more of the information in the roleDiagnostic to form the error message
             ((ValidationFailure)result).setErrorCode(roleDiagnostic.getErrorCode());
         }

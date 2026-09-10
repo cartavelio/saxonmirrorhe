@@ -1281,7 +1281,7 @@ public final class Navigator {
                 if (next == null) {
                     return null;
                 }
-                if (!(next.getNodeKind() == Type.TEXT && next.getUnicodeStringValue().length() == 0)) {
+                if (!(next.getNodeKind() == Type.TEXT && next.getUnicodeStringValue().isEmpty())) {
                     return next;
                 }
             }

@@ -40,7 +40,8 @@ public class ForClauseOuterPull extends ForClausePull {
                 if (!base.nextTuple(context)) {
                     return false;
                 }
-                currentIteration = new FocusTrackingIterator(forClause.getSequence().iterate(context));
+                currentIteration = new FocusTrackingIterator(
+                        forClause.getSequenceOp().getOperandEvaluator(context).iterate(context));
                 next = currentIteration.next();
                 if (next == null) {
                     context.setLocalVariable(forClause.getRangeVariable().getLocalSlotNumber(),

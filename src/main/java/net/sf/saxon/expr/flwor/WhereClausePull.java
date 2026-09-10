@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr.flwor;
 
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -19,9 +19,9 @@ import net.sf.saxon.trans.XPathException;
 public class WhereClausePull extends TuplePull {
 
     TuplePull base;
-    Expression predicate;
+    OperandEvaluator predicate;
 
-    public WhereClausePull(TuplePull base, Expression predicate) {
+    public WhereClausePull(TuplePull base, OperandEvaluator predicate) {
         this.base = base;
         this.predicate = predicate;
     }

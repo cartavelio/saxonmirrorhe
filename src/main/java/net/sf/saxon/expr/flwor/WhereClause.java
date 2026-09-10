@@ -80,7 +80,7 @@ public class WhereClause extends Clause {
      */
     @Override
     public TuplePull getPullStream(TuplePull base, XPathContext context) {
-        return new WhereClausePull(base, getPredicate());
+        return new WhereClausePull(base, predicateOp.getOperandEvaluator(context));
     }
 
     @Override
@@ -111,7 +111,7 @@ public class WhereClause extends Clause {
      */
     @Override
     public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
-        return new WhereClausePush(output, destination, getPredicate());
+        return new WhereClausePush(output, destination, predicateOp.getOperandEvaluator(context));
     }
 
     /**

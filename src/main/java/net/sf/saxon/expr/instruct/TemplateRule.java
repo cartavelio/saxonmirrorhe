@@ -9,6 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
@@ -48,6 +49,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     // which is responsible for any type checking that's needed.
 
     protected Expression body;
+    protected OperandEvaluator bodyEvaluator;
     protected Pattern matchPattern;
     private boolean _hasRequiredParams;
     private boolean bodyIsTailCallReturner;
@@ -388,12 +390,10 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         }
 
         try {
-            if (bodyIsTailCallReturner) {
-                return ((TailCallReturner) body).processLeavingTail(output, context);
-            } else {
-                body.process(output, context);
-                return null;
+            if (bodyEvaluator == null) {
+                bodyEvaluator = context.getConfiguration().obtainOperandEvaluator(body);
             }
+            return bodyEvaluator.processLeavingTail(output, context);
         } catch (UncheckedXPathException e) {
             XPathException xe = e.getXPathException();
             xe.maybeSetLocation(this);

@@ -14,6 +14,7 @@ import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.compat.TypeChecker10;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.number.Numberer_en;
+import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AlphanumericCollator;
 import net.sf.saxon.expr.sort.CodepointCollator;
@@ -1881,10 +1882,6 @@ public class Configuration implements SourceResolver, NotationSet {
         return Version.platform.compileRegularExpression(this, regex, flags, hostLanguage, warnings);
     }
 
-    public PushEvaluator getPushEvaluator(Actor actor) {
-        return (out, context) -> actor.getBody().process(out, context);
-    }
-
     /**
      * Load a Numberer class for a given language and check it is OK.
      * This method is provided primarily for internal use.
@@ -2266,6 +2263,10 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public SerializationProperties obtainDefaultSerializationProperties() {
         return new SerializationProperties(defaultOutputProperties);
+    }
+
+    public OperandEvaluator obtainOperandEvaluator(Expression expression) {
+        return expression;
     }
 
     /**

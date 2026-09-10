@@ -10,6 +10,8 @@ package net.sf.saxon.expr;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.instruct.TailCall;
+import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.KeyFn;
 import net.sf.saxon.functions.SuperId;
@@ -32,7 +34,10 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntIterator;
 
@@ -60,7 +65,7 @@ import java.util.*;
  * no subexpressions.</p>
  */
 
-public abstract class Expression implements IdentityComparable, ExportAgent, Locatable, Traceable {
+public abstract class Expression implements OperandEvaluator, IdentityComparable, ExportAgent, Locatable, Traceable {
 
     public static final int EVALUATE_METHOD = 1;
     public static final int ITERATE_METHOD = 2;
@@ -922,7 +927,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     }
 
     /**
-     * Process the instruction, without returning any tail calls
+     * Process the instruction
      *
      *
      * @param output the destination for the result
@@ -958,6 +963,18 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
             e.maybeSetLocation(getLocation());
             e.maybeSetContext(context);
             throw e;
+        }
+    }
+
+    @Override
+    public TailCall processLeavingTail(Outputter outputter, XPathContext context) throws XPathException {
+        process(outputter, context);
+        return null;
+    }
+
+    public static void dispatchTailCall(TailCall tc) throws XPathException {
+        while (tc != null) {
+            tc = tc.processLeavingTail();
         }
     }
 

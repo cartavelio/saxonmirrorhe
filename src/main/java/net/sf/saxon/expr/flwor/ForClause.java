@@ -70,6 +70,10 @@ public class ForClause extends Clause {
         return sequenceOp.getChildExpression();
     }
 
+    public Operand getSequenceOp() {
+        return this.sequenceOp;
+    }
+
     /**
      * Set the range variable (the primary variable bound by this clause)
      *

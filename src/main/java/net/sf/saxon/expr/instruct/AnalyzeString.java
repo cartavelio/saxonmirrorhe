@@ -367,8 +367,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         PipelineConfiguration pipe = output.getPipelineConfiguration();
         pipe.setXPathContext(c2);
 
-        Item it;
-        while ((it = focusIter.next()) != null) {
+        while (focusIter.next() != null) {
             if (iter.isMatching()) {
                 if (getMatching() != null) {
                     getMatching().process(output, c2);
@@ -393,20 +392,24 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      * @throws XPathException if evaluation fails with a dynamic error
      */
 
-    private RegexIterator getRegexIterator(XPathContext context) throws XPathException {
+    public RegexIterator getRegexIterator(XPathContext context) throws XPathException {
         StringValue input = (StringValue)getSelect().evaluateItem(context);
         if (input == null) {
             input = StringValue.EMPTY_STRING;
         }
-        RegularExpression re = pattern;
-        if (re == null) {
-            String flagstr = getFlags().evaluateAsString(context).toString();
-            StringValue regexString = (StringValue)getRegex().evaluateItem(context);
-            re = context.getConfiguration().compileRegularExpression(
-                    regexString.getUnicodeStringValue(), flagstr, "XP30", null);
-        }
-
+        RegularExpression re = getRegularExpression(context);
         return re.analyze(input.getUnicodeStringValue());
+    }
+
+    public RegularExpression getRegularExpression(XPathContext context) throws XPathException {
+        if (pattern == null) {
+            String flagstr = getFlags().evaluateAsString(context).toString();
+            StringValue regexString = (StringValue) getRegex().evaluateItem(context);
+            return context.getConfiguration().compileRegularExpression(
+                    regexString.getUnicodeStringValue(), flagstr, "XP30", null);
+        } else {
+            return pattern;
+        }
     }
 
     /**

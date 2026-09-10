@@ -11,6 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 
@@ -47,11 +48,15 @@ public abstract class FoldingFunction extends SystemFunction {
         Fold fold = getFold(context, additionalArgs);
         SequenceIterator iter = arguments[0].iterate();
         Item item;
-        while ((item = iter.next()) != null) {
-            fold.processItem(item);
-            if (fold.isFinished()) {
-                break;
+        try {
+            while ((item = iter.next()) != null) {
+                fold.processItem(item);
+                if (fold.isFinished()) {
+                    break;
+                }
             }
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
         return fold.result();
     }

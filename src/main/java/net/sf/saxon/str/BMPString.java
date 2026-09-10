@@ -17,7 +17,7 @@ import java.util.function.IntPredicate;
 /**
  * An implementation of {@code UnicodeString} that wraps a Java string which is known to contain
  * no surrogates. That is, all the characters in the string are in the Basic Multilingual
- * Plane (their codepoints are in the range 0-65535).
+ * Plane (their codepoints are in the range 0-65535 and not in the surrogate range).
  */
 
 public class BMPString extends UnicodeString {

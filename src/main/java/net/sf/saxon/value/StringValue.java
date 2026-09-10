@@ -180,7 +180,7 @@ public class StringValue extends AtomicValue {
     }
 
     /**
-     * Get the content of this <code>StringItem</code>
+     * Get the content of this <code>StringValue</code>
      * @return the content
      */
 

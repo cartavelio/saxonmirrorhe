@@ -7,10 +7,9 @@
 
 package net.sf.saxon.expr.instruct;
 
-import com.saxonica.ee.elab.eval.PushEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.StandardNames;
@@ -48,12 +47,7 @@ public abstract class Actor implements ExpressionOwner, Location {
     private Component declaringComponent;
     private Visibility declaredVisibility = Visibility.UNDEFINED;
     private RetainedStaticContext retainedStaticContext;
-
-    private static boolean useElaboration = false;
-    //#if EE=true
-    static {
-        useElaboration = true;
-    }
+    private OperandEvaluator bodyEvaluator;
 
     public Actor() {
     }
@@ -312,22 +306,14 @@ public abstract class Actor implements ExpressionOwner, Location {
         setBody(expr);
     }
 
-    private PushEvaluator pushEvaluator = (out, context) -> body.process(out, context);
+    //private PushEvaluator pushEvaluator = (out, context) -> body.processLeavingTail(out, context);
 
 
-    protected void process(Outputter out, XPathContext context) throws XPathException {
-        //#if EE==true
-        if (useElaboration) {
-            if (pushEvaluator == null) {
-                pushEvaluator = Elaborator.makeElaborator(body).elaborateForPush();
-            }
-            pushEvaluator.process(out, context);
-        } else {
-            //#endif
-            body.process(out, context);
-            //#if EE==true
+    protected TailCall process(Outputter out, XPathContext context) throws XPathException {
+        if (bodyEvaluator == null) {
+            bodyEvaluator = context.getConfiguration().obtainOperandEvaluator(body);
         }
-        //#endif
+        return bodyEvaluator.processLeavingTail(out, context);
     }
 }
 
