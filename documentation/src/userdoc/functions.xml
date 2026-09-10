@@ -2573,7 +2573,36 @@
               expression engine only.</p>
           </li>
         </ul>
-        <p>In the case of <a class="bodylink code" href="../replace">fn:replace()</a>, if the platform-native regex engine is used
+        <p>If the native regex engine is used, then the flags preceding the semicolon 
+          are interpreted as follows:</p>
+        <ul>
+          <li class="javaonly"><p>For Java: </p></li>
+              <ul>
+                <li><code>'d': Pattern.UNIX_LINES</code></li>
+                <li><code>'m': Pattern.MULTILINE</code></li>
+                <li><code>'i': Pattern.CASE_INSENSITIVE</code></li>
+                <li><code>'s': Pattern.DOTALL</code></li>
+                <li><code>'x': Pattern.COMMENTS</code></li>
+                <li><code>'u': Pattern.UNICODE_CASE</code></li>
+                <li><code>'q': Pattern.LITERAL</code></li>
+                <li><code>'c': Pattern.CANON_EQ</code></li>
+              </ul>
+          
+          <li class="csonly"><p>For .NET: </p></li>
+              <ul>
+                <li><code>'d': RegexOptions.Multiline</code></li>
+                <li><code>'m': RegexOptions.Multiline</code></li>
+                <li><code>'i': RegexOptions.IgnoreCase</code></li>
+                <li><code>'s': RegexOptions.Singleline</code></li>
+                <li><code>'x': RegexOptions.IgnorePatternWhitespace</code></li>
+                <li><code>'u': ignored</code></li>
+                <li><code>'q': ignored</code></li>
+                <li><code>'c': ignored</code></li>
+              </ul>
+           </li>
+        </ul>
+        <p>In the case of <a class="bodylink code" href="../replace">fn:replace()</a>, 
+          if the platform-native regex engine is used
         (Java or .NET) then the syntax for the replacement expression in the third argument also
         follows the rules for the platform. For example, the syntax <code>${name}</code> can be used
         in a reference to a named captured group.</p>
