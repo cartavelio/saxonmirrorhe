@@ -106,6 +106,9 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
         register("map-as-sequence-of-maps", 1, MapAsSequenceOfMaps.class, mapRepresentation, STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE, null);
 
+        register("yes-no-boolean", 1, YesNoBoolean.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+
     }
 
     @Override
@@ -325,6 +328,27 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
             }
             return new SequenceExtent(mapList);
         }
+    }
+
+    public static class YesNoBoolean extends SystemFunction {
+
+        @Override
+        public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+            String supplied = arguments[0].head().getStringValue();
+            switch (Whitespace.trim(supplied)) {
+                case "0":
+                case "no":
+                case "false":
+                    return BooleanValue.FALSE;
+                case "1":
+                case "yes":
+                case "true":
+                    return BooleanValue.TRUE;
+                default:
+                    throw new XPathException("Supplied value for boolean argument must be 0|false|no or 1|true|yes", "FORG0001");
+            }
+        }
+
     }
 
 
