@@ -41,8 +41,6 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
         private final List<UnicodeString> keys = new ArrayList<>();
         private final List<GroundedValue> values = new ArrayList<>();
         private final int flags;
-        private Set<UnicodeString> keySet; // used only if the bloom filter indicates possible duplicates
-        private boolean duplicatesFound = false;
         public LazyStringMapBuilder(int flags) {
             Instrumentation.count("LazyStringMapBuilder");
             this.flags = flags;
@@ -105,7 +103,8 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
                         (reverseOrder ? new ReverseListIterable<>(keys) : keys).iterator();
                 Iterator<GroundedValue> valueIter =
                         (reverseOrder ? new ReverseListIterable<>(values) : values).iterator();
-                keySet = new HashSet<>();
+                Set<UnicodeString> keySet = new HashSet<>();
+
                 while (keyIter.hasNext() && valueIter.hasNext()) {
                     UnicodeString key = keyIter.next();
                     GroundedValue value = valueIter.next();
