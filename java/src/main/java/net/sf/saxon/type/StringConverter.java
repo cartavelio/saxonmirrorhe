@@ -100,10 +100,10 @@ public abstract class StringConverter extends Converter {
         }
 
         @Override
-        public StringToNonStringDerivedType setNamespaceResolver(NamespaceResolver resolver) {
+        public StringToNonStringDerivedType withNamespaceResolver(NamespaceResolver resolver) {
             return new StringToNonStringDerivedType(
-                    (StringConverter) phaseOne.setNamespaceResolver(resolver),
-                    (DownCastingConverter) phaseTwo.setNamespaceResolver(resolver));
+                    (StringConverter) phaseOne.withNamespaceResolver(resolver),
+                    (DownCastingConverter) phaseTwo.withNamespaceResolver(resolver));
         }
 
         
@@ -839,7 +839,7 @@ public abstract class StringConverter extends Converter {
         }
 
         @Override
-        public StringToQName setNamespaceResolver(NamespaceResolver resolver) {
+        public StringToQName withNamespaceResolver(NamespaceResolver resolver) {
             StringToQName c = new StringToQName(getConversionRules());
             c.nsResolver = resolver;
             return c;
@@ -887,7 +887,7 @@ public abstract class StringConverter extends Converter {
         }
 
         @Override
-        public StringToNotation setNamespaceResolver(NamespaceResolver resolver) {
+        public StringToNotation withNamespaceResolver(NamespaceResolver resolver) {
             StringToNotation c = new StringToNotation(getConversionRules());
             c.nsResolver = resolver;
             return c;

@@ -112,7 +112,7 @@ public class AtomicConstructorFunction extends AbstractFunction {
             ex.setIsTypeError(true);
             throw ex;
         }
-        converter = converter.setNamespaceResolver(nsResolver);
+        converter = converter.withNamespaceResolver(nsResolver);
         return converter.convert(val).asAtomic();
     }
 

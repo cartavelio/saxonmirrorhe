@@ -139,7 +139,7 @@ public abstract class Converter {
      * unchanged (see bug 2754)
      */
 
-    public Converter setNamespaceResolver(NamespaceResolver resolver) {
+    public Converter withNamespaceResolver(NamespaceResolver resolver) {
         return this;
         // no action
     }
@@ -290,8 +290,8 @@ public abstract class Converter {
         }
 
         @Override
-        public Converter setNamespaceResolver(NamespaceResolver resolver) {
-            return new TwoPhaseConverter(phaseOne.setNamespaceResolver(resolver), phaseTwo.setNamespaceResolver(resolver));
+        public Converter withNamespaceResolver(NamespaceResolver resolver) {
+            return new TwoPhaseConverter(phaseOne.withNamespaceResolver(resolver), phaseTwo.withNamespaceResolver(resolver));
         }
 
         /*@NotNull*/

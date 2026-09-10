@@ -213,7 +213,7 @@ public final class CastableExpression extends CastingExpression {
                 return true;
             }
             if (getTargetType().isNamespaceSensitive()) {
-                converter = converter.setNamespaceResolver(getRetainedStaticContext());
+                converter = converter.withNamespaceResolver(getRetainedStaticContext());
             }
         }
         return !(converter.convert(value) instanceof ValidationFailure);

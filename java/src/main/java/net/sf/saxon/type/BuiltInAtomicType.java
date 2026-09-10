@@ -10,6 +10,7 @@ package net.sf.saxon.type;
 import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.MapItem;
@@ -823,6 +824,32 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         return primitiveFingerprint;
     }
 
+    @Override
+    public Item cast(Item it, XPathContext context, NamespaceResolver resolver, boolean allowEmpty) throws XPathException {
+        AtomicValue av;
+        if (it instanceof AtomicValue) {
+            av = (AtomicValue) it;
+        } else {
+            AtomicSequence atoms = it.atomize();
+            if (atoms.getLength() != 1) {
+                if (atoms.getLength() == 0) {
+                    if (allowEmpty) {
+                        return null;
+                    } else {
+                        throw new XPathException("Atomized operand is empty, but the cast expression does not allow an empty sequence");
+                    }
+                } else if (atoms.getLength() > 1) {
+                    throw new XPathException("Cast expression: atomized item is not a singleton");
+                }
+            }
+            av = atoms.head();
+        }
+        ConversionRules rules = context.getConfiguration().getConversionRules();
+        Converter converter = rules.getConverter(av.getItemType(), this)
+                .withNamespaceResolver(resolver);
+        return converter.convert(av).asAtomic();
+    }
+
     /**
      * Determine whether this type is supported when using XSD 1.0
      *
@@ -1059,7 +1086,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
             if (nsResolver == null) {
                 throw new UnsupportedOperationException("Cannot validate a QName without a namespace resolver");
             }
-            converter = (StringConverter) converter.setNamespaceResolver(nsResolver);
+            converter = (StringConverter) converter.withNamespaceResolver(nsResolver);
             ConversionResult result = converter.convertString(value);
             if (result instanceof ValidationFailure) {
                 return (ValidationFailure) result;
@@ -1151,7 +1178,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         if (isNamespaceSensitive()) {
             NodeInfo container =
                     node.getNodeKind() == Type.ELEMENT ? node : (NodeInfo) node.getParent();
-            converter = (StringConverter) converter.setNamespaceResolver(container.getAllNamespaces());
+            converter = (StringConverter) converter.withNamespaceResolver(container.getAllNamespaces());
         }
         return converter.convertString(stringValue).asAtomic();
     }
@@ -1184,7 +1211,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         }
         StringConverter converter = getStringConverter(rules);
         if (isNamespaceSensitive()) {
-            converter = (StringConverter) converter.setNamespaceResolver(resolver);
+            converter = (StringConverter) converter.withNamespaceResolver(resolver);
         }
         return converter.convertString(value).asAtomic();
     }

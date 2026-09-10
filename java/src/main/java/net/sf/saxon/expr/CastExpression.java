@@ -118,7 +118,7 @@ public class CastExpression extends CastingExpression implements Callable {
                             .asTypeError();
                 } else {
                     if (getTargetType().isNamespaceSensitive()) {
-                        converter = converter.setNamespaceResolver(getRetainedStaticContext());
+                        converter = converter.withNamespaceResolver(getRetainedStaticContext());
                     }
                 }
 
@@ -371,7 +371,7 @@ public class CastExpression extends CastingExpression implements Callable {
                         .withErrorCode("XPTY0004");
             }
             if (getTargetType().isNamespaceSensitive()) {
-                converter = converter.setNamespaceResolver(getRetainedStaticContext());
+                converter = converter.withNamespaceResolver(getRetainedStaticContext());
             }
         }
         ConversionResult result = converter.convert(value);

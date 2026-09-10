@@ -7,6 +7,11 @@
 
 package net.sf.saxon.type;
 
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.trans.XPathException;
+
 /**
  * This marker interface represents a type that can be used as the target of a cast or castable
  * operation, that is, an atomic type, list type, or plain union type
@@ -14,6 +19,19 @@ package net.sf.saxon.type;
 
 public interface CastingTarget {
 
+    /**
+     * Cast a value to this type
+     *
+     * @param it         the value to be cast
+     * @param context    the dynamic context
+     * @param resolver   the namespace prefix resolver, for namespace-sensitive types
+     * @param allowEmpty true if an empty sequence is accepted
+     * @return the result of the cast if successful
+     * @throws XPathException if the cast is unsuccessful
+     */
 
+    default Item cast(Item it, XPathContext context, NamespaceResolver resolver, boolean allowEmpty) throws XPathException {
+        throw new UnsupportedOperationException("Not implemented yet");
+    };
 }
 

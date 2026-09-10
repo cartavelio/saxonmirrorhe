@@ -8,17 +8,22 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 
@@ -713,6 +718,34 @@ public final class SequenceType {
             return new SequenceType(it2, cardinality);
         }
         return this;
+    }
+
+
+    /**
+     * Cast a value to a SequenceType. Support function for casting arrays, maps, and records
+     * in 4.0.
+     * @param value the value to be cast to this SequenceType
+     * @param context the dynamic evaluation context
+     * @param resolver the namespace resolver from the static context (needed for casting to namespace-sensitive types)
+     */
+
+    public GroundedValue castSequence(GroundedValue value, XPathContext context, NamespaceResolver resolver) throws XPathException {
+        List<Item> result = new ArrayList<Item>();
+        ItemType targetItemType = getPrimaryType();
+        for (Item it : value.asIterable()) {
+            if (targetItemType.matches(it)) {
+                result.add(it);
+            } else if (targetItemType instanceof CastingTarget tgt) {
+                result.add(tgt.cast(it, context, resolver, true));
+            } else {
+                throw new XPathException("Cannot cast " + Err.depict(it) + " to " + this, "XPTY0004");
+            }
+        }
+        if (!Cardinality.allows(getCardinality(), result.size())) {
+            throw new XPathException("Cannot cast " + Err.depictSequence(value)
+                                             + " to " + this + ": incorrect cardinality", "XPTY0004");
+        }
+        return SequenceExtent.makeSequenceExtent(result);
     }
 
 

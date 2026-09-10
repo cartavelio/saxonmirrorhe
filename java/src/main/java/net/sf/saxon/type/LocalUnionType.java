@@ -222,7 +222,7 @@ public class LocalUnionType extends ChoiceItemType implements PlainType, UnionTy
                 }
             } else {
                 StringConverter converter = rules.makeStringConverter((AtomicType) type);
-                converter.setNamespaceResolver(resolver);
+                converter.withNamespaceResolver(resolver);
                 ConversionResult outcome = converter.convertString(value);
                 if (outcome instanceof AtomicValue) {
                     return (AtomicValue) outcome;

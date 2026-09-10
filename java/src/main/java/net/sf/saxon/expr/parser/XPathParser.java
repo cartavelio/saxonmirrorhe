@@ -1345,6 +1345,8 @@ public class XPathParser {
                         NamespaceResolver resolver = env.getNamespaceResolver();
                         ListConstructorFunction lcf = new ListConstructorFunction((ListType) type, resolver, allowEmpty);
                         return new StaticFunctionCall(lcf, new Expression[]{lhs});
+                    } else if (type instanceof ArrayItemType ait && env.getXPathVersion() >= 40) {
+                        return new CastToArrayExpr(lhs, ait, allowEmpty);
                     }
                     break;
                 default:

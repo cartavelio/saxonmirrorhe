@@ -8,10 +8,12 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -20,6 +22,8 @@ import net.sf.saxon.type.coercion.ArrayCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.function.Function;
@@ -29,7 +33,7 @@ import java.util.function.Supplier;
  * An instance of this class represents a specific array item type, for example
  * array(xs:boolean)
  */
-public class ArrayItemType extends AnyFunctionType {
+public class ArrayItemType extends AnyFunctionType implements CastingTarget{
 
     public final static ArrayItemType ANY_ARRAY_TYPE = new ArrayItemType(SequenceType.ANY_SEQUENCE);
 
@@ -173,6 +177,33 @@ public class ArrayItemType extends AnyFunctionType {
             }
             return  true;
         }
+    }
+
+    /**
+     * Cast a value to this type
+     *
+     * @param it         the value to be cast
+     * @param context    the dynamic context
+     * @param resolver   the namespace prefix resolver, for namespace-sensitive types
+     * @param allowEmpty
+     * @return the result of the cast if successful
+     * @throws XPathException if the cast is unsuccessful
+     */
+
+    @Override
+    public Item cast(Item it, XPathContext context, NamespaceResolver resolver, boolean allowEmpty) throws XPathException {
+        if (it instanceof ArrayItem in) {
+            List<GroundedValue> result = new ArrayList<>();
+            for (GroundedValue member : in.members()) {
+                if (memberType.matches(member)) {
+                    result.add(member);
+                } else {
+                    result.add(memberType.castSequence(member, context, resolver));
+                }
+            }
+            return new SimpleArrayItem(result);
+        }
+        throw new XPathException("Cannot cast " + Err.depict(it) + " to an array", "XPTY0004");
     }
 
     /**
