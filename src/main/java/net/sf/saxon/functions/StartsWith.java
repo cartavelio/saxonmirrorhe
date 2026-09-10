@@ -85,10 +85,5 @@ public class StartsWith extends CollatingFunctionFixed {
         return BooleanValue.get(startsWith(s0, s1, (SubstringMatcher) getStringCollator()));
     }
 
-    @Override
-    public String getCompilerName() {
-        return "StartsWithCompiler";
-    }
-
 }
 

@@ -69,11 +69,6 @@ public class Root_1 extends SystemFunction {
         return "Root";
     }
 
-    @Override
-    public String getCompilerName() {
-        return "RootFunctionCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *

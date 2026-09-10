@@ -59,11 +59,6 @@ public final class Round extends SystemFunction {
 
     }
 
-    @Override
-    public String getCompilerName() {
-        return "RoundingCompiler";
-    }
-
     /**
      * Make an elaborator for this expression
      *

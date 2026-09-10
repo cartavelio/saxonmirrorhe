@@ -108,11 +108,6 @@ public class NotFn extends SystemFunction {
     }
 
     @Override
-    public String getCompilerName() {
-        return "NotFnCompiler";
-    }
-
-    @Override
     public String getStreamerName() {
         return "NotFn";
     }

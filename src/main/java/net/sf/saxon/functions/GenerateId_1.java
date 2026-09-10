@@ -62,11 +62,6 @@ public class GenerateId_1 extends ScalarSystemFunction {
 
     }
 
-    @Override
-    public String getCompilerName() {
-        return "GenerateIdCompiler";
-    }
-
     /**
      * Make an elaborator for this expression
      *

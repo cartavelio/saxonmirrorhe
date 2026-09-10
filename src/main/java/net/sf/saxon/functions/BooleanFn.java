@@ -145,11 +145,6 @@ public class BooleanFn extends SystemFunction {
     }
 
     @Override
-    public String getCompilerName() {
-        return "BooleanFnCompiler";
-    }
-
-    @Override
     public String getStreamerName() {
         return "BooleanFn";
     }

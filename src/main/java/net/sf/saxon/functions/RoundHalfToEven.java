@@ -65,11 +65,6 @@ public final class RoundHalfToEven extends SystemFunction {
         return val0.roundHalfToEven(scale);
     }
 
-    @Override
-    public String getCompilerName() {
-        return "RoundingCompiler";
-    }
-
     /**
      * Make an elaborator for this expression
      *

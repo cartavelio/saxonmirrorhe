@@ -138,12 +138,6 @@ public class Concat extends SystemFunction implements PushableFunction {
         // concat() is a special case
     }
 
-    @Override
-    public String getCompilerName() {
-        return "ConcatCompiler";
-    }
-
-
 
 }
 

@@ -105,11 +105,6 @@ public class Count extends SystemFunction {
     }
 
     @Override
-    public String getCompilerName() {
-        return "CountCompiler";
-    }
-
-    @Override
     public String getStreamerName() {
         return "Count";
     }

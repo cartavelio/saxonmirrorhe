@@ -40,11 +40,6 @@ public class UpperCase extends ScalarSystemFunction {
         return StringValue.EMPTY_STRING;
     }
 
-    @Override
-    public String getCompilerName() {
-        return "ForceCaseCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *

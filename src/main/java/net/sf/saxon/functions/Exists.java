@@ -86,11 +86,6 @@ public class Exists extends Aggregate {
     }
 
     @Override
-    public String getCompilerName() {
-        return "ExistsCompiler";
-    }
-
-    @Override
     public String getStreamerName() {
         return "Exists";
     }

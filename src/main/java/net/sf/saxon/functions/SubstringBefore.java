@@ -51,11 +51,6 @@ public class SubstringBefore extends CollatingFunctionFixed {
         return new StringValue(((SubstringMatcher)collator).substringBefore(s0, s1));
     }
 
-    @Override
-    public String getCompilerName() {
-        return "SubstringBeforeCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *

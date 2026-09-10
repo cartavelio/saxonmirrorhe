@@ -143,11 +143,6 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
             return Int64Value.makeIntegerValue(currentIterator.position());
         }
 
-        @Override
-        public String getCompilerName() {
-            return "PositionCompiler";
-        }
-
         /**
          * Make an elaborator for a system function call on this function
          *
@@ -191,11 +186,6 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
             } catch (UncheckedXPathException e) {
                 throw XPathException.makeXPathException(e);
             }
-        }
-
-        @Override
-        public String getCompilerName() {
-            return "LastCompiler";
         }
 
         @Override

@@ -28,11 +28,6 @@ public final class Floor extends ScalarSystemFunction {
         return ((NumericValue) arg).floor();
     }
 
-    @Override
-    public String getCompilerName() {
-        return "RoundingCompiler";
-    }
-
     /**
      * Make an elaborator for this expression
      *

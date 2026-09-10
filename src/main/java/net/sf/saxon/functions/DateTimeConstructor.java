@@ -45,11 +45,6 @@ public class DateTimeConstructor extends SystemFunction {
         return DateTimeValue.makeDateTimeValue(arg0, arg1);
     }
 
-    @Override
-    public String getCompilerName() {
-        return "DateTimeConstructorCompiler";
-    }
-
     /**
      * Make an elaborator for a system function call on this function
      *

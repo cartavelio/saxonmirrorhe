@@ -541,16 +541,6 @@ public abstract class SystemFunction extends AbstractFunction {
     public void importAttributes(Properties attributes) throws XPathException {}
 
     /**
-     * Get the (local) name of a class that can be used to generate bytecode for this
-     * system function
-     * @return the name of a bytecode generation class, or null if there is no bytecode
-     * support for this function
-     */
-    public String getCompilerName() {
-        return null;
-    }
-
-    /**
      * Get a name that identifies the class that can be used to evaluate this function
      * in streaming mode, that is, supplying one item or event at a time as it is
      * delivered by the parser. Special streaming support is generally available in

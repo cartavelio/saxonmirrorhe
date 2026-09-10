@@ -192,11 +192,6 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
         }
     }
 
-    @Override
-    public String getCompilerName() {
-        return "StringJoinCompiler";
-    }
-
 
 }
 

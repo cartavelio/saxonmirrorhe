@@ -86,11 +86,6 @@ public class EndsWith extends CollatingFunctionFixed {
         return BooleanValue.get(endsWith(s0, s1, (SubstringMatcher)getStringCollator()));
     }
 
-    @Override
-    public String getCompilerName() {
-        return "StartsWithCompiler";
-    }   // sic
-
 
 }
 

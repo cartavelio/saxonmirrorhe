@@ -171,11 +171,6 @@ public class Empty extends Aggregate {
 //    }
 
     @Override
-    public String getCompilerName() {
-        return "EmptyCompiler";
-    }
-
-    @Override
     public String getStreamerName() {
         return "Empty";
     }

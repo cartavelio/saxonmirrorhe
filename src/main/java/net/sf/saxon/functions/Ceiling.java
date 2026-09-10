@@ -27,11 +27,6 @@ public final class Ceiling extends ScalarSystemFunction {
         return ((NumericValue)arg).ceiling();
     }
 
-    @Override
-    public String getCompilerName() {
-        return "RoundingCompiler";
-    }
-
     /**
      * Make an elaborator for this expression
      *
