@@ -538,6 +538,9 @@ public class XPathProcessor extends SaxonCAPI {
 
 
         XPathProcessor xpath = new XPathProcessor(false);
+
+        XdmItem item = xpath.getCompiler().evaluateSingle("matches('abcdef', '^\\p{IsBasicLatin}+$')", null);
+        System.out.println(item.getStringValue());
         /*System.out.println("Version: " + SaxonCAPI.getProductVersion(xpath.processor));
         String sourcefile1 = "kamervragen.xml";
         String[] params1 = {"s"};

@@ -21,6 +21,7 @@ class Environment:
         self.xquery_proc = self.proc.new_xquery_processor()
 
         self.xslt_proc = self.proc.new_xslt30_processor()
+        self.sheet = None
 
         self.context_item = None
 

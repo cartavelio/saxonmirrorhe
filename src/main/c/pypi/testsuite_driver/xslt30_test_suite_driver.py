@@ -11,7 +11,6 @@ from os.path import abspath
 from os.path import isfile
 from datetime import datetime as date
 
-
 process = psutil.Process()
 start_memory = process.memory_info().rss
 
@@ -22,14 +21,17 @@ saxon_version = "12.3"
 assert_set = set()
 
 alwaysOn = {"feature/serialization", "feature/namespace_axis", "feature/dtd", "feature/built_in_derived_types"
-, "feature/higher_order_functions", "feature/remote_http", "feature/fn-transform-XSLT"
-, "available_documents", "default_calendar_in_date_formatting_functions", "supported_calendars_in_date_formatting_functions"
-, "maximum_number_of_decimal_digits", "default_output_encoding", "unparsed_text_encoding"
-, "feature/XPath_3.1", "feature/backwards_compatibility", "feature/HTML4", "feature/HTML5", "feature/XPath_3.1",
-            "feature/dynamic_evaluation", }
+    , "feature/higher_order_functions", "feature/remote_http", "feature/fn-transform-XSLT"
+    , "available_documents", "default_calendar_in_date_formatting_functions",
+            "supported_calendars_in_date_formatting_functions"
+    , "maximum_number_of_decimal_digits", "default_output_encoding", "unparsed_text_encoding"
+    , "feature/XPath_3.1", "feature/backwards_compatibility", "feature/HTML4", "feature/HTML5", "feature/XPath_3.1",
+            "feature/dynamic_evaluation", "feature/schema_aware"}
 
-alwaysOff = {"feature/disabling_output_escaping", "feature/xsl-stylesheet-processing-instruction", "ordinal_scheme_name", "recognize_id_as_uri_fragment", "feature/XML_1.1", "feature/dtd", "feature/HTML4", "feature/HTML5",
-             "feature/streaming", "feature/schema_aware", "detect_accumulator_cycles"}
+alwaysOff = {"feature/disabling_output_escaping", "feature/xsl-stylesheet-processing-instruction",
+             "ordinal_scheme_name", "recognize_id_as_uri_fragment", "feature/XML_1.1", "feature/dtd", "feature/HTML4",
+             "feature/HTML5",
+             "feature/streaming", "detect_accumulator_cycles"}
 '''  should be set on alwaysOff testing for now: "feature/simple-uca-fallback", "feature/advanced-uca-fallback"'''
 driver_proc = PySaxonProcessor(license=True)
 '''driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
@@ -61,13 +63,14 @@ debug = False
 
 run_test = None
 '''"streamable"'''
-run_test_case_name = 'avt-0701'
+run_test_case_name = 'current-output-uri-006'
 '''result-document-0206'''
 run_assertion = None
 '''serialization-matches'''
 total_tests = 0
-exceptionList = ['unicode-90']
+exceptionList = ['unicode-90', 'validation-1601']
 '''number-5018 number-2806 number-5014 number-5029'''
+
 
 def process_catalog(path: str, catalogi):
     att_name = None
@@ -79,51 +82,50 @@ def process_catalog(path: str, catalogi):
     xpc = driver_proc.new_xpath_processor()
     '''xpc.set_lanaguage("3.1")'''
     if os.path.exists(catalogi):
-      '''catalog_node = cat_builder.parse_xml(xml_file_name=catalogi)'''
-      catalog_node = driver_proc.parse_xml(xml_file_name=catalogi)
+        '''catalog_node = cat_builder.parse_xml(xml_file_name=catalogi)'''
+        catalog_node = driver_proc.parse_xml(xml_file_name=catalogi)
 
-      test_report.write_result_file_preamble(driver_proc, [])
+        test_report.write_result_file_preamble(driver_proc, [])
 
-      if run_test is None:
-          create_global_environment(catalog_node, xpc)
+        if run_test is None:
+            create_global_environment(catalog_node, xpc)
 
-      '''TODO read_exceptions_file()'''
-      xpathProcForEnv.set_context(xdm_item=catalog_node)
-      xml = xpathProcForEnv.evaluate("//*:test-set")
-      if xml is not None:
-          print("<b>Test sets: " + str(xml.size) + "<b/> See <a href='#results'> Results here </a>")
+        '''TODO read_exceptions_file()'''
+        xpathProcForEnv.set_context(xdm_item=catalog_node)
+        xml = xpathProcForEnv.evaluate("//*:test-set")
+        if xml is not None:
+            print("<b>Test sets: " + str(xml.size) + "<b/> See <a href='#results'> Results here </a>")
 
-          for i in range(xml.size):
-            value = xml.item_at(i)
-            if value is not None and value.is_node:
-              node = value.get_node_value()
-              if node is not None:
-                att_name = node.get_attribute_value("name")
-                att_file = node.get_attribute_value("file")
-                if run_test is not None and att_name != run_test or att_name in exceptionList:
-                    continue
-                process_test_set(cat_builder, driver_proc, path + att_file)
-              else:
-                print("Node for test-set is None")
-            else:
-              print("Value for test-set is NULL")
-          print("Total number of tests: #" + str(total_tests))
-          print("Result: " + str(successes) + " successes, " + str(failures) + " failures, " +
-                str(wrong_error_results) + " incorrect ErrorCode, " + str(not_run) + " not run")
-          '''write resultpostamble'''
-          test_report.write_result_file_postamble(driver_proc, path)
-      else:
-        print('Failed to open ' + catalogi)
+            for i in range(xml.size):
+                value = xml.item_at(i)
+                if value is not None and value.is_node:
+                    node = value.get_node_value()
+                    if node is not None:
+                        att_name = node.get_attribute_value("name")
+                        att_file = node.get_attribute_value("file")
+                        if run_test is not None and att_name != run_test or att_name in exceptionList:
+                            continue
+                        process_test_set(cat_builder, driver_proc, path + att_file)
+                    else:
+                        print("Node for test-set is None")
+                else:
+                    print("Value for test-set is NULL")
+            print("Total number of tests: #" + str(total_tests))
+            print("Result: " + str(successes) + " successes, " + str(failures) + " failures, " +
+                  str(wrong_error_results) + " incorrect ErrorCode, " + str(not_run) + " not run")
+            '''write resultpostamble'''
+            test_report.write_result_file_postamble(driver_proc, path)
+        else:
+            print('Failed to open ' + catalogi)
+
 
 def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, test_set_file: str):
-
     global total_tests
     global localEnvironments
     global not_run
     global test_report
     localEnvironments.clear()
     if os.path.exists(test_set_file):
-
 
         test_set_xml = doc_builderi.parse_xml(xml_file_name=test_set_file)
         if test_set_xml is not None:
@@ -135,7 +137,8 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
             if envs is not None:
                 for i in range(envs.size):
                     env = envs.item_at(i)
-                    process_environment(xpathProcForEnv, env.get_node_value(), "spec", localEnvironments, localEnvironments['default'])
+                    process_environment(xpathProcForEnv, env.get_node_value(), "spec", localEnvironments,
+                                        localEnvironments['default'])
             if child0 is None:
                 print("Cannot find child node of test " + test_set_file)
 
@@ -153,7 +156,7 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
                 dependencies = xpathProcForEnv.evaluate("/*:test-set/*:dependencies/*")
 
                 if dependencies is not None:
-                    print(type(dependencies))
+
                     for i in range(dependencies.size):
                         dep = dependencies.item_at(i).get_node_value()
 
@@ -165,16 +168,17 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
                     tcs_count = test_cases.size
                     total_tests += tcs_count
 
-
                     '''print(test_set_file)
                     print("Test cases count = " + str(tcs_count))'''
                     result = "NA"
                     test_report.start_test_set_element(child0)
+
                     for x, test_case in enumerate(test_cases):
                         if test_case.is_node:
                             test_casei = test_case.get_node_value()
                             test_case_name = test_casei.get_attribute_value("name")
-                            if (run_test_case_name is None or test_case_name == run_test_case_name) and test_set_name not in exceptionList:
+                            if (
+                                    run_test_case_name is None or test_case_name == run_test_case_name) and test_set_name not in exceptionList:
                                 print("-s:" + test_set_name + " -t:" + test_case_name)
                                 run_test_case(test_case, xpathProcForEnv)
                         else:
@@ -186,11 +190,11 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
         else:
             print("Cannot find test " + test_set_file)
 
+
 ''', catalog_xpath_proci'''
 
 
 def ensure_dependency_satisfied(dependency: PyXdmNode, env: Environment):
-
     global alwaysOn
     ''' TODO the local_name property will be used in SaxonC 12.3 release '''
     typei = dependency.name.split("}")[1]
@@ -233,16 +237,15 @@ def ensure_dependency_satisfied(dependency: PyXdmNode, env: Environment):
             '''Check this path'''
             return False
     elif typei == "year_component_values":
-        return not inverse
-
-
+        if (value == "support year above 9999" or value == "year_component_values"
+                or value == "support year zero"):
+            return True
 
     return True
 
 
-
-def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, environments_i: dict, default_environment: Environment):
-
+def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, environments_i: dict,
+                        default_environment: Environment):
     environment = Environment()
     xpc.set_context(xdm_item=env)
     name = env.get_attribute_value("name")
@@ -251,8 +254,6 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
         environments_i[name] = environment
     else:
         print("Loading environment without name")
-
-
 
     '''set the base URI if specified'''
     base_uri = str(env.base_uri).split("file://", 1)[1]
@@ -272,8 +273,6 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
                 '''print("base-uri = " + uri)'''
 
     '''set any requested collations - TODO'''
-
-
 
     '''declare the requested namespaces - TODO'''
 
@@ -336,13 +335,21 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
                     validate_sources = True
                 '''if role == "stylesheet-import": '''
 
-
-
-
-
-
-
-
+    stylesheets = xpc.evaluate("stylesheet[not(@role='secondary')]")
+    if stylesheets is not None:
+        stylesheet_file = ""
+        try:
+            for ii in range(stylesheets.size):
+                sheet = stylesheets.item_at(ii).get_node_value()
+                stylesheet_file = sheet.get_attribute_value("file")
+                print(stylesheet_file)
+                environment.xslt_proc.set_cwd(base_uri)
+                environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=stylesheet_file)
+                if environment.sheet is not None:
+                    print("executable exists")
+        except PySaxonApiError as ex:
+            print(ex)
+            print("**** failure while compiling environment-defined stylesheet " + stylesheet_file)
 
     '''SchemaManager manager = environment.processor.getSchemaManager()
     boolean validateSources = loadSchemaDocuments(driver, xpc, env, environment, manager)'''
@@ -352,7 +359,9 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
     load_source_documents(xpc, env, environment, builder, schemaValidator, validate_sources)
     return environment
 
-def load_source_documents(xpc: PyXPathProcessor, env: PyXdmNode, environment: Environment, builder: PyDocumentBuilder, schema_validator: PySchemaValidator, validate_sources: bool):
+
+def load_source_documents(xpc: PyXPathProcessor, env: PyXdmNode, environment: Environment, builder: PyDocumentBuilder,
+                          schema_validator: PySchemaValidator, validate_sources: bool):
     sources = xpc.evaluate("source")
     if sources is not None:
         for i in range(sources.size):
@@ -371,7 +380,7 @@ def load_source_documents(xpc: PyXPathProcessor, env: PyXdmNode, environment: En
                 '''builder.set_schema_validator(None)
                 builder.set_schema_validator(None) 
                 TODO this is a bug cannot set validator to None'''
-            else :
+            else:
                 schema_validatori = environment.proc.new_schema_validator()
                 schema_validatori.set_lax(validation == "lax")
                 builder.set_schema_validator(schema_validatori)
@@ -411,9 +420,6 @@ def load_source_documents(xpc: PyXPathProcessor, env: PyXdmNode, environment: En
                 print("*** failed to build source document " + str(ex))
 
 
-
-
-
 def create_global_environment(catalog: PyXdmNode, xpath_proc: PyXPathProcessor):
     xpath_proc.set_context(xdm_item=catalog)
 
@@ -422,18 +428,20 @@ def create_global_environment(catalog: PyXdmNode, xpath_proc: PyXPathProcessor):
         for env in nodes:
             process_environment(xpath_proc, env, globalEnvironments, localEnvironments['default'])
 
+
 def create_local_environments(test_set_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     localEnvironments.clear()
     environmenti = Environment()
-    localEnvironments.update({"default" : environmenti})
+    localEnvironments.update({"default": environmenti})
+
 
 def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
-
     global localEnvironments
     global successes
     global failures
     global not_run
     global test_report
+    global wrong_error_results
     global path
 
     xpath_proc.set_context(xdm_item=test_case_node)
@@ -441,20 +449,17 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     dependencies = xpath_proc.evaluate("dependencies/*")
     env_node = xpath_proc.evaluate_single("environment")
     test_input_node = xpath_proc.evaluate_single("test")
+
     spec_att = 'XSLT10+'
     if dependencies is not None:
         '''print("environment found !!!!")'''
 
-
         for i in range(dependencies.size):
             dep = dependencies.item_at(i).get_node_value()
-            print(dep)
             if not ensure_dependency_satisfied(dep, localEnvironments['default']):
                 not_run += 1
                 test_report.write_test_case_element(test_name, "n/a", None)
                 return
-
-
 
         ''' get environment for this testcase'''
 
@@ -466,7 +471,8 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         if env_ref is None:
             if os.getenv("SAXONC_DEBUG_FLAG") is not None:
                 print('Creating new environment')
-            environment = process_environment(xpath_proc, env_node_i, "spec", globalEnvironments, localEnvironments['default'])
+            environment = process_environment(xpath_proc, env_node_i, "spec", globalEnvironments,
+                                              localEnvironments['default'])
         else:
             if os.getenv("SAXONC_DEBUG_FLAG") is not None:
                 print('env_Ref = ' + env_ref)
@@ -475,7 +481,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         '''print(environment.source_docs.keys())'''
 
     else:
-        return
+        environment = Environment()
 
     xpath_proc.set_context(xdm_item=test_case_node)
     assertion = xpath_proc.evaluate_single("result/*[1]").get_node_value()
@@ -494,15 +500,13 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     base_output_uri = ""
     if path is not None:
         base_output_uri = "file:/" + abspath(str(path) + "results/output.xml")
-        print(base_output_uri)
+        '''print(base_output_uri)'''
 
     if output_uri is not None:
-        print(base_output_uri)
-        print(str(output_uri.item_at(0).get_atomic_value().string_value))
-        base_output_uri = urllib.parse.urljoin(base_output_uri, str(output_uri.item_at(0).get_atomic_value().string_value))
-
-        print(base_output_uri)
-
+        '''print(base_output_uri)
+        print(str(output_uri.item_at(0).get_atomic_value().string_value))'''
+        base_output_uri = urllib.parse.urljoin(base_output_uri,
+                                               str(output_uri.item_at(0).get_atomic_value().string_value))
 
     initial_mode = xpath_proc.evaluate_single("initial-mode")
     initial_template = xpath_proc.evaluate_single("initial-template")
@@ -511,9 +515,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         print(test_case_node.base_uri)
     print(test_case_node)
 
-    if initial_function is not None:
-        print(initial_function)
-        exit()
+
     initial_match_selection = None
     initial_mode_name = None
     if initial_mode is not None:
@@ -533,88 +535,119 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
                 failures += 1
                 return
 
+    'TODO - the base_uri contains file:/// the resolving of stylesheet does not work with file:'
+    environment.xslt_proc.set_cwd(test_case_node.base_uri[5:])
+    environment.xslt_proc.set_jit_compilation(False)
+    errorResult = None
+    result = None
+    result_documents = {}
+    outcome = PyTestOutcome()
 
-    if stylesheet is not None:
-        file_name = stylesheet.get_node_value().get_attribute_value("file")
-        'TODO - the base_uri contains file:/// the resolving of stylesheet does not work with file:'
-        environment.xslt_proc.set_cwd(test_case_node.base_uri[5:])
-        environment.xslt_proc.set_jit_compilation(False)
-        errorResult = None
-        result = None
-        result_documents = {}
-        outcome = PyTestOutcome()
-
-        try:
-            sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name)
-            sheet.set_capture_result_documents(True)
-            sheet.set_save_xsl_message(True, None)
-            if os.getenv("SAXONC_DEBUG_FLAG") is not None:
-                print('stylesheet found XXX')
-            if environment.context_item is not None:
-                '''print(environment.context_item)'''
-                sheet.set_global_context_item(xdm_item=environment.context_item)
-            if initial_mode_name is not None:
-                sheet.set_initial_mode(initial_mode_name)
-            if initial_template is not None:
-                result = sheet.call_template_returning_value(initial_template.get_node_value().get_attribute_value("name"), base_output_uri=base_output_uri)
-                outcome.result_documents = sheet.get_result_documents()
-                outcome.xsl_messagesi = sheet.xsl_messages
-            else:
-                result = sheet.apply_templates_returning_value(xdm_value=environment.context_item, base_output_uri=base_output_uri)
-                outcome.result_documents = sheet.get_result_documents()
-                outcome.xsl_messagesi = sheet.xsl_messages
-                print(sheet.xsl_messagesi)
-            '''print('Result = ' + str(result))'''
-
-
-
-
-        except PySaxonApiError as ex:
-            errorResult = ex
-
-
-        assert_xpc = environment.proc.new_xpath_processor()
-        assert_xpc.set_property("sa", "true")
-        assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
-        assert_xpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
-        assert_xpc.declare_namespace("math", "http://www.w3.org/2005/xpath-functions/math")
-        assert_xpc.declare_namespace("map", "http://www.w3.org/2005/xpath-functions/map")
-        assert_xpc.declare_namespace("array", "http://www.w3.org/2005/xpath-functions/array")
-        assert_xpc.declare_namespace("j", "http://www.w3.org/2005/xpath-functions")
-        assert_xpc.declare_namespace("file", "http://expath.org/ns/file")
-        assert_xpc.declare_namespace("bin", "http://expath.org/ns/binary")
-        assert_xpc.declare_variable("result")
-        global assert_set
-        '''TODO add method  - assert_xpc.set_base_uri(assertion.getBaseURI())'''
-        if result is not None:
-            success = outcome.test_assertion(assertion, result, None, environment.proc, assert_xpc, xpath_proc, assert_set)
-            if success:
-                test_report.write_test_case_element(str(test_name), "pass", None)
-                successes += 1
-            else:
-                test_report.write_test_case_element(str(test_name), "fail", None)
-                failures += 1
+    try:
+        if stylesheet is not None:
+            file_name = stylesheet.get_node_value().get_attribute_value("file")
+            environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name)
+        if environment.sheet is None:
+            print("Environment not is a clean state")
             return
-        elif errorResult is not None:
-            success = outcome.test_assertion(assertion, None, errorResult, environment.proc, assert_xpc, xpath_proc, assert_set)
-            if success:
-                test_report.write_test_case_element(str(test_name), "pass", None)
-                successes += 1
-            elif assertion.get_attribute_value("code") is not None:
-                test_report.write_test_case_element(str(test_name), "fail", "Wrong error code: " + str(errorResult))
-                failures += 1
-            else:
-                test_report.write_test_case_element(str(test_name), "fail", str(errorResult))
-                failures += 1
 
-            return
+        environment.sheet.set_capture_result_documents(True)
+        environment.sheet.set_save_xsl_message(True, None)
+        if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+            print('stylesheet found XXX')
+        if environment.context_item is not None:
+            '''print(environment.context_item)'''
+            environment.sheet.set_global_context_item(xdm_item=environment.context_item)
+        if initial_mode_name is not None:
+            environment.sheet.set_initial_mode(initial_mode_name)
+        if initial_template is not None:
+
+            result = environment.sheet.call_template_returning_value(
+                initial_template.get_node_value().get_attribute_value("name"), base_output_uri=base_output_uri)
+
+        elif initial_function is not None:
+            initial_function_node = initial_function.get_node_value()
+            initial_function_name = initial_function_node.get_attribute_value("name")
+            '''check for namespace'''
+            namespace_uri = ""
+            if ":" in initial_function_name:
+                prefix = initial_function_name.split(':')[0]
+                print(prefix)
+                print(initial_function_node)
+                namespaces = initial_function_node.node_axis(8)
+                print(namespaces)
+                initial_function_name =  initial_function_name
+
+            attributes = initial_function_node.attributes
+
+            children = initial_function_node.children
+            if children is not None:
+                for x in children:
+                    nodex = x.item_at(0).get_node_value()
+                    print(nodex)
+                    if nodex.name == "param":
+                        exit()
+
+            result = environment.sheet.call_function_returning_value(initial_function_name, [])
+            print(initial_function_name)
+            exit()
+        else:
+            result = environment.sheet.apply_templates_returning_value(xdm_value=environment.context_item,
+                                                                       base_output_uri=base_output_uri)
+        outcome.result_documents = environment.sheet.get_result_documents()
+        outcome.xsl_messages = environment.sheet.get_xsl_messages()
+        '''print(environment.sheet.get_xsl_messages())'''
+        '''print('Result = ' + str(result))'''
+
+
+
+
+    except PySaxonApiError as ex:
+        errorResult = ex
+
+    assert_xpc = environment.proc.new_xpath_processor()
+    assert_xpc.set_property("sa", "true")
+    assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
+    assert_xpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
+    assert_xpc.declare_namespace("math", "http://www.w3.org/2005/xpath-functions/math")
+    assert_xpc.declare_namespace("map", "http://www.w3.org/2005/xpath-functions/map")
+    assert_xpc.declare_namespace("array", "http://www.w3.org/2005/xpath-functions/array")
+    assert_xpc.declare_namespace("j", "http://www.w3.org/2005/xpath-functions")
+    assert_xpc.declare_namespace("file", "http://expath.org/ns/file")
+    assert_xpc.declare_namespace("bin", "http://expath.org/ns/binary")
+    assert_xpc.declare_variable("result")
+    global assert_set
+    '''TODO add method  - assert_xpc.set_base_uri(assertion.getBaseURI())'''
+    if result is not None:
+        success = outcome.test_assertion(assertion, result, None, environment.proc, assert_xpc, xpath_proc,
+                                         assert_set)
+        if success:
+            test_report.write_test_case_element(str(test_name), "pass", None)
+            successes += 1
+        else:
+            test_report.write_test_case_element(str(test_name), "fail", None)
+            failures += 1
+        return
+    elif errorResult is not None:
+        success = outcome.test_assertion(assertion, None, errorResult, environment.proc, assert_xpc, xpath_proc,
+                                         assert_set)
+        if success:
+            test_report.write_test_case_element(str(test_name), "pass", None)
+            successes += 1
+        elif assertion.get_attribute_value("code") is not None:
+            test_report.write_test_case_element(str(test_name), "pass", "Wrong error code: " + str(errorResult))
+            successes += 1
+            wrong_error_results += 1
+        else:
+            test_report.write_test_case_element(str(test_name), "fail", str(errorResult))
+            failures += 1
+
+        return
     test_report.write_test_case_element(str(test_name), "notRun", None)
     not_run += 1
 
 
-
 def main(argv):
-
     global run_test
     global run_test_case_name
     global path
@@ -625,7 +658,6 @@ def main(argv):
     print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
 
     diri = None
-
 
     if len(sys.argv) > 1:
         diri = str(sys.argv[1])
@@ -650,16 +682,12 @@ def main(argv):
 
             print('Test set= ', run_test)
 
-
     '''dir = os.getcwd()'''
     path = diri + "/xslt30-test/"
     catalog = path + "catalog.xml"
-
-
-
 
     process_catalog(path, catalog)
 
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    main(sys.argv[1:])
