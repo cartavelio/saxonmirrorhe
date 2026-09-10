@@ -180,19 +180,21 @@ val debugVenv = tasks.register<PythonVenv>("debug_venv") {
 }
 
 /* We need the local dev/debug wheels to be built and repaired, but auditwheel currently refuses to just fix a wheel up
- * and not monkey with the platform tag. This is the most recent manylinux target and hopefully is usable on dev machines
+ * and not monkey with the platform tag. Use the most recent manylinux target for this machine.
  */
-val cheatyManyLinuxTarget = "manylinux_2_39"
+val localDevManylinuxTargetTask = tasks.register<LocalManylinuxTargetTask>("local_dev_manylinux_target") {
+    cachefile = layout.buildDirectory.file("local-manylinux-target-cache/target")
+}
 
 val devWheelPlatformTagTask = tasks.register<WheelCompatibilityTags>("dev_wheel_platform_tag") {
     pythonExe = venv.map { it.pythonExe.get() }
-    manylinuxTarget = cheatyManyLinuxTarget
+    manylinuxTarget = localDevManylinuxTargetTask.map { it.manylinuxTarget }
     macosxDeploymentTarget = saxonBuild.macosx_min_version
 }
 
 val devWheelDebugPlatformTagTask = tasks.register<WheelCompatibilityTags>("dev_wheel_debug_platform_tag") {
     pythonExe = debugVenv.map { it.pythonExe.get() }
-    manylinuxTarget = cheatyManyLinuxTarget
+    manylinuxTarget = localDevManylinuxTargetTask.map { it.manylinuxTarget }
     macosxDeploymentTarget = saxonBuild.macosx_min_version
 }
 

@@ -3,23 +3,77 @@ package com.saxonica.build.python
 import SaxonBuildExtension
 import SaxonCPythonExtension
 import com.saxonica.build.PyprojectToml
+import com.saxonica.build.TargetHost
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.*
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.filter
+import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.register
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
+
+/**
+ * Task for outputting the current machine's GLibc symbols version
+ *
+ * We need to set a manylinux version for auditwheel currently, and if it's too new, or too old, stuff explodes. So, we
+ * need to work out what the correct version is, lest we're eaten by porridge-deprived bears.
+ */
+abstract class LocalManylinuxTargetTask @Inject constructor(private val ex: ExecOperations, private val obj: ObjectFactory) : DefaultTask() {
+    private val targetHost = TargetHost.current()
+    private val versionMatcher = Regex("""\s(?<major>[0-9]+)\.(?<minor>[0-9]+)$""")
+    private val manylinuxTargetCache: Property<String> = obj.property<String>()
+
+    @get:Internal
+    abstract val cachefile: RegularFileProperty
+
+    @get:OutputFile
+    val outputFile: Provider<RegularFile> = cachefile
+
+    @TaskAction
+    fun invoke() {
+        if (targetHost.isLinux) {
+            val target = askLdd()
+            cachefile.get().asFile.writeText(target)
+            manylinuxTargetCache = target
+        }
+        else {
+            cachefile.get().asFile.writeText("")
+        }
+    }
+
+    private fun askLdd(): String {
+        val output = ByteArrayOutputStream()
+        ex.exec {
+            executable = "/usr/bin/ldd"
+            args("--version")
+            standardOutput = output
+        }
+        val glibcLine = output.toString().lines().first()
+        val (major, minor) = versionMatcher.find(glibcLine)!!.destructured
+        return "manylinux_${major}_${minor}"
+    }
+
+
+    private fun getTarget(): String {
+        if (!manylinuxTargetCache.isPresent) manylinuxTargetCache.set(cachefile.get().asFile.readText().trim())
+        return manylinuxTargetCache.get()
+    }
+
+    @get:Internal
+    val manylinuxTarget get() = getTarget()
+}
 
 /**
  * Task for providing the Wheel platform tag, which we need in a couple of places
