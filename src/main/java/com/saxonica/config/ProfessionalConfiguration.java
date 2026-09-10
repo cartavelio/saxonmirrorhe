@@ -142,6 +142,7 @@ public class ProfessionalConfiguration extends Configuration {
         internalSetBooleanProperty(Feature.DISABLE_XSL_EVALUATE, false);
     }
 
+
     @Override
     protected ConfigurationReader makeConfigurationReader() {
         return new ConfigurationReaderPE();

@@ -1,6 +1,5 @@
 package com.saxonica.config;
 
-import com.saxonica.config.pe.ConfigurationReaderPE;
 import com.saxonica.ee.bytecode.ByteCodeMonitor;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.config.*;
@@ -264,17 +263,17 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         }
     }
 
-    /**
-     * Read the configuration file an construct a new Configuration (the real one)
-     *
-     * @param source the source of the configuration file
-     * @return the Configuration that will be used for real work
-     * @throws net.sf.saxon.trans.XPathException if, for example, the configuration file is invalid
-     */
-    @Override
-    protected Configuration readConfigurationFile(Source source) throws XPathException {
-        return new ConfigurationReaderPE().makeConfiguration(source);
-    }
+//    /**
+//     * Read the configuration file an construct a new Configuration (the real one)
+//     *
+//     * @param source the source of the configuration file
+//     * @return the Configuration that will be used for real work
+//     * @throws net.sf.saxon.trans.XPathException if, for example, the configuration file is invalid
+//     */
+//    @Override
+//    protected Configuration readConfigurationFile(Source source) throws XPathException {
+//        return new ConfigurationReaderPE().makeConfiguration(source);
+//    }
 
     /**
      * Get a property of the configuration
