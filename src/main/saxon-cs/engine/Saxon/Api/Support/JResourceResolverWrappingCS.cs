@@ -22,7 +22,7 @@ namespace Saxon.Api.Support {
             IResource resource = null;
             ResourceRequest request = new() {
                 Uri = jRequest.uri == null ? null : new Uri(jRequest.uri),
-                BaseUri = jRequest.baseUri==null ? null : new Uri(jRequest.baseUri),
+                BaseUri = string.IsNullOrEmpty(jRequest.baseUri) ? null : new Uri(jRequest.baseUri),
                 RelativeUri = jRequest.relativeUri,
                 Nature = jRequest.nature,
                 Purpose = jRequest.purpose,
