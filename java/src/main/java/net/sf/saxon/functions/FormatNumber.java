@@ -702,12 +702,14 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
 
             if (wholePartGroupingPositions != null) {
                 UnicodeString separator = dfs.getProperty(DecimalSymbols.Property.GROUPING_SEPARATOR_RENDITION);
+                int newPoint = point;
                 if (regular) {
                     // grouping separators are at regular positions
                     int g = wholePartGroupingPositions[0];
                     int p = point - g;
                     while (p > 0) {
                         ib = ib.insert(p, separator);
+                        newPoint += separator.length32();
                         p -= g;
                     }
                 } else {
@@ -716,9 +718,11 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                         int p = point - wholePartGroupingPosition;
                         if (p > 0) {
                             ib = ib.insert(p, separator);
+                            newPoint += separator.length32();
                         }
                     }
                 }
+                point = newPoint;
             }
 
             // Add the fractional-part grouping separators
