@@ -15,6 +15,8 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -661,18 +663,14 @@ public final class AxisExpression extends Expression {
      */
 
     private NodeTest makeUnionNodeTest(IntHashSet elements, NamePool pool) {
-        NodeTest test = null;
+        List<QNameTest> list = new ArrayList<>(elements.size());
         IntIterator iter = elements.iterator();
         while (iter.hasNext()) {
             int fp = iter.next();
-            NodeTest nextTest = new NameTest(Type.ELEMENT, fp, pool);
-            if (test == null) {
-                test = nextTest;
-            } else {
-                test = new CombinedNodeTest(test, OperatorSymbol.UNION, nextTest);
-            }
+            list.add(new SpecificQNameTest(pool, fp));
         }
-        return test;
+        UnionQNameTest test = new UnionQNameTest(list);
+        return new NameTestUnion(test, Type.ELEMENT);
     }
 
     /**

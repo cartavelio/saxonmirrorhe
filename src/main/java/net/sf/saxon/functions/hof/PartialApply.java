@@ -37,7 +37,7 @@ import java.util.function.Supplier;
 public class PartialApply extends Expression {
 
     private final Operand baseOp;
-    private final Operand[] boundArgumentsOp; // contains null where the question marks appear
+    private final Operand[] boundArgumentsOp;
 
     /**
      * Create a partial function application expression

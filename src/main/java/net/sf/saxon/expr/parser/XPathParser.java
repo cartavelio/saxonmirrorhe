@@ -4403,6 +4403,14 @@ public class XPathParser {
             List<String> reasons = new ArrayList<>();
             return parser.reportMissingFunction(offset, name, args, reasons);
         }
+        if (target instanceof IContextAccessorFunction) {
+            // For a context-dependent function, return a call on function-lookup(), which saves the context
+            SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
+            lookup.setRetainedStaticContext(env.makeRetainedStaticContext());
+            return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(name, BuiltInAtomicType.QNAME)),
+                                           Literal.makeLiteral(Int64Value.makeIntegerValue(args.length)));
+
+        }
         Expression targetExp = makeNamedFunctionReference(name, target);
         parser.setLocation(targetExp, offset);
         return curryFunction(targetExp, args, placeMarkerArgs);
