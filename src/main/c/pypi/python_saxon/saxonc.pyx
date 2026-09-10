@@ -41,6 +41,21 @@ class XdmType(IntEnum):
     XDM_EMPTY = 6
     XDM_ITEM = 7
 
+class XdmNodeKind(IntEnum):
+    ANCESTOR = 0
+    ANCESTOR_OR_SELF = 1
+    ATTRIBUTE = 2
+    CHILD = 3
+    DESCENDANT = 4
+    DESCENDANT_OR_SELF = 5
+    FOLLOWING = 6
+    FOLLOWING_SIBLING = 7
+    NAMESPACE = 8
+    PARENT = 9
+    PRECEDING = 10
+    PRECEDING_SIBLING = 11
+    SELF = 12
+
 
 
 def create_xdm_dict(proc, mmap):
@@ -4772,10 +4787,11 @@ cdef class PyXdmNode(PyXdmItem):
                 nodes.append(val)
         return nodes
 
-     def axis_nodes(self, axis):
+     def axis_nodes(self, int axis):
         """
         axis_nodes(self, int axis)
         Get the array of nodes reachable from this node via a given axis.
+        Deprecated the argument type for axis will change from Saxon 13 to use the XdmNodeKind enum type
         Axis options are as follows: ANCESTOR = 0,
         ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
         DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,
