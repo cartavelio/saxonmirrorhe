@@ -31,10 +31,7 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.jiter.WrappingJavaIterator;
-import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.tree.tiny.TinyElementImpl;
-import net.sf.saxon.tree.tiny.TinyNodeImpl;
-import net.sf.saxon.tree.tiny.TinyTextualElement;
+import net.sf.saxon.tree.tiny.*;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
@@ -1680,7 +1677,7 @@ public final class Navigator {
      */
 
     public static SequenceIterator iteratePrecedingOrAncestorAxis(GNode origin, NodePredicate predicate) {
-        if (origin instanceof TinyNodeImpl n) {
+        if (origin instanceof TinyNodeImpl n && !(origin instanceof TinyAttributeImpl)) {
             // Fast path for tinytree
             return new net.sf.saxon.tree.tiny.PrecedingIterator(n.getTree(), n, predicate, true);
         }
