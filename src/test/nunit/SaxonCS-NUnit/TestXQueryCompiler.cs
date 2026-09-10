@@ -25,10 +25,7 @@ namespace SaxonCS_NUnit {
                     };
 
                     return new[] {
-                        new XQueryModuleSource() {
-                            Content = module,
-                            BaseUri = new Uri("http://dummy.com/")
-                        }
+                        new TextResource(module,  new Uri("http://dummy.com/"))
                     };
                 });
                 XQueryExecutable exec = c.Compile("import module namespace b = 'b.uri' at 'b.xq'; $b:b");
@@ -181,7 +178,7 @@ namespace SaxonCS_NUnit {
                 const string q1 = "import module namespace m2='http://www.example.com/module-two'; m2:add($m2:ten,2)";
                 comp.XQueryResolver = (moduleUri, baseURI, locations) => {
                     return moduleUri == "http://www.example.com/module-two" 
-                        ? new[] {new XQueryModuleSource() {Content = m2}} 
+                        ? new[] {new TextResource(m2, new Uri("http://www.example.com/module-two"))} 
                         : null;
                 };
                 XQueryEvaluator ev = comp.Compile(q1).Load();
@@ -379,7 +376,7 @@ namespace SaxonCS_NUnit {
                 XQueryCompiler xqueryCompiler = processor.NewXQueryCompiler();
                 xqueryCompiler.XQueryResolver = (moduleURI, baseURI, locations) => {
                     const string q = "module namespace x='x'; declare variable $x:x := 'x';";
-                    return new [] {new XQueryModuleSource() {Content = q}};
+                    return new [] {new TextResource(q, new Uri("http://dummy/"))};
                 };
 
                 xqueryCompiler.BaseUri = new Uri(Environment.CurrentDirectory);
@@ -411,7 +408,7 @@ namespace SaxonCS_NUnit {
                     _ => ""
                 };
 
-                return new[] {new XQueryModuleSource() {Content = module, BaseUri = new Uri(moduleURI)}};
+                return new[] {new TextResource(module, new Uri(moduleURI))};
             };
             compiler.CompileLibrary(main);
         }

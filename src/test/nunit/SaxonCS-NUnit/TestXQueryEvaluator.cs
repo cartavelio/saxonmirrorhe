@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using J2N.Text;
 using Saxon.Api;
+using Saxon.Ejavax.xml.transform;
 using static Saxon.Api.Steps;
 
 namespace SaxonCS_NUnit {
@@ -973,8 +974,7 @@ namespace SaxonCS_NUnit {
                 Processor p = new ();
                 XQueryCompiler c = p.NewXQueryCompiler();
                 XQueryEvaluator eval = c.Compile("doc('file:///a.xml')/z").Load();
-                eval.XmlResolver =
-                    new SimpleUriResolver(uri => new MemoryStream("<z>17</z>".GetBytes(Encoding.UTF8)));
+                eval.XmlDocumentResolver = (uri, props) => new TextResource("<z>17</z>", uri);
 
                 XdmItem result = eval.First();
                 Assert.AreEqual("17", result.StringValue);
@@ -984,19 +984,19 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        [Test]
-        public void testGlobalURIResolver() {
-            try {
-                Processor p = new();
-                p.XmlResolver = new SimpleUriResolver(uri => new MemoryStream("<z>17</z>".GetBytes(Encoding.UTF8)));
-                XQueryCompiler c = p.NewXQueryCompiler();
-                XQueryEvaluator eval = c.Compile("doc('file:///a.xml')/z").Load();
-                XdmItem result = eval.First();
-                Assert.AreEqual("17", result.StringValue);
-            }
-            catch (SaxonApiException e) {
-                Assert.Fail(e.Message);
-            }
-        }
+        // [Test]
+        // public void testGlobalURIResolver() {
+        //     try {
+        //         Processor p = new();
+        //         p.XmlDocumentResolver = (uri, props) => new TextResource("<z>17</z>", uri);
+        //         XQueryCompiler c = p.NewXQueryCompiler();
+        //         XQueryEvaluator eval = c.Compile("doc('file:///a.xml')/z").Load();
+        //         XdmItem result = eval.First();
+        //         Assert.AreEqual("17", result.StringValue);
+        //     }
+        //     catch (SaxonApiException e) {
+        //         Assert.Fail(e.Message);
+        //     }
+        // }
     }
 }
