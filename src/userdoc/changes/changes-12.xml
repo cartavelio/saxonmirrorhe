@@ -54,6 +54,11 @@
                 that have not been schema-validated).</li>
         </ul>
         
+        <p>The <code>XsltCompiler</code> has two new convenience methods: the <code>compile()</code> and <code>compilePackage()</code>
+        methods now have overloads that take a <code>java.io.File</code> as their argument.</p>
+        
+        <p>The <code>SchemaManager</code> has a new convenience method: the <code>load()</code> 
+            method now has an overload that takes a <code>java.io.File</code> as its argument.</p>
         
         
         
