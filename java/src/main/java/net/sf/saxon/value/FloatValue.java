@@ -476,7 +476,7 @@ public final class FloatValue extends NumericValue {
         }
     }
 
-    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(value);")
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.BigDecimalUtils.ExactValueOf(value);")
     private static BigDecimal fromFloat(float value) {
         return new BigDecimal(value);
     }
