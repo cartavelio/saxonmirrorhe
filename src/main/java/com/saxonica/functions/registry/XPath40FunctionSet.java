@@ -503,6 +503,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(1, predicate2, OPT, null));
 
+        SpecificFunctionType comparator = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_INTEGER);
+
+        register("sort-with", 2, e -> e.populate(SortWith::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, comparator, STAR, null));
+
         register("starts-with", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, BooleanValue.TRUE)
