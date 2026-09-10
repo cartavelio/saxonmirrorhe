@@ -37,6 +37,7 @@ import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
@@ -668,6 +669,25 @@ public class XsltCompiler {
         }
     }
 
+    /**
+     * Compile a library package.
+     * <p>This is a convenience method that simple calls <code>compilePackage(new StreamSource(file))</code>.</p>
+     *
+     * @param file identifies an XML document holding the the XSLT package to be compiled
+     * @return the XsltPackage that results from the compilation. Note that this package
+     * is not automatically imported to this <code>XsltCompiler</code>; if the package is required
+     * for use in subsequent compilations then it must be explicitly imported.
+     * @throws SaxonApiException if the source cannot be read or if static errors are found during the
+     *                           compilation. Any such errors will have been notified to the registered <code>ErrorListener</code>
+     *                           if there is one, or reported on the <code>System.err</code> output stream otherwise.
+     * @see #compile(Source) - especially the notes regarding error handling and just-in-time compilation.
+     * @since 12.0
+     */
+
+    public XsltPackage compilePackage(File file) throws SaxonApiException {
+        return compilePackage(new StreamSource(file));
+    }
+
     private PackageLibrary getPackageLibrary() {
         return compilerInfo.getPackageLibrary();
     }
@@ -942,6 +962,28 @@ public class XsltCompiler {
             throw new SaxonApiException(e);
         }
     }
+
+    /**
+     * Compile a stylesheet held in a file.
+     * <p><i>Note: the term "compile" here indicates that the stylesheet is converted into an executable
+     * form. There is no implication that this involves code generation.</i></p>
+     * <p>This is a convenience method that simply calls <code>compile(new StreamSource(file))</code>.</p>
+     *
+     * @param file The file containing the principal stylesheet module to be compiled.
+     *               Must not be null.
+     * @return an {@code XsltExecutable}, which represents the compiled stylesheet. The {@code XsltExecutable}
+     * is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
+     * @throws SaxonApiException if the stylesheet contains static errors or if it cannot be read. Note that
+     *                           the exception that is thrown will <b>not</b> contain details of the actual errors found in the stylesheet. These
+     *                           will instead be notified to the registered {@code ErrorListener} or {@code ErrorList}.
+     *                           The default {@code ErrorListener} displays error messages on the standard error output.
+     * @since 12.0
+     */
+
+    public XsltExecutable compile(File file) throws SaxonApiException {
+        return compile(new StreamSource(file));
+    }
+
 
     /**
      * Get the underlying {@link CompilerInfo} object, which provides more detailed (but less stable) control
