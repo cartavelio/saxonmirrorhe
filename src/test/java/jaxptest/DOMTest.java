@@ -15,6 +15,7 @@ import net.sf.saxon.expr.sort.CodepointCollatingComparer;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
 import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.StaticQueryContext;
@@ -63,6 +64,7 @@ import static net.sf.saxon.s9api.streams.Steps.followingSibling;
 import static net.sf.saxon.s9api.streams.Steps.precedingSibling;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -70,7 +72,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 //import org.apache.xpath.NodeSet;
 
 /**
- *
+ *  Tests of transformations with DOM input or output
  */
 public class DOMTest {
 
@@ -1760,7 +1762,58 @@ public class DOMTest {
         }
     }
 
+    @Test
+    void testIdentityTransformToDomNamespaces() throws Exception {
+        TransformerFactory transformerFactory = new net.sf.saxon.TransformerFactoryImpl();
+        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+        documentFactory.setNamespaceAware(true);
 
+        Document document = documentFactory.newDocumentBuilder().newDocument();
+        DOMResult result = new DOMResult(document);
+
+        String xml =
+                "<X xmlns=\"FOO\" xmlns:b=\"BAR\">"
+                        + "<Y xmlns=\"\"/>"
+                        + "</X>";
+
+        transformerFactory.newTransformer().transform(new StreamSource(
+                new StringReader(xml)), result);
+
+        assertNotNull(document.getDocumentElement().getChildNodes().item(0)
+                              .getAttributes().getNamedItem("xmlns"));
+    }
+
+    @Test
+    void testUndeclareExistingNamespace() throws Exception {
+        TransformerFactory transformerFactory = new net.sf.saxon.TransformerFactoryImpl();
+        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+        documentFactory.setNamespaceAware(true);
+
+        InputSource stub = new InputSource(new StringReader("<a xmlns='http://ns.one/' xmlns:b='http://ns.two/' xmlns:c='http://ns.three/'/>"));
+        Document document = documentFactory.newDocumentBuilder().parse(stub);
+        DOMResult result = new DOMResult(document.getDocumentElement());
+
+        String xml = "<X xmlns:b='http://ns.two.b/' xmlns:c='http://ns.three/'/>";
+
+        transformerFactory.newTransformer().transform(new StreamSource(
+                new StringReader(xml)), result);
+
+        StringWriter sw = new StringWriter();
+        transformerFactory.newTransformer().transform(new DOMSource(document), new StreamResult(sw));
+
+        Node outer = document.getDocumentElement();
+        assertEquals("a", outer.getLocalName());
+        assertEquals("http://ns.one/", outer.getNamespaceURI());
+        assertEquals("http://ns.one/", outer.getAttributes().getNamedItem("xmlns").getNodeValue());
+        assertEquals("http://ns.two/", outer.getAttributes().getNamedItemNS(NamespaceConstant.XMLNS, "b").getNodeValue());
+        assertEquals("http://ns.three/", outer.getAttributes().getNamedItemNS(NamespaceConstant.XMLNS, "c").getNodeValue());
+        Node inner = outer.getFirstChild();
+        assertEquals("X", inner.getLocalName());
+        assertNull(inner.getNamespaceURI());
+        assertEquals("", inner.getAttributes().getNamedItem("xmlns").getNodeValue());
+        assertEquals("http://ns.two.b/", inner.getAttributes().getNamedItemNS(NamespaceConstant.XMLNS, "b").getNodeValue());
+        assertNull(inner.getAttributes().getNamedItemNS(NamespaceConstant.XMLNS, "c"));
+    }
 
 
 }
