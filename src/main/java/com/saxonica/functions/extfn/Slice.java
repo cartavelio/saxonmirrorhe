@@ -42,7 +42,7 @@ public class Slice extends SystemFunction {
                     return new LazySequence(
                             SubsequenceIterator.make(arguments[0].iterate(),
                                                      start,
-                                                     start - 1 + (int) range.getEnd()));
+                                                     (int) range.getEnd()));
                 }
             }
         }
