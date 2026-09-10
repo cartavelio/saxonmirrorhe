@@ -132,8 +132,7 @@ public class NodeTestPattern extends Pattern {
      */
     @Override
     public Pattern convertToTypedPattern(String val) throws XPathException {
-        if (nodeTest instanceof NamedXNodePredicate) {
-            NamedXNodePredicate fpTest = (NamedXNodePredicate)nodeTest;
+        if (nodeTest instanceof NamedXNodePredicate fpTest) {
             int fp = fpTest.getRequiredFingerprint();
             if (fp != -1) {
                 StructuredQName qName = getRetainedStaticContext().getConfiguration().getNamePool().getStructuredQName(fp);

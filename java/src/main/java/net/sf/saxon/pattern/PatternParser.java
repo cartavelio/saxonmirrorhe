@@ -116,6 +116,10 @@ public class PatternParser extends XPathParser {
         return operand;
     }
 
+    protected void notAllowedInPattern() throws XPathException {
+        grumble("Pattern uses syntax that is allowed in expressions, but not in patterns");
+    }
+
 
 //    public Pattern parsePrimaryPattern(boolean topLevel, StaticContext env) throws XPathException {
 //        if (t.currentToken == Token.LPAREN) {
@@ -206,16 +210,9 @@ public class PatternParser extends XPathParser {
 
     private Pattern parseTypePattern() throws XPathException {
         Pattern result;
-        readKeyword("type");
+        readToken(Token.TILDE);
         ItemType type = parseItemType();
         result = new ItemTypePattern(type);
-//        if (isKeyword("type")) {
-//            ItemType req = parseTypeQualifier();
-//            result = new ItemTypePattern(req);
-//        } else {
-//            ItemType req = parseItemType();
-//            result = new ItemTypePattern(req);
-//        }
         while (t.currentToken == Token.LSQB) {
             nextToken();
             Expression predicate = parsePredicate();
@@ -316,7 +313,7 @@ public class PatternParser extends XPathParser {
             pat = PatternMaker.fromExpression(exp.simplify(), env.getConfiguration(), true);
         }
 
-        if (exp instanceof FilterExpression && pat instanceof NodeTestPattern) {
+        if (exp instanceof FilterExpression) {
             // the pattern has been simplified but needs to retain a default priority based on its syntactic form (test match-058)
             pat.setPriority(0.5);
         }

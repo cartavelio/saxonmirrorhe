@@ -244,7 +244,7 @@ public class UseWhenFilter extends ProxyReceiver {
         if (href == null) {
             throw new XPathException("Missing href attribute on " + elemName.getDisplayName(), "XTSE0010");
         }
-        System.err.println((isImport ? "import" : "include") + " at precedence " + precedence);
+        //System.err.println((isImport ? "import" : "include") + " at precedence " + precedence);
         NestedIntegerValue newPrecedence = precedence;
         if (isImport) {
             newPrecedence = precedence.getStem().append(precedence.getLeaf() - 1).append(2 * ++importCount);

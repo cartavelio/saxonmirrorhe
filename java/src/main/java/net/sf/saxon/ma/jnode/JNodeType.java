@@ -1,17 +1,13 @@
 package net.sf.saxon.ma.jnode;
 
 import net.sf.saxon.om.Genre;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.JNodeCoercionPlan;
 import net.sf.saxon.type.gnode.GNodeType;
 import net.sf.saxon.value.SequenceType;
-
-import java.util.Optional;
 
 public abstract class JNodeType extends GNodeType {
 
@@ -28,18 +24,6 @@ public abstract class JNodeType extends GNodeType {
     public Genre getGenre() {
         return Genre.JNODE;
     }
-
-//    /**
-//     * Test whether a given item conforms to this type
-//     *
-//     * @param item The item to be tested
-//     * @param th   The type hierarchy cache. Currently used only when matching function items.
-//     * @return true if the item is an instance of this type; false otherwise
-//     */
-//    @Override
-//    public boolean matches(Item item) {
-//        return item instanceof JNode && valueType.matches(((JNode)item).getContent());
-//    }
 
     /**
      * Get the primitive item type corresponding to this item type. For item(),
@@ -94,30 +78,6 @@ public abstract class JNodeType extends GNodeType {
         return 0;
     }
 
-//    /**
-//     * Get the item type of the atomic values that will be produced when an item
-//     * of this type is atomized
-//     *
-//     * @return the best available item type of the atomic values that will be produced when an item
-//     * of this type is atomized, or null if it is known that atomization will throw an error.
-//     */
-//    @Override
-//    public PlainType getAtomizedItemType() {
-//        return getValueType().getPrimaryType().getAtomizedItemType();
-//    }
-
-//    /**
-//     * Ask whether values of this type are atomizable
-//     *
-//     * @param th the type hierarchy cache
-//     * @return true if some or all instances of this type can be successfully atomized; false
-//     * if no instances of this type can be atomized
-//     */
-//    @Override
-//    public boolean isAtomizable(TypeHierarchy th) {
-//        return getValueType().getPrimaryType().isAtomizable(th);
-//    }
-
     /**
      * Get the coercion plan for use when this type is the required type for (say) coercion
      * of arguments in a function call
@@ -143,32 +103,6 @@ public abstract class JNodeType extends GNodeType {
         return "J";
     }
 
-    /**
-     * Get extra diagnostic information about why a supplied item does not conform to this
-     * item type, if available. If extra information is returned, it should be in the form of a complete
-     * sentence, minus the closing full stop. No information should be returned for obvious cases.
-     *
-     * @param item the item that doesn't match this type
-     * @param th   the type hierarchy cache
-     * @return optionally, a message explaining why the item does not match the type
-     */
-    @Override
-    public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
-        return Optional.empty();
-    }
 
-//    /**
-//     * Return a string representation of this ItemType.
-//     *
-//     * @return the string representation
-//     */
-//    @Override
-//    public String toString() {
-//        if (this == ANY_JNODE) {
-//            return "jnode()";
-//        } else {
-//            return "jnode(" + valueType.toString() + ")";
-//        }
-//    }
 }
 

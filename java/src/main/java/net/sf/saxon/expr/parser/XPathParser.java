@@ -3087,6 +3087,7 @@ public class XPathParser {
                         return ae;
                     }
                     case "jnode": {
+                        notAllowedInPattern();
                         if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
@@ -3103,6 +3104,7 @@ public class XPathParser {
                         return ae;
                     }
                     case "gnode": {
+                        notAllowedInPattern();
                         if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
@@ -3123,6 +3125,7 @@ public class XPathParser {
                         return ae;
                     }
                     case "get": {
+                        notAllowedInPattern();
                         if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
@@ -3135,6 +3138,7 @@ public class XPathParser {
                         return getExpr;
                     }
                     case "type": {
+                        notAllowedInPattern();
                         if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
@@ -3149,6 +3153,7 @@ public class XPathParser {
                         return typeExpr;
                     }
                     case "record": {
+                        notAllowedInPattern();
                         if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
@@ -3164,6 +3169,7 @@ public class XPathParser {
                     case "map":
                     case "enum":
                     case "item": {
+                        notAllowedInPattern();
                         if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
@@ -3177,12 +3183,14 @@ public class XPathParser {
                     }
                     case "function":
                     case "fn":
+                        notAllowedInPattern();
                         return parseInlineFunction(AnnotationList.EMPTY);
                     default:
                         return parseFunctionCall(name, null);
 
                 }
             } else if (t.peekAhead() == Token.LCURLY) {
+                notAllowedInPattern();
                 String name = t.currentName();
                 switch (name) {
                     case "map":
@@ -3416,6 +3424,10 @@ public class XPathParser {
 
     protected boolean isMaybeNamedConstructor() {
         return false;
+    }
+
+    protected void notAllowedInPattern() throws XPathException {
+        // Overridden in pattern parser
     }
 
     /**

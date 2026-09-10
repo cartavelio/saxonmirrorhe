@@ -3,6 +3,7 @@ package net.sf.saxon.ma.jnode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.type.PlainType;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
@@ -15,9 +16,16 @@ import java.util.Optional;
 public class SpecificJNodeType extends JNodeType {
 
     private final SequenceType valueType;
+    private final AtomicValue selector;
 
 
     public SpecificJNodeType(SequenceType valueType) {
+        this.valueType = valueType;
+        this.selector = null;
+    }
+
+    public SpecificJNodeType(AtomicValue selector, SequenceType valueType) {
+        this.selector = selector;
         this.valueType = valueType;
     }
 
@@ -25,6 +33,9 @@ public class SpecificJNodeType extends JNodeType {
         return valueType;
     }
 
+    public AtomicValue getSelector() {
+        return selector;
+    }
 
     /**
      * Test whether a given item conforms to this type
@@ -34,7 +45,9 @@ public class SpecificJNodeType extends JNodeType {
      */
     @Override
     public boolean matches(Item item) {
-        return item instanceof JNode && valueType.matches(((JNode)item).getContent());
+        return item instanceof JNode j
+                && valueType.matches(j.getContent())
+                && (selector == null || j.getSelector().asMapKey(40).equals(selector.asMapKey(40)));
     }
 
     /**

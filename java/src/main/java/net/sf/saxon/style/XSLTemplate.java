@@ -587,14 +587,35 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             compileError("A template with visibility='abstract' must have no body");
         }
 
+        // If the pattern matches both XNodes and JNodes, split it into two separate
+        // patterns, one for each case. This enables the template body to be optimized
+        // separately for each case, which is especially important when streaming
+
+        boolean splitGNode = false;
+        if (match instanceof NodeTestPattern ntp && ntp.getNodeTest() instanceof SelectorTest st) {
+            double priority = match.getDefaultPriority();
+            Configuration config = getConfiguration();
+            Pattern p1 = new NodeTestPattern(st.asXNodeTest(config));
+            p1.setPriority(priority);
+            ExpressionTool.copyLocationInfo(match, p1);
+            Pattern p2 = st.asJNodePattern();
+            p2.setPriority(priority);
+            ExpressionTool.copyLocationInfo(match, p2);
+            Pattern unionPattern = new UnionPattern(p1, p2);
+            ExpressionTool.copyLocationInfo(match, unionPattern);
+            match = unionPattern;
+            match.setPriority(priority);
+            splitGNode = true;
+        }
+
         // If the pattern is a union pattern and there is no priority specified, split into
         // multiple template rules so each can be given its own priority. This rule changes
-        // in 4.0
+        // in 4.0.
         if (match instanceof UnionPattern) {
             subPatterns = new ArrayList<>(2);
-            if (prioritySpecified) {
+            if (prioritySpecified && !splitGNode) {
                 subPatterns.add(match);
-            } else if (getCompilation().getCompilerInfo().getXsltVersion() >= 40) {
+            } else if (getCompilation().getCompilerInfo().getXsltVersion() >= 40 && !splitGNode) {
                 List<Pattern> localSubPatterns = new ArrayList<>(2);
                 gatherSubPatterns(match, localSubPatterns);
                 if (localSubPatterns.size() > 1) {
@@ -627,14 +648,12 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * @param subPatterns output parameter to hold the list of subpatterns after splitting
      */
     private void gatherSubPatterns(Pattern match, List<Pattern> subPatterns) {
-        if (match instanceof UnionPattern) {
-            UnionPattern up = (UnionPattern) match;
+        if (match instanceof UnionPattern up) {
             gatherSubPatterns(up.getLHS(), subPatterns);
             gatherSubPatterns(up.getRHS(), subPatterns);
         } else if (match instanceof NodeTestPattern &&
-                match.getItemType() instanceof CombinedNodeTest &&
+                match.getItemType() instanceof CombinedNodeTest cnt &&
                 ((CombinedNodeTest) match.getItemType()).getOperator() == OperatorSymbol.UNION) {
-            CombinedNodeTest cnt = (CombinedNodeTest) match.getItemType();
             NodeTest[] nt = cnt.getComponentNodeTests();
             final NodeTestPattern nt0 = new NodeTestPattern(nt[0]);
             subPatterns.add(nt0);
@@ -957,7 +976,6 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     if (!declaresRequiredType) {
                         rule.setRequiredType(mode.getDefaultResultType());
                     } else {
-                        TypeHierarchy th = getConfiguration().getTypeHierarchy();
                         Affinity aff = Subsumption.sequenceTypeRelationship(requiredType, mode.getDefaultResultType());
                         if (aff != Affinity.SAME_TYPE && aff != Affinity.SUBSUMED_BY) {
                             compileError("Type declared in xsl:template/@as must be a subtype of the type declared in xsl:mode/@as",

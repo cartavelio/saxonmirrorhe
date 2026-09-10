@@ -26,6 +26,8 @@ import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Optional;
 import java.util.function.IntPredicate;
@@ -78,7 +80,25 @@ public class SelectorTest implements NodeTest, NodeVectorMatchMaker, NamedXNodeP
         return new NamedXNodeType(nodeKind, getQNameTest(), config);
     }
 
-
+    /**
+     * Get an equivalent node test, knowing that it will only be used to match XNodes
+     *
+     * @return an equivalent node test for XNodes
+     */
+    public JNodePattern asJNodePattern() {
+        if (asNCName) {
+            String mapKey;
+            if (key instanceof LocalQNameTest) {
+                mapKey = ((LocalQNameTest) key).getLocalName();
+            } else {
+                mapKey = ((SpecificQNameTest) key).getStructuredQName().getLocalPart();
+            }
+            return new JNodePattern(new StringValue(mapKey), SequenceType.ANY_SEQUENCE);
+        } else {
+            AtomicValue actual = new QNameValue(((SpecificQNameTest) key).getStructuredQName(), BuiltInAtomicType.QNAME);
+            return new JNodePattern(actual, SequenceType.ANY_SEQUENCE);
+        }
+    }
 
 
     /**
