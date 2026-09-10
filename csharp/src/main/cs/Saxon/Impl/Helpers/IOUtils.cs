@@ -20,6 +20,16 @@ namespace Saxon.Impl.Helpers {
 
             return new System.IO.StreamWriter(stream, textEncoding);
         }
+
+        // Read all bytes from an input stream
+        public static byte[] readAllBytes(System.IO.Stream stream) {
+            byte[] bytes;
+            using (var binaryReader = new System.IO.BinaryReader(stream))
+            {
+                bytes = binaryReader.ReadBytes((int)stream.Length);
+            }
+            return bytes;
+        }
     }
 }
 
