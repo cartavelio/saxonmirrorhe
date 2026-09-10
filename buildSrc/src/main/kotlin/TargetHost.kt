@@ -3,6 +3,23 @@ package com.saxonica.build
 import org.gradle.internal.os.OperatingSystem
 
 /**
+ * Represents an OS ('platform') we support
+ */
+enum class Platforms(val value: String) {
+  MACOS("macos"),
+  LINUX("linux"),
+  WINDOWS("windows"),
+}
+
+/**
+ * Represents an processor architecture we support
+ */
+enum class Architectures(val value: String) {
+  X86_64("x86_64"),
+  ARM64("arm64")
+}
+
+/**
  * Represents a target OS / arch for building / publishing release artifacts
  *
  *
@@ -49,57 +66,50 @@ sealed interface TargetHost {
       val osArch = System.getProperty("os.arch")
       return if (os.isWindows) windows(osArch) else if (os.isMacOsX) macOS(osArch) else linux(osArch)
     }
+
+    val platforms: Map<Platforms, List<TargetHost>> get() {
+      return mapOf(
+        Platforms.LINUX to listOf(Linux.X86_64(), Linux.Arm64()),
+        Platforms.MACOS to listOf(MacOS.X86_64(), MacOS.Arm64()),
+        Platforms.WINDOWS to listOf(Windows.X86_64()),
+      )
+    }
   }
 
-  val name: String
-  val architecture: String
+  val platformConst: Platforms
+  val architectureConst: Architectures
 
-  val isWindows: Boolean get() = false
-  val isLinux: Boolean get() = false
-  val isMacOS: Boolean get() = false
+  val isWindows: Boolean get() = platformConst === Platforms.WINDOWS
+  val isLinux: Boolean get() = platformConst === Platforms.LINUX
+  val isMacOS: Boolean get() = platformConst === Platforms.MACOS
 
-  val isX86_64: Boolean get() = false
-  val isArm64: Boolean get() = false
+  val isX86_64: Boolean get() = architectureConst === Architectures.X86_64
+  val isArm64: Boolean get() = architectureConst === Architectures.ARM64
 
-  operator fun component1() = name
+  val platform: String get() = platformConst.value
+  val architecture: String get() = architectureConst.value
+
+  operator fun component1() = platform
   operator fun component2() = architecture
 
-  sealed class Windows(override val architecture: String) : TargetHost {
-    override val name = "windows"
-    override val isWindows = true
+  sealed class Windows(override val architectureConst: Architectures) : TargetHost {
+    override val platformConst = Platforms.WINDOWS
 
-    class X86_64(): Windows("x86_64") {
-      override val isX86_64 = true
-    }
-
-    class Arm64(): Windows("aarch64") {
-      override val isArm64 = true
-    }
+    class X86_64(): Windows(Architectures.X86_64)
+    class Arm64(): Windows(Architectures.ARM64)
   }
 
-  sealed class Linux(override val architecture: String) : TargetHost {
-    override val name = "linux"
-    override val isLinux = true
+  sealed class Linux(override val architectureConst: Architectures) : TargetHost {
+    override val platformConst = Platforms.LINUX
 
-    class X86_64(): Linux("x86_64") {
-      override val isX86_64 = true
-    }
-
-    class Arm64(): Linux("aarch64") {
-      override val isArm64 = true
-    }
+    class X86_64(): Linux(Architectures.X86_64)
+    class Arm64(): Linux(Architectures.ARM64)
   }
 
-  sealed class MacOS(override val architecture: String) : TargetHost {
-    override val name = "macos"
-    override val isMacOS = true
+  sealed class MacOS(override val architectureConst: Architectures) : TargetHost {
+    override val platformConst = Platforms.MACOS
 
-    class X86_64(): MacOS("x86_64") {
-      override val isX86_64 = true
-    }
-
-    class Arm64(): MacOS("aarch64") {
-      override val isArm64 = true
-    }
+    class X86_64(): MacOS(Architectures.X86_64)
+    class Arm64(): MacOS(Architectures.ARM64)
   }
 }

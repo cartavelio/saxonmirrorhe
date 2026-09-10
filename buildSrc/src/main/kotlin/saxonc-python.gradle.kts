@@ -1,4 +1,7 @@
+import com.saxonica.build.Architectures
 import com.saxonica.build.LifecycleTasks
+import com.saxonica.build.Platforms
+import com.saxonica.build.TargetHost
 import com.saxonica.build.python.*
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.internal.os.OperatingSystem
@@ -18,13 +21,14 @@ val unixish = systemOs.isMacOsX() || systemOs.isLinux()
 val venvBaseDir = project.layout.buildDirectory.dir("pyvenv")
 val pythonVersion: String by project
 val pythonReleaseVersions: String by project
+val manylinuxTarget: String by project
 
 extension.pythonBinDirName.convention(if (unixish) "bin" else "scripts")
 extension.venvBinarySuffix.convention(if (unixish) "" else ".exe")
 extension.venvBaseDir.convention(venvBaseDir)
 extension.venvBasePath.convention(venvBaseDir.map { it.asFile.toString() })
 extension.version.convention(pythonVersion)
-extension.manylinuxTarget.convention("manylinux_2_24")
+extension.manylinuxTarget.convention(manylinuxTarget)
 extension.releaseVersions = pythonReleaseVersions.split(",")
 
 val libsaxoncReleaseArtifactsBucket by configurations.dependencyScope("libsaxoncReleaseArtifactsBucket")
