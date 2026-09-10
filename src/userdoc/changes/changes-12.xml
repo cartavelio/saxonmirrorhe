@@ -262,7 +262,7 @@
             <code>fn:items-after()</code>, <code>fn:items-at()</code>, <code>fn:items-before()</code>, <code>fn:items-ending-where()</code>, <code>fn:items-starting-where()</code>, 
             <code>fn:iterate-while()</code>, <code>fn:lowest()</code>, <code>fn:op()</code>, <code>fn:parcel()*</code>, <code>fn:parse-QName()</code>, <code>fn:parts()*</code>, 
             <code>fn:replicate()</code>, <code>fn:slice()*</code>, <code>fn:some()</code>, <code>fn:starts-with-sequence()</code>,
-            <code>fn:truncate()</code>, and <code>fn:unparcel()*</code>. Specifications of these functions
+            <code>fn:trunk()</code>, and <code>fn:unparcel()*</code>. Specifications of these functions
             can be found in the <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html">QT4CG draft specification</a>.</p>
         
         <aside><p>None of these functions can be regarded as 100% stable, but the
@@ -274,7 +274,7 @@
         
         <p>The proposed 4.0 functions <code>map:build()</code> and <code>map:filter()</code> are implemented.</p>
         
-        <p>The proposed 4.0 functions <code>array:foot()</code> and <code>array:truncate()</code> are implemented.</p>
+        <p>The proposed 4.0 functions <code>array:foot()</code> and <code>array:trunk()</code> are implemented.</p>
         
         <h2>Dropped or Changed Extension Functions</h2>
         
