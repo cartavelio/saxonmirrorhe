@@ -172,8 +172,8 @@ public class AxiomObjectModel extends TreeModel implements ExternalObjectModel {
     /**
      * Test whether this object model recognizes a particular kind of JAXP Result object,
      * and if it does, return a Receiver that builds an instance of this data model from
-     * a sequence of events. If the Result is not recognised, return null.
-     * @return
+     * a sequence of events. If the Result is not recognized, return null.
+     * @return Always null, because no Axiom Result implementation is recognized.
      */
 
     @Override

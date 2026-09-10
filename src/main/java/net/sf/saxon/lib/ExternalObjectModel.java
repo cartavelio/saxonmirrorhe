@@ -28,8 +28,6 @@ import javax.xml.transform.Source;
  * this interface. To implement <code>TreeModel</code>, it must supply a Builder; in effect this
  * means that it will be possible to use the external object model for output as well as for
  * input.</p>
- *
- * <p>From Saxon 11, this interface extends {@link}</p>
  */
 
 public interface ExternalObjectModel {
