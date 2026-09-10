@@ -923,10 +923,9 @@ public class Environment implements ResourceResolver {
                             fileInputStream = new FileInputStream(file);
                             if (driver.usePullParser) {
                                 try {
-                                    InputStreamReader impsr = new InputStreamReader(fileInputStream);
                                     System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
                                     XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(
-                                            fileLoc.toString(), impsr);
+                                            fileLoc.toString(), fileInputStream);
                                     ss = new StAXSource(parser);
                                 } catch (XMLStreamException e) {
                                     driver.println("*** failed to pull-parse source document " + href);
