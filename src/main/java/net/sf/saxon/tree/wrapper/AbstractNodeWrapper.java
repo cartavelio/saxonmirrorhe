@@ -364,6 +364,12 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
                         new Navigator.PrecedingIterator(this, true),
                         nodeTest);
 
+            case AxisInfo.FOLLOWING_OR_SELF:
+            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+            case AxisInfo.PRECEDING_OR_SELF:
+            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
+                return Navigator.orSelfIterator(this, axisNumber, nodeTest);
+
             default:
                 throw new IllegalArgumentException("Unknown axis number " + axisNumber);
         }

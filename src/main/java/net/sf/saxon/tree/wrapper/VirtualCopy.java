@@ -483,6 +483,11 @@ public class VirtualCopy implements NodeInfo {
             case AxisInfo.PRECEDING_OR_ANCESTOR:
                 return new Navigator.AxisFilter(
                         new Navigator.PrecedingIterator(this, true), nodeTest);
+            case AxisInfo.FOLLOWING_OR_SELF:
+            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+            case AxisInfo.PRECEDING_OR_SELF:
+            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
+                return Navigator.orSelfIterator(this, axisNumber, nodeTest);
 
         }
         return makeCopier(original.iterateAxis(axisNumber, nodeTest), newParent, !AxisInfo.isSubtreeAxis[axisNumber]);

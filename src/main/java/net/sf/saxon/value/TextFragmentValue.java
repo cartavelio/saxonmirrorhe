@@ -458,6 +458,10 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
             case AxisInfo.SELF:
             case AxisInfo.ANCESTOR_OR_SELF:
+            case AxisInfo.FOLLOWING_OR_SELF:
+            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+            case AxisInfo.PRECEDING_OR_SELF:
+            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
                 return Navigator.filteredSingleton(this, nodeTest);
 
             case AxisInfo.CHILD:
@@ -950,6 +954,10 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
                 case AxisInfo.SELF:
                 case AxisInfo.DESCENDANT_OR_SELF:
+                case AxisInfo.FOLLOWING_OR_SELF:
+                case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+                case AxisInfo.PRECEDING_OR_SELF:
+                case AxisInfo.PRECEDING_SIBLING_OR_SELF:
                     return Navigator.filteredSingleton(this, nodeTest);
 
                 default:
