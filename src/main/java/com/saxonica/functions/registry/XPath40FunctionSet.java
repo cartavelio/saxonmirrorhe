@@ -1,14 +1,15 @@
 package com.saxonica.functions.registry;
 
 import com.saxonica.functions.qt4.*;
-import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.Error;
+import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
@@ -323,7 +324,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.INTEGER, STAR, null));
 
 
-        register("replace", 2, 5, e -> e.populate(Replace::new, BuiltInAtomicType.STRING, ONE, 0)
+        register("replace", 2, 5, e -> e.populate(CSharp.staticRef(Replace::make40), BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null)
