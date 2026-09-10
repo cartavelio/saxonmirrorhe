@@ -134,6 +134,12 @@ TODO: rethink redefines and override
         <code>doc.select(Steps.child("test-set").then(Steps.child("dependencies"))).first()</code> reduces to
         <code>doc.select("test-set").select("dependencies").first()</code>.</p>
         
+    <p>A couple of methods have been added to <code>net.sf.saxon.soapi.ItemType</code>. The static method
+    <code>ItemType.builtInAtomicType(localName)</code> provides a quick way of getting an <code>ItemType</code>
+       such as <code>ItemType.DATE_TIME</code> if the local name is not known statically. The method
+       <code>ItemType.validateAtomic(String)</code> tests whether a given string is in the lexical space
+       of an atomic type, and returns the corresponding atomic value if it is.</p>    
+        
         <p>The interface <code>net.sf.saxon.s9api.StaticError</code>, which was no longer used, has now been
         dropped from the product.</p>
         

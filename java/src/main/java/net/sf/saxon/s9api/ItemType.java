@@ -14,15 +14,14 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.type.gnode.AnyXNodeType;
-import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.streams.Step;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.NumericValue;
 
@@ -63,6 +62,15 @@ public abstract class ItemType implements Predicate<XdmItem> {
         defaultConversionRules.setStringToDoubleConverter(StringToDouble.getInstance());
         defaultConversionRules.setNotationSet(null);
         defaultConversionRules.setURIChecker(StandardURIChecker.getInstance());
+    }
+
+    /**
+     * Ask whether this is an atomic type
+     * @return true if this is an atomic type
+     */
+
+    public boolean isAtomic() {
+        return getUnderlyingItemType().isAtomicType();
     }
 
     /**
@@ -788,6 +796,52 @@ public abstract class ItemType implements Predicate<XdmItem> {
      */
 
     public abstract boolean matches(XdmItem item);
+
+    /**
+     * Get a built-in atomic type given its local name
+     * @param localName the local name of the type within the
+     *                  XSD namespace, for example "dateTime"
+     *                  to get the xs:dateTime type
+     * @return the requested type, or null if the name
+     * is not one of the built-in types
+     */
+
+    public static ItemType builtInAtomicType(String localName) {
+        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, localName);
+        if (fp == -1) {
+            return null;
+        }
+        SchemaType type = BuiltInType.getSchemaType(fp);
+        if (type instanceof BuiltInAtomicType) {
+            return ItemType.atomic((BuiltInAtomicType)type, defaultConversionRules);
+        }
+        return null;
+    }
+
+    /**
+     * Validate a string against this atomic type
+     * @param value the string to be validated
+     * @return the corresponding atomic value, if the supplied string was valid.
+     * @throws UnsupportedOperationException if this is not an atomic type
+     * @throws SaxonApiException if the supplied value is invalid against this atomic type
+     * @since 13.0
+     */
+
+    public XdmAtomicValue validateAtomic(String value) throws SaxonApiException {
+        if (!isAtomic()) {
+            throw new UnsupportedOperationException("Item type " + toString() + " is not atomic");
+        }
+        AtomicType aType = (AtomicType)getUnderlyingItemType();
+        StringConverter converter = aType.getStringConverter(getConversionRules());
+        UnicodeString str = StringTool.fromCharSequence(value);
+        ConversionResult result = converter.convertString(str);
+        try {
+            return new XdmAtomicValue(result.asAtomic());
+        } catch (ValidationException ve) {
+            throw new SaxonApiException(ve);
+        }
+
+    }
 
     /**
      * Determine whether this ItemType subsumes another ItemType. Specifically,

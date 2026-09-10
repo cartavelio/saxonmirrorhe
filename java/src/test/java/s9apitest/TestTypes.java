@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -417,6 +418,26 @@ public class TestTypes {
             assertEquals("(function(node()?) as xs:string)", nameFnType.toString());
         } catch (Exception e) {
             fail();
+        }
+    }
+
+    @Test
+    public void testAtomicValidation() {
+        ItemType dateTime = ItemType.builtInAtomicType("date");
+        assertNotNull(dateTime);
+        assertEquals(ItemType.DATE, dateTime);
+        XdmAtomicValue value;
+        try {
+            value = dateTime.validateAtomic("2025-09-01");
+            assertEquals(new XdmAtomicValue(LocalDate.of(2025, 9, 1)), value);
+        } catch (SaxonApiException e) {
+            fail(e);
+        }
+        try {
+            value = dateTime.validateAtomic("2025-09-32");
+            fail("unexpected success");
+        } catch (SaxonApiException e) {
+            // OK
         }
     }
 }
