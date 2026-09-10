@@ -1312,7 +1312,7 @@
     <ul>
       <li class="javaonly">
         <p>SaxonJ uses the default SAX parser provided as part of the JDK. With
-          the Sun/Oracle JDK, this is a variant of the Apache Xerces parser customized by Sun.</p>
+          the Oracle JDK, this is a variant of the Apache Xerces parser customized by Oracle.</p>
       </li>
       <li class="csonly">
         <p>SaxonCS uses the <code>System.Xml.XmlReader</code> parser family.</p>
@@ -1670,13 +1670,61 @@
     <section id="input-filters" title="Writing input filters" class="javaonly">
       <h1>Writing input filters</h1>
       
-      <p>Saxon can take its input from a JAXP <code>SAXSource</code> object, which essentially
-        represents a sequence of SAX events representing the output of an XML parser. A very useful
-        technique is to interpose a <i>filter</i> between the parser and Saxon. The filter will
-        typically be an instance of the SAX2 <strong>XMLFilter</strong> class. </p>
       
-      <p>There are a number of ways of using a Saxon XSLT transformation as part of a pipeline of
-        filters. Some of these techniques also work with XQuery. The techniques include:</p>
+      <p>SaxonJ generally takes its input from a JAXP <code>SAXSource</code> object, which 
+        represents a sequence of SAX events as output by an XML parser. These events are sent
+        to the internal class <code java="net.sf.saxon.event.ReceivingContentHandler">ReceivingContentHandler</code>, 
+        which converts them to a slightly
+        different format, which are then passed to a Saxon 
+        <code java="net.sf.saxon.event.Receiver">Receiver</code>. In a typical scenario, the events are passed through
+        a pipeline of <code>Receiver</code>s, each of which modifies the events in some way.</p>
+      
+      <aside>The <code>-x</code> option on the Saxon command line specifies the parser that Saxon will use
+        to process the source files. This class must implement the SAX2 <code>XMLReader</code>
+        interface, but it is not required to be a real XML parser; it can take the input from any kind
+        of source file, so long as it presents it in the form of a stream of SAX events. When using
+        the JAXP API, the equivalent to the <code>-x</code> option is to set the configuration property 
+        <a class="feature" href="SOURCE_PARSER_CLASS"/>.</aside>
+      
+      
+      <p>Examples of the steps on this pipeline include:</p>
+      
+      <ul>
+        <li>A whitespace stripper, responsible for removing whitespace as directed by the
+          <code>xsl:strip-space</code> and <code>xsl:preserve-space</code> declarations.</li>
+        <li>A schema validator, responsible for performing schema validation (which not only
+          validates the input against the schema, but also adds type annotations and expands
+          default values for absent attributes).</li>
+        <li>An annotation stripper, responsible for removing type annotations as directed
+        by the <code>input-type-annotations="strip"</code> attribute in a stylesheet.</li>
+      </ul>
+      
+      
+      <p>At the end of this pipeline, the events are typically passed to one of:</p>
+      <ul>
+        <li>A tree builder, which builds a tree of nodes, ready for query or transformation.</li>
+        <li>A streaming XSLT transformation.</li>
+        <li>A serializer (to implement an identity transformation).</li>
+      </ul>
+      
+      <p>It is possible to add a user-written filter to the input pipeline. This might be
+        used, for example, to:</p>
+      
+      <ul>
+        <li>Rename elements or attributes, perhaps changing their namespace.</li>
+        <li>Add or remove elements or attributes.</li>
+        <li>Strip comments or processing instructions.</li>
+        <li>Expand processing instructions (for example, a processing instruction might
+        contain a SQL query to access a database).</li>
+        <li>Perform a complete XSLT transformation, streamed or unstreamed.</li>
+      </ul>
+      
+      <p>A filter can either be inserted to process SAX events, before they are converted
+        to <code>Receiver</code> events, or it can be inserted to process <code>Receiver</code>
+        events after the conversion.</p>
+      
+ 
+      <p>To filter events at the SAX level, the techniques include:</p>
       <ul>
         <li>
           <p>Generate the transformation as an <code>XMLFilter</code> using the
@@ -1704,12 +1752,28 @@
         </li>
       </ul>
       
-      <p>The <code>-x</code> option on the Saxon command line specifies the parser that Saxon will use
-        to process the source files. This class must implement the SAX2 <code>XMLReader</code>
-        interface, but it is not required to be a real XML parser; it can take the input from any kind
-        of source file, so long as it presents it in the form of a stream of SAX events. When using
-        the JAXP API, the equivalent to the <code>-x</code> option is to set the configuration property 
-        <a class="feature" href="SOURCE_PARSER_CLASS"/>.</p>
+      <p>To insert a filter for <code>Receiver</code> events, it is usual to implement the
+      filter by extending the class <code java="net.sf.saxon.event.ProxyReceiver">ProxyReceiver</code>, overriding only the methods for those
+      events that need to be changed. The filter can be injected into the pipeline by supplying 
+      the document in the form of an <code java="net.sf.saxon.lib.AugmentedSource">AugmentedSource</code>: a typical example would be:</p>
+      
+      <samp><![CDATA[
+AugmentedSource as = AugmentedSource.makeAugmentedSource(new StreamSource(...));
+as.addFilter(receiver -> new MyFilter(receiver));
+documentBuilder.build(as);
+        ]]></samp>
+      
+      <p>Here <code>MyFilter</code> is typically a class that extends <code>ProxyReceiver</code>
+      by overriding some of its methods: for example, you might override the <code>comment()</code>
+      method to do nothing, which has the effect of stripping comments from the source document.</p>
+      
+      <p>Filters inserted into the pipeline in this way are applied after any system-defined filters
+      such as the schema validator.</p>
+      
+      <aside>Saxon makes extensive use of <code>Receiver</code> filters internally. For example,
+      when processing XSLT stylesheet documents, filters are used to strip comments and processing
+      instructions, to evaluate static variables, and to process <code>xsl:use-when</code>
+      attributes.</aside>
       
     </section>
     <section id="XInclude" title="XInclude processing">
@@ -1775,8 +1839,8 @@
         >http://www.sagehill.net/docbookxsl/Xinclude.html</a>.</p>
     </section>
     
-    <section id="validation" title="Validation of Source Documents">
-      <h1>Validation of Source Documents</h1>
+    <section id="validation" title="Schema Validation">
+      <h1>Schema Validation</h1>
       
       
       <p>With Saxon-EE, source documents may be validated against a schema. Not only does this perform
@@ -1832,8 +1896,8 @@
           code" href="/xsl-elements/source-document">xsl:source-document</a> instruction.</p>
       
     </section>
-    <section id="whitespace" title="Whitespace Stripping in Source Documents">
-      <h1>Whitespace Stripping in Source Documents</h1>
+    <section id="whitespace" title="Whitespace Stripping">
+      <h1>Whitespace Stripping</h1>
       
       
       <p>A number of factors combine to determine whether whitespace-only text nodes in the source
@@ -2277,6 +2341,11 @@
           command line because it has no useful effect with a single-shot compile-and-run interface.</p>
         <p>This option has no effect if the URI supplied to the <code>doc()</code> or
           <code>document()</code> function includes a fragment identifier.</p>
+        
+        <p>With XSLT 3.0, a similar effect can be achieved by binding the result of the <code>doc()</code>
+        call to a static global variable. (According to the specification, it is implementation-defined
+        whether calls to <code>doc()</code> in static expressions are allowed. In Saxon, they are.)</p>
+        
         <p>It is also possible to preload a specific document into the shared document pool from the
           Java application by using the call <code>config.getGlobalDocumentPool().add(doc, uri)</code>.
           When the <code>doc()</code> or <code>document()</code> function is called, the shared document
