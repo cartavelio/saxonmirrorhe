@@ -9,6 +9,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.StringValue;
 
 /**
@@ -24,7 +25,9 @@ public class AtomicCoercionPlan extends CoercionPlan {
     /**
      * Apply the coercion rules (function conversion rules) to a value, given a required type.
      *
-     * @param request the input to the coercion
+     * @param request the input to the coercion (note, the requiredType in the request
+     *                must correspond to the item type that is handled by this particular
+     *                {@code CoercionPlan}).
      * @return the converted value (possibly as a lazily-evaluated sequence)
      * @throws XPathException if the value cannot be converted to the required type
      */
@@ -103,9 +106,13 @@ public class AtomicCoercionPlan extends CoercionPlan {
 
             // Check the cardinality of the result
 
-            if (request.requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
+            int requiredCardinality = request.requiredType.getCardinality();
+            if (!Cardinality.subsumes(requiredCardinality, knownCardinality)) {
                 iterator = new CardinalityCheckingIterator(
-                        iterator, request.requiredType.getCardinality(), request.roleSupplier, request.locator);
+                        iterator,
+                        request.requiredType.getCardinality(),
+                        request.roleSupplier,
+                        request.locator);
             }
 
             // Return a lazy sequence that is constructed on demand by reading this iterator
@@ -117,7 +124,15 @@ public class AtomicCoercionPlan extends CoercionPlan {
 
     }
 
-
+    /**
+     * This method handles untypedAtomic values in the atomized input. The default action is appropriate
+     * for most atomic types; there are overrides for special cases such as handling of union types or
+     * QNames.
+     * @param request the coercion request
+     * @param atomizedtype the type of the input after atomization, so far as this is known
+     * @return a function to be applied to each item in the atomized input, or null if no
+     *      * mapping is to be applied.
+     */
     protected ItemMappingFunction getUntypedAtomicPromoter(CoercionRequest request, UType atomizedtype) {
 
         Configuration config = request.config;
@@ -152,6 +167,16 @@ public class AtomicCoercionPlan extends CoercionPlan {
         }
         return null;
     }
+
+    /**
+     * This method is implemented in subclasses that do type promotion to the target type, and
+     * for other types such as Union types and Record types where special rules apply
+     * @param request  the coercion request
+     * @param atomizedType the type of the input (so far as it is known) after atomization
+     *                     has been performed
+     * @return a function to be applied to each item in the atomized input, or null if no
+     * mapping is to be applied.
+     */
 
     public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {
         return null;
