@@ -418,10 +418,20 @@ public final class FloatValue extends NumericValue {
 
     @Override
     public int transitiveCompareTo(NumericValue other) {
-        if (other instanceof FloatValue f) {
-            return Float.compare(getFloatValue(), f.getFloatValue());
+        if (other instanceof FloatValue fv2) {
+            float f1 = getFloatValue();
+            float f2 = fv2.getFloatValue();
+            if (f1 == f2) {
+                return 0; // handles positive/negative zero comparison
+            }
+            return Float.compare(f1, f2);
         } else if (other instanceof DoubleValue) {
-            return Double.compare(getDoubleValue(), other.getDoubleValue());
+            double d1 = getDoubleValue();
+            double d2 = other.getDoubleValue();
+            if (d1 == d2) {
+                return 0; // handles positive/negative zero comparison
+            }
+            return Double.compare(d1, d2);
         } else if (other instanceof Int64Value) {
             try {
                 return compareTo(other.longValue());

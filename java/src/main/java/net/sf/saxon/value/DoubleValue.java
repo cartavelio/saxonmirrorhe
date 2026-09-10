@@ -432,7 +432,11 @@ public final class DoubleValue extends NumericValue {
     @Override
     public int transitiveCompareTo(NumericValue other) {
         if (other instanceof DoubleValue || other instanceof FloatValue) {
-            return Double.compare(value, other.getDoubleValue());
+            double d2 = other.getDoubleValue();
+            if (value == d2) {
+                return 0; // handles the positive/negative zero case
+            }
+            return Double.compare(value, d2);
         } else if (other instanceof Int64Value) {
             try {
                 return compareTo(other.longValue());
