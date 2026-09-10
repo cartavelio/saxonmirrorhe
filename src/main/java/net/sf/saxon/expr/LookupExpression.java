@@ -19,7 +19,7 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
-import net.sf.saxon.ma.map.TupleType;
+import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -144,7 +144,7 @@ public class LookupExpression extends BinaryExpression {
 
         ItemType containerType = getLhsExpression().getItemType();
         isArrayLookup = containerType instanceof ArrayItemType;
-        boolean isTupleLookup = containerType instanceof TupleType || originalType instanceof TupleType;
+        boolean isTupleLookup = containerType instanceof RecordType || originalType instanceof RecordType;
         isMapLookup = containerType instanceof MapType || isTupleLookup;
         //#if CSHARP==false
         if (th.isSubType(containerType, AnyExternalObjectType.THE_INSTANCE)) {
@@ -186,7 +186,7 @@ public class LookupExpression extends BinaryExpression {
         isSingleEntry = getRhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
 
         if (isTupleLookup && getRhsExpression() instanceof StringLiteral) {
-            TupleType tt = (TupleType)(containerType instanceof TupleType ? containerType : originalType);
+            RecordType tt = (RecordType)(containerType instanceof RecordType ? containerType : originalType);
             if (!tt.isExtensible()) {
                 String fieldName = ((StringLiteral) getRhsExpression()).stringify();
                 if (tt.getFieldType(fieldName) == null) {

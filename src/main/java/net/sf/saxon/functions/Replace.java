@@ -96,7 +96,8 @@ public class Replace extends RegexFunction  {
             if (actionFn != null) {
                 action = (in, groups) -> {
                     try {
-                        List<Item> groupItems = new ArrayList<>(groups.length);
+                        // cast to UnicodeString[] is needed for the transpiler
+                        List<Item> groupItems = new ArrayList<>(((UnicodeString[])groups).length);
                         for (UnicodeString group : groups) {
                             groupItems.add(new StringValue(group, BuiltInAtomicType.UNTYPED_ATOMIC));
                         }

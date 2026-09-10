@@ -11,17 +11,18 @@ import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.value.SequenceType;
 
 /**
- * An instance of this class represents a specific tuple item type, for example
- * tuple(x as xs:double, y as element(employee)).
+ * An instance of this class represents a specific record type, for example
+ * record(x as xs:double, y as element(employee)).
  *
- * Tuple types are a Saxon extension introduced in Saxon 9.8. The syntax for constructing
- * a tuple type requires Saxon-PE or higher, but the supporting code is included in
+ * Tuple types were introduced as a Saxon extension in Saxon 9.8, and subsequently adopted
+ * and renamed as record types in XPath 4.0. The syntax for constructing
+ * a record type requires Saxon-PE or higher, but the supporting code is included in
  * Saxon-HE for convenience.
  *
- * Extended in 10.0 to distinguish extensible vs non-extensible tuple types. Extensible tuple
- * types permit fields other than those listed to appear; non-extensible tuple types do not.
+ * Extended in 10.0 to distinguish extensible vs non-extensible record types. Extensible record
+ * types permit fields other than those listed to appear; non-extensible record types do not.
  */
-public interface TupleType extends FunctionItemType {
+public interface RecordType extends FunctionItemType {
 
     /**
      * Get the names of all the fields

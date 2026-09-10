@@ -14,7 +14,6 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -107,8 +106,8 @@ public class OptionsParameter {
      * @throws XPathException if any supplied options are invalid
      */
 
-    public Map<String, Sequence> processSuppliedOptions(MapItem supplied, XPathContext context) throws XPathException {
-        Map<String, Sequence> result = new HashMap<>();
+    public Map<String, GroundedValue> processSuppliedOptions(MapItem supplied, XPathContext context) throws XPathException {
+        Map<String, GroundedValue> result = new HashMap<>();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
 
         for (String req : requiredOptions) {
@@ -160,7 +159,7 @@ public class OptionsParameter {
                 }
                 result.put(nominalKey, actual);
             } else {
-                Sequence def = defaultValues.get(nominalKey);
+                GroundedValue def = defaultValues.get(nominalKey);
                 if (def != null) {
                     result.put(nominalKey, def);
                 }
@@ -176,7 +175,7 @@ public class OptionsParameter {
      * @return a map containing the default values
      */
 
-    public Map<String, Sequence> getDefaultOptions()  {
+    public Map<String, GroundedValue> getDefaultOptions()  {
         return new HashMap<>(defaultValues);
     }
 

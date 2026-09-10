@@ -19,6 +19,7 @@ import net.sf.saxon.functions.PushableFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.UniStringConsumer;
@@ -76,7 +77,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
     private Options getOptions(XPathContext context, Sequence[] arguments) throws XPathException {
         if (getArity() > 1) {
             MapItem suppliedOptions = (MapItem) arguments[1].head();
-            Map<String, Sequence> options = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
+            Map<String, GroundedValue> options = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
             Options o = new Options();
             o.indent = ((BooleanValue) options.get("indent").head()).getBooleanValue();
             Sequence format = options.get("number-formatter");

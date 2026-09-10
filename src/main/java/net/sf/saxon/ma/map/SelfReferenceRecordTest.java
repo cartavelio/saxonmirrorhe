@@ -25,7 +25,7 @@ import java.util.function.Supplier;
  * to the containing type, but needs to handle operations differently such as conversion to a string
  * or alpha-code, or comparison of item types for equality, to avoid going into infinite recursion.
  */
-public class SelfReferenceRecordTest extends AnyFunctionType implements TupleType {
+public class SelfReferenceRecordTest extends AnyFunctionType implements RecordType {
 
     private final RecordTest containingType;
 

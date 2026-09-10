@@ -134,7 +134,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
 
 
         public DeepEqualOptions(MapItem map, String collationName, XPathContext context) throws XPathException {
-            Map<String, Sequence> values = OPTION_DETAILS.processSuppliedOptions(map, context);
+            Map<String, GroundedValue> values = OPTION_DETAILS.processSuppliedOptions(map, context);
             for (String option : DeepEqualOptions.booleanOptions) {
                 setBooleanOption(values, option);
             }
@@ -165,7 +165,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
             }
         }
 
-        private void setBooleanOption(Map<String, Sequence> map, String optionName) throws XPathException {
+        private void setBooleanOption(Map<String, GroundedValue> map, String optionName) throws XPathException {
             Sequence value = map.get(optionName);
             if (value != null) {
                 boolean booleanValue = ExpressionTool.effectiveBooleanValue(value.iterate());

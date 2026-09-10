@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
@@ -80,7 +81,7 @@ public class JsonDoc extends SystemFunction  {
             throw UnparsedTextFunction.handleIOError(absoluteURI, ioErr);
         }
 
-        Map<String, Sequence> checkedOptions;
+        Map<String, GroundedValue> checkedOptions;
         if (getArity() == 2) {
             MapItem options = (MapItem) arguments[1].head();
             checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);

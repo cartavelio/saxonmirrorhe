@@ -22,7 +22,7 @@ import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.TupleType;
+import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -109,7 +109,7 @@ public class LookupAllExpression extends UnaryExpression {
 
         ItemType containerType = getBaseExpression().getItemType();
         boolean isArrayLookup = containerType instanceof ArrayItemType;
-        boolean isMapLookup = containerType instanceof MapType || containerType instanceof TupleType;
+        boolean isMapLookup = containerType instanceof MapType || containerType instanceof RecordType;
 
         if (!isArrayLookup && !isMapLookup) {
             if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT &&

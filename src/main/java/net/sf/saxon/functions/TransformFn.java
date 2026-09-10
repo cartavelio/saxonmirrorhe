@@ -118,7 +118,7 @@ public class TransformFn extends SystemFunction implements Callable {
      * options with recognized names and type-valid values.
      */
 
-    private void checkTransformOptions(Map<String, Sequence> options, XPathContext context, int languageVersion) throws XPathException {
+    private void checkTransformOptions(Map<String, GroundedValue> options, XPathContext context, int languageVersion) throws XPathException {
         if (options.isEmpty()) {
             throw new XPathException("No transformation options supplied", "FOXT0002");
         }
@@ -130,11 +130,11 @@ public class TransformFn extends SystemFunction implements Callable {
         }
     }
 
-    private String checkStylesheetMutualExclusion(Map<String, Sequence> map) throws XPathException {
+    private String checkStylesheetMutualExclusion(Map<String, GroundedValue> map) throws XPathException {
         return exactlyOneOf(map, "stylesheet-location", "stylesheet-node", "stylesheet-text");
     }
 
-    private String checkStylesheetMutualExclusion30(Map<String, Sequence> map) throws XPathException {
+    private String checkStylesheetMutualExclusion30(Map<String, GroundedValue> map) throws XPathException {
         String styleOption = exactlyOneOf(map, "stylesheet-location", "stylesheet-node", "stylesheet-text",
                                           "package-name", "package-node", "package-location");
         if (styleOption.equals("package-location")) {
@@ -143,7 +143,7 @@ public class TransformFn extends SystemFunction implements Callable {
         return styleOption;
     }
 
-    private String checkInvocationMutualExclusion(Map<String, Sequence> options) throws XPathException {
+    private String checkInvocationMutualExclusion(Map<String, GroundedValue> options) throws XPathException {
         return oneOf(options, "initial-mode", "initial-template");
     }
 
@@ -156,7 +156,7 @@ public class TransformFn extends SystemFunction implements Callable {
      * @throws XPathException if more than one of the keys is present
      */
 
-    private String oneOf(Map<String, Sequence> map, String... keys) throws XPathException {
+    private String oneOf(Map<String, GroundedValue> map, String... keys) throws XPathException {
         String found = null;
         for (String s : keys) {
             if (map.get(s) != null) {
@@ -181,7 +181,7 @@ public class TransformFn extends SystemFunction implements Callable {
      * @throws XPathException if none of the keys is present or if more than one of the keys is present
      */
 
-    private String exactlyOneOf(Map<String, Sequence> map, String... keys) throws XPathException {
+    private String exactlyOneOf(Map<String, GroundedValue> map, String... keys) throws XPathException {
         String found = oneOf(map, keys);
         if (found == null) {
             throw new XPathException("One of the following transform options must be present: " + enumerate(keys));
@@ -203,7 +203,7 @@ public class TransformFn extends SystemFunction implements Callable {
         return buffer.toString();
     }
 
-    private String checkInvocationMutualExclusion30(Map<String, Sequence> map) throws XPathException {
+    private String checkInvocationMutualExclusion30(Map<String, GroundedValue> map) throws XPathException {
         return oneOf(map, "initial-mode", "initial-template", "initial-function");
     }
 
@@ -225,7 +225,7 @@ public class TransformFn extends SystemFunction implements Callable {
         throw new XPathException("Unrecognized boolean value " + value, "FOXT0002");
     }
 
-    private void setRequestedProperties(Map<String, Sequence> options, Processor processor) throws XPathException {
+    private void setRequestedProperties(Map<String, GroundedValue> options, Processor processor) throws XPathException {
         MapItem requestedProps = (MapItem) options.get("requested-properties").head();
         AtomicIterator optionIterator = requestedProps.keys();
         while (true) {
@@ -343,7 +343,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
     }
 
-    private void setStaticParams(Map<String, Sequence> options, XsltCompiler xsltCompiler, boolean allowTypedNodes) throws XPathException {
+    private void setStaticParams(Map<String, GroundedValue> options, XsltCompiler xsltCompiler, boolean allowTypedNodes) throws XPathException {
         MapItem staticParamsMap = (MapItem) options.get("static-params").head();
         AtomicIterator paramIterator = staticParamsMap.keys();
         while (true) {
@@ -365,7 +365,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
     }
 
-    private XsltExecutable getStylesheet(Map<String, Sequence> options, XsltCompiler xsltCompiler, String styleOptionStr, XPathContext context) throws XPathException {
+    private XsltExecutable getStylesheet(Map<String, GroundedValue> options, XsltCompiler xsltCompiler, String styleOptionStr, XPathContext context) throws XPathException {
         Item styleOptionItem = options.get(styleOptionStr).head();
         URI stylesheetBaseUri = null;
         Sequence seq;
@@ -544,7 +544,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Map<String, Sequence> options = getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[0].head(), context);
+        Map<String, GroundedValue> options = getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[0].head(), context);
 
         Sequence vendorOptionsValue = options.get("vendor-options");
         MapItem vendorOptions = vendorOptionsValue == null ? null : (MapItem) vendorOptionsValue.head();

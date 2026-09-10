@@ -287,10 +287,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public void supplyTypeInformation(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType, Expression[] arguments) throws XPathException {
             ItemType it = arguments[0].getItemType();
-            if (it instanceof TupleType && arguments.length == 2) {
+            if (it instanceof RecordType && arguments.length == 2) {
                 if (arguments[1] instanceof StringLiteral) {
                     String key = ((StringLiteral)arguments[1]).stringify();
-                    if (((TupleType)it).getFieldType(key) == null) {
+                    if (((RecordType)it).getFieldType(key) == null) {
                         XPathException xe = new XPathException("Field " + key + " is not defined for tuple type " + it, "SXTT0001");
                         xe.setIsTypeError(true);
                         throw xe;
@@ -674,7 +674,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments) throws XPathException {
             if (arguments.length == 2 && arguments[1] instanceof Literal) {
                 MapItem options = (MapItem) ((Literal)arguments[1]).getGroundedValue().head();
-                Map<String, Sequence> values = getDetails().optionDetails.processSuppliedOptions(
+                Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(
                         options, visitor.getStaticContext().makeEarlyEvaluationContext());
                 String duplicates = ((StringValue) values.get("duplicates")).getStringValue();
                 String duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
@@ -743,7 +743,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 FunctionItem onDuplicates = this.onDuplicates;
                 if (arguments.length > 1) {
                     MapItem options = (MapItem) arguments[1].head();
-                    Map<String, Sequence> values = getDetails().optionDetails.processSuppliedOptions(options, context);
+                    Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(options, context);
                     duplicates = ((StringValue) values.get("duplicates")).getStringValue();
                     duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
                     treatAsFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();

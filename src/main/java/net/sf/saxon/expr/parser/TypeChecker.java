@@ -11,7 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.TupleType;
+import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -135,7 +135,7 @@ public class TypeChecker {
                         !(suppliedCard == StaticProperty.EMPTY)) {
                     if (!suppliedItemType.isAtomizable(th)) {
                         String shortItemType;
-                        if (suppliedItemType instanceof TupleType) {
+                        if (suppliedItemType instanceof RecordType) {
                             shortItemType = "a record type";
                         } else if (suppliedItemType instanceof MapType) {
                             shortItemType = "a map type";

@@ -12,8 +12,8 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.ma.json.ParseJsonFn;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
@@ -91,7 +91,7 @@ public class JsonBuilder {
             XPathContext context = new Controller(config).newXPathContext();
             IntPredicateProxy checker = IntSetPredicate.ALWAYS_TRUE;
             UnicodeString content = UnparsedTextFunction.readFile(checker, jsonReader);
-            Map<String, Sequence> options = new HashMap<>();
+            Map<String, GroundedValue> options = new HashMap<>();
             options.put("liberal", BooleanValue.get(liberal));
             options.put("escape", BooleanValue.TRUE);
             Item result = ParseJsonFn.parse(content.toString(), options, context);

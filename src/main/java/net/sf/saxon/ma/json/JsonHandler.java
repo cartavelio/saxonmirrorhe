@@ -10,6 +10,7 @@ package net.sf.saxon.ma.json;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
@@ -237,8 +238,8 @@ public class JsonHandler {
         }
     }
 
-    public void setFallbackFunction(Map<String, Sequence> options, XPathContext context) throws XPathException {
-        Sequence val = options.get("fallback");
+    public void setFallbackFunction(Map<String, GroundedValue> options, XPathContext context) throws XPathException {
+        GroundedValue val = options.get("fallback");
         if (val != null) {
             Item fn = val.head();
             if (fn instanceof FunctionItem) {

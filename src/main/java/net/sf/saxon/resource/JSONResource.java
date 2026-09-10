@@ -12,8 +12,8 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.ma.json.ParseJsonFn;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
@@ -80,7 +80,7 @@ public class JSONResource implements Resource {
                 return null;
             }
         }
-        Map<String, Sequence> options = new HashMap<>();
+        Map<String, GroundedValue> options = new HashMap<>();
         options.put("liberal", BooleanValue.FALSE);
         options.put("duplicates", StringValue.bmp("use-first"));
         options.put("escape", BooleanValue.FALSE);

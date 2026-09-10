@@ -63,7 +63,7 @@ public class Doc_2 extends SystemFunction implements Callable {
 
 
     public static ParseOptions setParseOptions(
-            RetainedStaticContext rsc, Map<String, Sequence> checkedOptions, XPathContext context) throws XPathException {
+            RetainedStaticContext rsc, Map<String, GroundedValue> checkedOptions, XPathContext context) throws XPathException {
         ParseOptions result = context.getConfiguration().getParseOptions();
 
         Sequence value = checkedOptions.get("validation");
@@ -76,18 +76,14 @@ public class Doc_2 extends SystemFunction implements Callable {
             if (v == Validation.INVALID) {
                throw new XPathException("Invalid validation value " + valStr, "SXZZ0002");
             }
-            result = result
-                    .withSchemaValidationMode(v)
-                    .withSchema(rsc.getPackageData().getImportedSchema());
+            result = result.withSchemaValidationMode(v);
         }
         value = checkedOptions.get("type");
         if (value != null) {
             QNameValue qval = (QNameValue) value.head();
-            StructuredQName name = qval.getStructuredQName();
             result = result
-                    .withTopLevelType(rsc.getPackageData().getImportedSchema().getSchemaType(name))
-                    .withSchemaValidationMode(Validation.BY_TYPE)
-                    .withSchema(rsc.getPackageData().getImportedSchema());
+                    .withTopLevelType(context.getConfiguration().getSchemaType(qval.getStructuredQName()))
+                    .withSchemaValidationMode(Validation.BY_TYPE);
         }
         value = checkedOptions.get("strip-space");
         if (value != null) {
@@ -153,7 +149,7 @@ public class Doc_2 extends SystemFunction implements Callable {
         }
         String href = hrefVal.getStringValue();
         Item param = arguments[1].head();
-        Map<String, Sequence> checkedOptions =
+        Map<String, GroundedValue> checkedOptions =
                 getDetails().optionDetails.processSuppliedOptions((MapItem) param, context);
         ParseOptions parseOptions = setParseOptions(getRetainedStaticContext(), checkedOptions, context);
 
