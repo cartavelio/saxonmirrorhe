@@ -1082,7 +1082,7 @@ namespace SaxonEE
             XsltCompiler compiler = processor.NewXsltCompiler();
 
             // Create a list to hold the error information
-            List<XmlProcessingError> errorList = new();
+            List<Error> errorList = new();
             compiler.ErrorReporter = error => errorList.Add(error);
 
             // Define a stylesheet containing errors
@@ -1107,7 +1107,7 @@ namespace SaxonEE
             catch (Exception)
             {
                 Console.WriteLine("Stylesheet compilation failed with " + errorList.Count + " errors");
-                foreach (XmlProcessingError error in errorList) {
+                foreach (Error error in errorList) {
                     Console.WriteLine("At line " + error.Location.LineNumber + ": " + error.Message);
                 }
             }
@@ -2280,7 +2280,7 @@ namespace SaxonEE
             processor.SetProperty("http://saxon.sf.net/feature/validation-warnings", "false"); //Set to true to suppress the exception
             SchemaManager manager = processor.SchemaManager;
             manager.XsdVersion = "1.1";
-            List<XmlProcessingError> errorList = new();
+            List<Error> errorList = new();
             manager.ErrorReporter = err => errorList.Add(err);
             Uri schemaUri = new Uri(samplesDir, "data/books.xsd");
 
@@ -2292,7 +2292,7 @@ namespace SaxonEE
             {
                 Console.WriteLine(e);
                 Console.WriteLine("Schema compilation failed with " + errorList.Count + " errors");
-                foreach (XmlProcessingError error in errorList)
+                foreach (Error error in errorList)
                 {
                     Console.WriteLine("At line " + error.Location.LineNumber + ": " + error.Message);
                 }
