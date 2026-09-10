@@ -367,7 +367,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
     }
 
     /**
-     * Get an iterator over the descendant axis, starting at this node; the nodes will
+     * Get an iterator over the descendant or self axis, starting at this node; the nodes will
      * be in document order.
      *
      * @param predicate a condition that the nodes must satisfy, or null
@@ -375,7 +375,10 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
      */
     @Override
     public SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
-        return iterateDescendants(predicate, true);
+        if (getNodeKind() == Type.DOCUMENT || getNodeKind() == Type.ELEMENT) {
+            return iterateDescendants(predicate, true);
+        }
+        return EmptyIterator.INSTANCE;
     }
 
     /**
