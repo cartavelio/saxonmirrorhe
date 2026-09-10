@@ -1811,10 +1811,15 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
       "<xsl:param name='b' as='xs:float'/>     <xsl:sequence select='., $a + "
       "$b'/>  </xsl:template>  </xsl:stylesheet>";
   cout << endl << "Test:testInitialTemplate" << endl;
-  XsltExecutable *executable = trans->compileFromString(source);
-  if (executable == nullptr) {
-    if (trans->exceptionOccurred()) {
-      cout << "Error: " << trans->getErrorMessage() << endl;
+  XsltExecutable *executable = nullptr;
+  try {
+  	executable = trans->compileFromString(source);
+  } catch (SaxonApiException &e) {
+    sresult->failure++;
+    sresult->failureList.push_back("testResultDocumentAsMap");
+    const char *message = e.getMessage();
+    if (message != nullptr) {
+      cout << "Error: " << message << endl;
     }
     return;
   }
@@ -1829,7 +1834,24 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
   parameterValues["b"] = a2;
   executable->setInitialTemplateParameters(parameterValues, false);
   executable->setInitialMatchSelection(node);
-  XdmValue *result = executable->applyTemplatesReturningValue();
+  XdmValue *result = nullptr;
+  try {
+  	result = executable->applyTemplatesReturningValue();
+    } catch (SaxonApiException &e) {
+    delete executable;
+    parameterValues.clear();
+    delete a1;
+    delete a2;
+    delete node;
+    sresult->failure++;
+    sresult->failureList.push_back("testResultDocumentAsMap");
+    const char *message = e.getMessage();
+    if (message != nullptr) {
+      cout << "Error: " << message << endl;
+    }
+    return;
+  }
+
   if (result != nullptr) {
     XdmItem *itemResult = result->getHead();
     const char *resultStr = itemResult->getStringValue();
@@ -1845,7 +1867,9 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
   delete executable;
   delete a1;
   delete a2;
+  if(node != nullptr) {
   delete node;
+  }
   parameterValues.clear();
 }
 

@@ -18,7 +18,7 @@ import org.graalvm.nativeimage.c.function.CEntryPoint;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MapData {
+public class    MapData {
     private Map<XdmAtomicValue, XdmValue> primitiveMap;
 
     public MapData() {

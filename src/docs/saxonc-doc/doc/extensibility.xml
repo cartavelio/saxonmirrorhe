@@ -337,7 +337,8 @@ XdmValue * myFunc(int length, XdmValue ** values) {
        <p>Example Python code to register user function:
 
            <samp>
-               proc.register_user_function("http://www.example.com", user_function, "{ \"myFunc\": {"
+               proc = PySaxonProcessor(license=True)
+               proc.register_user_function("http://www.example.com", my_func, "{ \"myFunc\": {"
                "      \"as\": \"xs:integer?\","
                "      \"param\": ["
                "        \"xs:integer\""
@@ -349,7 +350,7 @@ XdmValue * myFunc(int length, XdmValue ** values) {
 
 
 
-       <h2 class="subtitle">Calling extension functions from XSLT and XQuery</h2>
+       <h2 class="subtitle">Calling extension functions from XSLT, XQuery and XPath</h2>
 
        <p>Calling the user extension functions from XSLT, XPath and XQuery is done firstly by
            declaring the namespace for the function. Then using the function name in your query or stylesheet.
@@ -357,26 +358,23 @@ XdmValue * myFunc(int length, XdmValue ** values) {
            For example using the XPath API the following example calls the function:
 
            <samp>
-               $xpath->declareNamespace("dy", "http://www.example.com");
-               $result = $xpath->evaluateSingle("dy:sumASequence([1,2,3,4,5])");
-               if($result != null) {
-               $value = $result->getAtomicValue()->getLongValue();
-               echo 'Correct Result='.$value;
+               xpath_processor = proc.new_xpath_processor()
+               xpath_processor.declare_namespace("dy", "http://www.example.com")
+               result = xpath_processor.evaluate_single("dy:myFunc(3)")
            </samp></p>
 
-       <p>In the example above the PHP "sumASequence" extension function is called from XPath, but can be called
-           from the XSLT stylesheet. The implementation of the <Code>sumASequence</Code> as PHP is given
-           below. We make the assumption that the array contains numbers. This is a simple example but better error checking
-           is required to make the code more robust. The returned integer is internally converted to an XdmAtomicValue:
+       <p>In the example above the Python "myFunc" extension function is called from XPath, but can be called
+           from an XSLT stylesheet or from XQuery. The implementation of the python function <Code>my_func</Code> is given
+           below. In this example we set <code>use_python_types=False</code> there there is no conversion from XDM types to native python types:
 
            <samp>
-               function sumASequence($arr){
-               if(is_array($arr)){
-               return array_sum($arr);
-               }
-               throw new Exception('$arr argument is not an array type');
-
-               }
+               def my_func(values):
+               saxonproc = PySaxonProcessor()
+               try:
+                    valuex= saxonproc.make_integer_value(n_value)
+                    return valuex
+               except Exception as err:
+               return None
            </samp>
        </p>
 

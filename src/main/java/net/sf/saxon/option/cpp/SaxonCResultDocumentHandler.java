@@ -11,7 +11,6 @@ import net.sf.saxon.s9api.*;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
-import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
@@ -20,8 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This is the SaxonC SaxonCResultDocumentHandler class which implements Function&lt;URI, Destination&gt; interface
@@ -30,9 +28,9 @@ import java.util.Map;
 public class SaxonCResultDocumentHandler implements java.util.function.Function<URI, Destination> {
 
 
-    final Map<String, XdmDestination> results = new HashMap<>();
+    final ConcurrentHashMap<String, XdmDestination> results = new ConcurrentHashMap<>();
 
-    final Map<String, RawDestination> rawResults = new HashMap<>();
+    final ConcurrentHashMap<String, RawDestination> rawResults = new ConcurrentHashMap<>();
 
     private boolean rawResultsFlag;
 

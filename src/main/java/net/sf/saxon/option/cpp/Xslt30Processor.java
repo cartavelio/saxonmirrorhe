@@ -773,6 +773,7 @@ public class Xslt30Processor extends SaxonCAPI {
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
         String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        Object sourceObj = getMatchSelectionObject(sourceObjRef, paramsMap);
         try {
             applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
         } catch (Exception ex) {
@@ -798,16 +799,7 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             xdmResult = new XdmDestination();
         }
-        if (sourceObjRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Source Object is NULL");
-        }
-        Object sourceObji = objectHandles.get(sourceObjRef);
-        Object sourceObj = null;
-        if (sourceObji instanceof ProcessorDataAccumulator) {
-            sourceObj = ((ProcessorDataAccumulator) sourceObji).getValues();
-        } else {
-            sourceObj = sourceObji;
-        }
+
         if (sourceObj instanceof String) {
             Source source = resolveFileToSource(processor, cwd, (String) sourceObj, ResourceRequest.XML_NATURE);
             if (paramsMap.containsKey("dtd")) {
@@ -854,6 +846,33 @@ public class Xslt30Processor extends SaxonCAPI {
         ObjectHandle handle = SaxonCAPI.createHandle(value);
         return handle.rawValue();
     }
+
+    private static Object getMatchSelectionObject(ObjectHandle sourceObjRef, Map<String, Object> paramsMap) throws SaxonApiException {
+                Object sourceObji;
+                Object sourceObj = null;
+
+                        if (paramsMap.containsKey("_i_matchs")) {
+                        sourceObji = paramsMap.get("_i_matchs");
+                        if (debug) {
+                                if(sourceObji == null) {
+                                        System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name null found");
+                                    } else {
+                                        System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name: " + sourceObji.getClass().getName());
+                                    }
+                            }
+                    } else if (sourceObjRef == WordFactory.nullPointer()) {
+                        throw new SaxonApiException("Source Object is NULL");
+                    } else {
+                        sourceObji = objectHandles.get(sourceObjRef);
+                    }
+
+                        if (sourceObji instanceof ProcessorDataAccumulator) {
+                        sourceObj = ((ProcessorDataAccumulator) sourceObji).getValues();
+                    } else {
+                        sourceObj = sourceObji;
+                    }
+                return sourceObj;
+            }
 
     private static XdmValue getXdmValue(Destination xdmResult, Map<String, Object> paramsMap) {
         boolean returnXdmValue = false;
@@ -921,23 +940,14 @@ public class Xslt30Processor extends SaxonCAPI {
         } else if (serializer == null) {
             throw new SaxonApiException("Output file not set for this transformation");
         }
-
+        Object sourceObj = getMatchSelectionObject(sourceObjRef, paramsMap);
         try {
             applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
         } catch (Exception ex) {
             throw new SaxonApiException(ex);
 
         }
-        if (sourceObjRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Source object is null");
-        }
-        Object sourceObji = objectHandles.get(sourceObjRef);
-        Object sourceObj = null;
-        if (sourceObji instanceof ProcessorDataAccumulator) {
-            sourceObj = ((ProcessorDataAccumulator) sourceObji).getValues();
-        } else {
-            sourceObj = sourceObji;
-        }
+
         if (sourceObj instanceof String) {
 
             Source source = resolveFileToSource(processor, cwd, (String) sourceObj, ResourceRequest.XML_NATURE);
@@ -1003,13 +1013,6 @@ public class Xslt30Processor extends SaxonCAPI {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltExecutable executable = objectHandles.get(executableRef);
-        Object sourceObji = objectHandles.get(sourceObjRef);
-        Object sourceObj = null;
-        if (sourceObji instanceof ProcessorDataAccumulator) {
-            sourceObj = ((ProcessorDataAccumulator) sourceObji).getValues();
-        } else {
-            sourceObj = sourceObji;
-        }
 
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
@@ -1024,6 +1027,8 @@ public class Xslt30Processor extends SaxonCAPI {
         Processor processor = executable.getProcessor();
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
         Serializer serializer = processor.newSerializer(bStream);
+
+        Object sourceObj = getMatchSelectionObject(sourceObjRef, paramsMap);
 
         try {
             applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
@@ -1672,8 +1677,6 @@ public class Xslt30Processor extends SaxonCAPI {
                 //extension function library path
                 //String libName = (String) map.get("extc");
                 //SaxonCAPI.setLibrary("", libName);
-
-
             }
 
             if (map.containsKey("baseoutput")) {

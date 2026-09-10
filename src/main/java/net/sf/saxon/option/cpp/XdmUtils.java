@@ -154,12 +154,16 @@ public class XdmUtils {
      */
     @CEntryPoint(name = "xdmItemToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
     public static CCharPointer toString_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) {
+        String itemStr = "";
         if(value == WordFactory.nullPointer()) {
-            return WordFactory.nullPointer();
+            itemStr = XdmEmptySequence.getInstance().toString();
+        } else {
+            XdmItem item = SaxonCAPI.objectHandles.get(value);
+            itemStr = item.toString();
         }
         XdmItem item = SaxonCAPI.objectHandles.get(value);
 
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.toString());
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, itemStr);
         return a;
     }
 
