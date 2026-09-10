@@ -231,7 +231,6 @@ com/saxonica/ee/schema/sdoc/XSDNotation.class
 com/saxonica/ee/schema/sdoc/XSDOpenContent.class
 com/saxonica/ee/schema/sdoc/XSDOverride.class
 com/saxonica/ee/schema/sdoc/XSDRedefine.class
-com/saxonica/ee/schema/sdoc/XSDSchema.class
 com/saxonica/ee/schema/sdoc/XSDSimpleContent.class
 com/saxonica/ee/schema/sdoc/XSDSimpleContentRestriction.class
 com/saxonica/ee/schema/sdoc/XSDSimpleType.class
@@ -555,11 +554,9 @@ com/saxonica/functions/extfn/NewText.class
 com/saxonica/functions/extfn/ObjectMap.class
 com/saxonica/functions/extfn/Parse.class
 com/saxonica/functions/extfn/ParseXPath.class
-com/saxonica/functions/extfn/PedigreeFn.class
 com/saxonica/functions/extfn/QueryFn.class
 com/saxonica/functions/extfn/ReadBinaryResource.class
 com/saxonica/functions/extfn/ReplaceWith.class
-com/saxonica/functions/extfn/SaxonDeepEqual.class
 com/saxonica/functions/extfn/SendMail.class
 com/saxonica/functions/extfn/Serialize.class
 com/saxonica/functions/extfn/TimestampFn.class
@@ -567,7 +564,6 @@ com/saxonica/functions/extfn/TransformFn.class
 com/saxonica/functions/extfn/UnescapeNCName.class
 com/saxonica/functions/extfn/Unindexed.class
 com/saxonica/functions/extfn/VendorFunctionSetPE.class
-com/saxonica/functions/extfn/WithPedigree.class
 com/saxonica/functions/extfn/XQueryFn.class
 com/saxonica/functions/registry/
 com/saxonica/functions/registry/XQUpdate10FunctionSet.class
@@ -624,9 +620,6 @@ com/saxonica/xsltextn/pedigree/
 com/saxonica/xsltextn/pedigree/DelegatingArrayItem.class
 com/saxonica/xsltextn/pedigree/DelegatingMapItem.class
 com/saxonica/xsltextn/pedigree/Pedigree.class
-com/saxonica/xsltextn/pedigree/PedigreeArrayItem.class
-com/saxonica/xsltextn/pedigree/PedigreeMapItem.class
-com/saxonica/xsltextn/pedigree/PedigreeValue.class
 com/saxonica/xsltextn/style/
 com/saxonica/xsltextn/style/Saxon6ElementFactory.class
 com/saxonica/xsltextn/style/SaxonAssign.class
@@ -1049,7 +1042,6 @@ net/sf/saxon/expr/parser/Evaluators.class
 net/sf/saxon/expr/parser/ExpressionAction.class
 net/sf/saxon/expr/parser/ExpressionTool.class
 net/sf/saxon/expr/parser/ExpressionVisitor.class
-net/sf/saxon/expr/parser/ICompilerService.class
 net/sf/saxon/expr/parser/Loc.class
 net/sf/saxon/expr/parser/LoopLifter.class
 net/sf/saxon/expr/parser/Optimizer.class
@@ -1599,7 +1591,6 @@ net/sf/saxon/pattern/PatternMaker.class
 net/sf/saxon/pattern/PatternParser.class
 net/sf/saxon/pattern/PatternThatSetsCurrent.class
 net/sf/saxon/pattern/PatternWithPredicate.class
-net/sf/saxon/pattern/QNameTest.class
 net/sf/saxon/pattern/SameNameTest.class
 net/sf/saxon/pattern/SchemaNodeTest.class
 net/sf/saxon/pattern/SimplePositionalPattern.class
@@ -1728,8 +1719,6 @@ net/sf/saxon/s9api/Location.class
 net/sf/saxon/s9api/Message.class
 net/sf/saxon/s9api/MessageListener.class
 net/sf/saxon/s9api/MessageListener2.class
-net/sf/saxon/s9api/MessageListener2Proxy.class
-net/sf/saxon/s9api/MessageListenerProxy.class
 net/sf/saxon/s9api/NullDestination.class
 net/sf/saxon/s9api/OccurrenceIndicator.class
 net/sf/saxon/s9api/Processor.class
@@ -1742,7 +1731,6 @@ net/sf/saxon/s9api/SchemaManager.class
 net/sf/saxon/s9api/SchemaValidator.class
 net/sf/saxon/s9api/SequenceType.class
 net/sf/saxon/s9api/Serializer.class
-net/sf/saxon/s9api/StaticError.class
 net/sf/saxon/s9api/TeeDestination.class
 net/sf/saxon/s9api/UnprefixedElementMatchingPolicy.class
 net/sf/saxon/s9api/ValidationMode.class
@@ -2222,7 +2210,6 @@ net/sf/saxon/type/ComplexVariety.class
 net/sf/saxon/type/ConversionResult.class
 net/sf/saxon/type/Converter.class
 net/sf/saxon/type/Derivation.class
-net/sf/saxon/type/EnumerationType.class
 net/sf/saxon/type/ErrorType.class
 net/sf/saxon/type/ExternalObjectType.class
 net/sf/saxon/type/FunctionItemType.class
@@ -2238,7 +2225,6 @@ net/sf/saxon/type/OpenContentVariety.class
 net/sf/saxon/type/PlainType.class
 net/sf/saxon/type/PrimitiveUType.class
 net/sf/saxon/type/SchemaComponent.class
-net/sf/saxon/type/SchemaDeclaration.class
 net/sf/saxon/type/SchemaException.class
 net/sf/saxon/type/SchemaType.class
 net/sf/saxon/type/SchemaValidationStatus.class
