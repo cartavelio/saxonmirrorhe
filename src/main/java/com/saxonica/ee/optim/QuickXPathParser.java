@@ -193,7 +193,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
         // nodekind() - select children with given node kind.
         patterns.put(
-                key(Token.NODEKIND, Token.RPAR),
+                key(Token.KEYWORD_LBRA, Token.RPAR),
                 (values, env) -> {
                     String kind = values.get(0);
                     NodeTest test = null;
