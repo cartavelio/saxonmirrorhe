@@ -78,6 +78,8 @@ ext {
   // Docker containers
   c_sqlserver = "sqlserver"
   dotnetex = null
+  csrid = null
+  csplatform = null
 }
 
 // Find dotnet
