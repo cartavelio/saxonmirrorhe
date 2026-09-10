@@ -1719,11 +1719,17 @@ zval makePHPValue(void * value){
 
 void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
 
-       //graal_isolatethread_t *thread1 = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-
+       graal_isolatethread_t *thread1 = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+              if (getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr<<"makeXdmValueFromPHPZVal cp0"<< std::endl;
+              }
        if(retval == nullptr || Z_TYPE_P(retval) ==0){
             //zend_error(E_ERROR, "Function returned null");
+              if (getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr<<"PHP internal: Z_TYPE_P(retval)~~"<< std::endl;
+              }
             zend_throw_exception(zend_ce_exception, "Function returned null", 0);
+            return NULL;
         }
 
         XdmValue * resultValue = nullptr;
@@ -1763,19 +1769,19 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
 
         switch (Z_TYPE_P(retval)) {
             case IS_FALSE:
-                return (void *)j_makeBooleanValue(SaxonProcessor::sxn_environ->thread, (int)false);
+                return (void *)j_makeBooleanValue(thread1, (int)false);
             case IS_TRUE:
-                return (void *)j_makeBooleanValue(SaxonProcessor::sxn_environ->thread, (int)true);
+                return (void *)j_makeBooleanValue(thread1, (int)true);
 
             case IS_LONG:
                 //resultValue = nprocessor->makeIntegerValue(Z_LVAL_P(retval));
-                return (void *)j_makeLongValue(SaxonProcessor::sxn_environ->thread, Z_LVAL_P(retval));
+                return (void *)j_makeLongValue(thread1, Z_LVAL_P(retval));
 
             case IS_STRING:
                 sVal = Z_STRVAL_P(retval);
                 len = Z_STRLEN_P(retval);
                 //resultValue = nprocessor->makeStringValue(estrndup(sVal,len));
-                return (void *)j_makeStringValue(SaxonProcessor::sxn_environ->thread, (char *)estrndup(sVal,len), (char *)NULL);
+                return (void *)j_makeStringValue(thread1, (char *)estrndup(sVal,len), (char *)NULL);
             case IS_NULL:
               if (getenv("SAXONC_DEBUG_FLAG")) {
                 std::cerr<<"PHP internal: call_user_function return is NULL"<< std::endl;
@@ -1783,7 +1789,7 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
                 return nullptr;
             case IS_DOUBLE:
                 //resultValue = nprocessor->makeDoubleValue((double)Z_DVAL_P(retval));
-                return (void *)j_makeDoubleValue(SaxonProcessor::sxn_environ->thread, (double)Z_DVAL_P(retval));
+                return (void *)j_makeDoubleValue(thread1, (double)Z_DVAL_P(retval));
 
             case IS_ARRAY:
               if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -1792,19 +1798,19 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
               rv_arr_hash = Z_ARRVAL_P(retval);
       		  rv_arr_length = zend_hash_num_elements(rv_arr_hash);
 
-			  resultVoidValue = (void *)createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, rv_arr_length);
+			  resultVoidValue = (void *)createProcessorDataWithCapacity(thread1, rv_arr_length);
 
               //arrItems = new void*[rv_arr_length]; // TODO delete pointer array when finished
 
               ZEND_HASH_FOREACH_KEY_VAL(rv_arr_hash, num_key, rv_key, arr_val) {
                 	valuei = makeXdmValueFromPHPZVal(nprocessor, arr_val);
-                    addProcessorValue(SaxonProcessor::sxn_environ->thread, resultVoidValue,valuei);
-                    j_handles_destroy(SaxonProcessor::sxn_environ->thread, valuei);
+                    addProcessorValue(thread1, resultVoidValue,valuei);
+                    j_handles_destroy(thread1, valuei);
               }
               ZEND_HASH_FOREACH_END();
               //return SaxonProcessor::makeInternalArray(arrItems, rv_arr_length);
-              valuei = (void *) j_makeXdmArray(SaxonProcessor::sxn_environ->thread, (void *)resultVoidValue);
-              j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)resultVoidValue);
+              valuei = (void *) j_makeXdmArray(thread1, (void *)resultVoidValue);
+              j_handles_destroy(thread1, (void *)resultVoidValue);
               return valuei;
 
             case IS_OBJECT:
@@ -1831,7 +1837,7 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
                  	}
                    //resultValue = new XdmValue();
 
-    				resultVoidValue  = (void *)createProcessorData(SaxonProcessor::sxn_environ->thread);
+    				resultVoidValue  = (void *)createProcessorData(thread1);
                  	while(Z_TYPE_P(arrIter_valid) == IS_TRUE) {
 					 	if (!arrIter_retval) {
 							ZVAL_UNDEF(&tmp);
@@ -1846,8 +1852,8 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
                           //TODO The XdmItems in the resultValue are not getting freed and the OBject Handles pool is also not getting cleared
                     		//resultValue->addUnderlyingValue((int64_t)valuei);
 
-							addProcessorValue(SaxonProcessor::sxn_environ->thread, resultVoidValue,valuei);
-							j_handles_destroy(SaxonProcessor::sxn_environ->thread, valuei);
+							addProcessorValue(thread1, resultVoidValue,valuei);
+							j_handles_destroy(thread1, valuei);
                     	} else {
                       	//do nothing
                     	}
@@ -1941,7 +1947,7 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
       }
 
       resultVoidValue = (void *)resultValue->getUnderlyingValue();
-      int64_t resultCopiedVoidValue = j_copy_handles(SaxonProcessor::sxn_environ->thread, resultVoidValue);
+      int64_t resultCopiedVoidValue = j_copy_handles(thread1, resultVoidValue);
       //TODO check for memory leak - if we need to delete the resultValue.
       //delete resultValue;
 
@@ -1958,6 +1964,8 @@ void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, 
         }
         return NULL;
     }
+
+    graal_isolatethread_t *thread1 = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     std::string nativeString2 = std::string(functionName);
 
 
@@ -1995,7 +2003,7 @@ void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, 
                 if (getenv("SAXONC_DEBUG_FLAG")) {
                     fprintf(stdout, "Making XdmValue ref=%ld.\n", (long)argumentsi[i]);
                 }
-                argument = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)argumentsi[i]);
+                argument = j_copy_handles(thread1, (void *)argumentsi[i]);
                 arguments[i] = SaxonProcessor::makeXdmValueFromRef(argument);
             }
         }
@@ -2006,7 +2014,7 @@ void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, 
 
       zval * oth = nullptr;
       for(int i=0; i<argLength;i++){
-        int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
+        int typeRef = j_getXdmObjectType(thread1,
                                  (void *)(arguments[i])->getUnderlyingValue());
 
         XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
@@ -2165,14 +2173,22 @@ void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, 
     if(call_user_function(CG(function_table), (zval*)callOnObj,
                                  &function_name, &retval, argLength, params) != SUCCESS){
        zend_throw_exception(zend_ce_exception, "Function call failed", 0);
+       if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"PHP internal: call_user_function FAILED!!!"<< std::endl;
+       }
+       return nullptr;
+    } else{
+
     }
 
     void * resultValue = makeXdmValueFromPHPZVal(nprocessor, &retval);
 
+    zval_dtor(&retval);
+    zval_dtor(&function_name);
     if(resultValue == nullptr){
       return nullptr;
     }
-    //void* resultPointer = j_copy_handles(SaxonProcessor::sxn_environ->thread, resultValue);
+    //void* resultPointer = j_copy_handles(thread1, resultValue);
 
     return resultValue;
 }
@@ -2200,10 +2216,11 @@ XtOffsetOf(saxonProcessor_object, std));
    }
 
     saxonProcessor = obj->saxonProcessor;
+    graal_isolatethread_t *thread1 = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     try {
-        j_setPHPNative(SaxonProcessor::sxn_environ->thread); //TODO move this method call to avoid repeated calls
+        j_setPHPNative(thread1); //TODO move this method call to avoid repeated calls
         nativePHPFn fn1 = userFunctionPHPNativeCall;
-        saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, (void *)fn1, (const char *)signature, useNativeTypes);
+        saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, (void *)fn1, (const char *)signature, true, useNativeTypes);
     } catch (SaxonApiException &e) {
         zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }

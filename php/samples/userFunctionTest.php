@@ -25,7 +25,8 @@ function sumASequence($arr){
   if(is_array($arr)){
     return array_sum($arr);
   }
-
+  echo(gettype($arr));
+  echo("Error in sumASequence\n");
   throw new Exception('$arr argument is not an array type');
 
 }
