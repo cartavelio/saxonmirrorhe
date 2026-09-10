@@ -455,9 +455,7 @@
       <xsl:call-template name="indent"/>
       <xsl:variable name="full-name" select="f:full-method-name(.)"/>
       <xsl:variable name="arity" select="count(parameters/parameter)"/>
-      <!--<xsl:message>Method {name/@identifier} = {$full-name}</xsl:message>-->
       <xsl:variable name="digestMethod" select="key('digestMethodKey', $full-name, $digest)[1]"/>
-      
       <xsl:if test="$digestMethod/@hidden='1' and not($expandingDefaults)">        
          <xsl:text>/* implicit ====={$NL}</xsl:text>
          <xsl:call-template name="indent"/>
@@ -1048,7 +1046,7 @@
                         if (name/@identifier = 'DEFAULT_NAMESPACE') then 'DefaultNamespace' 
                         else if (name/@identifier = 'ANY_NAMESPACE') then 'AnyNamespace' 
                         else if (name/@identifier = 'DEFAULT_NAMESPACE_OR_NONE') then 'DefaultNamespaceOrNone' else '**'}</xsl:when>                   
-                     <xsl:when test="$enumType and exists($firstLabel/@RESOLVED_TYPE)">{f:renameType($firstLabel/@RESOLVED_TYPE)}.{(:if (not($isSimpleEnum)) then 'InnerEnum.' else '':)}{name/@identifier}</xsl:when>
+                     <xsl:when test="$enumType and exists($firstLabel/@RESOLVED_TYPE)">{f:renameType($firstLabel/@RESOLVED_TYPE)}.{()(:if (not($isSimpleEnum)) then 'InnerEnum.' else '':)}{name/@identifier}</xsl:when>
                      <xsl:otherwise>
                         <xsl:apply-templates select="."/>
                      </xsl:otherwise>
@@ -2174,6 +2172,11 @@
    <xsl:template match="*[@nodeType='NameExpr']">
       <xsl:apply-templates select="name"/>
    </xsl:template>
+   
+   <xsl:template match="*[@nodeType='YieldStmt']">
+      YIELD(); /* Error: the transpiler cannot handle a Java yield statement */
+   </xsl:template>
+   
  
    <!-- Where an interface defines defaulted implementations of methods, copy this methods into all (immediately)
         implementing classes that do not define their own override of the method. In addition, C# requires that
