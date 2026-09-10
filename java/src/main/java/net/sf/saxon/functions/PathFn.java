@@ -129,6 +129,7 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
 
         }
         if (origin != null && (node instanceof NodeInfo) != (origin instanceof NodeInfo)) {
+            // One is an XNode, the other is a JNode, so they can't be in the same tree
             throw new XPathException(
                     "In fn:path, the origin node must be in the same tree as the target node", "FOPA0001");
         }
