@@ -100,8 +100,9 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      * Get a name identifying the kind of expression, in terms meaningful to a user.
      *
      * @return a name identifying the kind of expression, in terms meaningful to a user.
-     *         The name will always be in the form of a lexical XML QName, and should match the name used
-     *         in export() output displaying the expression.
+     *         The name will always be in the form of an XML NCName, and should match the name used
+     *         in export() output displaying the expression. It is used, among other things, in -T trace
+     *         output, which is why it must be an NCName.
      */
 
     public String getExpressionName() {

@@ -19,10 +19,7 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.GNodeType;
 import net.sf.saxon.type.gnode.XNodeType;
@@ -240,8 +237,9 @@ public class SequenceCoercer extends UnaryExpression {
     /**
      * Determine the data type of the items returned by the expression
      *
-     * @return a value such as Type.STRING, Type.BOOLEAN, Type.NUMBER, Type.NODE,
-     * or Type.ITEM (meaning not known in advance)
+     * @return a value such as {@link BuiltInAtomicType#STRING}, {@code BuiltInAtomicType#BOOLEAN},
+     * {@link NumericType#getInstance()}, {@link AnyXNodeType#getInstance()}, or
+     * {@link AnyItemType#getInstance()} (meaning not known in advance)
      */
 
     /*@NotNull*/
@@ -286,9 +284,18 @@ public class SequenceCoercer extends UnaryExpression {
 
     @Override
     public String getExpressionName() {
-        return "coercer{" + requiredType + "}";
+        return "coercer";
     }
 
+    @Override
+    public String toString() {
+        return "coerce(" + getBaseExpression() + " to " + requiredType + ")";
+    }
+
+    @Override
+    public String toShortString() {
+        return "coerce(" + getBaseExpression().toShortString() + " to " + requiredType + ")";
+    }
 
     /**
      * Export expression to SEF file. The abstract expression tree
