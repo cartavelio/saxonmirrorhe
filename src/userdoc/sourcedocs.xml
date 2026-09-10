@@ -2181,12 +2181,28 @@ documentBuilder.build(as);]]></samp>
         <code>xsl:output</code> to ensure that the transformation or query result is a well-formed
       document (for example, that it does not contain several elements at the top level).</p>
 
-    <p>External object models do not in all cases fully support the XDM (XPath data model). In
-      particular, many of them have restrictions concerning the recognition of <code>ID</code> and
-        <code>IDREF</code> attributes. In most cases they do not allow "namespace undeclarations" (so
-      a prefix that is in-scope for a parent element will always be in-scope for its child elements).
-      None of the external object models support typed
-      (schema-validated) data, and none support in-situ update using XQuery updates.</p>
+    <p>In some cases external object models do not fully support the XDM (XPath data model), for example:</p>
+      
+      <ul>
+        <li><p>They may allow nodes to be created with invalid names, or with namespace prefixes
+        that are not declared.</p></li>
+        <li><p>Many of them have restrictions concerning the recognition of <code>ID</code> and
+          <code>IDREF</code> attributes.</p></li>
+        <li><p>In most cases they do not allow "namespace undeclarations" as permitted in XML 1.1 (so
+          a prefix that is in-scope for a parent element will always be in-scope for its child elements).</p></li>
+        <li><p>None of the external object models support typed (schema-validated) data.</p></li>
+        <li><p>None of the external object models support in-situ update using XQuery Update.</p></li>
+        <li><p>Many of the external object models allow a document to contain adjacent text nodes, especially
+          when the tree is constructed programmatically rather than as the result of XML parsing.</p> 
+          <p>In the case
+        of DOM, the Saxon wrapper code creates a view of the tree in which multiple adjacent DOM text nodes
+        are presented as a single composite XDM text node. But this logic is not implemented for other
+        external models: in such cases the XDM tree may violate the constraint that adjacent text nodes
+          are not allowed.</p>
+        <p>In the case of DOM4J, a tree with adjacent text nodes may be created even when the tree is
+          built directly by parsing XML using a <code>org.dom4j.io.SAXReader</code>, unless the option 
+          <code>SAXReader.setMergeAdjacentTextNodes(true)</code> is set prior to parsing.</p></li>
+      </ul>
       
     </div>
   </section>

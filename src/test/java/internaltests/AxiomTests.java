@@ -11,7 +11,7 @@ import java.util.Iterator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Created by mike on 07/12/15.
+ * Tests for the Axiom object model
  */
 public class AxiomTests {
 
