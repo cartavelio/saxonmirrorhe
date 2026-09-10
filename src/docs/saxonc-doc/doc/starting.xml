@@ -52,9 +52,9 @@ provide any other feedback.</p>
       </li>
       <li>
         <p><b>Copy the core SaxonC installation files to the install location</b></p>
-        <p>The core SaxonC files which must be copied are:</p>
+        <p>The core SaxonC library is located under the <code>lib/nix</code> directory. The file name is as follows:</p>
         <ul>
-          <li><code>libsaxon[EDITION].so</code> - SaxonC library</li>
+          <li><code>libsaxon-[EDITION]C-[VERSION].so</code> - SaxonC library</li>
         </ul>
                
         <p>On Linux, the expected install location is <code>/usr/lib</code>, and the following
@@ -65,7 +65,7 @@ provide any other feedback.</p>
         <code>libsaxon-[EDITION]C-[VERSION]</code>, to <code>/usr/lib</code>:</p>
         
         <kbd>cd libsaxon-[EDITION]C-[VERSION]/</kbd>
-        <kbd>sudo cp libsaxon[EDITION].so /usr/lib/.</kbd>
+        <kbd>sudo cp libsaxon-[EDITION]C-[VERSION].so /usr/lib/.</kbd>
       </li>
       <li>
         <p><b>Set the LD_LIBRARY_PATH environment variable</b></p>
@@ -104,13 +104,13 @@ provide any other feedback.</p>
       <li>
         <p><b>Unpack</b></p>
         <p>To install the SaxonC-[EDITION] release on Mac OS, first unpack the download by
-        unzipping the file <code>libsaxon-[EDITION]C-mac-setup-v[VERSION].zip</code>.</p>
+        unzipping the file <code>libsaxon-[EDITION]C-mac-[x86_64|aarch64]-v[VERSION].zip</code>.</p>
       </li>
       <li>
         <p><b>Copy the core SaxonC installation files to the install location</b></p>
-        <p>The core SaxonC files which must be copied are:</p>
+        <p>The core SaxonC library file is in the directory <code>libs/darwin</code>:</p>
         <ul>
-          <li><code>libsaxon[EDITION].dylib</code> - SaxonC library</li>
+          <li><code>libsaxon-[EDITION]C-[VERSION].dylib</code> - SaxonC library</li>
         </ul>
                
         <p>On Mac OS, the expected install location is
@@ -124,7 +124,7 @@ provide any other feedback.</p>
         <code>/usr/local/lib</code>:</p>
                
                <kbd>cd Saxonica/Saxon-[EDITION]C-[VERSION]/</kbd>
-               <kbd>sudo cp libsaxon[EDITION].dylib /usr/local/lib/.</kbd>
+               <kbd>sudo cp libs/darwin/libsaxon[EDITION].dylib /usr/local/lib/.</kbd>
                <!-- <kbd>sudo cp -r saxon-data /usr/local/lib/.</kbd> -->
                
          <aside>If you encounter permission issues after copying, then
@@ -164,25 +164,22 @@ provide any other feedback.</p>
       </li>
       <li>
         <p><b>Run the installation tool</b></p>
-        <p>To install the SaxonC-[EDITION] release on Windows, run the installer executable
-        <code>libsaxon-[EDITION]-win-setup-v[VERSION].exe</code>, and follow the installer
-        steps.</p>
+        <p>To install the SaxonC-[EDITION] release on Windows, first unpack the download by unzipping the file
+        <code>libsaxon-[EDITION]C-windows-v[VERSION].zip</code></p>
+
+        <p>The zip file can be unpacked any where suitable, but recommended to unzip files here:
+        <code>C:\Program-Files\Saxonica\Saxon[EDITION][VERSION]</code>.
+        </p>
                
-        <p>During the installation process, you will be asked to <b>select the destination
-        folder</b>, which is the directory in which the core SaxonC files will be installed.
-        The default and recommended location is
-        <code>C:\Program Files\Saxonica\Saxon[EDITION][VERSION]</code>.
-        This is the location that the PHP extension looks for the
-        SaxonC DLL library, so we advise using this default
-        location.</p>
-               
-        <p>If you choose to install to a different location, then the SAXONC_HOME variable
-        must be set accordingly (see the next step).</p>
+          <p>The core SaxonC library file is in the directory <code>libs/windows</code> and this path must be added to the enivironment variable <code>PATH</code>.
+              The library file is named as follows:</p>
+             <code>libsaxon-[EDITION]C-[VERSION].dll</code>
+
       </li>
       <li>
         <p><b>Set the SAXONC_HOME environment variable</b></p>
         <p>If the SaxonC files were installed to a location other than the default
-        <code>C:\Program Files\Saxonica\Saxon[EDITION][VERSION]</code>, then the
+        <code>C:\Program Files\Saxonica\Saxon[EDITION][VERSION]</code>, then the
         SAXONC_HOME variable must be set to the correct location.</p>
         <p>On Windows, this can be done in various ways. The environment variable can be set
         from Window Settings &gt; System Properties &gt; Environment Variables; or from
@@ -273,7 +270,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <p>The <code>samples/cppTest</code> directory provides many more examples in C/C++ which can
          be run. For more information about these samples see <a href="/samples/samples_c"
-            >Samples</a>.</p>
+          >Samples</a>. If the sample exe file does not run due to dll not found either add the dll to your environment variable or copy the dll, exp and .lib file to t he <code>/samples/cppTest</code> directory.</p>
 
 
       <h2 class="subtitle">Using SaxonC in applications</h2>

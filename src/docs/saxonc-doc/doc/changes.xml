@@ -57,6 +57,8 @@
                Python.</li>
             <li>The <code>flag</code> argument in the <code>setCatalog()</code> method of
                <code>SaxonProcessor</code> has been dropped.</li>
+            <li>The <code>Xslt30Processor</code> class now has the following method to better support exporting a stylesheet the the XSLT specifications available: <code>setFastCompilation(bool)</code>,
+            <code>setRelocatable(bool)</code>, <code>setTargetEdition(const char*)</code> and <code>setXsltLanguageVersion(const char*)</code>. These methods are available across all languages (C++, PHP and Python)</li>
          </ul>
       </category>
       
@@ -67,10 +69,13 @@
                <a href="/starting/installing">Installing SaxonC</a>, and the installation documentation for
                the <a href="/starting/installingphp">PHP extension</a> and <a
                   href="/starting/installingpython">Python extension</a>.</li>
+            <li>We have restructured the download directory by moving the core library file within the <code>lib/[nix|darwin|windows]</code> directory.</li>
+            <li>The Windows download is not presented as a .zip file rather than an .exe file.</li>
             <li>For Python users, the product is now available as a Python wheel package on pypi,
                for multiple platforms. This means that it can be installed with pip, which greatly simplifies
                the installation process. See <a href="/starting/installingpython">Python extension</a> for
                details.</li>
+            <li>The python source code has been moved out of the Saxon.C.API directory to the top-level under the directory <code>pypi/python_saxon</code>.</li>
          </ul>
       </category>
    </release>
