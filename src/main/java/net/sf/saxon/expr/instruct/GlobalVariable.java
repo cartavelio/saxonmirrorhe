@@ -356,6 +356,15 @@ public class GlobalVariable extends Actor
     }
 
     /**
+     * Count the references to this variable
+     * @return the number of references
+     */
+
+    public int countReferences() {
+        return references.size();
+    }
+
+    /**
      * Get the slot number allocated to this variable in the Bindery
      *
      * @return the slot number, that is the position allocated to the variable within the Bindery

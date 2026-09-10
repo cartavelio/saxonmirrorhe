@@ -1769,12 +1769,18 @@ public class QueryModule implements StaticContext {
     }
 
     /**
-     * Inner class containing information about an active namespace entry
+     * Get the number of references to a not-yet-declared global variable
      */
 
-    private static class ActiveNamespace {
-        /*@Nullable*/ public String prefix;
-        /*@Nullable*/ public String uri;
+    public int getForwardReferenceCount(StructuredQName variableName) {
+        UndeclaredVariable var = undeclaredVariables.get(variableName);
+        if (var == null) {
+            return 0;
+        } else {
+            return var.countReferences();
+        }
     }
+
+
 }
 
