@@ -248,72 +248,71 @@ namespace TestDriver {
                     return false;
                 }
                 case "feature": {
-                    if ("namespace-axis".Equals(value)) {
-                        return !inverse;
-                    }
-                    else if ("higherOrderFunctions".Equals(value)) {
-                        return !inverse;
-                    }
-                    else if ("schemaImport".Equals(value) || "schemaValidation".Equals(value) ||
-                             "schemaAware".Equals(value) || "schema-location-hint".Equals(value)) {
-                        return makeSchemaAware(env, inverse);
-
-                    }
-                    else if ("staticTyping".Equals(value)) {
-                        return inverse;
-                    }
-                    else if ("moduleImport".Equals(value)) {
-                        return !inverse;
-                    }
-                    else if ("schema-location-hint".Equals(value)) {
-                        return (edition.Equals("EE")) ^ inverse;
-                    }
-                    else if ("info-dtd".Equals(value)) {
-                        if (treeModel == "tiny" || treeModel == "linked" ||
-                            treeModel == "condensed") {
+                    switch (value) {
+                        case "namespace-axis":
+                        case "higherOrderFunctions":
+                        case "binary":
+                        case "moduleImport":
                             return !inverse;
-                        }
-                        else {
+                        case "schemaImport":
+                        case "schemaValidation":
+                        case "schemaAware":
+                        case "schema-location-hint":
+                            return makeSchemaAware(env, inverse);
+                        case "staticTyping":
                             return inverse;
-                        }
-                    }
-                    else if ("serialization".Equals(value)) {
-                        return true;
-                    }
-                    else if ("non_codepoint_collation".Equals(value)) {
-                        return !inverse;
-                    }
-                    else if ("non_empty_sequence_collection".Equals(value)) {
-                        return !inverse;
-                    }
-                    else if ("fn-load-xquery-module".Equals(value)) {
-                        return edition.Equals("EE") ^ inverse;
-                    }
-                    else if ("fn-transform-XSLT".Equals(value)) {
-                        return !inverse;
-                    }
-                    else if ("fn-transform-XSLT30".Equals(value)) {
-                        return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
-                    }
-                    else if ("fn-format-integer-CLDR".Equals(value)) {
-                        return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
-                    }
-                    else if ("simple-uca-fallback".Equals(value)) {
-                        return !inverse;
-                    }
-                    else if ("advanced-uca-fallback".Equals(value)) {
-                        return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
-                    }
-                    else if ("XQUpdate" == value) {
-                        if (edition == "EE" && !inverse) {
-                            env.xqueryCompiler.UpdatingEnabled = true;
-                        }
-                        return edition == "EE" && !inverse;
-                    }
+                        default: {
+                            if ("schema-location-hint".Equals(value)) {
+                                return (edition.Equals("EE")) ^ inverse;
+                            }
+                            else if ("info-dtd".Equals(value)) {
+                                if (treeModel == "tiny" || treeModel == "linked" ||
+                                    treeModel == "condensed") {
+                                    return !inverse;
+                                }
+                                else {
+                                    return inverse;
+                                }
+                            }
+                            else if ("serialization".Equals(value)) {
+                                return true;
+                            }
+                            else if ("non_codepoint_collation".Equals(value)) {
+                                return !inverse;
+                            }
+                            else if ("non_empty_sequence_collection".Equals(value)) {
+                                return !inverse;
+                            }
+                            else if ("fn-load-xquery-module".Equals(value)) {
+                                return edition.Equals("EE") ^ inverse;
+                            }
+                            else if ("fn-transform-XSLT".Equals(value)) {
+                                return !inverse;
+                            }
+                            else if ("fn-transform-XSLT30".Equals(value)) {
+                                return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
+                            }
+                            else if ("fn-format-integer-CLDR".Equals(value)) {
+                                return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
+                            }
+                            else if ("simple-uca-fallback".Equals(value)) {
+                                return !inverse;
+                            }
+                            else if ("advanced-uca-fallback".Equals(value)) {
+                                return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
+                            }
+                            else if ("XQUpdate" == value) {
+                                if (edition == "EE" && !inverse) {
+                                    env.xqueryCompiler.UpdatingEnabled = true;
+                                }
+                                return edition == "EE" && !inverse;
+                            }
                     
-                    else {
-                        println("**** feature = " + value + "  ????");
-                        return false;
+                            else {
+                                println("**** feature = " + value + "  ????");
+                                return false;
+                            }
+                        }
                     }
                 }
                 default: {
@@ -866,11 +865,14 @@ namespace TestDriver {
                 }
 
                 XPathCompiler assertXpc = env.processor.NewXPathCompiler();
-#if EE
-                assertXpc.XPathLanguageVersion = "4.0";
-#else
-                assertXpc.XPathLanguageVersion = "3.1";
-#endif                
+                if ("4.0" == langVersion) {
+                    assertXpc.XPathLanguageVersion = langVersion;
+                }
+// #if EE
+//                 assertXpc.XPathLanguageVersion = "4.0";
+// #else
+//                 assertXpc.XPathLanguageVersion = "3.1";
+// #endif                
                 assertXpc.SchemaAware = testIsSchemaAware;
                 if (testIsSchemaAware) {
                     assertXpc.Schema = env.schema;
