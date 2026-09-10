@@ -8,6 +8,8 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.ResourceResolver;
+import net.sf.saxon.lib.ResourceResolverWrappingURIResolver;
 import net.sf.saxon.lib.UnparsedTextURIResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.streams.XdmStream;
@@ -124,8 +126,33 @@ public class XPathSelector implements Iterable<XdmItem> {
      * @since 9.4
      */
 
+    public void setResourceResolver(ResourceResolver resolver) {
+        dynamicContext.setResourceResolver(resolver);
+    }
+
+    /**
+     * Get the URI resolver.
+     *
+     * @return the user-supplied URI resolver if there is one, or the
+     * system-defined one otherwise
+     * @since 9.4
+     */
+
+    public ResourceResolver getResourceResolver() {
+        return dynamicContext.getResourceResolver();
+    }
+
+
+    /**
+     * Set an object that will be used to resolve URIs used in
+     * fn:doc() and related functions.
+     *
+     * @param resolver An object that implements the URIResolver interface, or null.
+     * @since 9.4
+     */
+
     public void setURIResolver(URIResolver resolver) {
-        dynamicContext.setURIResolver(resolver);
+        dynamicContext.setResourceResolver(new ResourceResolverWrappingURIResolver(resolver));
     }
 
     /**
@@ -137,7 +164,11 @@ public class XPathSelector implements Iterable<XdmItem> {
      */
 
     public URIResolver getURIResolver() {
-        return dynamicContext.getURIResolver();
+        if (dynamicContext.getResourceResolver() instanceof ResourceResolverWrappingURIResolver) {
+            return ((ResourceResolverWrappingURIResolver) dynamicContext.getResourceResolver()).getWrappedURIResolver();
+        } else {
+            return null;
+        }
     }
 
     /**

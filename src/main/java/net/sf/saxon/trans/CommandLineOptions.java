@@ -289,15 +289,16 @@ public class CommandLineOptions {
         if (optionValue != null) {
             ArrayList<String> catalogs = new ArrayList<>();
             if ((getOptionValue("u") != null) || isImplicitURI(optionValue)) {
+                ResourceRequest request = new ResourceRequest();
+                request.nature = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
+                request.purpose = "catalog";
                 for (String s : optionValue.split(";")) {
-                    Source sourceInput = null;
+                    Source sourceInput;
                     try {
-                        sourceInput = config.getURIResolver().resolve(s, null);
-                    } catch (TransformerException e) {
-                        // no action - try the standard URI resolver instead
-                    }
-                    if (sourceInput == null) {
-                        sourceInput = config.getSystemURIResolver().resolve(s, null);
+                        request.uri = s;
+                        sourceInput = new DirectResourceResolver(config).resolve(request);
+                    } catch (XPathException e) {
+                        throw new XPathException("Catalog file not found: " + s, e);
                     }
                     catalogs.add(sourceInput.getSystemId());
                 }
@@ -388,7 +389,7 @@ public class CommandLineOptions {
 
         optionValue = getOptionValue("r");
         if (optionValue != null) {
-            config.setURIResolver(config.makeURIResolver(optionValue));
+            config.setResourceResolver(config.makeResourceResolver(optionValue));
         }
 
         optionValue = getOptionValue("strip");
@@ -475,7 +476,12 @@ public class CommandLineOptions {
 
     @CSharpReplaceBody(code="config.getCommonResourceResolver().SetFeature(Org.XmlResolver.Features.ResolverFeature.CATALOG_FILES, catalogs);")
     private void setCatalogFiles(Configuration config, ArrayList<String> catalogs) throws XPathException {
-        config.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogs);
+        ResourceResolver rr = config.getResourceResolver();
+        if (rr instanceof CatalogResourceResolver) {
+            ((CatalogResourceResolver)rr).setFeature(ResolverFeature.CATALOG_FILES, catalogs);
+        } else {
+            throw new IllegalStateException("The resolver in the Configuration is not a CatalogResolver");
+        }
     }
 
     /**
@@ -704,11 +710,12 @@ public class CommandLineOptions {
         Configuration config = processor.getUnderlyingConfiguration();
         if (useURLs || isImplicitURI(sourceFileName)) {
             try {
-                sourceInput = config.getURIResolver().resolve(sourceFileName, null);
-                if (sourceInput == null) {
-                    sourceInput = config.getSystemURIResolver().resolve(sourceFileName, null);
-                }
-            } catch (TransformerException e) {
+                ResourceRequest request = new ResourceRequest();
+                request.uri = sourceFileName;
+                request.nature = ResourceRequest.XML_NATURE;
+                request.purpose = "source document";
+                sourceInput = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+            } catch (XPathException e) {
                 throw new SaxonApiException(e);
             }
             sources.add(sourceInput);

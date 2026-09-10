@@ -12,6 +12,7 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trace.ContextStackFrame;
@@ -22,7 +23,6 @@ import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.DateTimeValue;
 
-import javax.xml.transform.URIResolver;
 import java.util.Iterator;
 import java.util.function.Function;
 
@@ -284,8 +284,8 @@ public class XPathContextMinor implements XPathContext {
      * @since 9.6
      */
     @Override
-    public URIResolver getURIResolver() {
-        return caller.getURIResolver();
+    public ResourceResolver getResourceResolver() {
+        return caller.getResourceResolver();
     }
 
     /**

@@ -370,6 +370,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "preEvaluateDoc", FeatureCode.PRE_EVALUATE_DOC_FUNCTION, "JN");
         //applyProperty(props, "preferJaxpParser", FeatureCode.PREFER_JAXP_PARSER);
         applyProperty(props, "recognizeUriQueryParameters", FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS, "JN");
+        applyProperty(props, "resourceResolver", FeatureCode.RESOURCE_RESOLVER_CLASS, "J");
         applyProperty(props, "retainNodeForDiagnostics", FeatureCode.RETAIN_NODE_FOR_DIAGNOSTICS, "JN");
         applyProperty(props, "schemaValidation", FeatureCode.SCHEMA_VALIDATION_MODE, "JN");
         applyProperty(props, "serializerFactory", FeatureCode.SERIALIZER_FACTORY_CLASS, "J");
@@ -393,7 +394,6 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "treeModel", FeatureCode.TREE_MODEL_NAME, "JN");
         applyProperty(props, "unparsedTextUriResolver", FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
         applyProperty(props, "uriResolver", FeatureCode.URI_RESOLVER_CLASS, "J");
-        applyProperty(props, "commonResourceResolver", FeatureCode.COMMON_RESOURCE_RESOLVER_CLASS, "J");
         applyProperty(props, "usePiDisableOutputEscaping", FeatureCode.USE_PI_DISABLE_OUTPUT_ESCAPING, "JN");
         applyProperty(props, "useTypedValueCache", FeatureCode.USE_TYPED_VALUE_CACHE, "JN");
         applyProperty(props, "validationComments", FeatureCode.VALIDATION_COMMENTS, "JN");
@@ -811,8 +811,11 @@ public class ConfigurationReader implements Receiver {
         }
 
         //#if CSHARP==false
-        if (level == 2 && "resources".equals(localName) && catalogFiles.size() != 0) {
-            targetConfig.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogFiles);
+        if (level == 2
+                && "resources".equals(localName)
+                && catalogFiles.size() != 0
+                && targetConfig.getResourceResolver() instanceof CatalogResourceResolver) {
+            ((CatalogResourceResolver)targetConfig.getResourceResolver()).setFeature(ResolverFeature.CATALOG_FILES, catalogFiles);
         }
         //#endif
 

@@ -518,10 +518,8 @@ public class Processor implements Configuration.ApiProvider {
 
     public void setCatalogFile(String... fileNames) {
         //#if CSHARP==false
-        try {
-            config.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, Arrays.asList(fileNames));
-        } catch (XPathException e) {
-            throw new IllegalArgumentException(e);
+        if (config.getResourceResolver() instanceof CatalogResourceResolver) {
+            ((CatalogResourceResolver) config.getResourceResolver()).setFeature(ResolverFeature.CATALOG_FILES, Arrays.asList(fileNames));
         }
         //#endif
     }

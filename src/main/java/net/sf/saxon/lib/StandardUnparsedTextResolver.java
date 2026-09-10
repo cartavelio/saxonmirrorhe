@@ -11,11 +11,11 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.resource.*;
 import net.sf.saxon.trans.XPathException;
 
-
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import java.io.*;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.*;
 import java.util.zip.GZIPInputStream;
 
@@ -75,22 +75,23 @@ public class StandardUnparsedTextResolver
             throw new XPathException("Resolved URI supplied to unparsed-text() is not absolute: " + absoluteURI.toString(),
                     "FOUT1170");
         }
-        if (!config.getAllowedUriTest().test(absoluteURI)) {
-            throw new XPathException("URI scheme '" + absoluteURI.getScheme() + "' has been disallowed");
-        }
+//        if (!config.getAllowedUriTest().test(absoluteURI)) {
+//            throw new XPathException("URI scheme '" + absoluteURI.getScheme() + "' has been disallowed");
+//        }
 
         // Do this early in case it returns a data: or classpath: URI.
-        try {
-            Source resolved = config.getCommonResourceResolver().resolve(absoluteURI.toString(), null);
-            if (resolved != null) {
-                absoluteURI = new URI(resolved.getSystemId());
-            }
-        } catch (TransformerException te) {
-            // nevermind, we'll just fall through and try the old way
-        } catch (URISyntaxException mue) {
-            // let this fall through too; it shouldn't be possible, but if it is,
-            // try the old way.
-        }
+        //TODO reinstate me
+//        try {
+////            Source resolved = config.getResourceResolver().resolve(absoluteURI.toString(), null);
+////            if (resolved != null) {
+////                absoluteURI = new URI(resolved.getSystemId());
+////            }
+//        } catch (TransformerException te) {
+//            // nevermind, we'll just fall through and try the old way
+//        } catch (URISyntaxException mue) {
+//            // let this fall through too; it shouldn't be possible, but if it is,
+//            // try the old way.
+//        }
 
         InputStream inputStream = null;
         String contentEncoding;

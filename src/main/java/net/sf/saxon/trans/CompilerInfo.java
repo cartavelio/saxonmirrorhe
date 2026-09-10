@@ -36,8 +36,7 @@ import javax.xml.transform.URIResolver;
 public class CompilerInfo {
 
     private Configuration config;
-    private URIResolver uriResolver;
-    private CommonResourceResolver commonResourceResolver;
+    private ResourceResolver resourceResolver;
     private ErrorReporter errorReporter = new StandardErrorReporter();
     private CodeInjector codeInjector;
     private int recoveryPolicy = Mode.RECOVER_WITH_WARNINGS;
@@ -94,10 +93,7 @@ public class CompilerInfo {
 
     public void copyFrom(CompilerInfo info) {
         config = info.config;
-        uriResolver = info.uriResolver;
-        //#if CSHARP==false
-        commonResourceResolver = info.commonResourceResolver;
-        //#endif
+        resourceResolver = info.resourceResolver;
         errorReporter = info.errorReporter;
         codeInjector = info.codeInjector;
         recoveryPolicy = info.recoveryPolicy;
@@ -162,22 +158,23 @@ public class CompilerInfo {
      * @param resolver The URIResolver to be used. This is used to dereference URIs encountered in constructs
      *                 such as xsl:include, xsl:import, and xsl:import-schema.
      * @since 8.7
+     * @deprecated since 11.1: use {@link #setResourceResolver}
      */
 
     public void setURIResolver(URIResolver resolver) {
-        uriResolver = resolver;
+        resourceResolver = new ResourceResolverWrappingURIResolver(resolver);
     }
 
     /**
-     * Set the resource resolver to be used when resolving external identifiers and URIs.
+     * Set the URI Resolver to be used in this compilation episode.
      *
-     * @param resolver The {@link CommonResourceResolver} to be used. This is used to resolve external identifiers
-     *                 and URIs.
-     * @since 11.0
+     * @param resolver The URIResolver to be used. This is used to dereference URIs encountered in constructs
+     *                 such as xsl:include, xsl:import, and xsl:import-schema.
+     * @since 8.7
      */
 
-    public void setCommonResourceResolver(CommonResourceResolver resolver) {
-        commonResourceResolver = resolver;
+    public void setResourceResolver(ResourceResolver resolver) {
+        resourceResolver = resolver;
     }
 
     /**
@@ -376,19 +373,23 @@ public class CompilerInfo {
      */
 
     public URIResolver getURIResolver() {
-        return uriResolver;
+        if (resourceResolver instanceof ResourceResolverWrappingURIResolver) {
+            return ((ResourceResolverWrappingURIResolver)resourceResolver).getWrappedURIResolver();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the ResourceResolver being used
+     * @return the current ResourceResolver. Defaults to null.
+     */
+
+    public ResourceResolver getResourceResolver() {
+        return resourceResolver;
     }
 
     //#if CSHARP==false
-    /**
-     * Get the resource resolver being used.
-     *
-     * @return resolver The {@link CommonResourceResolver} in use.
-     * @since 11.0
-     */
-    public CommonResourceResolver getCommonResourceResolver() {
-        return commonResourceResolver;
-    }
 
     /**
      * Get the OutputURIResolver that will be used to resolve URIs used in the

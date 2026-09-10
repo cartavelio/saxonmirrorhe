@@ -12,6 +12,7 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trace.ContextStackFrame;
@@ -22,7 +23,6 @@ import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.value.CalendarValue;
 import net.sf.saxon.value.DateTimeValue;
 
-import javax.xml.transform.URIResolver;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -76,8 +76,8 @@ public class EarlyEvaluationContext implements XPathContext {
      * @since 9.6
      */
     @Override
-    public URIResolver getURIResolver() {
-        return config.getURIResolver();
+    public ResourceResolver getResourceResolver() {
+        return config.getResourceResolver();
     }
 
     /**

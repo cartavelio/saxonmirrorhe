@@ -29,8 +29,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.*;
@@ -47,7 +45,7 @@ import static net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE.isTrue;
  * of test cases.
  */
 
-public class Environment implements URIResolver {
+public class Environment implements ResourceResolver {
 
     public static class CatalogResource {
         public File file;
@@ -1107,20 +1105,23 @@ public class Environment implements URIResolver {
                     environment.xsltExecutable = environment.xsltCompiler.compile(styleSource);
                 } catch (SaxonApiException e) {
                     driver.println("*** failed to compile stylesheet referenced in source document " + href);
+                    environment.failedToBuild = true;
                 }
             }
         }
     }
 
     /**
-     * The environment acts as a URIResolver
+     * The environment acts as a ResourceResolver
      */
 
     @Override
-    public Source resolve(String href, String base) throws TransformerException {
-        XdmNode node = sourceDocs.get(href);
+    public Source resolve(ResourceRequest request) throws XPathException {
+        XdmNode node = sourceDocs.get(request.relativeUri);
         if (node == null) {
             String uri;
+            String base = request.baseUri;
+            String href = request.relativeUri;
             if (base == null) {
                 base = href;
                 href = "";

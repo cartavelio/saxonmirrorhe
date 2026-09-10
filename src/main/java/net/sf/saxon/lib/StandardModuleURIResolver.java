@@ -35,8 +35,7 @@ import java.net.URLConnection;
  */
 
 public class StandardModuleURIResolver implements ModuleURIResolver {
-    public static final String XQUERY_NATURE = "https://www.iana.org/assignments/media-types/application/xquery";
-
+    
     Configuration config = null;
 
     /**
@@ -99,35 +98,47 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
             throw err;
         } else {
             // One or more locations given: import modules from all these locations
+            ResourceRequest rr = new ResourceRequest();
+            rr.baseUri = baseURI;
+            rr.nature = ResourceRequest.XQUERY_NATURE;
             StreamSource[] sources = new StreamSource[locations.length];
             for (int m = 0; m < locations.length; m++) {
-                String href = locations[m];
-                URI absoluteURI;
+                rr.relativeUri = locations[m];
                 try {
-                    Source source = null;
-                    if (config != null) {
-                        try {
-                            source = config.getCommonResourceResolver().resolve(href, baseURI);
-                        } catch (TransformerException ex) {
-                            // Sigh. Nevermind then.
-                        }
-                    }
-                    if (source == null) {
-                        absoluteURI = ResolveURI.makeAbsolute(href, baseURI);
-                    } else {
-                        absoluteURI = new URI(source.getSystemId());
-                    }
+                    rr.uri = ResolveURI.makeAbsolute(rr.relativeUri, baseURI).toString();
+                    sources[m] = (StreamSource)rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
                 } catch (URISyntaxException err) {
-                    XPathException se = new XPathException("Cannot resolve relative URI " + href, err);
+                    XPathException se = new XPathException("Cannot resolve relative URI " + rr.relativeUri, err);
                     se.setErrorCode("XQST0059");
                     se.setIsStaticError(true);
                     throw se;
                 }
-                if (config != null && !config.getAllowedUriTest().test(absoluteURI)) {
-                    throw new XPathException("URI scheme '" + absoluteURI.getScheme() + "' has been disallowed");
-                }
+//                URI absoluteURI;
+//                try {
+//                    Source source = null;
+//                    if (config != null) {
+//                        try {
+//                            source = config.getResourceResolver().resolve(href, baseURI);
+//                        } catch (TransformerException ex) {
+//                            // Sigh. Nevermind then.
+//                        }
+//                    }
+//                    if (source == null) {
+//                        absoluteURI = ResolveURI.makeAbsolute(href, baseURI);
+//                    } else {
+//                        absoluteURI = new URI(source.getSystemId());
+//                    }
+//                } catch (URISyntaxException err) {
+//                    XPathException se = new XPathException("Cannot resolve relative URI " + href, err);
+//                    se.setErrorCode("XQST0059");
+//                    se.setIsStaticError(true);
+//                    throw se;
+//                }
+//                if (config != null && !config.getAllowedUriTest().test(absoluteURI)) {
+//                    throw new XPathException("URI scheme '" + absoluteURI.getScheme() + "' has been disallowed");
+//                }
 
-                sources[m] = getQuerySource(absoluteURI);
+//                sources[m] = getQuerySource(absoluteURI);
             }
             return sources;
         }
@@ -137,10 +148,16 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
         try {
             Source source = null;
             if (config != null) {
-                source = config.getCommonResourceResolver().resolveNamespace(moduleURI, XQUERY_NATURE, null);
+                ResourceRequest rr = new ResourceRequest();
+                rr.uri = moduleURI;
+                rr.uriIsNamespace = true;
+                rr.baseUri = baseURI;
+                rr.nature = ResourceRequest.XQUERY_NATURE;
+                source = config.getResourceResolver().resolve(rr);
                 if (source == null && baseURI != null) {
-                    String resuri = new URI(baseURI).resolve(moduleURI).toString();
-                    source = config.getCommonResourceResolver().resolveNamespace(resuri, XQUERY_NATURE, null);
+                    rr.uri = new URI(baseURI).resolve(moduleURI).toString();
+                    rr.uriIsNamespace = false;
+                    source = config.getResourceResolver().resolve(rr);
                 }
             }
             if (source != null) {

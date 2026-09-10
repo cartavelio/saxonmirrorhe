@@ -15,9 +15,7 @@ import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.lib.Logger;
-import net.sf.saxon.lib.TraceListener;
-import net.sf.saxon.lib.UnparsedTextURIResolver;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.XQueryExpression;
@@ -212,10 +210,11 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      *
      * @param resolver An object that implements the URIResolver interface, or
      *                 null.
+     * @deprecated since 11.1 - use a <code>ResourceResolver</code> instead
      */
 
     public void setURIResolver(URIResolver resolver) {
-        context.setURIResolver(resolver);
+        context.setResourceResolver(new ResourceResolverWrappingURIResolver(resolver));
     }
 
     /**
@@ -223,11 +222,39 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      *
      * @return the user-supplied URI resolver if there is one, or the
      *         system-defined one otherwise
+     * @deprecated since 11.1 - use a <code>ResourceResolver</code> instead
      */
 
     public URIResolver getURIResolver() {
-        return context.getURIResolver();
+        ResourceResolver rr = context.getResourceResolver();
+        if (rr instanceof ResourceResolverWrappingURIResolver) {
+            return ((ResourceResolverWrappingURIResolver) rr).getWrappedURIResolver();
+        } else {
+            return null;
+        }
     }
+
+    /**
+     * Set the ResourceResolver to be used during query evaluation.
+     * @param resolver the ResourceResolver to be used during query evaluation.
+     */
+
+
+    public void setResourceResolver(ResourceResolver resolver) {
+        context.setResourceResolver(resolver);
+    }
+
+    /**
+     * Get the ResourceResolver to be used during query evaluation.
+     *
+     * @return the ResourceResolver used during query evaluation. Returns null if no user-supplied
+     * ResourceResolver has been set.
+     */
+
+    public ResourceResolver getResourceResolver() {
+        return context.getResourceResolver();
+    }
+
 
     /**
      * Set an object that will be used to resolve URIs used in

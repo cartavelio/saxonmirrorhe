@@ -111,24 +111,24 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
         this.allowedUriTest = test;
     }
 
-    /**
-     * Set a Predicate that is applied to a URI to determine whether the resolver should accept it.
-     *
-     * <p>The default predicate can be set by means of the configuration property
-     * {@link Feature#ALLOWED_PROTOCOLS}.</p>
-     */
-
-    public Predicate<URI> getAllowedUriTest() {
-        if (allowedUriTest == null) {
-            if (config == null) {
-                return uri -> true;
-            } else {
-                return config.getAllowedUriTest();
-            }
-        } else {
-            return allowedUriTest;
-        }
-    }
+//    /**
+//     * Set a Predicate that is applied to a URI to determine whether the resolver should accept it.
+//     *
+//     * <p>The default predicate can be set by means of the configuration property
+//     * {@link Feature#ALLOWED_PROTOCOLS}.</p>
+//     */
+//
+//    public Predicate<URI> getAllowedUriTest() {
+//        if (allowedUriTest == null) {
+//            if (config == null) {
+//                return uri -> true;
+//            } else {
+//                return config.getAllowedUriTest();
+//            }
+//        } else {
+//            return allowedUriTest;
+//        }
+//    }
 
     /**
      * Get the relevant platform
@@ -230,9 +230,9 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
             throw new XPathException("Invalid URI " + Err.wrap(relativeURI) + " - base " + Err.wrap(base), err);
         }
 
-        if (!getAllowedUriTest().test(uri)) {
-            throw new XPathException("URI '" + uri.toString() + "' has been disallowed", "FODC0002");
-        }
+//        if (!getAllowedUriTest().test(uri)) {
+//            throw new XPathException("URI '" + uri.toString() + "' has been disallowed", "FODC0002");
+//        }
 
         // Check that any "%" sign in the URI is part of a well-formed percent-encoded UTF-8 character.
         // Without this check, dereferencing the resulting URL can fail with arbitrary unchecked exceptions
@@ -242,6 +242,7 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
 
         // Handle a URI using the data: URI scheme
         if ("data".equals(uri.getScheme())) {
+            // TODO: could rely on the CommonResourceResolver to handle this case
             Resource resource;
             try {
                 resource = DataURIScheme.decode(uri);
@@ -261,11 +262,12 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
             }
         } else {
             if (config != null) {
-                try {
-                    source = config.getCommonResourceResolver().resolve(relativeURI, base);
-                } catch (Exception ex) {
-                    throw XPathException.makeXPathException(ex);
-                }
+                return null; // TODO
+//                try {
+//                    source = config.getResourceResolver().resolve(relativeURI, base);
+//                } catch (Exception ex) {
+//                    throw XPathException.makeXPathException(ex);
+//                }
             }
             if (source == null) {
                 source = new SAXSource();

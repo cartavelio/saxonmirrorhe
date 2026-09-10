@@ -1,16 +1,15 @@
 package net.sf.saxon.lib;
 
-import org.xml.sax.EntityResolver;
+import net.sf.saxon.trans.XPathException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.ext.EntityResolver2;
 import org.xmlresolver.Resolver;
 import org.xmlresolver.ResolverFeature;
 import org.xmlresolver.XMLResolverConfiguration;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
+import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -25,7 +24,7 @@ import java.util.Collections;
  */
 
 public class CatalogResourceResolver extends CommonResourceResolver {
-    private final Resolver resolver;
+    private org.xmlresolver.Resolver catalogBasedResolver;
 
     /**
      * Creates a new CatalogResourceResolver resolver with a default {@link org.xmlresolver.XMLResolverConfiguration}.
@@ -39,7 +38,7 @@ public class CatalogResourceResolver extends CommonResourceResolver {
         // We explicitly pass in an empty list so that in the absence of any other configuration,
         // the resolver doesn't use ./catalog.xml as a default. Historically, Saxon didn't use a
         // resolver unless a catalog was specified, so this default could have unexpected consequences.
-        resolver = new Resolver(new XMLResolverConfiguration(null, Collections.emptyList()));
+        catalogBasedResolver = new Resolver(new XMLResolverConfiguration(null, Collections.emptyList()));
     }
 
     /**
@@ -47,7 +46,7 @@ public class CatalogResourceResolver extends CommonResourceResolver {
      * @param resolver The resolver to wrap.
      */
     public CatalogResourceResolver(Resolver resolver) {
-        this.resolver = resolver;
+        this.catalogBasedResolver = resolver;
     }
 
     /**
@@ -56,45 +55,45 @@ public class CatalogResourceResolver extends CommonResourceResolver {
      * @return A new CatalogResourceResolver.
      */
     public CommonResourceResolver newInstance() {
-        CommonResourceResolver newResolver = new CatalogResourceResolver(resolver);
+        CommonResourceResolver newResolver = new CatalogResourceResolver(catalogBasedResolver);
         newResolver.copyFrom(this);
         return newResolver;
     }
 
-    /**
-     * Chains an entity resolver.
-     * @param resolver the fallback resolver. If the fallback resolver is an instance of <code>EntityResolver2</code>,
-     *                 it will be used as the fallback for that interface as well.
-     * @return this
-     */
-    public CommonResourceResolver chain(EntityResolver resolver) {
-        nextEntityResolver = resolver;
-        if (resolver instanceof EntityResolver2) {
-            nextEntityResolver2 = (EntityResolver2) resolver;
-        }
-        return this;
-    }
-
-    /**
-     * Chains an entity resolver.
-     * @param resolver the fallback resolver.
-     * @return this
-     */
-    public CommonResourceResolver chain(EntityResolver2 resolver) {
-        nextEntityResolver = resolver;
-        nextEntityResolver2 = resolver;
-        return this;
-    }
-
-    /**
-     * Chains a URI resolver.
-     * @param resolver the fallback resolver.
-     * @return this.
-     */
-    public CommonResourceResolver chain(URIResolver resolver) {
-        nextURIResolver = resolver;
-        return this;
-    }
+//    /**
+//     * Chains an entity resolver.
+//     * @param resolver the fallback resolver. If the fallback resolver is an instance of <code>EntityResolver2</code>,
+//     *                 it will be used as the fallback for that interface as well.
+//     * @return this
+//     */
+//    public CommonResourceResolver chain(EntityResolver resolver) {
+//        nextEntityResolver = resolver;
+//        if (resolver instanceof EntityResolver2) {
+//            nextEntityResolver2 = (EntityResolver2) resolver;
+//        }
+//        return this;
+//    }
+//
+//    /**
+//     * Chains an entity resolver.
+//     * @param resolver the fallback resolver.
+//     * @return this
+//     */
+//    public CommonResourceResolver chain(EntityResolver2 resolver) {
+//        nextEntityResolver = resolver;
+//        nextEntityResolver2 = resolver;
+//        return this;
+//    }
+//
+//    /**
+//     * Chains a URI resolver.
+//     * @param resolver the fallback resolver.
+//     * @return this.
+//     */
+//    public CommonResourceResolver chain(ResourceResolver resolver) {
+//        nextResourceResolver = resolver;
+//        return this;
+//    }
 
     /**
      * Calls {@link org.xmlresolver.XMLResolverConfiguration#getFeature} on the underlying
@@ -104,10 +103,10 @@ public class CatalogResourceResolver extends CommonResourceResolver {
      * @return The value for the specified feature.
      */
     public <T> T getFeature(ResolverFeature<T> feature) {
-        if (resolver == null) {
+        if (catalogBasedResolver == null) {
             return null;
         }
-        return resolver.getConfiguration().getFeature(feature);
+        return catalogBasedResolver.getConfiguration().getFeature(feature);
     }
 
     /**
@@ -121,36 +120,71 @@ public class CatalogResourceResolver extends CommonResourceResolver {
      * feature value.
      */
     public <T> void setFeature(ResolverFeature<T> feature, T value) {
-        if (resolver == null) {
+        if (catalogBasedResolver == null) {
             throw new NullPointerException();
         }
-        resolver.getConfiguration().setFeature(feature, value);
+        catalogBasedResolver.getConfiguration().setFeature(feature, value);
     }
 
     /**
-     * Resolve the URI. If the specified <code>href</code> cannot be resolved, it will be
-     * made absolute against the <code>base</code> (if the base has been provided). If the
-     * resulting absolute URI is different from <code>href</code>, an attempt will be
-     * made to resolve the absolute URI.
+     * Resolve a resource request.
      *
      * If catalog resolution fails and a fallback URI resolver has been chained, the
      * fallback resolver will be attempted.
      *
-     * @param href The URI
-     * @param base The base URI
+     * @param request details of the resource request
      * @return The resolved resource, or null if it could not be resolved.
-     * @throws TransformerException if an error occurs during the attempt to resolve the URI.
+     * @throws XPathException if an error occurs during the attempt to resolve the URI.
      */
     @Override
-    public Source resolve(String href, String base) throws TransformerException {
-        Source result = null;
-        if (resolver != null) {
-            result = resolver.resolve(href, base);
+    public Source resolve(ResourceRequest request) throws XPathException {
+        if (catalogBasedResolver != null) {
+
+            Source rr = null;
+            if (request.uriIsNamespace) {
+                try {
+                    rr = catalogBasedResolver.resolveNamespace(
+                            request.uri, request.nature, request.purpose);
+                } catch (TransformerException e) {
+                    throw XPathException.makeXPathException(e);
+                }
+            } else if (ResourceRequest.DTD_NATURE.equals(request.nature)) {
+                return null;
+            } else if (ResourceRequest.EXTERNAL_ENTITY_NATURE.equals(request.nature)) {
+                try {
+                    InputSource is = catalogBasedResolver.resolveEntity(
+                            request.entityName, request.publicId, request.baseUri, request.uri);
+                    if (is == null) {
+                        return null;
+                    }
+                    StreamSource ss = new StreamSource(request.uri);
+                    if (is.getByteStream() != null) {
+                        ss.setInputStream(is.getByteStream());
+                    }
+                    if (is.getCharacterStream() != null) {
+                        ss.setReader(is.getCharacterStream());
+                    }
+                    return ss;
+                } catch (SAXException| IOException e) {
+                    throw XPathException.makeXPathException(e);
+                }
+            } else {
+                String href = request.relativeUri == null ? request.uri : request.relativeUri;
+                String baseUri = request.baseUri == null ? request.uri : request.baseUri;
+                try {
+                    rr = catalogBasedResolver.resolve(href, baseUri);
+                } catch (TransformerException e) {
+                    throw XPathException.makeXPathException(e);
+                } catch (IllegalArgumentException e) {
+                    // TODO: this is only here because of a Resolver bug which will probably be fixed. Test stream-006
+                    throw XPathException.makeXPathException(e);
+                }
+            }
+            if (rr != null) {
+                return rr;
+            }
         }
-        if (result == null && nextURIResolver != null) {
-            result = nextURIResolver.resolve(href, base);
-        }
-        return result;
+        return nextResourceResolver == null ? null : nextResourceResolver.resolve(request);
     }
 
     /**
@@ -169,8 +203,8 @@ public class CatalogResourceResolver extends CommonResourceResolver {
     @Override
     public InputSource getExternalSubset(String name, String baseURI) throws SAXException, IOException {
         InputSource result = null;
-        if (resolver != null) {
-            result = resolver.getExternalSubset(name, baseURI);
+        if (catalogBasedResolver != null) {
+            result = catalogBasedResolver.getExternalSubset(name, baseURI);
         }
         if (result == null && nextEntityResolver2 != null) {
             result = nextEntityResolver2.getExternalSubset(name, baseURI);
@@ -201,8 +235,8 @@ public class CatalogResourceResolver extends CommonResourceResolver {
     @Override
     public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
         InputSource result = null;
-        if (resolver != null) {
-            result = resolver.resolveEntity(name, publicId, baseURI, systemId);
+        if (catalogBasedResolver != null) {
+            result = catalogBasedResolver.resolveEntity(name, publicId, baseURI, systemId);
         }
         if (result == null && nextEntityResolver2 != null) {
             result = nextEntityResolver2.resolveEntity(name, publicId, baseURI, systemId);
@@ -229,8 +263,8 @@ public class CatalogResourceResolver extends CommonResourceResolver {
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
         InputSource result = null;
-        if (resolver != null) {
-            result = resolver.resolveEntity(publicId, systemId);
+        if (catalogBasedResolver != null) {
+            result = catalogBasedResolver.resolveEntity(publicId, systemId);
         }
         if (result == null && nextEntityResolver2 != null) {
             result = nextEntityResolver2.resolveEntity(publicId, systemId);
@@ -261,9 +295,9 @@ public class CatalogResourceResolver extends CommonResourceResolver {
     @Override
     public Source resolveNamespace(String uri, String nature, String purpose) throws TransformerException {
         Source result = null;
-        if (resolver != null) {
-            result = resolver.resolveNamespace(uri, nature, purpose);
-        } if (resolver == null && nextNamespaceResolver != null) {
+        if (catalogBasedResolver != null) {
+            result = catalogBasedResolver.resolveNamespace(uri, nature, purpose);
+        } if (catalogBasedResolver == null && nextNamespaceResolver != null) {
             result = nextNamespaceResolver.resolveNamespace(uri, nature, purpose);
         }
         return result;

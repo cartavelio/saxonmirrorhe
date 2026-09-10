@@ -20,7 +20,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
 
 import javax.xml.transform.ErrorListener;
-import javax.xml.transform.URIResolver;
 
 /**
  * This object represents a dynamic context for query execution. This class is used
@@ -38,7 +37,7 @@ public class DynamicQueryContext {
     /*@Nullable*/ private Item contextItem;
     /*@Nullable*/ private GlobalParameterSet parameters = new GlobalParameterSet();
     private final Configuration config;
-    private URIResolver uriResolver;
+    private ResourceResolver resourceResolver;
     private ErrorReporter errorReporter;
     /*@Nullable*/ private TraceListener traceListener;
     private UnparsedTextURIResolver unparsedTextURIResolver;
@@ -56,7 +55,6 @@ public class DynamicQueryContext {
 
     public DynamicQueryContext(/*@NotNull*/ Configuration config) {
         this.config = config;
-        uriResolver = config.getURIResolver();
         errorReporter = config.makeErrorReporter();
         traceFunctionDestination = config.getLogger();
     }
@@ -224,14 +222,14 @@ public class DynamicQueryContext {
      * Set an object that will be used to resolve URIs used in
      * fn:document() and related functions.
      *
-     * @param resolver An object that implements the URIResolver interface, or
+     * @param resolver An object that implements the ResourceResolver interface, or
      *                 null.
-     * @since 8.4
+     * @since 11.1; replaces setURIResolver in earlier releases
      */
 
-    public void setURIResolver(URIResolver resolver) {
+    public void setResourceResolver(ResourceResolver resolver) {
         // System.err.println("Setting uriresolver to " + resolver + " on " + this);
-        uriResolver = resolver;
+        resourceResolver = resolver;
     }
 
     /**
@@ -239,11 +237,11 @@ public class DynamicQueryContext {
      *
      * @return the user-supplied URI resolver if there is one, or the
      *         system-defined one otherwise
-     * @since 8.4
+     * @since 11.1; replaces getURIResolver in earlier releases
      */
 
-    public URIResolver getURIResolver() {
-        return uriResolver;
+    public ResourceResolver getResourceResolver() {
+        return resourceResolver;
     }
 
     /**
@@ -430,7 +428,7 @@ public class DynamicQueryContext {
      */
 
     public void initializeController(/*@NotNull*/ Controller controller) throws XPathException {
-        controller.setURIResolver(getURIResolver());
+        controller.setResourceResolver(getResourceResolver());
         controller.setErrorReporter(getErrorReporter());
         controller.addTraceListener(getTraceListener());
         if (unparsedTextURIResolver != null) {

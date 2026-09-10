@@ -604,7 +604,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                                            QName initialTemplateName, String baseOutputURI) {
         try {
             XsltTransformer transformer = sheet.load();
-            transformer.setURIResolver(env);
+            transformer.setResourceResolver(env);
             transformer.setBaseOutputURI(baseOutputURI);
             if (env.unparsedTextResolver != null) {
                 transformer.getUnderlyingController().setUnparsedTextURIResolver(env.unparsedTextResolver);
@@ -767,7 +767,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
 
             Xslt30Transformer transformer = sheet.load30();
-            transformer.setURIResolver(env);
+            transformer.setResourceResolver(env);
             if (env.unparsedTextResolver != null) {
                 transformer.getUnderlyingController().setUnparsedTextURIResolver(env.unparsedTextResolver);
             }

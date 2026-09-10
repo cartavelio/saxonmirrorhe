@@ -12,11 +12,9 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.HostLanguage;
 
-import javax.xml.transform.URIResolver;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,8 +31,6 @@ import java.util.Map;
 public class PipelineConfiguration {
 
     /*@NotNull*/ private Configuration config;
-    private URIResolver uriResolver;
-    private SchemaURIResolver schemaURIResolver;
     private Controller controller;
     private ParseOptions parseOptions;
     private HostLanguage hostLanguage = HostLanguage.XSLT;
@@ -66,8 +62,6 @@ public class PipelineConfiguration {
 
     public PipelineConfiguration(PipelineConfiguration p) {
         config = p.config;
-        uriResolver = p.uriResolver;
-        schemaURIResolver = p.schemaURIResolver;
         controller = p.controller;
         parseOptions = new ParseOptions(p.parseOptions);
         hostLanguage = p.hostLanguage;
@@ -122,37 +116,6 @@ public class PipelineConfiguration {
 
     public void setErrorReporter(ErrorReporter errorReporter) {
         parseOptions.setErrorReporter(errorReporter);
-    }
-
-    /**
-     * Get the URIResolver used for processing URIs encountered on this pipeline
-     *
-     * @return the URIResolver
-     */
-
-    public URIResolver getURIResolver() {
-        return uriResolver;
-    }
-
-    /**
-     * Set the URIResolver used for processing URIs encountered on this pipeline
-     *
-     * @param uriResolver the URIResolver
-     */
-
-    public void setURIResolver(URIResolver uriResolver) {
-        this.uriResolver = uriResolver;
-    }
-
-    /**
-     * Get the user-defined SchemaURIResolver for resolving URIs used in "import schema"
-     * declarations; returns null if none has been explicitly set.
-     *
-     * @return the SchemaURIResolver
-     */
-
-    public SchemaURIResolver getSchemaURIResolver() {
-        return schemaURIResolver;
     }
 
     /**
@@ -217,16 +180,16 @@ public class PipelineConfiguration {
         return parseOptions.isContinueAfterValidationErrors();
     }
 
-    /**
-     * Set a user-defined SchemaURIResolver for resolving URIs used in "import schema"
-     * declarations.
-     *
-     * @param resolver the SchemaURIResolver
-     */
-
-    public void setSchemaURIResolver(SchemaURIResolver resolver) {
-        schemaURIResolver = resolver;
-    }
+//    /**
+//     * Set a user-defined SchemaURIResolver for resolving URIs used in "import schema"
+//     * declarations.
+//     *
+//     * @param resolver the SchemaURIResolver
+//     */
+//
+//    public void setSchemaURIResolver(SchemaURIResolver resolver) {
+//        schemaURIResolver = resolver;
+//    }
 
     /**
      * Get the controller associated with this pipelineConfiguration

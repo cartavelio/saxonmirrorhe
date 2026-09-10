@@ -44,7 +44,6 @@ import org.xml.sax.SAXParseException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
@@ -101,8 +100,7 @@ public class Controller implements ContextOriginator {
     protected TraceListener traceListener;
     private boolean tracingPaused;
     private Logger traceFunctionDestination;
-    private URIResolver standardURIResolver;
-    private URIResolver userURIResolver;
+    private ResourceResolver resourceResolver;
     protected Receiver principalResult;
     protected String principalResultURI;
     private UnparsedTextURIResolver unparsedTextResolver;
@@ -187,8 +185,8 @@ public class Controller implements ContextOriginator {
         globalParameters = new GlobalParameterSet();
         focusTrackerFactory = config.getFocusTrackerFactory(executable, false);
         multiThreadedFocusTrackerFactory = config.getFocusTrackerFactory(executable, true);
-        standardURIResolver = config.getSystemURIResolver();
-        userURIResolver = config.getURIResolver();
+        //standardURIResolver = config.getSystemURIResolver();
+        resourceResolver = null;
         unparsedTextResolver = config.getUnparsedTextURIResolver();
         validationMode = config.getSchemaValidationMode();
         errorReporter = config.makeErrorReporter();
@@ -397,7 +395,7 @@ public class Controller implements ContextOriginator {
     /*@NotNull*/
     public PipelineConfiguration makePipelineConfiguration() {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setURIResolver(userURIResolver == null ? standardURIResolver : userURIResolver);
+        //pipe.setURIResolver(userURIResolver == null ? standardURIResolver : userURIResolver);
         pipe.getParseOptions().setSchemaValidationMode(validationMode); // added in 9.7
         pipe.getParseOptions().setErrorReporter(errorReporter); // added in 9.7.0.4
         pipe.setController(this);
@@ -667,15 +665,12 @@ public class Controller implements ContextOriginator {
      * Set an object that will be used to resolve URIs used in
      * document(), etc.
      *
-     * @param resolver An object that implements the URIResolver interface, or
+     * @param resolver An object that implements the ResourceResolver interface, or
      *                 null.
      */
 
-    public void setURIResolver(URIResolver resolver) {
-        userURIResolver = resolver;
-        if (resolver instanceof StandardURIResolver) {
-            ((StandardURIResolver) resolver).setConfiguration(getConfiguration());
-        }
+    public void setResourceResolver(ResourceResolver resolver) {
+        resourceResolver = resolver;
     }
 
     /**
@@ -687,20 +682,8 @@ public class Controller implements ContextOriginator {
      * @return the user-supplied URI resolver if there is one, or null otherwise.
      */
 
-    public URIResolver getURIResolver() {
-        return userURIResolver;
-    }
-
-    /**
-     * Get the fallback URI resolver. This is the URIResolver that Saxon uses when
-     * the user-supplied URI resolver returns null.
-     * <p>This method is intended for internal use only.</p>
-     *
-     * @return the the system-defined URIResolver
-     */
-
-    public URIResolver getStandardURIResolver() {
-        return standardURIResolver;
+    public ResourceResolver getResourceResolver() {
+        return resourceResolver;
     }
 
     /**

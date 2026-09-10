@@ -7,8 +7,12 @@
 
 package net.sf.saxon.lib;
 
+import net.sf.saxon.trans.XPathException;
+
 import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -19,10 +23,7 @@ import java.util.function.Predicate;
  * which constrain the set of URIs that can be used by supplying a list of permitted protocols.
  */
 
-public class ProtocolRestricter {
-
-    //private final String rule;
-    //private final List<Predicate<URI>> permitted = new ArrayList<>();
+public class ProtocolRestricter implements ResourceResolver {
 
     /**
      * Create a predicate from a list of allowed protocols.
@@ -80,5 +81,37 @@ public class ProtocolRestricter {
         URI uri = new URI(args[0]);
         System.err.println(uri.getScheme() + " + " + uri.getSchemeSpecificPart());
     }
+
+    private final Predicate<URI> predicate;
+
+    public ProtocolRestricter(Predicate<URI> predicate) {
+        this.predicate = predicate;
+
+    }
+
+    /**
+     * Process a resource request. This is not a true resolver because it never delivers a Source;
+     * rather it validates the resource request to ensure that access to the requested URI is permitted.
+     *
+     * @param request the resource request
+     * @return the returned Source; or null to delegate resolution to another resolver
+     * @throws XPathException if the request is invalid in some way, or if the identified resource is unsuitable,
+     *                        or if resolution is to fail rather than being delegated to another resolver.
+     */
+    @Override
+    public Source resolve(ResourceRequest request) throws XPathException {
+        if (request.uri != null) {
+            try {
+                URI uriU = new URI(request.uri);
+                if (!predicate.test(uriU)) {
+                    throw new XPathException("Resource access using URI " + request.uri + " has been disallowed");
+                }
+            } catch (URISyntaxException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
 }
 

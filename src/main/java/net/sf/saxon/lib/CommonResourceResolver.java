@@ -6,8 +6,6 @@ import org.xml.sax.ext.EntityResolver2;
 import org.xmlresolver.NamespaceResolver;
 import org.xmlresolver.ResolverFeature;
 
-import javax.xml.transform.URIResolver;
-
 /**
  * The CommonResourceResolver is the centralized handler for resolving URIs to resources.
  *
@@ -67,10 +65,10 @@ import javax.xml.transform.URIResolver;
  * @since 11
  */
 
-public abstract class CommonResourceResolver implements EntityResolver, EntityResolver2, URIResolver, NamespaceResolver {
+public abstract class CommonResourceResolver implements EntityResolver, EntityResolver2, ResourceResolver, NamespaceResolver {
     protected EntityResolver nextEntityResolver = null;
     protected EntityResolver2 nextEntityResolver2 = null;
-    protected URIResolver nextURIResolver = null;
+    protected ResourceResolver nextResourceResolver = null;
     protected NamespaceResolver nextNamespaceResolver = null;
 
     /**
@@ -105,7 +103,7 @@ public abstract class CommonResourceResolver implements EntityResolver, EntityRe
     protected void copyFrom(CommonResourceResolver resolver) {
         nextEntityResolver = resolver.nextEntityResolver;
         nextEntityResolver2 = resolver.nextEntityResolver2;
-        nextURIResolver = resolver.nextURIResolver;
+        nextResourceResolver = resolver.nextResourceResolver;
         nextNamespaceResolver = resolver.nextNamespaceResolver;
     }
 
@@ -161,10 +159,10 @@ public abstract class CommonResourceResolver implements EntityResolver, EntityRe
      * @param resolver the fallback resolver.
      * @return a new CommonResourceResolver that adds the fallback capability
      */
-    public CommonResourceResolver chain(URIResolver resolver) {
+    public CommonResourceResolver chain(ResourceResolver resolver) {
         CommonResourceResolver copy = newInstance();
         copy.copyFrom(this);
-        copy.nextURIResolver = resolver;
+        copy.nextResourceResolver = resolver;
         return copy;
     }
 

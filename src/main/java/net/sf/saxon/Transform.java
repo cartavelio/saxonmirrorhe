@@ -737,10 +737,13 @@ public class Transform {
                 Source styleSource = null;
 
                 if (isURI) {
-                    styleSource = config.getURIResolver().resolve(styleFileName, null);
-                    if (styleSource == null) {
-                        styleSource = config.getSystemURIResolver().resolve(styleFileName, null);
-                    }
+                    ResourceRequest request = new ResourceRequest();
+                    request.relativeUri = styleFileName;
+                    URI cwd = new File(System.getProperty("user.dir")).toURI();
+                    request.baseUri = cwd.toString();
+                    request.uri = cwd.resolve(styleFileName).toString();
+                    request.nature = ResourceRequest.XSLT_NATURE;
+                    request.purpose = "transformation";
                 } else if (styleFileName.equals("-")) {
                     // take input from stdin
                     String sysId = new File(System.getProperty("user.dir")).toURI().toASCIIString();

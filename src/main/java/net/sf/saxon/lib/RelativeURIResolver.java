@@ -58,6 +58,17 @@ public interface RelativeURIResolver extends URIResolver {
     Source dereference(String uri)
             throws TransformerException;
 
+    /**
+     * Extended method that accepts flags
+     * @param uri the URI to be dereferecned
+     * @param flags recognized flags are S=streamable, M=stylesheet module, D=document, K=schema
+     * @return
+     * @throws TransformerException
+     */
+    default Source dereference(String uri, String flags) throws TransformerException {
+        return dereference(uri);
+    }
+
     //#if CSHARP==false
     /**
      * Called by the processor when it encounters
@@ -81,6 +92,19 @@ public interface RelativeURIResolver extends URIResolver {
     Source resolve(String href, String base)
             throws TransformerException;
     //#endif
+
+    /**
+     * Extended method that accepts flags
+     *
+     * @param href   the relative URI to be dereferenced
+     * @param base the base URI
+     * @param flags recognized flags are S=streamable, M=stylesheet module, D=document, K=schema
+     * @return the resolved source
+     * @throws TransformerException in the event of failure
+     */
+    default Source resolve(String href, String base, String flags) throws TransformerException {
+        return resolve(href, base);
+    }
 
 }
 

@@ -9,25 +9,28 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.Builder;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.lib.*;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.StylesheetPackage;
-import net.sf.saxon.trans.*;
+import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.value.Cardinality;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -369,8 +372,11 @@ public class DocumentFn extends SystemFunction implements Callable {
 
     public static Source resolveURI(String href, String baseURI, String documentKey, XPathContext context)
             throws XPathException {
-        URIResolver resolver = context.getURIResolver();
-        Source source;
+        Configuration config = context.getConfiguration();
+        ResourceResolver resolver = context.getResourceResolver();
+        if (href.contains(" ")) {
+            href = ResolveURI.escapeSpaces(href);
+        }
 
         if (baseURI == null) {
             try {
@@ -384,51 +390,26 @@ public class DocumentFn extends SystemFunction implements Callable {
             }
         }
 
+        ResourceRequest request = new ResourceRequest();
+        request.relativeUri = href;
+        if (baseURI != null) {
+            request.baseUri = baseURI;
+            request.uri = documentKey;
+        } else {
+            request.uri = href;
+        }
+        request.nature = ResourceRequest.XML_NATURE;
+        request.purpose = "source document";
         try {
-            if (resolver instanceof RelativeURIResolver && documentKey != null) {
-                source = ((RelativeURIResolver) resolver).dereference(documentKey);
-            } else {
-                source = resolver.resolve(href, baseURI);
-            }
+            return request.resolve(resolver, config.getResourceResolver(), new DirectResourceResolver(config));
         } catch (Exception ex) {
-            //ex.printStackTrace();
             XPathException de = new XPathException("Exception thrown by URIResolver resolving `"
                                                            + href + "` against `" + baseURI + "'", ex);
-            if (context.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS)) {
+            if (config.getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS)) {
                 ex.printStackTrace();
             }
             throw de;
         }
-
-        if (source instanceof StreamSource && ((StreamSource)source).getInputStream() == null && ((StreamSource)source).getReader() == null) {
-            String uri = source.getSystemId();
-            if (uri != null) {
-                resolver = context.getController().getStandardURIResolver();
-                try {
-                    source = resolver.resolve(uri, "");
-                } catch (TransformerException ex) {
-                    throw XPathException.makeXPathException(ex);
-                }
-            } else {
-                source = null; // the supplied source is useless, treat it as if the URIResolver had returned null
-            }
-        }
-        // if a user URI resolver returns null, try the standard one
-        // (Note, the standard URI resolver never returns null)
-        if (source == null && !(resolver instanceof NonDelegatingURIResolver) ) {
-            resolver = context.getController().getStandardURIResolver();
-            try {
-                if (resolver instanceof RelativeURIResolver && documentKey != null) {
-                    source = ((RelativeURIResolver) resolver).dereference(documentKey);
-                } else {
-                    source = resolver.resolve(href, baseURI);
-                }
-            } catch (TransformerException ex) {
-                throw XPathException.makeXPathException(ex);
-            }
-        }
-        return source;
-
     }
 
     /**
@@ -436,14 +417,7 @@ public class DocumentFn extends SystemFunction implements Callable {
      */
 
     protected static DocumentKey computeDocumentKey(String href, String baseURI, PackageData packageData, XPathContext c) throws XPathException {
-        // Resolve relative URI
-        Controller controller = c.getController();
-
-        URIResolver resolver = controller.getURIResolver();
-        if (resolver == null) {
-            resolver = controller.getStandardURIResolver();
-        }
-        return computeDocumentKey(href, baseURI, packageData, resolver, true);
+        return computeDocumentKey(href, baseURI, packageData, true);
     }
 
     /**
@@ -451,43 +425,35 @@ public class DocumentFn extends SystemFunction implements Callable {
      * @param href     the relative URI
      * @param baseURI  the base URI
      * @param packageData the package in which the call to doc() or document() appears (affects options
-     *                    such as strip-space)
-     * @param resolver the URIResolver
-     * @param strip true if the document is subject to whitespace stripping (typically a source document), false
-     *              otherwise (typically a stylesheet module)
+ *                    such as strip-space)
+     * @param strip true if the document is subject to whitespace stripping (typically a source document),
+     *              otherwise false
      */
     public static DocumentKey computeDocumentKey(
-            String href, String baseURI, PackageData packageData, URIResolver resolver, boolean strip) {
+            String href, String baseURI, PackageData packageData, boolean strip) {
         String absURI;
-        if (resolver instanceof RelativeURIResolver) {
-            // If this is the case, the URIResolver is responsible for absolutization as well as dereferencing
+
+        // Saxon takes charge of absolutization, leaving the user URIResolver to handle dereferencing only
+        href = ResolveURI.escapeSpaces(href);
+        if (baseURI == null) {    // no base URI available
             try {
-                absURI = ((RelativeURIResolver) resolver).makeAbsolute(href, baseURI);
-            } catch (TransformerException e) {
+                // the href might be an absolute URL
+                absURI = new URI(href).toString();
+            } catch (URISyntaxException err) {
+                // it isn't; but the URI resolver might know how to cope
                 absURI = '/' + href;
             }
+        } else if (href.isEmpty()) {
+            // common case in XSLT, which java.net.URI#resolve() does not handle correctly
+            absURI = baseURI;
         } else {
-            // Saxon takes charge of absolutization, leaving the user URIResolver to handle dereferencing only
-            href = ResolveURI.escapeSpaces(href);
-            if (baseURI == null) {    // no base URI available
-                try {
-                    // the href might be an absolute URL
-                    absURI = new URI(href).toString();
-                } catch (URISyntaxException err) {
-                    // it isn't; but the URI resolver might know how to cope
-                    absURI = '/' + href;
-                }
-            } else if (href.isEmpty()) {
-                // common case in XSLT, which java.net.URI#resolve() does not handle correctly
-                absURI = baseURI;
-            } else {
-                try {
-                    absURI = ResolveURI.makeAbsolute(href, baseURI).toString();
-                } catch (URISyntaxException | IllegalArgumentException err) {
-                    absURI = baseURI + "/../" + href;
-                }
+            try {
+                absURI = ResolveURI.makeAbsolute(href, baseURI).toString();
+            } catch (URISyntaxException | IllegalArgumentException err) {
+                absURI = baseURI + "/../" + href;
             }
         }
+
         if (strip && packageData instanceof StylesheetPackage &&
                 ((StylesheetPackage) packageData).getSpaceStrippingRule() != NoElementsSpaceStrippingRule.getInstance()) {
             String name = ((StylesheetPackage) packageData).getPackageName();
@@ -518,35 +484,24 @@ public class DocumentFn extends SystemFunction implements Callable {
             throw new XPathException("Fragment identifier not supported for preloaded documents");
         }
 
-        // Resolve relative URI
         String documentKey;
-        URIResolver resolver = config.getURIResolver();
-        if (resolver instanceof RelativeURIResolver) {
+         if (baseURI == null) {    // no base URI available
             try {
-                documentKey = ((RelativeURIResolver) resolver).makeAbsolute(href, baseURI);
-            } catch (TransformerException e) {
+                // the href might be an absolute URL
+                documentKey = new URI(href).toString();
+            } catch (URISyntaxException err) {
+                // it isn't; but the URI resolver might know how to cope
                 documentKey = '/' + href;
                 baseURI = "";
             }
+        } else if (href.isEmpty()) {
+            // common case in XSLT, which java.net.URI#resolve() does not handle correctly
+            documentKey = baseURI;
         } else {
-            if (baseURI == null) {    // no base URI available
-                try {
-                    // the href might be an absolute URL
-                    documentKey = new URI(href).toString();
-                } catch (URISyntaxException err) {
-                    // it isn't; but the URI resolver might know how to cope
-                    documentKey = '/' + href;
-                    baseURI = "";
-                }
-            } else if (href.isEmpty()) {
-                // common case in XSLT, which java.net.URI#resolve() does not handle correctly
-                documentKey = baseURI;
-            } else {
-                try {
-                    documentKey = ResolveURI.makeAbsolute(href, baseURI).toString();
-                } catch (URISyntaxException | IllegalArgumentException err) {
-                    documentKey = baseURI + "/../" + href;
-                }
+            try {
+                documentKey = ResolveURI.makeAbsolute(href, baseURI).toString();
+            } catch (URISyntaxException | IllegalArgumentException err) {
+                documentKey = baseURI + "/../" + href;
             }
         }
 
@@ -557,44 +512,29 @@ public class DocumentFn extends SystemFunction implements Callable {
             return doc.getRootNode();
         }
 
+        ResourceRequest rr = new ResourceRequest();
+        rr.relativeUri = href;
+        rr.baseUri = baseURI;
+        rr.uri = documentKey;
+
+        Source source;
         try {
             // Get a Source from the URIResolver
-
-            URIResolver r = resolver;
-            Source source = null;
-            if (r != null) {
-                try {
-                    source = r.resolve(href, baseURI);
-                } catch (Exception ex) {
-                    XPathException de = new XPathException("Exception thrown by URIResolver", ex);
-                    if (config.getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS)) {
-                        ex.printStackTrace();
-                    }
-                    de.setLocator(locator);
-                    throw de;
-                }
+            source = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+        } catch (Exception ex) {
+            XPathException de = new XPathException("Exception thrown by ResourceResolver", ex);
+            if (config.getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS)) {
+                ex.printStackTrace();
             }
-
-            // if a user URI resolver returns null, try the standard one
-            // (Note, the standard URI resolver never returns null)
-            if (source == null && !(r instanceof NonDelegatingURIResolver)) {
-                r = config.getSystemURIResolver();
-                source = r.resolve(href, baseURI);
-            }
-            //System.err.println("URI resolver returned " + source.getClass() + " " + source.getSystemId());
-            source = config.getSourceResolver().resolveSource(source, config);
-            //System.err.println("Resolved source " + source.getClass() + " " + source.getSystemId());
-
-            TreeInfo newdoc = config.buildDocumentTree(source);
-            config.getGlobalDocumentPool().add(newdoc, documentKey);
-            return newdoc.getRootNode();
-
-        } catch (TransformerException err) {
-            XPathException xerr = XPathException.makeXPathException(err);
-            xerr.setLocator(locator);
-            xerr.setErrorCode("FODC0002");
-            throw new XPathException(err);
+            de.setLocator(locator);
+            throw de;
         }
+
+        TreeInfo newdoc = config.buildDocumentTree(source);
+        config.getGlobalDocumentPool().add(newdoc, documentKey);
+        return newdoc.getRootNode();
+
+
     }
 
 
@@ -604,47 +544,48 @@ public class DocumentFn extends SystemFunction implements Callable {
      * This method cannot handle fragment identifiers
      *
      * @param href    the relative URI
-     * @param baseURL the base URI
-     * @param c       the XPath dynamic context
+     * @param baseURI the base URI
+     * @param context       the XPath dynamic context
      * @param locator used to identify the lcoation of the instruction in case of error
      * @param out     the destination where the document is to be sent
      */
 
-    public static void sendDoc(String href, String baseURL, XPathContext c,
+    public static void sendDoc(String href, String baseURI, XPathContext context,
                                Location locator, Receiver out,
                                ParseOptions parseOptions) throws XPathException {
 
         PipelineConfiguration pipe = out.getPipelineConfiguration();
         if (pipe == null) {
-            pipe = c.getController().makePipelineConfiguration();
-            pipe.setXPathContext(c);
+            pipe = context.getController().makePipelineConfiguration();
+            pipe.setXPathContext(context);
             out.setPipelineConfiguration(pipe);
         }
 
         // Resolve relative URI
 
         String documentKey;
-        if (baseURL == null) {    // no base URI available
+        if (baseURI == null) {    // no base URI available
             try {
                 // the href might be an absolute URL
                 documentKey = new URI(href).toString();
             } catch (URISyntaxException err) {
                 // it isn't; but the URI resolver might know how to cope
                 documentKey = '/' + href;
-                baseURL = "";
+                baseURI = "";
             }
         } else if (href.isEmpty()) {
             // common case in XSLT, which java.net.URI#resolve() does not handle correctly
-            documentKey = baseURL;
+            documentKey = baseURI;
         } else {
             try {
-                documentKey = ResolveURI.makeAbsolute(href, baseURL).toString();
+                documentKey = ResolveURI.makeAbsolute(href, baseURI).toString();
             } catch (URISyntaxException | IllegalArgumentException err) {
-                documentKey = baseURL + "/../" + href;
+                documentKey = baseURI + "/../" + href;
             }
         }
 
-        Controller controller = c.getController();
+        Controller controller = context.getController();
+        Configuration config = controller.getConfiguration();
 
         // see if the document is already loaded
 
@@ -655,19 +596,18 @@ public class DocumentFn extends SystemFunction implements Callable {
         } else {
 
             try {
-                // Get a Source from the URIResolver
+                // Get a Source from the resource resolver
+                ResourceRequest request = new ResourceRequest();
+                request.baseUri = baseURI;
+                request.relativeUri = href;
+                request.uri = documentKey;
+                request.streamable = true;
+                request.nature = ResourceRequest.XML_NATURE;
+                request.purpose = "source document";
 
-                URIResolver r = controller.getURIResolver();
-                if (r != null) {
-                    source = r.resolve(href, baseURL);
-                }
-
-                // if a user URI resolver returns null, try the standard one
-                // (Note, the standard URI resolver never returns null)
-                if (source == null) {
-                    r = controller.getStandardURIResolver();
-                    source = r.resolve(href, baseURL);
-                }
+                source = request.resolve(context.getResourceResolver(),
+                                                config.getResourceResolver(),
+                                                new DirectResourceResolver(config));
                 if (sourceIsTree(source)) {
                     NodeInfo startNode = controller.prepareInputTree(source);
                     source = startNode.getRoot().asActiveSource();

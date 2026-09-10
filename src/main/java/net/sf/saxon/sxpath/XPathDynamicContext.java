@@ -14,6 +14,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.lib.CollectionFinder;
 import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.lib.UnparsedTextURIResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -22,8 +23,6 @@ import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
-
-import javax.xml.transform.URIResolver;
 
 /**
  * This object represents the dynamic XPath execution context for use in the free-standing Saxon XPath API.
@@ -139,24 +138,26 @@ public class XPathDynamicContext {
      *
      * @param resolver An object that implements the URIResolver interface, or
      *                 null.
-     * @since 9.2. Changed in 9.6 to set the URIResolver locally.
+     * @since 9.2. Changed in 9.6 to set the URIResolver locally. Changed in 11.1 to use a ResourceResolver
+     * rather than a URIResolver.
      */
 
-    public void setURIResolver(URIResolver resolver) {
-        contextObject.setURIResolver(resolver);
+    public void setResourceResolver(ResourceResolver resolver) {
+        contextObject.setResourceResolver(resolver);
     }
 
     /**
-     * Get the URI resolver.
+     * Get the resource resolver.
      *
-     * @return the user-supplied URI resolver if there is one, or null otherwise. If no URIResolver
-     * has been set locally, the URIResolver in the Controller is returned; this in turn defaults
-     * to the URIResolver set in the Configuration.
-     * @since 9.2. Changed in 9.6 to use a local URIResolver.
+     * @return the user-supplied URI resolver if there is one, or null otherwise. If no Resolver
+     * has been set locally, the Resolver in the Controller is returned; this in turn defaults
+     * to the resolver set in the Configuration.
+     * @since 9.2. Changed in 9.6 to use a local URIResolver. Changed in 11.1 to use a ResourceResolver
+     * rather than a URIResolver.
      */
 
-    public URIResolver getURIResolver() {
-        return contextObject.getURIResolver();
+    public ResourceResolver getResourceResolver() {
+        return contextObject.getResourceResolver();
     }
 
     /**

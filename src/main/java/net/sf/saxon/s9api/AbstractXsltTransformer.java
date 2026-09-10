@@ -101,10 +101,43 @@ public abstract class AbstractXsltTransformer {
      *
      * @param resolver An object that implements the URIResolver interface, or
      *                 null.
+     * @deprecated since 11.1. Use {@link #setResourceResolver} in preference.
      */
 
     public void setURIResolver(URIResolver resolver) {
-        controller.setURIResolver(resolver);
+        controller.setResourceResolver(new ResourceResolverWrappingURIResolver(resolver));
+    }
+
+    /**
+     * Set the <code>ResourceResolver</code> to be used during stylesheet execution.
+     * The <code>ResourceResolver</code> is used for dereferencing
+     * an absolute URI (after URI resolution) to return a {@link javax.xml.transform.Source} representing the
+     * required resource.
+     * <p>This <code>ResourceResolver</code> is used to dereference the URIs appearing in the <code>doc()</code>,
+     * <code>doc-available()</code>, and <code>document()</code> functions: in these cases it may return any
+     * supported <code>Source</code> object.</p>
+     * <p>It is also used to dereference the URI supplied to the <code>xsl:source-document</code>
+     * instruction. In this case the resource request passed to the resolver indicates whether the
+     * instruction has the attribute <code>streamable="yes"</code>; if it does, the returned
+     * <code>Source</code> object must be a <code>StreamSource</code> or <code>SAXSource</code>.</p>
+     * <p>The resolver is also used for a number of other cases where URIs are dereferenced during
+     * stylesheet execution, for example in the <code>fn:transform</code> function</p>
+     *
+     * @param resolver the <code>ResourceResolver</code> to be used during stylesheet execution.
+     */
+
+    public void setResourceResolver(ResourceResolver resolver) {
+        controller.setResourceResolver(resolver);
+    }
+
+    /**
+     * Get the resource resolver.
+     *
+     * @return the user-supplied resource resolver if there is one, or null otherwise
+     */
+
+    public ResourceResolver getResourceResolver() {
+        return controller.getResourceResolver();
     }
 
     /**
@@ -114,7 +147,11 @@ public abstract class AbstractXsltTransformer {
      */
 
     public URIResolver getURIResolver() {
-        return controller.getURIResolver();
+        ResourceResolver resolver = controller.getResourceResolver();
+        if (resolver instanceof ResourceResolverWrappingURIResolver) {
+            return ((ResourceResolverWrappingURIResolver)resolver).getWrappedURIResolver();
+        }
+        return null;
     }
 
     /**
