@@ -179,7 +179,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
             return nillable && (schemaType.equals(AnyType.INSTANCE));
         }
         if (kind == Type.ATTRIBUTE) {
-            return schemaType.equals(BuiltInAtomicType.ANY_ATOMIC);
+            return schemaType.equals(BuiltInAtomicType.ANY_ATOMIC) || schemaType == AnyType.INSTANCE;
         }
         return true;
     }

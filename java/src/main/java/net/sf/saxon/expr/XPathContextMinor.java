@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr;
 
-import com.saxonica.ee.parallel.MultithreadedFocusTrackingIterator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.instruct.ParameterSet;
@@ -237,16 +236,9 @@ public class XPathContextMinor implements XPathContext {
         if (currentIterator == null) {
             return null;
         }
-        //Instrumentation.count(currentIterator.getClass().toString());
-        //#if EE=true
-        if (currentIterator instanceof MultithreadedFocusTrackingIterator mfti) {
+        if (currentIterator instanceof FocusTrackingIterator mfti) {
             // Common case extracted to reduce overhead of megamorphism
             return mfti.current();
-        }
-        //#endif
-        if (currentIterator instanceof FocusTrackingIterator fti) {
-            // Common case extracted to reduce overhead of megamorphism
-            return fti.current();
         } else {
             return currentIterator.current();
         }

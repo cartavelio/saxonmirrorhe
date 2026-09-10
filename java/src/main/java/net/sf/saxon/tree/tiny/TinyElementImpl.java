@@ -26,11 +26,9 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.z.IntHashMap;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -236,6 +234,9 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
     public TinyAttributeImpl getAttributeNode(int fp) {
         int index = tree.alpha[nodeNr];
+        if (index < 0) {
+            return null;
+        }
         int[] attNames = tree.getAttributeNameCodeArray();
         while (index < tree.numberOfAttributes && tree.attParent[index] == nodeNr) {
             if (fp == (attNames[index] & NamePool.FP_MASK)) {
@@ -276,6 +277,9 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                 }
                 return EmptyIterator.INSTANCE;
             }
+        }
+        if (predicate == NodeKindType.ATTRIBUTE) {
+            predicate = node -> true;
         }
         return new AttributeIterator(tree, nodeNr, predicate);
     }
@@ -409,7 +413,8 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
                         int att = tree.alpha[next];
                         if (att >= 0) {
-                            List<AttributeInfo> attributeInfoList = new ArrayList<>(8);
+                            attributes = EmptyAttributeMap.INSTANCE;
+                            //List<AttributeInfo> attributeInfoList = new ArrayList<>(8);
                             int[] attParent = tree.attParent;
                             while (att < tree.numberOfAttributes && attParent[att] == next) {
                                 int attCode = tree.attCode[att];
@@ -432,7 +437,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                 if (tree.isIdrefAttribute(att)) {
                                     attProps |= ReceiverOption.IS_IDREF;
                                 }
-                                attributeInfoList.add(new AttributeInfo(new CodedName(attfp, attPrefix, pool),
+                                attributes = attributes.put(new AttributeInfo(new CodedName(attfp, attPrefix, pool),
                                                                         attributeType, tree.attValue[att],
                                                                         location, attProps));
                                 if (addAttributeNamespaces && !attPrefix.isEmpty()) {
@@ -440,7 +445,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                 }
                                 att++;
                             }
-                            attributes = SequenceTool.attributeMapFromList(attributeInfoList);
+                            //attributes = SequenceTool.attributeMapFromList(attributeInfoList);
                         } else {
                             attributes = emptyAttributes;
                         }

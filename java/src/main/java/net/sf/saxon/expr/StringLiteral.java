@@ -9,8 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.str.StringTool;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
@@ -30,8 +29,18 @@ public class StringLiteral extends Literal {
      */
 
     public StringLiteral(StringValue value) {
-        super(value);
+        super(entwine(value));
         valueAsString = value.getStringValue();
+    }
+
+    private static StringValue entwine(StringValue in) {
+        UnicodeString us = in.getUnicodeStringValue();
+        if (us instanceof Twine8 || us instanceof Twine16 || us instanceof Twine24
+                || us instanceof EmptyUnicodeString || us instanceof UnicodeChar) {
+            return in;
+        }
+        UnicodeString twine = TwineBuilder.make(in.length32()).append(us).toUnicodeString();
+        return new StringValue(twine);
     }
 
     /**

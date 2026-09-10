@@ -9,10 +9,7 @@ package net.sf.saxon.ma.map;
 
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.OptionsParameter;
@@ -548,6 +545,45 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public String getStreamerName() {
             return "MapEntry";
+        }
+
+        /**
+         * Make an elaborator for a system function call on this function
+         *
+         * @return a suitable elaborator; or null if no custom elaborator is available
+         */
+        @Override
+        public Elaborator getElaborator() {
+            return new MapEntryElaborator();
+        }
+
+        public static class MapEntryElaborator extends ItemElaborator {
+            @Override
+            public ItemEvaluator elaborateForItem() {
+                SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+                ItemEvaluator keyElab = fnc.getArg(0).makeElaborator().elaborateForItem();
+                int card = fnc.getArg(1).getCardinality();
+                int version = fnc.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+                if (Cardinality.allowsMany(card)) {
+                    SequenceEvaluator valElab = fnc.getArg(1).makeElaborator().eagerly();
+                    return cxt -> new SingleEntryMap((AtomicValue) keyElab.eval(cxt),
+                                                     (GroundedValue) valElab.evaluate(cxt),
+                                                     version);
+                } else if (Cardinality.allowsZero(card)) {
+                    ItemEvaluator valElab = fnc.getArg(1).makeElaborator().elaborateForItem();
+                    return cxt -> {
+                        Item val = valElab.eval(cxt);
+                        return new SingleEntryMap((AtomicValue) keyElab.eval(cxt),
+                                                  val == null ? EmptySequence.INSTANCE : val,
+                                                  version);
+                    };
+                } else {
+                    ItemEvaluator valElab = fnc.getArg(1).makeElaborator().elaborateForItem();
+                    return cxt -> new SingleEntryMap((AtomicValue) keyElab.eval(cxt),
+                                                     valElab.eval(cxt),
+                                                     version);
+                }
+            }
         }
 
     }

@@ -12,7 +12,6 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.Pattern;
@@ -365,12 +364,11 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     public TailCall applyLeavingTail(Outputter output, XPathContext context) throws XPathException {
         //initialize();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-        Item contextItem = context.getContextItem();
         if (requiredContextItemType != AnyItemType.INSTANCE &&
-                !requiredContextItemType.matches(contextItem, th)) {
+                !requiredContextItemType.matches(context.getContextItem(), th)) {
             RoleDiagnostic role = new RoleDiagnostic(
                     RoleDiagnostic.MISC, "context item for the template rule", 0);
-            String message = role.composeErrorMessage(requiredContextItemType, contextItem, th);
+            String message = role.composeErrorMessage(requiredContextItemType, context.getContextItem(), th);
             throw new XPathException(message, "XTTE0590").withLocation(this).asTypeError();
         }
         if (absentFocus) {

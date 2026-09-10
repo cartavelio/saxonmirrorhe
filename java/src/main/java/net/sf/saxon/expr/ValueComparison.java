@@ -213,6 +213,20 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             p1 = BuiltInAtomicType.STRING;
         }
 
+        // If both types are strings, then supplying an untypedAtomic would serve just as well, so we can
+        // eliminate any forced conversion from untypedAtomic to string
+
+        if (p0 == BuiltInAtomicType.STRING && p1 == BuiltInAtomicType.STRING) {
+            if (getLhsExpression() instanceof CastExpression lhsCast
+                    && lhsCast.getBaseExpression().getItemType() == BuiltInAtomicType.UNTYPED_ATOMIC) {
+                setLhsExpression(lhsCast.getBaseExpression());
+            }
+            if (getRhsExpression() instanceof CastExpression rhsCast
+                    && rhsCast.getBaseExpression().getItemType() == BuiltInAtomicType.UNTYPED_ATOMIC) {
+                setRhsExpression(rhsCast.getBaseExpression());
+            }
+        }
+
         needsRuntimeCheck =
                 p0.equals(BuiltInAtomicType.ANY_ATOMIC) || p1.equals(BuiltInAtomicType.ANY_ATOMIC);
 
@@ -403,22 +417,15 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             return op == OperatorSymbol.FNE;
         }
         try {
-            switch (op) {
-                case FEQ:
-                    return comparer.comparesEqual(v0, v1);
-                case FNE:
-                    return !comparer.comparesEqual(v0, v1);
-                case FGT:
-                    return comparer.compareAtomicValues(v0, v1) > 0;
-                case FLT:
-                    return comparer.compareAtomicValues(v0, v1) < 0;
-                case FGE:
-                    return comparer.compareAtomicValues(v0, v1) >= 0;
-                case FLE:
-                    return comparer.compareAtomicValues(v0, v1) <= 0;
-                default:
-                    throw new UnsupportedOperationException("Unknown operator " + op);
-            }
+            return switch (op) {
+                case FEQ -> comparer.comparesEqual(v0, v1);
+                case FNE -> !comparer.comparesEqual(v0, v1);
+                case FGT -> comparer.compareAtomicValues(v0, v1) > 0;
+                case FLT -> comparer.compareAtomicValues(v0, v1) < 0;
+                case FGE -> comparer.compareAtomicValues(v0, v1) >= 0;
+                case FLE -> comparer.compareAtomicValues(v0, v1) <= 0;
+                default -> throw new UnsupportedOperationException("Unknown operator " + op);
+            };
         } catch (ComparisonException err) {
             throw err.getReason();
         } catch (ClassCastException err) {

@@ -37,6 +37,27 @@ public class StringTool {
     }
 
     /**
+     * Get the width of a string: 8, 16, or 24, being the number of bits needed
+     * to hold the highest codepoint
+     * @param s the string in question
+     * @return the width of the string, based on the highest codepoint present in the string
+     */
+
+    public static int getWidth(/*@NotNull*/ CharSequence s) {
+        boolean isLatin = true;
+        for (int i = 0; i < s.length(); i++) {
+            int c = s.charAt(i);
+            if (UTF16CharacterSet.isSurrogate(c)) {
+                return 24;
+            }
+            if (c > 255) {
+                isLatin = false;
+            }
+        }
+        return isLatin ? 8 : 16;
+    }
+
+    /**
      * Expand a string into an array of 32-bit characters
      *
      * @param s the string to be expanded
@@ -88,27 +109,32 @@ public class StringTool {
      */
 
     public static UnicodeString fromCharSequence(CharSequence chars) {
-        int uLength = StringTool.getStringLength(chars);
-        if (uLength == chars.length()) {
-            // No surrogate pairs
-            return new BMPString(chars.toString());
-        } else {
-            byte[] triples = new byte[uLength * 3];
-            for (int i = 0, j = 0; i < chars.length(); i++) {
-                char c = chars.charAt(i);
-                if (UTF16CharacterSet.isSurrogate(c)) {
-                    int cp = UTF16CharacterSet.combinePair(c, chars.charAt(++i));
-                    triples[j++] = (byte) ((cp >> 16) & 0xff);
-                    triples[j++] = (byte) ((cp >> 8) & 0xff);
-                    triples[j++] = (byte) (cp & 0xff);
-                } else {
-                    triples[j++] = 0;
-                    triples[j++] = (byte) ((c >> 8) & 0xff);
-                    triples[j++] = (byte) (c & 0xff);
-                }
-            }
-            return new Twine24(triples);
+        if (chars.length() == 0) {
+            return EmptyUnicodeString.getInstance();
         }
+        int width = getWidth(chars);
+        if (width == 8) {
+            return new Twine8(chars.toString());
+        }
+        if (width == 16) {
+            return new BMPString(chars.toString());
+        }
+        int uLength = StringTool.getStringLength(chars);
+        byte[] triples = new byte[uLength * 3];
+        for (int i = 0, j = 0; i < chars.length(); i++) {
+            char c = chars.charAt(i);
+            if (UTF16CharacterSet.isSurrogate(c)) {
+                int cp = UTF16CharacterSet.combinePair(c, chars.charAt(++i));
+                triples[j++] = (byte) ((cp >> 16) & 0xff);
+                triples[j++] = (byte) ((cp >> 8) & 0xff);
+                triples[j++] = (byte) (cp & 0xff);
+            } else {
+                triples[j++] = 0;
+                triples[j++] = (byte) ((c >> 8) & 0xff);
+                triples[j++] = (byte) (c & 0xff);
+            }
+        }
+        return new Twine24(triples);
     }
 
     /**

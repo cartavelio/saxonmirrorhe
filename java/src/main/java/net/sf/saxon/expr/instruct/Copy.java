@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
@@ -21,7 +20,7 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.MultipleNodeKindTest;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
@@ -543,10 +542,9 @@ public class Copy extends ElementCreator {
             }
             properties |= ReceiverOption.ALL_NAMESPACES;
             final int finalProperties = properties;
+            Configuration config = expr.getConfiguration();
 
             return (output, context) -> {
-                Controller controller = context.getController();
-                Configuration config = controller.getConfiguration();
                 Item item = context.getContextItem();
                 if (item == null) {
                     throw new XPathException("There is no context item for xsl:copy", "XTTE0945")

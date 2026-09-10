@@ -21,6 +21,7 @@ import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.Untyped;
 
 import java.util.Arrays;
 import java.util.Stack;
@@ -330,9 +331,7 @@ public class TinyBuilder extends Builder {
         nodeNr = tree.addNode(Type.ELEMENT, currentDepth, -1, -1, nameCode);
 
         isIDElement = ReceiverOption.contains(properties, ReceiverOption.IS_ID);
-        int typeCode = type.getFingerprint();
-        if (typeCode != StandardNames.XS_UNTYPED) {
-
+        if (type != Untyped.INSTANCE) {
             tree.setElementAnnotation(nodeNr, type);
             if (ReceiverOption.contains(properties, ReceiverOption.NILLED_ELEMENT)) {
                 tree.setNilled(nodeNr);

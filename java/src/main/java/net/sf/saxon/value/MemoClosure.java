@@ -57,7 +57,6 @@ public class MemoClosure extends Closure implements ContextOriginator {
 
 
     public MemoClosure(Expression expr, PullEvaluator inputEvaluator, XPathContext context) throws XPathException {
-        //Instrumentation.count("MemoClosure(X)");
         setInputEvaluator(inputEvaluator);
         XPathContextMajor c2 = context.newContext();
         c2.setOrigin(this);

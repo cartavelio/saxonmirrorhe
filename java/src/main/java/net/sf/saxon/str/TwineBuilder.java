@@ -156,6 +156,12 @@ public abstract class TwineBuilder {
 
         @Override
         public UnicodeString toUnicodeString() {
+            if (used == 0) {
+                return EmptyUnicodeString.getInstance();
+            }
+            if (used == 1) {
+                return new UnicodeChar(buffer[0]);
+            }
             return new Twine8(buffer, 0, used);
         }
     }
@@ -201,6 +207,12 @@ public abstract class TwineBuilder {
 
         @Override
         public UnicodeString toUnicodeString() {
+            if (used == 0) {
+                return EmptyUnicodeString.getInstance();
+            }
+            if (used == 1) {
+                return new UnicodeChar(buffer[0]);
+            }
             return new Twine16(buffer, 0, used);
         }
     }

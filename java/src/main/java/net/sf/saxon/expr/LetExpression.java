@@ -811,7 +811,7 @@ public class LetExpression extends Assignation {
             finalAction.add(next);
             switch (setters.size()) {
                 // for a small number of local variables, unroll the loop
-                case 1: {
+                case 1 -> {
                     LetExpression let = setters.get(0);
                     SequenceEvaluator evaluator = makeSequenceEvaluator(let);
                     int slot = setters.get(0).slotNumber;
@@ -820,7 +820,7 @@ public class LetExpression extends Assignation {
                         return null;
                     };
                 }
-                case 2: {
+                case 2 -> {
                     SequenceEvaluator evaluator0 = makeSequenceEvaluator(setters.get(0));
                     int slot0 = setters.get(0).slotNumber;
                     SequenceEvaluator evaluator1 = makeSequenceEvaluator(setters.get(1));
@@ -831,7 +831,7 @@ public class LetExpression extends Assignation {
                         return null;
                     };
                 }
-                case 3: {
+                case 3 -> {
                     SequenceEvaluator evaluator0 = makeSequenceEvaluator(setters.get(0));
                     int slot0 = setters.get(0).slotNumber;
                     SequenceEvaluator evaluator1 = makeSequenceEvaluator(setters.get(1));
@@ -845,7 +845,7 @@ public class LetExpression extends Assignation {
                         return null;
                     };
                 }
-                case 4: {
+                case 4 -> {
                     SequenceEvaluator evaluator0 = makeSequenceEvaluator(setters.get(0));
                     int slot0 = setters.get(0).slotNumber;
                     SequenceEvaluator evaluator1 = makeSequenceEvaluator(setters.get(1));
@@ -862,7 +862,7 @@ public class LetExpression extends Assignation {
                         return null;
                     };
                 }
-                default: {
+                default -> {
                     SequenceEvaluator[] evaluators = new SequenceEvaluator[setters.size()];
                     int[] slots = new int[setters.size()];
                     for (int i = 0; i < setters.size(); i++) {
@@ -876,7 +876,6 @@ public class LetExpression extends Assignation {
                         return null;
                     };
                 }
-
             }
 
         }
