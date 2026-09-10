@@ -156,6 +156,9 @@ import java.util.*;
  * in a NameTest, but never in a SequenceType. However, they can be represented in alphacodes using the syntax
  * "n*:name" and "nQ{uri}*" respectively. The syntax "~localname" is used for a name in the XSD namespace.</p>
  *
+ * <p>n - may also represent a choice of names, written in square brackets, space separated, for example
+ * "n[Q{}A Q{}B]</p>
+ *
  * <p>n - also used for named record types (primary code FMR)</p>
  *
  * <ul>
@@ -168,7 +171,7 @@ import java.util.*;
  * <li><p>k - Key type, present when the basic code is FM (i.e. for maps), omitted if the key type is xs:anyAtomicType.
  * The value is the alphacode of the key type, enclosed in square brackets: it will always start with "1A".</p></li>
  *
- * <li><p>v - Value type, present when when the basic code is (FM, FA) (i.e. for maps and arrays), omitted if the
+ * <li><p>v - Value type, present when the basic code is (FM, FA) (i.e. for maps and arrays), omitted if the
  * value type is item()*. The value is the alphacode of the value type, enclosed in square brackets. For example
  * the alphacode for array(xs:string+)* is "*FA v[+AS]".</p></li>
  *
@@ -444,20 +447,29 @@ public class AlphaCode {
                     case ' ':
                         position++;
                         break;
-                    case 'n':
-                    case 'c':
+                    case 'n': {
                         position++;
                         String token = nextToken();
                         if (token.startsWith("~")) {
                             token = "Q{" + NamespaceConstant.SCHEMA + "}" + token.substring(1);
                         }
-                        if (c == 'c' && token.endsWith("?")) {
+                        callBack.setStringProperty(container, "n", token);
+                        break;
+                    }
+                    case 'c': {
+                        position++;
+                        String token = nextToken();
+                        if (token.startsWith("~")) {
+                            token = "Q{" + NamespaceConstant.SCHEMA + "}" + token.substring(1);
+                        }
+                        if (token.endsWith("?")) {
                             // nillability: represented in alphaTree as "z":"1"
                             callBack.setStringProperty(container, "z", "1");
                             token = token.substring(0, token.length() - 1);
                         }
-                        callBack.setStringProperty(container, "" + c, token);
+                        callBack.setStringProperty(container, "c", token);
                         break;
+                    }
                     case 'k':
                     case 'r':
                     case 'v':
@@ -1176,7 +1188,7 @@ public class AlphaCode {
             sb.append('}');
         }
         if (tree.name != null) {
-            sb.append(" n").append(abbreviateEQName(tree.name));
+            sb.append(" n").append(abbreviateEQName(tree.name.replace(' ', '|')));
         }
         if (tree.content != null) {
             String display = abbreviateEQName(tree.content) + (tree.nillable ? "?" : "");

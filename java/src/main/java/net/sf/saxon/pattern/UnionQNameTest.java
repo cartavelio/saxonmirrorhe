@@ -72,7 +72,7 @@ public class UnionQNameTest implements QNameTest {
      * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
      *
      * @return a string representation of the QNameTest, suitable for use in export files. The format is
-     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
+     * a sequence of alternatives separated by spaces, where each alternative is one of '*',
      * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
      */
     @Override
@@ -81,7 +81,7 @@ public class UnionQNameTest implements QNameTest {
         boolean first = true;
         for (QNameTest test : tests) {
             if (!first) {
-                builder.append("|");
+                builder.append(" ");
             } else {
                 first = false;
             }

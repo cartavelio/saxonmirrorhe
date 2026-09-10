@@ -1433,6 +1433,7 @@ public class PackageLoaderHE implements IPackageLoader {
         final NamespaceResolver resolver = element.getAllNamespaces();
         env.setNamespaceResolver(resolver);
         env.setXPathLanguageLevel(pack.getHostLanguageVersion());
+        env.setImportedSchema(pack.getImportedSchema(""));
         parser.setQNameParser(parser.getQNameParser().withNamespaceResolver(resolver));
         return env;
     }
@@ -3508,6 +3509,9 @@ public class PackageLoaderHE implements IPackageLoader {
                 }
                 if (flags.contains("i")) {
                     options = options.withXIncludeAware(true);
+                }
+                if (validation != Validation.SKIP) {
+                    options = options.withSchema(loader.getSchema());
                 }
             }
             Expression body = loader.getExpressionWithRole(element, "body");
