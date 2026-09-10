@@ -307,6 +307,11 @@ public class UseWhenFilter extends ProxyReceiver {
                                             config.getResourceResolver(),
                                             new DirectResourceResolver(config));
 
+            if (source == null) {
+                XPathException e = new XPathException("Unable to resolve " + elemName.getDisplayName() + " stylesheet URI " + href, "XTSE0165");
+                e.setLocation(location);
+                throw e;
+            }
             if (source instanceof EmptySource) {
                 source = new StreamSource(
                         new StringReader("<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'/>"));

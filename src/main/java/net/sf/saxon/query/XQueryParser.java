@@ -4074,7 +4074,7 @@ public class XQueryParser extends XPathParser {
      */
 
     /*@NotNull*/
-    @CSharpReplaceException(from="System.StringIndexOutOfBoundsException", to="System.ArgumentOutOfRangeException")
+    @CSharpReplaceException(from="java.lang.StringIndexOutOfBoundsException", to="System.ArgumentOutOfRangeException")
     private Expression parsePseudoXML(boolean allowEndTag) throws XPathException {
         try {
             Expression exp;
