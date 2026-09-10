@@ -590,28 +590,18 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
     }
 
     private synchronized Component getFunctionComponent(QName function, XdmValue[] arguments) throws XPathException {
-        int arity = arguments.length;
-        while (true) {
-            SymbolicName fName = new SymbolicName.F(function.getStructuredQName(), arity);
-            PreparedStylesheet pss = (PreparedStylesheet) controller.getExecutable();
-            Component f = pss.getComponent(fName);
-            if (f != null) {
-                UserFunction fn = (UserFunction)f.getActor();
-                if (fn.getArity() < arity) {
-                    break;
-                }
-                if (f.getVisibility() != Visibility.FINAL && f.getVisibility() != Visibility.PUBLIC) {
-                    throw new XPathException("Cannot invoke " + fName + " externally, because it is not public", "XTDE0041");
-                }
-                return f;
-            }
-            arity += 1;
+        SymbolicName fName = new SymbolicName.F(function.getStructuredQName(), arguments.length);
+        PreparedStylesheet pss = (PreparedStylesheet) controller.getExecutable();
+        Component f = pss.getComponent(fName);
+        if (f == null) {
+            throw new XPathException("No public function with name " + function.getClarkName() +
+                                             " and arity " + arguments.length + " has been declared in the stylesheet", "XTDE0041");
+        } else if (f.getVisibility() != Visibility.FINAL && f.getVisibility() != Visibility.PUBLIC) {
+            throw new XPathException("Cannot invoke " + fName + " externally, because it is not public", "XTDE0041");
         }
-        throw new XPathException("No public function with name " + function.getClarkName() +
-                         " and arity " + arguments.length + " has been declared in the stylesheet", "XTDE0041");
-
+        return f;
     }
-
+    
     private Sequence[] typeCheckFunctionArguments(UserFunction uf, XdmValue[] arguments) throws XPathException {
         Configuration config = processor.getUnderlyingConfiguration();
         int version = controller.getExecutable().getTopLevelPackage().getHostLanguageVersion();

@@ -13,7 +13,7 @@ package net.sf.saxon.transpile;
  * that is generated.
  */
 
-public class CSharp {
+public final class CSharp {
 
     /**
      * CSharp.emitCode("goto label") causes the converter to include
