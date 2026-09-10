@@ -16,9 +16,10 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.tree.iter.AtomizingIterator;
 import net.sf.saxon.z.IntIterator;
 
 import java.io.IOException;
@@ -174,7 +175,7 @@ public class CSVEmitter extends SequenceWriter {
                         } else {
                             writer.writeCodePoint(separatorChar);
                         }
-                        writer.write(it.getUnicodeStringValue());
+                        writer.write(processString(it.getUnicodeStringValue()));
                     }
                     writer.write(endOfLine);
                 }
@@ -198,18 +199,23 @@ public class CSVEmitter extends SequenceWriter {
     }
 
     private void processArray(ArrayItem a) throws XPathException, IOException {
-        boolean first = true;
+        boolean firstMember = true;
         for (GroundedValue gv : a.members()) {
-            if (gv.materialize() instanceof AtomicValue av) {
-                if (first) {
-                    first = false;
+            SequenceIterator iter = new AtomizingIterator(gv.iterate());
+            boolean firstItem = true;
+            Item it;
+            while((it = iter.next()) != null) {
+                if (!firstItem) {
+                    throw new XPathException("An array to be serialized as CSV must have singleton atomic items as its atomized members", "SERE0025");
+                }
+                firstItem = false;
+                if (firstMember) {
+                    firstMember = false;
                 } else {
                     writer.writeCodePoint(separatorChar);
                 }
-                UnicodeString content = av.getUnicodeStringValue();
+                UnicodeString content = it.getUnicodeStringValue();
                 writer.write(processString(content));
-            } else {
-                throw new XPathException("An array to be serialized as CSV must have singleton atomic values as its members", "SERE0025");
             }
         }
         writer.write(endOfLine);
