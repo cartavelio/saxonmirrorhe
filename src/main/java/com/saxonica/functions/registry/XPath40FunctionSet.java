@@ -57,6 +57,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
                 SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
 
+        SpecificFunctionType predicate2ebv = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
+
         SpecificFunctionType compareFnType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
                 SequenceType.SINGLE_BOOLEAN);
@@ -489,6 +493,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
+
+        register("take-while", 1, 2, e -> e.populate(TakeWhile::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate2ebv, OPT, null));
 
         register("tokenize", 2, e -> e.populate(RegexFunctionSansFlags::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
