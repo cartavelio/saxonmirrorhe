@@ -39,6 +39,8 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
     protected XdmSequenceIterator(SequenceIterator base) {
         try {
             this.base = LookaheadIteratorImpl.makeLookaheadIterator(base);
+        } catch (UncheckedXPathException uxe) {
+            throw new SaxonApiUncheckedException(uxe.getXPathException());
         } catch (XPathException xe) {
             throw new SaxonApiUncheckedException(xe);
         }

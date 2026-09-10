@@ -9,6 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +96,7 @@ public class PackageVersion implements Comparable<PackageVersion> {
     public boolean equals(Object o) {
         if (o instanceof PackageVersion) {
             PackageVersion p = (PackageVersion) o;
-            if (parts.equals(p.parts)) {
+            if (equalParts(parts, p.parts)) {
                 if (suffix != null) {
                     return suffix.equals(p.suffix);
                 } else {
@@ -104,6 +105,11 @@ public class PackageVersion implements Comparable<PackageVersion> {
             }
         }
         return false;
+    }
+
+    @CSharpReplaceBody(code="return a.SequenceEqual(b);")
+    private static boolean equalParts(List<Integer> a, List<Integer> b) {
+        return a.equals(b);
     }
 
     /**

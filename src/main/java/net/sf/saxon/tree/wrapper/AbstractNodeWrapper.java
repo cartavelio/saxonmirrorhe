@@ -152,6 +152,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
 
     @Override
+    @CSharpModifiers(code={"public virtual"})
     public String getBaseURI() {
         if (getNodeKind() == Type.NAMESPACE) {
             return null;

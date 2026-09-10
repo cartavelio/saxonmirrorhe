@@ -60,21 +60,7 @@ public class NormalizeUnicode extends SystemFunction {
             err.setXPathContext(c);
             throw err;
         }
-
-//        // fast path for ASCII strings: normalization is a no-op
-//        boolean allASCII = true;
-//
-//        IntIterator iter = StringTool.codePoints(sv);
-//        while (iter.hasNext()) {
-//            if (iter.next() > 127) {
-//                allASCII = false;
-//                break;
-//            }
-//        }
-//        if (allASCII) {
-//            return sv;
-//        }
-
+        
         return Normalizer.normalize(sv, fb);
     }
 

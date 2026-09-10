@@ -7,7 +7,6 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.*;
@@ -76,13 +75,13 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
     }
 
     private StartTag pendingTag = null;
+    private final Stack<NamespaceMap> namespaceStack = new Stack<>();
 
     /**
      * The receiver to which events will be passed
      */
 
     private final Receiver receiver;
-    private final Configuration config;
 
     /**
      * The Checker used for testing valid characters
@@ -140,24 +139,12 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
         // where needed to support prefix-uri mappings used on elements and attributes
         PipelineConfiguration pipe = receiver.getPipelineConfiguration();
         this.inScopeNamespaces = new NamespaceReducer(receiver);
+        this.namespaceStack.push(NamespaceMap.emptyMap());
         this.receiver = inScopeNamespaces;
-        this.config = pipe.getConfiguration();
-        //this.receiver = new TracingFilter(this.receiver);
         this.charChecker = pipe.getConfiguration().getValidCharacterChecker();
         this.setPrefixes.push(new ArrayList<>());
-        this.rootNamespaceContext = new NamespaceContextImpl(new NamespaceResolver() {
+        this.rootNamespaceContext = new NamespaceContextImpl(NamespaceMap.emptyMap());
             // See bug 2902; initialise rootNamespaceContext to an empty set of namespaces
-            @Override
-            public String getURIForPrefix(String prefix, boolean useDefault) {
-                return null;
-            }
-
-            @Override
-            public Iterator<String> iteratePrefixes() {
-                List<String> e = Collections.emptyList();
-                return e.iterator();
-            }
-        });
     }
 
 
@@ -209,7 +196,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
                     elemName = new FingerprintedQName(pendingTag.elementName.prefix, pendingTag.elementName.uri, pendingTag.elementName.local);
                 }
 
-                NamespaceMap nsMap = NamespaceMap.emptyMap();
+                NamespaceMap nsMap = namespaceStack.peek();
                 if (!pendingTag.elementName.uri.isEmpty()) {
                     nsMap = nsMap.put(pendingTag.elementName.prefix, pendingTag.elementName.uri);
                 }
@@ -248,6 +235,8 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
                     depth--;
                     setPrefixes.pop();
                     receiver.endElement();
+                } else {
+                    namespaceStack.push(nsMap);
                 }
             } catch (XPathException e) {
                 throw new XMLStreamException(e);
@@ -288,23 +277,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
         }
     }
 
-    private String getDefaultNamespace() {
-        for (Triple t : pendingTag.namespaces) {
-            if (t.prefix == null || t.prefix.isEmpty()) {
-                return t.uri;
-            }
-        }
-        return inScopeNamespaces.getURIForPrefix("", true);
-    }
-
-    private String getUriForPrefix(String prefix) {
-        for (Triple t : pendingTag.namespaces) {
-            if (prefix.equals(t.prefix)) {
-                return t.uri;
-            }
-        }
-        return inScopeNamespaces.getURIForPrefix(prefix, false);
-    }
+    
 
     private String getPrefixForUri(String uri) {
         for (Triple t : pendingTag.namespaces) {
@@ -453,6 +426,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
         try {
             flushStartTag();
             setPrefixes.pop();
+            namespaceStack.pop();
             receiver.endElement();
             depth--;
         } catch (XPathException err) {
@@ -773,7 +747,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
      * in-scope at the time, overlaid on the root namespace context that was defined using
      * {@link #setNamespaceContext(NamespaceContext)}. The namespaces bound using {@link #setPrefix(String, String)}
      * are copied, and are therefore unaffected by subsequent changes, but the root namespace context
-     * is not copied, because the NamespaceContext interface provides no way of doing so.</p>
+     * is not copied, because the {@link NamespaceContext} interface provides no way of doing so.</p>
      * @return a copy of the current namespace context.
      */
     @Override
@@ -821,9 +795,10 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
                     prefixes.add(entry.getKey());
                 }
             }
-            Iterator root = rootNamespaceContext.getPrefixes(namespaceURI);
+            @SuppressWarnings("unchecked")
+            Iterator<String> root = (Iterator<String>)rootNamespaceContext.getPrefixes(namespaceURI);
             while (root.hasNext()) {
-                prefixes.add((String)root.next());
+                prefixes.add(root.next());
             }
             return prefixes.iterator();
         }

@@ -467,7 +467,7 @@ public class NamedTimeZone {
         try {
             return ZoneId.of(olsonName);
         } catch (java.time.zone.ZoneRulesException e) {
-            return ZoneId.of("Z");
+            return ZoneId.of("UTC");
         }
     }
 
