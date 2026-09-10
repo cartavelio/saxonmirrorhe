@@ -25,7 +25,8 @@ sandpit/
 /extra/lib/
 csharp/ee/bin/Debug/
 csharp/ee/obj/
-
+documentation/tools/qt4/**/*.ods
+.~lock.*
 
 
 # Created by running the unit tests :-(
