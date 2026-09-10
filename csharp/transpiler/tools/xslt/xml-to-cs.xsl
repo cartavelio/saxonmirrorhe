@@ -57,7 +57,10 @@
       <xsl:text>using System;{$NL}</xsl:text>
       <xsl:text>using System.Collections.Generic;{$NL}</xsl:text>
       <xsl:text>using System.Linq;{$NL}</xsl:text>
-      <xsl:apply-templates select="packageDeclaration"/>
+      <xsl:for-each select="types/type[1]/annotations/annotation[name/@identifier='CSharpUsing']//*[@nodeType='StringLiteralExpr']">
+         <xsl:text>using {f:unescapeJava(@value)};{$NL}</xsl:text>                    
+      </xsl:for-each>
+      <xsl:apply-templates select="packageDeclaration"/>     
       <xsl:text>{{{$NL}</xsl:text>
       <xsl:apply-templates select="* except packageDeclaration">
          <xsl:with-param name="indent" select="1" tunnel="yes"/>
@@ -449,8 +452,14 @@
       
       <!-- Modifiers -->
       
+      <xsl:variable name="in-enum-extension" 
+                    select="../..[@nodeType='EnumDeclaration'][entries/entrie[2]] and not(modifiers/modifier/@keyword='STATIC')"/>
       <xsl:choose>
-         
+         <xsl:when test="$in-enum-extension">
+            <!-- Generating an extension method for an enumeration type. This takes the form
+                 public static UType toUType(this PrimitiveUType prim) -->
+            <xsl:text>public static </xsl:text>
+         </xsl:when>
          <xsl:when test="annotations/annotation[name/@identifier='CSharpModifiers']">
             <xsl:value-of select="annotations/annotation[name/@identifier='CSharpModifiers']//@value ! string()" separator=" "/>
             <xsl:text> </xsl:text>
@@ -519,6 +528,12 @@
       <!-- Parameter declarations -->
       
       <xsl:text>(</xsl:text>
+      <xsl:if test="$in-enum-extension">
+         <!-- generating an extension method for an enum type: add a parameter of the form
+              this PrimitiveUType value. -->
+         <xsl:variable name="valueVar" select="(ancestor::members/member[@nodeType='FieldDeclaration'][1]/variables/variable/name/@identifier, 'value')[1]"/>
+         <xsl:text>this {f:packageName(.)}.{ancestor::type[1]/name/@identifier} {$valueVar}{if (exists(parameters/parameter)) then ", " else ""}</xsl:text>
+      </xsl:if>   
       <xsl:apply-templates select="parameters"/>
       <xsl:text>)</xsl:text>
       
@@ -645,8 +660,39 @@
       <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
    
-   <xsl:template match="*[@nodeType='EnumDeclaration']">
-      <!-- Code for complex enum classes is inspired by the Tangible converter -->
+   <!-- New code for enumerations generating an extension class -->
+   <xsl:template match="*[@nodeType='EnumDeclaration']" priority="9">
+      <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
+      <xsl:call-template name="indent"/>
+      <xsl:call-template name="modifiers"/>
+      <xsl:text>enum {name/@identifier} {{{$NL}</xsl:text>
+      <xsl:for-each select="entries/entrie">
+         <xsl:call-template name="indent-extra"/>
+         <xsl:text>{name/@identifier}</xsl:text>
+         <xsl:if test="arguments/argument[@nodeType='IntegerLiteralExpr' or @RETURN='int']">
+            <xsl:text> = </xsl:text>
+            <xsl:apply-templates select="arguments/argument"/>
+         </xsl:if>
+         <xsl:text>,{$NL}</xsl:text>
+      </xsl:for-each>
+      <xsl:call-template name="indent"/>
+      <xsl:text>}}{$NL}</xsl:text>
+      
+     
+      <xsl:if test="members/member[@nodeType='MethodDeclaration']">
+         <xsl:text>ERROR - COMPLEX ENUM TYPE !!!{$NL}</xsl:text>
+         <xsl:text>// The transpiler cannot handle an enumeration type with its own methods. {$NL}</xsl:text>
+         <xsl:text>// Make the methods static, and move them to a separate helper class. {$NL}</xsl:text>
+         <!--<xsl:text>public static class {name/@identifier}_Extension {{{$NL}</xsl:text>
+         <xsl:apply-templates select="members/member[@nodeType='MethodDeclaration']"/>
+         <xsl:call-template name="indent"/>
+         <xsl:text>}}{$NL}</xsl:text>-->
+      </xsl:if>
+      
+   </xsl:template>
+   
+   <!--<xsl:template match="*[@nodeType='EnumDeclaration']" priority="-100">
+      <!-\- Code for complex enum classes is inspired by the Tangible converter -\->
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:variable name="enumDecl" select="."/>
       <xsl:call-template name="indent"/>
@@ -695,7 +741,7 @@
       <xsl:text>}}{$NL}</xsl:text>
       
       <xsl:call-template name="indent-extra"/>
-      <!-- The Java language spec says that `values()` returns an array, but returning a list works well enough -->
+      <!-\- The Java language spec says that `values()` returns an array, but returning a list works well enough -\->
       <xsl:text>public static IList&lt;{$className}> values() {{{$NL}</xsl:text>
       <xsl:call-template name="indent-plus-two"/>
       <xsl:text>return valueList;{$NL}</xsl:text>
@@ -720,9 +766,9 @@
       <xsl:call-template name="indent-extra"/>
       <xsl:text>public static int nextOrdinal = 0;{$NL}</xsl:text>
            
-      <!--<xsl:apply-templates select="members/member">
+      <!-\-<xsl:apply-templates select="members/member">
          <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
-      </xsl:apply-templates>-->
+      </xsl:apply-templates>-\->
       
       <xsl:call-template name="indent-extra"/>
       <xsl:text>internal {$className}(string name, InnerEnum innerEnum</xsl:text>
@@ -766,7 +812,7 @@
       
       <xsl:call-template name="indent"/>
       <xsl:text>}}{$NL}</xsl:text>
-   </xsl:template>
+   </xsl:template>-->
    
    <xsl:template match="*[@nodeType = 'InitializerDeclaration'][@isStatic = 'true']"/>
       
@@ -974,7 +1020,7 @@
       <xsl:call-template name="indent"/>
       <xsl:text>switch (</xsl:text>
       <xsl:apply-templates select="selector"/>
-      <xsl:if test="$enumType and not($isSimpleEnum)">.innerEnumValue</xsl:if>
+      <!--<xsl:if test="$enumType and not($isSimpleEnum)">.innerEnumValue</xsl:if>-->
       <xsl:text>) {{{$NL}</xsl:text>
       <xsl:for-each select="entries/entrie">
          
@@ -989,7 +1035,7 @@
                         if (name/@identifier = 'DEFAULT_NAMESPACE') then 'DefaultNamespace' 
                         else if (name/@identifier = 'ANY_NAMESPACE') then 'AnyNamespace' 
                         else if (name/@identifier = 'DEFAULT_NAMESPACE_OR_NONE') then 'DefaultNamespaceOrNone' else '**'}</xsl:when>                   
-                     <xsl:when test="$enumType and exists($firstLabel/@RESOLVED_TYPE)">{f:renameType($firstLabel/@RESOLVED_TYPE)}.{if (not($isSimpleEnum)) then 'InnerEnum.' else ''}{name/@identifier}</xsl:when>
+                     <xsl:when test="$enumType and exists($firstLabel/@RESOLVED_TYPE)">{f:renameType($firstLabel/@RESOLVED_TYPE)}.{(:if (not($isSimpleEnum)) then 'InnerEnum.' else '':)}{name/@identifier}</xsl:when>
                      <xsl:otherwise>
                         <xsl:apply-templates select="."/>
                      </xsl:otherwise>
@@ -1009,7 +1055,8 @@
          <xsl:apply-templates select="statements">
             <xsl:with-param name="indent" select="$indent + 1" tunnel="yes"/>
          </xsl:apply-templates>
-         <xsl:if test="@type='EXPRESSION'">
+         <!--<xsl:text>/*SwitchStmt @type = {@type}*/</xsl:text>-->
+         <xsl:if test="@type=('EXPRESSION', 'BLOCK')">
             <xsl:call-template name="indent-extra"/>
             <xsl:text>break;{$NL}</xsl:text>
          </xsl:if>
@@ -1593,12 +1640,16 @@
          <xsl:choose>
             <xsl:when test="@isDefault='true'">_</xsl:when>
             <xsl:otherwise>
-               <xsl:apply-templates select="labels/label"/>
+               <xsl:for-each select="labels/label">
+                  <xsl:if test="position() != 1"> or </xsl:if>
+                  <xsl:apply-templates select="."/>
+               </xsl:for-each>
             </xsl:otherwise>
          </xsl:choose>        
          <xsl:text> => </xsl:text>
          <xsl:choose>
             <xsl:when test="count(statements/statement/expression) = 1">
+               <xsl:if test="@type = 'THROWS_STATEMENT'">throw </xsl:if>
                <xsl:apply-templates select="statements/statement/expression"/>
             </xsl:when>
             <xsl:otherwise>
@@ -1897,7 +1948,9 @@
    
    
    <!-- Handle a method call to a field in a record. `record.field()` in Java becomes `record.field` in C# -->
-   <xsl:template match="*[@nodeType='MethodCallExpr'][key('digestClassKey', @RESOLVED_TYPE, $digest)[self::record]]" priority="18">
+   <xsl:template match="*[@nodeType='MethodCallExpr']
+                         [key('digestClassKey', @RESOLVED_TYPE, $digest)[self::record]]
+                         [not(name/@identifier = ('hashCode', 'equals', 'toString'))]" priority="18">
       <xsl:apply-templates select="scope"/>
       <xsl:text>.{f:renameMethod(name/@identifier, .)}</xsl:text>
    </xsl:template>
@@ -2008,6 +2061,13 @@
       <xsl:text>this</xsl:text>
    </xsl:template>
    
+   <!-- Within an extension method of an extended enum, replace "this" by the name of the substituted variable -->
+   <xsl:template match="type[@nodeType='EnumDeclaration'][entries/entrie[2]]
+                        /members/member[@nodeType='MethodDeclaration']
+                        //*[@nodeType='ThisExpr']" priority="20">
+      <xsl:text>{(ancestor::members/member[@nodeType='ConstructorDeclaration']/parameters/parameter[1]/name/@identifier, 'value')[1]}</xsl:text>
+   </xsl:template>
+   
    <xsl:template match="*[@nodeType='TypeExpr']">
       <xsl:apply-templates select="type"/>
    </xsl:template>
@@ -2093,7 +2153,7 @@
                          [@nodeType='NameExpr']
                          [matches(name/@identifier, '^[A-Z0-9_]+$')]
                          [key('digestClassKey', f:expressionType(current()), $digest)/self::enum]" priority="18">
-      <xsl:text>/*implicit enum*/ {f:escapeDottedName(f:renameType(f:expressionType(.)))}.{name/@identifier}</xsl:text>
+      <xsl:text>{f:escapeDottedName(f:renameType(f:expressionType(.)))}.{name/@identifier}</xsl:text>
    </xsl:template>
    
    
@@ -2192,6 +2252,12 @@
          </xsl:call-template>
       </xsl:if>
    </xsl:template>
+
+   <xsl:function name="f:packageName" as="xs:string">
+      <xsl:param name="elem" as="element(*)"/>
+      <xsl:sequence select="string-join(reverse(root($elem)//packageDeclaration//@identifier), '.')
+          => replace('^com\.saxonica', 'Saxon.Eej') => replace('^net\.sf\.saxon', 'Saxon.Hej')"/>
+   </xsl:function>
    
   
 </xsl:stylesheet>

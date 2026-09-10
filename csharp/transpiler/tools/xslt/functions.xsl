@@ -343,8 +343,8 @@
         directly or indirectly; and if it does; return the class over which it iterates -->
    <xsl:function name="f:typeThatThisIteratesOver" as="xs:string?">
       <xsl:param name="type" as="element()"/>
-      <xsl:assert test="$type[self::class|self::interface]">Wrong element type in f:iteratesOver: {name($type)}</xsl:assert>
-      <xsl:variable name="superTypes" as="element(*)*" select="$type/implements | $type/extends"/>
+      <!--<xsl:assert test="$type[self::class|self::interface]">Wrong element type in f:typeThatThisIteratesOver: {name($type)}</xsl:assert>
+      --><xsl:variable name="superTypes" as="element(*)*" select="$type/implements | $type/extends"/>
       <xsl:variable name="iteratorSuperType" select="$superTypes[@name = 'java.util.Iterator']"/>
       <xsl:choose>
          <xsl:when test="$iteratorSuperType">
