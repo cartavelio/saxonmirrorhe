@@ -208,9 +208,14 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                     throw new IllegalArgumentException(
                             "Value of " + name + "must be two integers, comma-separated");
                 }
-                int min = Integer.parseInt(val.substring(0, comma));
-                int max = Integer.parseInt(val.substring(comma + 1));
-                setOccurrenceLimits(min, max);
+                try {
+                    int min = Integer.parseInt(val.substring(0, comma));
+                    int max = Integer.parseInt(val.substring(comma + 1));
+                    setOccurrenceLimits(min, max);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException(
+                            "Value of " + name + "must be two integers, comma-separated");
+                }
                 break;
             }
             case FeatureCode.RESULT_DOCUMENT_THREADS: {

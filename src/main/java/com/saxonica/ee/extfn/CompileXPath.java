@@ -209,7 +209,13 @@ public class CompileXPath extends SystemFunction {
                 }
 
                 String[] parts = nameArity.split("#");
-                int arity = Integer.parseInt(parts[1]);
+                int arity;
+
+                try {
+                    arity = Integer.parseInt(parts[1]);
+                } catch (NumberFormatException e) {
+                    throw new XPathException("Function arity must be an integer");
+                }
                 SymbolicName.F functionName = new SymbolicName.F(StructuredQName.fromClarkName(parts[0]), arity);
                 UserFunction fn = new UserFunction();
                 fn.setFunctionName(functionName.getComponentName());

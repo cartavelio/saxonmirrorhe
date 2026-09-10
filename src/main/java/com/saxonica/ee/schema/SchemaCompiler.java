@@ -412,6 +412,9 @@ public class SchemaCompiler {
             SchemaDocument schemadoc;
             try {
                 Source source = sources[i];
+                if (source == null) {
+                    throw new SchemaException("Unable to load schema at " + schemaLocations.get(i));
+                }
                 schemadoc = SchemaReader.read(source, this, pipe, null);
                 if (schemadoc.isCompiledSchemaDocument()) {
                     throw new SchemaException("Only source schema documents (not SCM compiled schemas) are accepted here");

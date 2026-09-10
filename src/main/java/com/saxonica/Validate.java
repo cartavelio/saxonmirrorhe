@@ -226,9 +226,13 @@ public class Validate {
                     badUsage("format: -limits:min,max");
                     return 2;
                 }
-                int min = Integer.parseInt(value.substring(0, comma));
-                int max = Integer.parseInt(value.substring(comma + 1));
-                config.setOccurrenceLimits(min, max);
+                try {
+                    int min = Integer.parseInt(value.substring(0, comma));
+                    int max = Integer.parseInt(value.substring(comma + 1));
+                    config.setOccurrenceLimits(min, max);
+                } catch (NumberFormatException e) {
+                    badUsage("format: -limits:min,max where min and max are integers");
+                }
             }
 
             scmInput = options.getOptionValue("scmin");
