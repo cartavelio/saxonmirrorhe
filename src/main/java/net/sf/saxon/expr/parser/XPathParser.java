@@ -1839,6 +1839,7 @@ public class XPathParser {
                     break;
                 case "tuple": // No longer recognized
                     grumble("The keyword 'tuple' is no longer recognized: use 'record' instead");
+                    primaryType = null;
                     break;
                 case "atomic":
                     // Allowed only in patterns, not in item types??
