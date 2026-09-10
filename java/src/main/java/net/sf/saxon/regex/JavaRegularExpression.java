@@ -46,11 +46,6 @@ public class JavaRegularExpression implements RegularExpression {
         this.flagBits = setFlags(flags);
         this.javaRegex = javaRegex.toString();
         try {
-            //#if CSHARP==false
-            // The Java COMMENTS option does more than the XPath "x" option. However,
-            // on .NET, the "x" option can be emulated accurately.
-            flagBits = flagBits & (~(Pattern.COMMENTS));
-            //#endif
             pattern = Pattern.compile(this.javaRegex, flagBits);
         } catch (PatternSyntaxException e) {
             throw new XPathException("Incorrect syntax for native regular expression: " + e.getMessage(), "FORX0002");
