@@ -67,7 +67,7 @@ public class Serializer extends AbstractDestination {
     private Processor processor; // never null
     private final Map<StructuredQName, String> properties = new HashMap<>(10);
     private final StreamResult result = new StreamResult();
-    private CharacterMapIndex characterMap = null;
+    private CharacterMapIndex characterMapIndex = null;
     private boolean mustClose = false;
 
     // Index of permitted property names
@@ -394,7 +394,7 @@ public class Serializer extends AbstractDestination {
      */
 
     public void setCharacterMap(CharacterMapIndex characterMap) {
-        CharacterMapIndex existingIndex = this.characterMap;
+        CharacterMapIndex existingIndex = this.characterMapIndex;
         if (existingIndex == null || existingIndex.isEmpty()) {
             existingIndex = characterMap;
         } else if (characterMap != null && !characterMap.isEmpty() && existingIndex != characterMap) {
@@ -404,7 +404,19 @@ public class Serializer extends AbstractDestination {
                 existingIndex.putCharacterMap(map.getName(), map);
             }
         }
-        this.characterMap = existingIndex;
+        this.characterMapIndex = existingIndex;
+    }
+
+    /**
+     * Get the character map index in use
+     * @return a set of named character maps.
+     */
+    
+    public CharacterMapIndex getCharacterMapIndex() {
+        if (characterMapIndex == null) {
+            characterMapIndex = new CharacterMapIndex();
+        }
+        return characterMapIndex;
     }
 
     /**
@@ -609,7 +621,7 @@ public class Serializer extends AbstractDestination {
         } else {
             try {
                 SerializationProperties properties =
-                        new SerializationProperties(getLocallyDefinedProperties(), characterMap);
+                        new SerializationProperties(getLocallyDefinedProperties(), characterMapIndex);
                 QueryResult.serializeSequence(value.getUnderlyingValue().iterate(),
                                               processor.getUnderlyingConfiguration(), result, properties);
             } catch (XPathException e) {
@@ -846,7 +858,7 @@ public class Serializer extends AbstractDestination {
      */
 
     public SerializationProperties getSerializationProperties() {
-        return new SerializationProperties(getLocallyDefinedProperties(), characterMap);
+        return new SerializationProperties(getLocallyDefinedProperties(), characterMapIndex);
     }
 
     /**
