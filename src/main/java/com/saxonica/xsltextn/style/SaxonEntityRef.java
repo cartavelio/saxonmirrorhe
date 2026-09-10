@@ -8,7 +8,7 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
-import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
@@ -18,21 +18,9 @@ import net.sf.saxon.value.Whitespace;
  * to be output to the XML or HTML output stream. <br>
  */
 
-public class SaxonEntityRef extends StyleElement {
+public class SaxonEntityRef extends ExtensionInstruction {
 
     String nameAttribute;
-
-    /**
-     * Determine whether this node is an instruction.
-     *
-     * @return true - it is an instruction
-     */
-
-    @Override
-    public boolean isInstruction() {
-        return true;
-    }
-
 
     @Override
     protected void prepareAttributes() {

@@ -4,10 +4,7 @@ import com.saxonica.xsltextn.instruct.While;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.style.Compilation;
-import net.sf.saxon.style.ComponentDeclaration;
-import net.sf.saxon.style.StyleElement;
-import net.sf.saxon.style.XSLIf;
+import net.sf.saxon.style.*;
 import net.sf.saxon.trans.XPathException;
 
 
@@ -17,20 +14,9 @@ import net.sf.saxon.trans.XPathException;
  * The content is output repeatedly so long as the test condition is true.
  */
 
-public class SaxonWhile extends StyleElement {
+public class SaxonWhile extends ExtensionInstruction {
 
     private Expression test;
-
-    /**
-     * Determine whether this node is an instruction.
-     *
-     * @return true - it is an instruction
-     */
-
-    @Override
-    public boolean isInstruction() {
-        return true;
-    }
 
     /**
      * Determine whether this type of element is allowed to contain a template-body

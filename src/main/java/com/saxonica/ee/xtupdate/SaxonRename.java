@@ -8,28 +8,17 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
-import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.XPathException;
 
 /**
  * saxon:rename is an XSLT version of the XQuery Update rename expression.
  */
 
-public class SaxonRename extends StyleElement {
+public class SaxonRename extends ExtensionInstruction {
 
     private Expression select;
     private Expression newName;
-
-    /**
-     * Determine whether this node is an instruction.
-     *
-     * @return true - it is an instruction
-     */
-
-    @Override
-    public boolean isInstruction() {
-        return true;
-    }
 
     /**
      * Determine whether this type of element is allowed to contain a template-body

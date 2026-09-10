@@ -28,6 +28,16 @@ public class SaxonImportQuery extends StyleElement {
     private String href;
     private String moduleURI;
 
+    /**
+     * Ask whether the element is in the XSLT namespace
+     *
+     * @return true if the element is in the XSLT namespace
+     */
+    @Override
+    public boolean isInXsltNamespace() {
+        return false;
+    }
+
     @Override
     protected void prepareAttributes() {
 

@@ -20,20 +20,9 @@ import net.sf.saxon.trans.XPathException;
  * item established by the select expression.
  */
 
-public class SaxonUpdate extends StyleElement {
+public class SaxonUpdate extends ExtensionInstruction {
 
     private Expression select;
-
-    /**
-     * Determine whether this node is an instruction.
-     *
-     * @return true - it is an instruction
-     */
-
-    @Override
-    public boolean isInstruction() {
-        return true;
-    }
 
     /**
      * Determine whether this type of element is allowed to contain a template-body

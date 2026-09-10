@@ -44,6 +44,16 @@ public class SaxonAssign extends XSLGeneralVariable {
         return true;
     }
 
+    /**
+     * Ask whether the element is in the XSLT namespace
+     *
+     * @return true if the element is in the XSLT namespace
+     */
+    @Override
+    public boolean isInXsltNamespace() {
+        return false;
+    }
+
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);

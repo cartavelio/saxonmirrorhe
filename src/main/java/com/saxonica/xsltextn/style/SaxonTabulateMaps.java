@@ -7,7 +7,7 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
-import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 
@@ -16,21 +16,10 @@ import net.sf.saxon.trans.XPathException;
  * Handler for saxon:tabulate-maps elements in stylesheet.
  */
 
-public class SaxonTabulateMaps extends StyleElement {
+public class SaxonTabulateMaps extends ExtensionInstruction {
 
     private Expression root;
     private Expression select;
-
-    /**
-     * Determine whether this node is an instruction.
-     *
-     * @return true - it is an instruction
-     */
-
-    @Override
-    public boolean isInstruction() {
-        return true;
-    }
 
     /**
      * Determine whether this type of element is allowed to contain a template-body

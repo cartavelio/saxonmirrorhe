@@ -10,7 +10,7 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
-import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
@@ -18,21 +18,10 @@ import net.sf.saxon.value.Whitespace;
  * saxon:insert is an XSLT version of the XQuery Update "insert node" expression.
  */
 
-public class SaxonInsert extends StyleElement {
+public class SaxonInsert extends ExtensionInstruction {
 
     private Expression select;
     private String positionAtt;
-
-    /**
-     * Determine whether this node is an instruction.
-     *
-     * @return true - it is an instruction
-     */
-
-    @Override
-    public boolean isInstruction() {
-        return true;
-    }
 
     /**
      * Determine whether this type of element is allowed to contain a template-body

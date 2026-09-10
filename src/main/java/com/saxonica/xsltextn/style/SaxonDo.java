@@ -7,7 +7,7 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
-import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.XPathException;
 
 
@@ -19,20 +19,9 @@ import net.sf.saxon.trans.XPathException;
  * @since 9.9
  */
 
-public class SaxonDo extends StyleElement {
+public class SaxonDo extends ExtensionInstruction {
 
     private Expression action;
-
-    /**
-     * Determine whether this node is an instruction.
-     *
-     * @return true - it is an instruction
-     */
-
-    @Override
-    public boolean isInstruction() {
-        return true;
-    }
 
     /**
      * Determine whether this type of element is allowed to contain a template-body
@@ -72,10 +61,6 @@ public class SaxonDo extends StyleElement {
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
-//        Expression action = compileSequenceConstructor(exec, decl, true);
-//        if (action == null) {
-//            action = Literal.makeEmptySequence();
-//        }
         return new DoInstr(action);
     }
 

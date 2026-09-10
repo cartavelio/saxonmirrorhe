@@ -8,25 +8,14 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
-import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.XPathException;
 
 /**
  * A saxon:doctype element in the stylesheet.
  */
 
-public class SaxonDoctype extends StyleElement {
-
-    /**
-     * Determine whether this node is an instruction.
-     *
-     * @return true - it is an instruction
-     */
-
-    @Override
-    public boolean isInstruction() {
-        return true;
-    }
+public class SaxonDoctype extends ExtensionInstruction {
 
     /**
      * Determine whether this type of element is allowed to contain a template-body
