@@ -13,6 +13,7 @@ import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.ComponentTracer;
 import net.sf.saxon.expr.instruct.TraceExpression;
 import net.sf.saxon.expr.parser.XPathParser;
+import net.sf.saxon.functions.TransformFn;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
@@ -44,6 +45,9 @@ public class XSLTTraceCodeInjector extends TraceCodeInjector {
         Expression parent = exp.getParentExpression();
         if (parent instanceof TraceExpression) {
             parent = parent.getParentExpression();
+        }
+        if (exp.isCallOn(TransformFn.class)) {
+            return true;
         }
         if (parent != null && parent.getLocation() instanceof XPathParser.NestedLocation) {
             return false;

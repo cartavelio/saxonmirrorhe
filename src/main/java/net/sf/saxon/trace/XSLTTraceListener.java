@@ -67,9 +67,9 @@ public class XSLTTraceListener extends AbstractTraceListener {
             } else if (expr instanceof LetExpression) {
                 return "xsl:variable";
             } else if (expr.isCallOn(Trace.class)) {
-                return "fn:trace";
+                return "fn-trace";
             } else if (expr instanceof SystemFunctionCall) {
-                return ((SystemFunctionCall)expr).getTargetFunction().getFunctionName().getDisplayName();
+                return "call";
             } else  {
                 return expr.getExpressionName();
             }
@@ -84,7 +84,7 @@ public class XSLTTraceListener extends AbstractTraceListener {
         } else if (info instanceof GlobalVariable) {
             return "xsl:variable";
         } else if (info instanceof Trace) {
-            return "fn:trace";
+            return "fn-trace";
         } else {
             return "misc";
         }
