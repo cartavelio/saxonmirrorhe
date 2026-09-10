@@ -155,6 +155,11 @@
       <reason>Currently restricting default value of a user function parameter to be a literal or "."</reason>
    </exception>
    
+   <exception test-set="prod-Recordtest" test-case="RecordTest-010" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-18"/>
+      <reason>Coercion on fields of record test not yet implemented</reason>
+   </exception>
+   
    <exception test-set="misc-BuiltInKeywords" test-case="
       Keywords-fn-char-1
       Keywords-fn-remove-1
@@ -238,6 +243,9 @@
    <exception test-set="app-spec-examples" 
       test-case=" fo-test-array-values-001
                   fo-test-array-values-002
+                  fo-test-array-sort-002
+                  fo-test-array-sort-005
+                  fo-test-fn-sort-002
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
