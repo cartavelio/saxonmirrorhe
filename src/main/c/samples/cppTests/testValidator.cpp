@@ -81,10 +81,10 @@ void testValidator4(SaxonProcessor * processor, SchemaValidator * val){
   val->clearProperties();
   cout<<endl<<"Test 4: Validate source file with schema file. i.e. family.xml and family.xsd"<<endl;	
 
-	val->registerSchemaFromFile("family-ext.xsd");
+	val->registerSchemaFromFile("../data/family-ext.xsd");
        //val->registerSchema("family.xsd");
-	val->registerSchemaFromFile("family.xsd");
-	val->validate("family.xml");
+	val->registerSchemaFromFile("../data/family.xsd");
+	val->validate("../data/family.xml");
 	if(!val->exceptionOccurred()) {
 		cout<<endl<<"Doc1 is OK"<<endl;
 	} else {
@@ -99,10 +99,10 @@ void testValidator4a(SaxonProcessor * processor, SchemaValidator * val){
   val->clearProperties();
   cout<<endl<<"Test 4: Validate source file with schema file. i.e. family.xml and family.xsd to XdmNode"<<endl;	
 
-	val->registerSchemaFromFile("family-ext.xsd");
+	val->registerSchemaFromFile("../data/family-ext.xsd");
        //val->registerSchema("family.xsd");
-	val->registerSchemaFromFile("family.xsd");
-	XdmNode * node = val->validateToNode("family.xml");
+	val->registerSchemaFromFile("../data/family.xsd");
+	XdmNode * node = val->validateToNode("../data/family.xml");
 	if(node != NULL) {
 	    const char * valueStr = node->toString();
 		if(!val->exceptionOccurred() && valueStr != nullptr) {
