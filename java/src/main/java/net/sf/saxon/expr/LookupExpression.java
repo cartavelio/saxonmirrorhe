@@ -487,15 +487,15 @@ public class LookupExpression extends BinaryExpression {
                             case ARRAY: {
                                 MappingFunction arrayAccess = SequenceMapper.of(index -> {
                                     if (index instanceof IntegerValue) {
-                                        int i = ((IntegerValue)index).asSubscript();
-                                        if (i > 0 && i <= ((ArrayItem) baseItem).arrayLength()) {
-                                            GroundedValue member = ((ArrayItem) baseItem).get(i - 1);
-                                            return member.iterate();
-                                        }
-//                                            int subscript = ArrayFunctionSet.checkSubscript(
-//                                                    (IntegerValue) index, ((ArrayItem) baseItem).arrayLength()) - 1;
-//                                            GroundedValue member = ((ArrayItem) baseItem).get(subscript);
+//                                        int i = ((IntegerValue)index).asSubscript();
+//                                        if (i > 0 && i <= ((ArrayItem) baseItem).arrayLength()) {
+//                                            GroundedValue member = ((ArrayItem) baseItem).get(i - 1);
 //                                            return member.iterate();
+//                                        }
+                                        int subscript = ArrayFunctionSet.checkSubscript(
+                                                (IntegerValue) index, ((ArrayItem) baseItem).arrayLength()) - 1;
+                                        GroundedValue member = ((ArrayItem) baseItem).get(subscript);
+                                        return member.iterate();
                                     }
                                         return EmptyIterator.getInstance();
 //                                            throw new XPathException(
