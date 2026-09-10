@@ -251,8 +251,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         if (!st.isSimpleType()) {
             throw new XQException("baseType " + basetype + " is not a simple type");
         }
-        ContentTypeTest contentTest = new ContentTypeTest(Type.ATTRIBUTE, st, config, false);
-        return makeAttributeTest(nodename, contentTest, config);
+        return makeAttributeTest(nodename, st, config);
 
     }
 
@@ -276,19 +275,18 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         } else if (!st.isSimpleType()) {
             throw new XQException("Type " + typename + " is not a simple type");
         }
-        ContentTypeTest contentTest = new ContentTypeTest(Type.ATTRIBUTE, st, config, false);
-        return makeAttributeTest(nodename, contentTest, config);
+        return makeAttributeTest(nodename, st, config);
     }
 
-    private static XQItemType makeAttributeTest(QName nodename, ContentTypeTest contentTest, Configuration config) {
-        if (nodename == null) {
-            return new SaxonXQItemType(contentTest, config);
-        } else {
-            NameTest nameTest = new NameTest(
-                    Type.ATTRIBUTE, NamespaceUri.of(nodename.getNamespaceURI()), nodename.getLocalPart(), config.getNamePool());
-            CombinedNodeTest combined = new CombinedNodeTest(nameTest, OperatorSymbol.INTERSECT, contentTest);
-            return new SaxonXQItemType(combined, config);
+    private static XQItemType makeAttributeTest(QName nodename, SchemaType schemaType, Configuration config) {
+        QNameTest nameTest = AnyNodeTest.getInstance();
+        if (nodename != null) {
+            nameTest = new NameTest(
+                    Type.ATTRIBUTE, NamespaceUri.of(nodename.getNamespaceURI()),
+                    nodename.getLocalPart(), config.getNamePool());
         }
+        ContentTypeTest combined = new ContentTypeTest(Type.ATTRIBUTE, nameTest, schemaType, false, config);
+        return new SaxonXQItemType(combined, config);
     }
 
     /*@NotNull*/
@@ -352,7 +350,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             throw new XQException("Unknown base type " + basetype);
         }
         SchemaType st = BuiltInType.getSchemaType(saxonType);
-        ContentTypeTest contentTest = new ContentTypeTest(Type.ELEMENT, st, config, false);
+        ContentTypeTest contentTest = new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), st, false, config);
         return makeElementTest(nodename, contentTest, config);
 
     }
@@ -388,7 +386,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             throw new XQException("Type " + typename + " not found in schema");
         }
 
-        ContentTypeTest contentTest = new ContentTypeTest(Type.ELEMENT, st, config, allowNill);
+        ContentTypeTest contentTest = new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), st, allowNill, config);
         return makeElementTest(nodename, contentTest, config);
     }
 

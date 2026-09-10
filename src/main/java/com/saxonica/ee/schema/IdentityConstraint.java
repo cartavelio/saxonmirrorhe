@@ -6,6 +6,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.StringTool;
@@ -213,14 +214,11 @@ public abstract class IdentityConstraint extends SchemaStructure
 
     public void typeCheck(final SchemaCompiler compiler, SchemaType contextType) throws XPathException {
         final EnterpriseConfiguration config = compiler.getConfiguration();
-
         IndependentContext env = new IndependentContext(config);
         env.setWarningHandler((message, code, loc) -> compiler.warning(message, code, this));
         env.setSchemaAware(true);
-
         ExpressionVisitor visitor = ExpressionVisitor.make(env);
-        visitor.setSchemaForTypeChecking(compiler.getPreparedSchema());
-        ItemType contextItemType = new ContentTypeTest(Type.ELEMENT, contextType, config, false);
+        ItemType contextItemType = new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), contextType, false, config);
         ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, true);
         selector.setSelectExpression(selector.getSelectExpression().typeCheck(visitor, cit));
         ItemType selectorType = selector.getSelectExpression().getItemType();
