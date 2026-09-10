@@ -171,7 +171,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
     }
 
     /**
-     * Ask if the map contains only the binding
+     * Ask if the map contains no namespace bindings
      * @return true if the map contains no bindings
      */
 
@@ -182,7 +182,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
     /**
      * Get the URI associated with a given prefix. If the supplied prefix is "xml", the
      * XML namespace {@link NamespaceConstant#XML} is returned, even if the map is empty.
-     * @param prefix the required prefix (may be an empty string to get the default namespace)
+     * @param prefix the required prefix (this may be an empty string to get the default namespace)
      * @return the associated URI, or null if no mapping is present. Note that we return null
      * when no mapping is present, even for the case where the prefix is the empty string.
      */
