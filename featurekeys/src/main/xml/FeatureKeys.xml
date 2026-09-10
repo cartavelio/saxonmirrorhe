@@ -2845,7 +2845,7 @@
             <p>The restriction is passed on to an underlying XML parser in cases where Saxon is in control
             of the parsing (for example, by setting an <code>EntityResolver</code> in Java, or an <code>XmlResolver</code>
             on .NET). Saxon will not generally change the settings of a user-supplied XML parser (for example 
-            a parser supplied as an <code>XmlReader</code> within a <code>SAXSource</code>.</p>
+            a parser supplied as an <code>XmlReader</code> within a <code>SAXSource</code>).</p>
             <p>The constraint applies to the URI used to request
                 the resource; the constraint is applied by the standard URI resolvers, but if 
                 user-supplied resolvers are used (such as a <code>URIResolver</code>), they can decide
