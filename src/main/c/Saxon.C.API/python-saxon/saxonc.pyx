@@ -2184,14 +2184,11 @@ cdef class PyXsltExecutable:
      def call_template_returning_value(self, str template_name=None, **kwds):
         """
         call_template_returning_value(self, str template_name, **kwds)
-        Invoke a transformation by calling a named template and return the result as a PyXdmValue. This method does not
-        set the global context item for the transformation; if that is required, it can be done separately using the
-        set_global_context_item method.
+        Invoke a transformation by calling a named template and return the result as a PyXdmValue.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
-            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
-                base_output_uri (str) which is used for resolving relative URIs in the href attribute
-                of the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: base_output_uri (str) which is used for resolving relative URIs in
+                the href attribute of the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
@@ -2264,14 +2261,11 @@ cdef class PyXsltExecutable:
      def call_template_returning_string(self, str template_name=None, **kwds):
         """
         call_template_returning_string(self, str template_name, **kwds)
-        Invoke a transformation by calling a named template and return the result as a string. This method does not
-        set the global context item for the transformation; if that is required, it can be done separately using the
-        set_global_context_item method.
+        Invoke a transformation by calling a named template and return the result as a string.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
-            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
-                base_output_uri (str) which is used for resolving relative URIs in the href attribute
-                of the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: base_output_uri (str) which is used for resolving relative URIs in
+                the href attribute of the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
@@ -2312,13 +2306,11 @@ cdef class PyXsltExecutable:
         """
         call_template_returning_file(self, str template_name, **kwds)
         Invoke a transformation by calling a named template with the result saved to file. It is possible to specify the
-        output file as an argument or using the set_output_file method. This method does not set the global context item
-        for the transformation; if that is required, it can be done separately using the set_global_context_item method.
+        output file as an argument or using the set_output_file method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
-            **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode); output_file (str), and
-                base_output_uri (str) which is used for resolving relative URIs in the href attribute
-                of the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: output_file (str), and base_output_uri (str) which is used for
+                resolving relative URIs in the href attribute of the xsl:result-document instruction.
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.call_template_returning_file("main", output_file="result.xml")
