@@ -1434,7 +1434,7 @@ zval makePHPValue(void * value){
       break;
       case saxonTypeEnum::enumDouble:
       case saxonTypeEnum::enumFloat:
-        dvalue = j_getDoubleValue(thread, (void *)value);//aitem->getDoubleValue();
+        dvalue = j_getDoubleValue(thread, (void *)value, &r);//aitem->getDoubleValue();
       ZVAL_DOUBLE(&retval, dvalue);
       break;
 
@@ -1442,7 +1442,7 @@ zval makePHPValue(void * value){
         if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr<<"PHP internal: type not found"<< std::endl;
         }
-        astri = (const char *)getStringValueForXdmItem(thread,(void *)fn, (void *)value, NULL);//aitem->getStringValue();
+        astri = (const char *)getStringValueForXdmItem(thread,(void *)fn, (void *)value, NULL, &r);//aitem->getStringValue();
         ZVAL_STRING(&retval, astri);
         break;
 
@@ -1553,6 +1553,8 @@ zval makePHPValue(void * value){
     std::cerr<<"PHPValue: XDMarray size="<<count<<std::endl;
   }
 
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+
   ///// creating PHP array
   zend_array *ret = zend_new_array(count);
   zend_ulong idx = 0;
@@ -1560,9 +1562,11 @@ zval makePHPValue(void * value){
   for (int j = 0; j < count; j++) {
 
     avaluej =
-        j_xdmArray_get(thread, (void *)value, j);
-    //XdmValue * avaluej =aitem->get(j);
-    //itemi->incrementRefCount();
+        j_xdmArray_get(thread, (void *)value, j, &r);
+
+    if (r.status != SAXON_OK) {
+        zend_throw_exception(zend_ce_exception, r.message, 0);
+    }
 
     zval retvali = makePHPValue((void *)avaluej);
 
@@ -1654,7 +1658,9 @@ zval makePHPValue(void * value){
 
 }
   zend_throw_exception(zend_ce_exception, "Internal Error: Cannot convert XdmValue to PHP value", 0);
-
+  zval result_null;
+  ZVAL_NULL(&result_null);
+  return result_null;
 }
 
 
@@ -1708,6 +1714,8 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
         void * valuei = nullptr;
         zval tmp;
 
+       saxon_error_t r = SAXON_ERROR_DEFAULT;
+
         switch (Z_TYPE_P(retval)) {
             case IS_FALSE:
                 return (void *)j_makeBooleanValue(thread1, (int)false);
@@ -1722,7 +1730,11 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
                 sVal = Z_STRVAL_P(retval);
                 len = Z_STRLEN_P(retval);
                 //resultValue = nprocessor->makeStringValue(estrndup(sVal,len));
-                return (void *)j_makeStringValue(thread1, (char *)estrndup(sVal,len), (char *)NULL);
+                valuei = (void *)j_makeStringValue(thread1, (char *)estrndup(sVal,len), (char *)NULL, &r);
+                if (r.status != SAXON_OK) {
+                    zend_throw_exception(zend_ce_exception, r.message, 0);
+                }
+                return valuei;
             case IS_NULL:
               if (getenv("SAXONC_DEBUG_FLAG")) {
                 std::cerr<<"PHP internal: call_user_function return is NULL"<< std::endl;
@@ -1750,7 +1762,10 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
               }
               ZEND_HASH_FOREACH_END();
               //return SaxonProcessor::makeInternalArray(arrItems, rv_arr_length);
-              valuei = (void *) j_makeXdmArray(thread1, (void *)resultVoidValue);
+              valuei = (void *) j_makeXdmArray(thread1, (void *)resultVoidValue, &r);
+              if (r.status != SAXON_OK) {
+                  zend_throw_exception(zend_ce_exception, r.message, 0);
+              }
               j_handles_destroy(thread1, (void *)resultVoidValue);
               return valuei;
 
@@ -1764,7 +1779,7 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
 					arrIter_valid = &tmp;
 				 }
 			  	 zend_call_method_with_0_params(Z_OBJ_P(retval), spl_ce_ArrayIterator, NULL, "valid", arrIter_valid);
-                if(Z_TYPE_P(arrIter_valid) == NULL) {
+                if(Z_TYPE_P(arrIter_valid) == IS_NULL) {
                       std::cerr<<"PHP internal: call_user_function return arrIter_valid is NULL"<< std::endl;
                     }
 					if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -1937,7 +1952,7 @@ void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, 
     } else {
 
         XdmValue ** arguments = NULL;
-        int64_t argument = NULL;
+        int64_t argument = -1;
         if(numOfArguments > 0) {
             arguments = new XdmValue*[numOfArguments];
             for(int i =0; i< numOfArguments; i++) {
