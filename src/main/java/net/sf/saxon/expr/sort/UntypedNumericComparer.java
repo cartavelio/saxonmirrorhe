@@ -56,6 +56,9 @@ public class UntypedNumericComparer implements AtomicComparer {
     public static boolean quickCompare(
             StringValue a0, NumericValue a1, int operator, ConversionRules rules)
             throws XPathException {
+        if (a1.isNaN()) {
+            return operator == Token.FNE;
+        }
         int comp = quickComparison(a0, a1, rules);
         switch (operator) {
             case Token.FEQ:

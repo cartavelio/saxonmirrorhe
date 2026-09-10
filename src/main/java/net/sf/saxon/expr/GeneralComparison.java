@@ -873,7 +873,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                                          Location loc,
                                          XPathContext context) throws XPathException {
             try {
-                if (value1 == null) {
+                if (value1 == null || (value1.isNaN() && singletonOperator != Token.FNE)) {
+                    iter0.close();
                     return false;
                 }
                 if (iter0 instanceof RangeIterator) {
