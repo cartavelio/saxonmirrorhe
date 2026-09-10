@@ -228,7 +228,7 @@ TODO: rethink redefines and override
         used for validation, rather than allowing only one schema per <code>Configuration</code> as before.</p>
         
         <p>New capabilities are available when an XDM document is constructed by
-            wrapping a DOM (an instance of class <code>System.Xml.XmlDocument). Provided DTD processing
+            wrapping a DOM (an instance of class <code>System.Xml.XmlDocument</code>). Provided DTD processing
         is enabled when constructing the DOM, the XPath <code>id()</code> function will now locate
         element based on DTD-identified ID attributes, and the XSLT <code>unparsed-entity-uri</code>
         and <code>unparsed-entity-uri</code> functions can be used to obtain information about
