@@ -528,6 +528,7 @@ public class TestXPathCompiler {
         }
 
         Processor processor = new Processor(true);
+        SchemaManager schemaManager = processor.getSchemaManager();
         EnterpriseConfiguration conf = (EnterpriseConfiguration) processor.getUnderlyingConfiguration();
 
         conf.displayLicenseMessage();
@@ -537,12 +538,15 @@ public class TestXPathCompiler {
         try {
 
             // 1. load schema into EnterpriseConfiguration
-            conf.addSchemaSource(new StreamSource(configTest.getDataDir() + "malix/schema.xsd"));
+            XsdSchema schema = schemaManager.load(new StreamSource(configTest.getDataDir() + "malix/schema.xsd"));
+
             XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
             xqueryCompiler.setSchemaAware(true);
+            xqueryCompiler.useSchema(schema);
 
             xpathCompiler = processor.newXPathCompiler();
             xpathCompiler.setSchemaAware(true);
+            xpathCompiler.useSchema(schema);
 
             String xq =
                     "declare namespace xfi='http://www.xbrl.org/2008/function/instance'; \n" +
@@ -744,7 +748,7 @@ public class TestXPathCompiler {
     private boolean trySchemaAwareEquality(boolean isSchemaAware) throws SaxonApiException {
 
         Processor processor = new Processor(true);
-        SchemaManager sm = processor.getSchemaManager();
+        XsdCompiler sm = processor.newXsdCompiler();
         String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" \n" +
                 "           targetNamespace=\"http://www.xpathtest.com/test\" \n" +
                 "           xmlns:test=\"http://www.xpathtest.com/test\" \n" +
@@ -765,8 +769,8 @@ public class TestXPathCompiler {
                 "    </xs:complexType>\n" +
                 "  </xs:element>\n" +
                 "</xs:schema>";
-        sm.load(new StreamSource(new StringReader(xsd)));
-        SchemaValidator sv = sm.newSchemaValidator();
+        XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd)));
+        SchemaValidator sv = schema.newValidator();
         XdmDestination xdmDest = new XdmDestination();
         sv.setDestination(xdmDest);
         String xml = "<comparables xmlns=\"http://www.xpathtest.com/test\">\n" +

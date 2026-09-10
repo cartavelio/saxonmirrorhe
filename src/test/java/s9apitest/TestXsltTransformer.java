@@ -21,7 +21,6 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.XSLTTraceListener;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ComplexType;
-import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.QNameValue;
@@ -519,10 +518,10 @@ public class TestXsltTransformer {
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             XsltTransformer transformer = exec.load();
 
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
             DocumentBuilder builder = proc.newDocumentBuilder();
-            builder.setSchemaValidator(sm.newSchemaValidator());
+            builder.setSchemaValidator(schema.newValidator());
             XdmNode books = builder.build(new File(configTest.getDataDir() + "books.xml"));
             transformer.setInitialContextNode(books);
             // Create a serializer
@@ -554,7 +553,7 @@ public class TestXsltTransformer {
         int fp = config.getNamePool().allocateFingerprint(
                 NamespaceUri.of(childName.getComponent(AccessorFn.Component.NAMESPACE).getStringValue()),
                 childName.getComponent(AccessorFn.Component.LOCALNAME).getStringValue());
-        int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, true);
+        int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, null, true);
         return Cardinality.allowsZero(cardinality);
     }
 
@@ -723,15 +722,19 @@ public class TestXsltTransformer {
     public void testValidationWarnings() {
         try {
             Processor processor = new Processor(true);
-            processor.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, Boolean.TRUE);
-            processor.getUnderlyingConfiguration().addSchemaSource(
+            processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, true);
+
+            XsdCompiler schemaManager = processor.newXsdCompiler();
+            processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, true);
+            XsdSchema schema = schemaManager.compile(
                     new StreamSource(configTest.getDataDir() + "books.xsd"));
+
 
             Serializer serializer = processor.newSerializer();
             serializer.setOutputFile(new File(configTest.getTempDir() + "validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
-            compiler.setSchemaAware(true);
+            compiler.useSchema(schema);
 
             String xsl = "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
                     "\n" +
@@ -757,10 +760,7 @@ public class TestXsltTransformer {
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
-        } catch (SchemaException se) {
-            se.printStackTrace();
-            fail();
-        }
+        } 
     }
 
     /**
