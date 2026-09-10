@@ -42,7 +42,7 @@ task resources_notices(
 
 task resources_userdoc_html(
         dependsOn: ["resources_html_docs",
-                    //"resources_html_javadoc", // exclude Java only stuff for now
+                    "resources_html_javadoc",
                     "resources_html_dotnetdoc"],
         description: "Copy HTML docs into the resources folder"
 ) {
