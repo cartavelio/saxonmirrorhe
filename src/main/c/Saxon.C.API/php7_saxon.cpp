@@ -2343,7 +2343,7 @@ PHP_METHOD(XdmFunctionItem,  getArity)  {
         	int value = xdmFunctionItem->getArity();
             RETURN_LONG(value);
        	}else {
-    		RETURN_LONG(-1)
+    		RETURN_LONG(-1);
     	}
 
 
@@ -2590,7 +2590,7 @@ PHP_METHOD(XdmMap,  mapSize)  {
         	int value = xdmMap->mapSize();
             RETURN_LONG(value);
        	}else {
-    		RETURN_LONG(-1)
+    		RETURN_LONG(-1);
     	}
 
 }
@@ -3137,7 +3137,7 @@ PHP_METHOD(XdmArray,  getArity)  {
         	int value = xdmArray->getArity();
             RETURN_LONG(value);
        	}else {
-    		RETURN_LONG(-1)
+    		RETURN_LONG(-1);
     	}
 
 
@@ -3153,7 +3153,7 @@ PHP_METHOD(XdmArray,  arrayLength)  {
         	int value = xdmArray->arrayLength();
             RETURN_LONG(value);
        	}else {
-    		RETURN_LONG(-1)
+    		RETURN_LONG(-1);
     	}
 
 
