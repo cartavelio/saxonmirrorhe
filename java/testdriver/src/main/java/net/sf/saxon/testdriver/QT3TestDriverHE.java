@@ -738,9 +738,17 @@ public class QT3TestDriverHE extends TestDriver {
                                 }
 
                                 if (needResultValue) {
-                                    XdmValue result = selector.evaluate();
-                                    previousResult = result;
-                                    outcome.setPrincipalResult(result);
+                                    if (pushPolarity) {
+                                        RawDestination dest = new RawDestination();
+                                        selector.run(dest);
+                                        XdmValue result = dest.getXdmValue();
+                                        previousResult = result;
+                                        outcome.setPrincipalResult(result);
+                                    } else {
+                                        XdmValue result = selector.evaluate();
+                                        previousResult = result;
+                                        outcome.setPrincipalResult(result);
+                                    }
                                 }
                             }
                         } catch (SaxonApiException err) {

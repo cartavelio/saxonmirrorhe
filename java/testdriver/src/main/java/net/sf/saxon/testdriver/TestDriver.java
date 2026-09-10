@@ -77,6 +77,7 @@ public abstract class TestDriver {
     protected boolean strict = false;
     protected Set<String> laxTests = new HashSet<>();
     protected Set<String> exceptionPredicates = new HashSet<>();
+    protected boolean pushPolarity;
 
     static Set<String> unsharedEnvironments = new HashSet<>();
     static {
@@ -128,6 +129,9 @@ public abstract class TestDriver {
             }
             if (args[i].equals("-quiet")) {
                 quiet = true;
+            }
+            if (args[i].equals("-push")) {
+                pushPolarity = true;
             }
             if (args[i].startsWith("-o:")) {
                 resultsDir = argValue;
