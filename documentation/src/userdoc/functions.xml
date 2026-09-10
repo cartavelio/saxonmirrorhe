@@ -6913,197 +6913,6 @@
     </function>
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">analyze-uri</name>
-      <description>
-        <p>Parses a URI, returning a map containing information about its components.</p>
-      </description>
-      <signatures>
-        <proto return-type="map(xs:string, item()*)">
-          <arg name="uri" type="xs:string" desc="The URI to be analyzed"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since Saxon 10.</p>
-      </status>
-      <saxon-edition>PE/EE 10</saxon-edition>
-      <details>
-        <div>
-          <p>This function analyzes a supplied URI (supplied in the form of a string) and returns
-            information about its properties. The returned information is in the form of a map whose
-            keys are all strings. Most of the components are optional, and will be absent when not
-            present in the supplied URI.</p>
-          <p>The precise behaviour is defined by reference to the corresponding properties delivered
-            by the <code>java.net.URI</code> class.</p>
-          <p>The following entries are available in the returned map, where applicable:</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Key</th>
-                <th>Type</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>isValid</td>
-                <td>boolean</td>
-                <td>true if the string represents a valid URI. If the value is false, the only other
-                  entry will be <code>error</code>.</td>
-              </tr>
-              <tr>
-                <td>error</td>
-                <td>string</td>
-                <td>if the URI is invalid, a description of the error.</td>
-              </tr>
-              <tr>
-                <td>isAbsolute</td>
-                <td>boolean</td>
-                <td>true if the URI is absolutet</td>
-              </tr>
-              <tr>
-                <td>isOpaque</td>
-                <td>boolean</td>
-                <td>true if the URI is opaque</td>
-              </tr>
-              <tr>
-                <td>authority</td>
-                <td>string</td>
-                <td>The authority component of the URI, with escaped characters decoded</td>
-              </tr>
-              <tr>
-                <td>rawAuthority</td>
-                <td>string</td>
-                <td>The authority component of the URI, as written</td>
-              </tr>
-              <tr>
-                <td>userInfo</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>rawUserInfo</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>scheme</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>host</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>schemeSpecificPart</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>rawSchemeSpecificPart</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>port</td>
-                <td>integer</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>path</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>rawPath</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>query</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>rawQuery</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>queryParams</td>
-                <td>map(xs:string, xs:string*)</td>
-                <td>A map obtained by extracting the parameters in the query part of the URI,
-                  treating these as key=value pairs separated by ampersands or semicolons. If there
-                  is an equals sign but no value, the value is treated as a zero-length string. If
-                  there is no equals sign, the value is treated as an empty sequence. If a parameter
-                  appears twice, then the resulting values are combined, in order, and returned as a
-                  sequence. If any parameters in the URI were percent-encoded, they will be returned
-                  in decoded form.</td>
-              </tr>
-              <tr>
-                <td>fragment</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>rawFragment</td>
-                <td>string</td>
-                <td/>
-              </tr>
-              <tr>
-                <td>asciiString</td>
-                <td>string</td>
-                <td/>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </details>
-    </function>
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">array-member</name>
-      <description>
-        <p>Returns an external object intended for use as a member of a newly constructed array.</p>
-      </description>
-      <signatures>
-        <proto return-type="jt:com.saxonica.functions.extfn.ArrayMemberValue">
-          <arg name="value" type="item()*" desc="The value to be used as an array member"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since Saxon 9.8.</p>
-        <p>Dropped in Saxon 13. </p>
-      </status>
-      <saxon-edition>PE/EE 9.8</saxon-edition>
-      <details>
-        <div>
-          <p>This function can be used to assist in constructing arrays whose members are sequences
-            rather than individual items.</p>
-
-          <p>For example, the expression <code>array { (1 to $n) ! saxon:array-member(1 to $n)
-              }</code> (with <code>$n = 4</code>) constructs the array <code>array{1, (1, 2), (1, 2,
-              3), (1, 2, 3, 4)}</code>. Without this construct, there is no convenient way of
-            constructing an array where (a) the number of members is not known statically, and (b)
-            the members may be arbitrary sequences rather than single items.</p>
-
-          <p>The actual result of the function is an external object which is specially recognized
-            by the internal function <code>array:_fromSequence</code> which underpins the XPath
-            curly array constructor <code>array{a, b, c}</code> and also the extension instruction
-              <a class="bodylink code" href="/extensions/instructions/array">saxon:array</a>. If
-            this internal function recognizes an instance of
-              <code>com.saxonica.functions.extfn.ArrayMemberValue</code> in its input sequence, then
-            instead of adding it to the array as a member directly, it unwraps it to obtain the
-            underlying sequence, and adds this sequence as the next member of the array.</p>
-
-          <p>See also the <a class="bodylink code" href="/extensions/instructions/array-member"
-              >saxon:array-member</a> extension instruction.</p>
-        </div>
-      </details>
-    </function>
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">base64Binary-to-octets</name>
       <description>
         <p>Converts a binary value to a sequence of octets.</p>
@@ -7156,7 +6965,6 @@
       <see-also namespace="http://saxon.sf.net/" name="string-to-base64Binary"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">characters</name>
       <description>
@@ -7183,8 +6991,6 @@
         </div>
       </details>
     </function>
-
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">column-number</name>
@@ -7664,7 +7470,6 @@
       </details>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">escape-NCName</name>
       <description>
@@ -7710,7 +7515,6 @@
       <see-also name="unescape-NCName" namespace="http://saxon.sf.net/"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">EQName</name>
       <description>
@@ -7752,7 +7556,6 @@
         </div>
       </details>
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">eval</name>
@@ -7848,7 +7651,6 @@
       <see-also name="expression" namespace="http://saxon.sf.net/"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">expression</name>
       <description>
@@ -7931,11 +7733,6 @@
       <see-also name="evaluate" namespace="http://saxon.sf.net/"/>
     </function>
 
-
-
-
-
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">function-annotations</name>
       <description>
@@ -7981,7 +7778,6 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};</code></pre>
       </details>
 
     </function>
-    
     
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">generate-sequence</name>
@@ -8029,8 +7825,6 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};</code></pre>
 
     </function>
 
-
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">get-pseudo-attribute</name>
       <description>
@@ -8072,7 +7866,6 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};</code></pre>
         </div>
       </details>
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">group-starting</name>
@@ -8135,8 +7928,6 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};</code></pre>
         </div>
       </details>
     </function>
-
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">has-same-nodes</name>
@@ -8217,54 +8008,6 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};</code></pre>
     </function>
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">highest</name>
-      <description>
-        <p>Finds the items having the highest value for some expression.</p>
-      </description>
-      <signatures>
-        <proto return-type="item()*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
-        </proto>
-        <proto return-type="item()*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="key" type="function(item()) as xs:anyAtomicType?"
-            desc="Function to compute the sort key"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since before Saxon 8.0. Changed in Saxon 9.5 to take a function rather than an
-          expression as the second argument. Changed in 9.9 to allow the sort key to be an empty
-          sequence, and to define the result of edge cases more precisely.</p>
-      </status>
-      <saxon-edition>PE/EE</saxon-edition>
-      <details>
-        <div>
-          <p>This function returns the item or items from the input sequence that have the highest
-            value for the function <code>$key</code>. If the second argument is omitted, it defaults
-            to the function <code>fn:data#1</code>, that is, it atomizes the item from the input
-            sequence.</p>
-          <p>The <code>$key</code> function is evaluated for each item in <code>$input</code> in
-            turn, with that item supplied as the parameter to the function. Any items for which the
-            sort key evaluates to an empty sequence or to NaN are ignored. If the input sequence is
-            empty, the result is an empty sequence. If several items have the highest value, the
-            result sequence contains them all, retaining the original order.</p>
-          <p>Any computed key that is of type <code>xs:untypedAtomic</code> is converted to
-              <code>xs:double</code>.</p>
-          <p>Strings are compared using the default collation from the static context.</p>
-          <p>An error occurs if any key belongs to an unordered type (such as <code>xs:QName</code>)
-            or if two keys belong to types that are not comparable (for example
-              <code>xs:integer</code> and <code>xs:string</code>).</p>
-
-          <p>Example: <code>saxon:highest(sale, function($x){$x/@price * $x/@qty})</code> will
-            evaluate price times quantity for each child <code>&lt;sale&gt;</code> element, and
-            return the element or elements for which this has the highest value.</p>
-
-        </div>
-      </details>
-      <see-also namespace="http://saxon.sf.net/" name="lowest"/>
-    </function>
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">in-scope-namespaces</name>
       <description>
         <p>Returns a map from prefixes to namespace URIs giving the in-scope namespace bindings for
@@ -8335,117 +8078,6 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};</code></pre>
     </function>
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">index</name>
-      <description>
-        <p>Indexes a sequence as a map.</p>
-      </description>
-      <signatures>
-        <proto return-type="map(*)">
-          <arg name="sequence" type="item()*" desc="The sequence to be indexed"/>
-          <arg name="function" type="function(item()) as xs:anyAtomicType*"
-            desc="Computes the value(s) on which the sequence is indexed"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Introduced in Saxon 8.3. Changed in Saxon 9.5 to take a function as the second
-          argument, and to return a map as the result; and the collation argument was dropped.
-          The function is dropped in Saxon 13, replaced by the standard 4.0 function <code>map:build</code>.
-        </p>
-      </status>
-      <saxon-edition>PE/EE</saxon-edition>
-      <details>
-        <div>
-          <p>The first argument is any sequence. Usually it will be a sequence of nodes, but this is
-            not essential. This is the sequence being indexed.</p>
-
-          <p>The second argument is a function used to compute a key. This function is called once
-            for each item in the sequence being indexed, with that item as the argument. The result
-            of the function is atomized. Each value in the atomized result represents a key value:
-            the item in the indexed sequence can be efficiently found using any of these key
-            values.</p>
-
-          <p>If a key value is of type <code>xs:untypedAtomic</code>, it is treated as a string. If
-            you want to treat the value as numeric, say, then perform a conversion within the
-            expression.</p>
-
-
-          <p>The result is a map, that can be supplied as input to any <a class="bodylink"
-              href="/functions/map">map functions</a> such as <code>map:get()</code> or
-              <code>map:size()</code>.</p>
-
-          <p>For example, consider a source document of the form:</p>
-          <pre><code class="language-xml">&lt;doc&gt; 
-    &lt;town name="Amherst" state="NH"/&gt; 
-    &lt;town name="Amherst" state="MA"/&gt; 
-    &lt;town name="Auburn" state="MA"/&gt; 
-    &lt;town name="Auburn" state="NH"/&gt; 
-    &lt;town name="Auburn" state="ME"/&gt; 
-    &lt;town name="Bristol" state="RI"/&gt; 
-    &lt;town name="Bristol" state="ME"/&gt; 
-    &lt;town name="Bristol" state="CT"/&gt; 
-    &lt;town name="Bristol" state="NH"/&gt; 
-    &lt;town name="Bristol" state="VT"/&gt;
-    &lt;town name="Cambridge" state="ME"/&gt; 
-&lt;/doc&gt;</code></pre>
-
-          <p>and suppose there is a requirement to find <code>&lt;town&gt;</code> elements
-            efficiently given the abbreviation for the <code>state</code>. You can do this by first
-            setting up an indexed sequence. In XQuery you can write:</p>
-          <pre><code class="language-xquery">declare namespace saxon="http://saxon.sf.net/"; 
-declare namespace java="http://saxon.sf.net/java-type"; 
-declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/@state});</code></pre>
-
-          <p>This could be a local variable (declared in a <code>let</code> clause) rather than a
-            global variable. The XSLT equivalent is:</p>
-          <pre><code class="language-xml">&lt;xsl:variable name="indexedTowns" select="saxon:index(//town, 
-      function($t){$t/@state})" as="map(*)"/&gt;</code></pre>
-
-          <p>You can then find all the towns in New Hampshire using the expression:</p>
-          <pre><code class="language-xquery">map:get($indexedTowns, "NH")</code></pre>
-
-          <p>Indexed sequences were introduced primarily for use in XQuery, where they provide
-            functionality equivalent to the standard <code>xsl:key</code> mechanism in XSLT. From
-            Saxon 9.5 the data structure used for an indexed sequence is a map, and with the
-            introduction of maps the function could now be implemented simply as:</p>
-
-          <pre><code class="language-xquery">declare function saxon:index($seq as item()*, $f as function(item()) as xs:anyAtomicValue) { 
-    map:merge( for $item in $seq for $key in $f($item) group by $key
-                 return map:entry($key, $item) ) 
-};</code></pre>
-
-          <p>For further information about maps see <a class="bodylink" href="/expressions/primary/maps">Maps</a>.</p>
-        </div>
-      </details>
-    </function>
-
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">index-where</name>
-      <description>
-        <p>Returns the index positions (starting at 1) of those items from the sequence
-            <code>$seq</code> for which the supplied function <code>$f</code> returns true.</p>
-      </description>
-      <signatures>
-        <proto return-type="item()*">
-          <arg name="seq" type="item()*" desc="The sequence to be searched"/>
-          <arg name="f" type="function(item()) as xs:boolean"
-            desc="The predicate function (used to test each item in the sequence)"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available in Saxon-PE/EE since 10.</p>
-      </status>
-      <saxon-edition>PE/EE 10</saxon-edition>
-      <details>
-        <div>
-          <p>For example, <code>saxon:index-where(("London", "Rome", "Berlin", "Paris"),
-              function($x){string-length($x)=6})</code> returns <code>(1, 3)</code>.</p>
-        </div>
-      </details>
-    </function>
-
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">is-defaulted</name>
       <description>
         <p>Tests whether an attribute node is present in the data model as a result of expansion of
@@ -8484,43 +8116,11 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
 
           <p>The function is not available in SaxonCS, because the Microsoft XML parser does not
             make the information available.</p>
-
-
-
-
         </div>
       </details>
       <see-also name="system-id" namespace="http://saxon.sf.net/"/>
       <see-also name="column-number" namespace="http://saxon.sf.net/"/>
     </function>
-
-
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">is-NaN</name>
-      <description>
-        <p>Returns true if the value of the argument is NaN.</p>
-      </description>
-      <signatures>
-        <proto return-type="xs:boolean">
-          <arg name="input" type="xs:anyAtomicType" desc="The supplied value"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since Saxon 10.</p>
-      </status>
-      <saxon-edition>PE/EE 10</saxon-edition>
-      <details>
-        <div>
-          <p>This function takes as input a single atomic item, and returns true if the value is
-            the <code>xs:double</code> or <code>xs:float</code> value <code>NaN</code>.</p>
-          <p>For example, the call <code>saxon:is-NaN(number("N/A"))</code> returns true.</p>
-        </div>
-      </details>
-    </function>
-
-
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">is-whole-number</name>
@@ -8552,7 +8152,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
         </div>
       </details>
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">items-after</name>
@@ -8597,7 +8196,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <see-also namespace="http://saxon.sf.net/" name="items-until"/>
 
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">items-before</name>
@@ -8649,8 +8247,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <see-also namespace="http://saxon.sf.net/" name="items-from"/>
     </function>
 
-
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">items-from</name>
       <description>
@@ -8698,8 +8294,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <see-also namespace="http://saxon.sf.net/" name="items-after"/>
     </function>
 
-
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">items-until</name>
       <description>
@@ -8746,8 +8340,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <see-also namespace="http://saxon.sf.net/" name="items-after"/>
       <see-also namespace="http://saxon.sf.net/" name="items-from"/>
     </function>
-
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">key-map</name>
@@ -8963,55 +8555,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
     </function>
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">lowest</name>
-      <description>
-        <p>Finds the items having the lowest value for some computed key.</p>
-      </description>
-      <signatures>
-        <proto return-type="item()*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
-        </proto>
-        <proto return-type="item()*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="key" type="function(item()) as xs:anyAtomicType?"
-            desc="Function to compute the sort key"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since before Saxon 8.0. Changed in Saxon 9.5 to take a function rather than an
-          expression as the second argument. Changed in 9.9 to allow the sort key to be an empty
-          sequence, and to define the result of edge cases more precisely.</p>
-      </status>
-      <saxon-edition>PE/EE</saxon-edition>
-      <details>
-        <div>
-          <p>This function returns the item or items from the input sequence that have the lowest
-            value for the function <code>$key</code>. If the second argument is omitted, it defaults
-            to the function <code>fn:data#1</code>, that is, it atomizes the item from the input
-            sequence.</p>
-          <p>The <code>$key</code> function is evaluated for each item in <code>$input</code> in
-            turn, with that item supplied as the parameter to the function. Any items for which the
-            sort key evaluates to an empty sequence or to NaN are ignored. If the input sequence is
-            empty, the result is an empty sequence. If several items have the lowest value, the
-            result sequence contains them all, retaining the original order.</p>
-          <p>Any computed key that is of type <code>xs:untypedAtomic</code> is converted to
-              <code>xs:double</code>.</p>
-          <p>Strings are compared using the default collation from the static context.</p>
-          <p>An error occurs if any key belongs to an unordered type (such as <code>xs:QName</code>)
-            or if two keys belong to types that are not comparable (for example
-              <code>xs:integer</code> and <code>xs:string</code>).</p>
-
-          <p>Example: <code>saxon:lowest(sale, function($x){$x/@price * $x/@qty})</code> will
-            evaluate price times quantity for each child <code>&lt;sale&gt;</code> element, and
-            return the element or elements for which this has the lowest value.</p>
-
-        </div>
-      </details>
-      <see-also namespace="http://saxon.sf.net/" name="highest"/>
-    </function>
-
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">map-search</name>
       <description>
         <p>Searches recursively through a structure of nested maps and arrays.</p>
@@ -9079,7 +8622,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       </details>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">message-count</name>
       <description>
@@ -9121,7 +8663,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       </details>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">namespace-node</name>
       <description>
@@ -9153,7 +8694,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
         </div>
       </details>
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">new-attribute</name>
@@ -9250,7 +8790,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <see-also name="new-processing-instruction" namespace="http://saxon.sf.net/"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">new-comment</name>
       <description>
@@ -9292,7 +8831,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <see-also name="new-processing-instruction" namespace="http://saxon.sf.net/"/>
       <see-also name="new-text" namespace="http://saxon.sf.net/"/>
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">new-document</name>
@@ -9339,7 +8877,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <see-also name="new-comment" namespace="http://saxon.sf.net/"/>
       <see-also name="new-processing-instruction" namespace="http://saxon.sf.net/"/>
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">new-element</name>
@@ -9437,7 +8974,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <see-also name="new-processing-instruction" namespace="http://saxon.sf.net/"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">new-processing-instruction</name>
       <description>
@@ -9488,7 +9024,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <see-also name="new-attribute" namespace="http://saxon.sf.net/"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">new-text</name>
       <description>
@@ -9526,8 +9061,6 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <see-also name="new-comment" namespace="http://saxon.sf.net/"/>
       <see-also name="new-processing-instruction" namespace="http://saxon.sf.net/"/>
     </function>
-
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">object-map</name>
@@ -9694,7 +9227,6 @@ StreamSource:new() =&gt; saxon:object-map() =&gt; map:keys() =&gt; sort()</code>
       <see-also namespace="http://www.w3.org/2005/xpath-functions" name="parse-xml"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">parse-dateTime</name>
       <description>
@@ -9839,52 +9371,6 @@ StreamSource:new() =&gt; saxon:object-map() =&gt; map:keys() =&gt; sort()</code>
       </details>
     </function>
 
-
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">parse-html</name>
-      <description>
-        <p>Parses HTML supplied as a string.</p>
-      </description>
-      <signatures>
-        <proto return-type="document-node()">
-          <arg name="html" type="xs:string" desc="The HTML content as a string"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since Saxon 9.2. Reimplemented in Saxon 12. Dropped in Saxon 13 in favor of the 
-          standard 4.0 function <code>fn:parse-html</code>.</p>
-      </status>
-      <saxon-edition>PE/EE</saxon-edition>
-      <details>
-        <div>
-          <p>This function takes a single argument, a string containing the source text of an HTML
-            document. It returns the document node (root node) that results from parsing this text
-            using the <code>validator.nu</code> parser on Java and the <code>AngleSharp</code>
-            parser on .NET.</p>
-
-          <p class="javaonly">On the Java platform, the <code>validator.nu</code> jar file must be
-            on the classpath. It may be downloaded from Maven.</p>
-
-          <p class="csonly">For SaxonCS, the HTML is parsed using <code>AngleSharp</code>, which is
-            registered as a dependency and will normally be installed automatically by
-            <b>nuget</b>.</p>
-
-          <p>This function is useful where an HTML document is embedded inside another using CDATA.
-            It can also be used in conjunction with the <a class="bodylink code"
-              href="/functions/fn/unparsed-text">unparsed-text()</a> function to read HTML from
-            filestore. Note that the base URI of the document is not retained in this case.</p>
-
-          <p>Because different parsers are used, there are minor differences depending on the
-            platform, but these generally occur only in edge cases, such as use of element or
-            attribute names containing characters disallowed in XML.</p>
-          
-          <p class="csonly">In SaxonCS, (a) the <code>fail-on-error</code> and <code>encoding</code> options
-            are ignored, and (b) the HTML <code>template</code> element is not expanded.</p>
-        </div>
-      </details>
-    </function>
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">path</name>
       <description>
@@ -9922,9 +9408,6 @@ StreamSource:new() =&gt; saxon:object-map() =&gt; map:keys() =&gt; sort()</code>
       </details>
       <see-also namespace="http://www.w3.org/2005/xpath-functions" name="path"/>
     </function>
-
-
-    
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">print-stack</name>
@@ -10091,7 +9574,6 @@ let $q1 := "declare variable $x external; declare variable $y external; &lt;z&gt
       </details>
 
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">schema</name>
@@ -11267,7 +10749,6 @@ return saxon:serialize($x, &lt;xsl:output method="xml"
       <see-also namespace="http://www.w3.org/2005/xpath-functions" name="serialize"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">slice</name>
       <description>
@@ -11315,8 +10796,6 @@ return saxon:serialize($x, &lt;xsl:output method="xml"
         </div>
       </details>
     </function>
-
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">stream</name>
@@ -11466,7 +10945,6 @@ return saxon:serialize($x, &lt;xsl:output method="xml"
       </details>
       <see-also namespace="http://saxon.sf.net/" name="hexBinary-to-string"/>
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">string-to-utf8</name>
@@ -11625,7 +11103,6 @@ return saxon:transform($splitter, $results)</code></pre>
       <see-also name="transform" namespace="http://www.w3.org/2005/xpath-functions"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">timestamp</name>
       <description>
@@ -11685,7 +11162,6 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
       </details>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">tunnel-params</name>
       <description>
@@ -11715,7 +11191,6 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
       </details>
 
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">type</name>
@@ -11787,7 +11262,6 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
       <see-also name="type" namespace="http://saxon.sf.net/"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">unescape-NCName</name>
       <description>
@@ -11830,7 +11304,6 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
       <see-also name="escape-NCName" namespace="http://saxon.sf.net/"/>
     </function>
 
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">unindexed</name>
       <description>
@@ -11871,7 +11344,6 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
         </div>
       </details>
     </function>
-
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">unparsed-entities</name>
@@ -12052,8 +11524,6 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
         </div>
       </details>
     </function>
-
-
     
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">xquery</name>

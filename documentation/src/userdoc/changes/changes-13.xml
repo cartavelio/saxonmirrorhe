@@ -878,7 +878,7 @@ TODO: rethink redefines and override
     
     <category name="extensions">
         
-        <h2>In the EXPath binary module</h2>>
+        <h2>Changes to EXPath functions</h2>>
     	<ul>
     		<li><p>The handling of byte order marks in <code>bin:encode-string</code> and <code>bin:decode-string</code> has been clarified in the specification, and this has resulted in changes to the Saxon implementation. The changed behaviour applies whether or not 4.0 is enabled. (PR 1765)</p></li>
     		<li><p>The non-standard function <code>bin:version</code> is dropped.</p></li>
@@ -922,12 +922,6 @@ TODO: rethink redefines and override
                 <code>fn:contains-subsequence</code>, <code>fn:ends-with-subsequence</code> and
                 <code>fn:starts-with-subsequence</code> respectively.</p></li>
             <li><p><code>fn:intersperse</code> is renamed <code>fn:insert-separator</code>.</p></li>
-            <li>The <code>fn:pin</code> and <code>fn:label</code> functions are dropped
-            (replaced by JNodes). For the time being, though, the <code>saxon:deep-update</code> extension function
-            continues to use pinned and labelled items; this is likely to change in due course.</li>
-            <li>The functions <code>fn:</code> and <code>fn:unparcel</code> are dropped.
-            In Saxon 12, <code>fn:parcel($x)</code> simply did <code>{'value': $x}</code>, and
-            <code>fn:unparcel($p)</code> simply did <code>$p?value</code>.</li>
             <li><p>The functions <code>fn:items-after</code>, <code>fn:items-before</code>,
                 <code>fn:items-ending-where</code>, <code>fn:items-starting-where</code> are
                 dropped. (The alternative original Saxon namespace functions remain available: 
@@ -935,18 +929,25 @@ TODO: rethink redefines and override
                 <code>saxon:items-from</code>, <code>saxon:items-until</code>.)</p></li>
             <li><p>The function <code>fn:iterate-while</code> is replaced by
                 <code>fn:while-do</code> and <code>fn:do-until</code>.</p></li>
+            <li>The functions <code>fn:parcel</code> and <code>fn:unparcel</code> are dropped.
+            In Saxon 12, <code>fn:parcel($x)</code> simply did <code>{'value': $x}</code>, and
+            <code>fn:unparcel($p)</code> simply did <code>$p?value</code>.</li>
             <li><p>The function <code>fn:parts</code> is dropped.</p></li>
+            <li>The <code>fn:pin</code> and <code>fn:label</code> functions are dropped
+                (replaced by JNodes). For the time being, though, the <code>saxon:deep-update</code> extension function
+                continues to use pinned and labelled items; this is likely to change in due course.</li>
             <li><p>The function <code>fn:xdm-to-json</code> is dropped.</p></li>
-            <li><p>The function <code>array:of</code> is renamed <code>array:of-members</code>.</p></li>
             <li><p>The function <code>array:exists</code> is dropped.</p></li>
-        	<li><p>The function <code>array:replace</code> is dropped.</p></li>
-            <li><p>The second argument for <code>map:keys</code> is dropped, replaced by the new
-                function <code>map:keys-where</code>.</p></li>
-            <li><p>Following PR2572, the proposed <code>map:keys-where</code> function is dropped.</p></li>
+            <li><p>The function <code>array:of</code> is renamed <code>array:of-members</code>.</p></li>
+            <li><p>The function <code>array:replace</code> is dropped.</p></li>
+            <li><p>The function <code>map:index</code> is dropped.</p></li>
+            <li><p>The second argument for <code>map:keys</code> is dropped.</p></li>
+            <li><p>The proposed <code>map:keys-where</code> function is dropped.</p></li>
             <li><p>The functions <code>map:pair</code>, <code>map:pairs</code> and <code>map:of-pairs</code> are dropped.</p></li>
-        	<li><p>The function <code>map:index</code> is dropped.</p></li>    
-        	<li><p>The function <code>fn:compose</code> is replaced by the extension function <code>saxon:compose</code>.</p></li>
         </ul>
+        
+        
+        <h2>Dropped or changed extension functions</h2>
         
         <p>Some Saxon extension functions that were essentially prototypes of 
             near-identical XPath 4.0 functions are dropped:</p>
@@ -963,13 +964,24 @@ TODO: rethink redefines and override
             <li><p><code>saxon:is-NaN</code> is dropped, superseded by <code>fn:is-NaN</code>.</p></li>
             <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>, but
                 note that the specification for <code>fn:parse-html</code> has changed.</p></li>
-            <li><p><code>saxon:pedigree</code> and <code>saxon:with-</code> are dropped.
+            <li><p><code>saxon:pedigree</code> and <code>saxon:with-pedigree</code> are dropped.
             Applications using these functions should be rewritten to use JNodes, which build on the
             same idea but provide much more flexibility.</p></li>
         </ul>
         
+        <p>The undocumented functions <code>saxon:create-map</code> and <code>saxon:map-as-sequence-of-maps</code> are dropped.</p>
+        
         <p>The extension functions <code>saxon:line-number</code> and <code>saxon:column-number</code>
             now return an empty sequence if the argument value is an empty sequence.</p>
+        
+        
+        <h2>New extension functions</h2>
+        
+        <p>The new functions <code>saxon:compose</code> and <a class="bodylink code"
+            href="/functions/saxon/generate-sequence">saxon:generate-sequence</a> are implemented.</p>
+        
+        
+        <h2>Dropped or changed XSLT extensions</h2>
         
         <p>A new vendor option has been added to the <code>fn:transform</code> function. Setting
             the option <code>saxon:write-result-documents</code> to <code>true()</code> changes the
@@ -1016,9 +1028,6 @@ TODO: rethink redefines and override
                  ))
    }
 </xsl:select>]]></code></pre>
-    
-    	<p>The <code>saxon:create-map</code> and <code>saxon:map-as-sequence-of-maps</code> functions are dropped.</p>
-    	<p>The <code>saxon:analyze-uri</code> function is dropped.</p>
     
     </category>
     
