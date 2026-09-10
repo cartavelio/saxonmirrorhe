@@ -312,5 +312,15 @@ class.)</p>
       <h1>Localization</h1>
       <p>TBA</p>
    </section>
+   <section id="restrictions">
+      <h1>Restrictions</h1>
+      <h2>Restrictions Relative to Saxon-EE 11 on Java</h2>
+      
+      <h2>Restrictions Relative to Saxon-EE 10 on .NET</h2>
+      
+      <p>There have been some changes to the API for declaring collections.</p>
+      
+      <p>JAR/ZIP file collections are not supported.</p>
+   </section>
    
 </article>

@@ -225,6 +225,9 @@
         particular, the function name must be spelled as specified; it is no longer possible to use
         alternative spellings such as <code>saxon:printStack</code> for <code>saxon:print-stack</code>.</p>
         
+        <p>The functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
+        any encoding supported by the Java VM.</p>
+        
         <h2>New Extension Functions</h2>
         
         <p>The new function <code>saxon:unindexed()</code> returns the value of its argument unchanged,
