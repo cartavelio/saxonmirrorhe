@@ -131,12 +131,7 @@ public:
     void setParameter(const char* name, XdmValue * value);
 
 
-    /**
-    *   Return the result-documents resulting from the execution of the stylesheet.
-    *   Null is returned if the user has not enabled this feature via the method setCaptureResultDocuments()
-    *   @return std::map of result-document as the key value pair document uri string and XdmNode.
-    */
-    std::map<std::string,XdmNode*>& getResultDocuments();
+
 
 
 
@@ -278,10 +273,11 @@ public:
      */
     void setSaveXslMessage(bool show, const char* filename=nullptr);
 
-    //! Enable the capture of the result-document output into an std:map
+    //! Enable the capture of the result-document output into an std:map. This overrides the default mechanism.
    /**
      * When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
-     * via a user defined std::map object where we have the pair document URI and XdmNode object.
+     * via an std::map object where we have the pair document URI and XdmNode object. After the execution of the transformation
+     * A call on the <code>getResultDocuments</code> method is required to get access to the result-documents in a map.
      * @param flag - true enables map object which is used to save the result documents from the transformation
     */
     void setCaptureResultDocuments(bool flag);
@@ -421,7 +417,7 @@ public:
     //! Execute transformation to string. Properties supplied in advance.
     /**
      * Perform the transformation based upon what has been cached.
-     * @param source - source document suppplied as an XdmNode object
+     * @param source - source document supplied as an XdmNode object. nullptr accepted if source document has been set already.
      * @return char*. Pointer to Array of chars. Result returned as a string.
      *
      */
@@ -430,7 +426,7 @@ public:
     //! Execute transformation to Xdm Value. Properties supplied in advance.
     /**
      * Perform the transformation based upon cached stylesheet and any source document.
-     * @param source - source document suppplied as an XdmNode object
+     * @param source - source document supplied as an XdmNode object. nullptr accepted if source document has been set already.
      * @return as an XdmValue.
      *
      */
@@ -438,9 +434,9 @@ public:
 
     //! Execute transformation to file. Properties supplied in advance.
     /**
-     * Perform the transformation based upon cached stylesheet and source document.
+     * Perform the transformation based upon a compiled stylesheet and source document.
      * Assume the output file has been set in advance
-     * @param source - source document supplied as an XdmNode object
+     * @param source - source document supplied as an XdmNode object. nullptr accepted if source document has been set already.
      *
 
      */

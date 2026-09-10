@@ -140,9 +140,9 @@ public:
     /**
      * Default behaviour (false) is to leave XdmValues in memory
      *  true then XdmValues are deleted
-     *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
+     *  @param deleteValues -  Individual pointers to XdmValue objects have to be deleted in the calling program
      */
-    void clearParameters(bool deleteValues=false);
+    void clearParameters(bool deleteValues = false);
 
 
     /**
@@ -179,7 +179,7 @@ public:
      * The result is stored in the supplied outputfile.
      *
      * @param sourcefile - The file name of the source document
-     * @param stylesheetfile - The file name of the stylesheet document. If nullptr the most recently compiled stylesheet is used
+     * @param stylesheetfile - The file name of the stylesheet document.
      * @param outputfile - The file name where results will be stored
      */
     void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile); 
@@ -189,7 +189,7 @@ public:
      * The result is returned as a string
      *
      * @param sourcefile - The file name of the source document
-     * @param stylesheetfile - The file name of the stylesheet document. If nullptr the most recently compiled stylesheet is used
+     * @param stylesheetfile - The file name of the stylesheet document.
      * @return char array - result of the transformation
      */
     const char * transformFileToString(const char* sourcefile, const char* stylesheetfile);
@@ -198,7 +198,7 @@ public:
      * Perform a one shot transformation. The result is returned as an XdmValue
      *
      * @param sourcefile - The file name of the source document
-     * @param stylesheetfile - The file name of the stylesheet document. If nullptr the most recently compiled stylesheet is used
+     * @param stylesheetfile - The file name of the stylesheet document.
      * @return XdmValue - result of the transformation
      */
     XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile);
@@ -271,7 +271,7 @@ public:
      //!compile a stylesheet received as an XdmNode.
     /**
      * The compiled stylesheet is cached and available for execution later.
-     * @param stylesheet as a lexical string representation
+     * @param node the XdmNode object for the stylesheet
      * @param filename - the file to which the compiled package should be saved
      */
     void compileFromXdmNodeAndSave(XdmNode * node, const char* filename);

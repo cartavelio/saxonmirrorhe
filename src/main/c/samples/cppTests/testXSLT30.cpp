@@ -280,7 +280,7 @@ void testTransformToString3(SaxonProcessor *processor, Xslt30Processor *trans, s
     }
 
     XdmAtomicValue *value1 = processor->makeIntegerValue(10);
-
+f
     if (value1== nullptr) {
         cout << "value1 is null." << endl;
         if (trans->exceptionOccurred()) {

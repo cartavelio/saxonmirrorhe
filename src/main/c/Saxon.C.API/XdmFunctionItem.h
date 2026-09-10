@@ -55,15 +55,19 @@ public:
     }
 
 
+    //! Get the name of the function as EQName.
     /**
-     * Get the name of the function
+     * The expanded name, as a string using the notation devised by EQName.
+     * If the name is in a namespace, the resulting string takes the form <code>Q{uri}local</code>.
+     * Otherwise, the value is the local part of the name.
      *
-     * @return the function name, as a QName, or null for an anonymous inline function item
+     * @return the function name as a string in the EQName notation, or null for an anonymous inline function item
      */
     const char* getName();
 
+    //! Get the arity of the function
     /**
-     * Get the arity of the function
+     *
      *
      * @return the arity of the function, that is, the number of arguments in the function's signature
      */
@@ -74,6 +78,9 @@ public:
      * This can be any function defined in XPath 3.1 functions and operators,
      * including functions in the math, map, and array namespaces. It can also be a Saxon extension
      * function, provided a licensed Processor is used.
+     * @param processor - The Saxon Processor object required to get the system function
+     * @param name - the name of the function
+     * @param arity - the number of arguments in the function
      * @return the requested function, or null if there is no such function. Note that some functions
      * (those with particular context dependencies) may be unsuitable for dynamic calling.
      */
@@ -89,8 +96,9 @@ public:
     }
 
 
+    //! Call the function
     /**
-     * Call the function
+     *
      *
      * @param processor - the SaxonProcessor object required in the call of the function
      * @param arguments  - the values to be supplied as arguments to the function. The "function
