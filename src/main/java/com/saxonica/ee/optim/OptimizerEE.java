@@ -443,7 +443,7 @@ public class OptimizerEE extends Optimizer {
             boolean many0 = Cardinality.expectsMany(p0);
             boolean many1 = Cardinality.expectsMany(p1);
             if (many0 || many1) {
-                if (gc.getStringCollator() == CodepointCollator.getInstance()) {
+                if (gc.getStringCollator() == null || gc.getStringCollator() == CodepointCollator.getInstance()) {
                     // Optimize a test of the form ($X = (1, 7, 9, 10, 16, ....)) where the RHS is a constant list
                     if (p1 instanceof Literal && ((Literal) p1).getGroundedValue().getLength() > 8) {
                         Expression mapTest = makeMapTest(visitor, p0, (Literal) p1, contextItemType);
