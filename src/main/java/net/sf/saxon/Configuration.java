@@ -813,10 +813,12 @@ public class Configuration implements SourceResolver, NotationSet {
      */
     public ResourceResolver makeResourceResolver(String className) throws XPathException {
         Object obj = dynamicLoader.getInstance(className, null);
+        //#if CSHARP==false
         if (obj instanceof URIResolver) {
             getLogger().warning("From Saxon 11.1, the value of the -r option should be a ResourceResolver, not a URIResolver");
             obj = new ResourceResolverWrappingURIResolver((URIResolver)obj);
         }
+        //#endif
         if (obj instanceof ResourceResolver) {
             return (ResourceResolver) obj;
         }
@@ -4609,10 +4611,12 @@ public class Configuration implements SourceResolver, NotationSet {
                             (UnparsedTextURIResolver) instantiateClassName(name, value, UnparsedTextURIResolver.class));
                     break;
 
+                //#if CSHARP==false
                 case FeatureCode.URI_RESOLVER_CLASS:
                     URIResolver u = (URIResolver) instantiateClassName(name, value, URIResolver.class);
                     setResourceResolver(new ResourceResolverWrappingURIResolver(u));
                     break;
+                //#endif
 
                 case FeatureCode.USE_XSI_SCHEMA_LOCATION:
                     defaultParseOptions.setUseXsiSchemaLocation(requireBoolean(name, value));
@@ -4760,12 +4764,12 @@ public class Configuration implements SourceResolver, NotationSet {
                     getDefaultXsltCompilerInfo().setErrorListener(
                             (ErrorListener) instantiateClassName(name, value, ErrorListener.class));
                     break;
-                //#endif
 
                 case FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS:
                     getDefaultXsltCompilerInfo().setURIResolver(
                             (URIResolver) instantiateClassName(name, value, URIResolver.class));
                     break;
+                //#endif
 
                 case FeatureCode.XSLT_VERSION:
                     if (!"3.0".equals(value)) {
@@ -5191,12 +5195,14 @@ public class Configuration implements SourceResolver, NotationSet {
             case FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS:
                 return getUnparsedTextURIResolver().getClass().getName();
 
+            //#if CSHARP==false
             case FeatureCode.URI_RESOLVER_CLASS:
                 if (getResourceResolver() instanceof ResourceResolverWrappingURIResolver) {
                     return ((ResourceResolverWrappingURIResolver) getResourceResolver()).getClass().getName();
                 } else {
                     return null;
                 }
+            //#endif
 
             case FeatureCode.USE_XSI_SCHEMA_LOCATION:
                 return defaultParseOptions.isUseXsiSchemaLocation();
